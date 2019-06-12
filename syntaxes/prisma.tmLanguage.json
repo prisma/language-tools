@@ -377,8 +377,52 @@
       "name": "constant.numeric.prisma"
     },
     "double_quoted_string": {
-      "match": "\"[^\"]*\"",
-      "name": "string.prisma"
+      "begin": "\"",
+      "beginCaptures": {
+        "0": {
+          "name": "string.quoted.double.start.prisma"
+        }
+      },
+      "end": "\"",
+      "endCaptures": {
+        "0": {
+          "name": "string.quoted.double.end.prisma"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#string_interpolation"
+        },
+        {
+          "match": "([\\w\\-\\/\\._\\\\%]+)",
+          "name": "string.quoted.double.prisma"
+        }
+      ],
+      "name": "unnamed"
+    },
+    "string_interpolation": {
+      "patterns": [
+        {
+          "begin": "\\$\\{",
+          "beginCaptures": {
+            "0": {
+              "name": "keyword.control.interpolation.start.prisma"
+            }
+          },
+          "end": "\\s*\\}",
+          "endCaptures": {
+            "0": {
+              "name": "keyword.control.interpolation.end.prisma"
+            }
+          },
+          "name": "source.tag.embedded.source.prisma",
+          "patterns": [
+            {
+              "include": "#value"
+            }
+          ]
+        }
+      ]
     }
   }
 }
