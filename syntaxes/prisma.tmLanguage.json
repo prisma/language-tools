@@ -16,18 +16,21 @@
     },
     {
       "include": "#enum_block_definition"
+    },
+    {
+      "include": "#type_definition"
     }
   ],
   "repository": {
     "model_block_definition": {
-      "begin": "^(model)\\s+([A-Za-z][\\w]*)\\s+({)",
+      "begin": "^\\s*(model)\\s+([A-Za-z][\\w]*)\\s+({)",
       "name": "source.prisma.embedded.source",
       "beginCaptures": {
         "1": {
-          "name": "storage.function.prisma"
+          "name": "storage.type.model.prisma"
         },
         "2": {
-          "name": "support.type.primitive.ts"
+          "name": "support.type.type.prisma"
         },
         "3": {
           "name": "punctuation.definition.tag.prisma"
@@ -52,11 +55,11 @@
       }
     },
     "enum_block_definition": {
-      "begin": "^(enum)\\s+([A-Za-z][\\w]*)\\s+({)",
+      "begin": "^\\s*(enum)\\s+([A-Za-z][\\w]*)\\s+({)",
       "name": "source.prisma.embedded.source",
       "beginCaptures": {
         "1": {
-          "name": "storage.function.prisma"
+          "name": "storage.type.enum.prisma"
         },
         "2": {
           "name": "support.type.primitive.ts"
@@ -84,11 +87,11 @@
       }
     },
     "config_block_definition": {
-      "begin": "^(generator|datasource)\\s+([A-Za-z][\\w]*)\\s+({)",
+      "begin": "^\\s*(generator|datasource)\\s+([A-Za-z][\\w]*)\\s+({)",
       "name": "source.prisma.embedded.source",
       "beginCaptures": {
         "1": {
-          "name": "storage.function.prisma"
+          "name": "storage.type.config.prisma"
         },
         "2": {
           "name": "support.type.primitive.ts"
@@ -172,13 +175,16 @@
     "type_definition": {
       "patterns": [
         {
-          "match": "^type\\s+(\\w+)\\s*=\\s*(\\w+)",
+          "match": "^\\s*(type)\\s+(\\w+)\\s*=\\s*(\\w+)",
           "captures": {
             "1": {
-              "name": "variable.other.assignment.prisma"
+              "name": "storage.type.type.prisma"
+            },
+            "2": {
+              "name": "support.type.custom.prisma"
             },
             "3": {
-              "name": "support.type.primitive.ts"
+              "name": "support.type.type.prisma"
             }
           }
         },
@@ -321,7 +327,7 @@
       "patterns": [
         {
           "match": "\\b(\\w)+\\b",
-          "name": "variable.other.constant.prisma"
+          "name": "support.constant.constant.prisma"
         }
       ]
     },
