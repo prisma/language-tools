@@ -9,15 +9,18 @@
       "include": "#double_comment"
     },
     {
-      "include": "#field_block_definition"
+      "include": "#model_block_definition"
     },
     {
       "include": "#config_block_definition"
+    },
+    {
+      "include": "#enum_block_definition"
     }
   ],
   "repository": {
-    "field_block_definition": {
-      "begin": "^(model|embed)\\s+([A-Za-z][\\w]*)\\s+({)",
+    "model_block_definition": {
+      "begin": "^(model)\\s+([A-Za-z][\\w]*)\\s+({)",
       "name": "source.prisma.embedded.source",
       "beginCaptures": {
         "1": {
@@ -48,8 +51,40 @@
         }
       }
     },
+    "enum_block_definition": {
+      "begin": "^(enum)\\s+([A-Za-z][\\w]*)\\s+({)",
+      "name": "source.prisma.embedded.source",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.function.prisma"
+        },
+        "2": {
+          "name": "support.type.primitive.ts"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.prisma"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#triple_comment"
+        },
+        {
+          "include": "#double_comment"
+        },
+        {
+          "include": "#enum_value_definition"
+        }
+      ],
+      "end": "\\s*\\}",
+      "endCaptures": {
+        "0": {
+          "name": "entity.tag.embedded.end.prisma"
+        }
+      }
+    },
     "config_block_definition": {
-      "begin": "^(enum|datasource)\\s+([A-Za-z][\\w]*)\\s+({)",
+      "begin": "^(generator|datasource)\\s+([A-Za-z][\\w]*)\\s+({)",
       "name": "source.prisma.embedded.source",
       "beginCaptures": {
         "1": {
@@ -107,12 +142,42 @@
     "field_definition": {
       "patterns": [
         {
-          "match": "^\\s*(\\w+)\\s+(\\w+)",
+          "match": "^\\s*(\\w+)\\s+(\\w+)(\\[\\])?(\\?)?(\\!)?",
           "captures": {
             "1": {
               "name": "variable.other.assignment.prisma"
             },
             "2": {
+              "name": "support.type.primitive.ts"
+            },
+            "3": {
+              "name": "keyword.operator.list_type.prisma"
+            },
+            "4": {
+              "name": "keyword.operator.optional_type.prisma"
+            },
+            "5": {
+              "name": "invalid.illegal.required_type.prisma"
+            }
+          }
+        },
+        {
+          "include": "#attribute_with_arguments"
+        },
+        {
+          "include": "#attribute"
+        }
+      ]
+    },
+    "type_definition": {
+      "patterns": [
+        {
+          "match": "^type\\s+(\\w+)\\s*=\\s*(\\w+)",
+          "captures": {
+            "1": {
+              "name": "variable.other.assignment.prisma"
+            },
+            "3": {
               "name": "support.type.primitive.ts"
             }
           }
@@ -125,78 +190,65 @@
         }
       ]
     },
+    "enum_value_definition": {
+      "patterns": [
+        {
+          "match": "^\\s*(\\w+)\\s*$",
+          "captures": {
+            "1": {
+              "name": "variable.other.assignment.prisma"
+            }
+          }
+        },
+        {
+          "include": "#attribute_with_arguments"
+        },
+        {
+          "include": "#attribute"
+        }
+      ]
+    },
     "attribute_with_arguments": {
-      "name": "source.prisma.embedded.source",
+      "name": "source.prisma.attribute.with_arguments",
       "begin": "(@@?[\\w\\.]+)(\\()",
       "beginCaptures": {
         "1": {
-          "name": "entity.name.function.ts"
+          "name": "entity.name.function.attribute.prisma"
         },
         "2": {
-          "name": "punctuation.definition.tag.prisma"
+          "name": "entity.tag.attribute_args.start.prisma"
         }
       },
       "patterns": [
-        {
-          "include": "#map"
-        },
-        {
-          "include": "#array"
-        },
         {
           "include": "#named_argument"
-        },
-        {
-          "include": "#literal"
-        },
-        {
-          "include": "#identifier"
-        }
-      ],
-      "end": "\\)",
-      "endCaptures": {
-        "1": {
-          "name": "entity.tag.embedded.end.prisma"
-        }
-      }
-    },
-    "attribute": {
-      "match": "(@@?[\\w\\.]+)",
-      "captures": {
-        "1": {
-          "name": "entity.name.function.ts"
-        }
-      }
-    },
-    "map": {
-      "name": "source.prisma.embedded.source",
-      "begin": "\\{",
-      "beginCaptures": {
-        "1": {
-          "name": "punctuation.definition.tag.prisma"
-        }
-      },
-      "patterns": [
-        {
-          "include": "#map_key"
         },
         {
           "include": "#value"
         }
       ],
-      "end": "\\}",
+      "end": "\\)",
       "endCaptures": {
         "1": {
-          "name": "entity.tag.embedded.end.prisma"
+          "name": "entity.tag.attribute_args.end.prisma"
+        }
+      }
+    },
+    "attribute": {
+      "name": "source.prisma.attribute",
+      "match": "(@@?[\\w\\.]+)",
+      "captures": {
+        "1": {
+          "name": "entity.name.function.attribute.prisma"
         }
       }
     },
     "array": {
-      "name": "source.prisma.embedded.source",
+      "name": "source.prisma.array",
       "begin": "\\[",
       "beginCaptures": {
         "1": {
-          "name": "punctuation.definition.tag.prisma"
+          "name": "entity.tag.array.start.prisma"
         }
       },
       "patterns": [
@@ -207,24 +259,49 @@
       "end": "\\]",
       "endCaptures": {
         "1": {
-          "name": "entity.tag.embedded.end.prisma"
+          "name": "entity.tag.array.end.prisma"
         }
       }
     },
     "value": {
+      "name": "source.prisma.value",
       "patterns": [
         {
-          "include": "#map"
+          "include": "#array"
         },
         {
-          "include": "#array"
+          "include": "#functional"
         },
         {
           "include": "#literal"
         }
       ]
     },
+    "functional": {
+      "name": "source.prisma.functional",
+      "begin": "(\\w)+(\\()",
+      "beginCaptures": {
+        "1": {
+          "name": "support.function.functional.attribute.prisma"
+        },
+        "2": {
+          "name": "entity.tag.attribute_args.start.prisma"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#value"
+        }
+      ],
+      "end": "\\)",
+      "endCaptures": {
+        "1": {
+          "name": "entity.tag.attribute_args.end.prisma"
+        }
+      }
+    },
     "literal": {
+      "name": "source.prisma.literal",
       "patterns": [
         {
           "include": "#boolean"
@@ -234,24 +311,28 @@
         },
         {
           "include": "#double_quoted_string"
+        },
+        {
+          "include": "#identifier"
         }
       ]
     },
     "identifier": {
       "patterns": [
         {
-          "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b",
-          "name": "variable.other.assignment.prisma"
+          "match": "\\b(\\w)+\\b",
+          "name": "variable.other.constant.prisma"
         }
       ]
     },
     "map_key": {
+      "name": "source.prisma.key",
       "patterns": [
         {
-          "match": "(\\w+)\\s*(:)",
+          "match": "(\\w+)\\s*(:)\\s*",
           "captures": {
             "1": {
-              "name": "meta.object-literal.key.prisma"
+              "name": "variable.parameter.key.prisma"
             },
             "2": {
               "name": "punctuation.definition.separator.key-value.prisma"
@@ -261,12 +342,13 @@
       ]
     },
     "named_argument": {
+      "name": "source.prisma.named_argument",
       "patterns": [
         {
           "include": "#map_key"
         },
         {
-          "include": "#literal"
+          "include": "#value"
         }
       ]
     },
@@ -282,14 +364,14 @@
     },
     "boolean": {
       "match": "\\b(true|false)\\b",
-      "name": "constant.boolean.prisma"
+      "name": "constant.language.boolean.prisma"
     },
     "number": {
       "match": "((0(x|X)[0-9a-fA-F]*)|(\\+|-)?\\b(([0-9]+\\.?[0-9]*)|(\\.[0-9]+))((e|E)(\\+|-)?[0-9]+)?)([LlFfUuDdg]|UL|ul)?\\b",
       "name": "constant.numeric.prisma"
     },
     "double_quoted_string": {
-      "match": "\"[^\"]+\"",
+      "match": "\"[^\"]*\"",
       "name": "string.prisma"
     }
   }
