@@ -285,10 +285,10 @@
     },
     "functional": {
       "name": "source.prisma.functional",
-      "begin": "(\\w)+(\\()",
+      "begin": "(\\w+)(\\()",
       "beginCaptures": {
         "1": {
-          "name": "support.function.functional.attribute.prisma"
+          "name": "support.function.functional.prisma"
         },
         "2": {
           "name": "entity.tag.attribute_args.start.prisma"
