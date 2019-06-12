@@ -132,10 +132,7 @@
           },
           "patterns": [
             {
-              "include": "#array"
-            },
-            {
-              "include": "#literal"
+              "include": "#value"
             }
           ],
           "end": "\\n"
@@ -394,7 +391,7 @@
           "include": "#string_interpolation"
         },
         {
-          "match": "([\\w\\-\\/\\._\\\\%]+)",
+          "match": "([\\w\\-\\/\\._\\\\%@:\\?=]+)",
           "name": "string.quoted.double.prisma"
         }
       ],
