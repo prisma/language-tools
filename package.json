@@ -15,6 +15,7 @@
     "type": "github",
     "url": "https://github.com/prisma/vscode"
   },
+  "main": "./out/src/extension",
   "contributes": {
     "languages": [
       {
@@ -37,5 +38,16 @@
       }
     ]
   },
-  "dependencies": { }
+  "scripts": {
+      "postinstall": "node ./node_modules/vscode/bin/install && tsc && cp ./runtime/prisma-fmt out/"
+  },
+  "activationEvents": [
+    "onLanguage:prisma"
+  ],
+  "dependencies": { },
+  "devDependencies": {
+    "@types/node": "*",
+    "vscode": "1.0.3",
+    "typescript": "2.0.6"
+  }
 }
