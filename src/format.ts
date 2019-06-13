@@ -2,7 +2,6 @@ import { spawn } from 'child_process'
 import * as path from 'path'
 
 export default function format(text: string): Promise<string> {
-  
   const exec_path = path.join(__dirname, '../prisma-fmt')
   const fmt = spawn(exec_path)
 
@@ -24,11 +23,13 @@ export default function format(text: string): Promise<string> {
   fmt.stdin.end();
 
   return new Promise((resolve, reject) => {
-    fmt.stdout.on('end', () => {
-      if(err_chunks.length === 0) {
+    fmt.on('exit', (code) => {
+      if(code === 0 && err_chunks.length === 0) {
         resolve(chunks.join(""))
       } else {
-        reject(err_chunks)
+        console.log("prisma-fmt error'd during formatting.");
+        console.log(err_chunks);
+        resolve(text);
       }
     })
   })
