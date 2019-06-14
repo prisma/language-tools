@@ -15,12 +15,18 @@ function fullDocumentRange(document: TextDocument): Range {
 }
 
 class PrismaEditProvider implements DocumentFormattingEditProvider {
+    private exec_path: string
+
+    constructor(exec_path) {
+      this.exec_path = exec_path;
+    }
+
     provideDocumentFormattingEdits(
         document: TextDocument,
         options: FormattingOptions,
         token: CancellationToken
     ): Promise<TextEdit[]> {
-      return format(document.getText()).then((formatted) => 
+      return format(this.exec_path, options.tabSize, document.getText()).then((formatted) => 
         [TextEdit.replace(fullDocumentRange(document), formatted)]
       )
     }

@@ -2,14 +2,14 @@
   "name": "prisma",
   "displayName": "Prisma",
   "description": "Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.",
-  "version": "0.0.5",
+  "version": "0.0.9",
   "icon": "logo_white.png",
   "engines": {
     "vscode": "^1.34.0"
   },
   "publisher": "Prisma",
   "categories": [
-    "Languages"
+    "Programming Languages"
   ],
   "repository": {
     "type": "github",
@@ -39,14 +39,14 @@
     ]
   },
   "scripts": {
-      "vscode:prepublish": "npm run compile",
-      "compile": "tsc -p ./",
-      "postinstall": "node ./node_modules/vscode/bin/install && node install.js && chmod +x out/prisma-fmt"
+    "vscode:prepublish": "rm -rd out && npm run compile",
+    "compile": "tsc -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install"
   },
   "activationEvents": [
     "onLanguage:prisma"
   ],
-  "dependencies": { },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "*",
     "vscode": "1.0.3",

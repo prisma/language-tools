@@ -1,9 +1,7 @@
 import { spawn } from 'child_process'
-import * as path from 'path'
 
-export default function format(text: string): Promise<string> {
-  const exec_path = path.join(__dirname, '../prisma-fmt')
-  const fmt = spawn(exec_path)
+export default function format(exec_path: string, ident_width: number, text: string): Promise<string> {
+  const fmt = spawn(exec_path, ['-s', ident_width.toString()])
 
   const chunks = []
 
