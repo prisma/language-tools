@@ -11,7 +11,8 @@ export async function activate(context: vscode.ExtensionContext) {
       await install(exec_path)
       vscode.window.showInformationMessage("prisma-fmt installation succeeded.")
     } catch (err) {
-      vscode.window.showErrorMessage("Cannot install prisma-fmt: " + err)
+      // No error on install error.
+      // vscode.window.showErrorMessage("Cannot install prisma-fmt: " + err)
     }
   }
   vscode.languages.registerDocumentFormattingEditProvider('prisma', new PrismaEditProvider(exec_path)) 
