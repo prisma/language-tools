@@ -33,7 +33,7 @@
           "name": "support.type.type.prisma"
         },
         "3": {
-          "name": "punctuation.definition.tag.prisma"
+          "name": "entity.tag.model.start.prisma"
         }
       },
       "patterns": [
@@ -50,7 +50,7 @@
       "end": "\\s*\\}",
       "endCaptures": {
         "0": {
-          "name": "entity.tag.embedded.end.prisma"
+          "name": "entity.tag.model.end.prisma"
         }
       }
     },
@@ -65,7 +65,7 @@
           "name": "support.type.primitive.ts"
         },
         "3": {
-          "name": "punctuation.definition.tag.prisma"
+          "name": "entity.tag.enum.start.prisma"
         }
       },
       "patterns": [
@@ -82,7 +82,7 @@
       "end": "\\s*\\}",
       "endCaptures": {
         "0": {
-          "name": "entity.tag.embedded.end.prisma"
+          "name": "entity.tag.enum.end.prisma"
         }
       }
     },
@@ -97,7 +97,7 @@
           "name": "support.type.primitive.ts"
         },
         "3": {
-          "name": "punctuation.definition.tag.prisma"
+          "name": "entity.tag.config.start.prisma"
         }
       },
       "patterns": [
@@ -114,7 +114,7 @@
       "end": "\\s*\\}",
       "endCaptures": {
         "1": {
-          "name": "entity.tag.embedded.end.prisma"
+          "name": "entity.tag.config.end.prisma"
         }
       }
     },
