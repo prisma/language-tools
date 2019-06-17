@@ -30,7 +30,7 @@
           "name": "storage.type.model.prisma"
         },
         "2": {
-          "name": "support.type.type.prisma"
+          "name": "entity.name.type.model.prisma"
         },
         "3": {
           "name": "entity.tag.model.start.prisma"
@@ -62,7 +62,7 @@
           "name": "storage.type.enum.prisma"
         },
         "2": {
-          "name": "support.type.primitive.ts"
+          "name": "entity.name.type.enum.prisma"
         },
         "3": {
           "name": "entity.tag.enum.start.prisma"
@@ -94,7 +94,7 @@
           "name": "storage.type.config.prisma"
         },
         "2": {
-          "name": "support.type.primitive.ts"
+          "name": "entity.name.type.config.prisma"
         },
         "3": {
           "name": "entity.tag.config.start.prisma"
@@ -148,7 +148,7 @@
               "name": "variable.other.assignment.prisma"
             },
             "2": {
-              "name": "support.type.primitive.ts"
+              "name": "support.type.primitive.prisma"
             },
             "3": {
               "name": "keyword.operator.list_type.prisma"
@@ -178,10 +178,10 @@
               "name": "storage.type.type.prisma"
             },
             "2": {
-              "name": "support.type.custom.prisma"
+              "name": "entity.name.type.type.prisma"
             },
             "3": {
-              "name": "support.type.type.prisma"
+              "name": "support.type.primitive.prisma"
             }
           }
         },
