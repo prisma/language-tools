@@ -23,7 +23,7 @@
   ],
   "repository": {
     "model_block_definition": {
-      "begin": "^\\s*(model)\\s+([A-Za-z][\\w]*)\\s+({)",
+      "begin": "^\\s*(model|type)\\s+([A-Za-z][\\w]*)\\s+({)",
       "name": "source.prisma.embedded.source",
       "beginCaptures": {
         "1": {
@@ -127,7 +127,7 @@
               "name": "variable.other.assignment.prisma"
             },
             "2": {
-              "name": "punctuation.definition.tag.prisma"
+              "name": "support.other.assignment.prisma"
             }
           },
           "patterns": [
@@ -142,21 +142,24 @@
     "field_definition": {
       "patterns": [
         {
-          "match": "^\\s*(\\w+)\\s+(\\w+)(\\[\\])?(\\?)?(\\!)?",
+          "match": "^\\s*(\\w+)(\\s*:)?\\s+(\\w+)(\\[\\])?(\\?)?(\\!)?",
           "captures": {
             "1": {
               "name": "variable.other.assignment.prisma"
             },
             "2": {
-              "name": "support.type.primitive.prisma"
+              "name": "invalid.illegal.colon.prisma"
             },
             "3": {
-              "name": "keyword.operator.list_type.prisma"
+              "name": "support.type.primitive.prisma"
             },
             "4": {
-              "name": "keyword.operator.optional_type.prisma"
+              "name": "keyword.operator.list_type.prisma"
             },
             "5": {
+              "name": "keyword.operator.optional_type.prisma"
+            },
+            "6": {
               "name": "invalid.illegal.required_type.prisma"
             }
           }
