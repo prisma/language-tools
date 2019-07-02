@@ -2,6 +2,7 @@
 import * as os from 'os';
 import * as https from 'https';
 import * as fs from 'fs';
+import * as zlib from 'zlib';
 
 // Decides which platform to use.
 function getPlatform() {
@@ -17,7 +18,7 @@ function getPlatform() {
 
 // Gets the download URL for a platform
 function getFmtDownloadUrl(platform) {
-  return "https://s3-eu-west-1.amazonaws.com/prisma-native/alpha/latest/" + platform + "/prisma-fmt";
+  return "https://s3-eu-west-1.amazonaws.com/prisma-native/alpha/latest/" + platform + "/prisma-fmt.gz";
 }
 
 export default function install(fmtPath: string): Promise<string> {
@@ -33,11 +34,12 @@ export default function install(fmtPath: string): Promise<string> {
         reject(response.statusMessage)
       }
 
-      // If so, pipe into our file.
-      response.pipe(file);
+      // If so, unzip and pipe into our file.
+      const unzip = zlib.createGunzip()
+      response.pipe(unzip).pipe(file)
       file.on('finish', function() {
-        fs.chmodSync(fmtPath, '755');
-        file.close();
+        fs.chmodSync(fmtPath, '755')
+        file.close()
         resolve(fmtPath)
       });
     });
