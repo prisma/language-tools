@@ -33,7 +33,7 @@
           "name": "entity.name.type.model.prisma"
         },
         "3": {
-          "name": "entity.tag.model.start.prisma"
+          "name": "punctuation.definition.tag.prisma"
         }
       },
       "patterns": [
@@ -50,7 +50,7 @@
       "end": "\\s*\\}",
       "endCaptures": {
         "0": {
-          "name": "entity.tag.model.end.prisma"
+          "name": "punctuation.definition.tag.prisma"
         }
       }
     },
@@ -65,7 +65,7 @@
           "name": "entity.name.type.enum.prisma"
         },
         "3": {
-          "name": "entity.tag.enum.start.prisma"
+          "name": "punctuation.definition.tag.prisma"
         }
       },
       "patterns": [
@@ -82,7 +82,7 @@
       "end": "\\s*\\}",
       "endCaptures": {
         "0": {
-          "name": "entity.tag.enum.end.prisma"
+          "name": "punctuation.definition.tag.prisma"
         }
       }
     },
@@ -97,7 +97,7 @@
           "name": "entity.name.type.config.prisma"
         },
         "3": {
-          "name": "entity.tag.config.start.prisma"
+          "name": "punctuation.definition.tag.prisma"
         }
       },
       "patterns": [
@@ -114,7 +114,7 @@
       "end": "\\s*\\}",
       "endCaptures": {
         "1": {
-          "name": "entity.tag.config.end.prisma"
+          "name": "punctuation.definition.tag.prisma"
         }
       }
     },
@@ -127,7 +127,7 @@
               "name": "variable.other.assignment.prisma"
             },
             "2": {
-              "name": "support.other.assignment.prisma"
+              "name": "keyword.operator.terraform"
             }
           },
           "patterns": [
@@ -222,7 +222,7 @@
           "name": "entity.name.function.attribute.prisma"
         },
         "2": {
-          "name": "entity.tag.attribute_args.start.prisma"
+          "name": "punctuation.definition.tag.prisma"
         }
       },
       "patterns": [
@@ -236,7 +236,7 @@
       "end": "\\)",
       "endCaptures": {
         "1": {
-          "name": "entity.tag.attribute_args.end.prisma"
+          "name": "punctuation.definition.tag.prisma"
         }
       }
     },
@@ -254,7 +254,7 @@
       "begin": "\\[",
       "beginCaptures": {
         "1": {
-          "name": "entity.tag.array.start.prisma"
+          "name": "punctuation.definition.tag.prisma"
         }
       },
       "patterns": [
@@ -265,7 +265,7 @@
       "end": "\\]",
       "endCaptures": {
         "1": {
-          "name": "entity.tag.array.end.prisma"
+          "name": "punctuation.definition.tag.prisma"
         }
       }
     },
@@ -291,7 +291,7 @@
           "name": "support.function.functional.prisma"
         },
         "2": {
-          "name": "entity.tag.attribute_args.start.prisma"
+          "name": "punctuation.definition.tag.prisma"
         }
       },
       "patterns": [
@@ -302,7 +302,7 @@
       "end": "\\)",
       "endCaptures": {
         "1": {
-          "name": "entity.tag.attribute_args.end.prisma"
+          "name": "punctuation.definition.tag.prisma"
         }
       }
     },
