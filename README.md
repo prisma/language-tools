@@ -8,7 +8,7 @@ This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-pri
 
 - Syntax highlighting
 - Auto-formatting
-- Liniting
+- Linting
 - Auto-completion (_coming soon_)
 - Jump-to-definition (_coming soon_)
 
