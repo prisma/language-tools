@@ -1,11 +1,13 @@
 import * as vscode from 'vscode';
 import PrismaEditProvider, { fullDocumentRange } from './provider'
+import * as os from 'os';
 import * as path from 'path'
 import * as fs from 'fs'
 import install from './install'
 import lint from './lint';
 
-const exec_path = path.join(__dirname, '../prisma-fmt')
+const exec_filename = os.platform() === 'win32' ? 'prisma-fmt.exe' : 'prisma-fmt'
+const exec_path = path.join(__dirname, '../' + exec_filename)
 
 export async function activate(context: vscode.ExtensionContext) {
   if(!fs.existsSync(exec_path)) {

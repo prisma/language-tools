@@ -1,5 +1,6 @@
 // Mini download script to fetch prisma-fmt binary during install. 
 import * as os from 'os';
+import * as path from 'path';
 import * as https from 'https';
 import * as fs from 'fs';
 import * as zlib from 'zlib';
@@ -11,19 +12,21 @@ function getPlatform() {
     return platform;
   } else if(platform === 'linux') {
     return 'linux-glibc';
+  } else if(platform === 'win32') {
+    return 'windows'
   } else {
     throw "prisma-fmt: Unsupported OS platform: " + platform;
   }
 }
 
 // Gets the download URL for a platform
-function getFmtDownloadUrl(platform) {
-  return "https://s3-eu-west-1.amazonaws.com/prisma-native/alpha/latest/" + platform + "/prisma-fmt.gz";
+function getFmtDownloadUrl(platform, basename: string) {
+  return "https://s3-eu-west-1.amazonaws.com/prisma-native/alpha/latest/" + platform + "/" + basename + ".gz";
 }
 
 export default function install(fmtPath: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    const url = getFmtDownloadUrl(getPlatform());
+    const url = getFmtDownloadUrl(getPlatform(), path.basename(fmtPath));
     console.log("prisma-fmt: Downloading from " + url);
     const file = fs.createWriteStream(fmtPath);
 
