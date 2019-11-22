@@ -11,7 +11,7 @@ function getPlatform() {
   if(platform === "darwin") {
     return platform;
   } else if(platform === 'linux') {
-    return 'linux-glibc';
+    return 'debian'; // TODO: Add support for 'rhel'
   } else if(platform === 'win32') {
     return 'windows'
   } else {
@@ -21,7 +21,7 @@ function getPlatform() {
 
 // Gets the download URL for a platform
 function getFmtDownloadUrl(platform, basename: string) {
-  return "https://s3-eu-west-1.amazonaws.com/prisma-native/alpha/latest/" + platform + "/" + basename + ".gz";
+  return "https://prisma-builds.s3-eu-west-1.amazonaws.com/master/latest/" + platform + "/" + basename + ".gz";
 }
 
 export default function install(fmtPath: string): Promise<string> {
