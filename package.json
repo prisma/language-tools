@@ -50,7 +50,13 @@
   "dependencies": {},
   "devDependencies": {
     "@types/node": "*",
-    "vscode": "1.0.3",
-    "typescript": "2.0.6"
+    "prettier": "1.19.1",
+    "typescript": "2.0.6",
+    "vscode": "1.0.3"
+  },
+  "prettier": {
+    "semi": false,
+    "trailingComma": "all",
+    "singleQuote": true
   }
 }
