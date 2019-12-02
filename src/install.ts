@@ -10,19 +10,18 @@ function getPlatform() {
   if (platform === 'darwin') {
     return platform
   } else if (platform === 'linux') {
-    return 'linux-glibc'
+    // TODO: check openssl version
+    return 'debian-openssl-1.1.x'
+  } else if (platform === 'win32') {
+    return 'windows'
   } else {
     throw 'prisma-fmt: Unsupported OS platform: ' + platform
   }
 }
 
 // Gets the download URL for a platform
-function getFmtDownloadUrl(platform) {
-  return (
-    'https://s3-eu-west-1.amazonaws.com/prisma-native/alpha/latest/' +
-    platform +
-    '/prisma-fmt.gz'
-  )
+function getFmtDownloadUrl(platform: string) {
+  return `https://prisma-builds.s3-eu-west-1.amazonaws.com/master/latest/${platform}/prisma-fmt.gz`
 }
 
 export default function install(fmtPath: string): Promise<string> {
