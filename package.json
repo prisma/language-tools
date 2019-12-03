@@ -44,6 +44,7 @@
     "vscode:prepublish": "rm -rf *.vsix && rm -rf out && npm run compile",
     "watch": "tsc -w",
     "compile": "tsc -p ./",
+    "format": "prettier --write src/**/*.ts",
     "postinstall": "node ./node_modules/vscode/bin/install"
   },
   "activationEvents": [
@@ -54,10 +55,16 @@
   },
   "devDependencies": {
     "@types/node": "*",
+    "husky": "3.1.0",
     "prettier": "1.19.1",
     "typescript": "2.0.6",
     "vsce": "1.70.0",
     "vscode": "1.0.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run format"
+    }
   },
   "prettier": {
     "semi": false,
