@@ -18,9 +18,10 @@ This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-pri
 
 ## Development
 
-1. Open vscode extension folder in vscode
-   - You need to open the vscode folder as the top-level workspace in vscode, otherwise the following doesn't work.
-2. Press F5
-3. Make a change to the syntax
-4. Open up the vscode project command panel and autocomplete your way to **Developer: Reload Window**
-   1. Additionally **Developer: Inspect TM Scopes** is extremely helpful
+1. Run `yarn watch`
+2. Open this repository in vscode
+3. Press F5, a new file should open
+4. Change the language to Prisma
+5. Make a change to the syntax
+6. To reload, press the reload button in VSCode
+   1. **Developer: Inspect TM Scopes** is helpful for debugging syntax issues
