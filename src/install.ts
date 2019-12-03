@@ -25,7 +25,6 @@ export default async function install(fmtPath: string): Promise<string> {
   const file = fs.createWriteStream(fmtPath)
 
   // Fetch fetch fetch.
-  console.log('prisma-fmt: Downloading from ' + url)
   return new Promise<string>(function(resolve, reject) {
     https.get(url, function(response) {
       // Did everything go well?
