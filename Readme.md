@@ -25,3 +25,15 @@ This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-pri
 5. Make a change to the syntax
 6. To reload, press the reload button in VSCode
    1. **Developer: Inspect TM Scopes** is helpful for debugging syntax issues
+
+## Publishing
+
+Right now we manually publish. To do so:
+
+1. Increment the package version
+2. Run `yarn package`
+3. Go to https://marketplace.visualstudio.com/manage/publishers/Prisma
+4. Click the **••• More Actions**
+5. Drag `prisma-x.x.x.vsix` into the browser and click upload.
+
+This will take about an hour before the update is available.
