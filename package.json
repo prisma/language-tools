@@ -40,7 +40,8 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "rm -rf out && npm run compile",
+    "package": "vsce package",
+    "vscode:prepublish": "rm -rf *.vsix && rm -rf out && npm run compile",
     "watch": "tsc -w",
     "compile": "tsc -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install"
