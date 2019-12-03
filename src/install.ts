@@ -1,37 +1,31 @@
-// Mini download script to fetch prisma-fmt binary during install.
-import * as os from 'os'
+/**
+ * Imports
+ */
+
+import { getPlatform } from '@prisma/get-platform'
 import * as https from 'https'
-import * as fs from 'fs'
 import * as zlib from 'zlib'
+import * as fs from 'fs'
 
-// Decides which platform to use.
-function getPlatform() {
-  const platform = os.platform()
-  if (platform === 'darwin') {
-    return platform
-  } else if (platform === 'linux') {
-    return 'linux-glibc'
-  } else {
-    throw 'prisma-fmt: Unsupported OS platform: ' + platform
-  }
+/**
+ * Gets the download URL for a platform
+ */
+
+function getFmtDownloadUrl(platform: string) {
+  return `https://prisma-builds.s3-eu-west-1.amazonaws.com/master/latest/${platform}/prisma-fmt.gz`
 }
 
-// Gets the download URL for a platform
-function getFmtDownloadUrl(platform) {
-  return (
-    'https://s3-eu-west-1.amazonaws.com/prisma-native/alpha/latest/' +
-    platform +
-    '/prisma-fmt.gz'
-  )
-}
+/**
+ * Install prisma format
+ */
 
-export default function install(fmtPath: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const url = getFmtDownloadUrl(getPlatform())
-    console.log('prisma-fmt: Downloading from ' + url)
-    const file = fs.createWriteStream(fmtPath)
+export default async function install(fmtPath: string): Promise<string> {
+  const platform = await getPlatform()
+  const url = getFmtDownloadUrl(platform)
+  const file = fs.createWriteStream(fmtPath)
 
-    // Fetch fetch fetch.
+  // Fetch fetch fetch.
+  return new Promise<string>(function(resolve, reject) {
     https.get(url, function(response) {
       // Did everything go well?
       if (response.statusCode !== 200) {
