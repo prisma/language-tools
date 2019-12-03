@@ -2,6 +2,13 @@
 # yarn lockfile v1
 
 
+"@prisma/get-platform@0.1.23":
+  version "0.1.23"
+  resolved "https://registry.yarnpkg.com/@prisma/get-platform/-/get-platform-0.1.23.tgz#eaff452a2ddafb6349da0a59e7babc7f9c6c6373"
+  integrity sha512-R1T5SOF9CrEr3KLCQb2uoIz7SULxfvzelTF6pmn8QonYcEyIoJ+Y98zPfpvVD7INfO+ZVppryTYCXAtNRa5/Ag==
+  dependencies:
+    debug "^4.1.1"
+
 "@types/node@*":
   version "12.0.5"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.0.5.tgz#ac14404c33d1a789973c45379a67f7f7e58a01b9"
@@ -394,6 +401,13 @@ debug@2.2.0:
   integrity sha1-+HBX6ZWxofauaklgZkE3vFbwOdo=
   dependencies:
     ms "0.7.1"
+
+debug@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-4.1.1.tgz#3b72260255109c6b589cee050f1d516139664791"
+  integrity sha512-pYAIzeRo8J6KPEaJ0VWOh5Pzkbw/RetuzehGM7QRRX5he4fPHx2rdKMB256ehJCkX+XRQm16eZLqLNS8RSZXZw==
+  dependencies:
+    ms "^2.1.1"
 
 decamelize@^1.1.2:
   version "1.2.0"
@@ -1657,6 +1671,11 @@ ms@0.7.1:
   version "0.7.1"
   resolved "https://registry.yarnpkg.com/ms/-/ms-0.7.1.tgz#9cd13c03adbff25b65effde7ce864ee952017098"
   integrity sha1-nNE8A62/8ltl7/3nzoZO6VIBcJg=
+
+ms@^2.1.1:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
+  integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
 
 multimatch@^2.0.0:
   version "2.1.0"

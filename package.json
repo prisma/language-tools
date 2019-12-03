@@ -49,6 +49,9 @@
   "activationEvents": [
     "onLanguage:prisma"
   ],
+  "dependencies": {
+    "@prisma/get-platform": "0.1.23"
+  },
   "devDependencies": {
     "@types/node": "*",
     "prettier": "1.19.1",
