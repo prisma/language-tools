@@ -2,7 +2,7 @@
  * Imports
  */
 
-import { getPlatform } from '@prisma/get-platform'
+import { getPlatform, Platform } from '@prisma/get-platform'
 import * as https from 'https'
 import * as zlib from 'zlib'
 import * as fs from 'fs'
@@ -11,8 +11,9 @@ import * as fs from 'fs'
  * Gets the download URL for a platform
  */
 
-function getFmtDownloadUrl(platform: string) {
-  return `https://prisma-builds.s3-eu-west-1.amazonaws.com/master/latest/${platform}/prisma-fmt.gz`
+function getFmtDownloadUrl(platform: Platform) {
+  const extension = platform === 'windows' ? '.exe.gz' : '.gz'
+  return `https://prisma-builds.s3-eu-west-1.amazonaws.com/master/latest/${platform}/prisma-fmt${extension}`
 }
 
 /**
