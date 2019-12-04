@@ -12,6 +12,10 @@ This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-pri
 - Auto-completion (_coming soon_)
 - Jump-to-definition (_coming soon_)
 
+## Install
+
+Get the Prisma Extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma).
+
 ## Preview
 
 ![](https://imgur.com/HbufPo6.png)
