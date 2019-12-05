@@ -1,16 +1,23 @@
-import * as vscode from 'vscode'
 import PrismaEditProvider, { fullDocumentRange } from './provider'
+import { getPlatform, Platform } from '@prisma/get-platform'
+import * as vscode from 'vscode'
+import install from './install'
 import * as path from 'path'
 import * as fs from 'fs'
-import install from './install'
 import lint from './lint'
 
-const exec_path = path.join(__dirname, '../prisma-fmt')
+function getExecPath(platform: Platform): string {
+  const extension = platform === 'windows' ? '.exe' : ''
+  return path.join(__dirname, '..', `prisma-fmt${extension}`)
+}
 
 export async function activate(context: vscode.ExtensionContext) {
-  if (!fs.existsSync(exec_path)) {
+  const platform = await getPlatform()
+  const execPath = getExecPath(platform)
+
+  if (!fs.existsSync(execPath)) {
     try {
-      await install(exec_path)
+      await install(execPath)
       vscode.window.showInformationMessage(
         'Prisma plugin installation succeeded.',
       )
@@ -20,11 +27,11 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   }
 
-  if (fs.existsSync(exec_path)) {
+  if (fs.existsSync(execPath)) {
     // This registers our formatter, prisma-fmt
     vscode.languages.registerDocumentFormattingEditProvider(
       'prisma',
-      new PrismaEditProvider(exec_path),
+      new PrismaEditProvider(execPath),
     )
 
     // This registers our linter, also prisma-fmt for now.
@@ -53,28 +60,31 @@ async function updatePrismaDiagnostics(
   document: vscode.TextDocument,
   collection: vscode.DiagnosticCollection,
 ) {
-  if (document && document.languageId === 'prisma') {
-    const text = document.getText(fullDocumentRange(document))
-
-    const res = await lint(exec_path, text)
-
-    const errors = []
-
-    for (const error of res) {
-      errors.push({
-        code: '',
-        message: error.text,
-        range: new vscode.Range(
-          document.positionAt(error.start),
-          document.positionAt(error.end),
-        ),
-        severity: vscode.DiagnosticSeverity.Error,
-        source: '',
-        relatedInformation: [],
-      })
-    }
-    collection.set(document.uri, errors)
-  } else {
+  // ignore for non-prisma files
+  if (!document || document.languageId !== 'prisma') {
     collection.clear()
+    return
   }
+
+  const text = document.getText(fullDocumentRange(document))
+  const platform = await getPlatform()
+  const execPath = getExecPath(platform)
+
+  const res = await lint(execPath, text)
+  const errors = []
+
+  for (const error of res) {
+    errors.push({
+      code: '',
+      message: error.text,
+      range: new vscode.Range(
+        document.positionAt(error.start),
+        document.positionAt(error.end),
+      ),
+      severity: vscode.DiagnosticSeverity.Error,
+      source: '',
+      relatedInformation: [],
+    })
+  }
+  collection.set(document.uri, errors)
 }
