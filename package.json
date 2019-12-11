@@ -2,7 +2,7 @@
   "name": "prisma",
   "displayName": "Prisma",
   "description": "Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
