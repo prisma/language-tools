@@ -133,6 +133,9 @@
           "patterns": [
             {
               "include": "#value"
+            },
+            {
+              "include": "#double_comment_inline"
             }
           ],
           "end": "\\n"
@@ -366,6 +369,10 @@
     "double_comment": {
       "begin": "//",
       "end": "$\\n?",
+      "name": "comment.prisma"
+    },
+    "double_comment_inline": {
+      "match": "//[^\\n]*",
       "name": "comment.prisma"
     },
     "boolean": {
