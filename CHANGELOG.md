@@ -5,6 +5,11 @@ All notable changes to the "prisma" extension will be documented in this file.
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how
 to structure this file.
 
+## 0.0.23 / 2020-01-30
+
+- Fix inline comments syntax highlighting
+- Bump binary dependencies
+
 ## 0.0.22 / 2020-01-30
 
 - Bump binary dependencies
