@@ -18,10 +18,10 @@
     esutils "^2.0.2"
     js-tokens "^4.0.0"
 
-"@prisma/get-platform@0.1.23":
-  version "0.1.23"
-  resolved "https://registry.yarnpkg.com/@prisma/get-platform/-/get-platform-0.1.23.tgz#eaff452a2ddafb6349da0a59e7babc7f9c6c6373"
-  integrity sha512-R1T5SOF9CrEr3KLCQb2uoIz7SULxfvzelTF6pmn8QonYcEyIoJ+Y98zPfpvVD7INfO+ZVppryTYCXAtNRa5/Ag==
+"@prisma/get-platform@0.1.x":
+  version "0.1.28"
+  resolved "https://registry.yarnpkg.com/@prisma/get-platform/-/get-platform-0.1.28.tgz#90477ceb4d2d1523945e34054ce136f08e8fa0ae"
+  integrity sha512-pF/WJSBEMkTQDHd51OutsWI1JR85pIV3Vm4jgMt6+dn1Ifa5wAqd+96KrkbyP1gc1CpInP7rS/gJGeQ2Iozr8Q==
   dependencies:
     debug "^4.1.1"
 
@@ -2935,10 +2935,10 @@ vinyl@~2.0.1:
     remove-trailing-separator "^1.0.1"
     replace-ext "^1.0.0"
 
-vsce@1.70.0:
-  version "1.70.0"
-  resolved "https://registry.yarnpkg.com/vsce/-/vsce-1.70.0.tgz#b987e67b391f95bd006649993f05a00672ca4f26"
-  integrity sha512-mBTbVrWL348jODwfmaR+yXrlzb8EABGCT067C4shKOXriWiuMQi4/uCbFm6TUBcfnzTYLJv+DKa0VnKU8yEAjA==
+vsce@1.73.0:
+  version "1.73.0"
+  resolved "https://registry.yarnpkg.com/vsce/-/vsce-1.73.0.tgz#f65b501f0d1e45e50b220b284a47df164c4e847b"
+  integrity sha512-6W37Ebbkj3uF3WhT+SCfRtsneRQEFcGvf/XYz+b6OAgDCj4gPurWyDVrqw/HLsbP1WflGIyUfVZ8t5M7kQp6Uw==
   dependencies:
     azure-devops-node-api "^7.2.0"
     chalk "^2.4.2"
