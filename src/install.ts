@@ -13,7 +13,7 @@ import * as fs from 'fs'
 
 function getFmtDownloadUrl(platform: Platform) {
   const extension = platform === 'windows' ? '.exe.gz' : '.gz'
-  return `https://prisma-builds.s3-eu-west-1.amazonaws.com/master/latest/${platform}/prisma-fmt${extension}`
+  return `https://binaries.prisma.sh/master/latest/${platform}/prisma-fmt${extension}`
 }
 
 /**
