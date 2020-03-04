@@ -11,7 +11,7 @@ export default async function lint(
   text: string,
 ): Promise<LinterError[]> {
   try {
-    const result = await exec(exec_path, ['--lint', '--no_env_errors'], text)
+    const result = await exec(exec_path, ['lint', '--no-env-errors'], text)
     return JSON.parse(result)
   } catch (errors) {
     console.error("prisma-fmt error'd during linting.")
