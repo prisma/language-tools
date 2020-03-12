@@ -12,7 +12,7 @@ else
 fi
 
 echo "============================"
-echo "PAT: $PAT"
+echo "AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
 echo "PRODUCTION: $PRODUCTION"
 echo "============================"
 
@@ -25,16 +25,16 @@ else
     echo "Not setting up repo because PRODUCTION is not set"
 fi
 
-# Try to publish if $PAT (Personal Access Token - https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) exists 
-if [ -z "$PAT" ]; then
-    echo "\$PAT is empty. Please set the value of $PAT"
-elif [ -n "$PAT" ]; then
+# Try to publish if $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN (Personal Access Token - https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) exists 
+if [ -z "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
+    echo "\$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN is empty. Please set the value of $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
+elif [ -n "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
     if [ "$PRODUCTION" = "1" ]; then
         echo "Publishing patch release"
-        ./node_modules/.bin/vsce publish patch --pat "$PAT"
+        ./node_modules/.bin/vsce publish patch --pat "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
     else
         echo "Printing the command because PRODUCTION is not set"
-        echo "./node_modules/.bin/vsce publish patch --pat $PAT"
+        echo "./node_modules/.bin/vsce publish patch --pat $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
     fi
 fi
 
