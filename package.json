@@ -47,7 +47,8 @@
     "format": "prettier --write src/**/*.ts",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "vsce:publish": "sh scripts/publish.sh",
-    "vsce:check": "sh scripts/check-update.sh"
+    "vsce:check": "yarn shell:lint && sh scripts/check-update.sh",
+    "shell:lint": "shellcheck -x scripts/*.sh"
   },
   "activationEvents": [
     "onLanguage:prisma"
