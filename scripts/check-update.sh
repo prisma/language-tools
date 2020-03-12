@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
-set -eo pipefail
-shopt -s nullglob
+#!/bin/sh
+
+set -eu
 
 CURRENT_VERSION=$(cat scripts/prisma_version)
 echo "CURRENT_VERSION: $CURRENT_VERSION"

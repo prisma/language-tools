@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
-set -eo pipefail
-shopt -s nullglob
+#!/bin/sh
+
+set -eu
 
 # For local development, in production, the environment will be set though GH actions and GH secrets
 if [ -f ".envrc" ]; then
