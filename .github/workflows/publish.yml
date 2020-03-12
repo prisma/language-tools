@@ -1,0 +1,25 @@
+name: Automatic Publish
+
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: '*/5 * * * *'
+
+env:
+  AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  PRODUCTION: ${{ secrets.PRODUCTION }}
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    if: endsWith(github.ref, '/master')
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: npm install
+      - name: Publish Extension as Patch
+        run: yarn vsce:check
