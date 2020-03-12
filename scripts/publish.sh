@@ -6,7 +6,7 @@ set -eu
 if [ -f ".envrc" ]; then
     echo "Loading .envrc"
     # shellcheck disable=SC1091
-    source .envrc
+    . .envrc
 else
     echo "No .envrc"
 fi
