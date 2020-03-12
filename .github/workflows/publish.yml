@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - feat_automate_release
   schedule:
     - cron: '*/5 * * * *'
 
@@ -17,7 +16,7 @@ jobs:
   publish:
     name: Publish
     runs-on: ubuntu-latest
-    if: endsWith(github.ref, '/master') || endsWith(github.ref, '/feat_automate_release')
+    if: endsWith(github.ref, '/master')
     steps:
       - uses: actions/checkout@v2
       - name: Install Dependencies
