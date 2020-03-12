@@ -5,6 +5,7 @@ shopt -s nullglob
 # For local development, in production, the environment will be set though GH actions and GH secrets
 if [ -f ".envrc" ]; then
     echo "Loading .envrc"
+    # shellcheck disable=SC1091
     source .envrc
 else
     echo "No .envrc"
