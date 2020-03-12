@@ -16,15 +16,6 @@ echo "AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
 echo "PRODUCTION: $PRODUCTION"
 echo "============================"
 
-# Setup the repo with GH_TOKEN to avoid running jobs when CI commits
-if [ "$PRODUCTION" = "1" ]; then
-    git config --global user.email "prismabots@gmail.com"
-    git config --global user.name "Prismo"
-    git remote add github "https://$GITHUB_ACTOR:$GH_TOKEN@github.com/$GITHUB_REPOSITORY.git" || true
-else
-    echo "Not setting up repo because PRODUCTION is not set"
-fi
-
 # Try to publish if $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN (Personal Access Token - https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) exists 
 if [ -z "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
     echo "\$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN is empty. Please set the value of $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - fix_automate_release_2
   schedule:
     - cron: '*/5 * * * *'
 
@@ -16,7 +17,7 @@ jobs:
   publish:
     name: Publish
     runs-on: ubuntu-latest
-    if: endsWith(github.ref, '/master')
+    if: endsWith(github.ref, '/master') || endsWith(github.ref, '/fix_automate_release_2')
     steps:
       - uses: actions/checkout@v2
       - name: Install Dependencies
