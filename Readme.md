@@ -32,7 +32,13 @@ Get the Prisma Extension from the [Visual Studio Marketplace](https://marketplac
 
 ## Publishing
 
-Right now we manually publish. To do so:
+The extension is automatically published using a [Azure Devops Personal Access Token](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) via Github actions (see `.github/workflows/publish.yml`).
+
+Note that the personal access token is only valid for a year and will need to be renewed manually.
+
+### Manual Publishing
+
+To do a manual publish, please follow these steps:
 
 1. Increment the package version
 2. Run `yarn package`
