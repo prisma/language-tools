@@ -36,6 +36,8 @@ The extension is automatically published using a [Azure Devops Personal Access T
 
 Note that the personal access token is only valid for a year and will need to be renewed manually.
 
+### Manual Publishing
+
 To do a manual publish, please follow these steps:
 
 1. Increment the package version
