@@ -1,23 +1,15 @@
 import PrismaEditProvider, { fullDocumentRange } from './provider'
-import { getPlatform, Platform } from '@prisma/get-platform'
 import * as vscode from 'vscode'
 import install from './install'
-import * as path from 'path'
+import * as util from './util'
 import * as fs from 'fs'
 import lint from './lint'
 
-function getExecPath(platform: Platform): string {
-  const extension = platform === 'windows' ? '.exe' : ''
-  return path.join(__dirname, '..', `prisma-fmt${extension}`)
-}
-
 export async function activate(context: vscode.ExtensionContext) {
-  const platform = await getPlatform()
-  const execPath = getExecPath(platform)
-
-  if (!fs.existsSync(execPath)) {
+  const binPath = await util.getBinPath()
+  if (!fs.existsSync(binPath)) {
     try {
-      await install(execPath)
+      await install(binPath)
       vscode.window.showInformationMessage(
         'Prisma plugin installation succeeded.',
       )
@@ -27,11 +19,11 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   }
 
-  if (fs.existsSync(execPath)) {
+  if (fs.existsSync(binPath)) {
     // This registers our formatter, prisma-fmt
     vscode.languages.registerDocumentFormattingEditProvider(
       'prisma',
-      new PrismaEditProvider(execPath),
+      new PrismaEditProvider(binPath),
     )
 
     // This registers our linter, also prisma-fmt for now.
@@ -67,10 +59,8 @@ async function updatePrismaDiagnostics(
   }
 
   const text = document.getText(fullDocumentRange(document))
-  const platform = await getPlatform()
-  const execPath = getExecPath(platform)
-
-  const res = await lint(execPath, text)
+  const binPath = await util.getBinPath()
+  const res = await lint(binPath, text)
   const errors = []
 
   for (const error of res) {
