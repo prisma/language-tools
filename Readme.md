@@ -41,9 +41,10 @@ Note that the personal access token is only valid for a year and will need to be
 To do a manual publish, please follow these steps:
 
 1. Increment the package version
-2. Run `yarn package`
-3. Go to https://marketplace.visualstudio.com/manage/publishers/Prisma
-4. Click the **••• More Actions**
-5. Drag `prisma-x.x.x.vsix` into the browser and click upload.
+2. Update to latest pinned binary release in the [Prisma CLI's package.json](https://github.com/prisma/prisma2/blob/master/cli/prisma2/package.json) under **prisma.version**.
+3. Run `yarn package`
+4. Go to https://marketplace.visualstudio.com/manage/publishers/Prisma
+5. Click the **••• More Actions**
+6. Drag `prisma-x.x.x.vsix` into the browser and click upload.
 
 This will take about an hour before the update is available.
