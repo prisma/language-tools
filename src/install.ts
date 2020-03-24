@@ -2,27 +2,17 @@
  * Imports
  */
 
-import { getPlatform, Platform } from '@prisma/get-platform'
-import * as https from 'https'
-import * as zlib from 'zlib'
-import * as fs from 'fs'
-
-/**
- * Gets the download URL for a platform
- */
-
-function getFmtDownloadUrl(platform: Platform) {
-  const extension = platform === 'windows' ? '.exe.gz' : '.gz'
-  return `https://binaries.prisma.sh/master/latest/${platform}/prisma-fmt${extension}`
-}
+import * as util from './util'
+import https from 'https'
+import zlib from 'zlib'
+import fs from 'fs'
 
 /**
  * Install prisma format
  */
 
 export default async function install(fmtPath: string): Promise<string> {
-  const platform = await getPlatform()
-  const url = getFmtDownloadUrl(platform)
+  const url = await util.getDownloadURL()
   const file = fs.createWriteStream(fmtPath)
 
   // Fetch fetch fetch.

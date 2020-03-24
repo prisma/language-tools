@@ -15,11 +15,7 @@ export function fullDocumentRange(document: TextDocument): Range {
 }
 
 class PrismaEditProvider implements DocumentFormattingEditProvider {
-  private exec_path: string
-
-  constructor(exec_path) {
-    this.exec_path = exec_path
-  }
+  constructor(private readonly binPath: string) {}
 
   provideDocumentFormattingEdits(
     document: TextDocument,
@@ -27,7 +23,7 @@ class PrismaEditProvider implements DocumentFormattingEditProvider {
     token: CancellationToken,
   ): Promise<TextEdit[]> {
     return format(
-      this.exec_path,
+      this.binPath,
       options.tabSize,
       document.getText(),
     ).then(formatted => [

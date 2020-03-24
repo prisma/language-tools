@@ -7,13 +7,13 @@ export default function exec(
 ): Promise<string> {
   const fmt = spawn(exec_path, args)
 
-  const chunks = []
+  const chunks: string[] = []
 
   fmt.stdout.on('data', data => {
     chunks.push(data.toString())
   })
 
-  const err_chunks = []
+  const err_chunks: string[] = []
 
   fmt.stderr.on('data', data => {
     err_chunks.push(data.toString())

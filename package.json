@@ -3,6 +3,9 @@
   "displayName": "Prisma",
   "description": "Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.",
   "version": "0.0.28",
+  "prisma": {
+    "version": "ccd5785ebfc8a6f5e2d5351a785c26816b671170"
+  },
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
@@ -54,7 +57,8 @@
     "onLanguage:prisma"
   ],
   "dependencies": {
-    "@prisma/get-platform": "0.1.x"
+    "@prisma/get-platform": "0.1.x",
+    "pkg-dir": "4.2.0"
   },
   "devDependencies": {
     "@types/node": "12.12.14",
