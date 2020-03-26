@@ -4,7 +4,7 @@ set -eu
 
 OLD_SHA=$(jq ".prisma.version" ./package.json)
 
-SHA=$(npx @prisma/cli@latest --version | grep "Query Engine" | awk '{print $5}')
+SHA=$(npx -p @prisma/cli@latest prisma2 --version | grep "Query Engine" | awk '{print $5}')
 jq ".prisma.version = \"$SHA\"" ./package.json > ./package.json.bk
 mv ./package.json.bk ./package.json
 
