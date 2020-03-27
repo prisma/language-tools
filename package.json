@@ -4,7 +4,7 @@
   "description": "Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.",
   "version": "0.0.28",
   "prisma": {
-    "version": "ccd5785ebfc8a6f5e2d5351a785c26816b671170"
+    "version": "8814060fa684793b73d07dbfccd4b7777b3361ae"
   },
   "license": "Apache-2.0",
   "icon": "logo_white.png",
