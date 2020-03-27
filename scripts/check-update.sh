@@ -20,6 +20,7 @@ fi
 if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then
     echo "UPDATING to $NPM_VERSION"
     echo "$NPM_VERSION" > scripts/prisma_version
+    sh ./scripts/bump-sha.sh
     git add -A .
     git commit -m "bump prisma_version to $NPM_VERSION"
     yarn run vsce:publish

@@ -22,11 +22,10 @@ if [ -z "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
 elif [ -n "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
     if [ "$PRODUCTION" = "1" ]; then
         echo "Publishing patch release"
-        sh ./scripts/bump-sha.sh
         ./node_modules/.bin/vsce publish patch --pat "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
     else
         echo "Printing the command because PRODUCTION is not set"
-        echo "sh ./scripts/bump-sha.sh"
+        echo "sh ./scripts/bump-sha.sh" # The actual execution of this command is in check-update.sh becuase git working tree must be clean before calling `vsce publish`
         echo "./node_modules/.bin/vsce publish patch --pat $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
     fi
 fi
