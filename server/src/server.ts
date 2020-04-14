@@ -43,10 +43,12 @@ connection.onInitialize((params: InitializeParams) => {
     capabilities: {
       //definitionProvider: true,
       //hoverProvider: true,
+
     },
   }
   return result
 })
+
 
 /*
 connection.onHover(params => messageHandler.handleHoverRequest(params))
