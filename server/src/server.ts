@@ -20,7 +20,7 @@ let hasConfigurationCapability: boolean = false
 let hasWorkspaceFolderCapability: boolean = false
 let hasDiagnosticRelatedInformationCapability: boolean = false
 
-const messageHandler = new MessageHandler()
+const messageHandler = new MessageHandler(documents)
 
 connection.onInitialize((params: InitializeParams) => {
   let capabilities = params.capabilities
@@ -41,18 +41,19 @@ connection.onInitialize((params: InitializeParams) => {
 
   const result: InitializeResult = {
     capabilities: {
-      definitionProvider: true,
-      hoverProvider: true,
+      //definitionProvider: true,
+      //hoverProvider: true,
     },
   }
   return result
 })
 
+/*
 connection.onHover(params => messageHandler.handleHoverRequest(params))
 
 connection.onDefinition(params =>
   messageHandler.handleDefinitionRequest(params),
-)
+) */
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events

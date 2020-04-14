@@ -5,11 +5,13 @@ import * as util from './util'
 import * as fs from 'fs'
 import lint from './lint'
 import * as path from 'path'
+//import { getDMMF } from '@prisma/sdk'
 import {
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
   TransportKind,
+  CancellationToken,
 } from 'vscode-languageclient'
 
 let client: LanguageClient
@@ -93,7 +95,9 @@ export async function activate(context: vscode.ExtensionContext) {
           await updatePrismaDiagnostics(editor.document, collection)
         }
       }),
-    )
+    ),
+      vscode.languages.registerDefinitionProvider(clientOptions.documentSelector, new GoDefinitionProvider())
+    vscode.languages.registerHoverProvider(clientOptions.documentSelector, new GoHoverProvider())
   }
 }
 
@@ -127,3 +131,59 @@ async function updatePrismaDiagnostics(
   }
   collection.set(document.uri, errors)
 }
+
+
+class GoDefinitionProvider implements vscode.DefinitionProvider {
+  public provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: CancellationToken): Thenable<vscode.Location> {
+    return new Promise(resolve => {
+
+      resolve()
+      /*
+      const documentText = document.getText();
+
+      const range = document.getWordRangeAtPosition(position);
+      const type = document.getText(range)
+
+      // parse schem file to datamodel meta format (DMMF)
+      getDMMF({ datamodel: documentText }).then(response => {
+        let models = response.datamodel.models;
+        let modelNames = models.filter(m => m.name == type);
+
+
+        resolve({
+          uri: document.uri,
+          range: new vscode.Range(new vscode.Position(2, 3), new vscode.Position(2, 6)),
+        }) */
+    })
+  }
+}
+
+
+class GoHoverProvider implements vscode.HoverProvider {
+  public provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Thenable<vscode.Hover> {
+    return new Promise(resolve => {
+
+      /*const documentText = document.getText();
+      const range = document.getWordRangeAtPosition(position);
+      const type = document.getText(range)
+      // parse schem file to datamodel meta format (DMMF)
+      getDMMF({ datamodel: documentText }).then(response => {
+        let models = response.datamodel.models;
+        let modelNames = models.filter(m => m.name == type);
+
+        if (modelNames.length == 0) {
+          resolve();
+        }
+
+
+        const str = JSON.stringify(modelNames);
+
+        resolve(new vscode.Hover(type)) */
+
+      resolve()
+
+    })
+  }
+}
+
+
