@@ -1,7 +1,8 @@
 import {
   TextDocumentPositionParams,
   CancellationToken,
-  TextDocuments
+  TextDocuments,
+  DidChangeTextDocumentParams
 } from 'vscode-languageserver'
 //import { getDMMF } from '@prisma/sdk'
 import * as fs from 'fs'
@@ -37,6 +38,7 @@ export class MessageHandler {
       contents: str,
     }
   } */
+
 
   async handleHoverRequest(params:TextDocumentPositionParams) {
     return null;
