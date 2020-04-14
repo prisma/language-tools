@@ -2,3 +2,6 @@ out/
 node_modules/
 *.vsix
 .envrc
+client/server
+.vscode-test
+out
