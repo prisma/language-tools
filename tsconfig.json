@@ -5,9 +5,15 @@
     "outDir": "out",
     "lib": ["es6"],
     "sourceMap": true,
-    "rootDir": ".",
+    "rootDir": "src",
     "strict": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "composite": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src"],
+  "exclude": ["node_modules"],
+	"references": [
+		{ "path": "./client" },
+		{ "path": "./server" }
+	]
 }

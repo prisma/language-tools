@@ -1,0 +1,22 @@
+{
+    "name": "lsp-prisma-server",
+    "description": "Implementation of a language server.",
+    "version": "0.0.30",
+    "author": "Prisma",
+    "license": "Apache-2.0",
+    "engines": {
+        "node": "*"
+    },
+    "repository": {
+        "type": "github",
+        "url": "https://github.com/prisma/vscode"
+    },
+    "dependencies": {
+        "vscode-languageserver": "6.1.1",
+        "vscode-languageserver-textdocument": "1.0.1"
+    },
+    "devDependencies": {
+        "@types/vscode": "1.43.0"
+    },
+    "scripts": {}
+}

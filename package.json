@@ -19,7 +19,7 @@
     "type": "github",
     "url": "https://github.com/prisma/vscode"
   },
-  "main": "./out/src/extension",
+  "main": "./client/out/extension",
   "contributes": {
     "languages": [
       {
@@ -40,15 +40,38 @@
         "scopeName": "source.prisma",
         "path": "./syntaxes/prisma.tmLanguage.json"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Language server configuration",
+      "properties": {
+        "languageServerExample.maxNumberOfProblems": {
+          "scope": "resource",
+          "type": "number",
+          "default": 100,
+          "description": "Controls the maximum number of problems produced by the server."
+        },
+        "languageServerExample.trace.server": {
+          "scope": "window",
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces the communication between VS Code and the language server."
+        }
+      }
+    }
   },
   "scripts": {
     "package": "vsce package",
-    "vscode:prepublish": "rm -rf *.vsix && rm -rf out && npm run compile",
-    "watch": "tsc -w",
-    "compile": "tsc -p ./",
-    "format": "prettier --write src/**/*.ts",
-    "postinstall": "node ./node_modules/vscode/bin/install",
+    "vscode:prepublish": "cd client && rm -rf *.vsix && rm -rf out && cd .. &&  npm run compile",
+    "watch": "tsc -b -w",
+    "compile": "tsc -b",
+    "format": "prettier --write client/src/**/*.ts && prettier --write server/src/**/*.ts",
+    "postinstall": "node ./node_modules/vscode/bin/install && cd client && npm install && cd ../server && npm install && cd .. ",
     "vsce:publish": "sh scripts/publish.sh",
     "vsce:check": "yarn shell:lint && sh scripts/check-update.sh",
     "shell:lint": "shellcheck -x scripts/*.sh"
@@ -58,6 +81,7 @@
   ],
   "dependencies": {
     "@prisma/get-platform": "0.1.x",
+    "@prisma/sdk": "2.0.0-beta.2",
     "pkg-dir": "4.2.0"
   },
   "devDependencies": {
@@ -70,7 +94,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run format"
+      "pre-commit": "cd .. && npm run format"
     }
   },
   "prettier": {
