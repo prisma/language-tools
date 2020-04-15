@@ -9,7 +9,7 @@
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
-    "vscode": "^1.34.0"
+    "vscode": "^1.43.0"
   },
   "publisher": "Prisma",
   "categories": [
@@ -71,7 +71,7 @@
     "watch": "tsc -b -w",
     "compile": "tsc -b",
     "format": "prettier --write client/src/**/*.ts && prettier --write server/src/**/*.ts",
-    "postinstall": "node ./node_modules/vscode/bin/install && cd client && npm install && cd ../server && npm install && cd .. ",
+    "postinstall": "cd client && npm install && cd ../server && npm install && cd .. ",
     "vsce:publish": "sh scripts/publish.sh",
     "vsce:check": "yarn shell:lint && sh scripts/check-update.sh",
     "shell:lint": "shellcheck -x scripts/*.sh"
@@ -79,21 +79,16 @@
   "activationEvents": [
     "onLanguage:prisma"
   ],
-  "dependencies": {
-    "@prisma/get-platform": "0.1.x",
-    "pkg-dir": "4.2.0"
-  },
   "devDependencies": {
-    "@types/node": "12.12.14",
+    "@types/node": "^12.12.0",
     "husky": "3.1.0",
     "prettier": "1.19.1",
-    "typescript": "3.7.2",
-    "vsce": "1.74.0",
-    "vscode": "1.0.3"
+    "typescript": "^3.8.3",
+    "vsce": "1.74.0"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "cd .. && npm run format"
+      "pre-commit": "npm run format"
     }
   },
   "prettier": {

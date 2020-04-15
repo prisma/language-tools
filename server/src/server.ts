@@ -4,9 +4,15 @@ import {
   ProposedFeatures,
   InitializeParams,
   InitializeResult,
+  DiagnosticSeverity,
+  Diagnostic,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { MessageHandler } from './MessageHandler'
+import { fullDocumentRange } from './provider'
+import * as util from './util'
+import lint from './lint'
+//import { getDMMF } from '@prisma/sdk'
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -19,8 +25,6 @@ let documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 let hasConfigurationCapability: boolean = false
 let hasWorkspaceFolderCapability: boolean = false
 let hasDiagnosticRelatedInformationCapability: boolean = false
-
-const messageHandler = new MessageHandler(documents)
 
 connection.onInitialize((params: InitializeParams) => {
   let capabilities = params.capabilities
@@ -43,16 +47,61 @@ connection.onInitialize((params: InitializeParams) => {
     capabilities: {
       //definitionProvider: true,
       //hoverProvider: true,
-
+      documentFormattingProvider: true,
     },
   }
+
   return result
 })
 
+const messageHandler = new MessageHandler()
+
+connection.onDocumentFormatting(params =>
+  messageHandler.handleDocumentFormatting(params, documents),
+)
+
+documents.onDidChangeContent(change => {
+  validateTextDocument(change.document)
+})
+
+documents.onDidOpen(open => {
+  validateTextDocument(open.document)
+})
+
+async function validateTextDocument(textDocument: TextDocument): Promise<void> {
+  const text = textDocument.getText(fullDocumentRange(textDocument))
+  const binPath = await util.getBinPath()
+  const res = await lint(binPath, text)
+  let diagnostics: Diagnostic[] = []
+
+  for (const error of res) {
+    let diagnostic: Diagnostic = {
+      severity: DiagnosticSeverity.Error,
+      range: {
+        start: textDocument.positionAt(error.start),
+        end: textDocument.positionAt(error.end),
+      },
+      message: error.text,
+      source: '',
+    }
+    if (hasDiagnosticRelatedInformationCapability) {
+      diagnostic.relatedInformation = [
+        // send related Information such as location and message
+      ]
+    }
+    diagnostics.push(diagnostic)
+  }
+  connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
+}
+
+connection.onDidChangeWatchedFiles(_change => {
+  // Monitored files have change in VSCode
+  connection.console.log('We received an file change event')
+})
 
 /*
 connection.onHover(params => messageHandler.handleHoverRequest(params))
-
+ 
 connection.onDefinition(params =>
   messageHandler.handleDefinitionRequest(params),
 ) */
