@@ -67,7 +67,7 @@
   },
   "scripts": {
     "package": "vsce package",
-    "vscode:prepublish": "cd client && rm -rf *.vsix && rm -rf out && cd .. &&  npm run compile",
+    "vscode:prepublish": "npm run compile",
     "watch": "tsc -b -w",
     "compile": "tsc -b",
     "format": "prettier --write client/src/**/*.ts && prettier --write server/src/**/*.ts",
