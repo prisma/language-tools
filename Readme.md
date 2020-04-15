@@ -14,7 +14,23 @@ This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-pri
 
 ## Install
 
-Get the Prisma Extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma).
+There are two ways of testing it. 
+
+1.
+- You can export the `vsix` file by running `vsce package`. 
+- This will create an installation file `.vsix`.
+- To install the extension, open a command window and type `VSIX`.
+- Select the recently created `.vsix` file.
+- Reload VSCode.
+- Create a `.prisma` file to test it out.
+
+2. 
+- Simply drag-and-drop the already generated `vsix` file from the folder.
+- To install the extension, open a command window and type `VSIX`.
+- Select the `prisma-0.0.31.vsix` file.
+- Reload VSCode.
+- Create a `.prisma` file to test it out.
+
 
 ## Preview
 
