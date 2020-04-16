@@ -45,9 +45,9 @@ connection.onInitialize((params: InitializeParams) => {
 
   const result: InitializeResult = {
     capabilities: {
-      // definitionProvider: true,
-      //hoverProvider: true,
-      documentFormattingProvider: true
+      definitionProvider: true,
+      hoverProvider: true,
+      documentFormattingProvider: true,
     },
   }
 
@@ -56,9 +56,9 @@ connection.onInitialize((params: InitializeParams) => {
 
 const messageHandler = new MessageHandler()
 
- connection.onDocumentFormatting(params =>
+connection.onDocumentFormatting(params =>
   messageHandler.handleDocumentFormatting(params, documents),
-) 
+)
 
 documents.onDidChangeContent(change => {
   validateTextDocument(change.document)
@@ -66,7 +66,7 @@ documents.onDidChangeContent(change => {
 
 documents.onDidOpen(open => {
   validateTextDocument(open.document)
-}) 
+})
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   const text = textDocument.getText(fullDocumentRange(textDocument))
@@ -94,12 +94,11 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
 }
 
+connection.onHover(params => messageHandler.handleHoverRequest(params, documents))
 
-// connection.onHover(params => messageHandler.handleHoverRequest(params, documents))
- 
-//connection.onDefinition(params =>
-//  messageHandler.handleDefinitionRequest(params),
-//) 
+connection.onDefinition(params =>
+  messageHandler.handleDefinitionRequest(documents, params),
+)
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events
