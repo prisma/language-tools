@@ -7,6 +7,9 @@ import {
   Range,
   Location,
   DeclarationParams,
+  CompletionParams,
+  CompletionItem,
+  CompletionItemKind,
 } from 'vscode-languageserver'
 import * as util from './util'
 import { fullDocumentRange } from './provider'
@@ -17,7 +20,7 @@ import format from './format'
 import install from './install'
 
 export class MessageHandler {
-  constructor() { }
+  constructor() {}
 
   async handleHoverRequest(
     params: TextDocumentPositionParams,
@@ -31,6 +34,7 @@ export class MessageHandler {
       start: { line: position.line, character: 0 },
       end: { line: position.line, character: 9999 },
     })
+    // search for the word's beginning and end
     var beginning = currentLine.slice(0, position.character + 1).search(/\S+$/)
     var end = currentLine.slice(position.character).search(/\W/)
     if (end < 0) {
@@ -52,11 +56,11 @@ export class MessageHandler {
 
     const document = documents.get(textDocument.uri)
 
-    const documentText = document?.getText()
-
-    if (!document || !documentText) {
+    if(!document) {
       return new Promise(resolve => resolve())
     }
+
+    const documentText = document.getText()
 
     let word = this.getWordAtPosition(document, position)
     if (word == '') {
@@ -123,5 +127,26 @@ export class MessageHandler {
     ).then(formatted => [
       TextEdit.replace(fullDocumentRange(document), formatted),
     ])
+  }
+
+  /**
+   * This handler provides the initial list of the completion items.
+   */
+  async handleCompletionRequest(params: CompletionParams): Promise<CompletionItem[]> {
+    return [
+      {
+        label: 'Prisma Doc',
+        kind: CompletionItemKind.Text
+      }
+    ]
+  }
+
+  /**
+   * This handler resolves additional information for the item selected in the completion list.
+   */
+  async handleCompletionResolveRequest(item: CompletionItem): Promise<CompletionItem> {
+      item.detail = "Prisma details"
+      item.documentation = "Here you will see the documentation for this."
+      return item
   }
 }

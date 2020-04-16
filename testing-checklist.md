@@ -1,6 +1,9 @@
 # Test Checklist
+
+## Existing features
 Beforehand:
 - disable prisma vscode plugin
+- install `prisma-lsp-existing.vsix`
 
 Syntax highlighting
 - open `testDb.prisma` from the folder
@@ -23,3 +26,13 @@ Linting
 - red squiggles should underline the error and also a quick error description should be shown
 - remove `?` from `authorId Int?`
 - line `author` should be marked red, as at least one field of  `author` and `authorId` is required 
+
+## Additional jump-to-definition feature
+Beforehand:
+- disable prisma vscode plugin
+- install `prisma-lsp-jump-to-def.vsix`
+
+Jump-to-definition
+- open `testDb.prisma` from the folder
+- click on relation `User` in  model `Post`
+- focus should now move to the term `User` in model `User`

@@ -14,17 +14,10 @@ This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-pri
 
 ## Install
 
-There are two ways of testing it. 
+There are two different versions you can try out and install. 
+The `prisma-lsp-existing.vsix` contains all features, that are also 
+available in the brnach `master` while using the language server instead of the VSCode API. The `prisma-lsp-jump-to-def.vsix`contains an additional language feature `go-to-definition`.
 
-1.
-- You can export the `vsix` file by running `vsce package`. 
-- This will create an installation file `.vsix`.
-- To install the extension, open a command window and type `VSIX`.
-- Select the recently created `.vsix` file.
-- Reload VSCode.
-- Create a `.prisma` file to test it out.
-
-2. 
 - Simply drag-and-drop the already generated `vsix` file from the folder.
 - To install the extension, open a command window and type `VSIX`.
 - Select the `prisma-0.0.31.vsix` file.
