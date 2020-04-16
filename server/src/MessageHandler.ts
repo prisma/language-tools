@@ -56,7 +56,7 @@ export class MessageHandler {
 
     const document = documents.get(textDocument.uri)
 
-    if(!document) {
+    if (!document) {
       return new Promise(resolve => resolve())
     }
 
@@ -132,21 +132,25 @@ export class MessageHandler {
   /**
    * This handler provides the initial list of the completion items.
    */
-  async handleCompletionRequest(params: CompletionParams): Promise<CompletionItem[]> {
+  async handleCompletionRequest(
+    params: CompletionParams,
+  ): Promise<CompletionItem[]> {
     return [
       {
         label: 'Prisma Doc',
-        kind: CompletionItemKind.Text
-      }
+        kind: CompletionItemKind.Text,
+      },
     ]
   }
 
   /**
    * This handler resolves additional information for the item selected in the completion list.
    */
-  async handleCompletionResolveRequest(item: CompletionItem): Promise<CompletionItem> {
-      item.detail = "Prisma details"
-      item.documentation = "Here you will see the documentation for this."
-      return item
+  async handleCompletionResolveRequest(
+    item: CompletionItem,
+  ): Promise<CompletionItem> {
+    item.detail = 'Prisma details'
+    item.documentation = 'Here you will see the documentation for this.'
+    return item
   }
 }

@@ -1,6 +1,6 @@
 {
-  "name": "prisma",
-  "displayName": "Prisma",
+  "name": "prisma-lsp",
+  "displayName": "Prisma Extension Language Server",
   "description": "Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.",
   "version": "0.0.31",
   "prisma": {

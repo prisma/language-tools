@@ -3,7 +3,7 @@
 ## Existing features
 Beforehand:
 - disable prisma vscode plugin
-- install `prisma-lsp-existing.vsix`
+- install `prisma-lsp-0.0.31.vsix`
 
 Syntax highlighting
 - open `testDb.prisma` from the folder
@@ -30,7 +30,7 @@ Linting
 ## Additional jump-to-definition feature
 Beforehand:
 - disable prisma vscode plugin
-- install `prisma-lsp-jump-to-def.vsix`
+- install `prisma-lsp-jump-to-def-0.0.31.vsix`
 
 Jump-to-definition
 - open `testDb.prisma` from the folder
