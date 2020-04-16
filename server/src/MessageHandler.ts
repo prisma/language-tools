@@ -4,26 +4,66 @@ import {
   TextDocuments,
   DocumentFormattingParams,
   TextEdit,
+  Hover,
+  Range,
+  TypeDefinitionParams,
+  Location,
+  DeclarationParams,
 } from 'vscode-languageserver'
 import * as util from './util'
 import { fullDocumentRange } from './provider'
-//import { getDMMF } from '@prisma/sdk'
+import { getDMMF } from '@prisma/sdk'
 import * as fs from 'fs'
-import { TextDocument } from 'vscode-languageserver-textdocument'
+import { TextDocument, Position } from 'vscode-languageserver-textdocument'
 import format from './format'
 import install from './install'
 
-binPath: String
-
 export class MessageHandler {
-  constructor() {}
+  constructor() { }
 
-  async handleHoverRequest(params: TextDocumentPositionParams) {
-    return null
+  async handleHoverRequest(params: TextDocumentPositionParams, documents: TextDocuments<TextDocument>): Promise<Hover> {
+    const textDocument = params.textDocument
+    const position = params.position
+
+    const document = documents.get(textDocument.uri);
+
+    const documentText = document?.getText();
+
+    if (!document || !documentText) {
+      return { contents: '' };
+    }
+
+    // search for words beginning
+    let currentLine = document.getText({
+      start: {line: position.line, character: 0},
+      end: {line: position.line, character: 9999}
+    })
+    var beginning = currentLine.slice(0, position.character + 1).search(/\S+$/)
+    var end = currentLine.slice(position.character).search(/\s/)
+    if(end < 0) {
+      return { contents: '' };
+    }
+    let word = currentLine.slice(beginning, end + position.character)
+
+    // TODO parse file to AST
+    // parse schem file to datamodel meta format (DMMF) 
+    const dmmf = await getDMMF({ datamodel: documentText })
+
+    let models = dmmf.datamodel.models.map(model => model.name)?.find(name => name == word);
+
+    if(models == null) {
+      return { contents: ''}
+    }
+     const str = JSON.stringify(dmmf);
+
+    return {
+      contents: str,
+    }
   }
 
+
   async handleDefinitionRequest(
-    params: TextDocumentPositionParams,
+    params: DeclarationParams,
     _token?: CancellationToken,
   ) {
     return null
@@ -101,4 +141,6 @@ export class MessageHandler {
       contents: str,
     }
   } */
+
+
 }
