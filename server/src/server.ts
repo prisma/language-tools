@@ -46,7 +46,6 @@ connection.onInitialize((params: InitializeParams) => {
   const result: InitializeResult = {
     capabilities: {
       definitionProvider: true,
-      // hoverProvider: true,
       documentFormattingProvider: true,
     },
   }
@@ -93,8 +92,6 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   }
   connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
 }
-
-// connection.onHover(params => messageHandler.handleHoverRequest(params, documents))
 
 connection.onDefinition(params =>
   messageHandler.handleDefinitionRequest(documents, params),
