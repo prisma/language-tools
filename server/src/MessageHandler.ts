@@ -21,52 +21,76 @@ import install from './install'
 export class MessageHandler {
   constructor() { }
 
-  async handleHoverRequest(params: TextDocumentPositionParams, documents: TextDocuments<TextDocument>): Promise<Hover> {
+  async handleHoverRequest(
+    params: TextDocumentPositionParams,
+    documents: TextDocuments<TextDocument>,
+  ) {
+    return null;
+  }
+
+  getWordAtPosition(document: TextDocument, position: Position): String {
+    let currentLine = document.getText({
+      start: { line: position.line, character: 0 },
+      end: { line: position.line, character: 9999 },
+    })
+    var beginning = currentLine.slice(0, position.character + 1).search(/\S+$/)
+    var end = currentLine.slice(position.character).search(/\W/)
+    if (end < 0) {
+      return ''
+    }
+    return currentLine.slice(beginning, end + position.character)
+  }
+
+  async handleDefinitionRequest(documents: TextDocuments<TextDocument>,
+    params: DeclarationParams,
+    _token?: CancellationToken,
+  ): Promise<Location> {
+    // bad workaround! 
+    // ASTNode will be necessary to handle this a lot better
+
     const textDocument = params.textDocument
     const position = params.position
 
-    const document = documents.get(textDocument.uri);
+    const document = documents.get(textDocument.uri)
 
-    const documentText = document?.getText();
+    const documentText = document?.getText()
 
     if (!document || !documentText) {
-      return { contents: '' };
+      return new Promise(resolve => resolve())
     }
 
-    // search for words beginning
-    let currentLine = document.getText({
-      start: {line: position.line, character: 0},
-      end: {line: position.line, character: 9999}
-    })
-    var beginning = currentLine.slice(0, position.character + 1).search(/\S+$/)
-    var end = currentLine.slice(position.character).search(/\s/)
-    if(end < 0) {
-      return { contents: '' };
+    let word = this.getWordAtPosition(document, position);
+    if (word == '') {
+      return new Promise(resolve => resolve())
     }
-    let word = currentLine.slice(beginning, end + position.character)
 
-    // TODO parse file to AST
-    // parse schem file to datamodel meta format (DMMF) 
+    // parse schem file to datamodel meta format (DMMF)
     const dmmf = await getDMMF({ datamodel: documentText })
 
-    let models = dmmf.datamodel.models.map(model => model.name)?.find(name => name == word);
+    let modelName = dmmf.datamodel.models
+      .map(model => model.name)
+      ?.find(name => name == word)
 
-    if(models == null) {
-      return { contents: ''}
+    // selected word is not a model type
+    if (modelName == null) {
+      return new Promise(resolve => resolve())
     }
-     const str = JSON.stringify(dmmf);
+
+    let modelDefinition = "model ";
+    // get start position of model type
+    let index = documentText.indexOf(modelDefinition + modelName)
+    const EOL = '\n';
+    const buf = documentText.slice(0, index);
+    const lines = buf.split(EOL).length - 1;
+    const lastLineIndex = buf.lastIndexOf(EOL);
+    const startPosition = { line: lines, character: (index + modelDefinition.length - lastLineIndex - 1) }
+    const endPosition = { line: lines, character: (index + modelDefinition.length - lastLineIndex - 1 + modelName.length) }
 
     return {
-      contents: str,
+      uri: textDocument.uri,
+      range: Range.create(startPosition, endPosition)
     }
-  }
 
-
-  async handleDefinitionRequest(
-    params: DeclarationParams,
-    _token?: CancellationToken,
-  ) {
-    return null
   }
 
   async handleDocumentFormatting(
@@ -141,6 +165,4 @@ export class MessageHandler {
       contents: str,
     }
   } */
-
-
 }
