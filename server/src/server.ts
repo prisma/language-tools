@@ -12,7 +12,6 @@ import { MessageHandler } from './MessageHandler'
 import { fullDocumentRange } from './provider'
 import * as util from './util'
 import lint from './lint'
-//import { getDMMF } from '@prisma/sdk'
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -101,14 +100,14 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 connection.onDefinition(params =>
   messageHandler.handleDefinitionRequest(documents, params),
 )
-
- /* connection.onCompletion(params =>
+/*
+connection.onCompletion(params =>
   messageHandler.handleCompletionRequest(params)
 )
 
 connection.onCompletionResolve(params =>
   messageHandler.handleCompletionResolveRequest(params)
-) */ 
+) */
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events
