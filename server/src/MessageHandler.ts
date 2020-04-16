@@ -19,13 +19,13 @@ import format from './format'
 import install from './install'
 
 export class MessageHandler {
-  constructor() { }
+  constructor() {}
 
   async handleHoverRequest(
     params: TextDocumentPositionParams,
     documents: TextDocuments<TextDocument>,
   ) {
-    return null;
+    return null
   }
 
   getWordAtPosition(document: TextDocument, position: Position): String {
@@ -41,11 +41,12 @@ export class MessageHandler {
     return currentLine.slice(beginning, end + position.character)
   }
 
-  async handleDefinitionRequest(documents: TextDocuments<TextDocument>,
+  async handleDefinitionRequest(
+    documents: TextDocuments<TextDocument>,
     params: DeclarationParams,
     _token?: CancellationToken,
   ): Promise<Location> {
-    // bad workaround! 
+    // bad workaround!
     // ASTNode will be necessary to handle this a lot better
 
     const textDocument = params.textDocument
@@ -59,7 +60,7 @@ export class MessageHandler {
       return new Promise(resolve => resolve())
     }
 
-    let word = this.getWordAtPosition(document, position);
+    let word = this.getWordAtPosition(document, position)
     if (word == '') {
       return new Promise(resolve => resolve())
     }
@@ -76,21 +77,27 @@ export class MessageHandler {
       return new Promise(resolve => resolve())
     }
 
-    let modelDefinition = "model ";
+    let modelDefinition = 'model '
     // get start position of model type
     let index = documentText.indexOf(modelDefinition + modelName)
-    const EOL = '\n';
-    const buf = documentText.slice(0, index);
-    const lines = buf.split(EOL).length - 1;
-    const lastLineIndex = buf.lastIndexOf(EOL);
-    const startPosition = { line: lines, character: (index + modelDefinition.length - lastLineIndex - 1) }
-    const endPosition = { line: lines, character: (index + modelDefinition.length - lastLineIndex - 1 + modelName.length) }
+    const EOL = '\n'
+    const buf = documentText.slice(0, index)
+    const lines = buf.split(EOL).length - 1
+    const lastLineIndex = buf.lastIndexOf(EOL)
+    const startPosition = {
+      line: lines,
+      character: index + modelDefinition.length - lastLineIndex - 1,
+    }
+    const endPosition = {
+      line: lines,
+      character:
+        index + modelDefinition.length - lastLineIndex - 1 + modelName.length,
+    }
 
     return {
       uri: textDocument.uri,
-      range: Range.create(startPosition, endPosition)
+      range: Range.create(startPosition, endPosition),
     }
-
   }
 
   async handleDocumentFormatting(
