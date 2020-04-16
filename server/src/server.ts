@@ -47,6 +47,11 @@ connection.onInitialize((params: InitializeParams) => {
     capabilities: {
       definitionProvider: true,
       documentFormattingProvider: true,
+      /* // Tell the client that the server supports code completion
+      completionProvider: {
+        resolveProvider: true,
+        triggerCharacters: ['@']
+      } */
     },
   }
 
@@ -96,6 +101,14 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 connection.onDefinition(params =>
   messageHandler.handleDefinitionRequest(documents, params),
 )
+
+ /* connection.onCompletion(params =>
+  messageHandler.handleCompletionRequest(params)
+)
+
+connection.onCompletionResolve(params =>
+  messageHandler.handleCompletionResolveRequest(params)
+) */ 
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events
