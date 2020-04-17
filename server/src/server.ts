@@ -59,16 +59,19 @@ connection.onInitialize((params: InitializeParams) => {
   return result
 })
 
-connection.onInitialized(() => {
-  util.getBinPath().then(path => {
-    if (!fs.existsSync(path)) {
-      try {
-        install(path)
-      } catch (err) {
-        connection.console.error('Could not install prisma-fmt: ' + err)
-      }
+connection.onInitialized(async () => {
+  const binPath = await util.getBinPath()
+  if (!fs.existsSync(binPath)) {
+    try {
+      await install(binPath)
+      connection.console.info(
+        'Prisma plugin installation succeeded.',
+      )
+    } catch (err) {
+      // No error on install error.
+      connection.console.error("Cannot install prisma-fmt: " + err)
     }
-  })
+  }
 })
 
 const messageHandler = new MessageHandler()
