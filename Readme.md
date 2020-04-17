@@ -18,7 +18,8 @@ There are two different versions you can try out and install.
 The `prisma-lsp-0.0.31.vsix` contains all features, that are also 
 available in the brnach `master` while using the language server instead of the VSCode API. The `prisma-lsp-jump-to-def-0.0.31.vsix`contains an additional language feature `go-to-definition`.
 
-- Simply drag-and-drop the already generated `vsix` file from the folder.
+- Both files are included in the release `v0.0.31-alpha` in the Github repository.
+- Simply drag-and-drop the already generated `vsix` file.
 - To install the extension, open a command window and type `VSIX`.
 - Select the `.vsix` file.
 - Reload VSCode.
