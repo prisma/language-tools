@@ -18,7 +18,7 @@ import { TextDocument, Position } from 'vscode-languageserver-textdocument'
 import format from './format'
 
 export class MessageHandler {
-  constructor() { }
+  constructor() {}
 
   async handleHoverRequest(
     params: TextDocumentPositionParams,

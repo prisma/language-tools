@@ -15,7 +15,6 @@ import lint from './lint'
 import * as fs from 'fs'
 import install from './install'
 
-
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 let connection = createConnection(ProposedFeatures.all)
@@ -66,13 +65,11 @@ connection.onInitialized(() => {
       try {
         install(path)
       } catch (err) {
-        connection.console.error("Could not install prisma-fmt: " + err)
+        connection.console.error('Could not install prisma-fmt: ' + err)
       }
     }
   })
 })
-
-
 
 const messageHandler = new MessageHandler()
 
