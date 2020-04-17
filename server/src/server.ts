@@ -27,7 +27,7 @@ let hasConfigurationCapability: boolean = false
 let hasWorkspaceFolderCapability: boolean = false
 let hasDiagnosticRelatedInformationCapability: boolean = false
 
-connection.onInitialize((params: InitializeParams) => {
+connection.onInitialize(async (params: InitializeParams) => {
   let capabilities = params.capabilities
 
   // Does the client support the `workspace/configuration` request?
@@ -44,6 +44,19 @@ connection.onInitialize((params: InitializeParams) => {
     capabilities.textDocument.publishDiagnostics.relatedInformation
   )
 
+  const binPath = await util.getBinPath()
+  if (!fs.existsSync(binPath)) {
+    try {
+      await install(binPath)
+      connection.console.info(
+        'Prisma plugin installation succeeded.',
+      )
+    } catch (err) {
+      // No error on install error.
+      connection.console.error("Cannot install prisma-fmt: " + err)
+    }
+  }
+
   const result: InitializeResult = {
     capabilities: {
       definitionProvider: true,
@@ -59,20 +72,6 @@ connection.onInitialize((params: InitializeParams) => {
   return result
 })
 
-connection.onInitialized(async () => {
-  const binPath = await util.getBinPath()
-  if (!fs.existsSync(binPath)) {
-    try {
-      await install(binPath)
-      connection.console.info(
-        'Prisma plugin installation succeeded.',
-      )
-    } catch (err) {
-      // No error on install error.
-      connection.console.error("Cannot install prisma-fmt: " + err)
-    }
-  }
-})
 
 const messageHandler = new MessageHandler()
 
