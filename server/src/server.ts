@@ -12,6 +12,9 @@ import { MessageHandler } from './MessageHandler'
 import { fullDocumentRange } from './provider'
 import * as util from './util'
 import lint from './lint'
+import * as fs from 'fs'
+import install from './install'
+
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -56,6 +59,20 @@ connection.onInitialize((params: InitializeParams) => {
 
   return result
 })
+
+connection.onInitialized(() => {
+  util.getBinPath().then(path => {
+    if (!fs.existsSync(path)) {
+      try {
+        install(path)
+      } catch (err) {
+        connection.console.error("Could not install prisma-fmt: " + err)
+      }
+    }
+  })
+})
+
+
 
 const messageHandler = new MessageHandler()
 

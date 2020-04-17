@@ -14,13 +14,11 @@ import {
 import * as util from './util'
 import { fullDocumentRange } from './provider'
 import { getDMMF } from '@prisma/sdk'
-import * as fs from 'fs'
 import { TextDocument, Position } from 'vscode-languageserver-textdocument'
 import format from './format'
-import install from './install'
 
 export class MessageHandler {
-  constructor() {}
+  constructor() { }
 
   async handleHoverRequest(
     params: TextDocumentPositionParams,
@@ -112,14 +110,6 @@ export class MessageHandler {
       return []
     }
     const binPath = await util.getBinPath()
-    if (!fs.existsSync(binPath)) {
-      try {
-        await install(binPath)
-      } catch (err) {
-        // No error on install error.
-        // vscode.window.showErrorMessage("Cannot install prisma-fmt: " + err)
-      }
-    }
     return format(
       binPath,
       options.tabSize,
