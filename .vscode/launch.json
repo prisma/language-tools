@@ -20,7 +20,8 @@
 			"request": "attach",
 			"name": "Attach to Server",
 			"port": 6009,
-			"restart": true,
+            "restart": true,
+            "timeout": 50000,
 			"outFiles": ["${workspaceRoot}/server/out/**/*.js"]
 		},
     ],
