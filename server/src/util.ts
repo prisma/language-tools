@@ -23,10 +23,10 @@ async function getVersion(): Promise<string> {
     return 'latest'
   }
   const pkg = tryRequire(path.join(pkgPath, 'package.json'))
-  if (!pkg['lsp-prisma-server'] || !pkg['lsp-prisma-server']['version']) {
+  if (!pkg['prisma'] || !pkg['prisma']['version']) {
     return 'latest'
   }
-  return pkg['lsp-prisma-server']['version']
+  return pkg['prisma']['version']
 }
 
 /**
