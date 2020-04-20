@@ -37,7 +37,7 @@ export async function getBinPath(): Promise<string> {
   platform = platform || (await getPlatform())
   version = version || (await getVersion())
   const extension = platform === 'windows' ? '.exe' : ''
-  return path.join(__dirname, '..', `prisma-fmt.${version}${extension}`)
+  return path.join(__dirname, `prisma-fmt.${version}${extension}`)
 }
 
 /**
