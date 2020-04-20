@@ -47,7 +47,7 @@ export async function getSdkQueryEnginePath(): Promise<string> {
   platform = platform || (await getPlatform())
   version = version || (await getVersion())
   const extension = platform === 'windows' ? '.exe' : ''
-  const sdkDir = path.dirname(require.resolve('@prisma/sdk'))
+  const sdkDir = path.dirname(require.resolve('@prisma/sdk/package.json'))
   return path.join(sdkDir, `query-engine-${platform}${extension}`)
 }
 
