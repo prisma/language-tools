@@ -66,7 +66,10 @@ export class MessageHandler {
     }
 
     // parse schem file to datamodel meta format (DMMF)
-    const dmmf = await getDMMF({ datamodel: documentText })
+    const dmmf = await getDMMF({
+      datamodel: documentText,
+      prismaPath: await util.getSdkQueryEnginePath(),
+    })
 
     let modelName = dmmf.datamodel.models
       .map(model => model.name)

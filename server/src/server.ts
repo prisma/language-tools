@@ -48,10 +48,9 @@ connection.onInitialize(async (params: InitializeParams) => {
 
   const sdkQueryEnginePath = await util.getSdkQueryEnginePath()
   if (!fs.existsSync(sdkQueryEnginePath)) {
-    const sdkDir = path.dirname(require.resolve('@prisma/sdk/package.json'))
     await download({
       binaries: {
-        'query-engine': sdkDir,
+        'query-engine': __dirname,
       },
       failSilent: false,
     })
