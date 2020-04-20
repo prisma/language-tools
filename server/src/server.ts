@@ -48,12 +48,10 @@ connection.onInitialize(async (params: InitializeParams) => {
   if (!fs.existsSync(binPath)) {
     try {
       await install(binPath)
-      connection.console.info(
-        'Prisma plugin installation succeeded.',
-      )
+      connection.console.info('Prisma plugin installation succeeded.')
     } catch (err) {
       // No error on install error.
-      connection.console.error("Cannot install prisma-fmt: " + err)
+      connection.console.error('Cannot install prisma-fmt: ' + err)
     }
   }
 
