@@ -72,7 +72,6 @@ connection.onInitialize(async (params: InitializeParams) => {
   return result
 })
 
-
 const messageHandler = new MessageHandler()
 
 connection.onDocumentFormatting(params =>
