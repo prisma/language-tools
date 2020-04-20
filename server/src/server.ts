@@ -17,6 +17,7 @@ import install from './install'
 import * as sdk from '@prisma/sdk'
 import * as path from 'path'
 import execa from 'execa'
+import { download } from '@prisma/fetch-engine'
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -49,27 +50,29 @@ connection.onInitialize(async (params: InitializeParams) => {
 
   const sdkQueryEnginePath = await util.getSdkQueryEnginePath()
   if (!fs.existsSync(sdkQueryEnginePath)) {
-    const downloadScript = path.join(
-
-      path.dirname(require.resolve('@prisma/sdk/package.json')),
-      'scripts/download.js',
-    )
-    await execa.node(downloadScript)
+    const sdkDir = path.dirname(require.resolve('@prisma/sdk/package.json'))
+    await download({
+      binaries: {
+        'query-engine': sdkDir,
+      },
+      failSilent: false,
+    })
   }
 
   const binPathPrismaFmt = await util.getBinPath()
   if (!fs.existsSync(binPathPrismaFmt)) {
     try {
       await install(binPathPrismaFmt)
-      connection.console.info('Prisma plugin prisma-fmt installation succeeded.')
+      connection.console.info(
+        'Prisma plugin prisma-fmt installation succeeded.',
+      )
     } catch (err) {
       // No error on install error.
       connection.console.error('Cannot install prisma-fmt: ' + err)
     }
   }
-  
+
   // download hack
-  
 
   const result: InitializeResult = {
     capabilities: {
