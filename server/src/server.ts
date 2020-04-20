@@ -13,8 +13,9 @@ import { fullDocumentRange } from './provider'
 import * as util from './util'
 import lint from './lint'
 import * as fs from 'fs'
-import * as path from 'path'
 import install from './install'
+import * as sdk from '@prisma/sdk'
+import * as path from 'path'
 import execa from 'execa'
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
@@ -46,25 +47,29 @@ connection.onInitialize(async (params: InitializeParams) => {
     capabilities.textDocument.publishDiagnostics.relatedInformation
   )
 
-  const sdkQueryEnginePath = util.getSdkQueryEnginePath()
+  const sdkQueryEnginePath = await util.getSdkQueryEnginePath()
   if (!fs.existsSync(sdkQueryEnginePath)) {
     const downloadScript = path.join(
-      path.dirname(require.resolve('@prisma/sdk')),
+
+      path.dirname(require.resolve('@prisma/sdk/package.json')),
       'scripts/download.js',
     )
     await execa.node(downloadScript)
   }
 
-  const binPath = await util.getBinPath()
-  if (!fs.existsSync(binPath)) {
+  const binPathPrismaFmt = await util.getBinPath()
+  if (!fs.existsSync(binPathPrismaFmt)) {
     try {
-      await install(binPath)
-      connection.console.info('Prisma plugin installation succeeded.')
+      await install(binPathPrismaFmt)
+      connection.console.info('Prisma plugin prisma-fmt installation succeeded.')
     } catch (err) {
       // No error on install error.
       connection.console.error('Cannot install prisma-fmt: ' + err)
     }
   }
+  
+  // download hack
+  
 
   const result: InitializeResult = {
     capabilities: {
@@ -83,15 +88,15 @@ connection.onInitialize(async (params: InitializeParams) => {
 
 const messageHandler = new MessageHandler()
 
-connection.onDocumentFormatting((params) =>
+connection.onDocumentFormatting(params =>
   messageHandler.handleDocumentFormatting(params, documents),
 )
 
-documents.onDidChangeContent((change) => {
+documents.onDidChangeContent(change => {
   validateTextDocument(change.document)
 })
 
-documents.onDidOpen((open) => {
+documents.onDidOpen(open => {
   validateTextDocument(open.document)
 })
 
@@ -121,7 +126,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
 }
 
-connection.onDefinition((params) =>
+connection.onDefinition(params =>
   messageHandler.handleDefinitionRequest(documents, params),
 )
 /*
