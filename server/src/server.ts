@@ -15,7 +15,6 @@ import lint from './lint'
 import * as fs from 'fs'
 import install from './install'
 import * as path from 'path'
-import execa from 'execa'
 import { download } from '@prisma/fetch-engine'
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
