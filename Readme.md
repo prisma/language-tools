@@ -12,20 +12,9 @@ This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-pri
 - Jump-to-definition 
 - Auto-completion (_coming soon_)
 
-
 ## Install
 
-There are two different versions you can try out and install. 
-The `prisma-lsp-0.0.31.vsix` contains all features, that are also 
-available in the brnach `master` while using the language server instead of the VSCode API. The `prisma-lsp-jump-to-def-0.0.31.vsix`contains an additional language feature `go-to-definition`.
-
-- Both files are included in the release `v0.0.31-alpha` in the Github repository.
-- Simply drag-and-drop the already generated `vsix` file.
-- To install the extension, open a command window and type `VSIX`.
-- Select the `.vsix` file.
-- Reload VSCode.
-- Create a `.prisma` file to test it out.
-
+- Get the Prisma Extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma).
 
 ## Preview
 
@@ -43,7 +32,6 @@ available in the brnach `master` while using the language server instead of the 
     --- src
         --- server.ts // Language Server entry point
 ```
-
 
 ## Development
 

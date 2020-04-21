@@ -1,6 +1,6 @@
 {
-  "name": "prisma-lsp-jump-to-def",
-  "displayName": "Prisma Extension Language Server Existing Features",
+  "name": "prisma",
+  "displayName": "Prisma",
   "description": "Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.",
   "version": "0.0.31",
   "license": "Apache-2.0",
