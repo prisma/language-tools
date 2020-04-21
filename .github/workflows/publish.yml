@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - alpha
   schedule:
     - cron: '*/5 * * * *'
 
@@ -16,10 +17,23 @@ jobs:
   publish:
     name: Publish
     runs-on: ubuntu-latest
-    if: endsWith(github.ref, '/master')
+    if: endsWith(github.ref, '/master') || endsWith(github.ref, '/alpha')
     steps:
       - uses: actions/checkout@v2
       - name: Install Dependencies
         run: npm install
       - name: Publish Extension as Patch
-        run: yarn vsce:check
+        run: yarn vsce:check "latest"
+
+  publish-alpha:
+    name: Publish Alpha
+    runs-on: ubuntu-latest
+    if: endsWith(github.ref, '/master') || endsWith(github.ref, '/alpha')
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: alpha
+      - name: Install Dependencies
+        run: npm install
+      - name: Publish Extension as Patch
+        run: yarn vsce:check "alpha"

@@ -2,10 +2,22 @@
 
 set -eu
 
+# For local development, in production, the environment will be set though GH actions and GH secrets
+if [ -f ".envrc" ]; then
+    echo "Loading .envrc"
+    # shellcheck disable=SC1091
+    . .envrc
+else
+    echo "No .envrc"
+fi
+
+CHANNEL=$1
+echo "CHANNEL: $CHANNEL"
+
 CURRENT_VERSION=$(cat scripts/prisma_version)
 echo "CURRENT_VERSION: $CURRENT_VERSION"
 
-NPM_VERSION=$(sh scripts/prisma-version.sh "latest")
+NPM_VERSION=$(sh scripts/prisma-version.sh "$CHANNEL")
 echo "NPM_VERSION: $NPM_VERSION"
 
 # Setup the repo with GH_TOKEN to avoid running jobs when CI commits
@@ -20,10 +32,14 @@ fi
 if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then
     echo "UPDATING to $NPM_VERSION"
     echo "$NPM_VERSION" > scripts/prisma_version
-    sh ./scripts/bump-sha.sh
-    git add -A .
-    git commit -m "bump prisma_version to $NPM_VERSION"
-    yarn run vsce:publish
+    sh ./scripts/bump-sha.sh "$CHANNEL"
+    if [ "$PRODUCTION" = "1" ]; then
+        git add -A .
+        git commit -m "bump prisma_version to $NPM_VERSION"
+    else
+        echo "Not committing because production is not set"
+    fi
+    yarn run vsce:publish "$CHANNEL"
 else
     echo "CURRENT_VERSION ($CURRENT_VERSION) and NPM_VERSION ($NPM_VERSION) are same"
 fi

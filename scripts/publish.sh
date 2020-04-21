@@ -16,17 +16,23 @@ echo "AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
 echo "PRODUCTION: $PRODUCTION"
 echo "============================"
 
+PRISMA_VERSION=$(cat scripts/prisma_version)
+echo "PRISMA_VERSION: $PRISMA_VERSION"
+
+CHANNEL=$1
+echo "CHANNEL: $CHANNEL"
+
 # Try to publish if $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN (Personal Access Token - https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) exists 
 if [ -z "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
     echo "\$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN is empty. Please set the value of $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
 elif [ -n "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
     if [ "$PRODUCTION" = "1" ]; then
-        echo "Publishing patch release"
-        ./node_modules/.bin/vsce publish patch --pat "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
+        echo "Publishing $CHANNEL release"
+        ./node_modules/.bin/vsce publish "$PRISMA_VERSION" --pat "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
     else
         echo "Printing the command because PRODUCTION is not set"
         echo "sh ./scripts/bump-sha.sh" # The actual execution of this command is in check-update.sh becuase git working tree must be clean before calling `vsce publish`
-        echo "./node_modules/.bin/vsce publish patch --pat $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
+        echo "./node_modules/.bin/vsce publish \"$PRISMA_VERSION\" --pat $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
     fi
 fi
 
