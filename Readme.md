@@ -1,6 +1,6 @@
 # vscode
 
-Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for `.prisma` files.
+Adds syntax highlighting, formatting, jump-to-definition and linting for `.prisma` files.
 
 This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-prisma-2-zq1s745db8i5). Information about the new datamodel syntax can be found [here](https://github.com/prisma/prisma2/blob/master/docs/data-modeling.md).
 
@@ -9,8 +9,9 @@ This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-pri
 - Syntax highlighting
 - Auto-formatting
 - Linting
+- Jump-to-definition 
 - Auto-completion (_coming soon_)
-- Jump-to-definition (_coming soon_)
+
 
 ## Install
 
@@ -37,7 +38,7 @@ available in the brnach `master` while using the language server instead of the 
 --- client // Language Client
 |   --- src   
 |       --- extension.ts // Language Client entry point
---- package.json // The extension manifest.
+--- package.json // The extension manifest
 --- server // Language Server
     --- src
         --- server.ts // Language Server entry point
@@ -46,15 +47,18 @@ available in the brnach `master` while using the language server instead of the 
 
 ## Development
 
-1. Run `npm install` in this folder. This installs all necessary npm modules in both the client and server folder
-2. Run `yarn watch`
-3. Open this repository in vscode
-4. Press F5, this will run the launch config. A new file should open in the [Extension Development Host] instance of VSCode.
-5. Change the language to Prisma
-6. Make a change to the syntax
-7. To reload, press the reload button in VSCode
-   1. **Developer: Inspect TM Scopes** is helpful for debugging syntax issues
-- If you want to debug the server as well use the launch configuration `Attach to Server`
+- Run `npm install` in this folder. This installs all necessary npm modules in both the client and server folder.
+- Run `yarn watch`.
+- Open VS Code on this folder.
+- Press `Ctrl+Shift+B` to compile the client and the server.
+- Switch to the debug viewlet.
+- Select `Launch Client` from the drop down.
+- Run the launch config.
+- If you want to debug the server as welll use the launch configuration `Attach to Server` afterwards or select the launch configuration `Client + Server` at once.
+- A new file should open in the [Extension Development Host] instance of VSCode.
+- Change the language to Prisma.
+- Make a change to the syntax
+- To reload, press the reload button in VSCode ( **Developer: Inspect TM Scopes** is helpful for debugging syntax issues )
 
 ## Publishing
 
