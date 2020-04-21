@@ -1,7 +1,7 @@
 {
     "name": "lsp-prisma-server",
     "description": "Implementation of a language server in node.",
-    "version": "0.0.30",
+    "version": "0.0.31",
     "author": "Prisma",
     "license": "Apache-2.0",
     "engines": {
