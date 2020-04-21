@@ -22,7 +22,7 @@ import { download } from '@prisma/fetch-engine'
 let connection = createConnection(ProposedFeatures.all)
 
 // Create a simple text document manager. The text document manager
-// supports full document sync only
+// supports full document sync only.
 let documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
 let hasConfigurationCapability: boolean = false
@@ -33,7 +33,7 @@ connection.onInitialize(async (params: InitializeParams) => {
   let capabilities = params.capabilities
 
   // Does the client support the `workspace/configuration` request?
-  // If not, we will fall back using global settings
+  // If not, we will fall back using global settings.
   hasConfigurationCapability = !!(
     capabilities.workspace && !!capabilities.workspace.configuration
   )
@@ -48,13 +48,18 @@ connection.onInitialize(async (params: InitializeParams) => {
 
   const sdkQueryEnginePath = await util.getSdkQueryEnginePath()
   if (!fs.existsSync(sdkQueryEnginePath)) {
-    const sdkDir = path.dirname(require.resolve('@prisma/sdk/package.json'))
-    await download({
-      binaries: {
-        'query-engine': sdkDir,
-      },
-      failSilent: false,
-    })
+    try {
+      const sdkDir = path.dirname(require.resolve('@prisma/sdk/package.json'))
+      await download({
+        binaries: {
+          'query-engine': sdkDir,
+        },
+        failSilent: false,
+      })
+    } catch (err) {
+      // No error on install error.
+      connection.console.error('Cannot install prisma query-engine: ' + err)
+    }
   }
 
   const binPathPrismaFmt = await util.getBinPath()
@@ -69,8 +74,6 @@ connection.onInitialize(async (params: InitializeParams) => {
       connection.console.error('Cannot install prisma-fmt: ' + err)
     }
   }
-
-  // download hack
 
   const result: InitializeResult = {
     capabilities: {
@@ -119,7 +122,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
     }
     if (hasDiagnosticRelatedInformationCapability) {
       diagnostic.relatedInformation = [
-        // send related Information such as location and message
+        // could send related information such as location and message
       ]
     }
     diagnostics.push(diagnostic)
@@ -130,6 +133,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 connection.onDefinition(params =>
   messageHandler.handleDefinitionRequest(documents, params),
 )
+
 /*
 connection.onCompletion(params =>
   messageHandler.handleCompletionRequest(params)

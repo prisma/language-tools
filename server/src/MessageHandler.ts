@@ -100,6 +100,9 @@ export class MessageHandler {
     }
   }
 
+  /**
+   * This handler provides the modification to the document to be formatted.
+   */
   async handleDocumentFormatting(
     params: DocumentFormattingParams,
     documents: TextDocuments<TextDocument>,

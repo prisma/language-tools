@@ -1,7 +1,6 @@
 /**
  * Imports
  */
-
 import { getPlatform, Platform } from '@prisma/get-platform'
 import pkgdir from 'pkg-dir'
 import * as path from 'path'
@@ -9,14 +8,12 @@ import * as path from 'path'
 /**
  * Lookup Cache
  */
-
 let platform: Platform | undefined
 let version: string | undefined
 
 /**
  * Lookup version
  */
-
 async function getVersion(): Promise<string> {
   const pkgPath = await pkgdir(__dirname)
   if (!pkgPath) {
@@ -32,7 +29,6 @@ async function getVersion(): Promise<string> {
 /**
  * Get the exec path
  */
-
 export async function getBinPath(): Promise<string> {
   platform = platform || (await getPlatform())
   version = version || (await getVersion())
@@ -42,7 +38,6 @@ export async function getBinPath(): Promise<string> {
 /**
  * Get the exec path
  */
-
 export async function getSdkQueryEnginePath(): Promise<string> {
   platform = platform || (await getPlatform())
   version = version || (await getVersion())
@@ -54,7 +49,6 @@ export async function getSdkQueryEnginePath(): Promise<string> {
 /**
  * Gets the download URL for a platform
  */
-
 export async function getDownloadURL() {
   platform = platform || (await getPlatform())
   version = version || (await getVersion())
@@ -65,7 +59,6 @@ export async function getDownloadURL() {
 /**
  * Try requiring
  */
-
 function tryRequire(path: string): any {
   try {
     return require(path)
