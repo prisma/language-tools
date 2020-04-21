@@ -46,8 +46,7 @@ export class MessageHandler {
     params: DeclarationParams,
     _token?: CancellationToken,
   ): Promise<Location> {
-    // bad workaround!
-    // ASTNode will be necessary to handle this a lot better
+    // TODO: Replace bad workaround as soon as ASTNode is available
 
     const textDocument = params.textDocument
     const position = params.position
