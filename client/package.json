@@ -1,5 +1,5 @@
 {
-    "name": "lsp-prisma-client",
+    "name": "prisma-vscode-client",
     "description": "Implementation of a language server.",
     "version": "0.0.31",
     "author": "Prisma",
