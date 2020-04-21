@@ -48,6 +48,11 @@ This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-pri
 - Make a change to the syntax
 - To reload, press the reload button in VSCode ( **Developer: Inspect TM Scopes** is helpful for debugging syntax issues )
 
+
+## Testing
+
+Instructions on testing can be found [here](TESTING.md)
+
 ## Publishing
 
 The extension is automatically published using a [Azure Devops Personal Access Token](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) via Github actions (see `.github/workflows/publish.yml`).
