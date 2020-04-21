@@ -74,7 +74,7 @@ To do a manual publish, please follow these steps:
 2. Update to latest pinned binary release in the [Prisma CLI's package.json](https://github.com/prisma/prisma2/blob/master/cli/prisma2/package.json) under **prisma.version**.
 3. Run `yarn package`
 4. Go to https://marketplace.visualstudio.com/manage/publishers/Prisma
-5. Click the **â€¢â€¢â€¢ More Actions**
+5. Click the **••• More Actions**
 6. Drag `prisma-x.x.x.vsix` into the browser and click upload.
 
 This will take about an hour before the update is available.
