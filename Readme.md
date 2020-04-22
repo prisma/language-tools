@@ -40,7 +40,6 @@ It also includes an End-to-End test.
 - Run `npm install` in this folder. This installs all necessary npm modules in both the client and server folder.
 - Run `yarn watch`.
 - Open VS Code on this folder.
-- Press `Ctrl+Shift+B` to compile the client and the server.
 - Switch to the debug viewlet.
 - Select `Launch Client` from the drop down.
 - Run the launch config.
