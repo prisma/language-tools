@@ -8,6 +8,5 @@
     "esModuleInterop": true,
     "strict": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules"]
+  "include": ["src"]
 }
