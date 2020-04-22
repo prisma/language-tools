@@ -12,6 +12,8 @@ This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-pri
 - Jump-to-definition 
 - Auto-completion (_coming soon_)
 
+It also includes an End-to-End test.
+
 ## Install
 
 - Get the Prisma Extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma).
@@ -51,7 +53,9 @@ This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-pri
 
 ## Testing
 
-Instructions on testing can be found [here](TESTING.md)
+Instructions on manual testing can be found [here](TESTING.md).
+End-to-End tests can be run by using the launch configuration `Language Server E2E Test`.
+
 
 ## Publishing
 
