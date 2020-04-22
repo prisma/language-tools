@@ -3,9 +3,9 @@
  */
 
 import * as util from './util'
-import * as https from 'https'
-import * as zlib from 'zlib'
-import * as fs from 'fs'
+import https from 'https'
+import zlib from 'zlib'
+import fs from 'fs'
 
 /**
  * Install prisma format

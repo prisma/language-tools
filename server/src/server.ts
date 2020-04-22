@@ -12,9 +12,9 @@ import { MessageHandler } from './MessageHandler'
 import { fullDocumentRange } from './provider'
 import * as util from './util'
 import lint from './lint'
-import * as fs from 'fs'
+import fs from 'fs'
 import install from './install'
-import * as path from 'path'
+import path from 'path'
 import { download } from '@prisma/fetch-engine'
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
@@ -96,14 +96,6 @@ connection.onDocumentFormatting((params) =>
   messageHandler.handleDocumentFormatting(params, documents),
 )
 
-documents.onDidChangeContent((change) => {
-  validateTextDocument(change.document)
-})
-
-documents.onDidOpen((open) => {
-  validateTextDocument(open.document)
-})
-
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   const text = textDocument.getText(fullDocumentRange(textDocument))
   const binPath = await util.getBinPath()
@@ -129,6 +121,14 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   }
   connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
 }
+
+documents.onDidChangeContent((change) => {
+  validateTextDocument(change.document)
+})
+
+documents.onDidOpen((open) => {
+  validateTextDocument(open.document)
+})
 
 connection.onDefinition((params) =>
   messageHandler.handleDefinitionRequest(documents, params),

@@ -3,13 +3,24 @@
  */
 import { getPlatform, Platform } from '@prisma/get-platform'
 import pkgdir from 'pkg-dir'
-import * as path from 'path'
+import path from 'path'
 
 /**
  * Lookup Cache
  */
 let platform: Platform | undefined
 let version: string | undefined
+
+/**
+ * Try requiring
+ */
+function tryRequire(path: string): any {
+  try {
+    return require(path)
+  } catch (err) {
+    return {}
+  }
+}
 
 /**
  * Lookup version
@@ -49,20 +60,9 @@ export async function getSdkQueryEnginePath(): Promise<string> {
 /**
  * Gets the download URL for a platform
  */
-export async function getDownloadURL() {
+export async function getDownloadURL(): Promise<string> {
   platform = platform || (await getPlatform())
   version = version || (await getVersion())
   const extension = platform === 'windows' ? '.exe.gz' : '.gz'
   return `https://binaries.prisma.sh/master/${version}/${platform}/prisma-fmt${extension}`
-}
-
-/**
- * Try requiring
- */
-function tryRequire(path: string): any {
-  try {
-    return require(path)
-  } catch (err) {
-    return {}
-  }
 }
