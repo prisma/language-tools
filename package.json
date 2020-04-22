@@ -67,7 +67,6 @@
     "vscode:prepublish": "npm run compile",
     "watch": "tsc -b -w",
     "compile": "tsc -b",
-    "format": "prettier --write client/src/**/*.ts && prettier --write server/src/**/*.ts",
     "postinstall": "cd client && npm install && cd ../server && npm install && cd .. ",
     "vsce:publish": "sh scripts/publish.sh",
     "vsce:check": "yarn shell:lint && sh scripts/check-update.sh",
@@ -78,30 +77,8 @@
   ],
   "devDependencies": {
     "@types/node": "^12.12.0",
-    "@typescript-eslint/eslint-plugin": "^2.29.0",
-    "@typescript-eslint/parser": "^2.29.0",
-    "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-prettier": "^3.1.3",
-    "husky": "^3.1.0",
-    "lint-staged": "^10.1.7",
-    "prettier": "1.19.1",
     "typescript": "^3.8.3",
     "vsce": "1.74.0"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.{js,ts,css,json,md}": [
-      "prettier --write",
-      "git add"
-    ],
-    "*.{js,ts}": [
-      "eslint"
-    ]
   },
   "prettier": {
     "semi": false,
