@@ -1,26 +1,26 @@
 {
-    "name": "prisma-vscode-server",
-    "description": "Implementation of a language server in node.",
-    "version": "0.0.31",
-    "author": "Prisma",
-    "license": "Apache-2.0",
-    "engines": {
-        "node": ">=10"
-    },
-    "prisma": {
-        "version": "76857c35ba1e1764dd5473656ecbbb2f739e1822"
-    },
-    "repository": {
-        "type": "github",
-        "url": "https://github.com/prisma/vscode"
-    },
-    "dependencies": {
-        "@prisma/fetch-engine": "^2.0.0-beta.2",
-        "@prisma/get-platform": "^2.0.0-beta.2",
-        "@prisma/sdk": "2.0.0-beta.2",
-        "pkg-dir": "4.2.0",
-        "vscode-languageserver": "^6.1.1",
-        "vscode-languageserver-textdocument": "^1.0.1"
-    },
-    "scripts": {}
+  "name": "prisma-vscode-server",
+  "description": "Implementation of a language server in node.",
+  "version": "0.0.32",
+  "author": "Prisma",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=10"
+  },
+  "prisma": {
+    "version": "76857c35ba1e1764dd5473656ecbbb2f739e1822"
+  },
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/prisma/vscode"
+  },
+  "dependencies": {
+    "@prisma/fetch-engine": "^2.0.0-beta.2",
+    "@prisma/get-platform": "^2.0.0-beta.2",
+    "@prisma/sdk": "2.0.0-beta.2",
+    "pkg-dir": "4.2.0",
+    "vscode-languageserver": "^6.1.1",
+    "vscode-languageserver-textdocument": "^1.0.1"
+  },
+  "scripts": {}
 }
