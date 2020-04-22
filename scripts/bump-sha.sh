@@ -2,11 +2,12 @@
 
 set -eu
 
-PRISMA_VERSION=$(cat scripts/prisma_version)
-echo "PRISMA_VERSION: $PRISMA_VERSION"
-
 CHANNEL=$1
 echo "CHANNEL: $CHANNEL"
+
+PRISMA_VERSION=$2
+echo "PRISMA_VERSION: $PRISMA_VERSION"
+
 
 OLD_SHA=$(jq ".prisma.version" ./package.json)
 
@@ -16,7 +17,7 @@ SHA=$(npx -q -p @prisma/cli@"$CHANNEL" prisma2 --version | grep "Query Engine" |
 if [ "$CHANNEL" = "alpha" ]; then
     jq ".prisma.version = \"$SHA\" | .dependencies[\"@prisma/get-platform\"] = \"$PRISMA_VERSION\" | .name = \"prisma-alpha\" | .displayName = \"Prisma Alpha\"" ./package.json > ./package.json.bk
 else
-    jq ".prisma.version = \"$SHA\" | .dependencies[\"@prisma/get-platform\"] = \"$PRISMA_VERSION\"" ./package.json > ./package.json.bk
+    jq ".prisma.version = \"$SHA\" | .dependencies[\"@prisma/get-platform\"] = \"$PRISMA_VERSION\" | .name = \"prisma\" | .displayName = \"Prisma\"" ./package.json > ./package.json.bk
 fi
 
 mv ./package.json.bk ./package.json

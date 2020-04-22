@@ -14,7 +14,7 @@ fi
 CHANNEL=$1
 echo "CHANNEL: $CHANNEL"
 
-CURRENT_VERSION=$(cat scripts/prisma_version)
+CURRENT_VERSION=$(sh scripts/extension-version.sh "$CHANNEL")
 echo "CURRENT_VERSION: $CURRENT_VERSION"
 
 NPM_VERSION=$(sh scripts/prisma-version.sh "$CHANNEL")
@@ -31,15 +31,14 @@ fi
 
 if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then
     echo "UPDATING to $NPM_VERSION"
-    echo "$NPM_VERSION" > scripts/prisma_version
-    sh ./scripts/bump-sha.sh "$CHANNEL"
+    sh ./scripts/bump-sha.sh "$CHANNEL" "$NPM_VERSION"
     if [ "$PRODUCTION" = "1" ]; then
         git add -A .
         git commit -m "bump prisma_version to $NPM_VERSION"
     else
         echo "Not committing because production is not set"
     fi
-    yarn run vsce:publish "$CHANNEL"
+    yarn run vsce:publish "$CHANNEL" "$NPM_VERSION"
 else
     echo "CURRENT_VERSION ($CURRENT_VERSION) and NPM_VERSION ($NPM_VERSION) are same"
 fi

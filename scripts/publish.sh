@@ -16,11 +16,12 @@ echo "AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
 echo "PRODUCTION: $PRODUCTION"
 echo "============================"
 
-PRISMA_VERSION=$(cat scripts/prisma_version)
-echo "PRISMA_VERSION: $PRISMA_VERSION"
-
 CHANNEL=$1
 echo "CHANNEL: $CHANNEL"
+
+PRISMA_VERSION=$2
+echo "PRISMA_VERSION: $PRISMA_VERSION"
+
 
 # Try to publish if $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN (Personal Access Token - https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) exists 
 if [ -z "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
