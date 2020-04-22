@@ -2,10 +2,10 @@ import * as vscode from 'vscode';
 import * as assert from 'assert';
 import { getDocUri, activate } from './helper';
 
-suite('Should get diagnostics', () => {
-	const docUri = getDocUri('diagnostics.MissingArgument.prisma')
-	const docUri2 = getDocUri('diagnostics.WrongType.prisma')
-	const docUri3 = getDocUri('diagnostics.RequiredField.prisma')
+suite('Should get linting', () => {
+	const docUri = getDocUri('linting.MissingArgument.prisma')
+	const docUri2 = getDocUri('linting.WrongType.prisma')
+	const docUri3 = getDocUri('linting.RequiredField.prisma')
 
 
 	test('Diagnoses missing argument', async () => {
