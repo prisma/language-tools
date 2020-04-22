@@ -5,7 +5,7 @@ import {
   TransportKind,
 } from 'vscode-languageclient'
 import { ExtensionContext, workspace } from 'vscode'
-import * as path from 'path'
+import path from 'path'
 
 let client: LanguageClient
 
