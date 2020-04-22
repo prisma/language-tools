@@ -53,7 +53,7 @@ export class MessageHandler {
     const documentText = document.getText()
 
     let word = this.getWordAtPosition(document, position)
-    if (word == '') {
+    if (word === '') {
       return new Promise(resolve => resolve())
     }
 
@@ -62,7 +62,7 @@ export class MessageHandler {
 
     let modelName = dmmf.datamodel.models
       .map(model => model.name)
-      ?.find(name => name == word)
+      ?.find(name => name === word)
 
     // selected word is not a model type
 
