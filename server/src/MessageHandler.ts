@@ -68,7 +68,7 @@ export class MessageHandler {
 
     // selected word is not a model type
 
-    if (modelName == null) {
+    if (modelName === null) {
       return new Promise((resolve) => resolve())
     }
 
@@ -104,7 +104,7 @@ export class MessageHandler {
   ): Promise<TextEdit[]> {
     const options = params.options
     const document = documents.get(params.textDocument.uri)
-    if (document == null) {
+    if (document === null) {
       return []
     }
     const binPath = await util.getBinPath()
