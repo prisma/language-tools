@@ -69,7 +69,7 @@ export class MessageHandler {
     // selected word is not a model type
 
     if (!modelName) {
-      return new Promise((resolve) => resolve())
+      return Promise.resolve()
     }
 
     const modelDefinition = 'model '
