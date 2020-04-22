@@ -13,10 +13,6 @@ module.exports = {
     project: 'tsconfig.json',
   },
   overrides: [
-    // {
-    //   files: ['*.js'],
-    //   rules: {},
-    // },
     {
       files: ['*.ts'],
       extends: [
@@ -26,10 +22,7 @@ module.exports = {
         'plugin:@typescript-eslint/recommended-requiring-type-checking',
         'prettier/@typescript-eslint',
       ],
-      rules: {
-        // '@typescript-eslint/no-use-before-define': 'off',
-        // 'no-useless-escape': 'off',
-      },
+      rules: {},
     },
   ],
 }
