@@ -20,14 +20,14 @@ import format from './format'
 export class MessageHandler {
   constructor() { }
 
-  getWordAtPosition(document: TextDocument, position: Position): String {
-    let currentLine = document.getText({
+  getWordAtPosition(document: TextDocument, position: Position): string {
+    const currentLine = document.getText({
       start: { line: position.line, character: 0 },
       end: { line: position.line, character: 9999 },
     })
     // search for the word's beginning and end
-    var beginning = currentLine.slice(0, position.character + 1).search(/\S+$/)
-    var end = currentLine.slice(position.character).search(/\W/)
+    const beginning = currentLine.slice(0, position.character + 1).search(/\S+$/)
+    const end = currentLine.slice(position.character).search(/\W/)
     if (end < 0) {
       return ''
     }
