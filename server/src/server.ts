@@ -8,7 +8,7 @@ import {
   Diagnostic,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { MessageHandler } from './MessageHandler'
+import * as MessageHandler from './MessageHandler'
 import { fullDocumentRange } from './provider'
 import * as util from './util'
 import lint from './lint'
@@ -79,21 +79,14 @@ connection.onInitialize(async (params: InitializeParams) => {
     capabilities: {
       definitionProvider: true,
       documentFormattingProvider: true,
-      /* // Tell the client that the server supports code completion
-      completionProvider: {
-        resolveProvider: true,
-        triggerCharacters: ['@']
-      } */
     },
   }
 
   return result
 })
 
-const messageHandler = new MessageHandler()
-
 connection.onDocumentFormatting((params) =>
-  messageHandler.handleDocumentFormatting(params, documents),
+  MessageHandler.handleDocumentFormatting(params, documents),
 )
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
@@ -131,17 +124,8 @@ documents.onDidOpen((open) => {
 })
 
 connection.onDefinition((params) =>
-  messageHandler.handleDefinitionRequest(documents, params),
+  MessageHandler.handleDefinitionRequest(documents, params),
 )
-
-/*
-connection.onCompletion(params =>
-  messageHandler.handleCompletionRequest(params)
-)
-
-connection.onCompletionResolve(params =>
-  messageHandler.handleCompletionResolveRequest(params)
-) */
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events
