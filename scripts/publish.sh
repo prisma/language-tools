@@ -36,8 +36,8 @@ elif [ -n "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
     fi
 fi
 
-# Sync with remote branch (only master, see publish.yml) and push to it
-if [ "$PRODUCTION" = "1" ]; then
+# Sync with remote branch (only master, see publish.yml) when on alpha channel, and push to it
+if [ "$PRODUCTION" = "1" ] && [ "$CHANNEL" = "alpha" ]; then
     echo "Sync with ${GITHUB_REF} and push to it"
     git pull github "${GITHUB_REF}" --ff-only
     git push github HEAD:"${GITHUB_REF}"
