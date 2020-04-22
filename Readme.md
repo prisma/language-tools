@@ -44,7 +44,7 @@ It also includes an End-to-End test.
 - Switch to the debug viewlet.
 - Select `Launch Client` from the drop down.
 - Run the launch config.
-- If you want to debug the server as welll use the launch configuration `Attach to Server` afterwards or select the launch configuration `Client + Server` at once.
+- If you want to debug the server as well use the launch configuration `Attach to Server` afterwards or select the launch configuration `Client + Server` at once.
 - A new file should open in the [Extension Development Host] instance of VSCode.
 - Change the language to Prisma.
 - Make a change to the syntax
