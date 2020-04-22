@@ -108,7 +108,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   const text = textDocument.getText(fullDocumentRange(textDocument))
   const binPath = await util.getBinPath()
   const res = await lint(binPath, text)
-  let diagnostics: Diagnostic[] = []
+  const diagnostics: Diagnostic[] = []
 
   for (const error of res) {
     let diagnostic: Diagnostic = {
