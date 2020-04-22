@@ -19,18 +19,18 @@ import { download } from '@prisma/fetch-engine'
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
-let connection = createConnection(ProposedFeatures.all)
+const connection = createConnection(ProposedFeatures.all)
 
 // Create a simple text document manager. The text document manager
 // supports full document sync only.
-let documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
+const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
-let hasConfigurationCapability: boolean = false
-let hasWorkspaceFolderCapability: boolean = false
-let hasDiagnosticRelatedInformationCapability: boolean = false
+let hasConfigurationCapability = false
+let hasWorkspaceFolderCapability = false
+let hasDiagnosticRelatedInformationCapability = false
 
 connection.onInitialize(async (params: InitializeParams) => {
-  let capabilities = params.capabilities
+  const capabilities = params.capabilities
 
   // Does the client support the `workspace/configuration` request?
   // If not, we will fall back using global settings.
@@ -92,15 +92,15 @@ connection.onInitialize(async (params: InitializeParams) => {
 
 const messageHandler = new MessageHandler()
 
-connection.onDocumentFormatting(params =>
+connection.onDocumentFormatting((params) =>
   messageHandler.handleDocumentFormatting(params, documents),
 )
 
-documents.onDidChangeContent(change => {
+documents.onDidChangeContent((change) => {
   validateTextDocument(change.document)
 })
 
-documents.onDidOpen(open => {
+documents.onDidOpen((open) => {
   validateTextDocument(open.document)
 })
 
@@ -111,7 +111,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   const diagnostics: Diagnostic[] = []
 
   for (const error of res) {
-    let diagnostic: Diagnostic = {
+    const diagnostic: Diagnostic = {
       severity: DiagnosticSeverity.Error,
       range: {
         start: textDocument.positionAt(error.start),
@@ -130,7 +130,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
 }
 
-connection.onDefinition(params =>
+connection.onDefinition((params) =>
   messageHandler.handleDefinitionRequest(documents, params),
 )
 

@@ -18,7 +18,7 @@ import { TextDocument, Position } from 'vscode-languageserver-textdocument'
 import format from './format'
 
 export class MessageHandler {
-  constructor() { }
+  constructor() {}
 
   getWordAtPosition(document: TextDocument, position: Position): string {
     const currentLine = document.getText({
@@ -26,7 +26,9 @@ export class MessageHandler {
       end: { line: position.line, character: 9999 },
     })
     // search for the word's beginning and end
-    const beginning = currentLine.slice(0, position.character + 1).search(/\S+$/)
+    const beginning = currentLine
+      .slice(0, position.character + 1)
+      .search(/\S+$/)
     const end = currentLine.slice(position.character).search(/\W/)
     if (end < 0) {
       return ''
@@ -47,32 +49,32 @@ export class MessageHandler {
     const document = documents.get(textDocument.uri)
 
     if (!document) {
-      return new Promise(resolve => resolve())
+      return new Promise((resolve) => resolve())
     }
 
     const documentText = document.getText()
 
-    let word = this.getWordAtPosition(document, position)
+    const word = this.getWordAtPosition(document, position)
     if (word === '') {
-      return new Promise(resolve => resolve())
+      return new Promise((resolve) => resolve())
     }
 
     // parse schem file to datamodel meta format (DMMF)
     const dmmf = await getDMMF({ datamodel: documentText })
 
-    let modelName = dmmf.datamodel.models
-      .map(model => model.name)
-      ?.find(name => name === word)
+    const modelName = dmmf.datamodel.models
+      .map((model) => model.name)
+      ?.find((name) => name === word)
 
     // selected word is not a model type
 
     if (modelName == null) {
-      return new Promise(resolve => resolve())
+      return new Promise((resolve) => resolve())
     }
 
-    let modelDefinition = 'model '
+    const modelDefinition = 'model '
     // get start position of model type
-    let index = documentText.indexOf(modelDefinition + modelName)
+    const index = documentText.indexOf(modelDefinition + modelName)
     const buf = documentText.slice(0, index)
     const EOL = '\n'
     const lines = buf.split(EOL).length - 1
@@ -100,7 +102,7 @@ export class MessageHandler {
     params: DocumentFormattingParams,
     documents: TextDocuments<TextDocument>,
   ): Promise<TextEdit[]> {
-    let options = params.options
+    const options = params.options
     const document = documents.get(params.textDocument.uri)
     if (document == null) {
       return []
@@ -110,7 +112,7 @@ export class MessageHandler {
       binPath,
       options.tabSize,
       document.getText(),
-    ).then(formatted => [
+    ).then((formatted) => [
       TextEdit.replace(fullDocumentRange(document), formatted),
     ])
   }

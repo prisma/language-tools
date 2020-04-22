@@ -1,14 +1,14 @@
 {
-	"compilerOptions": {
-		"target": "es6",
-		"module": "commonjs",
-		"moduleResolution": "node",
-		"sourceMap": true,
-		"strict": true,
-		"outDir": "out",
-		"rootDir": "src",
-		"esModuleInterop": true,
-	},
-	"include": ["src"],
-	"exclude": ["node_modules"]
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "strict": true,
+    "outDir": "out",
+    "rootDir": "src",
+    "esModuleInterop": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }
