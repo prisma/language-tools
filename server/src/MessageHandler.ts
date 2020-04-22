@@ -16,7 +16,6 @@ import { fullDocumentRange } from './provider'
 import { getDMMF } from '@prisma/sdk'
 import { TextDocument, Position } from 'vscode-languageserver-textdocument'
 import format from './format'
-import * as os from 'os'
 
 export class MessageHandler {
   constructor() {}
@@ -73,6 +72,7 @@ export class MessageHandler {
       ?.find(name => name == word)
 
     // selected word is not a model type
+    
     if (modelName == null) {
       return new Promise(resolve => resolve())
     }
@@ -81,8 +81,9 @@ export class MessageHandler {
     // get start position of model type
     let index = documentText.indexOf(modelDefinition + modelName)
     const buf = documentText.slice(0, index)
-    const lines = buf.split(os.EOL).length - 1
-    const lastLineIndex = buf.lastIndexOf(os.EOL)
+    const EOL = '\n'
+    const lines = buf.split(EOL).length - 1
+    const lastLineIndex = buf.lastIndexOf(EOL)
     const startPosition = {
       line: lines,
       character: index + modelDefinition.length - lastLineIndex - 1,
