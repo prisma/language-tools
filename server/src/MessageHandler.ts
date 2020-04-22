@@ -18,14 +18,7 @@ import { TextDocument, Position } from 'vscode-languageserver-textdocument'
 import format from './format'
 
 export class MessageHandler {
-  constructor() {}
-
-  async handleHoverRequest(
-    params: TextDocumentPositionParams,
-    documents: TextDocuments<TextDocument>,
-  ) {
-    return null
-  }
+  constructor() { }
 
   getWordAtPosition(document: TextDocument, position: Position): String {
     let currentLine = document.getText({
@@ -72,7 +65,7 @@ export class MessageHandler {
       ?.find(name => name == word)
 
     // selected word is not a model type
-    
+
     if (modelName == null) {
       return new Promise(resolve => resolve())
     }
