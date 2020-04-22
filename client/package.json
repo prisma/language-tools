@@ -16,19 +16,19 @@
     "lint": "eslint --fix --ext .js,.ts ."
   },
   "dependencies": {
-    "vscode-languageclient": "^6.1.3"
+    "vscode-languageclient": "6.1.3"
   },
   "devDependencies": {
     "@types/vscode": "1.43.0",
-    "@typescript-eslint/eslint-plugin": "^2.29.0",
-    "@typescript-eslint/parser": "^2.29.0",
-    "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-prettier": "^3.1.3",
-    "husky": "^4.2.5",
-    "lint-staged": "^10.1.7",
-    "prettier": "^2.0.5",
-    "vscode-test": "^1.3.0"
+    "@typescript-eslint/eslint-plugin": "2.29.0",
+    "@typescript-eslint/parser": "2.29.0",
+    "eslint": "6.8.0",
+    "eslint-config-prettier": "6.11.0",
+    "eslint-plugin-prettier": "3.1.3",
+    "husky": "4.2.5",
+    "lint-staged": "10.1.7",
+    "prettier": "2.0.5",
+    "vscode-test": "1.3.0"
   },
   "prettier": {
     "semi": false,
