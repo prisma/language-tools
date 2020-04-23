@@ -9,13 +9,13 @@ export default function exec(
 
   const chunks: string[] = []
 
-  fmt.stdout.on('data', data => {
+  fmt.stdout.on('data', (data) => {
     chunks.push(data.toString())
   })
 
   const err_chunks: string[] = []
 
-  fmt.stderr.on('data', data => {
+  fmt.stderr.on('data', (data) => {
     err_chunks.push(data.toString())
   })
 
@@ -24,7 +24,7 @@ export default function exec(
   fmt.stdin.end()
 
   return new Promise((resolve, reject) => {
-    fmt.on('exit', code => {
+    fmt.on('exit', (code) => {
       if (code === 0 && err_chunks.length === 0) {
         resolve(chunks.join(''))
       } else {
