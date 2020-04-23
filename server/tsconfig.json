@@ -9,6 +9,5 @@
     "rootDir": "src",
     "esModuleInterop": true
   },
-  "include": ["src"],
-  "exclude": [".vscode-test"]
+  "include": ["src"]
 }
