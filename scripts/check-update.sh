@@ -31,7 +31,7 @@ fi
 
 if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then
     echo "UPDATING to $NPM_VERSION"
-    sh ./scripts/bump-sha.sh "$CHANNEL" "$NPM_VERSION"
+    sh ./scripts/bump.sh "$CHANNEL" "$NPM_VERSION"
     if [ "$PRODUCTION" = "1" ]; then
         git add -A .
         git commit -m "bump prisma_version to $NPM_VERSION"

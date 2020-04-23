@@ -32,13 +32,13 @@ elif [ -n "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
         ./node_modules/.bin/vsce publish "$PRISMA_VERSION" --pat "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
     else
         echo "Printing the command because PRODUCTION is not set"
-        echo "sh ./scripts/bump-sha.sh" # The actual execution of this command is in check-update.sh becuase git working tree must be clean before calling `vsce publish`
+        echo "sh ./scripts/bump.sh" # The actual execution of this command is in check-update.sh becuase git working tree must be clean before calling `vsce publish`
         echo "./node_modules/.bin/vsce publish \"$PRISMA_VERSION\" --pat $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
     fi
 fi
 
-# Sync with remote branch (only master, see publish.yml) when on alpha channel, and push to it
-if [ "$PRODUCTION" = "1" ] && [ "$CHANNEL" = "alpha" ]; then
+# Sync with remote branch (only master, see publish.yml) when on dev channel, and push to it
+if [ "$PRODUCTION" = "1" ] && [ "$CHANNEL" = "dev" ]; then
     echo "Sync with ${GITHUB_REF} and push to it"
     git pull github "${GITHUB_REF}" --ff-only
     git push github HEAD:"${GITHUB_REF}"

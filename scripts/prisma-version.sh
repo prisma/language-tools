@@ -2,6 +2,11 @@
 
 set -eu
 
-channel="$1"
+CHANNEL="$1"
 
-yarn info "@prisma/cli@$channel" --json | jq ".data[\"dist-tags\"].$channel" | tr -d '"'
+# TODO: remove this if-condition once we move to dev
+if [ "$CHANNEL" = "dev" ]; then
+    CHANNEL="alpha"
+fi
+
+yarn info "@prisma/cli@$CHANNEL" --json | jq ".data[\"dist-tags\"].$CHANNEL" | tr -d '"'
