@@ -11,7 +11,7 @@ echo "PRISMA_VERSION: $PRISMA_VERSION"
 
 OLD_SHA=$(jq ".prisma.version" ./package.json)
 
-SHA=$(npx -q -p @prisma/cli@"$CHANNEL" prisma2 --version | grep "Query Engine" | awk '{print $5}')
+SHA=$(npx -q -p @prisma/cli@"$CHANNEL" prisma --version | grep "Query Engine" | awk '{print $5}')
 
 # If the channel is alpha, we need to change the name, displayName to the alpha extension
 if [ "$CHANNEL" = "alpha" ]; then
