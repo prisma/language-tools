@@ -1,6 +1,6 @@
 import vscode from 'vscode';
 import assert from 'assert';
-import { getDocUri, activate, toRange } from './helper';
+import { getDocUri, activate, toRange, sleep } from './helper';
 
 suite('Should jump-to-definition', () => {
     const docUri = getDocUri('correct.prisma')

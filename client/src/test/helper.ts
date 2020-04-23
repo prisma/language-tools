@@ -28,7 +28,7 @@ export function toRange(sLine: number, sChar: number, eLine: number, eChar: numb
 	return new vscode.Range(start, end);
 }
 
-async function sleep(ms: number) {
+export async function sleep(ms: number) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 

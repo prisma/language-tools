@@ -70,8 +70,7 @@
     "postinstall": "cd client && npm install && cd ../server && npm install && cd .. ",
     "vsce:publish": "sh scripts/publish.sh",
     "vsce:check": "yarn shell:lint && sh scripts/check-update.sh",
-    "shell:lint": "shellcheck -x scripts/*.sh",
-    "test": "sh ./scripts/e2e.sh"
+    "shell:lint": "shellcheck -x scripts/*.sh"
   },
   "activationEvents": [
     "onLanguage:prisma"
