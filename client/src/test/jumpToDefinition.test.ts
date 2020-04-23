@@ -1,6 +1,6 @@
-import * as vscode from 'vscode';
-import * as assert from 'assert';
-import { getDocUri, activate } from './helper';
+import vscode from 'vscode';
+import assert from 'assert';
+import { getDocUri, activate, toRange } from './helper';
 
 suite('Should jump-to-definition', () => {
     const docUri = getDocUri('correct.prisma')
@@ -10,12 +10,6 @@ suite('Should jump-to-definition', () => {
         await testJumpToDefinition(docUri, new vscode.Position(14, 14), new vscode.Location(docUri, toRange(18, 6, 18, 10)))
     });
 });
-
-function toRange(sLine: number, sChar: number, eLine: number, eChar: number) {
-    const start = new vscode.Position(sLine, sChar);
-    const end = new vscode.Position(eLine, eChar);
-    return new vscode.Range(start, end);
-}
 
 async function testJumpToDefinition(docUri: vscode.Uri, position: vscode.Position, expectedLocation: vscode.Location) {
     await activate(docUri)

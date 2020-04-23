@@ -22,6 +22,12 @@ export async function activate(docUri: vscode.Uri) {
 	}
 }
 
+export function toRange(sLine: number, sChar: number, eLine: number, eChar: number) {
+	const start = new vscode.Position(sLine, sChar);
+	const end = new vscode.Position(eLine, eChar);
+	return new vscode.Range(start, end);
+}
+
 async function sleep(ms: number) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
