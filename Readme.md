@@ -1,6 +1,6 @@
 # vscode
 
-Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for `.prisma` files.
+Adds syntax highlighting, formatting, jump-to-definition and linting for `.prisma` files.
 
 This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-prisma-2-zq1s745db8i5). Information about the new datamodel syntax can be found [here](https://github.com/prisma/prisma2/blob/master/docs/data-modeling.md).
 
@@ -9,26 +9,52 @@ This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-pri
 - Syntax highlighting
 - Auto-formatting
 - Linting
+- Jump-to-definition 
 - Auto-completion (_coming soon_)
-- Jump-to-definition (_coming soon_)
+
+It also includes an End-to-End test.
 
 ## Install
 
-Get the Prisma Extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma).
+- Get the Prisma Extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma).
 
 ## Preview
 
 ![](https://imgur.com/HbufPo6.png)
 
+## Structure
+
+```
+.
+--- client // Language Client
+|   --- src   
+|       --- extension.ts // Language Client entry point
+--- package.json // The extension manifest
+--- server // Language Server
+    --- src
+        --- server.ts // Language Server entry point
+```
+
 ## Development
 
-1. Run `yarn watch`
-2. Open this repository in vscode
-3. Press F5, a new file should open
-4. Change the language to Prisma
-5. Make a change to the syntax
-6. To reload, press the reload button in VSCode
-   1. **Developer: Inspect TM Scopes** is helpful for debugging syntax issues
+- Run `npm install` in this folder. This installs all necessary npm modules in both the client and server folder.
+- Run `yarn watch`.
+- Open VS Code on this folder.
+- Switch to the debug viewlet.
+- Select `Launch Client` from the drop down.
+- Run the launch config.
+- If you want to debug the server as well use the launch configuration `Attach to Server` afterwards or select the launch configuration `Client + Server` at once.
+- A new file should open in the [Extension Development Host] instance of VSCode.
+- Change the language to Prisma.
+- Make a change to the syntax
+- To reload, press the reload button in VSCode ( **Developer: Inspect TM Scopes** is helpful for debugging syntax issues )
+
+
+## Testing
+
+Instructions on manual testing can be found [here](TESTING.md).
+End-to-End tests can be run by using the launch configuration `Language Server E2E Test`.
+
 
 ## Publishing
 
@@ -44,7 +70,7 @@ To do a manual publish, please follow these steps:
 2. Update to latest pinned binary release in the [Prisma CLI's package.json](https://github.com/prisma/prisma2/blob/master/cli/prisma2/package.json) under **prisma.version**.
 3. Run `yarn package`
 4. Go to https://marketplace.visualstudio.com/manage/publishers/Prisma
-5. Click the **â€¢â€¢â€¢ More Actions**
+5. Click the **••• More Actions**
 6. Drag `prisma-x.x.x.vsix` into the browser and click upload.
 
 This will take about an hour before the update is available.
