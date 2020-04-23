@@ -1,15 +1,10 @@
 import {
-  TextDocumentPositionParams,
-  CancellationToken,
   TextDocuments,
   DocumentFormattingParams,
   TextEdit,
   Range,
   Location,
   DeclarationParams,
-  CompletionParams,
-  CompletionItem,
-  CompletionItemKind,
 } from 'vscode-languageserver'
 import * as util from './util'
 import { fullDocumentRange } from './provider'
@@ -34,7 +29,6 @@ function getWordAtPosition(document: TextDocument, position: Position): string {
 export async function handleDefinitionRequest(
   documents: TextDocuments<TextDocument>,
   params: DeclarationParams,
-  _token?: CancellationToken,
 ): Promise<Location> {
   // TODO: Replace bad workaround as soon as ASTNode is available
 
