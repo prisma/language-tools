@@ -14,7 +14,7 @@ suite('Should jump-to-definition', () => {
 async function testJumpToDefinition(docUri: vscode.Uri, position: vscode.Position, expectedLocation: vscode.Location) {
     await activate(docUri)
 
-    const actualLocation = (await vscode.commands.executeCommand(
+    const actualLocation: vscode.Location[] = (await vscode.commands.executeCommand(
         'vscode.executeDefinitionProvider',
         docUri,
         position
