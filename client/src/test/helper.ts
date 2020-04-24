@@ -7,11 +7,12 @@ export let documentEol: string;
 export let platformEol: string;
 
 /**
- * Activates the vscode.lsp-sample extension
+ * Activates the vscode.prisma-vscode extension
  */
 export async function activate(docUri: vscode.Uri) {
 	// The extensionId is `publisher.name` from package.json
-	const ext = vscode.extensions.getExtension('Prisma.prisma-vscode')!;
+	const pj = require('../../../package.json')
+	const ext = vscode.extensions.getExtension(pj.publisher + '.'  + pj.name)!;
 	await ext.activate();
 	try {
 		doc = await vscode.workspace.openTextDocument(docUri);
