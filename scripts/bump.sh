@@ -40,12 +40,14 @@ mv ./client/package.json.bk ./client/package.json
 
 npm install
 
+(
 cd ./client
 npm install
-cd ..
+)
 
+(
 cd ./server
 npm install
-cd ..
+)
 
 echo "Bumped prisma.version in package.json from $OLD_SHA to $SHA"
