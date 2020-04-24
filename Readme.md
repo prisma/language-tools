@@ -53,7 +53,14 @@ It also includes an End-to-End test.
 ## Testing
 
 Instructions on manual testing can be found [here](TESTING.md).
-End-to-End tests can be run by using the launch configuration `Language Server E2E Test`.
+
+End-to-End tests:
+- Run `npm install` in this folder.
+- Open VS Code on this folder.
+- Switch to the debug viewlet.
+- Select `Language Server E2E Test` from the drop down.
+- Run the launch config.
+- Open the debug console to view the test results.
 
 
 ## Publishing
