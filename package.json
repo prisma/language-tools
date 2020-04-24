@@ -78,14 +78,6 @@
   "devDependencies": {
     "@types/node": "12.12.0",
     "typescript": "3.8.3",
-    "vsce": "1.74.0",
-    "@types/mocha": "5.2.7",
-    "mocha": "7.1.1",
-    "@types/glob": "5.0.35"
-  },
-  "prettier": {
-    "semi": false,
-    "trailingComma": "all",
-    "singleQuote": true
+    "vsce": "1.74.0"
   }
 }
