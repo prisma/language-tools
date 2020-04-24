@@ -1,4 +1,4 @@
-name: Automatic Publish
+name: Check for Update + Automated Publish
 
 on:
   push:
