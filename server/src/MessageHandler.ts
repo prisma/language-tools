@@ -1,5 +1,4 @@
 import {
-  TextDocumentPositionParams,
   CancellationToken,
   TextDocuments,
   DocumentFormattingParams,
@@ -7,9 +6,6 @@ import {
   Range,
   Location,
   DeclarationParams,
-  CompletionParams,
-  CompletionItem,
-  CompletionItemKind,
 } from 'vscode-languageserver'
 import * as util from './util'
 import { fullDocumentRange } from './provider'
@@ -96,6 +92,7 @@ export async function handleDefinitionRequest(
 export async function handleDocumentFormatting(
   params: DocumentFormattingParams,
   documents: TextDocuments<TextDocument>,
+  onError?: (errorMessage: string) => void,
 ): Promise<TextEdit[]> {
   const options = params.options
   const document = documents.get(params.textDocument.uri)
@@ -107,6 +104,7 @@ export async function handleDocumentFormatting(
     binPath,
     options.tabSize,
     document.getText(),
+    onError,
   ).then((formatted) => [
     TextEdit.replace(fullDocumentRange(document), formatted),
   ])
