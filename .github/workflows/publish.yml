@@ -1,4 +1,4 @@
-name: Automatic Publish
+name: Check for Update + Automated Publish
 
 on:
   push:
@@ -22,4 +22,15 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Publish Extension as Patch
-        run: yarn vsce:check
+        run: yarn vsce:check "latest"
+
+  publish-dev:
+    name: Publish Dev
+    runs-on: ubuntu-latest
+    if: endsWith(github.ref, '/master')
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: npm install
+      - name: Publish Extension as Patch
+        run: yarn vsce:check "dev"
