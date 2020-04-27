@@ -12,15 +12,16 @@ export async function sleep(ms: number): Promise<NodeJS.Timeout> {
 
 /**
  * Activates the vscode.prisma-vscode extension
+ * @todo check readiness of the server instead of timeout
  */
 export async function activate(docUri: vscode.Uri): Promise<void> {
   // The extensionId is `publisher.name` from package.json
-  const ext = vscode.extensions.getExtension('Prisma.prisma-vsocde')!
+  const ext = vscode.extensions.getExtension('Prisma.prisma-vscode')!
   await ext.activate()
   try {
     doc = await vscode.workspace.openTextDocument(docUri)
     editor = await vscode.window.showTextDocument(doc)
-    await sleep(2000) // Wait for server activation
+    await sleep(3000) // Wait for server activation
   } catch (e) {
     console.error(e)
   }
