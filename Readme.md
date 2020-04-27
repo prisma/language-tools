@@ -9,7 +9,7 @@ This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-pri
 - Syntax highlighting
 - Auto-formatting
 - Linting
-- Jump-to-definition 
+- Jump-to-definition
 - Auto-completion (_coming soon_)
 
 It also includes an End-to-End test.
@@ -27,7 +27,7 @@ It also includes an End-to-End test.
 ```
 .
 --- client // Language Client
-|   --- src   
+|   --- src
 |       --- extension.ts // Language Client entry point
 --- package.json // The extension manifest
 --- server // Language Server
@@ -49,19 +49,18 @@ It also includes an End-to-End test.
 - Make a change to the syntax
 - To reload, press the reload button in VSCode ( **Developer: Inspect TM Scopes** is helpful for debugging syntax issues )
 
-
 ## Testing
 
 Instructions on manual testing can be found [here](TESTING.md).
 
 End-to-End tests:
+
 - Run `npm install` in this folder.
 - Open VS Code on this folder.
 - Switch to the debug viewlet.
 - Select `Language Server E2E Test` from the drop down.
 - Run the launch config.
 - Open the debug console to view the test results.
-
 
 ## Publishing
 
@@ -77,7 +76,7 @@ To do a manual publish, please follow these steps:
 2. Update to latest pinned binary release in the [Prisma CLI's package.json](https://github.com/prisma/prisma2/blob/master/cli/prisma2/package.json) under **prisma.version**.
 3. Run `yarn package`
 4. Go to https://marketplace.visualstudio.com/manage/publishers/Prisma
-5. Click the **••• More Actions**
+5. Click the **ï¿½ï¿½ï¿½ More Actions**
 6. Drag `prisma-x.x.x.vsix` into the browser and click upload.
 
 This will take about an hour before the update is available.

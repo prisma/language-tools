@@ -71,7 +71,9 @@
     "vsce:publish": "sh scripts/publish.sh",
     "vsce:check": "yarn shell:lint && sh scripts/check-update.sh",
     "shell:lint": "shellcheck -x scripts/*.sh",
-    "test": "sh ./scripts/e2e.sh"
+    "test": "sh ./scripts/e2e.sh",
+    "format": "prettier --write .",
+    "lint": "eslint server --fix --ext .js,.ts ."
   },
   "activationEvents": [
     "onLanguage:prisma"
@@ -81,6 +83,28 @@
     "typescript": "3.8.3",
     "vsce": "1.75.0",
     "@types/mocha": "5.2.7",
-    "mocha": "7.1.1"
+    "mocha": "7.1.1",
+    "prettier": "2.0.5",
+    "husky": "4.2.3",
+    "lint-staged": "10.1.2",
+    "eslint": "6.8.0",
+    "eslint-config-prettier": "6.10.1",
+    "eslint-plugin-prettier": "3.1.2",
+    "@typescript-eslint/eslint-plugin": "2.27.0",
+    "@typescript-eslint/parser": "2.27.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,ts,css,json,md}": [
+      "prettier --write",
+      "git add"
+    ],
+    "*.{js,ts}": [
+      "eslint"
+    ]
   }
 }

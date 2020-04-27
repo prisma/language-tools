@@ -1,33 +1,33 @@
-import vscode from 'vscode';
-import assert from 'assert';
-import { getDocUri, activate, toRange, sleep } from './helper';
+import vscode from 'vscode'
+import assert from 'assert'
+import { getDocUri, activate, toRange, sleep } from './helper'
 import fs from 'fs'
 
 suite('Should auto-format', () => {
-    const docUri = getDocUri('autoFormat.prisma')
+  const docUri = getDocUri('autoFormat.prisma')
 
-    const docUriExpected = getDocUri('correct.prisma')
-    const textDocument = fs.readFileSync(docUriExpected.fsPath, 'utf8')
+  const docUriExpected = getDocUri('correct.prisma')
+  const textDocument = fs.readFileSync(docUriExpected.fsPath, 'utf8')
 
-    test('Diagnoses auto-format', async () => {
-        await testAutoFormat(docUri, textDocument)
-    });
-});
+  test('Diagnoses auto-format', async () => {
+    await testAutoFormat(docUri, textDocument)
+  })
+})
 
 async function testAutoFormat(docUri: vscode.Uri, expectedFormatted: string) {
-    await activate(docUri)
+  await activate(docUri)
 
-    const actualFormatted = (await vscode.commands.executeCommand(
-        'vscode.executeFormatDocumentProvider',
-        docUri,
-        <vscode.FormattingOptions> {insertSpaces: true, tabSize: 2 }
-    )) as vscode.TextEdit[]
+  const actualFormatted = (await vscode.commands.executeCommand(
+    'vscode.executeFormatDocumentProvider',
+    docUri,
+    <vscode.FormattingOptions>{ insertSpaces: true, tabSize: 2 },
+  )) as vscode.TextEdit[]
 
-    const workEdits = new vscode.WorkspaceEdit()
-    workEdits.set(docUri, actualFormatted)
-    await vscode.workspace.applyEdit(workEdits)
-    const document = await vscode.workspace.openTextDocument(docUri)
-    const actualResult = document.getText()
+  const workEdits = new vscode.WorkspaceEdit()
+  workEdits.set(docUri, actualFormatted)
+  await vscode.workspace.applyEdit(workEdits)
+  const document = await vscode.workspace.openTextDocument(docUri)
+  const actualResult = document.getText()
 
-    assert.equal(actualResult, expectedFormatted)
+  assert.equal(actualResult, expectedFormatted)
 }

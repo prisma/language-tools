@@ -32,7 +32,7 @@ export async function activate(context: ExtensionContext) {
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
     // Register the server for plain text documents
-    documentSelector: [{ scheme: 'file', language: 'prisma' }]
+    documentSelector: [{ scheme: 'file', language: 'prisma' }],
   }
 
   // Create the language client and start the client.
