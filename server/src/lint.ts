@@ -9,12 +9,17 @@ export interface LinterError {
 export default async function lint(
   execPath: string,
   text: string,
+  onError?: (errorMessage: string) => void,
 ): Promise<LinterError[]> {
   try {
     const result = await exec(execPath, ['lint', '--no-env-errors'], text)
     return JSON.parse(result)
   } catch (errors) {
-    console.error("prisma-fmt error'd during linting.")
+    const errorMessage = "prisma-fmt error'd during linting.\n"
+    if (onError) {
+      onError(errorMessage + errors)
+    }
+    console.error(errorMessage)
     console.error(errors)
     return []
   }
