@@ -48,7 +48,7 @@ elif [ "$PRODUCTION" = "1" ] && [ "$CHANNEL" = "latest" ]; then
     git pull github "${GITHUB_REF}" --ff-only
 
     # In the stable channel, we just need to commit the prisma_version_stable file
-    # To be able to track the Prisma version against which the current stable channel extension was published
+    # to be able to track the Prisma version against which the current stable channel extension was published
     git reset origin/master
     git add ./scripts/prisma_version_stable
     git commit -m "bump prisma_version to $NPM_VERSION"
