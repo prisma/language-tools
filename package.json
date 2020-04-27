@@ -73,7 +73,7 @@
     "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "sh ./scripts/e2e.sh",
     "format": "prettier --write .",
-    "lint": "eslint . --fix --ext .js,.ts ."
+    "lint": "eslint  --fix --ext .js,.ts ."
   },
   "activationEvents": [
     "onLanguage:prisma"
@@ -99,12 +99,12 @@
     }
   },
   "lint-staged": {
-    "*.{js,ts,css,json,md}": [
+    "*/**/*.{js,ts,css,json,md}": [
       "prettier --write .",
       "git add"
     ],
-    "*.{js,ts}": [
-      "eslint . --fix --ext .js,.ts ."
+    "*/**/*.{js,ts}": [
+      "eslint --fix --ext .js,.ts ."
     ]
   }
 }

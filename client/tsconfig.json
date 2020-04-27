@@ -6,7 +6,12 @@
     "rootDir": "src",
     "sourceMap": true,
     "esModuleInterop": true,
-    "strict": true
+    "strict": true,
+    "resolveJsonModule": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "node_modules",
+    ".vscode-test"
+  ]
 }

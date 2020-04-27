@@ -1,6 +1,23 @@
 import vscode from 'vscode'
 import assert from 'assert'
-import { getDocUri, activate, toRange, sleep } from './helper'
+import { getDocUri, activate, toRange } from './helper'
+
+async function testJumpToDefinition(
+  docUri: vscode.Uri,
+  position: vscode.Position,
+  expectedLocation: vscode.Location,
+): Promise<void> {
+  await activate(docUri)
+
+  const actualLocation: vscode.Location[] = (await vscode.commands.executeCommand(
+    'vscode.executeDefinitionProvider',
+    docUri,
+    position,
+  )) as vscode.Location[]
+
+  assert.ok(actualLocation.length === 1)
+  assert.deepEqual(actualLocation[0].range, expectedLocation.range)
+}
 
 suite('Should jump-to-definition', () => {
   const docUri = getDocUri('correct.prisma')
@@ -18,20 +35,3 @@ suite('Should jump-to-definition', () => {
     )
   })
 })
-
-async function testJumpToDefinition(
-  docUri: vscode.Uri,
-  position: vscode.Position,
-  expectedLocation: vscode.Location,
-) {
-  await activate(docUri)
-
-  const actualLocation: vscode.Location[] = (await vscode.commands.executeCommand(
-    'vscode.executeDefinitionProvider',
-    docUri,
-    position,
-  )) as vscode.Location[]
-
-  assert.ok(actualLocation.length === 1)
-  assert.deepEqual(actualLocation[0].range, expectedLocation.range)
-}

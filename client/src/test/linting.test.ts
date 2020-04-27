@@ -2,6 +2,24 @@ import * as vscode from 'vscode'
 import * as assert from 'assert'
 import { getDocUri, activate, toRange } from './helper'
 
+async function testDiagnostics(
+  docUri: vscode.Uri,
+  expectedDiagnostics: vscode.Diagnostic[],
+): Promise<void> {
+  await activate(docUri)
+
+  const actualDiagnostics = vscode.languages.getDiagnostics(docUri)
+
+  assert.equal(actualDiagnostics.length, expectedDiagnostics.length)
+
+  expectedDiagnostics.forEach((expectedDiagnostic, i) => {
+    const actualDiagnostic = actualDiagnostics[i]
+    assert.equal(actualDiagnostic.message, expectedDiagnostic.message)
+    assert.deepEqual(actualDiagnostic.range, expectedDiagnostic.range)
+    assert.equal(actualDiagnostic.severity, expectedDiagnostic.severity)
+  })
+}
+
 suite('Should get linting', () => {
   const docUri = getDocUri('linting.MissingArgument.prisma')
   const docUri2 = getDocUri('linting.WrongType.prisma')
@@ -40,21 +58,3 @@ suite('Should get linting', () => {
     ])
   })
 })
-
-async function testDiagnostics(
-  docUri: vscode.Uri,
-  expectedDiagnostics: vscode.Diagnostic[],
-) {
-  await activate(docUri)
-
-  const actualDiagnostics = vscode.languages.getDiagnostics(docUri)
-
-  assert.equal(actualDiagnostics.length, expectedDiagnostics.length)
-
-  expectedDiagnostics.forEach((expectedDiagnostic, i) => {
-    const actualDiagnostic = actualDiagnostics[i]
-    assert.equal(actualDiagnostic.message, expectedDiagnostic.message)
-    assert.deepEqual(actualDiagnostic.range, expectedDiagnostic.range)
-    assert.equal(actualDiagnostic.severity, expectedDiagnostic.severity)
-  })
-}

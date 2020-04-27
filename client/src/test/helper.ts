@@ -6,13 +6,16 @@ export let editor: vscode.TextEditor
 export let documentEol: string
 export let platformEol: string
 
+export async function sleep(ms: number): Promise<NodeJS.Timeout> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 /**
  * Activates the vscode.prisma-vscode extension
  */
-export async function activate(docUri: vscode.Uri) {
+export async function activate(docUri: vscode.Uri): Promise<void> {
   // The extensionId is `publisher.name` from package.json
-  const pj = require('../../../package.json')
-  const ext = vscode.extensions.getExtension(pj.publisher + '.' + pj.name)!
+  const ext = vscode.extensions.getExtension('Prisma.prisma-vsocde')!
   await ext.activate()
   try {
     doc = await vscode.workspace.openTextDocument(docUri)
@@ -28,20 +31,16 @@ export function toRange(
   sChar: number,
   eLine: number,
   eChar: number,
-) {
+): vscode.Range {
   const start = new vscode.Position(sLine, sChar)
   const end = new vscode.Position(eLine, eChar)
   return new vscode.Range(start, end)
 }
 
-export async function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-export const getDocPath = (p: string) => {
+export const getDocPath = (p: string): string => {
   return path.resolve(__dirname, '../../testFixture', p)
 }
-export const getDocUri = (p: string) => {
+export const getDocUri = (p: string): vscode.Uri => {
   return vscode.Uri.file(getDocPath(p))
 }
 
