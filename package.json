@@ -73,7 +73,7 @@
     "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "sh ./scripts/e2e.sh",
     "format": "prettier --write .",
-    "lint": "eslint server --fix --ext .js,.ts ."
+    "lint": "eslint . --fix --ext .js,.ts ."
   },
   "activationEvents": [
     "onLanguage:prisma"
