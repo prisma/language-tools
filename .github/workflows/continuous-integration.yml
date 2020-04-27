@@ -3,7 +3,8 @@ name: CI tests
 on: [push, pull_request]
 
 jobs:
-  build:
+  integration-tests:
+    name: Integration Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
