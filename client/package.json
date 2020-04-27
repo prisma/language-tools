@@ -42,7 +42,7 @@
       "git add"
     ],
     "../**/*.{js,ts}": [
-      "eslint"
+      "eslint --fix --ext .js,.ts ."
     ]
   }
 }
