@@ -86,13 +86,23 @@ connection.onInitialize(async (params: InitializeParams) => {
 })
 
 connection.onDocumentFormatting((params) =>
-  MessageHandler.handleDocumentFormatting(params, documents),
+  MessageHandler.handleDocumentFormatting(
+    params,
+    documents,
+    (errorMessage: string) => {
+      connection.window.showErrorMessage(errorMessage)
+    },
+  ),
 )
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   const text = textDocument.getText(fullDocumentRange(textDocument))
   const binPath = await util.getBinPath()
-  const res = await lint(binPath, text)
+
+  const res = await lint(binPath, text, (errorMessage: string) => {
+    connection.window.showErrorMessage(errorMessage)
+  })
+
   const diagnostics: Diagnostic[] = []
 
   for (const error of res) {
