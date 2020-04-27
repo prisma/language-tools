@@ -20,6 +20,32 @@
     "@prisma/sdk": "2.0.0-beta.2",
     "pkg-dir": "4.2.0",
     "vscode-languageserver": "6.1.1",
-    "vscode-languageserver-textdocument": "1.0.1"
+    "vscode-languageserver-textdocument": "1.0.1",
+    "prettier": "2.0.5",
+    "husky": "4.2.3",
+    "lint-staged": "10.1.2",
+    "eslint": "6.8.0",
+    "eslint-config-prettier": "6.10.1",
+    "eslint-plugin-prettier": "3.1.2",
+    "@typescript-eslint/eslint-plugin": "2.27.0",
+    "@typescript-eslint/parser": "2.27.0"
+  },
+  "scripts": {
+    "format": "prettier --write .",
+    "lint": "eslint  --fix --ext .js,.ts ."
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,ts,css,json,md}": [
+      "prettier --write",
+      "git add"
+    ],
+    "*.{js,ts}": [
+      "eslint"
+    ]
   }
 }
