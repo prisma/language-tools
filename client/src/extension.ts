@@ -4,12 +4,12 @@ import {
   ServerOptions,
   TransportKind,
 } from 'vscode-languageclient'
-import { ExtensionContext, workspace } from 'vscode'
+import { ExtensionContext } from 'vscode'
 import path from 'path'
 
 let client: LanguageClient
 
-export async function activate(context: ExtensionContext) {
+export function activate(context: ExtensionContext): void {
   // The server is implemented in node
   const serverModule = context.asAbsolutePath(
     path.join('server', 'out', 'server.js'),
@@ -32,7 +32,7 @@ export async function activate(context: ExtensionContext) {
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
     // Register the server for plain text documents
-    documentSelector: [{ scheme: 'file', language: 'prisma' }]
+    documentSelector: [{ scheme: 'file', language: 'prisma' }],
   }
 
   // Create the language client and start the client.

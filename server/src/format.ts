@@ -1,16 +1,20 @@
 import exec from './exec'
 
 export default async function format(
-  exec_path: string,
-  ident_width: number,
+  execPath: string,
+  identWidth: number,
   text: string,
+  onError?: (errorMessage: string) => void,
 ): Promise<string> {
   try {
-    return await exec(exec_path, ['format', '-s', ident_width.toString()], text)
+    return await exec(execPath, ['format', '-s', identWidth.toString()], text)
   } catch (errors) {
-    console.warn(
-      "prisma-fmt error'd during formatting. This was likely due to a syntax error. Please see linter output.",
-    )
+    const errorMessage =
+      "prisma-fmt error'd during formatting. This was likely due to a syntax error. Please see linter output."
+    if (onError) {
+      onError(errorMessage)
+    }
+    console.warn(errorMessage)
     return text
   }
 }
