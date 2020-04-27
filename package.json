@@ -1,6 +1,6 @@
 {
-  "name": "prisma-vscode",
-  "displayName": "Prisma VS Code extension",
+  "name": "prisma",
+  "displayName": "Prisma",
   "description": "Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.",
   "version": "0.0.32",
   "license": "Apache-2.0",
