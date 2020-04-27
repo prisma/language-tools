@@ -1,11 +1,11 @@
 import { spawn } from 'child_process'
 
 export default function exec(
-  exec_path: string,
+  execPath: string,
   args: string[],
   input: string,
 ): Promise<string> {
-  const fmt = spawn(exec_path, args)
+  const fmt = spawn(execPath, args)
 
   const chunks: string[] = []
 
@@ -13,10 +13,10 @@ export default function exec(
     chunks.push(data.toString())
   })
 
-  const err_chunks: string[] = []
+  const errChunks: string[] = []
 
   fmt.stderr.on('data', (data) => {
-    err_chunks.push(data.toString())
+    errChunks.push(data.toString())
   })
 
   fmt.stdin.setDefaultEncoding('utf-8')
@@ -25,10 +25,10 @@ export default function exec(
 
   return new Promise((resolve, reject) => {
     fmt.on('exit', (code) => {
-      if (code === 0 && err_chunks.length === 0) {
+      if (code === 0 && errChunks.length === 0) {
         resolve(chunks.join(''))
       } else {
-        reject(err_chunks.join(''))
+        reject(errChunks.join(''))
       }
     })
   })
