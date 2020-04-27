@@ -1,5 +1,4 @@
 import {
-  CancellationToken,
   TextDocuments,
   DocumentFormattingParams,
   TextEdit,
@@ -30,7 +29,6 @@ function getWordAtPosition(document: TextDocument, position: Position): string {
 export async function handleDefinitionRequest(
   documents: TextDocuments<TextDocument>,
   params: DeclarationParams,
-  _token?: CancellationToken,
 ): Promise<Location> {
   // TODO: Replace bad workaround as soon as ASTNode is available
 
