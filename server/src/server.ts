@@ -79,6 +79,9 @@ connection.onInitialize(async (params: InitializeParams) => {
     capabilities: {
       definitionProvider: true,
       documentFormattingProvider: true,
+      completionProvider: {
+        resolveProvider: true,
+      },
     },
   }
 
@@ -135,6 +138,14 @@ documents.onDidOpen((open) => {
 
 connection.onDefinition((params) =>
   MessageHandler.handleDefinitionRequest(documents, params),
+)
+
+connection.onCompletion((params) =>
+  MessageHandler.handleCompletionRequest(params, documents),
+)
+
+connection.onCompletionResolve((params) =>
+  MessageHandler.handleCompletionResolveRequest(params),
 )
 
 // Make the text document manager listen on the connection

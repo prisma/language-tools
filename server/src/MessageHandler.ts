@@ -5,6 +5,10 @@ import {
   Range,
   Location,
   DeclarationParams,
+  CompletionParams,
+  CompletionList,
+  CompletionItem,
+  CompletionItemKind,
 } from 'vscode-languageserver'
 import * as util from './util'
 import { fullDocumentRange } from './provider'
@@ -48,7 +52,7 @@ export async function handleDefinitionRequest(
     return new Promise((resolve) => resolve())
   }
 
-  // parse schem file to datamodel meta format (DMMF)
+  // parse schema file to datamodel meta format (DMMF)
   const dmmf = await getDMMF({ datamodel: documentText })
 
   const modelName = dmmf.datamodel.models
@@ -106,4 +110,66 @@ export async function handleDocumentFormatting(
   ).then((formatted) => [
     TextEdit.replace(fullDocumentRange(document), formatted),
   ])
+}
+
+/**
+ *
+ * This handler provides the initial list of the completion items.
+ */
+export async function handleCompletionRequest(
+  params: CompletionParams,
+  documents: TextDocuments<TextDocument>,
+): Promise<CompletionList | undefined> {
+  const context = params.context
+  if (context == null) {
+    return undefined
+  }
+
+  const document = documents.get(params.textDocument.uri)
+
+  if (!document) {
+    return undefined
+  }
+
+  const documentText = document.getText()
+
+  // parse schema file to datamodel meta format (DMMF)
+  const dmmf = await getDMMF({ datamodel: documentText })
+
+  return {
+    isIncomplete: true,
+    items: [
+      {
+        label: '@default(_ expr: Expr)',
+        kind: CompletionItemKind.Text,
+        data: 1,
+      },
+      {
+        label: '@id',
+        kind: CompletionItemKind.Text,
+        data: 2,
+      },
+      {
+        label: 'String',
+        kind: CompletionItemKind.Field,
+        data: 3,
+      },
+    ],
+  }
+}
+
+/**
+ *
+ * @param item This handler resolves additional information for the item selected in the completion list.
+ */
+export function handleCompletionResolveRequest(
+  item: CompletionItem,
+): CompletionItem {
+  if (item.data == 1) {
+    item.documentation = 'Specifies a default value if null is provided'
+  } else if (item.data == 2) {
+    item.documentation =
+      'The @id attribute marks the primary identifier of a model.'
+  }
+  return item
 }
