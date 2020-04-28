@@ -15,12 +15,20 @@ import { fullDocumentRange } from './provider'
 import { getDMMF } from '@prisma/sdk'
 import { TextDocument, Position } from 'vscode-languageserver-textdocument'
 import format from './format'
+import {
+  getSuggestionsForAttributes,
+  getSuggestionsForTypes,
+} from './completions'
 
 function getWordAtPosition(document: TextDocument, position: Position): string {
   const currentLine = document.getText({
     start: { line: position.line, character: 0 },
     end: { line: position.line, character: 9999 },
   })
+
+  if (currentLine.slice(0, position.character).endsWith('@@')) {
+    return '@@'
+  }
   // search for the word's beginning and end
   const beginning = currentLine.slice(0, position.character + 1).search(/\S+$/)
   const end = currentLine.slice(position.character).search(/\W/)
@@ -116,10 +124,10 @@ export async function handleDocumentFormatting(
  *
  * This handler provides the initial list of the completion items.
  */
-export async function handleCompletionRequest(
+export function handleCompletionRequest(
   params: CompletionParams,
   documents: TextDocuments<TextDocument>,
-): Promise<CompletionList | undefined> {
+): CompletionList | undefined {
   const context = params.context
   if (context == null) {
     return undefined
@@ -132,30 +140,23 @@ export async function handleCompletionRequest(
   }
 
   const documentText = document.getText()
+  const token = getWordAtPosition(document, params.position)
 
-  // parse schema file to datamodel meta format (DMMF)
-  const dmmf = await getDMMF({ datamodel: documentText })
-
-  return {
-    isIncomplete: true,
-    items: [
-      {
-        label: '@default(_ expr: Expr)',
-        kind: CompletionItemKind.Text,
-        data: 1,
-      },
-      {
-        label: '@id',
-        kind: CompletionItemKind.Text,
-        data: 2,
-      },
-      {
-        label: 'String',
-        kind: CompletionItemKind.Field,
-        data: 3,
-      },
-    ],
+  // Completion was triggered by a triggerCharacter
+  if (context.triggerKind === 2) {
+    switch (context.triggerCharacter) {
+      // get suggestions for directives
+      case '@':
+        return getSuggestionsForAttributes(token)
+    }
   }
+
+  // TODO check if in model block
+  const completionList = getSuggestionsForTypes()
+
+  // TODO get position in AST Node to know what the context is here (e.g. type, model, field or directive position)
+
+  return completionList
 }
 
 /**
@@ -165,11 +166,5 @@ export async function handleCompletionRequest(
 export function handleCompletionResolveRequest(
   item: CompletionItem,
 ): CompletionItem {
-  if (item.data == 1) {
-    item.documentation = 'Specifies a default value if null is provided'
-  } else if (item.data == 2) {
-    item.documentation =
-      'The @id attribute marks the primary identifier of a model.'
-  }
   return item
 }

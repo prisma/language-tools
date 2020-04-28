@@ -81,6 +81,7 @@ connection.onInitialize(async (params: InitializeParams) => {
       documentFormattingProvider: true,
       completionProvider: {
         resolveProvider: true,
+        triggerCharacters: ['@'],
       },
     },
   }
