@@ -80,3 +80,4 @@ To do a manual publish, please follow these steps:
 6. Drag `prisma-x.x.x.vsix` into the browser and click upload.
 
 This will take about an hour before the update is available.
+

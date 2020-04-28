@@ -14,11 +14,18 @@ fi
 CHANNEL=$1
 echo "CHANNEL: $CHANNEL"
 
-CURRENT_VERSION=$(sh scripts/extension-version.sh "$CHANNEL")
+if [ "$CHANNEL" = "dev" ]; then
+    CURRENT_VERSION=$(cat scripts/prisma_version_unstable)
+else
+    CURRENT_VERSION=$(cat scripts/prisma_version_stable)
+fi
 echo "CURRENT_VERSION: $CURRENT_VERSION"
 
 NPM_VERSION=$(sh scripts/prisma-version.sh "$CHANNEL")
 echo "NPM_VERSION: $NPM_VERSION"
+
+NEXT_EXTENSION_VERSION=$(sh scripts/extension-version.sh "$CHANNEL" "patch")
+echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
 
 # Setup the repo with GH_TOKEN to avoid running jobs when CI commits
 if [ "$PRODUCTION" = "1" ]; then
@@ -31,14 +38,14 @@ fi
 
 if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then
     echo "UPDATING to $NPM_VERSION"
-    sh ./scripts/bump.sh "$CHANNEL" "$NPM_VERSION"
+    sh ./scripts/bump.sh "$CHANNEL" "$NPM_VERSION" "$NEXT_EXTENSION_VERSION"
     if [ "$PRODUCTION" = "1" ]; then
         git add -A .
         git commit -m "bump prisma_version to $NPM_VERSION"
     else
         echo "Not committing because production is not set"
     fi
-    yarn run vsce:publish "$CHANNEL" "$NPM_VERSION"
+    yarn run vsce:publish "$CHANNEL" "$NPM_VERSION" "$NEXT_EXTENSION_VERSION"
 else
     echo "CURRENT_VERSION ($CURRENT_VERSION) and NPM_VERSION ($NPM_VERSION) are same"
 fi
