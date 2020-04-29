@@ -14,8 +14,6 @@ import * as util from './util'
 import lint from './lint'
 import fs from 'fs'
 import install from './install'
-import path from 'path'
-import { download } from '@prisma/fetch-engine'
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -45,22 +43,6 @@ connection.onInitialize(async (params: InitializeParams) => {
     capabilities.textDocument.publishDiagnostics &&
     capabilities.textDocument.publishDiagnostics.relatedInformation
   )
-
-  const sdkQueryEnginePath = await util.getSdkQueryEnginePath()
-  if (!fs.existsSync(sdkQueryEnginePath)) {
-    try {
-      const sdkDir = path.dirname(require.resolve('@prisma/sdk/package.json'))
-      await download({
-        binaries: {
-          'query-engine': sdkDir,
-        },
-        failSilent: false,
-      })
-    } catch (err) {
-      // No error on install error.
-      connection.console.error('Cannot install prisma query-engine: ' + err)
-    }
-  }
 
   const binPathPrismaFmt = await util.getBinPath()
   if (!fs.existsSync(binPathPrismaFmt)) {

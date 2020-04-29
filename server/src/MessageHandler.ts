@@ -12,13 +12,13 @@ import {
 } from 'vscode-languageserver'
 import * as util from './util'
 import { fullDocumentRange } from './provider'
-import { getDMMF } from '@prisma/sdk'
 import { TextDocument, Position } from 'vscode-languageserver-textdocument'
 import format from './format'
 import {
   getSuggestionsForAttributes,
   getSuggestionsForTypes,
 } from './completions'
+import { parse, print } from 'prismafile'
 
 function getWordAtPosition(document: TextDocument, position: Position): string {
   const currentLine = document.getText({
@@ -38,12 +38,13 @@ function getWordAtPosition(document: TextDocument, position: Position): string {
   return currentLine.slice(beginning, end + position.character)
 }
 
+/**
+ * @todo Use official schema.prisma parser. This is a workaround!
+ */
 export async function handleDefinitionRequest(
   documents: TextDocuments<TextDocument>,
   params: DeclarationParams,
 ): Promise<Location> {
-  // TODO: Replace bad workaround as soon as ASTNode is available
-
   const textDocument = params.textDocument
   const position = params.position
 
@@ -60,34 +61,23 @@ export async function handleDefinitionRequest(
     return new Promise((resolve) => resolve())
   }
 
-  // parse schema file to datamodel meta format (DMMF)
-  const dmmf = await getDMMF({ datamodel: documentText })
+  // parse schema file to AST node
+  const ast = parse(documentText)
 
-  const modelName = dmmf.datamodel.models
-    .map((model) => model.name)
-    ?.find((name) => name === word)
+  const found = ast.blocks.find((b) => b.type === 'model' && b.name === word)
 
   // selected word is not a model type
-
-  if (!modelName) {
+  if (!found) {
     return new Promise((resolve) => resolve())
   }
 
-  const modelDefinition = 'model '
-  // get start position of model type
-  const index = documentText.indexOf(modelDefinition + modelName)
-  const buf = documentText.slice(0, index)
-  const EOL = '\n'
-  const lines = buf.split(EOL).length - 1
-  const lastLineIndex = buf.lastIndexOf(EOL)
   const startPosition = {
-    line: lines,
-    character: index + modelDefinition.length - lastLineIndex - 1,
+    line: found.start.line - 1,
+    character: found.start.column - 1,
   }
   const endPosition = {
-    line: lines,
-    character:
-      index + modelDefinition.length - lastLineIndex - 1 + modelName.length,
+    line: found.end.line,
+    character: found.end.column,
   }
 
   return {
