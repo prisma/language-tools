@@ -8,7 +8,6 @@ import {
   CompletionParams,
   CompletionList,
   CompletionItem,
-  CompletionItemKind,
 } from 'vscode-languageserver'
 import * as util from './util'
 import { fullDocumentRange } from './provider'
@@ -18,7 +17,7 @@ import {
   getSuggestionsForAttributes,
   getSuggestionsForTypes,
 } from './completions'
-import { parse, print } from 'prismafile'
+import { Schema } from 'prismafile/dist/ast'
 
 function getWordAtPosition(document: TextDocument, position: Position): string {
   const currentLine = document.getText({
@@ -39,6 +38,80 @@ function getWordAtPosition(document: TextDocument, position: Position): string {
 }
 
 /**
+ * 
+ * @todo what happens with @default(autoincrement()) when at position inside autoincrement()?
+ */
+function getWordAtPositionTest(ast: Schema, position: Position) {
+  const foundBlock = ast.blocks.find(node =>
+    node.start.line - 1 <= position.line
+    && node.end.line - 1 >= position.line
+  )
+  if (!foundBlock) {
+    return ''
+  }
+
+  // this only works on formatted files!
+  if (foundBlock.start.line - 1 === position.line) {
+    // do something here 
+    if (foundBlock.type.length >= position.character) {
+      return foundBlock.type
+    }
+    if (position.character <= foundBlock.type.length + 1 + foundBlock.name.length) {
+      return foundBlock.name
+    }
+    return ''
+  }
+
+  switch (foundBlock.type) {
+    case "datasource":
+    case "generator":
+      let foundAssignment = foundBlock.assignments.find(node =>
+        node.start.line - 1 <= position.line
+        && node.end.line - 1 >= position.line
+        && node.start.column - 1 <= position.character
+        && node.end.column - 1 >= position.character)
+      if (!foundAssignment) {
+        break
+      }
+      if (position.character <= foundAssignment.start.column - 1 + foundAssignment.key.length) {
+        return foundAssignment.key
+      }
+      if (position.character >= foundAssignment.value.start.column - 1) {
+        return foundAssignment.value
+      }
+      break
+    case "model":
+      let foundProperty = foundBlock.properties.find(node =>
+        node.start.line - 1 <= position.line
+        && node.end.line - 1 >= position.line
+        && node.start.column - 1 <= position.character
+        && node.end.column - 1 >= position.character)
+      if(!foundProperty) {
+        break;
+      }
+      if(position.character <= foundProperty.start.column - 1 + foundProperty.name.length) {
+        return foundProperty.name
+      }
+      // TODO get datatype, attributes, e.g. @id, Int
+      break
+    case "enum":
+      let foundAttribute = foundBlock.attributes.find(node =>
+        node.start.line - 1 <= position.line
+        && node.end.line - 1 >= position.line)
+      let foundEnumerator = foundBlock.enumerators.find(node =>
+        node.start.line - 1 <= position.line
+        && node.end.line - 1 >= position.line)
+      break
+    case "type_alias":
+      let foundAlias = foundBlock.attributes.find(node =>
+        node.start.line - 1 <= position.line
+        && node.end.line - 1 >= position.line)
+      break
+  }
+  return ''
+}
+
+/**
  * @todo Use official schema.prisma parser. This is a workaround!
  */
 export async function handleDefinitionRequest(
@@ -55,14 +128,15 @@ export async function handleDefinitionRequest(
   }
 
   const documentText = document.getText()
+  // parse schema file to AST node
+  const ast = parse(documentText)
 
   const word = getWordAtPosition(document, position)
+  const testWord = getWordAtPositionTest(ast, position)
+
   if (word === '') {
     return new Promise((resolve) => resolve())
   }
-
-  // parse schema file to AST node
-  const ast = parse(documentText)
 
   const found = ast.blocks.find((b) => b.type === 'model' && b.name === word)
 
