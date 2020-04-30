@@ -153,3 +153,20 @@ export function getSuggestionForBlockTypes(ast: Schema): CompletionList {
     isIncomplete: true,
   }
 }
+
+/**
+ * @todo check if position is inside relation not e.g. in List Type
+ * @todo exclude field of current line 
+ */
+export function getSuggestionsForRelation(block: Block, currentLine: string): CompletionList | undefined {
+  if (block.type != 'model' || !currentLine.includes('@relation(')) {
+    return undefined
+  }
+  const suggestions = block.properties.map(prop => prop.name)
+
+  return {
+    items: toCompletionItems(suggestions, CompletionItemKind.Field),
+    isIncomplete: true
+  }
+}
+

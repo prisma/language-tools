@@ -18,29 +18,33 @@ import {
   getSuggestionsForTypes,
   getSuggestionForBlockTypes,
   getSuggestionForField,
+  getSuggestionsForRelation
 } from './completions'
 import { Schema, Block } from 'prismafile/dist/ast'
+
+
+function getCurrentLine(document: TextDocument, line: number): string {
+  return document.getText({
+    start: { line: line, character: 0 },
+    end: { line: line, character: 9999 },
+  })
+}
 
 function isFieldName(
   position: Position,
   token: string,
   document: TextDocument,
 ): boolean {
-  const currentLine = document.getText({
-    start: { line: position.line, character: 0 },
-    end: { line: position.line, character: 9999 },
-  })
+  const currentLine = getCurrentLine(document, position.line)
   if(token === '') {
     return currentLine.trim().length === 0
   }
   return currentLine.trim().startsWith(token)
 }
 
+
 function getWordAtPosition(document: TextDocument, position: Position): string {
-  const currentLine = document.getText({
-    start: { line: position.line, character: 0 },
-    end: { line: position.line, character: 9999 },
-  })
+  const currentLine = getCurrentLine(document, position.line)
 
   if (currentLine.slice(0, position.character).endsWith('@@')) {
     return '@@'
@@ -261,6 +265,8 @@ export function handleCompletionRequest(
     switch (context.triggerCharacter) {
       case '@':
         return getSuggestionsForAttributes(token, foundBlock)
+      case '[':
+        return getSuggestionsForRelation(foundBlock, getCurrentLine(document, params.position.line))
     }
   }
 
@@ -269,7 +275,10 @@ export function handleCompletionRequest(
     return getSuggestionForField(ast, foundBlock)
   }
 
+
   if (foundBlock.type === 'model') {
+    // check if inside directive
+
     return getSuggestionsForTypes(ast, foundBlock)
   }
 }
