@@ -212,20 +212,19 @@ export function handleCompletionRequest(
   if (!document) {
     return undefined
   }
+
   const foundBlock = getBlockAtPosition(ast, params.position)
   if(!foundBlock) {
     return getSuggestionForBlockTypes(ast)
   }
 
-  const documentText = document.getText()
   const token = getWordAtPosition(document, params.position)
  
   // Completion was triggered by a triggerCharacter
   if (context.triggerKind === 2) {
     switch (context.triggerCharacter) {
-      // get suggestions for directives
       case '@':
-        return getSuggestionsForAttributes(token)
+        return getSuggestionsForAttributes(token, foundBlock)
     }
   }
 

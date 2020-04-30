@@ -7,9 +7,12 @@ import {
 import { Schema, DataSource, Block } from 'prismafile/dist/ast'
 
 /**
- * @todo check if in 'model' or 'embed' blocks
+ * @todo check if in 'embed' blocks
  */
-function getSuggestionForBlockAttribute(): Array<string> {
+function getSuggestionForBlockAttribute(block: Block): Array<string> {
+  if(block.type != 'model') {
+    return []
+  }
   return [
     'map(_ name: String)',
     'id(_ fields: Identifier[])',
@@ -20,9 +23,12 @@ function getSuggestionForBlockAttribute(): Array<string> {
 
 /**
  *
- * @todo check if in 'model', 'embed' blocks or in 'type' definition
+ * @todo check if in 'embed' block
  */
-function getSuggestionForFieldAttribute(): Array<string> {
+function getSuggestionForFieldAttribute(block: Block): Array<string> {
+  if (block.type != 'model' && block.type != 'type_alias') {
+    return []
+  }
   return [
     'id',
     'unique',
@@ -32,10 +38,10 @@ function getSuggestionForFieldAttribute(): Array<string> {
   ]
 }
 
-export function getSuggestionsForAttributes(token: string): CompletionList {
+export function getSuggestionsForAttributes(token: string, block: Block): CompletionList {
   const labels = token.startsWith('@@')
-    ? getSuggestionForBlockAttribute()
-    : getSuggestionForFieldAttribute()
+    ? getSuggestionForBlockAttribute(block)
+    : getSuggestionForFieldAttribute(block)
   const items: CompletionItem[] = []
   labels.forEach((l) =>
     items.push({ label: l, kind: CompletionItemKind.Property }),
