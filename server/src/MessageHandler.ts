@@ -30,7 +30,10 @@ function isFieldName(
     start: { line: position.line, character: 0 },
     end: { line: position.line, character: 9999 },
   })
-  return currentLine.startsWith(token)
+  if(token === '') {
+    return currentLine.trim().length === 0
+  }
+  return currentLine.trim().startsWith(token)
 }
 
 function getWordAtPosition(document: TextDocument, position: Position): string {
