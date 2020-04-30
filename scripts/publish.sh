@@ -55,6 +55,7 @@ elif [ "$PRODUCTION" = "1" ] && [ "$CHANNEL" = "latest" ]; then
     git commit -m "bump prisma_version to $PRISMA_VERSION"
     git tag -a "$NEXT_EXTENSION_VERSION" -m "$NEXT_EXTENSION_VERSION" -m "Prisma version: $PRISMA_VERSION"
     git push github HEAD:"${GITHUB_REF}" --follow-tags
+    # TODO: Create a release linked to this tag for stable
 else 
     echo "Not pushing because PRODUCTION is not set"
 fi
