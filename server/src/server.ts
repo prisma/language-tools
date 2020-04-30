@@ -14,6 +14,8 @@ import * as util from './util'
 import lint from './lint'
 import fs from 'fs'
 import install from './install'
+import {parse} from 'prismafile'
+import { Schema } from 'prismafile/dist/ast'
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -26,6 +28,8 @@ const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 let hasConfigurationCapability = false
 let hasWorkspaceFolderCapability = false
 let hasDiagnosticRelatedInformationCapability = false
+
+let ast : Schema
 
 connection.onInitialize(async (params: InitializeParams) => {
   const capabilities = params.capabilities
@@ -109,7 +113,12 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
     diagnostics.push(diagnostic)
   }
   connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
+
+  if(diagnostics.length === 0) {
+    ast = parse(text)
+  }
 }
+
 
 documents.onDidChangeContent((change) => {
   validateTextDocument(change.document)
@@ -120,15 +129,15 @@ documents.onDidOpen((open) => {
 })
 
 connection.onDefinition((params) =>
-  MessageHandler.handleDefinitionRequest(documents, params),
+  MessageHandler.handleDefinitionRequest(documents, params, ast),
 )
 
 connection.onCompletion((params) =>
-  MessageHandler.handleCompletionRequest(params, documents),
+  MessageHandler.handleCompletionRequest(params, documents, ast),
 )
 
 connection.onCompletionResolve((params) =>
-  MessageHandler.handleCompletionResolveRequest(params),
+  MessageHandler.handleCompletionResolveRequest(params, ast),
 )
 
 // Make the text document manager listen on the connection

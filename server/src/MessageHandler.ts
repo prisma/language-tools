@@ -16,8 +16,10 @@ import format from './format'
 import {
   getSuggestionsForAttributes,
   getSuggestionsForTypes,
+  getSuggestionForBlockTypes
 } from './completions'
-import { Schema } from 'prismafile/dist/ast'
+import { Schema, DataSource, Block } from 'prismafile/dist/ast'
+
 
 function getWordAtPosition(document: TextDocument, position: Position): string {
   const currentLine = document.getText({
@@ -37,22 +39,31 @@ function getWordAtPosition(document: TextDocument, position: Position): string {
   return currentLine.slice(beginning, end + position.character)
 }
 
+
+function getBlockAtPosition(ast: Schema, position: Position): Block | undefined {
+  const foundBlock =  ast.blocks.find(node =>
+    node.start.line - 1 <= position.line
+    && node.end.line - 1 >= position.line
+  )
+  return !foundBlock ? undefined : foundBlock
+}
+
+function isInsideBlock(block: Block, position: Position): Boolean {
+  return position.line != block.start.line - 1
+}
+
 /**
  * 
  * @todo what happens with @default(autoincrement()) when at position inside autoincrement()?
  */
 function getWordAtPositionTest(ast: Schema, position: Position) {
-  const foundBlock = ast.blocks.find(node =>
-    node.start.line - 1 <= position.line
-    && node.end.line - 1 >= position.line
-  )
+  const foundBlock = getBlockAtPosition(ast, position)
   if (!foundBlock) {
     return ''
   }
 
   // this only works on formatted files!
-  if (foundBlock.start.line - 1 === position.line) {
-    // do something here 
+  if (!isInsideBlock(foundBlock, position)) {
     if (foundBlock.type.length >= position.character) {
       return foundBlock.type
     }
@@ -117,6 +128,7 @@ function getWordAtPositionTest(ast: Schema, position: Position) {
 export async function handleDefinitionRequest(
   documents: TextDocuments<TextDocument>,
   params: DeclarationParams,
+  ast: Schema
 ): Promise<Location> {
   const textDocument = params.textDocument
   const position = params.position
@@ -128,8 +140,6 @@ export async function handleDefinitionRequest(
   }
 
   const documentText = document.getText()
-  // parse schema file to AST node
-  const ast = parse(documentText)
 
   const word = getWordAtPosition(document, position)
   const testWord = getWordAtPositionTest(ast, position)
@@ -191,6 +201,7 @@ export async function handleDocumentFormatting(
 export function handleCompletionRequest(
   params: CompletionParams,
   documents: TextDocuments<TextDocument>,
+  ast: Schema
 ): CompletionList | undefined {
   const context = params.context
   if (context == null) {
@@ -198,14 +209,17 @@ export function handleCompletionRequest(
   }
 
   const document = documents.get(params.textDocument.uri)
-
   if (!document) {
     return undefined
+  }
+  const foundBlock = getBlockAtPosition(ast, params.position)
+  if(!foundBlock) {
+    return getSuggestionForBlockTypes(ast)
   }
 
   const documentText = document.getText()
   const token = getWordAtPosition(document, params.position)
-
+ 
   // Completion was triggered by a triggerCharacter
   if (context.triggerKind === 2) {
     switch (context.triggerCharacter) {
@@ -229,6 +243,7 @@ export function handleCompletionRequest(
  */
 export function handleCompletionResolveRequest(
   item: CompletionItem,
+  ast: Schema
 ): CompletionItem {
   return item
 }

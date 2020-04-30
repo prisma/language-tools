@@ -4,6 +4,7 @@ import {
   CompletionList,
   CompletionItemKind,
 } from 'vscode-languageserver'
+import { Schema, DataSource, Block } from 'prismafile/dist/ast'
 
 /**
  * @todo check if in 'model' or 'embed' blocks
@@ -53,6 +54,32 @@ export function getSuggestionsForTypes(): CompletionList {
   const items: CompletionItem[] = []
   coreTypes.forEach((type) =>
     items.push({ label: type, kind: CompletionItemKind.TypeParameter }),
+  )
+  return {
+    items: items,
+    isIncomplete: false,
+  }
+}
+
+/**
+ * 
+ * @todo add enum once supported!
+ */
+export function getSuggestionForBlockTypes(ast: Schema): CompletionList {
+  let allowedBlockTypes = ["datasource", "generator", "model", "type_alias"]
+
+  let existingBlockTypes = ast.blocks
+  .map(block => block.type.toString())
+  .filter(type => type === 'datasource' || type === 'generator')
+
+  existingBlockTypes.forEach(toRemove => {
+    let index = allowedBlockTypes.indexOf(toRemove)
+    allowedBlockTypes.splice(index, 1)
+  })
+
+  const items: CompletionItem[] = []
+  allowedBlockTypes.forEach((type) =>
+    items.push({ label: type, kind: CompletionItemKind.Class }),
   )
   return {
     items: items,
