@@ -228,8 +228,7 @@ export function handleCompletionRequest(
     }
   }
 
-  // TODO check if in model block
-  const completionList = getSuggestionsForTypes()
+  const completionList = getSuggestionsForTypes(ast, foundBlock)
 
   // TODO get position in AST Node to know what the context is here (e.g. type, model, field or directive position)
 

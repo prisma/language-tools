@@ -55,11 +55,18 @@ export function getSuggestionsForAttributes(token: string, block: Block): Comple
 /**
  * @todo get modelNames except the modelName we are currently in
  */
-export function getSuggestionsForTypes(): CompletionList {
+export function getSuggestionsForTypes(ast: Schema, foundBlock: Block): CompletionList {
   const coreTypes = ['String', 'Int', 'Boolean', 'Float', 'DateTime']
+  const relationTypes = ast.blocks
+  .filter( block => block.type === 'model')
+  .map(model => model.name)
+  .filter(modelName => modelName != foundBlock.name)
+
+  let allowedTypes = coreTypes.concat(relationTypes)
+  
   const items: CompletionItem[] = []
-  coreTypes.forEach((type) =>
-    items.push({ label: type, kind: CompletionItemKind.TypeParameter }),
+  allowedTypes.forEach((type) =>
+    items.push({ label: type, kind: CompletionItemKind.TypeParameter}),
   )
   return {
     items: items,
