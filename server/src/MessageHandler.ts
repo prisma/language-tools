@@ -17,10 +17,21 @@ import {
   getSuggestionsForAttributes,
   getSuggestionsForTypes,
   getSuggestionForBlockTypes,
-  getSuggestionForField
+  getSuggestionForField,
 } from './completions'
-import { Schema, DataSource, Block } from 'prismafile/dist/ast'
+import { Schema, Block } from 'prismafile/dist/ast'
 
+function isFieldName(
+  position: Position,
+  token: string,
+  document: TextDocument,
+): boolean {
+  const currentLine = document.getText({
+    start: { line: position.line, character: 0 },
+    end: { line: position.line, character: 9999 },
+  })
+  return currentLine.startsWith(token)
+}
 
 function getWordAtPosition(document: TextDocument, position: Position): string {
   const currentLine = document.getText({
@@ -40,21 +51,24 @@ function getWordAtPosition(document: TextDocument, position: Position): string {
   return currentLine.slice(beginning, end + position.character)
 }
 
-
-function getBlockAtPosition(ast: Schema, position: Position): Block | undefined {
-  const foundBlock = ast.blocks.find(node =>
-    node.start.line - 1 <= position.line
-    && node.end.line - 1 >= position.line
+function getBlockAtPosition(
+  ast: Schema,
+  position: Position,
+): Block | undefined {
+  const foundBlock = ast.blocks.find(
+    (node) =>
+      node.start.line - 1 <= position.line &&
+      node.end.line - 1 >= position.line,
   )
   return !foundBlock ? undefined : foundBlock
 }
 
-function isInsideBlock(block: Block, position: Position): Boolean {
+function isInsideBlock(block: Block, position: Position): boolean {
   return position.line != block.start.line - 1
 }
 
 /**
- * 
+ *
  * @todo what happens with @default(autoincrement()) when at position inside autoincrement()?
  */
 function getWordAtPositionTest(ast: Schema, position: Position) {
@@ -68,56 +82,75 @@ function getWordAtPositionTest(ast: Schema, position: Position) {
     if (foundBlock.type.length >= position.character) {
       return foundBlock.type
     }
-    if (position.character <= foundBlock.type.length + 1 + foundBlock.name.length) {
+    if (
+      position.character <=
+      foundBlock.type.length + 1 + foundBlock.name.length
+    ) {
       return foundBlock.name
     }
     return ''
   }
 
   switch (foundBlock.type) {
-    case "datasource":
-    case "generator":
-      let foundAssignment = foundBlock.assignments.find(node =>
-        node.start.line - 1 <= position.line
-        && node.end.line - 1 >= position.line
-        && node.start.column - 1 <= position.character
-        && node.end.column - 1 >= position.character)
+    case 'datasource':
+    case 'generator':
+      const foundAssignment = foundBlock.assignments.find(
+        (node) =>
+          node.start.line - 1 <= position.line &&
+          node.end.line - 1 >= position.line &&
+          node.start.column - 1 <= position.character &&
+          node.end.column - 1 >= position.character,
+      )
       if (!foundAssignment) {
         break
       }
-      if (position.character <= foundAssignment.start.column - 1 + foundAssignment.key.length) {
+      if (
+        position.character <=
+        foundAssignment.start.column - 1 + foundAssignment.key.length
+      ) {
         return foundAssignment.key
       }
       if (position.character >= foundAssignment.value.start.column - 1) {
         return foundAssignment.value
       }
       break
-    case "model":
-      let foundProperty = foundBlock.properties.find(node =>
-        node.start.line - 1 <= position.line
-        && node.end.line - 1 >= position.line
-        && node.start.column - 1 <= position.character
-        && node.end.column - 1 >= position.character)
+    case 'model':
+      const foundProperty = foundBlock.properties.find(
+        (node) =>
+          node.start.line - 1 <= position.line &&
+          node.end.line - 1 >= position.line &&
+          node.start.column - 1 <= position.character &&
+          node.end.column - 1 >= position.character,
+      )
       if (!foundProperty) {
-        break;
+        break
       }
-      if (position.character <= foundProperty.start.column - 1 + foundProperty.name.length) {
+      if (
+        position.character <=
+        foundProperty.start.column - 1 + foundProperty.name.length
+      ) {
         return foundProperty.name
       }
       // TODO get datatype, attributes, e.g. @id, Int
       break
-    case "enum":
-      let foundAttribute = foundBlock.attributes.find(node =>
-        node.start.line - 1 <= position.line
-        && node.end.line - 1 >= position.line)
-      let foundEnumerator = foundBlock.enumerators.find(node =>
-        node.start.line - 1 <= position.line
-        && node.end.line - 1 >= position.line)
+    case 'enum':
+      const foundAttribute = foundBlock.attributes.find(
+        (node) =>
+          node.start.line - 1 <= position.line &&
+          node.end.line - 1 >= position.line,
+      )
+      const foundEnumerator = foundBlock.enumerators.find(
+        (node) =>
+          node.start.line - 1 <= position.line &&
+          node.end.line - 1 >= position.line,
+      )
       break
-    case "type_alias":
-      let foundAlias = foundBlock.attributes.find(node =>
-        node.start.line - 1 <= position.line
-        && node.end.line - 1 >= position.line)
+    case 'type_alias':
+      const foundAlias = foundBlock.attributes.find(
+        (node) =>
+          node.start.line - 1 <= position.line &&
+          node.end.line - 1 >= position.line,
+      )
       break
   }
   return ''
@@ -129,7 +162,7 @@ function getWordAtPositionTest(ast: Schema, position: Position) {
 export async function handleDefinitionRequest(
   documents: TextDocuments<TextDocument>,
   params: DeclarationParams,
-  ast: Schema
+  ast: Schema,
 ): Promise<Location> {
   const textDocument = params.textDocument
   const position = params.position
@@ -143,7 +176,6 @@ export async function handleDefinitionRequest(
   const documentText = document.getText()
 
   const word = getWordAtPosition(document, position)
-  const testWord = getWordAtPositionTest(ast, position)
 
   if (word === '') {
     return new Promise((resolve) => resolve())
@@ -202,7 +234,7 @@ export async function handleDocumentFormatting(
 export function handleCompletionRequest(
   params: CompletionParams,
   documents: TextDocuments<TextDocument>,
-  ast: Schema
+  ast: Schema,
 ): CompletionList | undefined {
   const context = params.context
   if (context == null) {
@@ -229,8 +261,7 @@ export function handleCompletionRequest(
     }
   }
 
-
-  // check if suggestion for field name or type! 
+  // check if suggestion for field name or type!
   if (isFieldName(params.position, token, document)) {
     return getSuggestionForField(ast, foundBlock)
   }
@@ -246,15 +277,6 @@ export function handleCompletionRequest(
  */
 export function handleCompletionResolveRequest(
   item: CompletionItem,
-  ast: Schema
 ): CompletionItem {
   return item
-}
-
-function isFieldName(position: Position, token: string, document: TextDocument): Boolean {
-  const currentLine = document.getText({
-    start: { line: position.line, character: 0 },
-    end: { line: position.line, character: 9999 },
-  })
-  return currentLine.startsWith(token)
 }

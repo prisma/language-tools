@@ -1,16 +1,16 @@
 import {
   CompletionItem,
-  Position,
   CompletionList,
   CompletionItemKind,
 } from 'vscode-languageserver'
-import { Schema, DataSource, Block, Generator, Model } from 'prismafile/dist/ast'
+import { Schema, DataSource, Block, Generator } from 'prismafile/dist/ast'
 
-function toCompletionItems(allowedTypes: string[], kind: CompletionItemKind): CompletionItem[] {
+function toCompletionItems(
+  allowedTypes: string[],
+  kind: CompletionItemKind,
+): CompletionItem[] {
   const items: CompletionItem[] = []
-  allowedTypes.forEach((type) =>
-    items.push({ label: type, kind: CompletionItemKind.TypeParameter }),
-  )
+  allowedTypes.forEach((type) => items.push({ label: type, kind: kind }))
   return items
 }
 
@@ -46,7 +46,10 @@ function getSuggestionForFieldAttribute(block: Block): Array<string> {
   ]
 }
 
-export function getSuggestionsForAttributes(token: string, block: Block): CompletionList {
+export function getSuggestionsForAttributes(
+  token: string,
+  block: Block,
+): CompletionList {
   const labels = token.startsWith('@@')
     ? getSuggestionForBlockAttribute(block)
     : getSuggestionForFieldAttribute(block)
@@ -60,14 +63,17 @@ export function getSuggestionsForAttributes(token: string, block: Block): Comple
 /**
  * @todo get modelNames except the modelName we are currently in
  */
-export function getSuggestionsForTypes(ast: Schema, foundBlock: Block): CompletionList {
+export function getSuggestionsForTypes(
+  ast: Schema,
+  foundBlock: Block,
+): CompletionList {
   const coreTypes = ['String', 'Int', 'Boolean', 'Float', 'DateTime']
   const relationTypes = ast.blocks
-    .filter(block => block.type === 'model')
-    .map(model => model.name)
-    .filter(modelName => modelName != foundBlock.name)
+    .filter((block) => block.type === 'model')
+    .map((model) => model.name)
+    .filter((modelName) => modelName != foundBlock.name)
 
-  let allowedTypes = coreTypes.concat(relationTypes)
+  const allowedTypes = coreTypes.concat(relationTypes)
 
   return {
     items: toCompletionItems(allowedTypes, CompletionItemKind.TypeParameter),
@@ -78,8 +84,8 @@ export function getSuggestionsForTypes(ast: Schema, foundBlock: Block): Completi
 function getSuggestionForDataSourceField(block: DataSource): string[] {
   const supportedFields = ['provider', 'url']
 
-  block.assignments.forEach(toRemove => {
-    let index = supportedFields.indexOf(toRemove.key)
+  block.assignments.forEach((toRemove) => {
+    const index = supportedFields.indexOf(toRemove.key)
     supportedFields.splice(index, 1)
   })
 
@@ -89,8 +95,8 @@ function getSuggestionForDataSourceField(block: DataSource): string[] {
 function getSuggestionForGeneratorField(block: Generator): string[] {
   const supportedFields = ['provider', 'output']
 
-  block.assignments.forEach(toRemove => {
-    let index = supportedFields.indexOf(toRemove.key)
+  block.assignments.forEach((toRemove) => {
+    const index = supportedFields.indexOf(toRemove.key)
     supportedFields.splice(index, 1)
   })
 
@@ -98,11 +104,14 @@ function getSuggestionForGeneratorField(block: Generator): string[] {
 }
 
 /**
- * 
+ *
  * @todo add suggestions for type-alias and enum
- * @param foundBlock 
+ * @param foundBlock
  */
-export function getSuggestionForField(ast: Schema, foundBlock: Block): CompletionList {
+export function getSuggestionForField(
+  ast: Schema,
+  foundBlock: Block,
+): CompletionList {
   let result: string[] = []
   switch (foundBlock.type) {
     case 'datasource':
@@ -119,23 +128,23 @@ export function getSuggestionForField(ast: Schema, foundBlock: Block): Completio
   }
   return {
     items: toCompletionItems(result, CompletionItemKind.Field),
-    isIncomplete: false
+    isIncomplete: false,
   }
 }
 
 /**
- * 
+ *
  * @todo add enum once supported!
  */
 export function getSuggestionForBlockTypes(ast: Schema): CompletionList {
-  let allowedBlockTypes = ["datasource", "generator", "model", "type_alias"]
+  const allowedBlockTypes = ['datasource', 'generator', 'model', 'type_alias']
 
-  let existingBlockTypes = ast.blocks
-    .map(block => block.type.toString())
-    .filter(type => type === 'datasource' || type === 'generator')
+  const existingBlockTypes = ast.blocks
+    .map((block) => block.type.toString())
+    .filter((type) => type === 'datasource' || type === 'generator')
 
-  existingBlockTypes.forEach(toRemove => {
-    let index = allowedBlockTypes.indexOf(toRemove)
+  existingBlockTypes.forEach((toRemove) => {
+    const index = allowedBlockTypes.indexOf(toRemove)
     allowedBlockTypes.splice(index, 1)
   })
 
