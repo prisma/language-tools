@@ -16,7 +16,8 @@ import format from './format'
 import {
   getSuggestionsForAttributes,
   getSuggestionsForTypes,
-  getSuggestionForBlockTypes
+  getSuggestionForBlockTypes,
+  getSuggestionForField
 } from './completions'
 import { Schema, DataSource, Block } from 'prismafile/dist/ast'
 
@@ -41,7 +42,7 @@ function getWordAtPosition(document: TextDocument, position: Position): string {
 
 
 function getBlockAtPosition(ast: Schema, position: Position): Block | undefined {
-  const foundBlock =  ast.blocks.find(node =>
+  const foundBlock = ast.blocks.find(node =>
     node.start.line - 1 <= position.line
     && node.end.line - 1 >= position.line
   )
@@ -97,10 +98,10 @@ function getWordAtPositionTest(ast: Schema, position: Position) {
         && node.end.line - 1 >= position.line
         && node.start.column - 1 <= position.character
         && node.end.column - 1 >= position.character)
-      if(!foundProperty) {
+      if (!foundProperty) {
         break;
       }
-      if(position.character <= foundProperty.start.column - 1 + foundProperty.name.length) {
+      if (position.character <= foundProperty.start.column - 1 + foundProperty.name.length) {
         return foundProperty.name
       }
       // TODO get datatype, attributes, e.g. @id, Int
@@ -214,12 +215,12 @@ export function handleCompletionRequest(
   }
 
   const foundBlock = getBlockAtPosition(ast, params.position)
-  if(!foundBlock) {
+  if (!foundBlock) {
     return getSuggestionForBlockTypes(ast)
   }
 
   const token = getWordAtPosition(document, params.position)
- 
+
   // Completion was triggered by a triggerCharacter
   if (context.triggerKind === 2) {
     switch (context.triggerCharacter) {
@@ -228,11 +229,15 @@ export function handleCompletionRequest(
     }
   }
 
-  const completionList = getSuggestionsForTypes(ast, foundBlock)
 
-  // TODO get position in AST Node to know what the context is here (e.g. type, model, field or directive position)
+  // check if suggestion for field name or type! 
+  if (isFieldName(params.position, token, document)) {
+    return getSuggestionForField(ast, foundBlock)
+  }
 
-  return completionList
+  if (foundBlock.type === 'model') {
+    return getSuggestionsForTypes(ast, foundBlock)
+  }
 }
 
 /**
@@ -244,4 +249,12 @@ export function handleCompletionResolveRequest(
   ast: Schema
 ): CompletionItem {
   return item
+}
+
+function isFieldName(position: Position, token: string, document: TextDocument): Boolean {
+  const currentLine = document.getText({
+    start: { line: position.line, character: 0 },
+    end: { line: position.line, character: 9999 },
+  })
+  return currentLine.startsWith(token)
 }

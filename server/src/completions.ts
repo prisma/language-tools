@@ -4,13 +4,21 @@ import {
   CompletionList,
   CompletionItemKind,
 } from 'vscode-languageserver'
-import { Schema, DataSource, Block } from 'prismafile/dist/ast'
+import { Schema, DataSource, Block, Generator, Model } from 'prismafile/dist/ast'
+
+function toCompletionItems(allowedTypes: string[], kind: CompletionItemKind): CompletionItem[] {
+  const items: CompletionItem[] = []
+  allowedTypes.forEach((type) =>
+    items.push({ label: type, kind: CompletionItemKind.TypeParameter }),
+  )
+  return items
+}
 
 /**
  * @todo check if in 'embed' blocks
  */
 function getSuggestionForBlockAttribute(block: Block): Array<string> {
-  if(block.type != 'model') {
+  if (block.type != 'model') {
     return []
   }
   return [
@@ -42,12 +50,9 @@ export function getSuggestionsForAttributes(token: string, block: Block): Comple
   const labels = token.startsWith('@@')
     ? getSuggestionForBlockAttribute(block)
     : getSuggestionForFieldAttribute(block)
-  const items: CompletionItem[] = []
-  labels.forEach((l) =>
-    items.push({ label: l, kind: CompletionItemKind.Property }),
-  )
+
   return {
-    items: items,
+    items: toCompletionItems(labels, CompletionItemKind.Property),
     isIncomplete: true,
   }
 }
@@ -58,19 +63,63 @@ export function getSuggestionsForAttributes(token: string, block: Block): Comple
 export function getSuggestionsForTypes(ast: Schema, foundBlock: Block): CompletionList {
   const coreTypes = ['String', 'Int', 'Boolean', 'Float', 'DateTime']
   const relationTypes = ast.blocks
-  .filter( block => block.type === 'model')
-  .map(model => model.name)
-  .filter(modelName => modelName != foundBlock.name)
+    .filter(block => block.type === 'model')
+    .map(model => model.name)
+    .filter(modelName => modelName != foundBlock.name)
 
   let allowedTypes = coreTypes.concat(relationTypes)
-  
-  const items: CompletionItem[] = []
-  allowedTypes.forEach((type) =>
-    items.push({ label: type, kind: CompletionItemKind.TypeParameter}),
-  )
+
   return {
-    items: items,
+    items: toCompletionItems(allowedTypes, CompletionItemKind.TypeParameter),
     isIncomplete: false,
+  }
+}
+
+function getSuggestionForDataSourceField(block: DataSource): string[] {
+  const supportedFields = ['provider', 'url']
+
+  block.assignments.forEach(toRemove => {
+    let index = supportedFields.indexOf(toRemove.key)
+    supportedFields.splice(index, 1)
+  })
+
+  return supportedFields
+}
+
+function getSuggestionForGeneratorField(block: Generator): string[] {
+  const supportedFields = ['provider', 'output']
+
+  block.assignments.forEach(toRemove => {
+    let index = supportedFields.indexOf(toRemove.key)
+    supportedFields.splice(index, 1)
+  })
+
+  return supportedFields
+}
+
+/**
+ * 
+ * @todo add suggestions for type-alias and enum
+ * @param foundBlock 
+ */
+export function getSuggestionForField(ast: Schema, foundBlock: Block): CompletionList {
+  let result: string[] = []
+  switch (foundBlock.type) {
+    case 'datasource':
+      result = getSuggestionForDataSourceField(foundBlock)
+      break
+    case 'generator':
+      result = getSuggestionForGeneratorField(foundBlock)
+      break
+    case 'model':
+    case 'type_alias':
+    case 'enum':
+      result = []
+      break
+  }
+  return {
+    items: toCompletionItems(result, CompletionItemKind.Field),
+    isIncomplete: false
   }
 }
 
@@ -82,20 +131,16 @@ export function getSuggestionForBlockTypes(ast: Schema): CompletionList {
   let allowedBlockTypes = ["datasource", "generator", "model", "type_alias"]
 
   let existingBlockTypes = ast.blocks
-  .map(block => block.type.toString())
-  .filter(type => type === 'datasource' || type === 'generator')
+    .map(block => block.type.toString())
+    .filter(type => type === 'datasource' || type === 'generator')
 
   existingBlockTypes.forEach(toRemove => {
     let index = allowedBlockTypes.indexOf(toRemove)
     allowedBlockTypes.splice(index, 1)
   })
 
-  const items: CompletionItem[] = []
-  allowedBlockTypes.forEach((type) =>
-    items.push({ label: type, kind: CompletionItemKind.Class }),
-  )
   return {
-    items: items,
+    items: toCompletionItems(allowedBlockTypes, CompletionItemKind.Class),
     isIncomplete: true,
   }
 }
