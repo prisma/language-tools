@@ -22,6 +22,7 @@
     "watch": "npm run build -- -w",
     "compile": "tsc -b ./server ./clients/vscode",
     "vsce:publish": "sh scripts/publish.sh",
+    "postinstall": "cd clients/vscode && npm install && cd ../../server && npm install && cd .. ",
     "vsce:check": "yarn shell:lint && sh scripts/check-update.sh",
     "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "sh ./scripts/e2e.sh"
