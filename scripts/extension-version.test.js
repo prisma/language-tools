@@ -9,7 +9,7 @@ describe('next extension version', () => {
         prismaVersion: '2.0.0-beta.3',
         extensionVersion: '0.0.35',
       }),
-    ).to.eq('0.0.3')
+    ).to.eq('0.1.3')
   })
 
   it('it should work with stable channel and extension only push', () => {
@@ -18,7 +18,7 @@ describe('next extension version', () => {
         prismaVersion: '2.0.0-beta.3',
         extensionVersion: '0.0.3',
       }),
-    ).to.eq('0.0.3.1')
+    ).to.eq('0.1.3.1')
   })
 
   it('it should work with stable channel and new prisma version', () => {
@@ -27,7 +27,7 @@ describe('next extension version', () => {
         prismaVersion: '2.0.0-beta.4',
         extensionVersion: '0.0.3',
       }),
-    ).to.eq('0.0.4')
+    ).to.eq('0.1.4')
   })
 
   it('it should work with stable channel and new prisma version after an extension only publish', () => {
@@ -36,7 +36,7 @@ describe('next extension version', () => {
         prismaVersion: '2.0.0-beta.4',
         extensionVersion: '0.0.3.1',
       }),
-    ).to.eq('0.0.4')
+    ).to.eq('0.1.4')
   })
 
   it('it should work with unstable channel and current version to new version schema', () => {
