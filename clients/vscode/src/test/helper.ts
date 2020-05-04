@@ -17,7 +17,7 @@ export async function sleep(ms: number): Promise<NodeJS.Timeout> {
  */
 export async function activate(docUri: vscode.Uri): Promise<void> {
   // The extensionId is `publisher.name` from package.json
-  const pj = require('../../../package.json')
+  const pj = require('../../package.json')
   const ext = vscode.extensions.getExtension(pj.publisher + '.' + pj.name)!
   await ext.activate()
   try {

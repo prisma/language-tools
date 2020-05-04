@@ -22,23 +22,11 @@ It also includes an End-to-End test.
 
 ![](https://imgur.com/HbufPo6.png)
 
-## Structure
-
-```
-.
---- client // Language Client
-|   --- src
-|       --- extension.ts // Language Client entry point
---- package.json // The extension manifest
---- server // Language Server
-    --- src
-        --- server.ts // Language Server entry point
-```
 
 ## Development
 
 - Run `npm install` in this folder. This installs all necessary npm modules in both the client and server folder.
-- Run `yarn watch`.
+- Run `npm run watch`.
 - Open VS Code on this folder.
 - Switch to the debug viewlet.
 - Select `Launch Client` from the drop down.

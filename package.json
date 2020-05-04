@@ -1,87 +1,33 @@
 {
-  "name": "prisma-dev",
-  "displayName": "Prisma Dev",
-  "description": "Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.",
-  "version": "0.0.14",
-  "license": "Apache-2.0",
-  "icon": "logo_white.png",
-  "engines": {
-    "vscode": "^1.43.0"
-  },
-  "publisher": "Prisma",
-  "categories": [
-    "Programming Languages"
-  ],
-  "repository": {
-    "type": "github",
-    "url": "https://github.com/prisma/vscode"
-  },
-  "main": "./client/out/extension",
-  "contributes": {
-    "languages": [
-      {
-        "id": "prisma",
-        "aliases": [
-          "Prisma",
-          "prisma"
-        ],
-        "extensions": [
-          ".prisma"
-        ],
-        "configuration": "./language-configuration.json"
-      }
-    ],
-    "grammars": [
-      {
-        "language": "prisma",
-        "scopeName": "source.prisma",
-        "path": "./syntaxes/prisma.tmLanguage.json"
-      }
-    ],
-    "configuration": {
-      "type": "object",
-      "title": "Language server configuration",
-      "properties": {
-        "languageServerExample.maxNumberOfProblems": {
-          "scope": "resource",
-          "type": "number",
-          "default": 100,
-          "description": "Controls the maximum number of problems produced by the server."
-        },
-        "languageServerExample.trace.server": {
-          "scope": "window",
-          "type": "string",
-          "enum": [
-            "off",
-            "messages",
-            "verbose"
-          ],
-          "default": "off",
-          "description": "Traces the communication between VS Code and the language server."
-        }
-      }
-    }
-  },
-  "scripts": {
-    "package": "vsce package",
-    "vscode:prepublish": "npm run compile",
-    "watch": "tsc -b -w",
-    "compile": "tsc -b",
-    "postinstall": "cd client && npm install && cd ../server && npm install && cd .. ",
-    "vsce:publish": "sh scripts/publish.sh",
-    "vsce:check": "yarn shell:lint && sh scripts/check-update.sh",
-    "shell:lint": "shellcheck -x scripts/*.sh",
-    "test": "sh ./scripts/e2e.sh"
-  },
-  "activationEvents": [
-    "onLanguage:prisma"
-  ],
   "devDependencies": {
+    "prettier": "2.0.5",
+    "lint-staged": "10.1.2",
+    "husky": "4.2.3",
+    "eslint": "6.8.0",
+    "eslint-config-prettier": "6.10.1",
+    "eslint-plugin-prettier": "3.1.2",
+    "@typescript-eslint/eslint-plugin": "2.27.0",
+    "@typescript-eslint/parser": "2.27.0",
     "@types/node": "12.12.0",
     "semver": "7.3.2",
     "typescript": "3.8.3",
     "vsce": "1.75.0",
     "@types/mocha": "5.2.7",
     "mocha": "7.1.1"
+  },
+  "scripts": {
+    "build": "tsc -b ./server ./clients/vscode",
+    "format": "prettier  \"**/*.{ts,js,json,md}\"   --write",
+    "lint": "tsc -p ./server -noEmit && tsc -p ./clients/vscode --noEmit &&  eslint  --fix --ext '{server,clients/*}/src/**/*.ts'",
+    "watch": "npm run build -- -w",
+    "compile": "tsc -b ./server ./clients/vscode",
+    "vsce:publish": "sh scripts/publish.sh",
+    "vsce:check": "yarn shell:lint && sh scripts/check-update.sh",
+    "shell:lint": "shellcheck -x scripts/*.sh"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run format && npm run lint"
+    }
   }
 }
