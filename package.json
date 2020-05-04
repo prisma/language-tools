@@ -18,7 +18,7 @@
   "scripts": {
     "build": "tsc -b ./server ./clients/vscode",
     "format": "prettier  \"**/*.{ts,js,json,md}\"   --write",
-    "lint": "tsc -p ./server -noEmit && tsc -p ./clients/vscode --noEmit &&  eslint  --fix --ext '{server,clients/*}/src/**/*.ts'",
+    "lint": "eslint  --fix --ext  .js,.ts .",
     "watch": "npm run build -- -w",
     "compile": "tsc -b ./server ./clients/vscode",
     "vsce:publish": "sh scripts/publish.sh",
@@ -27,7 +27,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run format && npm run lint"
+      "pre-commit": "npm run format"
     }
   }
 }
