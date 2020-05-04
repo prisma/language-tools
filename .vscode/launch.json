@@ -28,11 +28,11 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionDevelopmentPath=${workspaceFolder}/clients/vscode/",
         "--extensionTestsPath=${workspaceFolder}/clients/vscode/out/test/index",
         "${workspaceFolder}/clients/vscode/testFixture"
       ],
-      "outFiles": ["${workspaceFolder}/client/out/test/**/*.js"]
+      "outFiles": ["${workspaceFolder}/clients/vscode/out/test/**/*.js"]
     }
   ],
   "compounds": [
