@@ -42,7 +42,8 @@ fi
 if [ "$PRODUCTION" = "1" ] && [ "$CHANNEL" = "dev" ]; then
     echo "Sync with ${GITHUB_REF} and push to it"
     git pull github "${GITHUB_REF}" --ff-only
-    git push github HEAD:"${GITHUB_REF}"
+    git tag -a "dev/$NEXT_EXTENSION_VERSION" -m "dev/$NEXT_EXTENSION_VERSION" -m "Prisma version: $PRISMA_VERSION"
+    git push github HEAD:"${GITHUB_REF}" --follow-tags
 elif [ "$PRODUCTION" = "1" ] && [ "$CHANNEL" = "latest" ]; then
     echo "Sync with ${GITHUB_REF} and push to it"
     git pull github "${GITHUB_REF}" --ff-only
@@ -52,8 +53,9 @@ elif [ "$PRODUCTION" = "1" ] && [ "$CHANNEL" = "latest" ]; then
     git reset origin/master
     git add ./scripts/prisma_version_stable
     git commit -m "bump prisma_version to $PRISMA_VERSION"
-
-    git push github HEAD:"${GITHUB_REF}"
+    git tag -a "$NEXT_EXTENSION_VERSION" -m "$NEXT_EXTENSION_VERSION" -m "Prisma version: $PRISMA_VERSION"
+    git push github HEAD:"${GITHUB_REF}" --follow-tags
+    # TODO: Create a release linked to this tag for stable
 else 
     echo "Not pushing because PRODUCTION is not set"
 fi

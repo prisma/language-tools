@@ -51,7 +51,7 @@ suite('Should get linting', () => {
       {
         message:
           'Error validating: The relation field `author` uses the scalar fields authorId. At least one of those fields is required. Hence the relation field must be required as well.',
-        range: toRange(14, 2, 14, 67),
+        range: toRange(14, 2, 15, 0),
         severity: vscode.DiagnosticSeverity.Error,
         source: '',
       },
