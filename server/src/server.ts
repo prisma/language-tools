@@ -74,7 +74,10 @@ connection.onInitialize(async (params: InitializeParams) => {
       connection.console.error('Cannot install prisma-fmt: ' + err)
     }
   }
-  connection.console.info('Installed version of Prisma plugin prisma-fmt: ' + await util.getVersion())
+  connection.console.info(
+    'Installed version of Prisma plugin prisma-fmt: ' +
+      (await util.getVersion()),
+  )
 
   const result: InitializeResult = {
     capabilities: {
