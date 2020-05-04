@@ -9,9 +9,9 @@ import {
   TextEdit,
   Position,
   DocumentFormattingParams,
-} from "vscode-languageserver";
-import { URI } from "vscode-uri";
-import { TextDocument } from 'vscode-languageserver-textdocument';
+} from 'vscode-languageserver'
+import { URI } from 'vscode-uri'
+import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as util from './util'
 import lint from './lint'
 import fs from 'fs'
@@ -28,31 +28,30 @@ export class PLS {
     return new PLS(connection)
   }
 
-  private documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
+  private documents: TextDocuments<TextDocument> = new TextDocuments(
+    TextDocument,
+  )
 
-  private validationDelayMs = 800;
+  private validationDelayMs = 800
   private pendingValidationRequests: {
-    [uri: string]: ReturnType<typeof setTimeout>;
-  } = {};
+    [uri: string]: ReturnType<typeof setTimeout>
+  } = {}
 
   constructor(private connection: IConnection) {
-    this.connection = connection;
-    this.documents.listen(connection);
-    connection.listen();
+    this.connection = connection
+    this.documents.listen(connection)
+    connection.listen()
 
-    this.documents.onDidChangeContent(change =>
-      this.queueValidation(change.document)
-    );
+    this.documents.onDidChangeContent((change) =>
+      this.queueValidation(change.document),
+    )
 
-    this.documents.onDidOpen(change =>
-      this.queueValidation(change.document)
-    );
+    this.documents.onDidOpen((change) => this.queueValidation(change.document))
 
     connection.onInitialize(async () => {
-
-      connection.onDocumentFormatting(this.onDocumentFormatting);
-      connection.onDefinition(this.onDefinition);
-      this.documents.all().forEach(doc => this.queueValidation(doc));
+      connection.onDocumentFormatting(this.onDocumentFormatting)
+      connection.onDefinition(this.onDefinition)
+      this.documents.all().forEach((doc) => this.queueValidation(doc))
 
       const binPathPrismaFmt = await util.getBinPath()
       if (!fs.existsSync(binPathPrismaFmt)) {
@@ -69,17 +68,19 @@ export class PLS {
       return {
         capabilities: {
           documentFormattingProvider: true,
-          definitionProvider: true
-        }
+          definitionProvider: true,
+        },
       }
-    });
+    })
   }
 
-  public async validateTextDocument(textDocument: TextDocument): Promise<Diagnostic[]> {
-    const { fsPath, scheme } = URI.parse(textDocument.uri);
+  public async validateTextDocument(
+    textDocument: TextDocument,
+  ): Promise<Diagnostic[]> {
+    const { fsPath, scheme } = URI.parse(textDocument.uri)
 
-    if (scheme !== "file") {
-      return [];
+    if (scheme !== 'file') {
+      return []
     }
 
     const text = textDocument.getText(fullDocumentRange(textDocument))
@@ -112,7 +113,7 @@ export class PLS {
 
   public onDocumentFormatting = async ({
     textDocument,
-    options
+    options,
   }: DocumentFormattingParams): Promise<TextEdit[]> => {
     const document = this.documents.get(textDocument.uri)
     if (!document) {
@@ -131,32 +132,31 @@ export class PLS {
     ])
   }
 
-
   public onDefinition = (params: TextDocumentPositionParams): Definition => {
     const textDocument = params.textDocument
     const position = params.position
-  
+
     const document = this.documents.get(textDocument.uri)
-  
+
     if (!document) {
       return []
     }
-  
+
     const documentText = document.getText()
-  
+
     const word = this.getWordAtPosition(document, position)
-  
+
     if (word === '') {
       return []
     }
-  
+
     const found = ast.blocks.find((b) => b.type === 'model' && b.name === word)
-  
+
     // selected word is not a model type
     if (!found) {
       return []
     }
-  
+
     const startPosition = {
       line: found.start.line - 1,
       character: found.start.column - 1,
@@ -165,7 +165,7 @@ export class PLS {
       line: found.end.line,
       character: found.end.column,
     }
-  
+
     return {
       uri: textDocument.uri,
       range: Range.create(startPosition, endPosition),
@@ -173,26 +173,26 @@ export class PLS {
   }
 
   private async queueValidation(textDocument: TextDocument): Promise<void> {
-    const previousRequest = this.pendingValidationRequests[textDocument.uri];
+    const previousRequest = this.pendingValidationRequests[textDocument.uri]
     if (previousRequest) {
-      clearTimeout(previousRequest);
-      delete this.pendingValidationRequests[textDocument.uri];
+      clearTimeout(previousRequest)
+      delete this.pendingValidationRequests[textDocument.uri]
     }
 
     this.pendingValidationRequests[textDocument.uri] = setTimeout(async () => {
-      delete this.pendingValidationRequests[textDocument.uri];
+      delete this.pendingValidationRequests[textDocument.uri]
       this.connection.sendDiagnostics({
         uri: textDocument.uri,
-        diagnostics: await this.validateTextDocument(textDocument)
-      });
-    }, this.validationDelayMs);
+        diagnostics: await this.validateTextDocument(textDocument),
+      })
+    }, this.validationDelayMs)
   }
 
-  private displayMessage(type: "info" | "warning" | "error", msg: string) {
+  private displayMessage(type: 'info' | 'warning' | 'error', msg: string) {
     this.connection.sendNotification(
       `$ / display${type[0].toUpperCase() + type.slice(1)} `,
-      msg
-    );
+      msg,
+    )
   }
 
   private getCurrentLine(document: TextDocument, line: number): string {
@@ -202,14 +202,19 @@ export class PLS {
     })
   }
 
-  private getWordAtPosition(document: TextDocument, position: Position): string {
+  private getWordAtPosition(
+    document: TextDocument,
+    position: Position,
+  ): string {
     const currentLine = this.getCurrentLine(document, position.line)
-  
+
     if (currentLine.slice(0, position.character).endsWith('@@')) {
       return '@@'
     }
     // search for the word's beginning and end
-    const beginning = currentLine.slice(0, position.character + 1).search(/\S+$/)
+    const beginning = currentLine
+      .slice(0, position.character + 1)
+      .search(/\S+$/)
     const end = currentLine.slice(position.character).search(/\W/)
     if (end < 0) {
       return ''

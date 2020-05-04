@@ -1,7 +1,6 @@
 import vscode from 'vscode'
 import path from 'path'
 
-
 export let doc: vscode.TextDocument
 export let editor: vscode.TextEditor
 export let documentEol: string
