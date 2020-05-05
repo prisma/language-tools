@@ -2,7 +2,7 @@
   "name": "@prisma/vscode-test",
   "displayName": "Prisma Dev",
   "description": "Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.",
-  "version": "0.0.43",
+  "version": "0.0.44",
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
@@ -13,7 +13,7 @@
     "Programming Languages"
   ],
   "dependencies": {
-    "@prisma/language-server-test": "^0.0.41",
+    "@prisma/language-server-test": "^0.0.42",
     "vscode-languageclient": "6.1.3"
   },
   "repository": {

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.0.44](https://github.com/prisma/vscode/compare/@prisma/vscode-test@0.0.43...@prisma/vscode-test@0.0.44) (2020-05-05)
+
+**Note:** Version bump only for package @prisma/vscode-test
+
+
+
+
+
 ## [0.0.43](https://github.com/prisma/vscode/compare/@prisma/vscode-test@0.0.42...@prisma/vscode-test@0.0.43) (2020-05-05)
 
 **Note:** Version bump only for package @prisma/vscode-test

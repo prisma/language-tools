@@ -1,7 +1,7 @@
 {
   "name": "@prisma/language-server-test",
   "description": "Implementation of a language server in node.",
-  "version": "0.0.41",
+  "version": "0.0.42",
   "author": "Prisma",
   "license": "Apache-2.0",
   "engines": {
