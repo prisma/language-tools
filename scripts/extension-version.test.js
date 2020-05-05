@@ -16,7 +16,7 @@ describe('next extension version', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.0.0-beta.3',
-        extensionVersion: '0.0.3',
+        extensionVersion: '0.1.3',
       }),
     ).to.eq('0.1.3.1')
   })
@@ -25,7 +25,7 @@ describe('next extension version', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.0.0-beta.4',
-        extensionVersion: '0.0.3',
+        extensionVersion: '0.1.3',
       }),
     ).to.eq('0.1.4')
   })
@@ -34,7 +34,7 @@ describe('next extension version', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.0.0-beta.4',
-        extensionVersion: '0.0.3.1',
+        extensionVersion: '0.1.3.1',
       }),
     ).to.eq('0.1.4')
   })
