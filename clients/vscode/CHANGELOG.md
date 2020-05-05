@@ -7,10 +7,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 **Note:** Version bump only for package @prisma/vscode-test
 
-
-
-
-
 ## [0.0.43](https://github.com/prisma/vscode/compare/@prisma/vscode-test@0.0.42...@prisma/vscode-test@0.0.43) (2020-05-05)
 
 **Note:** Version bump only for package @prisma/vscode-test
