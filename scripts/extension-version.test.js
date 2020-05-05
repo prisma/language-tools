@@ -121,7 +121,7 @@ describe('next extension version', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.0.1-dev.1',
-        extensionVersion: '0.0.1150',
+        extensionVersion: '0.0.1150', // = 2.0.0-alpha.1150
       }),
     ).to.eq('0.1.1')
   })
