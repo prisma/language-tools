@@ -1,14 +1,14 @@
 {
   "name": "@prisma/language-server-test",
   "description": "Implementation of a language server in node.",
-  "version": "0.0.42",
+  "version": "0.0.45",
   "author": "Prisma",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=10"
   },
   "prisma": {
-    "version": "052a692dc18f79e7b60004a3b29f8a15d53e5f3c"
+    "version": "d7866d1a109b061d955254b078e58be2615d4e31"
   },
   "repository": {
     "type": "github",
@@ -16,11 +16,11 @@
   },
   "main": "./out/index.js",
   "dependencies": {
-    "@prisma/fetch-engine": "2.0.0-alpha.1182",
-    "@prisma/get-platform": "2.0.0-alpha.1182",
-    "@prisma/sdk": "2.0.0-alpha.1182",
     "@typescript-eslint/eslint-plugin": "2.27.0",
     "@typescript-eslint/parser": "2.27.0",
+    "@prisma/fetch-engine": "2.0.0-alpha.1187",
+    "@prisma/get-platform": "2.0.0-alpha.1187",
+    "@prisma/sdk": "2.0.0-alpha.1187",
     "eslint": "6.8.0",
     "eslint-config-prettier": "6.10.1",
     "eslint-plugin-prettier": "3.1.2",
@@ -56,7 +56,7 @@
   ],
   "lint-staged": {
     "*/**/*.{js,ts,css,json,md}": [
-      "prettier --write",
+      "prettier --write .",
       "git add"
     ],
     "*/**/*.{js,ts}": [

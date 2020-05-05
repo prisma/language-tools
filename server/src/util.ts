@@ -25,7 +25,7 @@ function tryRequire(path: string): any {
 /**
  * Lookup version
  */
-async function getVersion(): Promise<string> {
+export async function getVersion(): Promise<string> {
   const pkgPath = await pkgdir(__dirname)
   if (!pkgPath) {
     return 'latest'
