@@ -66,5 +66,8 @@
   "bugs": {
     "url": "https://github.com/prisma/vscode/issues"
   },
-  "homepage": "https://github.com/prisma/vscode#readme"
+  "homepage": "https://github.com/prisma/vscode#readme",
+  "publishConfig": {
+    "access": "public"
+  }
 }
