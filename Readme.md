@@ -9,7 +9,7 @@ Server implementation can be found [here](server).
 
 - install .. from the marketplace ([plugin source](clients/vscode))
 
-### Neovim
+### Neovim (coming soon)
 
 - install [coc.nvim](https://github.com/neoclide/coc.nvim)
 - [`npm i -g @prisma/language-server-test`](https://www.npmjs.com/package/@prisma/language-server-test)
