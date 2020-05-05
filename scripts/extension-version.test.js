@@ -3,6 +3,8 @@ const { expect } = require('chai')
 const { nextExtensionVersion } = require('./extension-version')
 
 describe('next extension version', () => {
+  // stable channel
+
   it('it should work with stable channel and current version to new version schema', () => {
     expect(
       nextExtensionVersion({
