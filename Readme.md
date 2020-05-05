@@ -1,4 +1,4 @@
-# Prisma Language Support
+# Prisma Language Support Test
 
 Using the Language Server Protocol to improve Prisma's developer experience.
 Server implementation can be found [here](server).

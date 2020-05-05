@@ -1,5 +1,5 @@
 {
-  "name": "@prisma/language-server",
+  "name": "@prisma/language-server-test",
   "description": "Implementation of a language server in node.",
   "version": "0.0.40",
   "author": "Prisma",

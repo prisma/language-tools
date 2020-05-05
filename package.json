@@ -13,7 +13,8 @@
     "typescript": "3.8.3",
     "vsce": "1.75.0",
     "@types/mocha": "5.2.7",
-    "mocha": "7.1.1"
+    "mocha": "7.1.1",
+    "lerna": "3.20.2"
   },
   "scripts": {
     "build": "tsc -b ./server ./clients/vscode",
@@ -21,7 +22,8 @@
     "lint": "eslint  --fix --ext  .js,.ts .",
     "watch": "npm run build -- -w",
     "compile": "tsc -b ./server ./clients/vscode",
-    "vsce:publish": "sh scripts/publish.sh",
+    "publish": "npm run build && lerna publish",
+    "postpublish": "(cd ./clients/vscode && npm i && vsce publish)",
     "postinstall": "cd clients/vscode && npm install && cd ../../server && npm install && cd .. ",
     "vsce:check": "yarn shell:lint && sh scripts/check-update.sh",
     "shell:lint": "shellcheck -x scripts/*.sh",
@@ -30,6 +32,9 @@
   "husky": {
     "hooks": {
       "pre-commit": "npm run format"
+    },
+    "publishConfig": {
+      "access": "restricted"
     }
   }
 }

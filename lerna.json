@@ -1,0 +1,11 @@
+{
+  "command": {
+    "publish": {
+      "conventionalCommits": true,
+      "message": "chore: publish"
+    }
+  },
+  "version": "independent",
+  "packages": ["server", "clients/*"],
+  "ignoreChanges": ["**/package-lock.json", "**/*.md"]
+}
