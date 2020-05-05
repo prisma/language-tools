@@ -75,6 +75,8 @@ describe('next extension version', () => {
     ).to.eq('0.0.1150')
   })
 
+  // after GA
+  
   it('it should work with stable channel after the ga versioning scheme and current version to new version schema', () => {
     expect(
       nextExtensionVersion({
