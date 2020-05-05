@@ -5,6 +5,53 @@ All notable changes to the "prisma" extension will be documented in this file.
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how
 to structure this file.
 
+## 0.0.35 / 2020-04-30
+
+- Bump binary dependencies
+
+## dev/0.0.36 / 2020-04-30
+
+- Bump binary dependencies
+
+## dev/0.0.35 / 2020-04-30
+
+- Bump binary dependencies
+
+## dev/0.0.34 / 2020-04-30
+
+- Bump binary dependencies
+- Add language feature jump to definition
+
+## 0.0.32 / 2020-04-21
+
+- Bump binary dependencies
+
+## 0.0.31 / 2020-04-08
+
+- Bump binary dependencies
+
+## 0.0.30 / 2020-03-31
+
+- Bump binary dependencies
+
+## 0.0.29 / 2020-03-27
+
+- Replace yarn with npm
+- Fix syntax highlighting
+- Bump binary dependencies
+
+## 0.0.28 / 2020-03-12
+
+- Bump binary dependencies
+
+## 0.0.27 / 2020-03-12
+
+- Bump binary dependencies
+
+## 0.0.26 / 2020-03-12
+
+- Automate release
+
 ## 0.0.25 / 2020-03-04
 
 - Fix prisma-fmt
