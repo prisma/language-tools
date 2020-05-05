@@ -5,14 +5,14 @@ function nextExtensionVersion({ prismaVersion, extensionVersion }) {
     isBeta,
   )
 
-  const derivedExistingExtensionVersion = getDerivedExtensionVersion(
+  const existingExtensionVersion = getExtensionVersionWithoutExtensionOnly(
     extensionVersion,
     isBeta,
   )
 
-  if (derivedExtensionVersion === derivedExistingExtensionVersion) {
+  if (derivedExtensionVersion === existingExtensionVersion) {
     // Extension only publish
-    return bumpExtensionOnlyVersion(derivedExtensionVersion)
+    return bumpExtensionOnlyVersion(extensionVersion)
   }
   return derivedExtensionVersion
 }
@@ -43,13 +43,32 @@ function getDerivedExtensionVersion(version, isBeta = false) {
   )
 }
 
+function getExtensionVersionWithoutExtensionOnly(version, isBeta = false) {
+  const tokens = version.split('.')
+
+  // Because https://github.com/prisma/vscode/issues/121#issuecomment-623327393
+  if (isBeta) {
+    tokens[1] = 1
+  }
+
+  if (tokens.length === 4) {
+    return tokens.slice(0, 3).join('.')
+  }
+  if (tokens.length === 3) {
+    return tokens.join('.')
+  }
+  throw new Error(
+    `Version ${version} must have 3 or 4 tokens separated by "." character`,
+  )
+}
+
 function bumpExtensionOnlyVersion(version) {
   const tokens = version.split('.')
   if (tokens.length === 3) {
     return tokens.join('.') + '.1'
   }
   if (tokens.length === 4) {
-    return tokens.slice(0, 3).join('.') + (parseInt(tokens[4]) + 1)
+    return tokens.slice(0, 3).join('.') + '.' + (parseInt(tokens[3]) + 1)
   }
   throw new Error(
     `Version ${version} must have 3 or 4 tokens separated by "." character`,

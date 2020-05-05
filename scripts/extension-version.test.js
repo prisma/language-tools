@@ -23,6 +23,15 @@ describe('next extension version', () => {
     ).to.eq('0.1.3.1')
   })
 
+  it('it should work with stable channel and extension only push a second time', () => {
+    expect(
+      nextExtensionVersion({
+        prismaVersion: '2.0.0-beta.3',
+        extensionVersion: '0.1.3.1',
+      }),
+    ).to.eq('0.1.3.2')
+  })
+
   it('it should work with stable channel and new prisma version', () => {
     expect(
       nextExtensionVersion({
@@ -80,7 +89,7 @@ describe('next extension version', () => {
   })
 
   // after GA
-  
+
   it('it should work with stable channel after the ga versioning scheme and current version to new version schema', () => {
     expect(
       nextExtensionVersion({
