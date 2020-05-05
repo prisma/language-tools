@@ -39,6 +39,8 @@ describe('next extension version', () => {
     ).to.eq('0.1.4')
   })
 
+  // unstable channel
+
   it('it should work with unstable channel and current version to new version schema', () => {
     expect(
       nextExtensionVersion({
