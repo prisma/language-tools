@@ -3,6 +3,8 @@ const { expect } = require('chai')
 const { nextExtensionVersion } = require('./extension-version')
 
 describe('next extension version', () => {
+  // stable channel
+
   it('it should work with stable channel and current version to new version schema', () => {
     expect(
       nextExtensionVersion({
@@ -38,6 +40,8 @@ describe('next extension version', () => {
       }),
     ).to.eq('0.1.4')
   })
+
+  // unstable channel
 
   it('it should work with unstable channel and current version to new version schema', () => {
     expect(
@@ -75,6 +79,8 @@ describe('next extension version', () => {
     ).to.eq('0.0.1150')
   })
 
+  // after GA
+  
   it('it should work with stable channel after the ga versioning scheme and current version to new version schema', () => {
     expect(
       nextExtensionVersion({
@@ -115,7 +121,7 @@ describe('next extension version', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.0.1-dev.1',
-        extensionVersion: '0.0.1150',
+        extensionVersion: '0.0.1150', // = 2.0.0-alpha.1150
       }),
     ).to.eq('0.1.1')
   })
