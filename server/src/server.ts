@@ -75,7 +75,7 @@ connection.onInitialize(async (params: InitializeParams) => {
     }
   }
   connection.console.info(
-    'Installed version of Prisma plugin prisma-fmt: ' +
+    'Installed version of Prisma binary `prisma-fmt`: ' +
       (await util.getVersion()),
   )
 
