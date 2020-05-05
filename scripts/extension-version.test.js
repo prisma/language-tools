@@ -70,6 +70,15 @@ describe('next extension version', () => {
     ).to.eq('0.0.1149.1')
   })
 
+  it('it should work with unstable channel and extension only push a second time', () => {
+    expect(
+      nextExtensionVersion({
+        prismaVersion: '2.0.0-alpha.1149',
+        extensionVersion: '0.0.1149.1',
+      }),
+    ).to.eq('0.0.1149.2')
+  })
+
   it('it should work with unstable channel and new prisma version', () => {
     expect(
       nextExtensionVersion({
@@ -142,6 +151,15 @@ describe('next extension version', () => {
         extensionVersion: '0.1.1',
       }),
     ).to.eq('0.1.1.1')
+  })
+
+  it('it should work with unstable channel after the ga versioning scheme and extension only push a second time', () => {
+    expect(
+      nextExtensionVersion({
+        prismaVersion: '2.0.1-dev.1',
+        extensionVersion: '0.1.1.1',
+      }),
+    ).to.eq('0.1.1.2')
   })
 
   it('it should work with unstable channel after the ga versioning scheme and new prisma version', () => {
