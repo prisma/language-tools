@@ -10,6 +10,9 @@
   "prisma": {
     "version": "d7866d1a109b061d955254b078e58be2615d4e31"
   },
+  "bin": {
+    "prisma-language-server-test": "./out/bin.js"
+  },
   "repository": {
     "type": "github",
     "url": "git+https://github.com/prisma/vscode.git"
