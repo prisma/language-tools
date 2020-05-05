@@ -1,23 +1,23 @@
 {
   "name": "prisma-lsp-server",
   "description": "Implementation of a language server in node.",
-  "version": "0.0.45",
+  "version": "0.0.46",
   "author": "Prisma",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=10"
   },
   "prisma": {
-    "version": "d7866d1a109b061d955254b078e58be2615d4e31"
+    "version": "fc45fde2be3f39a089ade64c5c480b7ac30af461"
   },
   "repository": {
     "type": "github",
     "url": "https://github.com/prisma/vscode"
   },
   "dependencies": {
-    "@prisma/fetch-engine": "2.0.0-alpha.1187",
-    "@prisma/get-platform": "2.0.0-alpha.1187",
-    "@prisma/sdk": "2.0.0-alpha.1187",
+    "@prisma/fetch-engine": "2.0.0-alpha.1188",
+    "@prisma/get-platform": "2.0.0-alpha.1188",
+    "@prisma/sdk": "2.0.0-alpha.1188",
     "pkg-dir": "4.2.0",
     "vscode-languageserver": "6.1.1",
     "vscode-languageserver-textdocument": "1.0.1",
