@@ -99,5 +99,6 @@
     "*/**/*.{js,ts}": [
       "eslint --fix --ext .js,.ts ."
     ]
-  }
+  },
+  "gitHead": "7dc90994fb3bda5ea69572e87d6ba36a84b51532"
 }

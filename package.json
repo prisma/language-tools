@@ -32,9 +32,6 @@
   "husky": {
     "hooks": {
       "pre-commit": "npm run format"
-    },
-    "publishConfig": {
-      "access": "restricted"
     }
   }
 }
