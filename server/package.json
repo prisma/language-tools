@@ -22,32 +22,15 @@
     "@prisma/fetch-engine": "2.0.0-alpha.1187",
     "@prisma/get-platform": "2.0.0-alpha.1187",
     "@prisma/sdk": "2.0.0-alpha.1187",
-    "@typescript-eslint/eslint-plugin": "2.27.0",
-    "@typescript-eslint/parser": "2.27.0",
-    "eslint": "6.8.0",
-    "eslint-config-prettier": "6.10.1",
-    "eslint-plugin-prettier": "3.1.2",
-    "husky": "4.2.3",
-    "lint-staged": "10.1.2",
     "pkg-dir": "4.2.0",
-    "prettier": "2.0.5",
     "prismafile": "1.0.3",
     "vscode-languageserver": "6.1.1",
     "vscode-languageserver-textdocument": "1.0.1",
     "vscode-uri": "2.1.1"
   },
-  "scripts": {
-    "format": "prettier --write .",
-    "lint": "eslint  --fix --ext .js,.ts ."
-  },
   "files": [
     "out"
   ],
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "keywords": [
     "autocomplete",
     "intellisense",
@@ -57,15 +40,6 @@
     "formatting",
     "linting"
   ],
-  "lint-staged": {
-    "*/**/*.{js,ts,css,json,md}": [
-      "prettier --write .",
-      "git add"
-    ],
-    "*/**/*.{js,ts}": [
-      "eslint --fix --ext .js,.ts ."
-    ]
-  },
   "bugs": {
     "url": "https://github.com/prisma/vscode/issues"
   },

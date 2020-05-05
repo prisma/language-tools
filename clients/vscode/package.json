@@ -72,33 +72,7 @@
   "devDependencies": {
     "@types/glob": "5.0.35",
     "@types/vscode": "1.43.0",
-    "@typescript-eslint/eslint-plugin": "2.27.0",
-    "@typescript-eslint/parser": "2.27.0",
-    "eslint": "6.8.0",
-    "eslint-config-prettier": "6.10.1",
-    "eslint-plugin-prettier": "3.1.2",
-    "husky": "4.2.3",
-    "lint-staged": "10.1.2",
-    "prettier": "2.0.5",
     "vscode-test": "1.3.0"
-  },
-  "scripts": {
-    "format": "prettier --write .",
-    "lint": "eslint  --fix --ext .js,.ts ."
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*/**/*.{js,ts,css,json,md}": [
-      "prettier --write",
-      "git add"
-    ],
-    "*/**/*.{js,ts}": [
-      "eslint --fix --ext .js,.ts ."
-    ]
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
   "publishConfig": {
