@@ -7,10 +7,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 **Note:** Version bump only for package prisma-vscode-test
 
-
-
-
-
 # Change Log
 
 All notable changes to the "prisma" extension will be documented in this file.

@@ -7,10 +7,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 **Note:** Version bump only for package @prisma/language-server-test
 
-
-
-
-
 # Change Log
 
 All notable changes to the "prisma-language-server" will be documented in this file.
