@@ -22,7 +22,7 @@
     "lint": "eslint  --fix --ext  .js,.ts .",
     "watch": "npm run build -- -w",
     "compile": "tsc -b ./server ./clients/vscode",
-    "publish": "npm run build && lerna publish",
+    "publish": "npm run build && lerna publish --access public",
     "postpublish": "(cd ./clients/vscode && npm i && vsce publish)",
     "postinstall": "cd clients/vscode && npm install && cd ../../server && npm install && cd .. ",
     "vsce:check": "yarn shell:lint && sh scripts/check-update.sh",
