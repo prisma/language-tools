@@ -132,7 +132,7 @@ connection.onDefinition((params) =>
 )
 
 connection.onCompletion((params) =>
-  MessageHandler.handleCompletionRequest(params, documents, ast),
+  MessageHandler.handleCompletionRequest(params, documents),
 )
 
 connection.onCompletionResolve((params) =>

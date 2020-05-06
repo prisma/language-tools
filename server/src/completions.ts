@@ -139,15 +139,6 @@ export function getSuggestionForField(
 export function getSuggestionForBlockTypes(ast: Schema): CompletionList {
   const allowedBlockTypes = ['datasource', 'generator', 'model', 'type_alias']
 
-  const existingBlockTypes = ast.blocks
-    .map((block) => block.type.toString())
-    .filter((type) => type === 'datasource' || type === 'generator')
-
-  existingBlockTypes.forEach((toRemove) => {
-    const index = allowedBlockTypes.indexOf(toRemove)
-    allowedBlockTypes.splice(index, 1)
-  })
-
   return {
     items: toCompletionItems(allowedBlockTypes, CompletionItemKind.Class),
     isIncomplete: true,
@@ -156,17 +147,19 @@ export function getSuggestionForBlockTypes(ast: Schema): CompletionList {
 
 /**
  * @todo check if position is inside relation not e.g. in List Type
- * @todo exclude field of current line 
+ * @todo exclude field of current line
  */
-export function getSuggestionsForRelation(block: Block, currentLine: string): CompletionList | undefined {
+export function getSuggestionsForRelation(
+  block: Block,
+  currentLine: string,
+): CompletionList | undefined {
   if (block.type != 'model' || !currentLine.includes('@relation(')) {
     return undefined
   }
-  const suggestions = block.properties.map(prop => prop.name)
+  const suggestions = block.properties.map((prop) => prop.name)
 
   return {
     items: toCompletionItems(suggestions, CompletionItemKind.Field),
-    isIncomplete: true
+    isIncomplete: true,
   }
 }
-

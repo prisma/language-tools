@@ -8,6 +8,7 @@ import {
   CompletionParams,
   CompletionList,
   CompletionItem,
+  CompletionItemKind,
 } from 'vscode-languageserver'
 import * as util from './util'
 import { fullDocumentRange } from './provider'
@@ -18,10 +19,12 @@ import {
   getSuggestionsForTypes,
   getSuggestionForBlockTypes,
   getSuggestionForField,
-  getSuggestionsForRelation
+  getSuggestionsForRelation,
 } from './completions'
+import { parse } from 'prismafile'
+import { SyntaxError } from 'prismafile/dist/parser/index'
 import { Schema, Block } from 'prismafile/dist/ast'
-
+import { stringify } from 'querystring'
 
 function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
@@ -36,12 +39,11 @@ function isFieldName(
   document: TextDocument,
 ): boolean {
   const currentLine = getCurrentLine(document, position.line)
-  if(token === '') {
+  if (token === '') {
     return currentLine.trim().length === 0
   }
   return currentLine.trim().startsWith(token)
 }
-
 
 function getWordAtPosition(document: TextDocument, position: Position): string {
   const currentLine = getCurrentLine(document, position.line)
@@ -72,95 +74,6 @@ function getBlockAtPosition(
 
 function isInsideBlock(block: Block, position: Position): boolean {
   return position.line != block.start.line - 1
-}
-
-/**
- *
- * @todo what happens with @default(autoincrement()) when at position inside autoincrement()?
- */
-function getWordAtPositionTest(ast: Schema, position: Position) {
-  const foundBlock = getBlockAtPosition(ast, position)
-  if (!foundBlock) {
-    return ''
-  }
-
-  // this only works on formatted files!
-  if (!isInsideBlock(foundBlock, position)) {
-    if (foundBlock.type.length >= position.character) {
-      return foundBlock.type
-    }
-    if (
-      position.character <=
-      foundBlock.type.length + 1 + foundBlock.name.length
-    ) {
-      return foundBlock.name
-    }
-    return ''
-  }
-
-  switch (foundBlock.type) {
-    case 'datasource':
-    case 'generator':
-      const foundAssignment = foundBlock.assignments.find(
-        (node) =>
-          node.start.line - 1 <= position.line &&
-          node.end.line - 1 >= position.line &&
-          node.start.column - 1 <= position.character &&
-          node.end.column - 1 >= position.character,
-      )
-      if (!foundAssignment) {
-        break
-      }
-      if (
-        position.character <=
-        foundAssignment.start.column - 1 + foundAssignment.key.length
-      ) {
-        return foundAssignment.key
-      }
-      if (position.character >= foundAssignment.value.start.column - 1) {
-        return foundAssignment.value
-      }
-      break
-    case 'model':
-      const foundProperty = foundBlock.properties.find(
-        (node) =>
-          node.start.line - 1 <= position.line &&
-          node.end.line - 1 >= position.line &&
-          node.start.column - 1 <= position.character &&
-          node.end.column - 1 >= position.character,
-      )
-      if (!foundProperty) {
-        break
-      }
-      if (
-        position.character <=
-        foundProperty.start.column - 1 + foundProperty.name.length
-      ) {
-        return foundProperty.name
-      }
-      // TODO get datatype, attributes, e.g. @id, Int
-      break
-    case 'enum':
-      const foundAttribute = foundBlock.attributes.find(
-        (node) =>
-          node.start.line - 1 <= position.line &&
-          node.end.line - 1 >= position.line,
-      )
-      const foundEnumerator = foundBlock.enumerators.find(
-        (node) =>
-          node.start.line - 1 <= position.line &&
-          node.end.line - 1 >= position.line,
-      )
-      break
-    case 'type_alias':
-      const foundAlias = foundBlock.attributes.find(
-        (node) =>
-          node.start.line - 1 <= position.line &&
-          node.end.line - 1 >= position.line,
-      )
-      break
-  }
-  return ''
 }
 
 /**
@@ -241,7 +154,6 @@ export async function handleDocumentFormatting(
 export function handleCompletionRequest(
   params: CompletionParams,
   documents: TextDocuments<TextDocument>,
-  ast: Schema,
 ): CompletionList | undefined {
   const context = params.context
   if (context == null) {
@@ -253,34 +165,88 @@ export function handleCompletionRequest(
     return undefined
   }
 
-  const foundBlock = getBlockAtPosition(ast, params.position)
-  if (!foundBlock) {
-    return getSuggestionForBlockTypes(ast)
-  }
+  let ast: Schema | undefined
+  let error: SyntaxError | undefined
+  try {
+    ast = parse(document.getText())
 
-  const token = getWordAtPosition(document, params.position)
+    // no syntax error
+    if (ast) {
+      const foundBlock = getBlockAtPosition(ast, params.position)
+      if (!foundBlock) {
+        return getSuggestionForBlockTypes(ast)
+      }
 
-  // Completion was triggered by a triggerCharacter
-  if (context.triggerKind === 2) {
-    switch (context.triggerCharacter) {
-      case '@':
-        return getSuggestionsForAttributes(token, foundBlock)
-      case '[':
-        return getSuggestionsForRelation(foundBlock, getCurrentLine(document, params.position.line))
+      const token = getWordAtPosition(document, params.position)
+
+      // Completion was triggered by a triggerCharacter
+      if (context.triggerKind === 2) {
+        switch (context.triggerCharacter) {
+          case '@':
+            return getSuggestionsForAttributes(token, foundBlock)
+          case '[':
+            return getSuggestionsForRelation(
+              foundBlock,
+              getCurrentLine(document, params.position.line),
+            )
+        }
+      }
+
+      // check if suggestion for field name or type!
+      if (isFieldName(params.position, token, document)) {
+        return getSuggestionForField(ast, foundBlock)
+      }
+
+      if (foundBlock.type === 'model') {
+        // check if inside directive
+
+        return getSuggestionsForTypes(ast, foundBlock)
+      }
+    }
+  } catch (errors) {
+    if (errors instanceof SyntaxError) {
+      error = errors
+
+      const found: string = errors.found
+      const expected: Array<ExpectedObject> = errors.expected
+      const message: string = errors.message
+      const location: LocationError = errors.location
+      const name: string = errors.name
+
+      console.warn(
+        'expected: ' + expected.forEach((object) => console.log(object.text)),
+      )
+      console.warn('found: ' + found) // does not work with '@' right now
+      console.warn('location: ' + location)
+      console.warn('message: ' + message)
+      console.warn('name: ' + name)
+
+      const items: CompletionItem[] = []
+      expected.forEach((suggestions) => suggestions.text != 'undefined')
+      expected.forEach((type) =>
+        items.push({
+          label: type.text,
+          kind: CompletionItemKind.TypeParameter,
+        }),
+      )
+
+      return {
+        items: items,
+        isIncomplete: false,
+      }
     }
   }
+}
 
-  // check if suggestion for field name or type!
-  if (isFieldName(params.position, token, document)) {
-    return getSuggestionForField(ast, foundBlock)
-  }
+interface ExpectedObject {
+  text: string
+  type: string
+  ignoreCase: boolean
+}
 
-
-  if (foundBlock.type === 'model') {
-    // check if inside directive
-
-    return getSuggestionsForTypes(ast, foundBlock)
-  }
+interface LocationError {
+  start: { line: number; column: number; offset: number }
+  end: { line: number; column: number; offset: number }
 }
 
 /**
