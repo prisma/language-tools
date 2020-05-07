@@ -14,13 +14,7 @@ function toCompletionItems(
   return items
 }
 
-/**
- * @todo check if in 'embed' blocks
- */
-function getSuggestionForBlockAttribute(block: Block): Array<string> {
-  if (block.type != 'model') {
-    return []
-  }
+function getSuggestionForBlockAttribute(): Array<string> {
   return [
     'map(_ name: String)',
     'id(_ fields: Identifier[])',
@@ -29,14 +23,7 @@ function getSuggestionForBlockAttribute(block: Block): Array<string> {
   ]
 }
 
-/**
- *
- * @todo check if in 'embed' block
- */
-function getSuggestionForFieldAttribute(block: Block): Array<string> {
-  if (block.type != 'model' && block.type != 'type_alias') {
-    return []
-  }
+function getSuggestionForFieldAttribute(): Array<string> {
   return [
     'id',
     'unique',
@@ -46,13 +33,19 @@ function getSuggestionForFieldAttribute(block: Block): Array<string> {
   ]
 }
 
-export function getSuggestionsForAttributes(
-  token: string,
-  block: Block,
-): CompletionList {
-  const labels = token.startsWith('@@')
-    ? getSuggestionForBlockAttribute(block)
-    : getSuggestionForFieldAttribute(block)
+export function getSuggestionsForAttributes(block: Block): CompletionList {
+  let labels: string[] = []
+  switch (block.type) {
+    case 'model':
+      labels.concat(
+        getSuggestionForBlockAttribute(),
+        getSuggestionForFieldAttribute(),
+      )
+      break
+    case 'type_alias':
+      labels = getSuggestionForFieldAttribute()
+      break
+  }
 
   return {
     items: toCompletionItems(labels, CompletionItemKind.Property),
@@ -70,8 +63,8 @@ export function getSuggestionsForTypes(
   const coreTypes = ['String', 'Int', 'Boolean', 'Float', 'DateTime']
   const relationTypes = ast.blocks
     .filter((block) => block.type === 'model')
-    .map((model) => model.name)
-    .filter((modelName) => modelName != foundBlock.name)
+    .map((model) => model.name.name)
+    .filter((modelName) => modelName != foundBlock.name.name)
 
   const allowedTypes = coreTypes.concat(relationTypes)
 
@@ -85,7 +78,7 @@ function getSuggestionForDataSourceField(block: DataSource): string[] {
   const supportedFields = ['provider', 'url']
 
   block.assignments.forEach((toRemove) => {
-    const index = supportedFields.indexOf(toRemove.key)
+    const index = supportedFields.indexOf(toRemove.key.name)
     supportedFields.splice(index, 1)
   })
 
@@ -96,7 +89,7 @@ function getSuggestionForGeneratorField(block: Generator): string[] {
   const supportedFields = ['provider', 'output']
 
   block.assignments.forEach((toRemove) => {
-    const index = supportedFields.indexOf(toRemove.key)
+    const index = supportedFields.indexOf(toRemove.key.name)
     supportedFields.splice(index, 1)
   })
 
@@ -132,12 +125,29 @@ export function getSuggestionForField(
   }
 }
 
-/**
- *
- * @todo add enum once supported!
- */
 export function getSuggestionForBlockTypes(ast: Schema): CompletionList {
-  const allowedBlockTypes = ['datasource', 'generator', 'model', 'type_alias']
+  const allowedBlockTypes = [
+    'datasource',
+    'generator',
+    'model',
+    'type_alias',
+    'enum',
+  ]
+
+  // enum is not supported in sqlite
+  ast.blocks.forEach((block) => {
+    if (block.type === 'datasource') {
+      const foundNotSupportingEnumProvider = block.assignments.filter(
+        (o) =>
+          o.key.name === 'provider' &&
+          o.value.type === 'string_value' &&
+          o.value.value === 'sqlite',
+      )
+      if (foundNotSupportingEnumProvider.length != 0) {
+        allowedBlockTypes.pop()
+      }
+    }
+  })
 
   return {
     items: toCompletionItems(allowedBlockTypes, CompletionItemKind.Class),
@@ -156,7 +166,7 @@ export function getSuggestionsForRelation(
   if (block.type != 'model' || !currentLine.includes('@relation(')) {
     return undefined
   }
-  const suggestions = block.properties.map((prop) => prop.name)
+  const suggestions = block.properties.map((prop) => prop.name.name)
 
   return {
     items: toCompletionItems(suggestions, CompletionItemKind.Field),

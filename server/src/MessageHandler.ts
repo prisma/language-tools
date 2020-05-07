@@ -24,7 +24,6 @@ import {
 import { parse } from 'prismafile'
 import { SyntaxError } from 'prismafile/dist/parser/index'
 import { Schema, Block } from 'prismafile/dist/ast'
-import { stringify } from 'querystring'
 
 function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
@@ -33,16 +32,9 @@ function getCurrentLine(document: TextDocument, line: number): string {
   })
 }
 
-function isFieldName(
-  position: Position,
-  token: string,
-  document: TextDocument,
-): boolean {
+function isFieldName(position: Position, document: TextDocument): boolean {
   const currentLine = getCurrentLine(document, position.line)
-  if (token === '') {
-    return currentLine.trim().length === 0
-  }
-  return currentLine.trim().startsWith(token)
+  return currentLine.trim().length === 0
 }
 
 function getWordAtPosition(document: TextDocument, position: Position): string {
@@ -72,10 +64,6 @@ function getBlockAtPosition(
   return !foundBlock ? undefined : foundBlock
 }
 
-function isInsideBlock(block: Block, position: Position): boolean {
-  return position.line != block.start.line - 1
-}
-
 /**
  * @todo Use official schema.prisma parser. This is a workaround!
  */
@@ -93,15 +81,15 @@ export async function handleDefinitionRequest(
     return new Promise((resolve) => resolve())
   }
 
-  const documentText = document.getText()
-
   const word = getWordAtPosition(document, position)
 
   if (word === '') {
     return new Promise((resolve) => resolve())
   }
 
-  const found = ast.blocks.find((b) => b.type === 'model' && b.name === word)
+  const found = ast.blocks.find(
+    (b) => b.type === 'model' && b.name.name === word,
+  )
 
   // selected word is not a model type
   if (!found) {
@@ -166,7 +154,6 @@ export function handleCompletionRequest(
   }
 
   let ast: Schema | undefined
-  let error: SyntaxError | undefined
   try {
     ast = parse(document.getText())
 
@@ -177,13 +164,11 @@ export function handleCompletionRequest(
         return getSuggestionForBlockTypes(ast)
       }
 
-      const token = getWordAtPosition(document, params.position)
-
       // Completion was triggered by a triggerCharacter
       if (context.triggerKind === 2) {
         switch (context.triggerCharacter) {
           case '@':
-            return getSuggestionsForAttributes(token, foundBlock)
+            return getSuggestionsForAttributes(foundBlock)
           case '[':
             return getSuggestionsForRelation(
               foundBlock,
@@ -192,21 +177,17 @@ export function handleCompletionRequest(
         }
       }
 
-      // check if suggestion for field name or type!
-      if (isFieldName(params.position, token, document)) {
+      if (isFieldName(params.position, document)) {
         return getSuggestionForField(ast, foundBlock)
       }
 
       if (foundBlock.type === 'model') {
-        // check if inside directive
-
+        // TODO check if inside directive
         return getSuggestionsForTypes(ast, foundBlock)
       }
     }
   } catch (errors) {
     if (errors instanceof SyntaxError) {
-      error = errors
-
       const found: string = errors.found
       const expected: Array<ExpectedObject> = errors.expected
       const message: string = errors.message
