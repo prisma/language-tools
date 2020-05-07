@@ -6,7 +6,7 @@ import {
 } from 'vscode-languageserver'
 import { Schema, DataSource, Block, Generator } from 'prismafile/dist/ast'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { getCurrentLine } from './MessageHandler'
+import { getCurrentLine, MyBlock } from './MessageHandler'
 
 function toCompletionItems(
   allowedTypes: string[],
@@ -77,56 +77,93 @@ export function getSuggestionsForTypes(
   }
 }
 
-function getSuggestionForDataSourceField(block: DataSource): string[] {
+function removeInvalidFieldSuggestions(
+  supportedFields: Array<string>,
+  block: DataSource | Generator | MyBlock,
+  document: TextDocument,
+  position: Position,
+): Array<string> {
+  if (block instanceof MyBlock) {
+    for (let _i = block.start.line + 1; _i < block.end.line; _i++) {
+      if (_i === position.line) {
+        continue
+      }
+      const currentLine = getCurrentLine(document, _i)
+      const fieldName = currentLine.replace(/ .*/, '')
+      if (supportedFields.includes(fieldName)) {
+        supportedFields.filter((field) => field != fieldName)
+      }
+    }
+  } else {
+    if (!block.assignments) {
+      return supportedFields
+    }
+    block.assignments.forEach((toRemove) => {
+      const index = supportedFields.indexOf(toRemove.key.name)
+      supportedFields.splice(index, 1)
+    })
+  }
+  return supportedFields
+}
+
+function getSuggestionForDataSourceField(
+  block: DataSource | MyBlock,
+  document: TextDocument,
+  position: Position,
+): string[] {
   const supportedFields = ['provider', 'url']
 
-  block.assignments.forEach((toRemove) => {
-    const index = supportedFields.indexOf(toRemove.key.name)
-    supportedFields.splice(index, 1)
-  })
-
-  return supportedFields
+  return removeInvalidFieldSuggestions(
+    supportedFields,
+    block,
+    document,
+    position,
+  )
 }
 
-function getSuggestionForGeneratorField(block: Generator): string[] {
+function getSuggestionForGeneratorField(
+  block: Generator | MyBlock,
+  document: TextDocument,
+  position: Position,
+): string[] {
   const supportedFields = ['provider', 'output']
 
-  block.assignments.forEach((toRemove) => {
-    const index = supportedFields.indexOf(toRemove.key.name)
-    supportedFields.splice(index, 1)
-  })
-
-  return supportedFields
+  return removeInvalidFieldSuggestions(
+    supportedFields,
+    block,
+    document,
+    position,
+  )
 }
 
-/**
- *
- * @todo add suggestions for type-alias and enum
- * @param foundBlock
- */
 export function getSuggestionForField(
   blockType: string,
-  document?: TextDocument,
+  document: TextDocument,
+  position: Position,
   ast?: Schema,
-  foundBlock?: Block,
+  block?: Block | MyBlock,
 ): CompletionList {
   let result: string[] = []
-  if (foundBlock) {
-    switch (foundBlock.type) {
-      case 'datasource':
-        result = getSuggestionForDataSourceField(foundBlock)
-        break
-      case 'generator':
-        if (foundBlock) {
-          result = getSuggestionForGeneratorField(foundBlock)
-        }
-        break
-      case 'model':
-      case 'type_alias':
-      case 'enum':
-        result = []
-        break
-    }
+  switch (blockType) {
+    case 'datasource':
+      result = getSuggestionForDataSourceField(
+        block as DataSource,
+        document,
+        position,
+      )
+      break
+    case 'generator':
+      result = getSuggestionForGeneratorField(
+        block as Generator,
+        document,
+        position,
+      )
+      break
+    case 'model':
+    case 'type_alias':
+    case 'enum':
+      result = []
+      break
   }
 
   return {

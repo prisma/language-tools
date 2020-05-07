@@ -23,6 +23,8 @@ import {
 } from './completions'
 import { parse } from 'prismafile'
 import { Schema, Block } from 'prismafile/dist/ast'
+import { stringify } from 'querystring'
+import { SyntaxError } from 'prismafile/dist/parser/index'
 
 export function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
@@ -31,9 +33,20 @@ export function getCurrentLine(document: TextDocument, line: number): string {
   })
 }
 
-function isFieldName(position: Position, document: TextDocument): boolean {
+function isFieldName(
+  position: Position,
+  document: TextDocument,
+  invalidSchema: boolean,
+): boolean {
   const currentLine = getCurrentLine(document, position.line)
-  return currentLine.trim().length === 0
+  if (currentLine.trim().length === 0) {
+    return true
+  }
+
+  const stringTillPosition = currentLine.substring(0, position.character).trim()
+  const firstWordInLine = stringTillPosition.replace(/ .*/, '')
+
+  return stringTillPosition.length === firstWordInLine.length
 }
 
 function getWordAtPosition(document: TextDocument, position: Position): string {
@@ -51,11 +64,18 @@ function getWordAtPosition(document: TextDocument, position: Position): string {
   return currentLine.slice(beginning, end + position.character)
 }
 
-interface MyBlock {
+export class MyBlock {
   type: string
   start: Position
   end: Position
   name: string
+
+  constructor(type: string, start: Position, end: Position, name: string) {
+    this.type = type
+    this.start = start
+    this.end = end
+    this.name = name
+  }
 }
 
 function getBlockAtPosition(
@@ -77,7 +97,7 @@ function getBlockAtPosition(
     let blockStart: Position = Position.create(0, 0)
     let blockEnd: Position = Position.create(0, 0)
     // get block beginning
-    for (let _i = line; _i > 0; _i--) {
+    for (let _i = line; _i >= 0; _i--) {
       const currentLine = getCurrentLine(document, _i).trim()
       if (currentLine.includes('{')) {
         // position is inside a block
@@ -94,7 +114,7 @@ function getBlockAtPosition(
       }
     }
     // get block ending
-    for (let _j = line; _j < document.lineCount - 1; _j++) {
+    for (let _j = line; _j < document.lineCount; _j++) {
       const currentLine = getCurrentLine(document, _j).trim()
       if (currentLine.includes('}')) {
         blockEnd = Position.create(_j, 1)
@@ -201,12 +221,15 @@ export function handleCompletionRequest(
   const documentText = document.getText()
 
   let ast: Schema | undefined
+  let invalidSchema = false
   try {
     ast = parse(documentText)
   } catch (errors) {
-    const error: SyntaxError = errors
-    console.log('Error message: ' + error.message)
-    console.log('Error name: ' + error.name)
+    if (errors instanceof SyntaxError) {
+      invalidSchema = true
+      console.log('Error message: ' + errors.message)
+      console.log('Error name: ' + errors.name)
+    }
   }
 
   const foundBlock = getBlockAtPosition(params.position.line, ast, document)
@@ -214,8 +237,14 @@ export function handleCompletionRequest(
     return getSuggestionForBlockTypes(ast, document)
   }
 
-  if (isFieldName(params.position, document)) {
-    // return getSuggestionForField(foundBlock.type, document, ast, foundBlock)
+  if (isFieldName(params.position, document, invalidSchema)) {
+    return getSuggestionForField(
+      foundBlock.type,
+      document,
+      params.position,
+      ast,
+      foundBlock,
+    )
   }
 
   // Completion was triggered by a triggerCharacter
