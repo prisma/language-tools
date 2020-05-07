@@ -33,11 +33,7 @@ export function getCurrentLine(document: TextDocument, line: number): string {
   })
 }
 
-function isFieldName(
-  position: Position,
-  document: TextDocument,
-  invalidSchema: boolean,
-): boolean {
+function isFieldName(position: Position, document: TextDocument): boolean {
   const currentLine = getCurrentLine(document, position.line)
   if (currentLine.trim().length === 0) {
     return true
@@ -46,7 +42,7 @@ function isFieldName(
   const stringTillPosition = currentLine.substring(0, position.character).trim()
   const firstWordInLine = stringTillPosition.replace(/ .*/, '')
 
-  return stringTillPosition.length === firstWordInLine.length
+  return stringTillPosition.length != firstWordInLine.length
 }
 
 function getWordAtPosition(document: TextDocument, position: Position): string {
@@ -118,12 +114,7 @@ function getBlockAtPosition(
       const currentLine = getCurrentLine(document, _j).trim()
       if (currentLine.includes('}')) {
         blockEnd = Position.create(_j, 1)
-        return {
-          start: blockStart,
-          name: blockName,
-          end: blockEnd,
-          type: blockType,
-        }
+        return new MyBlock(blockType, blockStart, blockEnd, blockName)
       }
     }
   }
@@ -221,12 +212,10 @@ export function handleCompletionRequest(
   const documentText = document.getText()
 
   let ast: Schema | undefined
-  let invalidSchema = false
   try {
     ast = parse(documentText)
   } catch (errors) {
     if (errors instanceof SyntaxError) {
-      invalidSchema = true
       console.log('Error message: ' + errors.message)
       console.log('Error name: ' + errors.name)
     }
@@ -237,7 +226,7 @@ export function handleCompletionRequest(
     return getSuggestionForBlockTypes(ast, document)
   }
 
-  if (isFieldName(params.position, document, invalidSchema)) {
+  if (isFieldName(params.position, document)) {
     return getSuggestionForField(
       foundBlock.type,
       document,
@@ -262,19 +251,8 @@ export function handleCompletionRequest(
   }
 
   if (foundBlock.type === 'model') {
-    //return getSuggestionsForTypes(ast, foundBlock)
+    return getSuggestionsForTypes(foundBlock, document, ast)
   }
-}
-
-interface ExpectedObject {
-  text: string
-  type: string
-  ignoreCase: boolean
-}
-
-interface DocumentLocation {
-  start: { line: number; column: number; offset: number }
-  end: { line: number; column: number; offset: number }
 }
 
 /**

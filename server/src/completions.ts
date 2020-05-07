@@ -4,7 +4,13 @@ import {
   CompletionItemKind,
   Position,
 } from 'vscode-languageserver'
-import { Schema, DataSource, Block, Generator } from 'prismafile/dist/ast'
+import {
+  Schema,
+  DataSource,
+  Block,
+  Generator,
+  Model,
+} from 'prismafile/dist/ast'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { getCurrentLine, MyBlock } from './MessageHandler'
 
@@ -56,23 +62,61 @@ export function getSuggestionsForAttributes(blockType: string): CompletionList {
   }
 }
 
-/**
- * @todo get modelNames except the modelName we are currently in
- */
+function getAllRelationNamesWithoutAst(
+  document: TextDocument,
+  currentModelStartLine: number,
+): Array<string> {
+  const modelNames: Array<string> = []
+  for (let _i = 0; _i < document.lineCount; _i++) {
+    if (currentModelStartLine === _i) {
+      // do not suggest the model name we are currently in
+      continue
+    }
+    const currentLine = getCurrentLine(document, _i)
+    if (
+      (currentLine.includes('model') || currentLine.includes('enum')) &&
+      currentLine.includes('{')
+    ) {
+      // found a block
+      const trimmedLine = currentLine.trim()
+      const blockType = currentLine.trim().replace(/ .*/, '')
+      const blockName = trimmedLine
+        .substring(blockType.length, trimmedLine.length - 1)
+        .trim()
+
+      modelNames.push(blockName)
+      // block is at least 2 lines long
+      _i++
+    }
+  }
+  return modelNames
+}
+
 export function getSuggestionsForTypes(
-  ast: Schema,
-  foundBlock: Block,
+  foundBlock: Model | MyBlock,
+  document: TextDocument,
+  ast?: Schema,
 ): CompletionList {
   const coreTypes = ['String', 'Int', 'Boolean', 'Float', 'DateTime']
-  const relationTypes = ast.blocks
-    .filter((block) => block.type === 'model')
-    .map((model) => model.name.name)
-    .filter((modelName) => modelName != foundBlock.name.name)
+  let suggestions: Array<string> = coreTypes
 
-  const allowedTypes = coreTypes.concat(relationTypes)
+  if (foundBlock instanceof MyBlock) {
+    // get all model names
+    const modelNames: Array<string> = getAllRelationNamesWithoutAst(
+      document,
+      foundBlock.start.line,
+    )
+    suggestions = suggestions.concat(modelNames)
+  } else if (ast) {
+    const relationTypes = ast.blocks
+      .filter((block) => block.type === 'model' || block.type === 'enum')
+      .map((model) => model.name.name)
+      .filter((modelName) => modelName != foundBlock.name.name)
+    suggestions = suggestions.concat(relationTypes)
+  }
 
   return {
-    items: toCompletionItems(allowedTypes, CompletionItemKind.TypeParameter),
+    items: toCompletionItems(suggestions, CompletionItemKind.TypeParameter),
     isIncomplete: false,
   }
 }
