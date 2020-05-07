@@ -8,11 +8,11 @@ import {
   CompletionParams,
   CompletionList,
   CompletionItem,
-  CompletionItemKind,
+  Position,
 } from 'vscode-languageserver'
 import * as util from './util'
 import { fullDocumentRange } from './provider'
-import { TextDocument, Position } from 'vscode-languageserver-textdocument'
+import { TextDocument } from 'vscode-languageserver-textdocument'
 import format from './format'
 import {
   getSuggestionsForAttributes,
@@ -22,10 +22,9 @@ import {
   getSuggestionsForRelation,
 } from './completions'
 import { parse } from 'prismafile'
-import { SyntaxError } from 'prismafile/dist/parser/index'
 import { Schema, Block } from 'prismafile/dist/ast'
 
-function getCurrentLine(document: TextDocument, line: number): string {
+export function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
     start: { line: line, character: 0 },
     end: { line: line, character: 9999 },
@@ -52,16 +51,63 @@ function getWordAtPosition(document: TextDocument, position: Position): string {
   return currentLine.slice(beginning, end + position.character)
 }
 
+interface MyBlock {
+  type: string
+  start: Position
+  end: Position
+  name: string
+}
+
 function getBlockAtPosition(
-  ast: Schema,
-  position: Position,
-): Block | undefined {
-  const foundBlock = ast.blocks.find(
-    (node) =>
-      node.start.line - 1 <= position.line &&
-      node.end.line - 1 >= position.line,
-  )
-  return !foundBlock ? undefined : foundBlock
+  line: number,
+  ast?: Schema,
+  document?: TextDocument,
+): Block | MyBlock | undefined {
+  // valid schema
+  if (ast) {
+    const foundBlock = ast.blocks.find(
+      (node) => node.start.line - 1 <= line && node.end.line - 1 >= line,
+    )
+    return !foundBlock ? undefined : foundBlock
+  }
+  // invalid schema
+  if (document) {
+    let blockType = ''
+    let blockName = ''
+    let blockStart: Position = Position.create(0, 0)
+    let blockEnd: Position = Position.create(0, 0)
+    // get block beginning
+    for (let _i = line; _i > 0; _i--) {
+      const currentLine = getCurrentLine(document, _i).trim()
+      if (currentLine.includes('{')) {
+        // position is inside a block
+        blockType = currentLine.replace(/ .*/, '')
+        blockName = currentLine
+          .substring(blockType.length, currentLine.length - 2)
+          .trim()
+        blockStart = Position.create(_i, 0)
+        break
+      }
+      // not inside a block
+      if (currentLine.includes('}') || _i === 0) {
+        return undefined
+      }
+    }
+    // get block ending
+    for (let _j = line; _j < document.lineCount - 1; _j++) {
+      const currentLine = getCurrentLine(document, _j).trim()
+      if (currentLine.includes('}')) {
+        blockEnd = Position.create(_j, 1)
+        return {
+          start: blockStart,
+          name: blockName,
+          end: blockEnd,
+          type: blockType,
+        }
+      }
+    }
+  }
+  return undefined
 }
 
 /**
@@ -152,70 +198,42 @@ export function handleCompletionRequest(
   if (!document) {
     return undefined
   }
+  const documentText = document.getText()
 
   let ast: Schema | undefined
   try {
-    ast = parse(document.getText())
-
-    // no syntax error
-    if (ast) {
-      const foundBlock = getBlockAtPosition(ast, params.position)
-      if (!foundBlock) {
-        return getSuggestionForBlockTypes(ast)
-      }
-
-      // Completion was triggered by a triggerCharacter
-      if (context.triggerKind === 2) {
-        switch (context.triggerCharacter) {
-          case '@':
-            return getSuggestionsForAttributes(foundBlock)
-          case '[':
-            return getSuggestionsForRelation(
-              foundBlock,
-              getCurrentLine(document, params.position.line),
-            )
-        }
-      }
-
-      if (isFieldName(params.position, document)) {
-        return getSuggestionForField(ast, foundBlock)
-      }
-
-      if (foundBlock.type === 'model') {
-        // TODO check if inside directive
-        return getSuggestionsForTypes(ast, foundBlock)
-      }
-    }
+    ast = parse(documentText)
   } catch (errors) {
-    if (errors instanceof SyntaxError) {
-      const found: string = errors.found
-      const expected: Array<ExpectedObject> = errors.expected
-      const message: string = errors.message
-      const location: LocationError = errors.location
-      const name: string = errors.name
+    const error: SyntaxError = errors
+    console.log('Error message: ' + error.message)
+    console.log('Error name: ' + error.name)
+  }
 
-      console.warn(
-        'expected: ' + expected.forEach((object) => console.log(object.text)),
-      )
-      console.warn('found: ' + found) // does not work with '@' right now
-      console.warn('location: ' + location)
-      console.warn('message: ' + message)
-      console.warn('name: ' + name)
+  const foundBlock = getBlockAtPosition(params.position.line, ast, document)
+  if (!foundBlock) {
+    return getSuggestionForBlockTypes(ast, document)
+  }
 
-      const items: CompletionItem[] = []
-      expected.forEach((suggestions) => suggestions.text != 'undefined')
-      expected.forEach((type) =>
-        items.push({
-          label: type.text,
-          kind: CompletionItemKind.TypeParameter,
-        }),
-      )
+  if (isFieldName(params.position, document)) {
+    // return getSuggestionForField(foundBlock.type, document, ast, foundBlock)
+  }
 
-      return {
-        items: items,
-        isIncomplete: false,
-      }
+  // Completion was triggered by a triggerCharacter
+  if (context.triggerKind === 2) {
+    switch (context.triggerCharacter) {
+      case '@':
+        return getSuggestionsForAttributes(foundBlock.type)
+      case ':':
+        return getSuggestionsForRelation(
+          foundBlock.type,
+          document,
+          params.position,
+        )
     }
+  }
+
+  if (foundBlock.type === 'model') {
+    //return getSuggestionsForTypes(ast, foundBlock)
   }
 }
 
@@ -225,7 +243,7 @@ interface ExpectedObject {
   ignoreCase: boolean
 }
 
-interface LocationError {
+interface DocumentLocation {
   start: { line: number; column: number; offset: number }
   end: { line: number; column: number; offset: number }
 }

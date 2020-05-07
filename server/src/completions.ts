@@ -2,8 +2,11 @@ import {
   CompletionItem,
   CompletionList,
   CompletionItemKind,
+  Position,
 } from 'vscode-languageserver'
 import { Schema, DataSource, Block, Generator } from 'prismafile/dist/ast'
+import { TextDocument } from 'vscode-languageserver-textdocument'
+import { getCurrentLine } from './MessageHandler'
 
 function toCompletionItems(
   allowedTypes: string[],
@@ -16,10 +19,10 @@ function toCompletionItems(
 
 function getSuggestionForBlockAttribute(): Array<string> {
   return [
-    'map(_ name: String)',
-    'id(_ fields: Identifier[])',
-    'unique(_ fields: Identifier[], name: String?)',
-    'index(_ fields: Identifier[], name: String?)',
+    'map(name: String)',
+    'id(fields: Identifier[])',
+    'unique(fields: Identifier[], name: String?)',
+    'index(fields: Identifier[], name: String?)',
   ]
 }
 
@@ -27,17 +30,17 @@ function getSuggestionForFieldAttribute(): Array<string> {
   return [
     'id',
     'unique',
-    'map(_ name: String)',
-    'default(_expr: Expr)',
-    'relation(_ name?:String, references?: Identifier[], onDelete?: CascadeEnum)',
+    'map(name: String)',
+    'default(expr: Expr)',
+    'relation(name?: String, references?: Identifier[], onDelete?: CascadeEnum)',
   ]
 }
 
-export function getSuggestionsForAttributes(block: Block): CompletionList {
+export function getSuggestionsForAttributes(blockType: string): CompletionList {
   let labels: string[] = []
-  switch (block.type) {
+  switch (blockType) {
     case 'model':
-      labels.concat(
+      labels = labels.concat(
         getSuggestionForBlockAttribute(),
         getSuggestionForFieldAttribute(),
       )
@@ -102,30 +105,40 @@ function getSuggestionForGeneratorField(block: Generator): string[] {
  * @param foundBlock
  */
 export function getSuggestionForField(
-  ast: Schema,
-  foundBlock: Block,
+  blockType: string,
+  document?: TextDocument,
+  ast?: Schema,
+  foundBlock?: Block,
 ): CompletionList {
   let result: string[] = []
-  switch (foundBlock.type) {
-    case 'datasource':
-      result = getSuggestionForDataSourceField(foundBlock)
-      break
-    case 'generator':
-      result = getSuggestionForGeneratorField(foundBlock)
-      break
-    case 'model':
-    case 'type_alias':
-    case 'enum':
-      result = []
-      break
+  if (foundBlock) {
+    switch (foundBlock.type) {
+      case 'datasource':
+        result = getSuggestionForDataSourceField(foundBlock)
+        break
+      case 'generator':
+        if (foundBlock) {
+          result = getSuggestionForGeneratorField(foundBlock)
+        }
+        break
+      case 'model':
+      case 'type_alias':
+      case 'enum':
+        result = []
+        break
+    }
   }
+
   return {
     items: toCompletionItems(result, CompletionItemKind.Field),
     isIncomplete: false,
   }
 }
 
-export function getSuggestionForBlockTypes(ast: Schema): CompletionList {
+export function getSuggestionForBlockTypes(
+  ast?: Schema,
+  document?: TextDocument,
+): CompletionList {
   const allowedBlockTypes = [
     'datasource',
     'generator',
@@ -135,19 +148,43 @@ export function getSuggestionForBlockTypes(ast: Schema): CompletionList {
   ]
 
   // enum is not supported in sqlite
-  ast.blocks.forEach((block) => {
-    if (block.type === 'datasource') {
-      const foundNotSupportingEnumProvider = block.assignments.filter(
-        (o) =>
-          o.key.name === 'provider' &&
-          o.value.type === 'string_value' &&
-          o.value.value === 'sqlite',
-      )
-      if (foundNotSupportingEnumProvider.length != 0) {
-        allowedBlockTypes.pop()
+  if (ast) {
+    ast.blocks.forEach((block) => {
+      if (block.type === 'datasource') {
+        const foundNotSupportingEnumProvider = block.assignments.filter(
+          (o) =>
+            o.key.name === 'provider' &&
+            o.value.type === 'string_value' &&
+            o.value.value === 'sqlite',
+        )
+        if (foundNotSupportingEnumProvider.length != 0) {
+          allowedBlockTypes.pop()
+        }
+      }
+    })
+  } else if (document) {
+    for (let _i = 0; _i < document.lineCount - 1; _i++) {
+      let currentLine = getCurrentLine(document, _i)
+      if (currentLine.trim().includes('datasource')) {
+        for (let _j = _i; _j < document.lineCount - 1; _j++) {
+          currentLine = getCurrentLine(document, _j)
+          if (currentLine.includes('}')) {
+            break
+          }
+          if (
+            currentLine.trim().startsWith('provider') &&
+            currentLine.includes('sqlite')
+          ) {
+            allowedBlockTypes.pop()
+            break
+          }
+        }
+      }
+      if (!allowedBlockTypes.includes('enum')) {
+        break
       }
     }
-  })
+  }
 
   return {
     items: toCompletionItems(allowedBlockTypes, CompletionItemKind.Class),
@@ -160,16 +197,27 @@ export function getSuggestionForBlockTypes(ast: Schema): CompletionList {
  * @todo exclude field of current line
  */
 export function getSuggestionsForRelation(
-  block: Block,
-  currentLine: string,
+  blockType: string,
+  document: TextDocument,
+  position: Position,
 ): CompletionList | undefined {
-  if (block.type != 'model' || !currentLine.includes('@relation(')) {
+  const currentLine = getCurrentLine(document, position.line)
+  if (blockType != 'model' || !currentLine.includes('@relation(')) {
     return undefined
   }
-  const suggestions = block.properties.map((prop) => prop.name.name)
+
+  const foundIndexOfFields = currentLine.indexOf('fields:')
+  const foundIndexOfReferences = currentLine.indexOf('references:')
+
+  const subString = currentLine.substring(0, position.character - 1)
+  if (subString.endsWith('references')) {
+    // get identifiers from this block
+  } else if (subString.endsWith('fields')) {
+    // TODO do stuff here
+  }
 
   return {
-    items: toCompletionItems(suggestions, CompletionItemKind.Field),
+    items: toCompletionItems([], CompletionItemKind.Field),
     isIncomplete: true,
   }
 }
