@@ -14,6 +14,172 @@ import {
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { getCurrentLine, MyBlock } from './MessageHandler'
 
+const corePrimitiveTypes: CompletionItem[] = [
+  {
+    label: 'String',
+    kind: CompletionItemKind.TypeParameter,
+    documentation: 'Variable length text',
+  },
+  {
+    label: 'Boolean',
+    kind: CompletionItemKind.TypeParameter,
+    documentation: 'True or false value',
+  },
+  {
+    label: 'Int',
+    kind: CompletionItemKind.TypeParameter,
+    documentation: 'Integer value',
+  },
+  {
+    label: 'Float',
+    kind: CompletionItemKind.TypeParameter,
+    documentation: 'Floating point number',
+  },
+  {
+    label: 'DateTime',
+    kind: CompletionItemKind.TypeParameter,
+    documentation: 'Timestamp',
+  },
+]
+
+const allowedBlockTypes: CompletionItem[] = [
+  {
+    label: 'datasource',
+    kind: CompletionItemKind.Class,
+    documentation:
+      'The datasource block tells the schema where the models are backed.',
+  },
+  {
+    label: 'generator',
+    kind: CompletionItemKind.Class,
+    documentation:
+      "Generator blocks configure which clients are generated and how they're generated. Language preferences and binary configuration will go in here.",
+  },
+  {
+    label: 'model',
+    kind: CompletionItemKind.Class,
+    documentation:
+      'Models represent the entities of your application domain. They are defined using model blocks in the data model. ',
+  },
+  {
+    label: 'type_alias',
+    kind: CompletionItemKind.Class,
+  },
+  {
+    label: 'enum',
+    kind: CompletionItemKind.Class,
+    documentation:
+      "Enums are defined via the enum block. You can define enums in your data model if they're supported by the data source you use:\n• PostgreSQL: Supported\n• MySQL: Supported\n• SQLite: Not supported",
+  },
+]
+
+const blockAttributes: CompletionItem[] = [
+  {
+    label: 'map([])',
+    kind: CompletionItemKind.Property,
+    detail: '@@map(_ name: String)',
+    documentation:
+      'Defines the name of the underlying table or collection name.',
+  },
+  {
+    label: 'id([])',
+    kind: CompletionItemKind.Property,
+    detail: '@@id(_ fields: Identifier[])',
+    documentation: 'Defines a composite primary key across fields.',
+  },
+  {
+    label: 'unique([])',
+    kind: CompletionItemKind.Property,
+    detail: '@@unique(_ fields: Identifier[], name: String?)',
+    documentation: 'Defines a composite unique constraint across fields.',
+  },
+  {
+    label: 'index([])',
+    kind: CompletionItemKind.Property,
+    detail: '@@index(_ fields: Identifier[], name: String?)',
+    documentation: 'Defines an index for multiple fields',
+  },
+]
+
+const fieldAttributes: CompletionItem[] = [
+  {
+    label: 'id',
+    kind: CompletionItemKind.Property,
+    detail: '@id',
+    documentation:
+      'Defines the primary key. There must be exactly one field @id or block @id',
+  },
+  {
+    label: 'unique',
+    kind: CompletionItemKind.Property,
+    detail: '@unique',
+    documentation: 'Defines the unique constraint.',
+  },
+  {
+    label: 'map()',
+    kind: CompletionItemKind.Property,
+    detail: '@map(_ name: String)',
+    documentation: 'Defines the raw column name the field is mapped to.',
+  },
+  {
+    label: 'default()',
+    kind: CompletionItemKind.Property,
+    detail: '@default(_ expr: Expr)',
+    documentation: 'Specifies a default value if null is provided.',
+  },
+  {
+    label: 'relation()',
+    kind: CompletionItemKind.Property,
+    detail:
+      '@relation(_ name?: String, references?: Identifier[], onDelete?: CascadeEnum)\nArguments:\n•name: (optional, except when required for disambiguation) defines the name of the relationship. The name of the relation needs to be explicitly given to resolve amibiguities when the model contains two or more fields that refer to the same model (another model or itself).\n•references: (optional) list of field names to reference',
+    documentation:
+      'Specifies and disambiguates relationships when needed. Where possible on relational databases, the @relation annotation will translate to a foreign key constraint, but not an index.',
+  },
+]
+
+const supportedDataSourceFields: CompletionItem[] = [
+  {
+    label: 'provider',
+    kind: CompletionItemKind.Field,
+    documentation:
+      'Can be one of the following built in datasource providers:\n•`postgresql`\n•`mysql`\n•`sqlite`',
+  },
+  {
+    label: 'url',
+    kind: CompletionItemKind.Field,
+    documentation:
+      'Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database. (more information see https://github.com/prisma/specs/blob/master/schema/datasource_urls.md)',
+  },
+]
+
+const supportedGeneratorFields: CompletionItem[] = [
+  {
+    label: 'provider',
+    kind: CompletionItemKind.Field,
+    documentation:
+      'Can be a path or one of the following built in datasource providers:\n•`prisma-client-js`\n•`prisma-client-go` (This is not implemented yet.)',
+  },
+  {
+    label: 'output',
+    kind: CompletionItemKind.Field,
+    documentation: 'Path for the generated client.',
+  },
+  {
+    label: 'platforms',
+    kind: CompletionItemKind.Field,
+    detail: 'Declarative way to download the required binaries.',
+    documentation:
+      '(optional) An array of binaries that are required by the application, string for known platforms and path for custom binaries.',
+  },
+  {
+    label: 'pinnedPlatform',
+    kind: CompletionItemKind.Field,
+    detail: 'Declarative way to choose the runtime binary.',
+    documentation:
+      '(optional) A string that points to the name of an object in the platforms field, usually an environment variable.\nWhen a custom binary is provided the pinnedPlatform is required.',
+  },
+]
+
 function toCompletionItems(
   allowedTypes: string[],
   kind: CompletionItemKind,
@@ -23,35 +189,27 @@ function toCompletionItems(
   return items
 }
 
-function getSuggestionForBlockAttribute(blockType: string): Array<string> {
+function getSuggestionForBlockAttribute(blockType: string): CompletionItem[] {
   if (blockType != 'model') {
     return []
   }
-
-  return ['map([])', 'id([])', 'unique([])', 'index([])']
+  return blockAttributes
 }
 
 function getSuggestionForFieldAttribute(
   blockType: string,
   position: Position,
   document: TextDocument,
-): Array<string> {
+): CompletionItem[] {
   if (blockType != 'model' && blockType != 'type_alias') {
     return []
   }
   const currentLine = getCurrentLine(document, position.line)
-
-  let suggestions: Array<string> = [
-    'id',
-    'unique',
-    'map()',
-    'default()',
-    'relation()',
-  ]
+  let suggestions: CompletionItem[] = fieldAttributes
 
   if (!currentLine.includes('Int')) {
     // id not allowed
-    suggestions = suggestions.filter((sugg) => sugg != 'id')
+    suggestions = suggestions.filter((sugg) => sugg.label != 'id')
   }
 
   return suggestions
@@ -66,39 +224,41 @@ export function getSuggestionsForAttributes(
     start: { line: position.line, character: position.character - 2 },
     end: { line: position.line, character: position.character },
   })
-  let labels: string[] = []
+  let suggestions: CompletionItem[] = []
 
   if (symbolBeforePosition === '@@') {
-    labels = getSuggestionForBlockAttribute(blockType)
+    suggestions = getSuggestionForBlockAttribute(blockType)
   } else if (symbolBeforePosition === ' @') {
-    const blockLabels = getSuggestionForBlockAttribute(blockType)
-    for (let _i = 0; _i < blockLabels.length; _i++) {
-      blockLabels[_i] = '@' + blockLabels[_i]
+    const blockAttributeSuggestions: CompletionItem[] = getSuggestionForBlockAttribute(
+      blockType,
+    )
+    for (let _i = 0; _i < blockAttributeSuggestions.length; _i++) {
+      blockAttributeSuggestions[_i].data = '@' + blockAttributeSuggestions[_i]
     }
-    labels = getSuggestionForFieldAttribute(
+    suggestions = getSuggestionForFieldAttribute(
       blockType,
       position,
       document,
-    ).concat(blockLabels)
+    ).concat(blockAttributeSuggestions)
   } else {
     // valid schema
-    const fieldLabels = getSuggestionForFieldAttribute(
+    const fieldAttributeSuggestions = getSuggestionForFieldAttribute(
       blockType,
       position,
       document,
     )
-    for (let _i = 0; _i < fieldLabels.length; _i++) {
-      fieldLabels[_i] = '@' + fieldLabels[_i]
+    for (let _i = 0; _i < fieldAttributeSuggestions.length; _i++) {
+      fieldAttributeSuggestions[_i].label = '@' + fieldAttributeSuggestions[_i]
     }
-    const blockLabels = getSuggestionForBlockAttribute(blockType)
-    for (let _i = 0; _i < blockLabels.length; _i++) {
-      blockLabels[_i] = '@@' + blockLabels[_i]
+    const blockAttributeSuggestions = getSuggestionForBlockAttribute(blockType)
+    for (let _i = 0; _i < blockAttributeSuggestions.length; _i++) {
+      blockAttributeSuggestions[_i].label = '@@' + blockAttributeSuggestions[_i]
     }
-    labels = fieldLabels.concat(blockLabels)
+    suggestions = fieldAttributeSuggestions.concat(blockAttributeSuggestions)
   }
 
   return {
-    items: toCompletionItems(labels, CompletionItemKind.Property),
+    items: suggestions,
     isIncomplete: false,
   }
 }
@@ -133,20 +293,12 @@ export function getAllRelationNamesWithoutAst(
   return modelNames
 }
 
-export const coreTypes: Array<string> = [
-  'String',
-  'Int',
-  'Boolean',
-  'Float',
-  'DateTime',
-]
-
 export function getSuggestionsForTypes(
   foundBlock: Model | MyBlock,
   document: TextDocument,
   ast?: Schema,
 ): CompletionList {
-  let suggestions: Array<string> = coreTypes
+  let suggestions: CompletionItem[] = corePrimitiveTypes
 
   if (foundBlock instanceof MyBlock) {
     // get all model names
@@ -154,17 +306,21 @@ export function getSuggestionsForTypes(
       document,
       foundBlock.start.line,
     )
-    suggestions = suggestions.concat(modelNames)
+    suggestions = suggestions.concat(
+      toCompletionItems(modelNames, CompletionItemKind.TypeParameter),
+    )
   } else if (ast) {
     const relationTypes = ast.blocks
       .filter((block) => block.type === 'model' || block.type === 'enum')
       .map((model) => model.name.name)
       .filter((modelName) => modelName != foundBlock.name.name)
-    suggestions = suggestions.concat(relationTypes)
+    suggestions = suggestions.concat(
+      toCompletionItems(relationTypes, CompletionItemKind.TypeParameter),
+    )
   }
 
   return {
-    items: toCompletionItems(suggestions, CompletionItemKind.TypeParameter),
+    items: suggestions,
     isIncomplete: false,
   }
 }
@@ -202,32 +358,30 @@ function getSuggestionForDataSourceField(
   block: DataSource | MyBlock,
   document: TextDocument,
   position: Position,
-): string[] {
-  const supportedFields = ['provider', 'url']
-
-  return removeInvalidFieldSuggestions(
-    supportedFields,
+): CompletionItem[] {
+  const labels: Array<string> = removeInvalidFieldSuggestions(
+    supportedDataSourceFields.map((item) => item.label),
     block,
     document,
     position,
   )
+
+  return supportedDataSourceFields.filter((item) => labels.includes(item.label))
 }
 
 function getSuggestionForGeneratorField(
   block: Generator | MyBlock,
   document: TextDocument,
   position: Position,
-): string[] {
-  const supportedFields = ['provider', 'output', 'platforms', 'pinnedPlatform']
-
-  const suggestions = removeInvalidFieldSuggestions(
-    supportedFields,
+): CompletionItem[] {
+  const labels = removeInvalidFieldSuggestions(
+    supportedGeneratorFields.map((item) => item.label),
     block,
     document,
     position,
   )
 
-  return suggestions
+  return supportedGeneratorFields.filter((item) => labels.includes(item.label))
 }
 
 /**
@@ -240,17 +394,17 @@ export function getSuggestionForFirstInsideBlock(
   ast?: Schema,
   block?: Block | MyBlock,
 ): CompletionList {
-  let result: string[] = []
+  let suggestions: CompletionItem[] = []
   switch (blockType) {
     case 'datasource':
-      result = getSuggestionForDataSourceField(
+      suggestions = getSuggestionForDataSourceField(
         block as DataSource,
         document,
         position,
       )
       break
     case 'generator':
-      result = getSuggestionForGeneratorField(
+      suggestions = getSuggestionForGeneratorField(
         block as Generator,
         document,
         position,
@@ -258,18 +412,15 @@ export function getSuggestionForFirstInsideBlock(
       break
     case 'model':
     case 'type_alias':
-      result = getSuggestionForBlockAttribute(blockType)
-      for (let _i = 0; _i < result.length; _i++) {
-        result[_i] = '@@' + result[_i]
+      suggestions = getSuggestionForBlockAttribute(blockType)
+      for (let _i = 0; _i < suggestions.length; _i++) {
+        suggestions[_i].label = '@@' + suggestions[_i]
       }
-      break
-    case 'enum':
-      result = []
       break
   }
 
   return {
-    items: toCompletionItems(result, CompletionItemKind.Field),
+    items: suggestions,
     isIncomplete: false,
   }
 }
@@ -278,13 +429,7 @@ export function getSuggestionForBlockTypes(
   ast?: Schema,
   document?: TextDocument,
 ): CompletionList {
-  const allowedBlockTypes = [
-    'datasource',
-    'generator',
-    'model',
-    'type_alias',
-    'enum',
-  ]
+  const suggestions: CompletionItem[] = allowedBlockTypes
 
   // enum is not supported in sqlite
   if (ast) {
@@ -297,7 +442,7 @@ export function getSuggestionForBlockTypes(
             o.value.value === 'sqlite',
         )
         if (foundNotSupportingEnumProvider.length != 0) {
-          allowedBlockTypes.pop()
+          suggestions.pop()
         }
       }
     })
@@ -314,19 +459,19 @@ export function getSuggestionForBlockTypes(
             currentLine.trim().startsWith('provider') &&
             currentLine.includes('sqlite')
           ) {
-            allowedBlockTypes.pop()
+            suggestions.pop()
             break
           }
         }
       }
-      if (!allowedBlockTypes.includes('enum')) {
+      if (!suggestions.map((item) => item.label).includes('enum')) {
         break
       }
     }
   }
 
   return {
-    items: toCompletionItems(allowedBlockTypes, CompletionItemKind.Class),
+    items: suggestions,
     isIncomplete: false,
   }
 }
