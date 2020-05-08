@@ -28,7 +28,7 @@ function getSuggestionForBlockAttribute(blockType: string): Array<string> {
     return []
   }
 
-  return ['map()', 'id()', 'unique()', 'index()']
+  return ['map([])', 'id([])', 'unique([])', 'index([])']
 }
 
 function getSuggestionForFieldAttribute(
@@ -230,7 +230,10 @@ function getSuggestionForGeneratorField(
   return suggestions
 }
 
-export function getSuggestionForField(
+/**
+ * gets suggestions for block typ
+ */
+export function getSuggestionForFirstInsideBlock(
   blockType: string,
   document: TextDocument,
   position: Position,
@@ -255,6 +258,11 @@ export function getSuggestionForField(
       break
     case 'model':
     case 'type_alias':
+      result = getSuggestionForBlockAttribute(blockType)
+      for (let _i = 0; _i < result.length; _i++) {
+        result[_i] = '@@' + result[_i]
+      }
+      break
     case 'enum':
       result = []
       break
@@ -382,7 +390,7 @@ function getFieldsFromCurrentBlock(
   position: Position,
   wordsBeforePosition: Array<string>,
   block: Block | MyBlock,
-  context: string,
+  context?: string,
 ): Array<string> {
   let suggestions: Array<string> = []
   for (let i = block.start.line; i < block.end.line - 1; i++) {
@@ -391,10 +399,10 @@ function getFieldsFromCurrentBlock(
       suggestions.push(currentLine.replace(/ .*/, ''))
     }
   }
-  const otherContext = context === 'references' ? 'fields' : 'references'
 
   const currentLine = getCurrentLine(document, position.line).trim()
   if (currentLine.includes('fields') && currentLine.includes('references')) {
+    const otherContext = context === 'references' ? 'fields' : 'references'
     // remove all fields that might be inside other attribute
     // e.g. if inside 'references' context, fields from 'fields' context are not correct suggestions
     const startOfOtherContext = currentLine.indexOf(otherContext + ': [')
@@ -431,7 +439,7 @@ export function getSuggestionsForInsideAttributes(
     .split(' ')
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
 
-  if (wordBeforePosition === '@default') {
+  if (wordBeforePosition.includes('@default')) {
     suggestions = getFunctions(currentLine)
   } else if (wordBeforePosition?.includes('@relation')) {
     suggestions = ['references: []', 'fields: []', '""']
@@ -450,6 +458,17 @@ export function getSuggestionsForInsideAttributes(
       wordsBeforePosition,
       block,
       'references',
+    )
+  } else if (
+    wordBeforePosition.includes('@@unique') ||
+    wordBeforePosition.includes('@@id') ||
+    wordBeforePosition.includes('@@index')
+  ) {
+    suggestions = getFieldsFromCurrentBlock(
+      document,
+      position,
+      wordsBeforePosition,
+      block,
     )
   }
   return {

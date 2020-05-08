@@ -18,7 +18,7 @@ import {
   getSuggestionsForAttributes,
   getSuggestionsForTypes,
   getSuggestionForBlockTypes,
-  getSuggestionForField,
+  getSuggestionForFirstInsideBlock,
   getSuggestionForSupportedFields,
   getSuggestionsForInsideAttributes,
 } from './completions'
@@ -33,7 +33,10 @@ export function getCurrentLine(document: TextDocument, line: number): string {
   })
 }
 
-function isFieldName(position: Position, document: TextDocument): boolean {
+function isFirstInsideBlock(
+  position: Position,
+  document: TextDocument,
+): boolean {
   const currentLine = getCurrentLine(document, position.line)
   if (currentLine.trim().length === 0) {
     return true
@@ -226,8 +229,8 @@ export function handleCompletionRequest(
     return getSuggestionForBlockTypes(ast, document)
   }
 
-  if (isFieldName(params.position, document)) {
-    return getSuggestionForField(
+  if (isFirstInsideBlock(params.position, document)) {
+    return getSuggestionForFirstInsideBlock(
       foundBlock.type,
       document,
       params.position,
