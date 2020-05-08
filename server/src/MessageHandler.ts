@@ -19,11 +19,11 @@ import {
   getSuggestionsForTypes,
   getSuggestionForBlockTypes,
   getSuggestionForField,
-  getSuggestionsForRelation,
+  getSuggestionForSupportedFields,
+  getSuggestionsForInsideAttributes,
 } from './completions'
 import { parse } from 'prismafile'
 import { Schema, Block } from 'prismafile/dist/ast'
-import { stringify } from 'querystring'
 import { SyntaxError } from 'prismafile/dist/parser/index'
 
 export function getCurrentLine(document: TextDocument, line: number): string {
@@ -42,7 +42,7 @@ function isFieldName(position: Position, document: TextDocument): boolean {
   const stringTillPosition = currentLine.substring(0, position.character).trim()
   const firstWordInLine = stringTillPosition.replace(/ .*/, '')
 
-  return stringTillPosition.length != firstWordInLine.length
+  return stringTillPosition.length === firstWordInLine.length
 }
 
 function getWordAtPosition(document: TextDocument, position: Position): string {
@@ -240,9 +240,13 @@ export function handleCompletionRequest(
   if (context.triggerKind === 2) {
     switch (context.triggerCharacter) {
       case '@':
-        return getSuggestionsForAttributes(foundBlock.type)
-      case ':':
-        return getSuggestionsForRelation(
+        return getSuggestionsForAttributes(
+          foundBlock.type,
+          params.position,
+          document,
+        )
+      case '"':
+        return getSuggestionForSupportedFields(
           foundBlock.type,
           document,
           params.position,
@@ -251,7 +255,39 @@ export function handleCompletionRequest(
   }
 
   if (foundBlock.type === 'model') {
-    return getSuggestionsForTypes(foundBlock, document, ast)
+    const symbolBeforePosition = document.getText({
+      start: {
+        line: params.position.line,
+        character: params.position.character - 1,
+      },
+      end: { line: params.position.line, character: params.position.character },
+    })
+    const currentLine = getCurrentLine(document, params.position.line).trim()
+    const wordsBeforePosition: string[] = currentLine
+      .substring(0, params.position.character - 1)
+      .trim()
+      .split(/\s+/)
+
+    if (currentLine.includes('(')) {
+      return getSuggestionsForInsideAttributes(
+        document,
+        params.position,
+        foundBlock,
+      )
+    }
+
+    // check if type
+    if (
+      wordsBeforePosition.length < 2 ||
+      (wordsBeforePosition.length === 2 && symbolBeforePosition != ' ')
+    ) {
+      return getSuggestionsForTypes(foundBlock, document, ast)
+    }
+    return getSuggestionsForAttributes(
+      foundBlock.type,
+      params.position,
+      document,
+    )
   }
 }
 

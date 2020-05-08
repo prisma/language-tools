@@ -23,46 +23,87 @@ function toCompletionItems(
   return items
 }
 
-function getSuggestionForBlockAttribute(): Array<string> {
-  return [
-    'map(name: String)',
-    'id(fields: Identifier[])',
-    'unique(fields: Identifier[], name: String?)',
-    'index(fields: Identifier[], name: String?)',
-  ]
+function getSuggestionForBlockAttribute(blockType: string): Array<string> {
+  if (blockType != 'model') {
+    return []
+  }
+
+  return ['map()', 'id()', 'unique()', 'index()']
 }
 
-function getSuggestionForFieldAttribute(): Array<string> {
-  return [
+function getSuggestionForFieldAttribute(
+  blockType: string,
+  position: Position,
+  document: TextDocument,
+): Array<string> {
+  if (blockType != 'model' && blockType != 'type_alias') {
+    return []
+  }
+  const currentLine = getCurrentLine(document, position.line)
+
+  let suggestions: Array<string> = [
     'id',
     'unique',
-    'map(name: String)',
-    'default(expr: Expr)',
-    'relation(name?: String, references?: Identifier[], onDelete?: CascadeEnum)',
+    'map()',
+    'default()',
+    'relation()',
   ]
+
+  if (!currentLine.includes('Int')) {
+    // id not allowed
+    suggestions = suggestions.filter((sugg) => sugg != 'id')
+  }
+
+  return suggestions
 }
 
-export function getSuggestionsForAttributes(blockType: string): CompletionList {
+export function getSuggestionsForAttributes(
+  blockType: string,
+  position: Position,
+  document: TextDocument,
+): CompletionList {
+  const symbolBeforePosition = document.getText({
+    start: { line: position.line, character: position.character - 2 },
+    end: { line: position.line, character: position.character },
+  })
   let labels: string[] = []
-  switch (blockType) {
-    case 'model':
-      labels = labels.concat(
-        getSuggestionForBlockAttribute(),
-        getSuggestionForFieldAttribute(),
-      )
-      break
-    case 'type_alias':
-      labels = getSuggestionForFieldAttribute()
-      break
+
+  if (symbolBeforePosition === '@@') {
+    labels = getSuggestionForBlockAttribute(blockType)
+  } else if (symbolBeforePosition === ' @') {
+    const blockLabels = getSuggestionForBlockAttribute(blockType)
+    for (let _i = 0; _i < blockLabels.length; _i++) {
+      blockLabels[_i] = '@' + blockLabels[_i]
+    }
+    labels = getSuggestionForFieldAttribute(
+      blockType,
+      position,
+      document,
+    ).concat(blockLabels)
+  } else {
+    // valid schema
+    const fieldLabels = getSuggestionForFieldAttribute(
+      blockType,
+      position,
+      document,
+    )
+    for (let _i = 0; _i < fieldLabels.length; _i++) {
+      fieldLabels[_i] = '@' + fieldLabels[_i]
+    }
+    const blockLabels = getSuggestionForBlockAttribute(blockType)
+    for (let _i = 0; _i < blockLabels.length; _i++) {
+      blockLabels[_i] = '@@' + blockLabels[_i]
+    }
+    labels = fieldLabels.concat(blockLabels)
   }
 
   return {
     items: toCompletionItems(labels, CompletionItemKind.Property),
-    isIncomplete: true,
+    isIncomplete: false,
   }
 }
 
-function getAllRelationNamesWithoutAst(
+export function getAllRelationNamesWithoutAst(
   document: TextDocument,
   currentModelStartLine: number,
 ): Array<string> {
@@ -92,12 +133,19 @@ function getAllRelationNamesWithoutAst(
   return modelNames
 }
 
+export const coreTypes: Array<string> = [
+  'String',
+  'Int',
+  'Boolean',
+  'Float',
+  'DateTime',
+]
+
 export function getSuggestionsForTypes(
   foundBlock: Model | MyBlock,
   document: TextDocument,
   ast?: Schema,
 ): CompletionList {
-  const coreTypes = ['String', 'Int', 'Boolean', 'Float', 'DateTime']
   let suggestions: Array<string> = coreTypes
 
   if (foundBlock instanceof MyBlock) {
@@ -170,14 +218,16 @@ function getSuggestionForGeneratorField(
   document: TextDocument,
   position: Position,
 ): string[] {
-  const supportedFields = ['provider', 'output']
+  const supportedFields = ['provider', 'output', 'platforms', 'pinnedPlatform']
 
-  return removeInvalidFieldSuggestions(
+  const suggestions = removeInvalidFieldSuggestions(
     supportedFields,
     block,
     document,
     position,
   )
+
+  return suggestions
 }
 
 export function getSuggestionForField(
@@ -269,36 +319,141 @@ export function getSuggestionForBlockTypes(
 
   return {
     items: toCompletionItems(allowedBlockTypes, CompletionItemKind.Class),
-    isIncomplete: true,
+    isIncomplete: false,
   }
 }
 
-/**
- * @todo check if position is inside relation not e.g. in List Type
- * @todo exclude field of current line
- */
-export function getSuggestionsForRelation(
+export function getSuggestionForSupportedFields(
   blockType: string,
   document: TextDocument,
   position: Position,
 ): CompletionList | undefined {
-  const currentLine = getCurrentLine(document, position.line)
-  if (blockType != 'model' || !currentLine.includes('@relation(')) {
-    return undefined
-  }
+  let suggestions: Array<string> = []
+  const currentLine = getCurrentLine(document, position.line).trim()
 
-  const foundIndexOfFields = currentLine.indexOf('fields:')
-  const foundIndexOfReferences = currentLine.indexOf('references:')
-
-  const subString = currentLine.substring(0, position.character - 1)
-  if (subString.endsWith('references')) {
-    // get identifiers from this block
-  } else if (subString.endsWith('fields')) {
-    // TODO do stuff here
+  switch (blockType) {
+    case 'generator':
+      if (currentLine.startsWith('provider')) {
+        suggestions = ['prisma-client-js'] // TODO add prisma-client-go when implemented!
+      }
+      break
+    case 'datasource':
+      if (currentLine.startsWith('provider')) {
+        suggestions = ['postgresql', 'mysql', 'sqlite']
+      }
+      break
   }
 
   return {
-    items: toCompletionItems([], CompletionItemKind.Field),
-    isIncomplete: true,
+    items: toCompletionItems(suggestions, CompletionItemKind.Field),
+    isIncomplete: false,
+  }
+}
+
+function getFunctions(currentLine: string): Array<string> {
+  const suggestions: Array<string> = ['uuid()', 'cuid()']
+  if (currentLine.includes('Int') && currentLine.includes('id')) {
+    suggestions.push('autoincrement()')
+  }
+  if (currentLine.includes('DateTime')) {
+    suggestions.push('now()')
+  }
+  return suggestions
+}
+
+// checks if e.g. inside 'fields' or 'references' attribute
+function isInsideAttribute(
+  wordsBeforePosition: Array<string>,
+  attributeName: string,
+): boolean {
+  for (let i = wordsBeforePosition.length - 1; i > 0; i--) {
+    if (wordsBeforePosition[i].includes(']')) {
+      break
+    }
+    if (wordsBeforePosition[i].includes(attributeName)) {
+      return true
+    }
+  }
+  return false
+}
+
+function getFieldsFromCurrentBlock(
+  document: TextDocument,
+  position: Position,
+  wordsBeforePosition: Array<string>,
+  block: Block | MyBlock,
+  context: string,
+): Array<string> {
+  let suggestions: Array<string> = []
+  for (let i = block.start.line; i < block.end.line - 1; i++) {
+    if (i != position.line) {
+      const currentLine = getCurrentLine(document, i).trim()
+      suggestions.push(currentLine.replace(/ .*/, ''))
+    }
+  }
+  const otherContext = context === 'references' ? 'fields' : 'references'
+
+  const currentLine = getCurrentLine(document, position.line).trim()
+  if (currentLine.includes('fields') && currentLine.includes('references')) {
+    // remove all fields that might be inside other attribute
+    // e.g. if inside 'references' context, fields from 'fields' context are not correct suggestions
+    const startOfOtherContext = currentLine.indexOf(otherContext + ': [')
+    let end: number = startOfOtherContext
+    for (end; end < currentLine.length; end++) {
+      if (currentLine.charAt(end) === ']') {
+        break
+      }
+    }
+    const otherContextFieldsString = currentLine.substring(
+      startOfOtherContext + otherContext.length + 3,
+      end,
+    )
+    const otherContextFields = otherContextFieldsString.split(', ')
+
+    // remove otherContextFields from allFieldsInBlock
+    suggestions = suggestions.filter(
+      (sugg) => !otherContextFields.includes(sugg),
+    )
+  }
+
+  return suggestions
+}
+
+export function getSuggestionsForInsideAttributes(
+  document: TextDocument,
+  position: Position,
+  block: Block | MyBlock,
+): CompletionList | undefined {
+  let suggestions: Array<string> = []
+  const currentLine = getCurrentLine(document, position.line).trim()
+  const wordsBeforePosition = currentLine
+    .substring(0, position.character - 2)
+    .split(' ')
+  const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
+
+  if (wordBeforePosition === '@default') {
+    suggestions = getFunctions(currentLine)
+  } else if (wordBeforePosition?.includes('@relation')) {
+    suggestions = ['references: []', 'fields: []', '""']
+  } else if (isInsideAttribute(wordsBeforePosition, 'fields')) {
+    suggestions = getFieldsFromCurrentBlock(
+      document,
+      position,
+      wordsBeforePosition,
+      block,
+      'fields',
+    )
+  } else if (isInsideAttribute(wordsBeforePosition, 'references')) {
+    suggestions = getFieldsFromCurrentBlock(
+      document,
+      position,
+      wordsBeforePosition,
+      block,
+      'references',
+    )
+  }
+  return {
+    items: toCompletionItems(suggestions, CompletionItemKind.Field),
+    isIncomplete: false,
   }
 }
