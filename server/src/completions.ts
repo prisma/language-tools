@@ -233,7 +233,8 @@ export function getSuggestionsForAttributes(
       blockType,
     )
     for (let _i = 0; _i < blockAttributeSuggestions.length; _i++) {
-      blockAttributeSuggestions[_i].data = '@' + blockAttributeSuggestions[_i]
+      blockAttributeSuggestions[_i].data =
+        '@' + blockAttributeSuggestions[_i].label
     }
     suggestions = getSuggestionForFieldAttribute(
       blockType,
@@ -248,11 +249,13 @@ export function getSuggestionsForAttributes(
       document,
     )
     for (let _i = 0; _i < fieldAttributeSuggestions.length; _i++) {
-      fieldAttributeSuggestions[_i].label = '@' + fieldAttributeSuggestions[_i]
+      fieldAttributeSuggestions[_i].label =
+        '@' + fieldAttributeSuggestions[_i].label
     }
     const blockAttributeSuggestions = getSuggestionForBlockAttribute(blockType)
     for (let _i = 0; _i < blockAttributeSuggestions.length; _i++) {
-      blockAttributeSuggestions[_i].label = '@@' + blockAttributeSuggestions[_i]
+      blockAttributeSuggestions[_i].label =
+        '@@' + blockAttributeSuggestions[_i].label
     }
     suggestions = fieldAttributeSuggestions.concat(blockAttributeSuggestions)
   }
@@ -414,7 +417,7 @@ export function getSuggestionForFirstInsideBlock(
     case 'type_alias':
       suggestions = getSuggestionForBlockAttribute(blockType)
       for (let _i = 0; _i < suggestions.length; _i++) {
-        suggestions[_i].label = '@@' + suggestions[_i]
+        suggestions[_i].label = '@@' + suggestions[_i].label
       }
       break
   }
