@@ -1,4 +1,4 @@
-# Prisma Language Support Test
+# Prisma Language Support
 
 Using the Language Server Protocol to improve Prisma's developer experience.
 Server implementation can be found [here](server).
@@ -7,19 +7,14 @@ Server implementation can be found [here](server).
 
 ### VS Code
 
-- install .. from the marketplace ([plugin source](clients/vscode))
+- install stable version of [Prisma](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma) from the marketplace ([plugin source](clients/vscode))
+- or install unstable version of [Prisma Dev](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-dev) from the marketplace ([plugin source](clients/vscode))
 
 ### Neovim (coming soon)
 
-- install [coc.nvim](https://github.com/neoclide/coc.nvim)
-- [`npm i -g @prisma/language-server-test`](https://www.npmjs.com/package/@prisma/language-server-test)
-- follow the [instructions](https://github.com/neoclide/coc.nvim/wiki/Language-servers#register-custom-language-servers) using `prisma-language-server-test` as the executable
 
 ### IntelliJ/WebStorm (coming soon)
 
-- install [LSP Support](https://plugins.jetbrains.com/plugin/10209-lsp-support) from the marketplace
-- [`npm i -g @prisma/language-server-test`](https://www.npmjs.com/package/@prisma/language-server-test)
-- [update the server definitions](https://github.com/gtache/intellij-lsp#add-a-language-server) to include the `prisma-language-server-test` executable for the `.prisma` extension
 
 ## Development
 

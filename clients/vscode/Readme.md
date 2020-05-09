@@ -16,7 +16,8 @@ It also includes an End-to-End test.
 
 ## Install
 
-- Get the Prisma Extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma).
+- Get the stable version of the Prisma Extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma).
+- Get the unstable version of the Prisma Extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-dev)
 
 ## Preview
 
