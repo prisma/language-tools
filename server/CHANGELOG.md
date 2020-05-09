@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.0.48 (2020-05-09)
+
+**Note:** Version bump only for package @prisma/language-server
+
+
+
+
+
+
 ## [0.0.47](https://github.com/prisma/vscode/compare/@prisma/language-server-test@0.0.46...@prisma/language-server-test@0.0.47) (2020-05-05)
 
 **Note:** Version bump only for package @prisma/language-server-test

@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.0.47](https://github.com/prisma/vscode/compare/prisma-vscode@0.0.46...prisma-vscode@0.0.47) (2020-05-09)
+
+**Note:** Version bump only for package prisma-vscode
+
+
+
+
+
+
 ## [0.0.46](https://github.com/prisma/vscode/compare/prisma-vscode@0.0.45...prisma-vscode@0.0.46) (2020-05-05)
 
 **Note:** Version bump only for package prisma-vscode
