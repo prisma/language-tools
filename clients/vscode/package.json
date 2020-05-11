@@ -2,7 +2,7 @@
   "name": "prisma-vscode",
   "displayName": "Prisma Dev",
   "description": "Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.",
-  "version": "0.0.55",
+  "version": "0.0.56",
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
