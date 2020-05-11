@@ -22,7 +22,7 @@
   "scripts": {
     "build": "tsc -b ./server ./clients/vscode",
     "format": "prettier  \"**/*.{ts,js,json,md}\"   --write",
-    "lint": "eslint  --fix --ext  .js,.ts .",
+    "lint": "eslint */**/**/*.{js,ts,css,json,md} --fix --ext",
     "watch": "npm run build -- -w",
     "compile": "tsc -b ./server ./clients/vscode",
     "publish": "npm run build && lerna publish",
@@ -41,12 +41,12 @@
     "access": "public"
   },
   "lint-staged": {
-    "*.{js,ts,css,json,md}": [
+    "*/**/**/*.{js,ts,css,json,md}": [
       "prettier --write",
       "git add"
     ],
-    "*.{js,ts}": [
-      "eslint --fix --ext .js,.ts ."
+    "*/**/**/*.{js,ts}": [
+      "eslint --fix"
     ]
   }
 }

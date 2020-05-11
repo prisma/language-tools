@@ -5,12 +5,11 @@ import {
   TransportKind,
 } from 'vscode-languageclient'
 import { ExtensionContext } from 'vscode'
-import path from 'path'
 
 let client: LanguageClient
 
 // TODO this is for later when the server is pusblished as a npm package!
-const serverModule = require.resolve('@prisma/language-server-test')
+const serverModule = require.resolve('@prisma/language-server')
 
 export function activate(context: ExtensionContext) {
   // TODO remove this this is only if server is not published as a npm package yet!
