@@ -17,6 +17,7 @@
   "dependencies": {
     "@prisma/fetch-engine": "2.0.0-alpha.1147",
     "@prisma/get-platform": "2.0.0-alpha.1147",
+    "@prisma/sdk": "2.0.0-alpha.1147",
     "pkg-dir": "4.2.0",
     "vscode-languageserver": "6.1.1",
     "vscode-languageserver-textdocument": "1.0.1",
@@ -27,8 +28,7 @@
     "eslint-config-prettier": "6.10.1",
     "eslint-plugin-prettier": "3.1.2",
     "@typescript-eslint/eslint-plugin": "2.27.0",
-    "@typescript-eslint/parser": "2.27.0",
-    "prismafile": "1.0.4"
+    "@typescript-eslint/parser": "2.27.0"
   },
   "scripts": {
     "format": "prettier --write .",

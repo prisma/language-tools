@@ -22,9 +22,7 @@ import {
   getSuggestionForSupportedFields,
   getSuggestionsForInsideAttributes,
 } from './completions'
-import { parse } from 'prismafile'
-import { Schema, Block } from 'prismafile/dist/ast'
-import { SyntaxError } from 'prismafile/dist/parser/index'
+import { getDMMF } from '@prisma/sdk'
 
 export function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
@@ -79,17 +77,8 @@ export class MyBlock {
 
 function getBlockAtPosition(
   line: number,
-  ast?: Schema,
-  document?: TextDocument,
-): Block | MyBlock | undefined {
-  // valid schema
-  if (ast) {
-    const foundBlock = ast.blocks.find(
-      (node) => node.start.line - 1 <= line && node.end.line - 1 >= line,
-    )
-    return !foundBlock ? undefined : foundBlock
-  }
-  // invalid schema
+  document: TextDocument,
+): MyBlock | undefined {
   if (document) {
     let blockType = ''
     let blockName = ''
@@ -130,7 +119,6 @@ function getBlockAtPosition(
 export async function handleDefinitionRequest(
   documents: TextDocuments<TextDocument>,
   params: DeclarationParams,
-  ast: Schema,
 ): Promise<Location> {
   const textDocument = params.textDocument
   const position = params.position
@@ -147,22 +135,34 @@ export async function handleDefinitionRequest(
     return new Promise((resolve) => resolve())
   }
 
-  const found = ast.blocks.find(
-    (b) => b.type === 'model' && b.name.name === word,
-  )
+  const documentText = document.getText()
+  // parse schem file to datamodel meta format (DMMF)
+  const dmmf = await getDMMF({ datamodel: documentText })
+
+  const modelName = dmmf.datamodel.models
+    .map((model) => model.name)
+    ?.find((name) => name === word)
 
   // selected word is not a model type
-  if (!found) {
+  if (!modelName) {
     return new Promise((resolve) => resolve())
   }
 
+  const modelDefinition = 'model '
+  // get start position of model type
+  const index = documentText.indexOf(modelDefinition + modelName)
+  const buf = documentText.slice(0, index)
+  const EOL = '\n'
+  const lines = buf.split(EOL).length - 1
+  const lastLineIndex = buf.lastIndexOf(EOL)
   const startPosition = {
-    line: found.start.line - 1,
-    character: found.start.column - 1,
+    line: lines,
+    character: index + modelDefinition.length - lastLineIndex - 1,
   }
   const endPosition = {
-    line: found.end.line,
-    character: found.end.column,
+    line: lines,
+    character:
+      index + modelDefinition.length - lastLineIndex - 1 + modelName.length,
   }
 
   return {
@@ -212,21 +212,10 @@ export function handleCompletionRequest(
   if (!document) {
     return undefined
   }
-  const documentText = document.getText()
 
-  let ast: Schema | undefined
-  try {
-    ast = parse(documentText)
-  } catch (errors) {
-    if (errors instanceof SyntaxError) {
-      console.log('Error message: ' + errors.message)
-      console.log('Error name: ' + errors.name)
-    }
-  }
-
-  const foundBlock = getBlockAtPosition(params.position.line, ast, document)
+  const foundBlock = getBlockAtPosition(params.position.line, document)
   if (!foundBlock) {
-    return getSuggestionForBlockTypes(ast, document)
+    return getSuggestionForBlockTypes(document)
   }
 
   if (isFirstInsideBlock(params.position, document)) {
@@ -234,7 +223,6 @@ export function handleCompletionRequest(
       foundBlock.type,
       document,
       params.position,
-      ast,
       foundBlock,
     )
   }
@@ -284,7 +272,7 @@ export function handleCompletionRequest(
       wordsBeforePosition.length < 2 ||
       (wordsBeforePosition.length === 2 && symbolBeforePosition != ' ')
     ) {
-      return getSuggestionsForTypes(foundBlock, document, ast)
+      return getSuggestionsForTypes(foundBlock, document)
     }
     return getSuggestionsForAttributes(
       foundBlock.type,

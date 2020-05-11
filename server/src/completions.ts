@@ -4,13 +4,6 @@ import {
   CompletionItemKind,
   Position,
 } from 'vscode-languageserver'
-import {
-  Schema,
-  DataSource,
-  Block,
-  Generator,
-  Model,
-} from 'prismafile/dist/ast'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { getCurrentLine, MyBlock } from './MessageHandler'
 
@@ -297,9 +290,8 @@ export function getAllRelationNamesWithoutAst(
 }
 
 export function getSuggestionsForTypes(
-  foundBlock: Model | MyBlock,
+  foundBlock: MyBlock,
   document: TextDocument,
-  ast?: Schema,
 ): CompletionList {
   let suggestions: CompletionItem[] = corePrimitiveTypes
 
@@ -312,14 +304,6 @@ export function getSuggestionsForTypes(
     suggestions = suggestions.concat(
       toCompletionItems(modelNames, CompletionItemKind.TypeParameter),
     )
-  } else if (ast) {
-    const relationTypes = ast.blocks
-      .filter((block) => block.type === 'model' || block.type === 'enum')
-      .map((model) => model.name.name)
-      .filter((modelName) => modelName != foundBlock.name.name)
-    suggestions = suggestions.concat(
-      toCompletionItems(relationTypes, CompletionItemKind.TypeParameter),
-    )
   }
 
   return {
@@ -330,7 +314,7 @@ export function getSuggestionsForTypes(
 
 function removeInvalidFieldSuggestions(
   supportedFields: Array<string>,
-  block: DataSource | Generator | MyBlock,
+  block: MyBlock,
   document: TextDocument,
   position: Position,
 ): Array<string> {
@@ -345,20 +329,12 @@ function removeInvalidFieldSuggestions(
         supportedFields.filter((field) => field != fieldName)
       }
     }
-  } else {
-    if (!block.assignments) {
-      return supportedFields
-    }
-    block.assignments.forEach((toRemove) => {
-      const index = supportedFields.indexOf(toRemove.key.name)
-      supportedFields.splice(index, 1)
-    })
   }
   return supportedFields
 }
 
 function getSuggestionForDataSourceField(
-  block: DataSource | MyBlock,
+  block: MyBlock,
   document: TextDocument,
   position: Position,
 ): CompletionItem[] {
@@ -373,7 +349,7 @@ function getSuggestionForDataSourceField(
 }
 
 function getSuggestionForGeneratorField(
-  block: Generator | MyBlock,
+  block: MyBlock,
   document: TextDocument,
   position: Position,
 ): CompletionItem[] {
@@ -394,24 +370,15 @@ export function getSuggestionForFirstInsideBlock(
   blockType: string,
   document: TextDocument,
   position: Position,
-  ast?: Schema,
-  block?: Block | MyBlock,
+  block: MyBlock,
 ): CompletionList {
   let suggestions: CompletionItem[] = []
   switch (blockType) {
     case 'datasource':
-      suggestions = getSuggestionForDataSourceField(
-        block as DataSource,
-        document,
-        position,
-      )
+      suggestions = getSuggestionForDataSourceField(block, document, position)
       break
     case 'generator':
-      suggestions = getSuggestionForGeneratorField(
-        block as Generator,
-        document,
-        position,
-      )
+      suggestions = getSuggestionForGeneratorField(block, document, position)
       break
     case 'model':
     case 'type_alias':
@@ -429,47 +396,30 @@ export function getSuggestionForFirstInsideBlock(
 }
 
 export function getSuggestionForBlockTypes(
-  ast?: Schema,
-  document?: TextDocument,
+  document: TextDocument,
 ): CompletionList {
   const suggestions: CompletionItem[] = allowedBlockTypes
 
   // enum is not supported in sqlite
-  if (ast) {
-    ast.blocks.forEach((block) => {
-      if (block.type === 'datasource') {
-        const foundNotSupportingEnumProvider = block.assignments.filter(
-          (o) =>
-            o.key.name === 'provider' &&
-            o.value.type === 'string_value' &&
-            o.value.value === 'sqlite',
-        )
-        if (foundNotSupportingEnumProvider.length != 0) {
+  for (let _i = 0; _i < document.lineCount - 1; _i++) {
+    let currentLine = getCurrentLine(document, _i)
+    if (currentLine.trim().includes('datasource')) {
+      for (let _j = _i; _j < document.lineCount - 1; _j++) {
+        currentLine = getCurrentLine(document, _j)
+        if (currentLine.includes('}')) {
+          break
+        }
+        if (
+          currentLine.trim().startsWith('provider') &&
+          currentLine.includes('sqlite')
+        ) {
           suggestions.pop()
+          break
         }
       }
-    })
-  } else if (document) {
-    for (let _i = 0; _i < document.lineCount - 1; _i++) {
-      let currentLine = getCurrentLine(document, _i)
-      if (currentLine.trim().includes('datasource')) {
-        for (let _j = _i; _j < document.lineCount - 1; _j++) {
-          currentLine = getCurrentLine(document, _j)
-          if (currentLine.includes('}')) {
-            break
-          }
-          if (
-            currentLine.trim().startsWith('provider') &&
-            currentLine.includes('sqlite')
-          ) {
-            suggestions.pop()
-            break
-          }
-        }
-      }
-      if (!suggestions.map((item) => item.label).includes('enum')) {
-        break
-      }
+    }
+    if (!suggestions.map((item) => item.label).includes('enum')) {
+      break
     }
   }
 
@@ -536,8 +486,7 @@ function isInsideAttribute(
 function getFieldsFromCurrentBlock(
   document: TextDocument,
   position: Position,
-  wordsBeforePosition: Array<string>,
-  block: Block | MyBlock,
+  block: MyBlock,
   context?: string,
 ): Array<string> {
   let suggestions: Array<string> = []
@@ -578,7 +527,7 @@ function getFieldsFromCurrentBlock(
 export function getSuggestionsForInsideAttributes(
   document: TextDocument,
   position: Position,
-  block: Block | MyBlock,
+  block: MyBlock,
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
   const currentLine = getCurrentLine(document, position.line).trim()
@@ -592,18 +541,11 @@ export function getSuggestionsForInsideAttributes(
   } else if (wordBeforePosition?.includes('@relation')) {
     suggestions = ['references: []', 'fields: []', '""']
   } else if (isInsideAttribute(wordsBeforePosition, 'fields')) {
-    suggestions = getFieldsFromCurrentBlock(
-      document,
-      position,
-      wordsBeforePosition,
-      block,
-      'fields',
-    )
+    suggestions = getFieldsFromCurrentBlock(document, position, block, 'fields')
   } else if (isInsideAttribute(wordsBeforePosition, 'references')) {
     suggestions = getFieldsFromCurrentBlock(
       document,
       position,
-      wordsBeforePosition,
       block,
       'references',
     )
@@ -612,12 +554,7 @@ export function getSuggestionsForInsideAttributes(
     wordBeforePosition.includes('@@id') ||
     wordBeforePosition.includes('@@index')
   ) {
-    suggestions = getFieldsFromCurrentBlock(
-      document,
-      position,
-      wordsBeforePosition,
-      block,
-    )
+    suggestions = getFieldsFromCurrentBlock(document, position, block)
   }
   return {
     items: toCompletionItems(suggestions, CompletionItemKind.Field),

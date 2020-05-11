@@ -14,8 +14,9 @@ import * as util from './util'
 import lint from './lint'
 import fs from 'fs'
 import install from './install'
-import { parse } from 'prismafile'
+import path from 'path'
 import { Schema } from 'prismafile/dist/ast'
+import { download } from '@prisma/fetch-engine'
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -58,6 +59,22 @@ connection.onInitialize(async (params: InitializeParams) => {
     } catch (err) {
       // No error on install error.
       connection.console.error('Cannot install prisma-fmt: ' + err)
+    }
+  }
+
+  const sdkQueryEnginePath = await util.getSdkQueryEnginePath()
+  if (!fs.existsSync(sdkQueryEnginePath)) {
+    try {
+      const sdkDir = path.dirname(require.resolve('@prisma/sdk/package.json'))
+      await download({
+        binaries: {
+          'query-engine': sdkDir,
+        },
+        failSilent: false,
+      })
+    } catch (err) {
+      // No error on install error.
+      connection.console.error('Cannot install prisma query-engine: ' + err)
     }
   }
 
@@ -113,10 +130,6 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
     diagnostics.push(diagnostic)
   }
   connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
-
-  if (diagnostics.length === 0) {
-    ast = parse(text)
-  }
 }
 
 documents.onDidChangeContent((change) => {
@@ -128,7 +141,7 @@ documents.onDidOpen((open) => {
 })
 
 connection.onDefinition((params) =>
-  MessageHandler.handleDefinitionRequest(documents, params, ast),
+  MessageHandler.handleDefinitionRequest(documents, params),
 )
 
 connection.onCompletion((params) =>
