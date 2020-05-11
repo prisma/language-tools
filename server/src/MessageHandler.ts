@@ -154,15 +154,19 @@ export async function handleDefinitionRequest(
   const buf = documentText.slice(0, index)
   const EOL = '\n'
   const lines = buf.split(EOL).length - 1
-  const lastLineIndex = buf.lastIndexOf(EOL)
+  const modelBlock = getBlockAtPosition(lines, document)
+
+  if (!modelBlock) {
+    return new Promise((resolve) => resolve())
+  }
+
   const startPosition = {
-    line: lines,
-    character: index + modelDefinition.length - lastLineIndex - 1,
+    line: modelBlock?.start.line,
+    character: modelBlock?.start.character,
   }
   const endPosition = {
-    line: lines,
-    character:
-      index + modelDefinition.length - lastLineIndex - 1 + modelName.length,
+    line: modelBlock?.end.line,
+    character: modelBlock?.end.character,
   }
 
   return {
