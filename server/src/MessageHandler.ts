@@ -22,7 +22,6 @@ import {
   getSuggestionForSupportedFields,
   getSuggestionsForInsideAttributes,
 } from './completions'
-import { getDMMF } from '@prisma/sdk'
 
 export function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
@@ -136,17 +135,7 @@ export async function handleDefinitionRequest(
   }
 
   const documentText = document.getText()
-  // parse schem file to datamodel meta format (DMMF)
-  const dmmf = await getDMMF({ datamodel: documentText })
-
-  const modelName = dmmf.datamodel.models
-    .map((model) => model.name)
-    ?.find((name) => name === word)
-
-  // selected word is not a model type
-  if (!modelName) {
-    return new Promise((resolve) => resolve())
-  }
+  const modelName = getWordAtPosition(document, position)
 
   const modelDefinition = 'model '
   // get start position of model type

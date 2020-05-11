@@ -25,7 +25,7 @@ function tryRequire(path: string): any {
 /**
  * Lookup version
  */
-async function getVersion(): Promise<string> {
+export async function getVersion(): Promise<string> {
   const pkgPath = await pkgdir(__dirname)
   if (!pkgPath) {
     return 'latest'
@@ -45,17 +45,6 @@ export async function getBinPath(): Promise<string> {
   version = version || (await getVersion())
   const extension = platform === 'windows' ? '.exe' : ''
   return path.join(__dirname, `prisma-fmt.${version}${extension}`)
-}
-
-/**
- * Get the exec path
- */
-export async function getSdkQueryEnginePath(): Promise<string> {
-  platform = platform || (await getPlatform())
-  version = version || (await getVersion())
-  const extension = platform === 'windows' ? '.exe' : ''
-  const sdkDir = path.dirname(require.resolve('@prisma/sdk/package.json'))
-  return path.join(sdkDir, `query-engine-${platform}${extension}`)
 }
 
 /**
