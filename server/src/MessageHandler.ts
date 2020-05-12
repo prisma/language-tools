@@ -40,7 +40,10 @@ function isFirstInsideBlock(
   }
 
   const stringTillPosition = currentLine.substring(0, position.character).trim()
-  const firstWordInLine = stringTillPosition.replace(/ .*/, '')
+  const i = stringTillPosition.indexOf(' ')
+  const firstWordInLine = ~i
+    ? stringTillPosition.slice(0, i)
+    : stringTillPosition
 
   return stringTillPosition.length === firstWordInLine.length
 }
