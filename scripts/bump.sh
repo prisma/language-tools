@@ -49,16 +49,16 @@ jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
     ./server/package.json > ./server/package.json.bk
 
 jq ".version = \"$NEXT_EXTENSION_VERSION\"" \
-    ./client/package.json > ./client/package.json.bk
+    ./clients/vscode/package.json > ./clients/vscode/package.json.bk
 
 mv ./package.json.bk ./package.json
 mv ./server/package.json.bk ./server/package.json
-mv ./client/package.json.bk ./client/package.json
+mv ./clients/vscode/package.json.bk ./clients/vscode/package.json
 
 npm install
 
 (
-cd ./client
+cd ./clients/vscode
 npm install
 )
 
