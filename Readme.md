@@ -1,20 +1,14 @@
-<br />
-
-<div align="center">
-  <h1>Prisma VS Code Extension</h1>
-  <p><h3 align="center">Adds syntax highlighting, formatting, jump-to-definition and linting for `.prisma` files.</h3></p>
-</div>
-
-<hr>
-
+<h1 align="center"><img src="./logo_white.png" alt="Logo" height="128" /></h1>
+<h2 align="center">Prisma VS Code Extension</h2>
 <div align="center">
   
-  ![CI tests](https://github.com/prisma/vscode/workflows/CI+tests/badge.svg)
-  ![Check for Update + Automated Publish](https://github.com/prisma/vscode/workflows/Check+for+Update+%2B+Automated+Publish/badge.svg)
+  ![CI tests](https://github.com/prisma/vscode/workflows/CI%20tests/badge.svg)
+  ![Check for Update + Automated Publish](https://github.com/prisma/vscode/workflows/Check%20for%20Update%20%2B%20Automated%20Publish/badge.svg)
   
 </div>
 
 <hr>
+Adds syntax highlighting, formatting, jump-to-definition and linting for `.prisma` files.
 
 This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-prisma-2-zq1s745db8i5). Information about the new datamodel syntax can be found [here](https://github.com/prisma/prisma2/blob/master/docs/data-modeling.md).
 
