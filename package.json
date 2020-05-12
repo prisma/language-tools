@@ -27,7 +27,7 @@
     "compile": "tsc -b ./server ./clients/vscode",
     "publish": "npm run build && lerna publish",
     "postpublish": "(cd ./clients/vscode && npm i && vsce publish)",
-    "postinstall": "lerna bootstrap --ignore-prepublish",
+    "postinstall": "lerna exec npm install",
     "vsce:check": "yarn shell:lint && sh scripts/check-update.sh",
     "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "sh ./scripts/e2e.sh"
