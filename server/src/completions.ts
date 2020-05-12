@@ -225,9 +225,9 @@ export function getSuggestionsForAttributes(
     const blockAttributeSuggestions: CompletionItem[] = getSuggestionForBlockAttribute(
       blockType,
     )
-    for (let _i = 0; _i < blockAttributeSuggestions.length; _i++) {
-      blockAttributeSuggestions[_i].data =
-        '@' + blockAttributeSuggestions[_i].label
+    for (let i = 0; i < blockAttributeSuggestions.length; i++) {
+      blockAttributeSuggestions[i].data =
+        '@' + blockAttributeSuggestions[i].label
     }
     suggestions = getSuggestionForFieldAttribute(
       blockType,
@@ -241,14 +241,14 @@ export function getSuggestionsForAttributes(
       position,
       document,
     )
-    for (let _i = 0; _i < fieldAttributeSuggestions.length; _i++) {
-      fieldAttributeSuggestions[_i].label =
-        '@' + fieldAttributeSuggestions[_i].label
+    for (let i = 0; i < fieldAttributeSuggestions.length; i++) {
+      fieldAttributeSuggestions[i].label =
+        '@' + fieldAttributeSuggestions[i].label
     }
     const blockAttributeSuggestions = getSuggestionForBlockAttribute(blockType)
-    for (let _i = 0; _i < blockAttributeSuggestions.length; _i++) {
-      blockAttributeSuggestions[_i].label =
-        '@@' + blockAttributeSuggestions[_i].label
+    for (let i = 0; i < blockAttributeSuggestions.length; i++) {
+      blockAttributeSuggestions[i].label =
+        '@@' + blockAttributeSuggestions[i].label
     }
     suggestions = fieldAttributeSuggestions.concat(blockAttributeSuggestions)
   }
@@ -264,12 +264,12 @@ export function getAllRelationNamesWithoutAst(
   currentModelStartLine: number,
 ): Array<string> {
   const modelNames: Array<string> = []
-  for (let _i = 0; _i < document.lineCount; _i++) {
-    if (currentModelStartLine === _i) {
+  for (let i = 0; i < document.lineCount; i++) {
+    if (currentModelStartLine === i) {
       // do not suggest the model name we are currently in
       continue
     }
-    const currentLine = getCurrentLine(document, _i)
+    const currentLine = getCurrentLine(document, i)
     if (
       (currentLine.includes('model') || currentLine.includes('enum')) &&
       currentLine.includes('{')
@@ -283,7 +283,7 @@ export function getAllRelationNamesWithoutAst(
 
       modelNames.push(blockName)
       // block is at least 2 lines long
-      _i++
+      i++
     }
   }
   return modelNames
@@ -319,11 +319,11 @@ function removeInvalidFieldSuggestions(
   position: Position,
 ): Array<string> {
   if (block instanceof MyBlock) {
-    for (let _i = block.start.line + 1; _i < block.end.line; _i++) {
-      if (_i === position.line) {
+    for (let i = block.start.line + 1; i < block.end.line; i++) {
+      if (i === position.line) {
         continue
       }
-      const currentLine = getCurrentLine(document, _i)
+      const currentLine = getCurrentLine(document, i)
       const fieldName = currentLine.replace(/ .*/, '')
       if (supportedFields.includes(fieldName)) {
         supportedFields.filter((field) => field != fieldName)
@@ -383,8 +383,8 @@ export function getSuggestionForFirstInsideBlock(
     case 'model':
     case 'type_alias':
       suggestions = getSuggestionForBlockAttribute(blockType)
-      for (let _i = 0; _i < suggestions.length; _i++) {
-        suggestions[_i].label = '@@' + suggestions[_i].label
+      for (let i = 0; i < suggestions.length; i++) {
+        suggestions[i].label = '@@' + suggestions[i].label
       }
       break
   }
@@ -401,10 +401,10 @@ export function getSuggestionForBlockTypes(
   const suggestions: CompletionItem[] = allowedBlockTypes
 
   // enum is not supported in sqlite
-  for (let _i = 0; _i < document.lineCount - 1; _i++) {
-    let currentLine = getCurrentLine(document, _i)
+  for (let i = 0; i < document.lineCount - 1; i++) {
+    let currentLine = getCurrentLine(document, i)
     if (currentLine.trim().includes('datasource')) {
-      for (let _j = _i; _j < document.lineCount - 1; _j++) {
+      for (let _j = i; _j < document.lineCount - 1; _j++) {
         currentLine = getCurrentLine(document, _j)
         if (currentLine.includes('}')) {
           break

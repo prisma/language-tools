@@ -84,19 +84,19 @@ function getBlockAtPosition(
     let blockStart: Position = Position.create(0, 0)
     let blockEnd: Position = Position.create(0, 0)
     // get block beginning
-    for (let _i = line; _i >= 0; _i--) {
-      const currentLine = getCurrentLine(document, _i).trim()
+    for (let i = line; i >= 0; i--) {
+      const currentLine = getCurrentLine(document, i).trim()
       if (currentLine.includes('{')) {
         // position is inside a block
         blockType = currentLine.replace(/ .*/, '')
         blockName = currentLine
           .substring(blockType.length, currentLine.length - 2)
           .trim()
-        blockStart = Position.create(_i, 0)
+        blockStart = Position.create(i, 0)
         break
       }
       // not inside a block
-      if (currentLine.includes('}') || _i === 0) {
+      if (currentLine.includes('}') || i === 0) {
         return undefined
       }
     }
