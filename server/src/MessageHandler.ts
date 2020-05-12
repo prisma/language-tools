@@ -118,23 +118,23 @@ function getBlockAtPosition(
 /**
  * @todo Use official schema.prisma parser. This is a workaround!
  */
-export async function handleDefinitionRequest(
+export function handleDefinitionRequest(
   documents: TextDocuments<TextDocument>,
   params: DeclarationParams,
-): Promise<Location> {
+): Location | undefined {
   const textDocument = params.textDocument
   const position = params.position
 
   const document = documents.get(textDocument.uri)
 
   if (!document) {
-    return new Promise((resolve) => resolve())
+    return
   }
 
   const word = getWordAtPosition(document, position)
 
   if (word === '') {
-    return new Promise((resolve) => resolve())
+    return
   }
 
   const documentText = document.getText()
@@ -149,7 +149,7 @@ export async function handleDefinitionRequest(
   const modelBlock = getBlockAtPosition(lines, document)
 
   if (!modelBlock) {
-    return new Promise((resolve) => resolve())
+    return
   }
 
   const startPosition = {
