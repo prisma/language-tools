@@ -80,7 +80,7 @@ export class MyBlock {
 function getBlockAtPosition(
   line: number,
   document: TextDocument,
-): MyBlock | undefined {
+): MyBlock | void {
   if (document) {
     let blockType = ''
     let blockName = ''
@@ -100,19 +100,19 @@ function getBlockAtPosition(
       }
       // not inside a block
       if (currentLine.includes('}') || i === 0) {
-        return undefined
+        return
       }
     }
     // get block ending
-    for (let _j = line; _j < document.lineCount; _j++) {
-      const currentLine = getCurrentLine(document, _j).trim()
+    for (let j = line; j < document.lineCount; j++) {
+      const currentLine = getCurrentLine(document, j).trim()
       if (currentLine.includes('}')) {
-        blockEnd = Position.create(_j, 1)
+        blockEnd = Position.create(j, 1)
         return new MyBlock(blockType, blockStart, blockEnd, blockName)
       }
     }
   }
-  return undefined
+  return
 }
 
 /**
@@ -201,12 +201,12 @@ export function handleCompletionRequest(
 ): CompletionList | undefined {
   const context = params.context
   if (context == null) {
-    return undefined
+    return
   }
 
   const document = documents.get(params.textDocument.uri)
   if (!document) {
-    return undefined
+    return
   }
 
   const foundBlock = getBlockAtPosition(params.position.line, document)
