@@ -2,6 +2,13 @@
 <h2 align="center">Prisma VS Code Extension</h2>
 <div align="center">
   
+   [![Latest Release](https://vsmarketplacebadge.apphb.com/version-short/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
+  [![Installs](https://vsmarketplacebadge.apphb.com/installs-short/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
+  [![Rating](https://vsmarketplacebadge.apphb.com/rating-short/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
+  
+</div>
+<div align="center">
+  
   ![CI tests](https://github.com/prisma/vscode/workflows/CI%20tests/badge.svg)
   ![Check for Update + Automated Publish](https://github.com/prisma/vscode/workflows/Check%20for%20Update%20%2B%20Automated%20Publish/badge.svg)
   
