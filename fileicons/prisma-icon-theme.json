@@ -1,0 +1,10 @@
+{
+    "iconDefinitions": {
+        "_prisma_file": {
+            "iconPath": "./../logo_white.png"
+        }
+    },
+    "languageIds": {
+        "prisma": "_prisma_file"
+    }
+}
