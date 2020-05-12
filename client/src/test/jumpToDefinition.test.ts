@@ -36,7 +36,7 @@ suite('Should jump-to-definition', () => {
     await testJumpToDefinition(
       docUri,
       new vscode.Position(11, 16),
-      new vscode.Location(docUri, toRange(25, 0, 25, 1)),
+      new vscode.Location(docUri, toRange(25, 0, 30, 1)),
     )
   })
 })
