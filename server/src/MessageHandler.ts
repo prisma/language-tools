@@ -91,7 +91,8 @@ function getBlockAtPosition(
       const currentLine = getCurrentLine(document, i).trim()
       if (currentLine.includes('{')) {
         // position is inside a block
-        blockType = currentLine.replace(/ .*/, '')
+        const index = currentLine.indexOf(' ')
+        blockType = ~index ? currentLine.slice(0, index) : currentLine
         blockName = currentLine
           .substring(blockType.length, currentLine.length - 2)
           .trim()
