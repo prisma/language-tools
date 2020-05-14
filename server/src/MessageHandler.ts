@@ -143,7 +143,7 @@ export function handleDefinitionRequest(
 
   // get start position of model type
   const index = documentText.search(
-    new RegExp('model\\s+' + modelName + '[\\s+|{]'),
+    new RegExp('model\\s+' + modelName + '[\\s|{]'),
   )
 
   const modelBlock = getBlockAtPosition(
