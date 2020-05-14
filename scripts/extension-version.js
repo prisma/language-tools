@@ -1,6 +1,10 @@
 const semVer = require('semver')
 
-function nextExtensionVersion({ prismaVersion, extensionVersion }) {
+function nextExtensionVersion({
+  prismaVersion,
+  extensionVersion,
+  isExtensionOnlyCommit = false,
+}) {
   const isBeta = prismaVersion.includes('beta')
   const derivedExtensionVersion = getDerivedExtensionVersion(
     stripPreReleaseText(prismaVersion),
@@ -12,9 +16,19 @@ function nextExtensionVersion({ prismaVersion, extensionVersion }) {
     isBeta,
   )
 
-  if (derivedExtensionVersion === existingExtensionVersion) {
+  if (
+    derivedExtensionVersion === existingExtensionVersion &&
+    isExtensionOnlyCommit
+  ) {
     // Extension only publish
     return bumpExtensionOnlyVersion(extensionVersion)
+  } else if (
+    derivedExtensionVersion === existingExtensionVersion &&
+    !isExtensionOnlyCommit
+  ) {
+    throw new Error(
+      `derivedExtensionVersion === existingExtensionVersion but isExtensionOnlyCommit is false. This can happen if there were multiple versions of Prisma CLI released in a quick succession.`,
+    )
   }
   return derivedExtensionVersion
 }

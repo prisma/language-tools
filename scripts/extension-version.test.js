@@ -14,11 +14,23 @@ describe('next extension version', () => {
     ).to.eq('0.1.3')
   })
 
+  it('it should throw with stable channel and extension only push without the isExtensionOnlyCommit flag', () => {
+    expect(() => {
+      nextExtensionVersion({
+        prismaVersion: '2.0.0-beta.3',
+        extensionVersion: '0.1.3',
+      })
+    }).to.throw(
+      'derivedExtensionVersion === existingExtensionVersion but isExtensionOnlyCommit is false. This can happen if there were multiple versions of Prisma CLI released in a quick succession.',
+    )
+  })
+
   it('it should work with stable channel and extension only push', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.0.0-beta.3',
         extensionVersion: '0.1.3',
+        isExtensionOnlyCommit: true,
       }),
     ).to.eq('0.1.3.1')
   })
@@ -28,6 +40,7 @@ describe('next extension version', () => {
       nextExtensionVersion({
         prismaVersion: '2.0.0-beta.3',
         extensionVersion: '0.1.3.1',
+        isExtensionOnlyCommit: true,
       }),
     ).to.eq('0.1.3.2')
   })
@@ -61,11 +74,23 @@ describe('next extension version', () => {
     ).to.eq('0.0.1149')
   })
 
+  it('it should throw with unstable channel and extension only push without the isExtensionOnlyCommit flag', () => {
+    expect(() => {
+      nextExtensionVersion({
+        prismaVersion: '2.0.0-alpha.1149',
+        extensionVersion: '0.0.1149',
+      })
+    }).to.throw(
+      'derivedExtensionVersion === existingExtensionVersion but isExtensionOnlyCommit is false. This can happen if there were multiple versions of Prisma CLI released in a quick succession.',
+    )
+  })
+
   it('it should work with unstable channel and extension only push', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.0.0-alpha.1149',
         extensionVersion: '0.0.1149',
+        isExtensionOnlyCommit: true,
       }),
     ).to.eq('0.0.1149.1')
   })
@@ -75,6 +100,7 @@ describe('next extension version', () => {
       nextExtensionVersion({
         prismaVersion: '2.0.0-alpha.1149',
         extensionVersion: '0.0.1149.1',
+        isExtensionOnlyCommit: true,
       }),
     ).to.eq('0.0.1149.2')
   })
@@ -144,11 +170,21 @@ describe('next extension version', () => {
     ).to.eq('0.1.1')
   })
 
+  it('it should throw with unstable channel after the ga versioning scheme and extension only push without the isExtensionOnlyCommit flag', () => {
+    expect(() => {
+      nextExtensionVersion({
+        prismaVersion: '2.0.1-dev.1',
+        extensionVersion: '0.1.1',
+      })
+    }).to.throw('')
+  })
+
   it('it should work with unstable channel after the ga versioning scheme and extension only push', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.0.1-dev.1',
         extensionVersion: '0.1.1',
+        isExtensionOnlyCommit: true,
       }),
     ).to.eq('0.1.1.1')
   })
@@ -158,6 +194,7 @@ describe('next extension version', () => {
       nextExtensionVersion({
         prismaVersion: '2.0.1-dev.1',
         extensionVersion: '0.1.1.1',
+        isExtensionOnlyCommit: true,
       }),
     ).to.eq('0.1.1.2')
   })
