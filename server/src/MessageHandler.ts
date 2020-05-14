@@ -30,6 +30,14 @@ export function getCurrentLine(document: TextDocument, line: number): string {
   })
 }
 
+function convertDocumentTextToTrimmedLineArray(
+  document: TextDocument,
+): Array<string> {
+  return [...Array(document.lineCount)].map((_, i) =>
+    getCurrentLine(document, i).trim(),
+  )
+}
+
 function isFirstInsideBlock(
   position: Position,
   document: TextDocument,
@@ -48,9 +56,7 @@ function isFirstInsideBlock(
   return stringTillPosition.length === firstWordInLine.length
 }
 
-function getWordAtPosition(document: TextDocument, position: Position): string {
-  const currentLine = getCurrentLine(document, position.line)
-
+function getWordAtPosition(currentLine: string, position: Position): string {
   if (currentLine.slice(0, position.character).endsWith('@@')) {
     return '@@'
   }
@@ -79,38 +85,46 @@ export class MyBlock {
 
 function getBlockAtPosition(
   line: number,
-  document: TextDocument,
+  lines: Array<string>,
 ): MyBlock | void {
-  if (document) {
-    let blockType = ''
-    let blockName = ''
-    let blockStart: Position = Position.create(0, 0)
-    let blockEnd: Position = Position.create(0, 0)
-    // get block beginning
-    for (let i = line; i >= 0; i--) {
-      const currentLine = getCurrentLine(document, i).trim()
-      if (currentLine.includes('{')) {
-        // position is inside a block
-        const index = currentLine.search(/\s+/)
-        blockType = ~index ? currentLine.slice(0, index) : currentLine
-        blockName = currentLine
-          .slice(blockType.length, currentLine.length - 2)
-          .trim()
-        blockStart = Position.create(i, 0)
-        break
-      }
-      // not inside a block
-      if (currentLine.includes('}') || i === 0) {
-        return
-      }
+  let blockType = ''
+  let blockName = ''
+  let blockStart: Position = Position.create(0, 0)
+  let blockEnd: Position = Position.create(0, 0)
+  // get block beginning
+  let reachedLine = false
+  for (const [key, item] of lines.reverse().entries()) {
+    const actualIndex = lines.length - 1 - key
+    if (actualIndex === line) {
+      reachedLine = true
     }
-    // get block ending
-    for (let j = line; j < document.lineCount; j++) {
-      const currentLine = getCurrentLine(document, j).trim()
-      if (currentLine.includes('}')) {
-        blockEnd = Position.create(j, 1)
-        return new MyBlock(blockType, blockStart, blockEnd, blockName)
-      }
+    if (!reachedLine) {
+      continue
+    }
+    if (item.includes('{')) {
+      const index = item.search(/\s+/)
+      blockType = ~index ? item.slice(0, index) : item
+      blockName = item.slice(blockType.length, item.length - 2).trim()
+      blockStart = Position.create(actualIndex, 0)
+      break
+    }
+    // not inside a block
+    if (item.includes('}')) {
+      return
+    }
+  }
+  reachedLine = false
+  // get block ending
+  for (const [key, item] of lines.reverse().entries()) {
+    if (key === line) {
+      reachedLine = true
+    }
+    if (!reachedLine) {
+      continue
+    }
+    if (item.includes('}')) {
+      blockEnd = Position.create(key, 1)
+      return new MyBlock(blockType, blockStart, blockEnd, blockName)
     }
   }
   return
@@ -132,24 +146,19 @@ export function handleDefinitionRequest(
     return
   }
 
-  const word = getWordAtPosition(document, position)
+  const lines = convertDocumentTextToTrimmedLineArray(document)
+  const word = getWordAtPosition(lines[position.line], position)
 
   if (word === '') {
     return
   }
 
   const documentText = document.getText()
-  const modelName = getWordAtPosition(document, position)
 
   // get start position of model type
-  const index = documentText.search(
-    new RegExp('model\\s+' + modelName + '[\\s|{]'),
-  )
+  const index = documentText.search(new RegExp('model\\s+' + word + '[\\s|{]'))
 
-  const modelBlock = getBlockAtPosition(
-    document.positionAt(index).line,
-    document,
-  )
+  const modelBlock = getBlockAtPosition(document.positionAt(index).line, lines)
 
   if (!modelBlock) {
     return
@@ -211,8 +220,9 @@ export function handleCompletionRequest(
   if (!document) {
     return
   }
+  const lines = convertDocumentTextToTrimmedLineArray(document)
 
-  const foundBlock = getBlockAtPosition(params.position.line, document)
+  const foundBlock = getBlockAtPosition(params.position.line, lines)
   if (!foundBlock) {
     return getSuggestionForBlockTypes(document)
   }
