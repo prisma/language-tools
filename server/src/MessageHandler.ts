@@ -23,18 +23,16 @@ import {
   getSuggestionsForInsideAttributes,
 } from './completions'
 
-export function getCurrentLine(document: TextDocument, line: number): string {
-  return document.getText({
-    start: { line: line, character: 0 },
-    end: { line: line, character: 9999 },
-  })
-}
-
 function convertDocumentTextToTrimmedLineArray(
   document: TextDocument,
 ): Array<string> {
   return [...Array(document.lineCount)].map((_, i) =>
-    getCurrentLine(document, i).trim(),
+    document
+      .getText({
+        start: { line: i, character: 0 },
+        end: { line: i, character: 9999 },
+      })
+      .trim(),
   )
 }
 
@@ -224,13 +222,13 @@ export function handleCompletionRequest(
 
   const foundBlock = getBlockAtPosition(params.position.line, lines)
   if (!foundBlock) {
-    return getSuggestionForBlockTypes(document)
+    return getSuggestionForBlockTypes(lines)
   }
 
   if (isFirstInsideBlock(params.position, lines[params.position.line])) {
     return getSuggestionForFirstInsideBlock(
       foundBlock.type,
-      document,
+      lines,
       params.position,
       foundBlock,
     )
@@ -249,8 +247,7 @@ export function handleCompletionRequest(
       case '"':
         return getSuggestionForSupportedFields(
           foundBlock.type,
-          document,
-          params.position,
+          lines[params.position.line],
         )
     }
   }
@@ -271,7 +268,7 @@ export function handleCompletionRequest(
 
     if (currentLine.includes('(')) {
       return getSuggestionsForInsideAttributes(
-        document,
+        lines,
         params.position,
         foundBlock,
       )

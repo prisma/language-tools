@@ -5,7 +5,7 @@ import {
   Position,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { getCurrentLine, MyBlock } from './MessageHandler'
+import { MyBlock } from './MessageHandler'
 import {
   blockAttributes,
   fieldAttributes,
@@ -147,19 +147,23 @@ export function getSuggestionsForTypes(
 function removeInvalidFieldSuggestions(
   supportedFields: Array<string>,
   block: MyBlock,
-  document: TextDocument,
+  lines: Array<string>,
   position: Position,
 ): Array<string> {
-  if (block instanceof MyBlock) {
-    for (let i = block.start.line + 1; i < block.end.line; i++) {
-      if (i === position.line) {
-        continue
-      }
-      const currentLine = getCurrentLine(document, i)
-      const fieldName = currentLine.replace(/ .*/, '')
-      if (supportedFields.includes(fieldName)) {
-        supportedFields.filter((field) => field !== fieldName)
-      }
+  let reachedStartLine = false
+  for (const [key, item] of lines.entries()) {
+    if (key === block.start.line + 1) {
+      reachedStartLine = true
+    }
+    if (!reachedStartLine || key === position.line) {
+      continue
+    }
+    if (key === block.end.line) {
+      break
+    }
+    const fieldName = item.replace(/ .*/, '')
+    if (supportedFields.includes(fieldName)) {
+      supportedFields.filter((field) => field !== fieldName)
     }
   }
   return supportedFields
@@ -167,13 +171,13 @@ function removeInvalidFieldSuggestions(
 
 function getSuggestionForDataSourceField(
   block: MyBlock,
-  document: TextDocument,
+  lines: Array<string>,
   position: Position,
 ): CompletionItem[] {
   const labels: Array<string> = removeInvalidFieldSuggestions(
     supportedDataSourceFields.map((item) => item.label),
     block,
-    document,
+    lines,
     position,
   )
 
@@ -182,13 +186,13 @@ function getSuggestionForDataSourceField(
 
 function getSuggestionForGeneratorField(
   block: MyBlock,
-  document: TextDocument,
+  lines: Array<string>,
   position: Position,
 ): CompletionItem[] {
   const labels = removeInvalidFieldSuggestions(
     supportedGeneratorFields.map((item) => item.label),
     block,
-    document,
+    lines,
     position,
   )
 
@@ -200,17 +204,17 @@ function getSuggestionForGeneratorField(
  */
 export function getSuggestionForFirstInsideBlock(
   blockType: string,
-  document: TextDocument,
+  lines: Array<string>,
   position: Position,
   block: MyBlock,
 ): CompletionList {
   let suggestions: CompletionItem[] = []
   switch (blockType) {
     case 'datasource':
-      suggestions = getSuggestionForDataSourceField(block, document, position)
+      suggestions = getSuggestionForDataSourceField(block, lines, position)
       break
     case 'generator':
-      suggestions = getSuggestionForGeneratorField(block, document, position)
+      suggestions = getSuggestionForGeneratorField(block, lines, position)
       break
     case 'model':
     case 'type_alias':
@@ -228,32 +232,33 @@ export function getSuggestionForFirstInsideBlock(
 }
 
 export function getSuggestionForBlockTypes(
-  document: TextDocument,
+  lines: Array<string>,
 ): CompletionList {
   const suggestions: CompletionItem[] = allowedBlockTypes
 
   // enum is not supported in sqlite
-  for (let i = 0; i < document.lineCount - 1; i++) {
-    let currentLine = getCurrentLine(document, i)
-    if (currentLine.trim().includes('datasource')) {
-      for (let j = i; j < document.lineCount - 1; j++) {
-        currentLine = getCurrentLine(document, j)
-        if (currentLine.includes('}')) {
-          break
-        }
-        if (
-          currentLine.trim().startsWith('provider') &&
-          currentLine.includes('sqlite')
-        ) {
-          suggestions.pop()
-          break
-        }
+  let foundDataSourceBlock = false
+  for (const item of lines) {
+    if (item.includes('datasource')) {
+      foundDataSourceBlock = true
+      continue
+    }
+    if (foundDataSourceBlock) {
+      if (item.includes('}')) {
+        break
+      }
+      if (
+        item.startsWith('provider') &&
+        item.includes('sqlite')
+      ) {
+        suggestions.pop()
       }
     }
-    if (!suggestions.map((item) => item.label).includes('enum')) {
+    if (!suggestions.map((sugg) => sugg.label).includes('enum')) {
       break
     }
   }
+
 
   return {
     items: suggestions,
@@ -263,11 +268,9 @@ export function getSuggestionForBlockTypes(
 
 export function getSuggestionForSupportedFields(
   blockType: string,
-  document: TextDocument,
-  position: Position,
+  currentLine: string,
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
-  const currentLine = getCurrentLine(document, position.line).trim()
 
   switch (blockType) {
     case 'generator':
@@ -316,21 +319,30 @@ function isInsideAttribute(
 }
 
 function getFieldsFromCurrentBlock(
-  document: TextDocument,
+  lines: Array<string>,
   position: Position,
   block: MyBlock,
   context?: string,
 ): Array<string> {
   let suggestions: Array<string> = []
 
-  for (let i = block.start.line; i < block.end.line - 1; i++) {
-    if (i !== position.line) {
-      const currentLine = getCurrentLine(document, i).trim()
-      suggestions.push(currentLine.replace(/ .*/, ''))
+  let reachedStartLine = false
+  for (const [key, item] of lines.entries()) {
+    if (key === block.start.line + 1) {
+      reachedStartLine = true
+    }
+    if (!reachedStartLine) {
+      continue
+    }
+    if (key === block.end.line) {
+      break
+    }
+    if (key !== position.line) {
+      suggestions.push(item.replace(/ .*/, ''))
     }
   }
 
-  const currentLine = getCurrentLine(document, position.line).trim()
+  const currentLine = lines[position.line]
   if (currentLine.includes('fields') && currentLine.includes('references')) {
     const otherContext = context === 'references' ? 'fields' : 'references'
     // remove all fields that might be inside other attribute
@@ -358,26 +370,25 @@ function getFieldsFromCurrentBlock(
 }
 
 export function getSuggestionsForInsideAttributes(
-  document: TextDocument,
+  lines: Array<string>,
   position: Position,
   block: MyBlock,
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
-  const currentLine = getCurrentLine(document, position.line).trim()
-  const wordsBeforePosition = currentLine
+  const wordsBeforePosition = lines[position.line]
     .slice(0, position.character - 2)
     .split(' ')
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
 
   if (wordBeforePosition.includes('@default')) {
-    suggestions = getFunctions(currentLine)
+    suggestions = getFunctions(lines[position.line])
   } else if (wordBeforePosition?.includes('@relation')) {
     suggestions = ['references: []', 'fields: []', '""']
   } else if (isInsideAttribute(wordsBeforePosition, 'fields')) {
-    suggestions = getFieldsFromCurrentBlock(document, position, block, 'fields')
+    suggestions = getFieldsFromCurrentBlock(lines, position, block, 'fields')
   } else if (isInsideAttribute(wordsBeforePosition, 'references')) {
     suggestions = getFieldsFromCurrentBlock(
-      document,
+      lines,
       position,
       block,
       'references',
@@ -387,7 +398,7 @@ export function getSuggestionsForInsideAttributes(
     wordBeforePosition.includes('@@id') ||
     wordBeforePosition.includes('@@index')
   ) {
-    suggestions = getFieldsFromCurrentBlock(document, position, block)
+    suggestions = getFieldsFromCurrentBlock(lines, position, block)
   }
   return {
     items: toCompletionItems(suggestions, CompletionItemKind.Field),
