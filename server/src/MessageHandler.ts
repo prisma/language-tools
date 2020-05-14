@@ -23,16 +23,18 @@ import {
   getSuggestionsForInsideAttributes,
 } from './completions'
 
+function getCurrentLine(document: TextDocument, line: number) {
+  return document.getText({
+    start: { line: line, character: 0 },
+    end: { line: line, character: 9999 },
+  })
+}
+
 function convertDocumentTextToTrimmedLineArray(
   document: TextDocument,
 ): Array<string> {
   return [...Array(document.lineCount)].map((_, i) =>
-    document
-      .getText({
-        start: { line: i, character: 0 },
-        end: { line: i, character: 9999 },
-      })
-      .trim(),
+    getCurrentLine(document, i).trim(),
   )
 }
 
@@ -54,7 +56,8 @@ function isFirstInsideBlock(position: Position, currentLine: string): boolean {
   return stringTillPosition.length === firstWordInLine.length
 }
 
-function getWordAtPosition(currentLine: string, position: Position): string {
+function getWordAtPosition(document: TextDocument, position: Position): string {
+  const currentLine = getCurrentLine(document, position.line)
   if (currentLine.slice(0, position.character).endsWith('@@')) {
     return '@@'
   }
@@ -145,7 +148,7 @@ export function handleDefinitionRequest(
   }
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
-  const word = getWordAtPosition(lines[position.line], position)
+  const word = getWordAtPosition(document, position)
 
   if (word === '') {
     return
@@ -154,7 +157,9 @@ export function handleDefinitionRequest(
   const documentText = document.getText()
 
   // get start position of model type
-  const index = documentText.search(new RegExp('model\\s+' + word + '[\\s|{]'))
+  const index = documentText.search(
+    new RegExp('[model|enum]\\s+' + word + '[\\s|{]'),
+  )
 
   const modelBlock = getBlockAtPosition(document.positionAt(index).line, lines)
 
