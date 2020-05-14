@@ -177,13 +177,11 @@ function toCompletionItems(
   allowedTypes: string[],
   kind: CompletionItemKind,
 ): CompletionItem[] {
-  const items: CompletionItem[] = []
-  allowedTypes.forEach((type) => items.push({ label: type, kind: kind }))
-  return items
+  return allowedTypes.map(label => ({ label, kind }))
 }
 
 function getSuggestionForBlockAttribute(blockType: string): CompletionItem[] {
-  if (blockType != 'model') {
+  if (blockType !== 'model') {
     return []
   }
   return blockAttributes
@@ -194,7 +192,7 @@ function getSuggestionForFieldAttribute(
   position: Position,
   document: TextDocument,
 ): CompletionItem[] {
-  if (blockType != 'model' && blockType != 'type_alias') {
+  if (blockType !== 'model' && blockType !== 'type_alias') {
     return []
   }
   const currentLine = getCurrentLine(document, position.line)
@@ -202,7 +200,7 @@ function getSuggestionForFieldAttribute(
 
   if (!currentLine.includes('Int')) {
     // id not allowed
-    suggestions = suggestions.filter((sugg) => sugg.label != 'id')
+    suggestions = suggestions.filter((sugg) => sugg.label !== 'id')
   }
 
   return suggestions
@@ -225,9 +223,8 @@ export function getSuggestionsForAttributes(
     const blockAttributeSuggestions: CompletionItem[] = getSuggestionForBlockAttribute(
       blockType,
     )
-    for (let i = 0; i < blockAttributeSuggestions.length; i++) {
-      blockAttributeSuggestions[i].data =
-        '@' + blockAttributeSuggestions[i].label
+    for (const suggestion of blockAttributeSuggestions) {
+      suggestion.data = '@' + suggestion.label
     }
     suggestions = getSuggestionForFieldAttribute(
       blockType,
@@ -241,14 +238,12 @@ export function getSuggestionsForAttributes(
       position,
       document,
     )
-    for (let i = 0; i < fieldAttributeSuggestions.length; i++) {
-      fieldAttributeSuggestions[i].label =
-        '@' + fieldAttributeSuggestions[i].label
+    for (const suggestion of fieldAttributeSuggestions) {
+      suggestion.label = '@' + suggestion.label
     }
     const blockAttributeSuggestions = getSuggestionForBlockAttribute(blockType)
-    for (let i = 0; i < blockAttributeSuggestions.length; i++) {
-      blockAttributeSuggestions[i].label =
-        '@@' + blockAttributeSuggestions[i].label
+    for (const suggestion of blockAttributeSuggestions) {
+      suggestion.label = '@' + suggestion.label
     }
     suggestions = fieldAttributeSuggestions.concat(blockAttributeSuggestions)
   }
@@ -293,7 +288,7 @@ export function getSuggestionsForTypes(
   foundBlock: MyBlock,
   document: TextDocument,
 ): CompletionList {
-  let suggestions: CompletionItem[] = corePrimitiveTypes
+  const suggestions: CompletionItem[] = corePrimitiveTypes
 
   if (foundBlock instanceof MyBlock) {
     // get all model names
@@ -301,9 +296,7 @@ export function getSuggestionsForTypes(
       document,
       foundBlock.start.line,
     )
-    suggestions = suggestions.concat(
-      toCompletionItems(modelNames, CompletionItemKind.TypeParameter),
-    )
+    suggestions.push(...toCompletionItems(modelNames, CompletionItemKind.TypeParameter))
   }
 
   return {
@@ -326,7 +319,7 @@ function removeInvalidFieldSuggestions(
       const currentLine = getCurrentLine(document, i)
       const fieldName = currentLine.replace(/ .*/, '')
       if (supportedFields.includes(fieldName)) {
-        supportedFields.filter((field) => field != fieldName)
+        supportedFields.filter((field) => field !== fieldName)
       }
     }
   }
@@ -383,8 +376,8 @@ export function getSuggestionForFirstInsideBlock(
     case 'model':
     case 'type_alias':
       suggestions = getSuggestionForBlockAttribute(blockType)
-      for (let i = 0; i < suggestions.length; i++) {
-        suggestions[i].label = '@@' + suggestions[i].label
+      for (const suggestion of suggestions) {
+        suggestion.label = '@@' + suggestion.label
       }
       break
   }
@@ -404,8 +397,8 @@ export function getSuggestionForBlockTypes(
   for (let i = 0; i < document.lineCount - 1; i++) {
     let currentLine = getCurrentLine(document, i)
     if (currentLine.trim().includes('datasource')) {
-      for (let _j = i; _j < document.lineCount - 1; _j++) {
-        currentLine = getCurrentLine(document, _j)
+      for (let j = i; j < document.lineCount - 1; j++) {
+        currentLine = getCurrentLine(document, j)
         if (currentLine.includes('}')) {
           break
         }
@@ -472,11 +465,11 @@ function isInsideAttribute(
   wordsBeforePosition: Array<string>,
   attributeName: string,
 ): boolean {
-  for (let i = wordsBeforePosition.length - 1; i > 0; i--) {
-    if (wordsBeforePosition[i].includes(']')) {
+  for (const c of wordsBeforePosition.reverse()) {
+    if (c.includes(']')) {
       break
     }
-    if (wordsBeforePosition[i].includes(attributeName)) {
+    if (c.includes(attributeName)) {
       return true
     }
   }
@@ -490,8 +483,9 @@ function getFieldsFromCurrentBlock(
   context?: string,
 ): Array<string> {
   let suggestions: Array<string> = []
+
   for (let i = block.start.line; i < block.end.line - 1; i++) {
-    if (i != position.line) {
+    if (i !== position.line) {
       const currentLine = getCurrentLine(document, i).trim()
       suggestions.push(currentLine.replace(/ .*/, ''))
     }

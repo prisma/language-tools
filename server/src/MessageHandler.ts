@@ -143,7 +143,7 @@ export function handleDefinitionRequest(
 
   const modelDefinition = 'model '
   // get start position of model type
-  const index = documentText.search(modelDefinition + modelName + /\s+/)
+  const index = documentText.indexOf(modelDefinition + modelName + ' ')
   const buf = documentText.slice(0, index)
   const EOL = '\n'
   const lines = buf.split(EOL).length - 1
@@ -201,7 +201,7 @@ export function handleCompletionRequest(
   documents: TextDocuments<TextDocument>,
 ): CompletionList | undefined {
   const context = params.context
-  if (context == null) {
+  if (!context) {
     return
   }
 
@@ -267,7 +267,7 @@ export function handleCompletionRequest(
     // check if type
     if (
       wordsBeforePosition.length < 2 ||
-      (wordsBeforePosition.length === 2 && symbolBeforePosition != ' ')
+      (wordsBeforePosition.length === 2 && symbolBeforePosition !== ' ')
     ) {
       return getSuggestionsForTypes(foundBlock, document)
     }
