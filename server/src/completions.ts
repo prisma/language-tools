@@ -90,7 +90,7 @@ const blockAttributes: CompletionItem[] = [
     label: 'index([])',
     kind: CompletionItemKind.Property,
     detail: '@@index(_ fields: Identifier[], name: String?)',
-    documentation: 'Defines an index for multiple fields',
+    documentation: 'Defines an index for multiple fields.',
   },
 ]
 
