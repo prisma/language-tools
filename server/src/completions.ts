@@ -177,7 +177,7 @@ function toCompletionItems(
   allowedTypes: string[],
   kind: CompletionItemKind,
 ): CompletionItem[] {
-  return allowedTypes.map(label => ({ label, kind }))
+  return allowedTypes.map((label) => ({ label, kind }))
 }
 
 function getSuggestionForBlockAttribute(blockType: string): CompletionItem[] {
@@ -296,7 +296,9 @@ export function getSuggestionsForTypes(
       document,
       foundBlock.start.line,
     )
-    suggestions.push(...toCompletionItems(modelNames, CompletionItemKind.TypeParameter))
+    suggestions.push(
+      ...toCompletionItems(modelNames, CompletionItemKind.TypeParameter),
+    )
   }
 
   return {
