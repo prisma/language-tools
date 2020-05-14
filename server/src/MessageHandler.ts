@@ -39,7 +39,7 @@ function isFirstInsideBlock(
     return true
   }
 
-  const stringTillPosition = currentLine.substring(0, position.character).trim()
+  const stringTillPosition = currentLine.slice(0, position.character).trim()
   const i = stringTillPosition.search(/\s+/)
   const firstWordInLine = ~i
     ? stringTillPosition.slice(0, i)
@@ -94,7 +94,7 @@ function getBlockAtPosition(
         const index = currentLine.search(/\s+/)
         blockType = ~index ? currentLine.slice(0, index) : currentLine
         blockName = currentLine
-          .substring(blockType.length, currentLine.length - 2)
+          .slice(blockType.length, currentLine.length - 2)
           .trim()
         blockStart = Position.create(i, 0)
         break
@@ -252,7 +252,7 @@ export function handleCompletionRequest(
     })
     const currentLine = getCurrentLine(document, params.position.line).trim()
     const wordsBeforePosition: string[] = currentLine
-      .substring(0, params.position.character - 1)
+      .slice(0, params.position.character - 1)
       .trim()
       .split(/\s+/)
 

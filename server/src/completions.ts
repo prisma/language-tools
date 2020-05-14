@@ -278,7 +278,7 @@ export function getAllRelationNamesWithoutAst(
       const trimmedLine = currentLine.trim()
       const blockType = currentLine.trim().replace(/ .*/, '')
       const blockName = trimmedLine
-        .substring(blockType.length, trimmedLine.length - 1)
+        .slice(blockType.length, trimmedLine.length - 1)
         .trim()
 
       modelNames.push(blockName)
@@ -509,7 +509,7 @@ function getFieldsFromCurrentBlock(
         break
       }
     }
-    const otherContextFieldsString = currentLine.substring(
+    const otherContextFieldsString = currentLine.slice(
       startOfOtherContext + otherContext.length + 3,
       end,
     )
@@ -532,7 +532,7 @@ export function getSuggestionsForInsideAttributes(
   let suggestions: Array<string> = []
   const currentLine = getCurrentLine(document, position.line).trim()
   const wordsBeforePosition = currentLine
-    .substring(0, position.character - 2)
+    .slice(0, position.character - 2)
     .split(' ')
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
 
