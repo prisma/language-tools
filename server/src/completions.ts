@@ -62,7 +62,7 @@ const allowedBlockTypes: CompletionItem[] = [
     label: 'enum',
     kind: CompletionItemKind.Class,
     documentation:
-      "Enums are defined via the enum block. You can define enums in your data model if they're supported by the data source you use:\n• PostgreSQL: Supported\n• MySQL: Supported\n• SQLite: Not supported",
+      "Enums are defined via the enum block. You can define enums in your data model if they're supported by the data source you use:\n• PostgreSQL: Supported\n• MySQL: Supported\n• MariaDB: Supported\n• SQLite: Not supported",
   },
 ]
 
@@ -90,7 +90,7 @@ const blockAttributes: CompletionItem[] = [
     label: 'index([])',
     kind: CompletionItemKind.Property,
     detail: '@@index(_ fields: Identifier[], name: String?)',
-    documentation: 'Defines an index for multiple fields',
+    documentation: 'Defines an index for multiple fields.',
   },
 ]
 
