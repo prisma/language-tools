@@ -38,21 +38,21 @@ function convertDocumentTextToTrimmedLineArray(
   )
 }
 
-function isFirstInsideBlock(
-  position: Position,
-  document: TextDocument,
-): boolean {
-  const currentLine = getCurrentLine(document, position.line)
-  if (currentLine.trim().length === 0) {
+function isFirstInsideBlock(position: Position, currentLine: string): boolean {
+  if (currentLine.length === 0) {
     return true
   }
 
-  const stringTillPosition = currentLine.slice(0, position.character).trim()
+  const stringTillPosition = currentLine.slice(0, position.character)
   const i = stringTillPosition.search(/\s+/)
   const firstWordInLine = ~i
     ? stringTillPosition.slice(0, i)
     : stringTillPosition
 
+  // line is already trimmed
+  if (position.character > stringTillPosition.length) {
+    return false
+  }
   return stringTillPosition.length === firstWordInLine.length
 }
 
@@ -227,7 +227,7 @@ export function handleCompletionRequest(
     return getSuggestionForBlockTypes(document)
   }
 
-  if (isFirstInsideBlock(params.position, document)) {
+  if (isFirstInsideBlock(params.position, lines[params.position.line])) {
     return getSuggestionForFirstInsideBlock(
       foundBlock.type,
       document,
@@ -244,6 +244,7 @@ export function handleCompletionRequest(
           foundBlock.type,
           params.position,
           document,
+          lines[params.position.line],
         )
       case '"':
         return getSuggestionForSupportedFields(
@@ -262,7 +263,7 @@ export function handleCompletionRequest(
       },
       end: { line: params.position.line, character: params.position.character },
     })
-    const currentLine = getCurrentLine(document, params.position.line).trim()
+    const currentLine = lines[params.position.line]
     const wordsBeforePosition: string[] = currentLine
       .slice(0, params.position.character - 1)
       .trim()
@@ -281,12 +282,13 @@ export function handleCompletionRequest(
       wordsBeforePosition.length < 2 ||
       (wordsBeforePosition.length === 2 && symbolBeforePosition !== ' ')
     ) {
-      return getSuggestionsForTypes(foundBlock, document)
+      return getSuggestionsForTypes(foundBlock, lines)
     }
     return getSuggestionsForAttributes(
       foundBlock.type,
       params.position,
       document,
+      lines[params.position.line],
     )
   }
 }
