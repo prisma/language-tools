@@ -141,9 +141,11 @@ export function handleDefinitionRequest(
   const documentText = document.getText()
   const modelName = getWordAtPosition(document, position)
 
-  const modelDefinition = 'model '
   // get start position of model type
-  const index = documentText.indexOf(modelDefinition + modelName + ' ')
+  const index = documentText.search(
+    new RegExp('model\\s+' + modelName + '[\\s+|{]'),
+  )
+
   const modelBlock = getBlockAtPosition(
     document.positionAt(index).line,
     document,
