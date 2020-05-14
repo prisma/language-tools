@@ -247,10 +247,7 @@ export function getSuggestionForBlockTypes(
       if (item.includes('}')) {
         break
       }
-      if (
-        item.startsWith('provider') &&
-        item.includes('sqlite')
-      ) {
+      if (item.startsWith('provider') && item.includes('sqlite')) {
         suggestions.pop()
       }
     }
@@ -258,7 +255,6 @@ export function getSuggestionForBlockTypes(
       break
     }
   }
-
 
   return {
     items: suggestions,
