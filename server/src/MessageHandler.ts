@@ -144,10 +144,10 @@ export function handleDefinitionRequest(
   const modelDefinition = 'model '
   // get start position of model type
   const index = documentText.indexOf(modelDefinition + modelName + ' ')
-  const buf = documentText.slice(0, index)
-  const EOL = '\n'
-  const lines = buf.split(EOL).length - 1
-  const modelBlock = getBlockAtPosition(lines, document)
+  const modelBlock = getBlockAtPosition(
+    document.positionAt(index).line,
+    document,
+  )
 
   if (!modelBlock) {
     return
