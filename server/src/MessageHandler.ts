@@ -62,8 +62,10 @@ function getWordAtPosition(document: TextDocument, position: Position): string {
     return '@@'
   }
   // search for the word's beginning and end
-  const beginning = currentLine.slice(0, position.character + 1).search(/\S+$/)
-  const end = currentLine.slice(position.character).search(/\W/)
+  const beginning: number = currentLine
+    .slice(0, position.character + 1)
+    .search(/\S+$/)
+  const end: number = currentLine.slice(position.character).search(/\W/)
   if (end < 0) {
     return ''
   }
@@ -157,11 +159,22 @@ export function handleDefinitionRequest(
   const documentText = document.getText()
 
   // get start position of model type
-  const index = documentText.search(
-    new RegExp('[model|enum]\\s+' + word + '[\\s|{]'),
-  )
+  const result = lines
+    .map((line, index) => {
+      if (
+        (line.includes('model') && line.includes(word)) ||
+        (line.includes('enum') && line.includes(word))
+      ) {
+        return index
+      }
+    })
+    .filter((index) => index)
 
-  const modelBlock = getBlockAtPosition(document.positionAt(index).line, lines)
+  if (result.length === 0 || !result[0]) {
+    return
+  }
+
+  const modelBlock = getBlockAtPosition(result[0], lines)
 
   if (!modelBlock) {
     return
