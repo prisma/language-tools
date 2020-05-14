@@ -40,7 +40,7 @@ function isFirstInsideBlock(
   }
 
   const stringTillPosition = currentLine.substring(0, position.character).trim()
-  const i = stringTillPosition.indexOf(' ')
+  const i = stringTillPosition.search(/\s+/)
   const firstWordInLine = ~i
     ? stringTillPosition.slice(0, i)
     : stringTillPosition
@@ -91,7 +91,7 @@ function getBlockAtPosition(
       const currentLine = getCurrentLine(document, i).trim()
       if (currentLine.includes('{')) {
         // position is inside a block
-        const index = currentLine.indexOf(' ')
+        const index = currentLine.search(/\s+/)
         blockType = ~index ? currentLine.slice(0, index) : currentLine
         blockName = currentLine
           .substring(blockType.length, currentLine.length - 2)
@@ -143,7 +143,7 @@ export function handleDefinitionRequest(
 
   const modelDefinition = 'model '
   // get start position of model type
-  const index = documentText.indexOf(modelDefinition + modelName + ' ')
+  const index = documentText.search(modelDefinition + modelName + /\s+/)
   const buf = documentText.slice(0, index)
   const EOL = '\n'
   const lines = buf.split(EOL).length - 1
