@@ -33,9 +33,9 @@ function getCurrentLine(document: TextDocument, line: number) {
 function convertDocumentTextToTrimmedLineArray(
   document: TextDocument,
 ): Array<string> {
-  return Array(document.lineCount).fill().map((_, i) =>
-    getCurrentLine(document, i).trim(),
-  )
+  return Array(document.lineCount)
+    .fill(0)
+    .map((_, i) => getCurrentLine(document, i).trim())
 }
 
 function isFirstInsideBlock(position: Position, currentLine: string): boolean {
