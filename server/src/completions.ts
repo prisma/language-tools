@@ -14,6 +14,7 @@ import {
   supportedDataSourceFields,
   supportedGeneratorFields,
 } from './completionUtil'
+import klona from 'klona'
 
 function toCompletionItems(
   allowedTypes: string[],
@@ -37,9 +38,7 @@ function getSuggestionForBlockAttribute(
   })
   const symbolBeforePosition = symbolsBeforePosition.charAt(1)
   // create deep copy
-  const suggestions: CompletionItem[] = JSON.parse(
-    JSON.stringify(blockAttributes),
-  )
+  const suggestions: CompletionItem[] = klona(blockAttributes)
 
   if (symbolsBeforePosition === ' @') {
     // add @
@@ -66,9 +65,7 @@ function getSuggestionForFieldAttribute(
     return []
   }
   // create deep copy
-  let suggestions: CompletionItem[] = JSON.parse(
-    JSON.stringify(fieldAttributes),
-  )
+  let suggestions: CompletionItem[] = klona(fieldAttributes)
 
   if (!currentLine.includes('Int')) {
     // id not allowed
@@ -137,9 +134,7 @@ export function getSuggestionsForTypes(
   lines: Array<string>,
 ): CompletionList {
   // create deep copy
-  const suggestions: CompletionItem[] = JSON.parse(
-    JSON.stringify(corePrimitiveTypes),
-  )
+  const suggestions: CompletionItem[] = klona(corePrimitiveTypes)
 
   if (foundBlock instanceof MyBlock) {
     // get all model names
@@ -189,9 +184,7 @@ function getSuggestionForDataSourceField(
   position: Position,
 ): CompletionItem[] {
   // create deep copy
-  const suggestions: CompletionItem[] = JSON.parse(
-    JSON.stringify(supportedDataSourceFields),
-  )
+  const suggestions: CompletionItem[] = klona(supportedDataSourceFields)
 
   const labels: Array<string> = removeInvalidFieldSuggestions(
     suggestions.map((item) => item.label),
@@ -209,9 +202,7 @@ function getSuggestionForGeneratorField(
   position: Position,
 ): CompletionItem[] {
   // create deep copy
-  const suggestions: CompletionItem[] = JSON.parse(
-    JSON.stringify(supportedGeneratorFields),
-  )
+  const suggestions: CompletionItem[] = klona(supportedGeneratorFields)
 
   const labels = removeInvalidFieldSuggestions(
     suggestions.map((item) => item.label),
@@ -261,9 +252,7 @@ export function getSuggestionForBlockTypes(
   lines: Array<string>,
 ): CompletionList {
   // create deep copy
-  const suggestions: CompletionItem[] = JSON.parse(
-    JSON.stringify(allowedBlockTypes),
-  )
+  const suggestions: CompletionItem[] = klona(allowedBlockTypes)
 
   // enum is not supported in sqlite
   let foundDataSourceBlock = false
