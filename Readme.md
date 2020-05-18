@@ -10,7 +10,7 @@ This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-pri
 - Auto-formatting
 - Linting
 - Jump-to-definition
-- Auto-completion (_coming soon_)
+- Auto-completion
 
 It also includes an End-to-End test.
 
@@ -38,7 +38,7 @@ It also includes an End-to-End test.
 ## Development
 
 - Run `npm install` in this folder. This installs all necessary npm modules in both the client and server folder.
-- Run `yarn watch`.
+- Run `npm run watch`.
 - Open VS Code on this folder.
 - Switch to the debug viewlet.
 - Select `Launch Client` from the drop down.
