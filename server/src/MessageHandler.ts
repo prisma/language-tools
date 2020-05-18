@@ -39,27 +39,31 @@ function convertDocumentTextToTrimmedLineArray(
 }
 
 function isFirstInsideBlock(position: Position, currentLine: string): boolean {
-  if (currentLine.length === 0) {
+  if (currentLine.trim().length === 0) {
     return true
   }
 
   const stringTillPosition = currentLine.slice(0, position.character)
-  const i = stringTillPosition.search(/\s+/)
-  const firstWordInLine = ~i
-    ? stringTillPosition.slice(0, i)
-    : stringTillPosition
+  const matchArray = new RegExp(/\w+/).exec(stringTillPosition)
 
-  // line is already trimmed
-  if (position.character > stringTillPosition.length) {
-    return false
+  if (!matchArray) {
+    return true
   }
-  return stringTillPosition.length === firstWordInLine.length
+  return (
+    matchArray.length === 1 &&
+    matchArray.index !== undefined &&
+    stringTillPosition.length - matchArray.index - matchArray[0].length === 0
+  )
 }
 
 function getWordAtPosition(document: TextDocument, position: Position): string {
   const currentLine = getCurrentLine(document, position.line)
-  if (currentLine.slice(0, position.character).endsWith('@@')) {
+  const stringTillPosition = currentLine.slice(0, position.character)
+  if (stringTillPosition.endsWith('@@')) {
     return '@@'
+  }
+  if (stringTillPosition.endsWith('@')) {
+    return '@'
   }
   // search for the word's beginning and end
   const beginning: number = currentLine
@@ -156,8 +160,6 @@ export function handleDefinitionRequest(
     return
   }
 
-  const documentText = document.getText()
-
   // get start position of model type
   const result = lines
     .map((line, index) => {
@@ -243,12 +245,18 @@ export function handleCompletionRequest(
     return getSuggestionForBlockTypes(lines)
   }
 
-  if (isFirstInsideBlock(params.position, lines[params.position.line])) {
+  if (
+    isFirstInsideBlock(
+      params.position,
+      getCurrentLine(document, params.position.line),
+    )
+  ) {
     return getSuggestionForFirstInsideBlock(
       foundBlock.type,
       lines,
       params.position,
       foundBlock,
+      document,
     )
   }
 
