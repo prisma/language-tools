@@ -15,7 +15,6 @@ import {
   supportedGeneratorFields,
 } from './completionUtil'
 
-
 function toCompletionItems(
   allowedTypes: string[],
   kind: CompletionItemKind,
@@ -23,7 +22,11 @@ function toCompletionItems(
   return allowedTypes.map((label) => ({ label, kind }))
 }
 
-function getSuggestionForBlockAttribute(blockType: string, document: TextDocument, position: Position): CompletionItem[] {
+function getSuggestionForBlockAttribute(
+  blockType: string,
+  document: TextDocument,
+  position: Position,
+): CompletionItem[] {
   if (blockType !== 'model') {
     return []
   }
@@ -34,7 +37,9 @@ function getSuggestionForBlockAttribute(blockType: string, document: TextDocumen
   })
   const symbolBeforePosition = symbolsBeforePosition.charAt(1)
   // create deep copy
-  const suggestions: CompletionItem[] = JSON.parse(JSON.stringify(blockAttributes))
+  const suggestions: CompletionItem[] = JSON.parse(
+    JSON.stringify(blockAttributes),
+  )
 
   if (symbolsBeforePosition === ' @') {
     // add @
@@ -55,13 +60,15 @@ function getSuggestionForFieldAttribute(
   blockType: string,
   currentLine: string,
   document: TextDocument,
-  position: Position
+  position: Position,
 ): CompletionItem[] {
   if (blockType !== 'model' && blockType !== 'type_alias') {
     return []
   }
   // create deep copy
-  let suggestions: CompletionItem[] = JSON.parse(JSON.stringify(fieldAttributes))
+  let suggestions: CompletionItem[] = JSON.parse(
+    JSON.stringify(fieldAttributes),
+  )
 
   if (!currentLine.includes('Int')) {
     // id not allowed
@@ -91,7 +98,7 @@ export function getSuggestionsForAttributes(
     blockType,
     currentLine,
     document,
-    position
+    position,
   )
 
   return {
@@ -129,9 +136,10 @@ export function getSuggestionsForTypes(
   foundBlock: MyBlock,
   lines: Array<string>,
 ): CompletionList {
-
   // create deep copy
-  const suggestions: CompletionItem[] = JSON.parse(JSON.stringify(corePrimitiveTypes))
+  const suggestions: CompletionItem[] = JSON.parse(
+    JSON.stringify(corePrimitiveTypes),
+  )
 
   if (foundBlock instanceof MyBlock) {
     // get all model names
@@ -181,7 +189,9 @@ function getSuggestionForDataSourceField(
   position: Position,
 ): CompletionItem[] {
   // create deep copy
-  const suggestions: CompletionItem[] = JSON.parse(JSON.stringify(supportedDataSourceFields))
+  const suggestions: CompletionItem[] = JSON.parse(
+    JSON.stringify(supportedDataSourceFields),
+  )
 
   const labels: Array<string> = removeInvalidFieldSuggestions(
     suggestions.map((item) => item.label),
@@ -199,7 +209,9 @@ function getSuggestionForGeneratorField(
   position: Position,
 ): CompletionItem[] {
   // create deep copy
-  const suggestions: CompletionItem[] = JSON.parse(JSON.stringify(supportedGeneratorFields))
+  const suggestions: CompletionItem[] = JSON.parse(
+    JSON.stringify(supportedGeneratorFields),
+  )
 
   const labels = removeInvalidFieldSuggestions(
     suggestions.map((item) => item.label),
@@ -219,7 +231,7 @@ export function getSuggestionForFirstInsideBlock(
   lines: Array<string>,
   position: Position,
   block: MyBlock,
-  document: TextDocument
+  document: TextDocument,
 ): CompletionList {
   let suggestions: CompletionItem[] = []
   switch (blockType) {
@@ -231,7 +243,11 @@ export function getSuggestionForFirstInsideBlock(
       break
     case 'model':
     case 'type_alias':
-      suggestions = getSuggestionForBlockAttribute(blockType, document, position)
+      suggestions = getSuggestionForBlockAttribute(
+        blockType,
+        document,
+        position,
+      )
       break
   }
 
@@ -245,7 +261,9 @@ export function getSuggestionForBlockTypes(
   lines: Array<string>,
 ): CompletionList {
   // create deep copy
-  const suggestions: CompletionItem[] = JSON.parse(JSON.stringify(allowedBlockTypes))
+  const suggestions: CompletionItem[] = JSON.parse(
+    JSON.stringify(allowedBlockTypes),
+  )
 
   // enum is not supported in sqlite
   let foundDataSourceBlock = false
