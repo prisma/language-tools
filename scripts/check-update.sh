@@ -24,7 +24,10 @@ echo "CURRENT_VERSION: $CURRENT_VERSION"
 NPM_VERSION=$(sh scripts/prisma-version.sh "$CHANNEL")
 echo "NPM_VERSION: $NPM_VERSION"
 
-NEXT_EXTENSION_VERSION=$(sh scripts/extension-version.sh "$CHANNEL" "patch")
+EXTENSION_VERSION=$(sh scripts/extension-version.sh "$CHANNEL" "")
+echo "EXTENSION_VERSION: $EXTENSION_VERSION"
+
+NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
 echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
 
 # Setup the repo with GH_TOKEN to avoid running jobs when CI commits
