@@ -25,7 +25,7 @@ export default async function lint(
       ) {
         // recognized Prisma 1 schema
         onError(
-          "You are currently viewing a Prisma 1 datamodel which is based on GraphQL syntax. The current Prisma VS Code extension doesn't support this syntax. To get proper syntax highlighting for this file, please change its file extension to `.graphql` and download the [GraphQL VS Code extension](https://marketplace.visualstudio.com/items?itemName=Prisma.vscode-graphql). Learn more [here](https://pris.ly/prisma1-vscode).",
+          "You are currently viewing a Prisma 1 datamodel which is based on the GraphQL syntax. The current Prisma VSCode extension doesn't support this syntax. To get proper syntax highlighting for this file, please change the file extension to `.graphql` and download the [GraphQL VSCode extension](https://marketplace.visualstudio.com/items?itemName=Prisma.vscode-graphql). Learn more [here](https://pris.ly/prisma1-vscode).",
         )
       } else {
         onError(errorMessage + errors)
