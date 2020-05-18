@@ -33,7 +33,7 @@ function getCurrentLine(document: TextDocument, line: number) {
 function convertDocumentTextToTrimmedLineArray(
   document: TextDocument,
 ): Array<string> {
-  return [...Array(document.lineCount)].map((_, i) =>
+  return Array(document.lineCount).fill().map((_, i) =>
     getCurrentLine(document, i).trim(),
   )
 }
