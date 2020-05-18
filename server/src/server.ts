@@ -6,7 +6,6 @@ import {
   InitializeResult,
   DiagnosticSeverity,
   Diagnostic,
-  MessageActionItem,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
