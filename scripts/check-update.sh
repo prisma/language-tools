@@ -27,9 +27,6 @@ echo "NPM_VERSION: $NPM_VERSION"
 EXTENSION_VERSION=$(sh scripts/extension-version.sh "$CHANNEL" "")
 echo "EXTENSION_VERSION: $EXTENSION_VERSION"
 
-NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
-echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
-
 # Setup the repo with GH_TOKEN to avoid running jobs when CI commits
 if [ "$PRODUCTION" = "1" ]; then
     git config --global user.email "prismabots@gmail.com"
@@ -41,6 +38,10 @@ fi
 
 if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then
     echo "UPDATING to $NPM_VERSION"
+
+    NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
+    echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
+
     sh ./scripts/bump.sh "$CHANNEL" "$NPM_VERSION" "$NEXT_EXTENSION_VERSION"
     if [ "$PRODUCTION" = "1" ]; then
         git add -A .
