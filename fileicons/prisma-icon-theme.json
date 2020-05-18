@@ -1,7 +1,7 @@
 {
     "iconDefinitions": {
         "_prisma_file": {
-            "iconPath": "./../logo_white.png"
+            "iconPath": "./prisma.svg"
         }
     },
     "languageIds": {
