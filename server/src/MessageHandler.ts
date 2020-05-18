@@ -44,7 +44,7 @@ function isFirstInsideBlock(position: Position, currentLine: string): boolean {
   }
 
   const stringTillPosition = currentLine.slice(0, position.character)
-  const matchArray = new RegExp(/\w+/).exec(stringTillPosition)
+  const matchArray = /\w+/.exec(stringTillPosition)
 
   if (!matchArray) {
     return true
