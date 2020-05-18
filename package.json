@@ -29,7 +29,7 @@
     "vsce:publish": "sh scripts/publish.sh",
     "vsce:postpublish": "(cd ./clients/vscode && npm i && sh scripts/publish.sh)",
     "postinstall": "lerna exec npm install",
-    "vsce:check": "yarn shell:lint && sh scripts/check-update.sh && cd ./clients/vscode && yarn shell:lint && sh scripts/check-update.sh",
+    "vsce:check": "yarn shell:lint && sh scripts/check-update.sh",
     "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "sh ./scripts/e2e.sh"
   },
