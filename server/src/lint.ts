@@ -18,7 +18,11 @@ export default async function lint(
     const errorMessage = "prisma-fmt error'd during linting.\n"
 
     if (onError) {
-      if ((errors as string) && errors.includes('ParsingError')) {
+      if (
+        (errors as string) &&
+        errors.includes('ParsingError') &&
+        text.includes('type')
+      ) {
         // recognized Prisma 1 schema
         onError(
           "You are currently viewing a Prisma 1 datamodel which is based on GraphQL syntax. The current Prisma VS Code extension doesn't support this syntax. To get proper syntax highlighting for this file, please change its file extension to `.graphql` and download the [GraphQL VS Code extension](https://marketplace.visualstudio.com/items?itemName=Prisma.vscode-graphql). Learn more [here](https://pris.ly/prisma1-vscode).",
