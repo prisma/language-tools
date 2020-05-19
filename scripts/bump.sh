@@ -48,10 +48,6 @@ jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
     .dependencies[\"@prisma/sdk\"] = \"$PRISMA_VERSION\"" \
     ./server/package.json > ./server/package.json.bk
 
-jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
-    .dependencies[\"@prisma/language-server\"] = \"$NEXT_EXTENSION_VERSION\"" \
-    ./clients/vscode/package.json > ./clients/vscode/package.json.bk
-
 mv ./package.json.bk ./package.json
 mv ./server/package.json.bk ./server/package.json
 mv ./clients/vscode/package.json.bk ./clients/vscode/package.json
@@ -68,4 +64,4 @@ cd ./server
 npm install
 )
 
-echo "Bumped prisma.version in clients/vscode/package.json and server/package.json from $OLD_SHA to $SHA"
+echo "Bumped prisma.version in clients/vscode/package.json from $OLD_SHA to $SHA"
