@@ -34,19 +34,11 @@ if [ "$CHANNEL" = "dev" ]; then
         .name = \"prisma-dev\" | \
         .displayName = \"Prisma Dev\"" \
         ./clients/vscode/package.json > ./clients/vscode/package.json.bk
-    jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
-        .name = \"@prisma/language-server-dev\" | \
-        .displayName = \"Prisma Language Server Dev\"" \
-        ./server/package.json > ./server/package.json.bk
 else
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma\" | \
         .displayName = \"Prisma\"" \
         ./clients/vscode/package.json > ./clients/vscode/package.json.bk
-        jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
-        .name = \"@prisma/language-server\" | \
-        .displayName = \"Prisma Language Server\"" \
-        ./server/package.json > ./server/package.json.bk
 fi
 
 jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
@@ -56,7 +48,8 @@ jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
     .dependencies[\"@prisma/sdk\"] = \"$PRISMA_VERSION\"" \
     ./server/package.json > ./server/package.json.bk
 
-jq ".version = \"$NEXT_EXTENSION_VERSION\"" \
+jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
+    .dependencies[\"@prisma/language-server\"] = \"$NEXT_EXTENSION_VERSION\"" \
     ./clients/vscode/package.json > ./clients/vscode/package.json.bk
 
 mv ./package.json.bk ./package.json
