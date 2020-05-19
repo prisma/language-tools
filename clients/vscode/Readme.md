@@ -39,7 +39,7 @@ It also includes an End-to-End test.
 
 ## Testing
 
-Instructions on manual testing can be found [here](TESTING.md).
+Instructions on manual testing can be found [here](./../../TESTING.md).
 
 End-to-End tests:
 
@@ -52,7 +52,7 @@ End-to-End tests:
 
 ## Publishing
 
-The extension is automatically published using a [Azure Devops Personal Access Token](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) via Github actions (see `.github/workflows/publish.yml`).
+The extension is automatically published using a [Azure Devops Personal Access Token](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) via Github actions (see `./../../github/workflows/publish.yml`).
 
 Note that the personal access token is only valid for a year and will need to be renewed manually.
 
