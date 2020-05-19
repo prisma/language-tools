@@ -45,7 +45,7 @@ function getSuggestionForBlockAttribute(
     for (const sugg of suggestions) {
       sugg.label = '@' + sugg.label
     }
-  } else if (new RegExp(/\s/).exec(symbolBeforePosition)) {
+  } else if (/\s/.exec(symbolBeforePosition)) {
     // add @@
     for (const item of suggestions) {
       item.label = '@@' + item.label
