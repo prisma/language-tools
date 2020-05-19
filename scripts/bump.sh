@@ -48,7 +48,6 @@ jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
     .dependencies[\"@prisma/sdk\"] = \"$PRISMA_VERSION\"" \
     ./server/package.json > ./server/package.json.bk
 
-mv ./package.json.bk ./package.json
 mv ./server/package.json.bk ./server/package.json
 mv ./clients/vscode/package.json.bk ./clients/vscode/package.json
 
