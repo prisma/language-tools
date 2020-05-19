@@ -2,7 +2,7 @@
   "name": "@prisma/language-server",
   "description": "Implementation of a language server in node.",
   "displayName": "Prisma Language Server",
-  "version": "0.0.1222",
+  "version": "0.0.1224",
   "author": "Prisma",
   "license": "Apache-2.0",
   "engines": {
@@ -20,9 +20,9 @@
   },
   "main": "./out/index.js",
   "dependencies": {
-    "@prisma/fetch-engine": "2.0.0-alpha.1222",
-    "@prisma/get-platform": "2.0.0-alpha.1222",
-    "@prisma/sdk": "2.0.0-alpha.1222",
+    "@prisma/fetch-engine": "2.0.0-alpha.1224",
+    "@prisma/get-platform": "2.0.0-alpha.1224",
+    "@prisma/sdk": "2.0.0-alpha.1224",
     "pkg-dir": "4.2.0",
     "prismafile": "1.0.3",
     "vscode-languageserver": "6.1.1",
