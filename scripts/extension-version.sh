@@ -6,9 +6,9 @@ CHANNEL="$1"
 NEXT="$2"
 
 if [ "$CHANNEL" = "dev" ]; then
-    EXTENSION_VERSION=$(vsce show Prisma.prisma-dev --json | jq ".versions[0].version" | tr -d '"')
+    EXTENSION_VERSION=$(./clients/vscode/node_modules/.bin/vsce show Prisma.prisma-dev --json | jq ".versions[0].version" | tr -d '"')
 else
-    EXTENSION_VERSION=$(vsce show Prisma.prisma --json | jq ".versions[0].version" | tr -d '"')
+    EXTENSION_VERSION=$(./clients/vscode/node_modules/.bin/vsce show Prisma.prisma --json | jq ".versions[0].version" | tr -d '"')
 fi
 
 if [ "$NEXT" = "patch" ]; then
