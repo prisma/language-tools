@@ -25,17 +25,28 @@ echo "PRISMA_VERSION: $PRISMA_VERSION"
 NEXT_EXTENSION_VERSION=$3
 echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
 
+
+# Publish language server as npm package first
+if [ "$PRODUCTION" = "1" ]; then
+    echo "Publishing language server $CHANNEL release"
+    ./server/node_modules/.bin/npm publish "$NEXT_EXTENSION_VERSION" --pat "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
+else
+    echo "Printing the command because PRODUCTION is not set"
+    echo "sh ./scripts/bump.sh" # The actual execution of this command is in check-update.sh becuase git working tree must be clean before calling `vsce publish`
+    echo "./server/node_modules/.bin/npm publish \"$NEXT_EXTENSION_VERSION\" --pat $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
+fi
+
 # Try to publish if $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN (Personal Access Token - https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) exists 
 if [ -z "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
     echo "\$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN is empty. Please set the value of $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
 elif [ -n "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
     if [ "$PRODUCTION" = "1" ]; then
-        echo "Publishing $CHANNEL release"
-        ./node_modules/.bin/vsce publish "$NEXT_EXTENSION_VERSION" --pat "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
+        echo "Publishing extension $CHANNEL release"
+        ./clients/vscode/node_modules/.bin/vsce publish "$NEXT_EXTENSION_VERSION" --pat "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
     else
         echo "Printing the command because PRODUCTION is not set"
         echo "sh ./scripts/bump.sh" # The actual execution of this command is in check-update.sh becuase git working tree must be clean before calling `vsce publish`
-        echo "./node_modules/.bin/vsce publish \"$NEXT_EXTENSION_VERSION\" --pat $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
+        echo "./clients/vscode/node_modules/.bin/vsce publish \"$NEXT_EXTENSION_VERSION\" --pat $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
     fi
 fi
 
