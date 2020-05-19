@@ -16,7 +16,7 @@ else
 fi
 echo "PRISMA_CHANNEL=$PRISMA_CHANNEL"
 
-OLD_SHA=$(jq ".prisma.version" ./package.json)
+OLD_SHA=$(jq ".prisma.version" ./clients/vscode/package.json)
 SHA=$(npx -q -p @prisma/cli@"$PRISMA_CHANNEL" prisma --version | grep "Query Engine" | awk '{print $5}')
 
 NEXT_EXTENSION_VERSION=$3
@@ -33,12 +33,20 @@ if [ "$CHANNEL" = "dev" ]; then
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma-dev\" | \
         .displayName = \"Prisma Dev\"" \
-        ./package.json > ./package.json.bk
+        ./clients/vscode/package.json > ./clients/vscode/package.json.bk
+    jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
+        .name = \"@prisma/language-server-dev\" | \
+        .displayName = \"Prisma Language Server Dev\"" \
+        ./server/package.json > ./server/package.json.bk
 else
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma\" | \
         .displayName = \"Prisma\"" \
-        ./package.json > ./package.json.bk
+        ./clients/vscode/package.json > ./clients/vscode/package.json.bk
+        jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
+        .name = \"@prisma/language-server\" | \
+        .displayName = \"Prisma Language Server\"" \
+        ./server/package.json > ./server/package.json.bk
 fi
 
 jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
@@ -67,4 +75,4 @@ cd ./server
 npm install
 )
 
-echo "Bumped prisma.version in package.json from $OLD_SHA to $SHA"
+echo "Bumped prisma.version in clients/vscode/package.json and server/package.json from $OLD_SHA to $SHA"
