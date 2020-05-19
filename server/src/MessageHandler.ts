@@ -161,7 +161,7 @@ export function handleDefinitionRequest(
   }
 
   // get start position of model type
-  const result = lines
+  const results: number[] = lines
     .map((line, index) => {
       if (
         (line.includes('model') && line.includes(word)) ||
@@ -170,25 +170,36 @@ export function handleDefinitionRequest(
         return index
       }
     })
-    .filter((index) => index)
+    .filter((index) => index !== undefined) as number[]
 
-  if (result.length === 0 || !result[0]) {
+  if (results.length === 0) {
     return
   }
 
-  const modelBlock = getBlockAtPosition(result[0], lines)
+  const foundBlocks: MyBlock[] = results
+    .map((result) => {
+      const block = getBlockAtPosition(result, lines)
+      if (block && block.name === word) {
+        return block
+      }
+    })
+    .filter((block) => block !== undefined) as MyBlock[]
 
-  if (!modelBlock) {
+  if (foundBlocks.length !== 1) {
+    return
+  }
+
+  if (!foundBlocks[0]) {
     return
   }
 
   const startPosition = {
-    line: modelBlock?.start.line,
-    character: modelBlock?.start.character,
+    line: foundBlocks[0].start.line,
+    character: foundBlocks[0].start.character,
   }
   const endPosition = {
-    line: modelBlock?.end.line,
-    character: modelBlock?.end.character,
+    line: foundBlocks[0].end.line,
+    character: foundBlocks[0].end.character,
   }
 
   return {
