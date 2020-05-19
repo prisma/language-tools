@@ -31,7 +31,8 @@
     "postinstall": "lerna exec npm install",
     "vsce:check": "yarn shell:lint && sh scripts/check-update.sh",
     "shell:lint": "shellcheck -x scripts/*.sh",
-    "test": "sh ./scripts/e2e.sh"
+    "test": "sh ./scripts/e2e.sh",
+    "test-scripts": "mocha scripts/extension-version.test.js"
   },
   "husky": {
     "hooks": {
