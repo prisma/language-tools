@@ -123,6 +123,7 @@ function getBlockAtPosition(
     }
     // not inside a block
     if (item.includes('}')) {
+      lines.reverse()
       return
     }
   }
@@ -285,7 +286,7 @@ export function handleHoverRequest(
   }
 
   return {
-    contents: docComments.slice(4),
+    contents: docComments.slice(4).trim(),
   }
 }
 
