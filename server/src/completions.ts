@@ -5,7 +5,7 @@ import {
   Position,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { MyBlock } from './MessageHandler'
+import { MyBlock, getWordAtPosition } from './MessageHandler'
 import {
   blockAttributes,
   fieldAttributes,
@@ -90,7 +90,18 @@ export function getSuggestionsForAttributes(
   position: Position,
   document: TextDocument,
   currentLine: string,
-): CompletionList {
+): CompletionList | undefined {
+  // check if position is after field name and type!
+  const foundIndex = currentLine.indexOf('@')
+  if (foundIndex === -1) {
+    return
+  }
+  const wordsTillSymbol = currentLine.slice(0, foundIndex)
+  const matchArray = wordsTillSymbol.match(/\s+/g)
+  if (!matchArray || matchArray.length < 2) {
+    return
+  }
+
   const suggestions: CompletionItem[] = getSuggestionForFieldAttribute(
     blockType,
     currentLine,

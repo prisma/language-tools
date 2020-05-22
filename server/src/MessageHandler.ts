@@ -56,7 +56,10 @@ function isFirstInsideBlock(position: Position, currentLine: string): boolean {
   )
 }
 
-function getWordAtPosition(document: TextDocument, position: Position): string {
+export function getWordAtPosition(
+  document: TextDocument,
+  position: Position,
+): string {
   const currentLine = getCurrentLine(document, position.line)
   const stringTillPosition = currentLine.slice(0, position.character)
   if (stringTillPosition.endsWith('@@')) {
