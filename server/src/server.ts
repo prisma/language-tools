@@ -65,6 +65,7 @@ connection.onInitialize(async (params: InitializeParams) => {
         resolveProvider: true,
         triggerCharacters: ['@', '"'],
       },
+      hoverProvider: true,
     },
   }
 
@@ -124,11 +125,15 @@ connection.onDefinition((params) =>
 )
 
 connection.onCompletion((params) =>
-  MessageHandler.handleCompletionRequest(params, documents),
+  MessageHandler.handleCompletionRequest(documents, params),
 )
 
 connection.onCompletionResolve((params) =>
   MessageHandler.handleCompletionResolveRequest(params),
+)
+
+connection.onHover((params) =>
+  MessageHandler.handleHoverRequest(documents, params),
 )
 
 // Make the text document manager listen on the connection

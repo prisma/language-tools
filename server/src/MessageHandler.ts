@@ -9,6 +9,8 @@ import {
   CompletionList,
   CompletionItem,
   Position,
+  HoverParams,
+  Hover,
 } from 'vscode-languageserver'
 import * as util from './util'
 import { fullDocumentRange } from './provider'
@@ -22,6 +24,7 @@ import {
   getSuggestionForSupportedFields,
   getSuggestionsForInsideAttributes,
 } from './completions'
+import { start } from 'repl'
 
 function getCurrentLine(document: TextDocument, line: number) {
   return document.getText({
@@ -140,6 +143,46 @@ function getBlockAtPosition(
   return
 }
 
+function getModelOrEnumBlock(
+  blockName: string,
+  lines: string[],
+): MyBlock | void {
+  // get start position of model type
+  const results: number[] = lines
+    .map((line, index) => {
+      if (
+        (line.includes('model') && line.includes(blockName)) ||
+        (line.includes('enum') && line.includes(blockName))
+      ) {
+        return index
+      }
+    })
+    .filter((index) => index !== undefined) as number[]
+
+  if (results.length === 0) {
+    return
+  }
+
+  const foundBlocks: MyBlock[] = results
+    .map((result) => {
+      const block = getBlockAtPosition(result, lines)
+      if (block && block.name === blockName) {
+        return block
+      }
+    })
+    .filter((block) => block !== undefined) as MyBlock[]
+
+  if (foundBlocks.length !== 1) {
+    return
+  }
+
+  if (!foundBlocks[0]) {
+    return
+  }
+
+  return foundBlocks[0]
+}
+
 /**
  * @todo Use official schema.prisma parser. This is a workaround!
  */
@@ -163,46 +206,18 @@ export function handleDefinitionRequest(
     return
   }
 
-  // get start position of model type
-  const results: number[] = lines
-    .map((line, index) => {
-      if (
-        (line.includes('model') && line.includes(word)) ||
-        (line.includes('enum') && line.includes(word))
-      ) {
-        return index
-      }
-    })
-    .filter((index) => index !== undefined) as number[]
-
-  if (results.length === 0) {
-    return
-  }
-
-  const foundBlocks: MyBlock[] = results
-    .map((result) => {
-      const block = getBlockAtPosition(result, lines)
-      if (block && block.name === word) {
-        return block
-      }
-    })
-    .filter((block) => block !== undefined) as MyBlock[]
-
-  if (foundBlocks.length !== 1) {
-    return
-  }
-
-  if (!foundBlocks[0]) {
+  const foundBlock = getModelOrEnumBlock(word, lines)
+  if (!foundBlock) {
     return
   }
 
   const startPosition = {
-    line: foundBlocks[0].start.line,
-    character: foundBlocks[0].start.character,
+    line: foundBlock.start.line,
+    character: foundBlock.start.character,
   }
   const endPosition = {
-    line: foundBlocks[0].end.line,
-    character: foundBlocks[0].end.character,
+    line: foundBlock.end.line,
+    character: foundBlock.end.character,
   }
 
   return {
@@ -235,13 +250,52 @@ export async function handleDocumentFormatting(
   ])
 }
 
+export function handleHoverRequest(
+  documents: TextDocuments<TextDocument>,
+  params: HoverParams,
+): Hover | undefined {
+  const textDocument = params.textDocument
+  const position = params.position
+
+  const document = documents.get(textDocument.uri)
+
+  if (!document) {
+    return
+  }
+
+  const lines = convertDocumentTextToTrimmedLineArray(document)
+  const word = getWordAtPosition(document, position)
+
+  if (word === '') {
+    return
+  }
+
+  const foundBlock = getModelOrEnumBlock(word, lines)
+  if (!foundBlock) {
+    return
+  }
+
+  const commentLine = foundBlock.start.line - 1
+  const docComments = document.getText({
+    start: { line: commentLine, character: 0 },
+    end: { line: commentLine, character: 9999999 },
+  })
+  if (!docComments.startsWith('///')) {
+    return
+  }
+
+  return {
+    contents: docComments.slice(4),
+  }
+}
+
 /**
  *
  * This handler provides the initial list of the completion items.
  */
 export function handleCompletionRequest(
-  params: CompletionParams,
   documents: TextDocuments<TextDocument>,
+  params: CompletionParams,
 ): CompletionList | undefined {
   const context = params.context
   if (!context) {
