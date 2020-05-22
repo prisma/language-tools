@@ -41,13 +41,13 @@ It also includes an End-to-End test.
 
 ```
 .
---- client // Language Client
-|   --- src
-|       --- extension.ts // Language Client entry point
---- package.json // The extension manifest
---- server // Language Server
-    --- src
-        --- server.ts // Language Server entry point
+├── client               // Language Client
+│   └── src
+│       └── extension.ts // Language Client entry point
+├── server               // Language Server
+│   └── src
+│       └── server.ts    // Language Server entry point
+└── package.json         // The extension manifest
 ```
 
 ## Development

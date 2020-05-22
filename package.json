@@ -2,7 +2,7 @@
   "name": "prisma-dev",
   "displayName": "Prisma Dev",
   "description": "Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.",
-  "version": "0.0.61",
+  "version": "0.0.1234",
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
@@ -71,17 +71,19 @@
     "vsce:publish": "sh scripts/publish.sh",
     "vsce:check": "yarn shell:lint && sh scripts/check-update.sh",
     "shell:lint": "shellcheck -x scripts/*.sh",
-    "test": "sh ./scripts/e2e.sh"
+    "test": "sh ./scripts/e2e.sh",
+    "test-scripts": "mocha scripts/extension-version.test.js"
   },
   "activationEvents": [
     "onLanguage:prisma"
   ],
   "devDependencies": {
+    "@types/mocha": "5.2.7",
     "@types/node": "12.12.0",
+    "chai": "4.2.0",
+    "mocha": "7.1.1",
     "semver": "7.3.2",
     "typescript": "3.8.3",
-    "vsce": "1.75.0",
-    "@types/mocha": "5.2.7",
-    "mocha": "7.1.1"
+    "vsce": "1.75.0"
   }
 }
