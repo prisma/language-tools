@@ -15,7 +15,6 @@ Server implementation can be found [here](server).
 
 ### IntelliJ/WebStorm (coming soon)
 
-
 ## Development
 
 We include a `.vscode` directory that contains launch configurations for developers.
@@ -27,3 +26,33 @@ explained in the following items:
 - Open this folder in VS Code. In the Debug viewlet, run the 'Client + Server' task, this will open a new vscode instance and attach debuggers for the client and server code.
 - Open your `.prisma` schema file
 - Now you can add breakpoints to the client and the server.
+- To reload, press the reload button in VSCode ( **Developer: Inspect TM Scopes** is helpful for debugging syntax issues )
+
+## Structure
+
+```
+.
+├── clients               // Language Clients
+│   └── vscode
+│       └── src 
+|           └── extension.ts // Language Client entry point
+├── server               // Language Server
+│   └── src
+│       └── index.ts    // Language Server entry point
+└── package.json         // The extension manifest
+```
+
+## Testing
+
+Instructions on manual testing can be found [here](TESTING.md).
+
+End-to-End tests:
+
+- Run `npm install` in this folder.
+- Open VS Code on this folder.
+- Switch to the debug viewlet.
+- Select `Language Server E2E Test` from the drop down.
+- Run the launch config.
+- Open the debug console to view the test results.
+
+
