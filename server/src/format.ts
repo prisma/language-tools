@@ -10,11 +10,14 @@ export default async function format(
     return await exec(execPath, ['format', '-s', identWidth.toString()], text)
   } catch (errors) {
     const errorMessage =
-      "prisma-fmt error'd during formatting. This was likely due to a syntax error. Please see linter output."
+      "prisma-fmt error'd during formatting. This was likely due to a syntax error. Please see Prisma Language Server output."
     if (onError) {
       onError(errorMessage)
     }
-    console.warn(errorMessage)
+    console.warn(
+      "\nprisma-fmt error'd during formatting. This was likely due to a syntax error.\nLinter output:\n",
+    )
+    console.warn(errors)
     return text
   }
 }
