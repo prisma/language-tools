@@ -24,7 +24,6 @@ import {
   getSuggestionForSupportedFields,
   getSuggestionsForInsideAttributes,
 } from './completions'
-import { start } from 'repl'
 
 function getCurrentLine(document: TextDocument, line: number) {
   return document.getText({
