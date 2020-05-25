@@ -23,12 +23,43 @@ function toCompletionItems(
   return allowedTypes.map((label) => ({ label, kind }))
 }
 
-function getSuggestionForBlockAttribute(
-  blockType: string,
-  document: TextDocument,
+/**
+ * Removes all block attribute suggestions that are invalid in this context. E.g. `@@id()` when already used should not be in the suggestions.
+ */
+function removeInvalidBlockAttributeSuggestions(
+  supportedBlockAttributes: CompletionItem[],
+  block: Block,
+  lines: string[],
   position: Position,
 ): CompletionItem[] {
-  if (blockType !== 'model') {
+  let reachedStartLine = false
+  for (const [key, item] of lines.entries()) {
+    if (key === block.start.line + 1) {
+      reachedStartLine = true
+    }
+    if (!reachedStartLine || key === position.line) {
+      continue
+    }
+    if (key === block.end.line) {
+      break
+    }
+
+    if (item.includes('@id')) {
+      supportedBlockAttributes = supportedBlockAttributes.filter(
+        (attribute) => !attribute.label.includes('id'),
+      )
+    }
+  }
+  return supportedBlockAttributes
+}
+
+function getSuggestionForBlockAttribute(
+  block: Block,
+  document: TextDocument,
+  lines: string[],
+  position: Position,
+): CompletionItem[] {
+  if (block.type !== 'model') {
     return []
   }
 
@@ -38,7 +69,7 @@ function getSuggestionForBlockAttribute(
   })
   const symbolBeforePosition = symbolsBeforePosition.charAt(1)
   // create deep copy
-  const suggestions: CompletionItem[] = klona(blockAttributes)
+  let suggestions: CompletionItem[] = klona(blockAttributes)
 
   if (symbolsBeforePosition === ' @') {
     // add @
@@ -51,6 +82,12 @@ function getSuggestionForBlockAttribute(
       item.label = '@@' + item.label
     }
   }
+  suggestions = removeInvalidBlockAttributeSuggestions(
+    suggestions,
+    block,
+    lines,
+    position,
+  )
 
   return suggestions
 }
@@ -115,7 +152,7 @@ export function getSuggestionsForAttributes(
   }
 }
 
-export function getAllRelationNamesWithoutAst(
+export function getAllRelationNames(
   lines: Array<string>,
   currentModelStartLine: number,
 ): Array<string> {
@@ -149,7 +186,7 @@ export function getSuggestionsForTypes(
 
   if (foundBlock instanceof Block) {
     // get all model names
-    const modelNames: Array<string> = getAllRelationNamesWithoutAst(
+    const modelNames: Array<string> = getAllRelationNames(
       lines,
       foundBlock.start.line,
     )
@@ -157,7 +194,6 @@ export function getSuggestionsForTypes(
       ...toCompletionItems(modelNames, CompletionItemKind.TypeParameter),
     )
   }
-
   return {
     items: suggestions,
     isIncomplete: false,
@@ -189,7 +225,7 @@ function removeInvalidFieldSuggestions(
     }
     const fieldName = item.replace(/ .*/, '')
     if (supportedFields.includes(fieldName)) {
-      supportedFields.filter((field) => field !== fieldName)
+      supportedFields = supportedFields.filter((field) => field !== fieldName)
     }
   }
   return supportedFields
@@ -252,8 +288,9 @@ export function getSuggestionForFirstInsideBlock(
     case 'model':
     case 'type_alias':
       suggestions = getSuggestionForBlockAttribute(
-        blockType,
+        block,
         document,
+        lines,
         position,
       )
       break
