@@ -5,7 +5,7 @@ import {
   Position,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { MyBlock, getWordAtPosition } from './MessageHandler'
+import { Block } from './MessageHandler'
 import {
   blockAttributes,
   fieldAttributes,
@@ -141,13 +141,13 @@ export function getAllRelationNamesWithoutAst(
 }
 
 export function getSuggestionsForTypes(
-  foundBlock: MyBlock,
+  foundBlock: Block,
   lines: Array<string>,
 ): CompletionList {
   // create deep copy
   const suggestions: CompletionItem[] = klona(corePrimitiveTypes)
 
-  if (foundBlock instanceof MyBlock) {
+  if (foundBlock instanceof Block) {
     // get all model names
     const modelNames: Array<string> = getAllRelationNamesWithoutAst(
       lines,
@@ -166,7 +166,7 @@ export function getSuggestionsForTypes(
 
 function removeInvalidFieldSuggestions(
   supportedFields: Array<string>,
-  block: MyBlock,
+  block: Block,
   lines: Array<string>,
   position: Position,
 ): Array<string> {
@@ -190,7 +190,7 @@ function removeInvalidFieldSuggestions(
 }
 
 function getSuggestionForDataSourceField(
-  block: MyBlock,
+  block: Block,
   lines: Array<string>,
   position: Position,
 ): CompletionItem[] {
@@ -208,7 +208,7 @@ function getSuggestionForDataSourceField(
 }
 
 function getSuggestionForGeneratorField(
-  block: MyBlock,
+  block: Block,
   lines: Array<string>,
   position: Position,
 ): CompletionItem[] {
@@ -232,7 +232,7 @@ export function getSuggestionForFirstInsideBlock(
   blockType: string,
   lines: Array<string>,
   position: Position,
-  block: MyBlock,
+  block: Block,
   document: TextDocument,
 ): CompletionList {
   let suggestions: CompletionItem[] = []
@@ -346,7 +346,7 @@ function isInsideAttribute(
 function getFieldsFromCurrentBlock(
   lines: Array<string>,
   position: Position,
-  block: MyBlock,
+  block: Block,
   context?: string,
 ): Array<string> {
   let suggestions: Array<string> = []
@@ -397,7 +397,7 @@ function getFieldsFromCurrentBlock(
 export function getSuggestionsForInsideAttributes(
   lines: Array<string>,
   position: Position,
-  block: MyBlock,
+  block: Block,
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
   const wordsBeforePosition = lines[position.line]

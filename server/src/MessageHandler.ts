@@ -79,7 +79,7 @@ export function getWordAtPosition(
   return currentLine.slice(beginning, end + position.character)
 }
 
-export class MyBlock {
+export class Block {
   type: string
   start: Position
   end: Position
@@ -93,10 +93,7 @@ export class MyBlock {
   }
 }
 
-function getBlockAtPosition(
-  line: number,
-  lines: Array<string>,
-): MyBlock | void {
+function getBlockAtPosition(line: number, lines: Array<string>): Block | void {
   let blockType = ''
   let blockName = ''
   let blockStart: Position = Position.create(0, 0)
@@ -134,7 +131,7 @@ function getBlockAtPosition(
     }
     if (item.includes('}')) {
       blockEnd = Position.create(key, 1)
-      return new MyBlock(blockType, blockStart, blockEnd, blockName)
+      return new Block(blockType, blockStart, blockEnd, blockName)
     }
   }
   return
@@ -179,14 +176,14 @@ export function handleDefinitionRequest(
     return
   }
 
-  const foundBlocks: MyBlock[] = results
+  const foundBlocks: Block[] = results
     .map((result) => {
       const block = getBlockAtPosition(result, lines)
       if (block && block.name === word) {
         return block
       }
     })
-    .filter((block) => block !== undefined) as MyBlock[]
+    .filter((block) => block !== undefined) as Block[]
 
   if (foundBlocks.length !== 1) {
     return
