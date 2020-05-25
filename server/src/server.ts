@@ -81,7 +81,7 @@ connection.onInitialize(async (params: InitializeParams) => {
 
   const pj = require('../../package.json')
   connection.console.info(
-    'Extension name: ' + pj.name + ' with version: ' + pj.version
+    'Extension name ' + pj.name + ' with version ' + pj.version
   )
 
   const result: InitializeResult = {
