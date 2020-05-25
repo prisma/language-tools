@@ -164,6 +164,12 @@ export function getSuggestionsForTypes(
   }
 }
 
+/**
+ * Removes all field suggestion that are invalid in this context. E.g. fields that are used already in a block will not be suggested again.
+ * This function removes all field suggestion that are invalid in a certain context. E.g. in a generator block `provider, output, platforms, pinnedPlatForm`
+ * are possible fields. But those fields are only valid suggestions if they haven't been used in this block yet. So in case `provider` has already been used, only
+ * `output, platforms, pinnedPlatform` will be suggested.
+ */
 function removeInvalidFieldSuggestions(
   supportedFields: Array<string>,
   block: Block,
