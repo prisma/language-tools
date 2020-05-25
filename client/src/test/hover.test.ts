@@ -22,21 +22,38 @@ async function testHover(
     assert.deepStrictEqual(result.value, expectedHover)
 }
 
-suite('Should show documentation comments for', () => {
+suite('Should show /// documentation comments for', () => {
     const docUri = getDocUri('hover.prisma')
 
     test('model', async () => {
         await testHover(
             docUri,
-            new vscode.Position(22, 10),
+            new vscode.Position(23, 10),
             'Post including an author and content.'
         )
     })
     test('enum', async () => {
         await testHover(
             docUri,
-            new vscode.Position(23, 17),
+            new vscode.Position(24, 17),
             'This is an enum specifying the UserName.'
+        )
+    })
+})
+suite('Should show // comments for', () => {
+    const docUri = getDocUri('hover.prisma')
+
+    test('model', async() => {
+        await testHover(
+            docUri,
+            new vscode.Position(14, 15),
+            'Documentation for this model.')
+    })
+    test('enum', async () => {
+        await testHover(
+            docUri, 
+            new vscode.Position(25, 9),
+            'This is a test enum.'
         )
     })
 })

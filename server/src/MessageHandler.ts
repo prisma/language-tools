@@ -280,13 +280,18 @@ export function handleHoverRequest(
     start: { line: commentLine, character: 0 },
     end: { line: commentLine, character: 9999999 },
   })
-  if (!docComments.startsWith('///')) {
-    return
+  if (docComments.startsWith('///')) {
+    return {
+      contents: docComments.slice(4).trim(),
+    }
+  }
+  if (docComments.startsWith('//')) {
+    return {
+      contents: docComments.slice(3).trim(),
+    }
   }
 
-  return {
-    contents: docComments.slice(4).trim(),
-  }
+  return
 }
 
 /**
