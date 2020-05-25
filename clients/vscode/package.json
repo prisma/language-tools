@@ -13,7 +13,7 @@
     "Programming Languages"
   ],
   "dependencies": {
-    "@prisma/language-server": "0.0.48",
+    "@prisma/language-server": "0.0.1237",
     "vscode-languageclient": "6.1.3"
   },
   "repository": {

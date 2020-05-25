@@ -6,6 +6,6 @@
     }
   },
   "version": "independent",
-  "packages": ["server", "clients/*"],
+  "packages": ["server"],
   "ignoreChanges": ["**/package-lock.json", "**/*.md"]
 }
