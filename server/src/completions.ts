@@ -62,26 +62,9 @@ function getSuggestionForBlockAttribute(
   if (block.type !== 'model') {
     return []
   }
-
-  const symbolsBeforePosition = document.getText({
-    start: { line: position.line, character: position.character - 2 },
-    end: { line: position.line, character: position.character },
-  })
-  const symbolBeforePosition = symbolsBeforePosition.charAt(1)
   // create deep copy
   let suggestions: CompletionItem[] = klona(blockAttributes)
 
-  if (symbolsBeforePosition === ' @') {
-    // add @
-    for (const sugg of suggestions) {
-      sugg.label = '@' + sugg.label
-    }
-  } else if (/\s/.exec(symbolBeforePosition)) {
-    // add @@
-    for (const item of suggestions) {
-      item.label = '@@' + item.label
-    }
-  }
   suggestions = removeInvalidBlockAttributeSuggestions(
     suggestions,
     block,
@@ -107,16 +90,6 @@ function getSuggestionForFieldAttribute(
   if (!currentLine.includes('Int')) {
     // id not allowed
     suggestions = suggestions.filter((sugg) => sugg.label !== 'id')
-  }
-  const symbolBeforePosition = document.getText({
-    start: { line: position.line, character: position.character - 1 },
-    end: { line: position.line, character: position.character },
-  })
-  if (symbolBeforePosition !== '@') {
-    // add @
-    for (const sugg of suggestions) {
-      sugg.label = '@' + sugg.label
-    }
   }
 
   return suggestions
@@ -256,7 +229,6 @@ function getSuggestionForGeneratorField(
 ): CompletionItem[] {
   // create deep copy
   const suggestions: CompletionItem[] = klona(supportedGeneratorFields)
-
   const labels = removeInvalidFieldSuggestions(
     suggestions.map((item) => item.label),
     block,

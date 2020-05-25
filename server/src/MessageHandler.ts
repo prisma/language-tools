@@ -61,13 +61,7 @@ export function getWordAtPosition(
   position: Position,
 ): string {
   const currentLine = getCurrentLine(document, position.line)
-  const stringTillPosition = currentLine.slice(0, position.character)
-  if (stringTillPosition.endsWith('@@')) {
-    return '@@'
-  }
-  if (stringTillPosition.endsWith('@')) {
-    return '@'
-  }
+
   // search for the word's beginning and end
   const beginning: number = currentLine
     .slice(0, position.character + 1)
@@ -249,6 +243,7 @@ export function handleCompletionRequest(
   if (!document) {
     return
   }
+
   const lines = convertDocumentTextToTrimmedLineArray(document)
 
   const foundBlock = getBlockAtPosition(params.position.line, lines)
