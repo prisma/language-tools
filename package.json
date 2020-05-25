@@ -18,13 +18,6 @@
   },
   "main": "./client/out/extension",
   "contributes": {
-    "iconThemes": [
-      {
-        "id": "prisma",
-        "label": "Prisma",
-        "path": "./fileicons/prisma-icon-theme.json"
-      }
-    ],
     "languages": [
       {
         "id": "prisma",
