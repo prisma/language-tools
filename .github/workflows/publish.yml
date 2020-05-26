@@ -25,7 +25,7 @@ jobs:
         run: yarn vsce:check "latest"
 
   publish-dev:
-    name: Publish Dev
+    name: Publish Insider
     runs-on: ubuntu-latest
     if: endsWith(github.ref, '/master')
     steps:
@@ -33,4 +33,4 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Publish Extension as Patch
-        run: yarn vsce:check "dev"
+        run: yarn vsce:check "insider"
