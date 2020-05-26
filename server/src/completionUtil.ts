@@ -45,7 +45,7 @@ export const allowedBlockTypes: CompletionItem[] = [
     label: 'model',
     kind: CompletionItemKind.Class,
     documentation:
-      'Models represent the entities of your application domain. They are defined using model blocks in the data model. ',
+      'Models represent the entities of your application domain. They are defined using model blocks in the data model.',
   },
   {
     label: 'type_alias',

@@ -21,9 +21,9 @@ async function testDiagnostics(
 }
 
 suite('Should get linting', () => {
-  const docUri = getDocUri('linting.MissingArgument.prisma')
-  const docUri2 = getDocUri('linting.WrongType.prisma')
-  const docUri3 = getDocUri('linting.RequiredField.prisma')
+  const docUri = getDocUri('linting/missingArgument.prisma')
+  const docUri2 = getDocUri('linting/wrongType.prisma')
+  const docUri3 = getDocUri('linting/requiredField.prisma')
 
   test('Diagnoses missing argument', async () => {
     await testDiagnostics(docUri, [
