@@ -24,7 +24,7 @@ jobs:
       - name: Publish Extension as Patch
         run: yarn vsce:check "latest"
 
-  publish-dev:
+  publish-insider:
     name: Publish Insider
     runs-on: ubuntu-latest
     if: endsWith(github.ref, '/master')
