@@ -22,6 +22,7 @@ import {
   getSuggestionForSupportedFields,
   getSuggestionsForInsideAttributes,
 } from './completions'
+import { listenerCount } from 'cluster'
 
 function getCurrentLine(document: TextDocument, line: number) {
   return document.getText({
@@ -111,6 +112,7 @@ function getBlockAtPosition(line: number, lines: Array<string>): Block | void {
     }
     // not inside a block
     if (item.includes('}')) {
+      lines.reverse()
       return
     }
   }
