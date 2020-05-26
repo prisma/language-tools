@@ -4,6 +4,7 @@
 import { getPlatform, Platform } from '@prisma/get-platform'
 import pkgdir from 'pkg-dir'
 import path from 'path'
+import fs from 'fs'
 
 /**
  * Lookup Cache
@@ -55,4 +56,9 @@ export async function getDownloadURL(): Promise<string> {
   version = version || (await getVersion())
   const extension = platform === 'windows' ? '.exe.gz' : '.gz'
   return `https://binaries.prisma.sh/master/${version}/${platform}/prisma-fmt${extension}`
+}
+
+export function getCLIVersion(packageName: string)  {
+  const fileName =  packageName === 'prisma-dev' ? 'prisma_version_unstable' :  'prisma_version_stable'
+  return fs.readFileSync(path.join(__dirname, '../../scripts', fileName))
 }

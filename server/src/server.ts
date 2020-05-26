@@ -14,6 +14,8 @@ import * as util from './util'
 import lint from './lint'
 import fs from 'fs'
 import install from './install'
+import path from 'path'
+
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -66,6 +68,11 @@ connection.onInitialize(async (params: InitializeParams) => {
   connection.console.info(
     'Extension name ' + pj.name + ' with version ' + pj.version
   )
+  const prismaCLIVersion = util.getCLIVersion(pj.name)
+  connection.console.info(
+    'Prisma CLI version: ' + prismaCLIVersion
+  )
+
 
   const result: InitializeResult = {
     capabilities: {
