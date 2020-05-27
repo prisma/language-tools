@@ -23,7 +23,7 @@ It also includes an End-to-End test.
 
 ## Preview
 
-![](https://imgur.com/HbufPo6.png)
+![](https://imgur.com/W80iRwE)
 
 ## Structure
 
