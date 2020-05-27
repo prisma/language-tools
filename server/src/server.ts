@@ -15,7 +15,7 @@ import lint from './lint'
 import fs from 'fs'
 import install from './install'
 import path from 'path'
-import { download } from '@prisma/fetch-engine'
+
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -46,22 +46,6 @@ connection.onInitialize(async (params: InitializeParams) => {
     capabilities.textDocument.publishDiagnostics.relatedInformation
   )
 
-  const sdkQueryEnginePath = await util.getSdkQueryEnginePath()
-  if (!fs.existsSync(sdkQueryEnginePath)) {
-    try {
-      const sdkDir = path.dirname(require.resolve('@prisma/sdk/package.json'))
-      await download({
-        binaries: {
-          'query-engine': sdkDir,
-        },
-        failSilent: false,
-      })
-    } catch (err) {
-      // No error on install error.
-      connection.console.error('Cannot install prisma query-engine: ' + err)
-    }
-  }
-
   const binPathPrismaFmt = await util.getBinPath()
   if (!fs.existsSync(binPathPrismaFmt)) {
     try {
@@ -74,15 +58,30 @@ connection.onInitialize(async (params: InitializeParams) => {
       connection.console.error('Cannot install prisma-fmt: ' + err)
     }
   }
+
   connection.console.info(
     'Installed version of Prisma binary `prisma-fmt`: ' +
-      (await util.getVersion()),
+    (await util.getVersion()),
   )
+
+  const pj = require('../../package.json')
+  connection.console.info(
+    'Extension name ' + pj.name + ' with version ' + pj.version
+  )
+  const prismaCLIVersion = util.getCLIVersion(pj.name)
+  connection.console.info(
+    'Prisma CLI version: ' + prismaCLIVersion
+  )
+
 
   const result: InitializeResult = {
     capabilities: {
       definitionProvider: true,
       documentFormattingProvider: true,
+      completionProvider: {
+        resolveProvider: true,
+        triggerCharacters: ['@', '"'],
+      },
     },
   }
 
@@ -139,6 +138,14 @@ documents.onDidOpen((open) => {
 
 connection.onDefinition((params) =>
   MessageHandler.handleDefinitionRequest(documents, params),
+)
+
+connection.onCompletion((params) =>
+  MessageHandler.handleCompletionRequest(params, documents),
+)
+
+connection.onCompletionResolve((params) =>
+  MessageHandler.handleCompletionResolveRequest(params),
 )
 
 // Make the text document manager listen on the connection
