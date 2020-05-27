@@ -25,10 +25,10 @@ import {
   getSuggestionsForInsideAttributes,
 } from './completions'
 
-function getCurrentLine(document: TextDocument, line: number):string {
+function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
     start: { line: line, character: 0 },
-    end: { line: line, character: 9999 },
+    end: { line: line, character: Number.MAX_SAFE_INTEGER },
   })
 }
 
@@ -74,7 +74,6 @@ export function getWordAtPosition(
   }
   return currentLine.slice(beginning, end + position.character)
 }
-
 
 export class Block {
   type: string
@@ -135,16 +134,13 @@ function getBlockAtPosition(line: number, lines: Array<string>): Block | void {
   return
 }
 
-function getModelOrEnumBlock(
-  blockName: string,
-  lines: string[],
-): Block | void {
+function getModelOrEnumBlock(blockName: string, lines: string[]): Block | void {
   // get start position of model type
   const results: number[] = lines
     .map((line, index) => {
       if (
-        (line.startsWith('model') && line.includes(blockName)) ||
-        (line.startsWith('enum') && line.includes(blockName))
+        (line.includes('model') && line.includes(blockName)) ||
+        (line.includes('enum') && line.includes(blockName))
       ) {
         return index
       }
@@ -298,7 +294,7 @@ export function handleHoverRequest(
   const commentLine = foundBlock.start.line - 1
   const docComments = document.getText({
     start: { line: commentLine, character: 0 },
-    end: { line: commentLine, character: 9999999 },
+    end: { line: commentLine, character: Number.MAX_SAFE_INTEGER },
   })
   if (docComments.startsWith('///')) {
     return {

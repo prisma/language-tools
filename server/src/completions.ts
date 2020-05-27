@@ -23,7 +23,6 @@ function toCompletionItems(
   return allowedTypes.map((label) => ({ label, kind }))
 }
 
-
 /**
  * Removes all block attribute suggestions that are invalid in this context. E.g. `@@id()` when already used should not be in the suggestions.
  */
@@ -122,10 +121,7 @@ export function getSuggestionsForAttributes(
   }
 }
 
-
-export function getAllRelationNames(
-  lines: Array<string>,
-): Array<string> {
+export function getAllRelationNames(lines: Array<string>): Array<string> {
   const modelNames: Array<string> = []
   for (const item of lines) {
     if (
@@ -151,9 +147,7 @@ export function getSuggestionsForTypes(
   const suggestions: CompletionItem[] = klona(corePrimitiveTypes)
   if (foundBlock instanceof Block) {
     // get all model names
-    const modelNames: Array<string> = getAllRelationNames(
-      lines,
-    )
+    const modelNames: Array<string> = getAllRelationNames(lines)
     suggestions.push(
       ...toCompletionItems(modelNames, CompletionItemKind.TypeParameter),
     )
