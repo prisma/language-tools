@@ -14,7 +14,6 @@ import * as util from './util'
 import lint from './lint'
 import fs from 'fs'
 import install from './install'
-import path from 'path'
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -78,6 +77,7 @@ connection.onInitialize(async (params: InitializeParams) => {
         resolveProvider: true,
         triggerCharacters: ['@', '"'],
       },
+      hoverProvider: true,
     },
   }
 
@@ -142,6 +142,10 @@ connection.onCompletion((params) =>
 
 connection.onCompletionResolve((params) =>
   MessageHandler.handleCompletionResolveRequest(params),
+)
+
+connection.onHover((params) =>
+  MessageHandler.handleHoverRequest(documents, params),
 )
 
 // Make the text document manager listen on the connection
