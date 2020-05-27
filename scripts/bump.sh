@@ -43,9 +43,7 @@ fi
 
 jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
     .prisma.version = \"$SHA\" | \
-    .dependencies[\"@prisma/get-platform\"] = \"$PRISMA_VERSION\" | \
-    .dependencies[\"@prisma/fetch-engine\"] = \"$PRISMA_VERSION\" | \
-    .dependencies[\"@prisma/sdk\"] = \"$PRISMA_VERSION\"" \
+    .dependencies[\"@prisma/get-platform\"] = \"$PRISMA_VERSION\"" \
     ./server/package.json > ./server/package.json.bk
 
 jq ".version = \"$NEXT_EXTENSION_VERSION\"" \

@@ -78,8 +78,6 @@ function getSuggestionForBlockAttribute(
 function getSuggestionForFieldAttribute(
   blockType: string,
   currentLine: string,
-  document: TextDocument,
-  position: Position,
 ): CompletionItem[] {
   if (blockType !== 'model' && blockType !== 'type_alias') {
     return []
@@ -115,8 +113,6 @@ export function getSuggestionsForAttributes(
   const suggestions: CompletionItem[] = getSuggestionForFieldAttribute(
     blockType,
     currentLine,
-    document,
-    position,
   )
 
   return {
@@ -125,12 +121,9 @@ export function getSuggestionsForAttributes(
   }
 }
 
-export function getAllRelationNames(
-  lines: Array<string>,
-  currentModelStartLine: number,
-): Array<string> {
+export function getAllRelationNames(lines: Array<string>): Array<string> {
   const modelNames: Array<string> = []
-  for (const [key, item] of lines.entries()) {
+  for (const item of lines) {
     if (
       (item.includes('model') || item.includes('enum')) &&
       item.includes('{')
@@ -152,17 +145,14 @@ export function getSuggestionsForTypes(
 ): CompletionList {
   // create deep copy
   const suggestions: CompletionItem[] = klona(corePrimitiveTypes)
-
   if (foundBlock instanceof Block) {
     // get all model names
-    const modelNames: Array<string> = getAllRelationNames(
-      lines,
-      foundBlock.start.line,
-    )
+    const modelNames: Array<string> = getAllRelationNames(lines)
     suggestions.push(
       ...toCompletionItems(modelNames, CompletionItemKind.Reference),
     )
   }
+
   return {
     items: suggestions,
     isIncomplete: false,
@@ -225,6 +215,7 @@ function getSuggestionForGeneratorField(
 ): CompletionItem[] {
   // create deep copy
   const suggestions: CompletionItem[] = klona(supportedGeneratorFields)
+
   const labels = removeInvalidFieldSuggestions(
     suggestions.map((item) => item.label),
     block,

@@ -9,6 +9,8 @@ import {
   CompletionList,
   CompletionItem,
   Position,
+  HoverParams,
+  Hover,
 } from 'vscode-languageserver'
 import * as util from './util'
 import { fullDocumentRange } from './provider'
@@ -23,10 +25,10 @@ import {
   getSuggestionsForInsideAttributes,
 } from './completions'
 
-function getCurrentLine(document: TextDocument, line: number) {
+function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
     start: { line: line, character: 0 },
-    end: { line: line, character: 9999 },
+    end: { line: line, character: Number.MAX_SAFE_INTEGER },
   })
 }
 
@@ -111,6 +113,7 @@ function getBlockAtPosition(line: number, lines: Array<string>): Block | void {
     }
     // not inside a block
     if (item.includes('}')) {
+      lines.reverse()
       return
     }
   }
@@ -129,6 +132,43 @@ function getBlockAtPosition(line: number, lines: Array<string>): Block | void {
     }
   }
   return
+}
+
+function getModelOrEnumBlock(blockName: string, lines: string[]): Block | void {
+  // get start position of model type
+  const results: number[] = lines
+    .map((line, index) => {
+      if (
+        (line.includes('model') && line.includes(blockName)) ||
+        (line.includes('enum') && line.includes(blockName))
+      ) {
+        return index
+      }
+    })
+    .filter((index) => index !== undefined) as number[]
+
+  if (results.length === 0) {
+    return
+  }
+
+  const foundBlocks: Block[] = results
+    .map((result) => {
+      const block = getBlockAtPosition(result, lines)
+      if (block && block.name === blockName) {
+        return block
+      }
+    })
+    .filter((block) => block !== undefined) as Block[]
+
+  if (foundBlocks.length !== 1) {
+    return
+  }
+
+  if (!foundBlocks[0]) {
+    return
+  }
+
+  return foundBlocks[0]
 }
 
 /**
@@ -224,6 +264,51 @@ export async function handleDocumentFormatting(
   ).then((formatted) => [
     TextEdit.replace(fullDocumentRange(document), formatted),
   ])
+}
+
+export function handleHoverRequest(
+  documents: TextDocuments<TextDocument>,
+  params: HoverParams,
+): Hover | undefined {
+  const textDocument = params.textDocument
+  const position = params.position
+
+  const document = documents.get(textDocument.uri)
+
+  if (!document) {
+    return
+  }
+
+  const lines = convertDocumentTextToTrimmedLineArray(document)
+  const word = getWordAtPosition(document, position)
+
+  if (word === '') {
+    return
+  }
+
+  const foundBlock = getModelOrEnumBlock(word, lines)
+  if (!foundBlock) {
+    return
+  }
+
+  const commentLine = foundBlock.start.line - 1
+  const docComments = document.getText({
+    start: { line: commentLine, character: 0 },
+    end: { line: commentLine, character: Number.MAX_SAFE_INTEGER },
+  })
+  if (docComments.startsWith('///')) {
+    return {
+      contents: docComments.slice(4).trim(),
+    }
+  }
+  // TODO uncomment once https://github.com/prisma/prisma/issues/2546 is resolved!
+  /*if (docComments.startsWith('//')) {
+    return {
+      contents: docComments.slice(3).trim(),
+    }
+  } */
+
+  return
 }
 
 /**
