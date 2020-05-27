@@ -160,7 +160,7 @@ export function getSuggestionsForTypes(
       foundBlock.start.line,
     )
     suggestions.push(
-      ...toCompletionItems(modelNames, CompletionItemKind.TypeParameter),
+      ...toCompletionItems(modelNames, CompletionItemKind.Reference),
     )
   }
   return {
