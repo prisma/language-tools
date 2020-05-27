@@ -149,7 +149,7 @@ export function getSuggestionsForTypes(
     // get all model names
     const modelNames: Array<string> = getAllRelationNames(lines)
     suggestions.push(
-      ...toCompletionItems(modelNames, CompletionItemKind.TypeParameter),
+      ...toCompletionItems(modelNames, CompletionItemKind.Reference),
     )
   }
 
