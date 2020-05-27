@@ -143,8 +143,8 @@ function getModelOrEnumBlock(
   const results: number[] = lines
     .map((line, index) => {
       if (
-        (line.includes('model') && line.includes(blockName)) ||
-        (line.includes('enum') && line.includes(blockName))
+        (line.startsWith('model') && line.includes(blockName)) ||
+        (line.startsWith('enum') && line.includes(blockName))
       ) {
         return index
       }
