@@ -9,7 +9,7 @@ PRISMA_VERSION=$2
 echo "PRISMA_VERSION: $PRISMA_VERSION"
 
 # TODO: remove this if-condition once we move to insider
-if [ "$CHANNEL" = "insider" ]; then
+if [ "$CHANNEL" = "dev" ]; then
     PRISMA_CHANNEL="alpha"
 else
     PRISMA_CHANNEL="latest"
@@ -22,14 +22,14 @@ SHA=$(npx -q -p @prisma/cli@"$PRISMA_CHANNEL" prisma --version | grep "Query Eng
 NEXT_EXTENSION_VERSION=$3
 echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
 
-if [ "$CHANNEL" = "insider" ]; then
+if [ "$CHANNEL" = "dev" ]; then
     echo "$PRISMA_VERSION" > scripts/prisma_version_unstable
 else
     echo "$PRISMA_VERSION" > scripts/prisma_version_stable
 fi
 
-# If the channel is insider, we need to change the name, displayName to the insider extension
-if [ "$CHANNEL" = "insider" ]; then
+# If the channel is dev, we need to change the name, displayName to the insider extension
+if [ "$CHANNEL" = "dev" ]; then
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma-insider\" | \
         .displayName = \"Prisma - Insider\" | \
