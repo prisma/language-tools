@@ -33,4 +33,4 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Publish Extension as Patch
-        run: yarn vsce:check "insider"
+        run: yarn vsce:check "dev"

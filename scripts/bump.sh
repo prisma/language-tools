@@ -28,7 +28,7 @@ else
     echo "$PRISMA_VERSION" > scripts/prisma_version_stable
 fi
 
-# If the channel is dev, we need to change the name, displayName to the unstable extension
+# If the channel is dev, we need to change the name, displayName to the dev extension
 if [ "$CHANNEL" = "dev" ]; then
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma-insider\" | \
