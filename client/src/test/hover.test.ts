@@ -40,6 +40,8 @@ suite('Should show /// documentation comments for', () => {
         )
     })
 })
+// TODO uncomment once https://github.com/prisma/prisma/issues/2546 is resolved!
+/*
 suite('Should show // comments for', () => {
     const docUri = getDocUri('hover.prisma')
 
@@ -56,4 +58,4 @@ suite('Should show // comments for', () => {
             'This is a test enum.'
         )
     })
-})
+}) */

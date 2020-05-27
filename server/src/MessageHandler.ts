@@ -305,11 +305,12 @@ export function handleHoverRequest(
       contents: docComments.slice(4).trim(),
     }
   }
-  if (docComments.startsWith('//')) {
+  // TODO uncomment once https://github.com/prisma/prisma/issues/2546 is resolved!
+  /*if (docComments.startsWith('//')) {
     return {
       contents: docComments.slice(3).trim(),
     }
-  }
+  } */
 
   return
 }
