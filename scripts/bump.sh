@@ -23,7 +23,7 @@ NEXT_EXTENSION_VERSION=$3
 echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
 
 if [ "$CHANNEL" = "dev" ]; then
-    echo "$PRISMA_VERSION" > scripts/prisma_version_unstable
+    echo "$PRISMA_VERSION" > scripts/prisma_version_insider
 else
     echo "$PRISMA_VERSION" > scripts/prisma_version_stable
 fi
