@@ -59,6 +59,6 @@ export async function getDownloadURL(): Promise<string> {
 }
 
 export function getCLIVersion(packageName: string)  {
-  const fileName =  packageName === 'prisma-dev' ? 'prisma_version_insider' :  'prisma_version_stable'
+  const fileName =  packageName === 'prisma-dev' ? 'prisma_version_unstable' :  'prisma_version_stable'
   return fs.readFileSync(path.join(__dirname, '../../scripts', fileName))
 }

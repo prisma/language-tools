@@ -23,7 +23,7 @@ NEXT_EXTENSION_VERSION=$3
 echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
 
 if [ "$CHANNEL" = "dev" ]; then
-    echo "$PRISMA_VERSION" > scripts/prisma_version_insider
+    echo "$PRISMA_VERSION" > scripts/prisma_version_unstable
 else
     echo "$PRISMA_VERSION" > scripts/prisma_version_stable
 fi
@@ -31,17 +31,12 @@ fi
 # If the channel is dev, we need to change the name, displayName to the dev extension
 if [ "$CHANNEL" = "dev" ]; then
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
-        .name = \"prisma-insider\" | \
-        .displayName = \"Prisma - Insider\" | \
-        .description = \"This is the Insider Build.\" | \
-        .preview = true" \
+        .name = \"prisma-dev\" | \
+        .displayName = \"Prisma Dev\"" \
         ./package.json > ./package.json.bk
 else
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
-        .name = \"prisma\" | \
-        .displayName = \"Prisma\"| \
-        .description = \"Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.\" | \
-        .preview = false" \
+        .name = \"prisma\"" | \
         ./package.json > ./package.json.bk
 fi
 

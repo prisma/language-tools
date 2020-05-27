@@ -15,7 +15,7 @@ CHANNEL=$1
 echo "CHANNEL: $CHANNEL"
 
 if [ "$CHANNEL" = "dev" ]; then
-    CURRENT_VERSION=$(cat scripts/prisma_version_insider)
+    CURRENT_VERSION=$(cat scripts/prisma_version_unstable)
 else
     CURRENT_VERSION=$(cat scripts/prisma_version_stable)
 fi
