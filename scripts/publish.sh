@@ -16,8 +16,8 @@ echo "AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
 echo "PRODUCTION: $PRODUCTION"
 echo "============================"
 
-CHANNEL=$1
-echo "CHANNEL: $CHANNEL"
+NPM_TAG=$1
+echo "NPM_TAG: $NPM_TAG"
 
 PRISMA_VERSION=$2
 echo "PRISMA_VERSION: $PRISMA_VERSION"
@@ -30,7 +30,7 @@ if [ -z "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
     echo "\$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN is empty. Please set the value of $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
 elif [ -n "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
     if [ "$PRODUCTION" = "1" ]; then
-        echo "Publishing $CHANNEL release"
+        echo "Publishing $NPM_TAG release"
         ./node_modules/.bin/vsce publish "$NEXT_EXTENSION_VERSION" --pat "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
     else
         echo "Printing the command because PRODUCTION is not set"
@@ -39,12 +39,12 @@ elif [ -n "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
     fi
 fi
 
-if [ "$PRODUCTION" = "1" ] && [ "$CHANNEL" = "dev" ]; then
+if [ "$PRODUCTION" = "1" ] && [ "$NPM_TAG" = "dev" ]; then
     echo "Sync with ${GITHUB_REF} and push to it"
     git pull github "${GITHUB_REF}" --ff-only
     git tag -a "dev/$NEXT_EXTENSION_VERSION" -m "dev/$NEXT_EXTENSION_VERSION" -m "Prisma version: $PRISMA_VERSION"
     git push github HEAD:"${GITHUB_REF}" --follow-tags
-elif [ "$PRODUCTION" = "1" ] && [ "$CHANNEL" = "latest" ]; then
+elif [ "$PRODUCTION" = "1" ] && [ "$NPM_TAG" = "latest" ]; then
     echo "Sync with ${GITHUB_REF} and push to it"
     git pull github "${GITHUB_REF}" --ff-only
 

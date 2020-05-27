@@ -2,14 +2,14 @@
 
 set -eu
 
-CHANNEL=$1
-echo "CHANNEL: $CHANNEL"
+NPM_TAG=$1
+echo "NPM_TAG: $NPM_TAG"
 
 PRISMA_VERSION=$2
 echo "PRISMA_VERSION: $PRISMA_VERSION"
 
 # TODO: remove this if-condition once we move to dev
-if [ "$CHANNEL" = "dev" ]; then
+if [ "$NPM_TAG" = "dev" ]; then
     PRISMA_CHANNEL="alpha"
 else
     PRISMA_CHANNEL="latest"
@@ -22,14 +22,14 @@ SHA=$(npx -q -p @prisma/cli@"$PRISMA_CHANNEL" prisma --version | grep "Query Eng
 NEXT_EXTENSION_VERSION=$3
 echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
 
-if [ "$CHANNEL" = "dev" ]; then
+if [ "$NPM_TAG" = "dev" ]; then
     echo "$PRISMA_VERSION" > scripts/prisma_version_insider
 else
     echo "$PRISMA_VERSION" > scripts/prisma_version_stable
 fi
 
-# If the channel is dev, we need to change the name, displayName to the dev extension
-if [ "$CHANNEL" = "dev" ]; then
+# If the npm_tag is dev, we need to change the name, displayName to the dev extension
+if [ "$NPM_TAG" = "dev" ]; then
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma-insider\" | \
         .displayName = \"Prisma - Insider\" | \
