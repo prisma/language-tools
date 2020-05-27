@@ -1,23 +1,21 @@
 {
   "name": "prisma-lsp-server",
   "description": "Implementation of a language server in node.",
-  "version": "0.0.1245",
+  "version": "0.0.1252",
   "author": "Prisma",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=10"
   },
   "prisma": {
-    "version": "b6745bd0f67138b4b68e00f607c99483016924c8"
+    "version": "4dbefe724ae6df3621eb660a5d0e0402e34189bf"
   },
   "repository": {
     "type": "github",
     "url": "https://github.com/prisma/vscode"
   },
   "dependencies": {
-    "@prisma/fetch-engine": "2.0.0-alpha.1245",
-    "@prisma/get-platform": "2.0.0-alpha.1245",
-    "@prisma/sdk": "2.0.0-alpha.1245",
+    "@prisma/get-platform": "2.0.0-alpha.1252",
     "pkg-dir": "4.2.0",
     "vscode-languageserver": "6.1.1",
     "vscode-languageserver-textdocument": "1.0.1",
@@ -28,7 +26,10 @@
     "eslint-config-prettier": "6.10.1",
     "eslint-plugin-prettier": "3.1.2",
     "@typescript-eslint/eslint-plugin": "2.27.0",
-    "@typescript-eslint/parser": "2.27.0"
+    "@typescript-eslint/parser": "2.27.0",
+    "klona": "1.1.1",
+    "@prisma/fetch-engine": "2.0.0-alpha.1252",
+    "@prisma/sdk": "2.0.0-alpha.1252"
   },
   "scripts": {
     "format": "prettier --write .",
@@ -45,7 +46,8 @@
       "git add"
     ],
     "*/**/*.{js,ts}": [
-      "eslint --fix --ext .js,.ts ."
+      "eslint --fix --ext .js,.ts .",
+      "git add"
     ]
   }
 }
