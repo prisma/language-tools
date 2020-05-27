@@ -36,7 +36,8 @@ if [ "$CHANNEL" = "dev" ]; then
         ./package.json > ./package.json.bk
 else
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
-        .name = \"prisma\"" | \
+        .name = \"prisma\" | \
+        .displayName = \"Prisma\"" \
         ./package.json > ./package.json.bk
 fi
 
