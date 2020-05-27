@@ -63,9 +63,9 @@ describe('next extension version', () => {
     ).to.eq('0.1.4')
   })
 
-  // insider channel
+  // unstable channel
 
-  it('it should work with insider channel and current version to new version schema', () => {
+  it('it should work with unstable channel and current version to new version schema', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.0.0-alpha.1149',
@@ -74,7 +74,7 @@ describe('next extension version', () => {
     ).to.eq('0.0.1149')
   })
 
-  it('it should throw with insider channel and extension only push without the isExtensionOnlyCommit flag', () => {
+  it('it should throw with unstable channel and extension only push without the isExtensionOnlyCommit flag', () => {
     expect(() => {
       nextExtensionVersion({
         prismaVersion: '2.0.0-alpha.1149',
@@ -85,7 +85,7 @@ describe('next extension version', () => {
     )
   })
 
-  it('it should work with insider channel and extension only push', () => {
+  it('it should work with unstable channel and extension only push', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.0.0-alpha.1149',
@@ -95,7 +95,7 @@ describe('next extension version', () => {
     ).to.eq('0.0.1149.1')
   })
 
-  it('it should work with insider channel and extension only push a second time', () => {
+  it('it should work with unstable channel and extension only push a second time', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.0.0-alpha.1149',
@@ -105,7 +105,7 @@ describe('next extension version', () => {
     ).to.eq('0.0.1149.2')
   })
 
-  it('it should work with insider channel and new prisma version', () => {
+  it('it should work with unstable channel and new prisma version', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.0.0-alpha.1150',
@@ -114,7 +114,7 @@ describe('next extension version', () => {
     ).to.eq('0.0.1150')
   })
 
-  it('it should work with insider channel and new prisma version after an extension only publish', () => {
+  it('it should work with unstable channel and new prisma version after an extension only publish', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.0.0-alpha.1150',
@@ -161,7 +161,7 @@ describe('next extension version', () => {
     ).to.eq('2.0.2')
   })
 
-  it('it should work with insider channel after the ga versioning scheme and current version to new version schema', () => {
+  it('it should work with unstable channel after the ga versioning scheme and current version to new version schema', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.0.1-dev.1',
@@ -170,7 +170,7 @@ describe('next extension version', () => {
     ).to.eq('0.1.1')
   })
 
-  it('it should throw with insider channel after the ga versioning scheme and extension only push without the isExtensionOnlyCommit flag', () => {
+  it('it should throw with unstable channel after the ga versioning scheme and extension only push without the isExtensionOnlyCommit flag', () => {
     expect(() => {
       nextExtensionVersion({
         prismaVersion: '2.0.1-dev.1',
@@ -179,7 +179,7 @@ describe('next extension version', () => {
     }).to.throw('')
   })
 
-  it('it should work with insider channel after the ga versioning scheme and extension only push', () => {
+  it('it should work with unstable channel after the ga versioning scheme and extension only push', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.0.1-dev.1',
@@ -189,7 +189,7 @@ describe('next extension version', () => {
     ).to.eq('0.1.1.1')
   })
 
-  it('it should work with insider channel after the ga versioning scheme and extension only push a second time', () => {
+  it('it should work with unstable channel after the ga versioning scheme and extension only push a second time', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.0.1-dev.1',
@@ -199,7 +199,7 @@ describe('next extension version', () => {
     ).to.eq('0.1.1.2')
   })
 
-  it('it should work with insider channel after the ga versioning scheme and new prisma version', () => {
+  it('it should work with unstable channel after the ga versioning scheme and new prisma version', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.0.1-dev.2',
@@ -208,7 +208,7 @@ describe('next extension version', () => {
     ).to.eq('0.1.2')
   })
 
-  it('it should work with insider channel after the ga versioning scheme and new prisma version after an extension only publish', () => {
+  it('it should work with unstable channel after the ga versioning scheme and new prisma version after an extension only publish', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.0.1-dev.2',

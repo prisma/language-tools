@@ -39,10 +39,10 @@ elif [ -n "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
     fi
 fi
 
-if [ "$PRODUCTION" = "1" ] && [ "$CHANNEL" = "insider" ]; then
+if [ "$PRODUCTION" = "1" ] && [ "$CHANNEL" = "dev" ]; then
     echo "Sync with ${GITHUB_REF} and push to it"
     git pull github "${GITHUB_REF}" --ff-only
-    git tag -a "insider/$NEXT_EXTENSION_VERSION" -m "insider/$NEXT_EXTENSION_VERSION" -m "Prisma version: $PRISMA_VERSION"
+    git tag -a "dev/$NEXT_EXTENSION_VERSION" -m "dev/$NEXT_EXTENSION_VERSION" -m "Prisma version: $PRISMA_VERSION"
     git push github HEAD:"${GITHUB_REF}" --follow-tags
 elif [ "$PRODUCTION" = "1" ] && [ "$CHANNEL" = "latest" ]; then
     echo "Sync with ${GITHUB_REF} and push to it"

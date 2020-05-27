@@ -34,7 +34,7 @@ function nextExtensionVersion({
 }
 
 function stripPreReleaseText(version) {
-  return version.replace('-alpha', '').replace('-beta', '').replace('-insider', '')
+  return version.replace('-alpha', '').replace('-beta', '').replace('-dev', '')
 }
 
 function getDerivedExtensionVersion(version, isBeta = false) {

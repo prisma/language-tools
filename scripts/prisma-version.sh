@@ -4,8 +4,8 @@ set -eu
 
 CHANNEL="$1"
 
-# TODO: remove this if-condition once we move to insider
-if [ "$CHANNEL" = "insider" ]; then
+# TODO: remove this if-condition once we move to dev
+if [ "$CHANNEL" = "dev" ]; then
     CHANNEL="alpha"
 fi
 

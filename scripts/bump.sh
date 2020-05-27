@@ -8,7 +8,7 @@ echo "CHANNEL: $CHANNEL"
 PRISMA_VERSION=$2
 echo "PRISMA_VERSION: $PRISMA_VERSION"
 
-# TODO: remove this if-condition once we move to insider
+# TODO: remove this if-condition once we move to dev
 if [ "$CHANNEL" = "dev" ]; then
     PRISMA_CHANNEL="alpha"
 else
@@ -28,7 +28,7 @@ else
     echo "$PRISMA_VERSION" > scripts/prisma_version_stable
 fi
 
-# If the channel is dev, we need to change the name, displayName to the insider extension
+# If the channel is dev, we need to change the name, displayName to the unstable extension
 if [ "$CHANNEL" = "dev" ]; then
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma-insider\" | \
