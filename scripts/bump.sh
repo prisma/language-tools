@@ -33,7 +33,7 @@ if [ "$NPM_TAG" = "dev" ]; then
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma-insider\" | \
         .displayName = \"Prisma - Insider\" | \
-        .description = \"This is the Insider Build.\" | \
+        .description = \"This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the `dev` version of the CLI.\" | \
         .preview = true" \
         ./package.json > ./package.json.bk
 else
