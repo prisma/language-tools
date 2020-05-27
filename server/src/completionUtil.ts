@@ -61,26 +61,26 @@ export const allowedBlockTypes: CompletionItem[] = [
 
 export const blockAttributes: CompletionItem[] = [
   {
-    label: 'map([])',
+    label: '@@map([])',
     kind: CompletionItemKind.Property,
     detail: '@@map(_ name: String)',
     documentation:
       'Defines the name of the underlying table or collection name.',
   },
   {
-    label: 'id([])',
+    label: '@@id([])',
     kind: CompletionItemKind.Property,
     detail: '@@id(_ fields: Identifier[])',
     documentation: 'Defines a composite primary key across fields.',
   },
   {
-    label: 'unique([])',
+    label: '@@unique([])',
     kind: CompletionItemKind.Property,
     detail: '@@unique(_ fields: Identifier[], name: String?)',
     documentation: 'Defines a composite unique constraint across fields.',
   },
   {
-    label: 'index([])',
+    label: '@@index([])',
     kind: CompletionItemKind.Property,
     detail: '@@index(_ fields: Identifier[], name: String?)',
     documentation: 'Defines an index for multiple fields.',
@@ -89,32 +89,32 @@ export const blockAttributes: CompletionItem[] = [
 
 export const fieldAttributes: CompletionItem[] = [
   {
-    label: 'id',
+    label: '@id',
     kind: CompletionItemKind.Property,
     detail: '@id',
     documentation:
       'Defines the primary key. There must be exactly one field @id or block @id',
   },
   {
-    label: 'unique',
+    label: '@unique',
     kind: CompletionItemKind.Property,
     detail: '@unique',
     documentation: 'Defines the unique constraint.',
   },
   {
-    label: 'map()',
+    label: '@map()',
     kind: CompletionItemKind.Property,
     detail: '@map(_ name: String)',
     documentation: 'Defines the raw column name the field is mapped to.',
   },
   {
-    label: 'default()',
+    label: '@default()',
     kind: CompletionItemKind.Property,
     detail: '@default(_ expr: Expr)',
     documentation: 'Specifies a default value if null is provided.',
   },
   {
-    label: 'relation()',
+    label: '@relation()',
     kind: CompletionItemKind.Property,
     detail:
       '@relation(_ name?: String, references?: Identifier[], onDelete?: CascadeEnum)\nArguments:\n•name: (optional, except when required for disambiguation) defines the name of the relationship. The name of the relation needs to be explicitly given to resolve amibiguities when the model contains two or more fields that refer to the same model (another model or itself).\n•references: (optional) list of field names to reference',

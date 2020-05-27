@@ -5,7 +5,7 @@ import {
   Position,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { MyBlock, getWordAtPosition } from './MessageHandler'
+import { Block } from './MessageHandler'
 import {
   blockAttributes,
   fieldAttributes,
@@ -23,34 +23,55 @@ function toCompletionItems(
   return allowedTypes.map((label) => ({ label, kind }))
 }
 
-function getSuggestionForBlockAttribute(
-  blockType: string,
-  document: TextDocument,
+
+/**
+ * Removes all block attribute suggestions that are invalid in this context. E.g. `@@id()` when already used should not be in the suggestions.
+ */
+function removeInvalidBlockAttributeSuggestions(
+  supportedBlockAttributes: CompletionItem[],
+  block: Block,
+  lines: string[],
   position: Position,
 ): CompletionItem[] {
-  if (blockType !== 'model') {
+  let reachedStartLine = false
+  for (const [key, item] of lines.entries()) {
+    if (key === block.start.line + 1) {
+      reachedStartLine = true
+    }
+    if (!reachedStartLine || key === position.line) {
+      continue
+    }
+    if (key === block.end.line) {
+      break
+    }
+
+    if (item.includes('@id')) {
+      supportedBlockAttributes = supportedBlockAttributes.filter(
+        (attribute) => !attribute.label.includes('id'),
+      )
+    }
+  }
+  return supportedBlockAttributes
+}
+
+function getSuggestionForBlockAttribute(
+  block: Block,
+  document: TextDocument,
+  lines: string[],
+  position: Position,
+): CompletionItem[] {
+  if (block.type !== 'model') {
     return []
   }
-
-  const symbolsBeforePosition = document.getText({
-    start: { line: position.line, character: position.character - 2 },
-    end: { line: position.line, character: position.character },
-  })
-  const symbolBeforePosition = symbolsBeforePosition.charAt(1)
   // create deep copy
-  const suggestions: CompletionItem[] = klona(blockAttributes)
+  let suggestions: CompletionItem[] = klona(blockAttributes)
 
-  if (symbolsBeforePosition === ' @') {
-    // add @
-    for (const sugg of suggestions) {
-      sugg.label = '@' + sugg.label
-    }
-  } else if (/\s/.exec(symbolBeforePosition)) {
-    // add @@
-    for (const item of suggestions) {
-      item.label = '@@' + item.label
-    }
-  }
+  suggestions = removeInvalidBlockAttributeSuggestions(
+    suggestions,
+    block,
+    lines,
+    position,
+  )
 
   return suggestions
 }
@@ -58,8 +79,6 @@ function getSuggestionForBlockAttribute(
 function getSuggestionForFieldAttribute(
   blockType: string,
   currentLine: string,
-  document: TextDocument,
-  position: Position,
 ): CompletionItem[] {
   if (blockType !== 'model' && blockType !== 'type_alias') {
     return []
@@ -70,16 +89,6 @@ function getSuggestionForFieldAttribute(
   if (!currentLine.includes('Int')) {
     // id not allowed
     suggestions = suggestions.filter((sugg) => sugg.label !== 'id')
-  }
-  const symbolBeforePosition = document.getText({
-    start: { line: position.line, character: position.character - 1 },
-    end: { line: position.line, character: position.character },
-  })
-  if (symbolBeforePosition !== '@') {
-    // add @
-    for (const sugg of suggestions) {
-      sugg.label = '@' + sugg.label
-    }
   }
 
   return suggestions
@@ -105,8 +114,6 @@ export function getSuggestionsForAttributes(
   const suggestions: CompletionItem[] = getSuggestionForFieldAttribute(
     blockType,
     currentLine,
-    document,
-    position,
   )
 
   return {
@@ -115,16 +122,12 @@ export function getSuggestionsForAttributes(
   }
 }
 
-export function getAllRelationNamesWithoutAst(
+
+export function getAllRelationNames(
   lines: Array<string>,
-  currentModelStartLine: number,
 ): Array<string> {
   const modelNames: Array<string> = []
-  for (const [key, item] of lines.entries()) {
-    if (currentModelStartLine === key) {
-      // do not suggest the model name we are currently in
-      continue
-    }
+  for (const item of lines) {
     if (
       (item.includes('model') || item.includes('enum')) &&
       item.includes('{')
@@ -141,17 +144,15 @@ export function getAllRelationNamesWithoutAst(
 }
 
 export function getSuggestionsForTypes(
-  foundBlock: MyBlock,
+  foundBlock: Block,
   lines: Array<string>,
 ): CompletionList {
   // create deep copy
   const suggestions: CompletionItem[] = klona(corePrimitiveTypes)
-
-  if (foundBlock instanceof MyBlock) {
+  if (foundBlock instanceof Block) {
     // get all model names
-    const modelNames: Array<string> = getAllRelationNamesWithoutAst(
+    const modelNames: Array<string> = getAllRelationNames(
       lines,
-      foundBlock.start.line,
     )
     suggestions.push(
       ...toCompletionItems(modelNames, CompletionItemKind.TypeParameter),
@@ -164,9 +165,15 @@ export function getSuggestionsForTypes(
   }
 }
 
+/**
+ * Removes all field suggestion that are invalid in this context. E.g. fields that are used already in a block will not be suggested again.
+ * This function removes all field suggestion that are invalid in a certain context. E.g. in a generator block `provider, output, platforms, pinnedPlatForm`
+ * are possible fields. But those fields are only valid suggestions if they haven't been used in this block yet. So in case `provider` has already been used, only
+ * `output, platforms, pinnedPlatform` will be suggested.
+ */
 function removeInvalidFieldSuggestions(
   supportedFields: Array<string>,
-  block: MyBlock,
+  block: Block,
   lines: Array<string>,
   position: Position,
 ): Array<string> {
@@ -183,14 +190,14 @@ function removeInvalidFieldSuggestions(
     }
     const fieldName = item.replace(/ .*/, '')
     if (supportedFields.includes(fieldName)) {
-      supportedFields.filter((field) => field !== fieldName)
+      supportedFields = supportedFields.filter((field) => field !== fieldName)
     }
   }
   return supportedFields
 }
 
 function getSuggestionForDataSourceField(
-  block: MyBlock,
+  block: Block,
   lines: Array<string>,
   position: Position,
 ): CompletionItem[] {
@@ -208,7 +215,7 @@ function getSuggestionForDataSourceField(
 }
 
 function getSuggestionForGeneratorField(
-  block: MyBlock,
+  block: Block,
   lines: Array<string>,
   position: Position,
 ): CompletionItem[] {
@@ -232,7 +239,7 @@ export function getSuggestionForFirstInsideBlock(
   blockType: string,
   lines: Array<string>,
   position: Position,
-  block: MyBlock,
+  block: Block,
   document: TextDocument,
 ): CompletionList {
   let suggestions: CompletionItem[] = []
@@ -246,8 +253,9 @@ export function getSuggestionForFirstInsideBlock(
     case 'model':
     case 'type_alias':
       suggestions = getSuggestionForBlockAttribute(
-        blockType,
+        block,
         document,
+        lines,
         position,
       )
       break
@@ -346,7 +354,7 @@ function isInsideAttribute(
 function getFieldsFromCurrentBlock(
   lines: Array<string>,
   position: Position,
-  block: MyBlock,
+  block: Block,
   context?: string,
 ): Array<string> {
   let suggestions: Array<string> = []
@@ -397,7 +405,7 @@ function getFieldsFromCurrentBlock(
 export function getSuggestionsForInsideAttributes(
   lines: Array<string>,
   position: Position,
-  block: MyBlock,
+  block: Block,
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
   const wordsBeforePosition = lines[position.line]

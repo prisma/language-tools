@@ -25,7 +25,7 @@ import {
   getSuggestionsForInsideAttributes,
 } from './completions'
 
-function getCurrentLine(document: TextDocument, line: number) {
+function getCurrentLine(document: TextDocument, line: number):string {
   return document.getText({
     start: { line: line, character: 0 },
     end: { line: line, character: 9999 },
@@ -63,13 +63,7 @@ export function getWordAtPosition(
   position: Position,
 ): string {
   const currentLine = getCurrentLine(document, position.line)
-  const stringTillPosition = currentLine.slice(0, position.character)
-  if (stringTillPosition.endsWith('@@')) {
-    return '@@'
-  }
-  if (stringTillPosition.endsWith('@')) {
-    return '@'
-  }
+
   // search for the word's beginning and end
   const beginning: number = currentLine
     .slice(0, position.character + 1)
@@ -81,7 +75,8 @@ export function getWordAtPosition(
   return currentLine.slice(beginning, end + position.character)
 }
 
-export class MyBlock {
+
+export class Block {
   type: string
   start: Position
   end: Position
@@ -95,10 +90,7 @@ export class MyBlock {
   }
 }
 
-function getBlockAtPosition(
-  line: number,
-  lines: Array<string>,
-): MyBlock | void {
+function getBlockAtPosition(line: number, lines: Array<string>): Block | void {
   let blockType = ''
   let blockName = ''
   let blockStart: Position = Position.create(0, 0)
@@ -137,7 +129,7 @@ function getBlockAtPosition(
     }
     if (item.includes('}')) {
       blockEnd = Position.create(key, 1)
-      return new MyBlock(blockType, blockStart, blockEnd, blockName)
+      return new Block(blockType, blockStart, blockEnd, blockName)
     }
   }
   return
@@ -146,7 +138,7 @@ function getBlockAtPosition(
 function getModelOrEnumBlock(
   blockName: string,
   lines: string[],
-): MyBlock | void {
+): Block | void {
   // get start position of model type
   const results: number[] = lines
     .map((line, index) => {
@@ -163,14 +155,14 @@ function getModelOrEnumBlock(
     return
   }
 
-  const foundBlocks: MyBlock[] = results
+  const foundBlocks: Block[] = results
     .map((result) => {
       const block = getBlockAtPosition(result, lines)
       if (block && block.name === blockName) {
         return block
       }
     })
-    .filter((block) => block !== undefined) as MyBlock[]
+    .filter((block) => block !== undefined) as Block[]
 
   if (foundBlocks.length !== 1) {
     return
@@ -206,18 +198,46 @@ export function handleDefinitionRequest(
     return
   }
 
-  const foundBlock = getModelOrEnumBlock(word, lines)
-  if (!foundBlock) {
+  // get start position of model type
+  const results: number[] = lines
+    .map((line, index) => {
+      if (
+        (line.includes('model') && line.includes(word)) ||
+        (line.includes('enum') && line.includes(word))
+      ) {
+        return index
+      }
+    })
+    .filter((index) => index !== undefined) as number[]
+
+  if (results.length === 0) {
+    return
+  }
+
+  const foundBlocks: Block[] = results
+    .map((result) => {
+      const block = getBlockAtPosition(result, lines)
+      if (block && block.name === word) {
+        return block
+      }
+    })
+    .filter((block) => block !== undefined) as Block[]
+
+  if (foundBlocks.length !== 1) {
+    return
+  }
+
+  if (!foundBlocks[0]) {
     return
   }
 
   const startPosition = {
-    line: foundBlock.start.line,
-    character: foundBlock.start.character,
+    line: foundBlocks[0].start.line,
+    character: foundBlocks[0].start.character,
   }
   const endPosition = {
-    line: foundBlock.end.line,
-    character: foundBlock.end.character,
+    line: foundBlocks[0].end.line,
+    character: foundBlocks[0].end.character,
   }
 
   return {
@@ -299,8 +319,8 @@ export function handleHoverRequest(
  * This handler provides the initial list of the completion items.
  */
 export function handleCompletionRequest(
-  documents: TextDocuments<TextDocument>,
   params: CompletionParams,
+  documents: TextDocuments<TextDocument>,
 ): CompletionList | undefined {
   const context = params.context
   if (!context) {
@@ -311,6 +331,7 @@ export function handleCompletionRequest(
   if (!document) {
     return
   }
+
   const lines = convertDocumentTextToTrimmedLineArray(document)
 
   const foundBlock = getBlockAtPosition(params.position.line, lines)
