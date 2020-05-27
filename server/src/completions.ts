@@ -131,10 +131,6 @@ export function getAllRelationNames(
 ): Array<string> {
   const modelNames: Array<string> = []
   for (const [key, item] of lines.entries()) {
-    if (currentModelStartLine === key) {
-      // do not suggest the model name we are currently in
-      continue
-    }
     if (
       (item.includes('model') || item.includes('enum')) &&
       item.includes('{')
