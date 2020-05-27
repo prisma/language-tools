@@ -33,7 +33,7 @@ if [ "$CHANNEL" = "insider" ]; then
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma-insider\" | \
         .displayName = \"Prisma - Insider\" | \
-        .description = \"This is the Insiders Build.\" | \
+        .description = \"This is the Insider Build.\" | \
         .preview = true" \
         ./package.json > ./package.json.bk
 else
