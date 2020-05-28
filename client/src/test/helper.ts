@@ -17,7 +17,8 @@ function tryRequire(path: string): any {
   try {
     return require(path)
   } catch (err) {
-    return {}
+    console.error(err)
+    return 
   }
 }
 
@@ -28,6 +29,9 @@ function tryRequire(path: string): any {
 export async function activate(docUri: vscode.Uri): Promise<void> {
   // The extensionId is `publisher.name` from package.json
   const pj = tryRequire('../../../package.json')
+  if (!pj) {
+    return
+  }
   const ext = vscode.extensions.getExtension(pj.publisher + '.' + pj.name)
   if (!ext) {
     console.error('Failed to get extension.')

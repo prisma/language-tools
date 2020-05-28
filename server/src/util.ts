@@ -19,7 +19,8 @@ export function tryRequire(path: string): any {
   try {
     return require(path)
   } catch (err) {
-    return {}
+    console.error(err)
+    return
   }
 }
 
