@@ -376,6 +376,40 @@ function getFieldsFromCurrentBlock(
   return suggestions
 }
 
+function getSuggestionsForRelationDirective(wordsBeforePosition: string[], lines: string[], block: Block, position: Position): string[] {
+  const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
+  if (wordBeforePosition.includes('@relation')) {
+    return ['references: [], fields: []', '""']
+  }
+  if (isInsideAttribute(wordsBeforePosition, 'fields')) {
+    return getFieldsFromCurrentBlock(lines, block, position)
+  } 
+  if (isInsideAttribute(wordsBeforePosition, 'references')) {
+    const referencedModelName = wordsBeforePosition[1]
+    const referencedBlock = getModelOrEnumBlock(referencedModelName, lines)
+
+    // referenced model does not exist
+    if (!referencedBlock || referencedBlock.type !== 'model') {
+      return []
+    }
+    return getFieldsFromCurrentBlock(lines, referencedBlock)
+  } 
+  const referencesExist = wordsBeforePosition.includes('references')
+  const fieldsExist = wordsBeforePosition.includes('fields')
+  if (!wordBeforePosition.endsWith(',') || (referencesExist && fieldsExist)) {
+    return []
+  }
+  if (referencesExist) {
+    return ['fields: []']
+  }
+  if (fieldsExist) {
+    return ['references: []']
+  }
+
+
+  return []
+}
+
 export function getSuggestionsForInsideAttributes(
   lines: Array<string>,
   position: Position,
@@ -389,21 +423,6 @@ export function getSuggestionsForInsideAttributes(
 
   if (wordBeforePosition.includes('@default')) {
     suggestions = getFunctions(lines[position.line])
-  } else if (wordBeforePosition?.includes('@relation')) {
-    suggestions = ['references: [], fields: []', '""']
-  } else if (isInsideAttribute(wordsBeforePosition, 'fields')) {
-    suggestions = getFieldsFromCurrentBlock(lines, block, position)
-  } else if (isInsideAttribute(wordsBeforePosition, 'references')) {
-    const referencedModelName = wordsBeforePosition[1]
-    const referencedBlock = getModelOrEnumBlock(referencedModelName, lines)
-
-    // referenced model does not exist
-    if (!referencedBlock || referencedBlock.type !== 'model') {
-      return
-    }
-
-    suggestions = getFieldsFromCurrentBlock(lines, referencedBlock)
-
   } else if (
     wordBeforePosition.includes('@@unique') ||
     wordBeforePosition.includes('@@id') ||
@@ -411,6 +430,9 @@ export function getSuggestionsForInsideAttributes(
   ) {
     suggestions = getFieldsFromCurrentBlock(lines, block, position)
   }
+  else if (wordsBeforePosition.includes('@relation')) {
+    suggestions = getSuggestionsForRelationDirective(wordsBeforePosition, lines, block, position)
+  } 
   return {
     items: toCompletionItems(suggestions, CompletionItemKind.Field),
     isIncomplete: false,
