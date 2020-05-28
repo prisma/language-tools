@@ -5,7 +5,7 @@ import {
   Position,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { Block } from './MessageHandler'
+import { Block, getModelOrEnumBlock } from './MessageHandler'
 import {
   blockAttributes,
   fieldAttributes,
@@ -345,11 +345,11 @@ function isInsideAttribute(
   return false
 }
 
+
 function getFieldsFromCurrentBlock(
   lines: Array<string>,
-  position: Position,
   block: Block,
-  context?: string,
+  position?: Position,
 ): Array<string> {
   let suggestions: Array<string> = []
 
@@ -364,34 +364,14 @@ function getFieldsFromCurrentBlock(
     if (key === block.end.line) {
       break
     }
-    if (key !== position.line) {
+    if (!position) {
+      suggestions.push(item.replace(/ .*/, ''))
+    } else if (key !== position.line) {
       suggestions.push(item.replace(/ .*/, ''))
     }
+
   }
 
-  const currentLine = lines[position.line]
-  if (currentLine.includes('fields') && currentLine.includes('references')) {
-    const otherContext = context === 'references' ? 'fields' : 'references'
-    // remove all fields that might be inside other attribute
-    // e.g. if inside 'references' context, fields from 'fields' context are not correct suggestions
-    const startOfOtherContext = currentLine.indexOf(otherContext + ': [')
-    let end: number = startOfOtherContext
-    for (end; end < currentLine.length; end++) {
-      if (currentLine.charAt(end) === ']') {
-        break
-      }
-    }
-    const otherContextFieldsString = currentLine.slice(
-      startOfOtherContext + otherContext.length + 3,
-      end,
-    )
-    const otherContextFields = otherContextFieldsString.split(', ')
-
-    // remove otherContextFields from allFieldsInBlock
-    suggestions = suggestions.filter(
-      (sugg) => !otherContextFields.includes(sugg),
-    )
-  }
 
   return suggestions
 }
@@ -410,22 +390,26 @@ export function getSuggestionsForInsideAttributes(
   if (wordBeforePosition.includes('@default')) {
     suggestions = getFunctions(lines[position.line])
   } else if (wordBeforePosition?.includes('@relation')) {
-    suggestions = ['references: []', 'fields: []', '""']
+    suggestions = ['references: [], fields: []', '""']
   } else if (isInsideAttribute(wordsBeforePosition, 'fields')) {
-    suggestions = getFieldsFromCurrentBlock(lines, position, block, 'fields')
+    suggestions = getFieldsFromCurrentBlock(lines, block, position)
   } else if (isInsideAttribute(wordsBeforePosition, 'references')) {
-    suggestions = getFieldsFromCurrentBlock(
-      lines,
-      position,
-      block,
-      'references',
-    )
+    const referencedModelName = wordsBeforePosition[1]
+    const referencedBlock = getModelOrEnumBlock(referencedModelName, lines)
+
+    // referenced model does not exist
+    if (!referencedBlock || referencedBlock.type !== 'model') {
+      return
+    }
+
+    suggestions = getFieldsFromCurrentBlock(lines, referencedBlock)
+
   } else if (
     wordBeforePosition.includes('@@unique') ||
     wordBeforePosition.includes('@@id') ||
     wordBeforePosition.includes('@@index')
   ) {
-    suggestions = getFieldsFromCurrentBlock(lines, position, block)
+    suggestions = getFieldsFromCurrentBlock(lines, block, position)
   }
   return {
     items: toCompletionItems(suggestions, CompletionItemKind.Field),

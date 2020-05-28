@@ -134,7 +134,7 @@ function getBlockAtPosition(line: number, lines: Array<string>): Block | void {
   return
 }
 
-function getModelOrEnumBlock(blockName: string, lines: string[]): Block | void {
+export function getModelOrEnumBlock(blockName: string, lines: string[]): Block | void {
   // get start position of model type
   const results: number[] = lines
     .map((line, index) => {
