@@ -59,10 +59,11 @@ export async function getDownloadURL(): Promise<string> {
   return `https://binaries.prisma.sh/master/${version}/${platform}/prisma-fmt${extension}`
 }
 
-export function getCLIVersion(packageName: string): Buffer {
-  const fileName =
-    packageName === 'prisma-dev'
-      ? 'prisma_version_unstable'
-      : 'prisma_version_stable'
-  return fs.readFileSync(path.join(__dirname, '../../scripts', fileName))
+export async function getCLIVersion(): Promise<string> {
+  const pkgPath = await pkgdir(__dirname)
+  if (!pkgPath) {
+    return ''
+  }
+  const pkg = tryRequire(path.join(pkgPath, 'package.json'))
+  return pkg['dependencies']['@prisma/get-platform']
 }

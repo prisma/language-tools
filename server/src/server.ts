@@ -66,7 +66,7 @@ connection.onInitialize(async (params: InitializeParams) => {
   connection.console.info(
     'Extension name ' + pj.name + ' with version ' + pj.version,
   )
-  const prismaCLIVersion = util.getCLIVersion(pj.name)
+  const prismaCLIVersion = await util.getCLIVersion()
   connection.console.info('Prisma CLI version: ' + prismaCLIVersion)
 
   const result: InitializeResult = {
