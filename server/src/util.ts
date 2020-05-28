@@ -15,7 +15,7 @@ let version: string | undefined
 /**
  * Try requiring
  */
-function tryRequire(path: string): any {
+export function tryRequire(path: string): any {
   try {
     return require(path)
   } catch (err) {

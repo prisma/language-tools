@@ -1,7 +1,6 @@
 import vscode from 'vscode'
 import path from 'path'
 
-
 export let doc: vscode.TextDocument
 export let editor: vscode.TextEditor
 export let documentEol: string
@@ -12,13 +11,28 @@ export async function sleep(ms: number): Promise<NodeJS.Timeout> {
 }
 
 /**
+ * Try requiring
+ */
+function tryRequire(path: string): any {
+  try {
+    return require(path)
+  } catch (err) {
+    return {}
+  }
+}
+
+/**
  * Activates the vscode.prisma extension
  * @todo check readiness of the server instead of timeout
  */
 export async function activate(docUri: vscode.Uri): Promise<void> {
   // The extensionId is `publisher.name` from package.json
-  const pj = require('../../../package.json')
-  const ext = vscode.extensions.getExtension(pj.publisher + '.' + pj.name)!
+  const pj = tryRequire('../../../package.json')
+  const ext = vscode.extensions.getExtension(pj.publisher + '.' + pj.name)
+  if (!ext) {
+    console.error('Failed to get extension.')
+    return
+  }
   await ext.activate()
   try {
     doc = await vscode.workspace.openTextDocument(docUri)
