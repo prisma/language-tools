@@ -47,8 +47,8 @@ function isFirstInsideBlock(position: Position, currentLine: string): boolean {
     return true
   }
 
-  const stringTillPosition = currentLine.slice(0, position.character)
-  const matchArray = /\w+/.exec(stringTillPosition)
+  const stringTilPosition = currentLine.slice(0, position.character)
+  const matchArray = /\w+/.exec(stringTilPosition)
 
   if (!matchArray) {
     return true
@@ -56,7 +56,7 @@ function isFirstInsideBlock(position: Position, currentLine: string): boolean {
   return (
     matchArray.length === 1 &&
     matchArray.index !== undefined &&
-    stringTillPosition.length - matchArray.index - matchArray[0].length === 0
+    stringTilPosition.length - matchArray.index - matchArray[0].length === 0
   )
 }
 
@@ -393,16 +393,12 @@ export function handleCompletionRequest(
     if (!positionIsAfterFieldAndType(currentLine, position, document)) {
       return getSuggestionsForTypes(foundBlock, lines)
     }
-<<<<<<< HEAD
     return getSuggestionForFieldAttribute(
       foundBlock,
       lines[position.line],
       lines,
       position,
     )
-=======
-    return getSuggestionsForAttributes(foundBlock.type, lines[position.line])
->>>>>>> master
   }
 }
 
