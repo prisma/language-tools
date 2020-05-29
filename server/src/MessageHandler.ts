@@ -23,6 +23,8 @@ import {
   getSuggestionForFirstInsideBlock,
   getSuggestionForSupportedFields,
   getSuggestionsForInsideAttributes,
+  positionIsAfterFieldAndType,
+  isInsideAttribute,
 } from './completions'
 
 function getCurrentLine(document: TextDocument, line: number): string {
@@ -134,7 +136,10 @@ function getBlockAtPosition(line: number, lines: Array<string>): Block | void {
   return
 }
 
-function getModelOrEnumBlock(blockName: string, lines: string[]): Block | void {
+export function getModelOrEnumBlock(
+  blockName: string,
+  lines: string[],
+): Block | void {
   // get start position of model type
   const results: number[] = lines
     .map((line, index) => {
@@ -320,6 +325,7 @@ export function handleCompletionRequest(
   documents: TextDocuments<TextDocument>,
 ): CompletionList | undefined {
   const context = params.context
+  const position = params.position
   if (!context) {
     return
   }
@@ -331,21 +337,16 @@ export function handleCompletionRequest(
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
 
-  const foundBlock = getBlockAtPosition(params.position.line, lines)
+  const foundBlock = getBlockAtPosition(position.line, lines)
   if (!foundBlock) {
     return getSuggestionForBlockTypes(lines)
   }
 
-  if (
-    isFirstInsideBlock(
-      params.position,
-      getCurrentLine(document, params.position.line),
-    )
-  ) {
+  if (isFirstInsideBlock(position, getCurrentLine(document, position.line))) {
     return getSuggestionForFirstInsideBlock(
       foundBlock.type,
       lines,
-      params.position,
+      position,
       foundBlock,
       document,
     )
@@ -355,55 +356,42 @@ export function handleCompletionRequest(
   if (context.triggerKind === 2) {
     switch (context.triggerCharacter) {
       case '@':
+        if (
+          !positionIsAfterFieldAndType(lines[position.line], position, document)
+        ) {
+          return
+        }
         return getSuggestionsForAttributes(
           foundBlock.type,
-          params.position,
-          document,
-          lines[params.position.line],
+          getCurrentLine(document, position.line),
         )
       case '"':
         return getSuggestionForSupportedFields(
           foundBlock.type,
-          lines[params.position.line],
+          lines[position.line],
         )
     }
   }
 
   if (foundBlock.type === 'model') {
-    const symbolBeforePosition = document.getText({
-      start: {
-        line: params.position.line,
-        character: params.position.character - 1,
-      },
-      end: { line: params.position.line, character: params.position.character },
-    })
-    const currentLine = lines[params.position.line]
-    const wordsBeforePosition: string[] = currentLine
-      .slice(0, params.position.character - 1)
-      .trim()
-      .split(/\s+/)
+    const currentLine = lines[position.line]
+    const currentLineUntrimmed = getCurrentLine(document, position.line)
 
-    if (currentLine.includes('(')) {
+    // check if inside attribute
+    if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
       return getSuggestionsForInsideAttributes(
+        currentLineUntrimmed,
         lines,
-        params.position,
+        position,
         foundBlock,
       )
     }
 
     // check if type
-    if (
-      wordsBeforePosition.length < 2 ||
-      (wordsBeforePosition.length === 2 && symbolBeforePosition !== ' ')
-    ) {
+    if (!positionIsAfterFieldAndType(currentLine, position, document)) {
       return getSuggestionsForTypes(foundBlock, lines)
     }
-    return getSuggestionsForAttributes(
-      foundBlock.type,
-      params.position,
-      document,
-      lines[params.position.line],
-    )
+    return getSuggestionsForAttributes(foundBlock.type, lines[position.line])
   }
 }
 

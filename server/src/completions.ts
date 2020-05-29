@@ -5,7 +5,7 @@ import {
   Position,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { Block } from './MessageHandler'
+import { Block, getModelOrEnumBlock } from './MessageHandler'
 import {
   blockAttributes,
   fieldAttributes,
@@ -21,6 +21,59 @@ function toCompletionItems(
   kind: CompletionItemKind,
 ): CompletionItem[] {
   return allowedTypes.map((label) => ({ label, kind }))
+}
+
+/***
+ * @param brackets expects either '()' or '[]'
+ */
+export function isInsideAttribute(
+  currentLineUntrimmed: string,
+  position: Position,
+  brackets: string
+): boolean {
+  let numberOfOpenBrackets = 0
+  let numberOfClosedBrackets = 0
+  for (let i = 0; i < position.character; i++) {
+    if (currentLineUntrimmed[i] === brackets[0]) {
+      numberOfOpenBrackets++
+    } else if (currentLineUntrimmed[i] === brackets[1]) {
+      numberOfClosedBrackets++
+    }
+  }
+  return numberOfOpenBrackets > numberOfClosedBrackets
+}
+
+function getSymbolBeforePosition(
+  document: TextDocument,
+  position: Position,
+): string {
+  return document.getText({
+    start: {
+      line: position.line,
+      character: position.character - 1,
+    },
+    end: { line: position.line, character: position.character },
+  })
+}
+
+export function positionIsAfterFieldAndType(
+  currentLine: string,
+  position: Position,
+  document: TextDocument,
+): boolean {
+  const wordsBeforePosition: string[] = currentLine
+    .slice(0, position.character - 1)
+    .trim()
+    .split(/\s+/)
+
+  const symbolBeforePosition = getSymbolBeforePosition(document, position)
+  const symbolBeforeIsWhiteSpace = symbolBeforePosition.search(/\s/)
+
+  const hasAtRelation = wordsBeforePosition.length === 2 && symbolBeforePosition === '@'
+  const hasWhiteSpaceBeforePosition = wordsBeforePosition.length === 2 && symbolBeforeIsWhiteSpace !== -1
+
+  return wordsBeforePosition.length > 2 || hasAtRelation || hasWhiteSpaceBeforePosition
+
 }
 
 /**
@@ -95,21 +148,8 @@ function getSuggestionForFieldAttribute(
 
 export function getSuggestionsForAttributes(
   blockType: string,
-  position: Position,
-  document: TextDocument,
   currentLine: string,
 ): CompletionList | undefined {
-  // check if position is after field name and type!
-  const foundIndex = currentLine.indexOf('@')
-  if (foundIndex === -1) {
-    return
-  }
-  const wordsTillSymbol = currentLine.slice(0, foundIndex)
-  const matchArray = wordsTillSymbol.match(/\s+/g)
-  if (!matchArray || matchArray.length < 2) {
-    return
-  }
-
   const suggestions: CompletionItem[] = getSuggestionForFieldAttribute(
     blockType,
     currentLine,
@@ -330,28 +370,39 @@ function getFunctions(currentLine: string): Array<string> {
 }
 
 // checks if e.g. inside 'fields' or 'references' attribute
-function isInsideAttribute(
+function isInsideFieldsOrReferences(
+  currentLineUntrimmed: string,
   wordsBeforePosition: Array<string>,
   attributeName: string,
+  position: Position
 ): boolean {
-  for (const c of wordsBeforePosition.reverse()) {
-    if (c.includes(']')) {
-      break
-    }
-    if (c.includes(attributeName)) {
-      return true
-    }
+  if (!isInsideAttribute(currentLineUntrimmed, position, '[]')) {
+    return false
+  }
+  // check if in fields or references
+  const indexOfFields = wordsBeforePosition.findIndex(word => word === 'fields')
+  const indexOfReferences = wordsBeforePosition.findIndex(word => word.includes('references'))
+  if (indexOfFields === -1 && indexOfReferences === -1) {
+    return false
+  }
+  if ((indexOfFields === -1 && attributeName === 'fields') || indexOfReferences === -1 && attributeName === 'references') {
+    return false
+  }
+  if (attributeName === 'references') {
+    return indexOfReferences > indexOfFields
+  }
+  if (attributeName === 'fields') {
+    return indexOfFields > indexOfReferences
   }
   return false
 }
 
 function getFieldsFromCurrentBlock(
   lines: Array<string>,
-  position: Position,
   block: Block,
-  context?: string,
+  position?: Position,
 ): Array<string> {
-  let suggestions: Array<string> = []
+  const suggestions: Array<string> = []
 
   let reachedStartLine = false
   for (const [key, item] of lines.entries()) {
@@ -364,68 +415,113 @@ function getFieldsFromCurrentBlock(
     if (key === block.end.line) {
       break
     }
-    if (key !== position.line) {
+    if (!position || key !== position.line) {
       suggestions.push(item.replace(/ .*/, ''))
     }
   }
-
-  const currentLine = lines[position.line]
-  if (currentLine.includes('fields') && currentLine.includes('references')) {
-    const otherContext = context === 'references' ? 'fields' : 'references'
-    // remove all fields that might be inside other attribute
-    // e.g. if inside 'references' context, fields from 'fields' context are not correct suggestions
-    const startOfOtherContext = currentLine.indexOf(otherContext + ': [')
-    let end: number = startOfOtherContext
-    for (end; end < currentLine.length; end++) {
-      if (currentLine.charAt(end) === ']') {
-        break
-      }
-    }
-    const otherContextFieldsString = currentLine.slice(
-      startOfOtherContext + otherContext.length + 3,
-      end,
-    )
-    const otherContextFields = otherContextFieldsString.split(', ')
-
-    // remove otherContextFields from allFieldsInBlock
-    suggestions = suggestions.filter(
-      (sugg) => !otherContextFields.includes(sugg),
-    )
-  }
-
   return suggestions
 }
 
+function getSuggestionsForRelationDirective(
+  wordsBeforePosition: string[],
+  currentLineUntrimmed: string,
+  lines: string[],
+  block: Block,
+  position: Position,
+): CompletionList | undefined {
+  const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
+  const stringTilPosition = currentLineUntrimmed
+    .slice(0, position.character)
+    .trim()
+
+  if (wordBeforePosition.includes('@relation')) {
+    return {
+      items: toCompletionItems(
+        ['references: []', 'fields: []', '""'],
+        CompletionItemKind.Property,
+      ),
+      isIncomplete: false,
+    }
+  }
+  if (isInsideFieldsOrReferences(currentLineUntrimmed, wordsBeforePosition, 'fields', position)) {
+    return {
+      items: toCompletionItems(
+        getFieldsFromCurrentBlock(lines, block, position),
+        CompletionItemKind.Field,
+      ),
+      isIncomplete: false,
+    }
+  }
+  if (isInsideFieldsOrReferences(currentLineUntrimmed, wordsBeforePosition, 'references', position)) {
+    const referencedModelName = wordsBeforePosition[1]
+    const referencedBlock = getModelOrEnumBlock(referencedModelName, lines)
+
+    // referenced model does not exist
+    if (!referencedBlock || referencedBlock.type !== 'model') {
+      return
+    }
+    return {
+      items: toCompletionItems(
+        getFieldsFromCurrentBlock(lines, referencedBlock),
+        CompletionItemKind.Field,
+      ),
+      isIncomplete: false,
+    }
+  }
+  if (stringTilPosition.endsWith(',')) {
+    const referencesExist = wordsBeforePosition.some((a) =>
+      a.includes('references'),
+    )
+    const fieldsExist = wordsBeforePosition.some((a) => a.includes('fields'))
+    if (referencesExist && fieldsExist) {
+      return
+    }
+    if (referencesExist) {
+      return {
+        items: toCompletionItems(['fields: []'], CompletionItemKind.Property),
+        isIncomplete: false,
+      }
+    }
+    if (fieldsExist) {
+      return {
+        items: toCompletionItems(
+          ['references: []'],
+          CompletionItemKind.Property,
+        ),
+        isIncomplete: false,
+      }
+    }
+  }
+}
+
 export function getSuggestionsForInsideAttributes(
+  untrimmedCurrentLine: string,
   lines: Array<string>,
   position: Position,
   block: Block,
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
   const wordsBeforePosition = lines[position.line]
-    .slice(0, position.character - 2)
     .split(' ')
+    .slice(0, position.character - 2)
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
 
   if (wordBeforePosition.includes('@default')) {
     suggestions = getFunctions(lines[position.line])
-  } else if (wordBeforePosition?.includes('@relation')) {
-    suggestions = ['references: []', 'fields: []', '""']
-  } else if (isInsideAttribute(wordsBeforePosition, 'fields')) {
-    suggestions = getFieldsFromCurrentBlock(lines, position, block, 'fields')
-  } else if (isInsideAttribute(wordsBeforePosition, 'references')) {
-    suggestions = getFieldsFromCurrentBlock(
-      lines,
-      position,
-      block,
-      'references',
-    )
   } else if (
     wordBeforePosition.includes('@@unique') ||
     wordBeforePosition.includes('@@id') ||
     wordBeforePosition.includes('@@index')
   ) {
-    suggestions = getFieldsFromCurrentBlock(lines, position, block)
+    suggestions = getFieldsFromCurrentBlock(lines, block, position)
+  } else if (wordsBeforePosition.some((a) => a.includes('@relation'))) {
+    return getSuggestionsForRelationDirective(
+      wordsBeforePosition,
+      untrimmedCurrentLine,
+      lines,
+      block,
+      position,
+    )
   }
   return {
     items: toCompletionItems(suggestions, CompletionItemKind.Field),
