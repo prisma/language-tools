@@ -393,12 +393,16 @@ export function handleCompletionRequest(
     if (!positionIsAfterFieldAndType(currentLine, position, document)) {
       return getSuggestionsForTypes(foundBlock, lines)
     }
+<<<<<<< HEAD
     return getSuggestionForFieldAttribute(
       foundBlock,
       lines[position.line],
       lines,
       position,
     )
+=======
+    return getSuggestionsForAttributes(foundBlock.type, lines[position.line])
+>>>>>>> master
   }
 }
 
