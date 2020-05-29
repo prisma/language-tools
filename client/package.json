@@ -1,7 +1,7 @@
 {
   "name": "prisma-lsp-client",
   "description": "Implementation of a language server.",
-  "version": "0.0.1272",
+  "version": "0.0.1273",
   "author": "Prisma",
   "license": "Apache-2.0",
   "engines": {
