@@ -8,7 +8,7 @@ on:
     - cron: '*/5 * * * *'
 
 env:
-  SSH_KEY: ${{ secrets.SSH_KEY }}
+  AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   PRODUCTION: ${{ secrets.PRODUCTION }}
 
