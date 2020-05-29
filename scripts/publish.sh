@@ -19,10 +19,16 @@ echo "============================"
 CHANNEL=$1
 echo "CHANNEL: $CHANNEL"
 
-PRISMA_VERSION=$2
+PRISMA_VERSION=$(sh scripts/prisma-version.sh "$CHANNEL")
 echo "PRISMA_VERSION: $PRISMA_VERSION"
 
-NEXT_EXTENSION_VERSION=$3
+NPM_VERSION=$(sh scripts/prisma-version.sh "$CHANNEL")
+echo "NPM_VERSION: $NPM_VERSION"
+
+EXTENSION_VERSION=$(sh scripts/extension-version.sh "$CHANNEL" "")
+echo "EXTENSION_VERSION: $EXTENSION_VERSION"
+
+NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
 echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
 
 # Try to publish if $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN (Personal Access Token - https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) exists 

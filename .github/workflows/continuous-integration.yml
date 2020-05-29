@@ -1,6 +1,6 @@
 name: CI tests
 
-on: [push, pull_request, release]
+on: [push]
     
 
 jobs:

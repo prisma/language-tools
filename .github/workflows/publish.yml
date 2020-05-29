@@ -21,8 +21,25 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install Dependencies
         run: npm install
+      - name: Check for Update
+        run: yarn vsce:check "dev"
+        id: check_for_updates
+        outputs: 
+          new_updates: # id of the output
+            description: 'True if new updates are available'
+      - name: Bump versions
+        if: steps.check_for_updates.outputs.new_updates
+        run: yarn vsce:bump "dev"
+      - name: Compile
+        run: yarn compile
+      - name: Run headless e2e tests
+        if: steps.check_for_updates.outputs.new_updates
+        uses: GabrielBB/xvfb-action@v1.0
+        with:
+          run: npm run test
       - name: Publish Extension as Patch
-        run: yarn vsce:check "latest"
+        if: steps.check_for_updates.outputs.new_updates
+        run: yarn vsce:publish "latest"
 
   publish-dev:
     name: Publish Dev
@@ -32,5 +49,23 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install Dependencies
         run: npm install
-      - name: Publish Extension as Patch
+      - name: Check for Update
         run: yarn vsce:check "dev"
+        id: check_for_updates
+        outputs: 
+          new_updates: # id of the output
+            description: 'True if new updates are available'
+      - name: Bump versions
+        if: steps.check_for_updates.outputs.new_updates
+        run: yarn vsce:bump "dev"
+      - name: Compile
+        run: yarn compile
+      - name: Run headless e2e tests
+        if: steps.check_for_updates.outputs.new_updates
+        uses: GabrielBB/xvfb-action@v1.0
+        with:
+          run: npm run test
+      - name: Publish Extension as Patch
+        if: steps.check_for_updates.outputs.new_updates
+        run: yarn vsce:publish "dev"
+
