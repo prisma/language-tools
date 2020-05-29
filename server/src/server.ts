@@ -62,11 +62,11 @@ connection.onInitialize(async (params: InitializeParams) => {
       (await util.getVersion()),
   )
 
-  const pj = require('../../package.json')
+  const pj = util.tryRequire('../../package.json')
   connection.console.info(
     'Extension name ' + pj.name + ' with version ' + pj.version,
   )
-  const prismaCLIVersion = util.getCLIVersion(pj.name)
+  const prismaCLIVersion = await util.getCLIVersion()
   connection.console.info('Prisma CLI version: ' + prismaCLIVersion)
 
   const result: InitializeResult = {
