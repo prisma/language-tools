@@ -4,12 +4,56 @@ import {
   ServerOptions,
   TransportKind,
 } from 'vscode-languageclient'
-import { ExtensionContext } from 'vscode'
+import * as vscode from 'vscode'
 import path from 'path'
+import { exec } from 'child_process';
 
 let client: LanguageClient
+let generatePrismaStatusBarItem: vscode.StatusBarItem
+let prismaVersionStatusBarItem : vscode.StatusBarItem
 
-export function activate(context: ExtensionContext): void {
+export function activate(context: vscode.ExtensionContext): void {
+  // register a command that is invoked when the status bar
+	// item is selected
+  const generatePrismaCommandId = 'prisma.generate';
+  const prismaVersionCommandId = 'prisma.version';
+  context.subscriptions.push(vscode.commands.registerCommand(generatePrismaCommandId, () => {
+    exec('npx prisma generate', (err, stdout, stderr) => {
+      if (err) {
+        vscode.window.showErrorMessage(err.message)
+        return
+      }
+      vscode.window.showInformationMessage(stdout)
+      vscode.window.showErrorMessage(stderr)
+      console.log('stdout: ' + stdout)
+      console.log('stderr: ' + stderr)
+  })}));
+  context.subscriptions.push(vscode.commands.registerCommand(prismaVersionCommandId, () => {
+    exec('npx prisma -v', (err, stdout, stderr) => {
+      if (err) {
+        vscode.window.showErrorMessage(err.message)
+        return
+      }
+      vscode.window.showInformationMessage(stdout)
+      vscode.window.showErrorMessage(stderr)
+      console.log('stdout: ' + stdout)
+      console.log('stderr: ' + stderr)
+    })
+  }))
+
+	// create a new status bar item that we can now manage
+  generatePrismaStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 200)
+  generatePrismaStatusBarItem.text = '$(triangle-right) Prisma Generate'
+  generatePrismaStatusBarItem.tooltip = 'Run this command to install and generate Prisma Client in your project.'
+  generatePrismaStatusBarItem.command = generatePrismaCommandId
+  context.subscriptions.push(generatePrismaStatusBarItem)
+
+  prismaVersionStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 200)
+  prismaVersionStatusBarItem.text = '$(triangle-right) Prisma Version'
+  prismaVersionStatusBarItem.command = prismaVersionCommandId
+  context.subscriptions.push(prismaVersionStatusBarItem)
+
+
   // The server is implemented in node
   const serverModule = context.asAbsolutePath(
     path.join('server', 'out', 'server.js'),
@@ -43,8 +87,10 @@ export function activate(context: ExtensionContext): void {
     clientOptions,
   )
 
+  prismaVersionStatusBarItem.show()
+ generatePrismaStatusBarItem.show()
   // Start the client. This will also launch the server
-  client.start()
+  context.subscriptions.push(client.start())
 }
 
 export function deactivate(): Thenable<void> | undefined {
