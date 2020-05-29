@@ -122,7 +122,6 @@ function getSuggestionForBlockAttribute(
     suggestions,
     block,
     lines,
-    position,
   )
 
   return suggestions
@@ -149,7 +148,6 @@ export function getSuggestionForFieldAttribute(
     suggestions,
     block,
     lines,
-    position,
   )
 
   return {
