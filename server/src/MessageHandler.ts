@@ -17,7 +17,7 @@ import { fullDocumentRange } from './provider'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import format from './format'
 import {
-  getSuggestionsForAttributes,
+  getSuggestionForFieldAttribute,
   getSuggestionsForTypes,
   getSuggestionForBlockTypes,
   getSuggestionForFirstInsideBlock,
@@ -361,9 +361,11 @@ export function handleCompletionRequest(
         ) {
           return
         }
-        return getSuggestionsForAttributes(
-          foundBlock.type,
+        return getSuggestionForFieldAttribute(
+          foundBlock,
           getCurrentLine(document, position.line),
+          lines,
+          position,
         )
       case '"':
         return getSuggestionForSupportedFields(
@@ -391,7 +393,12 @@ export function handleCompletionRequest(
     if (!positionIsAfterFieldAndType(currentLine, position, document)) {
       return getSuggestionsForTypes(foundBlock, lines)
     }
-    return getSuggestionsForAttributes(foundBlock.type, lines[position.line])
+    return getSuggestionForFieldAttribute(
+      foundBlock,
+      lines[position.line],
+      lines,
+      position,
+    )
   }
 }
 
