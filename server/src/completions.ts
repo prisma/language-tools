@@ -65,11 +65,11 @@ export function positionIsAfterFieldAndType(
   const symbolBeforePosition = getSymbolBeforePosition(document, position)
   const symbolBeforeIsWhiteSpace = symbolBeforePosition.search(/\s/)
 
-  return (
-    wordsBeforePosition.length > 2 ||
-    (wordsBeforePosition.length === 2 &&
-      (symbolBeforeIsWhiteSpace !== -1 || symbolBeforePosition === '@'))
-  )
+  const hasAtRelation = wordsBeforePosition.length === 2 && symbolBeforePosition === '@'
+  const hasWhiteSpaceBeforePosition = wordsBeforePosition.length === 2 && symbolBeforeIsWhiteSpace !== -1
+
+  return wordsBeforePosition.length > 2 || hasAtRelation || hasWhiteSpaceBeforePosition
+  
 }
 
 /**
