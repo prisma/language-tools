@@ -79,18 +79,17 @@ export function positionIsAfterFieldAndType(
 /**
  * Removes all block attribute suggestions that are invalid in this context. E.g. `@@id()` when already used should not be in the suggestions.
  */
-function removeInvalidBlockAttributeSuggestions(
-  supportedBlockAttributes: CompletionItem[],
+function removeInvalidAttributeSuggestions(
+  supportedAttributes: CompletionItem[],
   block: Block,
   lines: string[],
-  position: Position,
 ): CompletionItem[] {
   let reachedStartLine = false
   for (const [key, item] of lines.entries()) {
     if (key === block.start.line + 1) {
       reachedStartLine = true
     }
-    if (!reachedStartLine || key === position.line) {
+    if (!reachedStartLine) {
       continue
     }
     if (key === block.end.line) {
@@ -98,12 +97,17 @@ function removeInvalidBlockAttributeSuggestions(
     }
 
     if (item.includes('@id')) {
-      supportedBlockAttributes = supportedBlockAttributes.filter(
+      supportedAttributes = supportedAttributes.filter(
         (attribute) => !attribute.label.includes('id'),
       )
     }
+    if (item.includes('@unique')) {
+      supportedAttributes = supportedAttributes.filter(
+        (attribute) => !attribute.label.includes('unique'),
+      )
+    }
   }
-  return supportedBlockAttributes
+  return supportedAttributes
 }
 
 function getSuggestionForBlockAttribute(
@@ -118,22 +122,23 @@ function getSuggestionForBlockAttribute(
   // create deep copy
   let suggestions: CompletionItem[] = klona(blockAttributes)
 
-  suggestions = removeInvalidBlockAttributeSuggestions(
+  suggestions = removeInvalidAttributeSuggestions(
     suggestions,
     block,
     lines,
-    position,
   )
 
   return suggestions
 }
 
-function getSuggestionForFieldAttribute(
-  blockType: string,
+export function getSuggestionForFieldAttribute(
+  block: Block,
   currentLine: string,
-): CompletionItem[] {
-  if (blockType !== 'model' && blockType !== 'type_alias') {
-    return []
+  lines: string[],
+  position: Position,
+): CompletionList | undefined {
+  if (block.type !== 'model' && block.type !== 'type_alias') {
+    return
   }
   // create deep copy
   let suggestions: CompletionItem[] = klona(fieldAttributes)
@@ -143,16 +148,10 @@ function getSuggestionForFieldAttribute(
     suggestions = suggestions.filter((sugg) => sugg.label !== 'id')
   }
 
-  return suggestions
-}
-
-export function getSuggestionsForAttributes(
-  blockType: string,
-  currentLine: string,
-): CompletionList | undefined {
-  const suggestions: CompletionItem[] = getSuggestionForFieldAttribute(
-    blockType,
-    currentLine,
+  suggestions = removeInvalidAttributeSuggestions(
+    suggestions,
+    block,
+    lines,
   )
 
   return {

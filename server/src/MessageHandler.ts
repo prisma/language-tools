@@ -17,7 +17,7 @@ import { fullDocumentRange } from './provider'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import format from './format'
 import {
-  getSuggestionsForAttributes,
+  getSuggestionForFieldAttribute,
   getSuggestionsForTypes,
   getSuggestionForBlockTypes,
   getSuggestionForFirstInsideBlock,
@@ -47,8 +47,8 @@ function isFirstInsideBlock(position: Position, currentLine: string): boolean {
     return true
   }
 
-  const stringTillPosition = currentLine.slice(0, position.character)
-  const matchArray = /\w+/.exec(stringTillPosition)
+  const stringTilPosition = currentLine.slice(0, position.character)
+  const matchArray = /\w+/.exec(stringTilPosition)
 
   if (!matchArray) {
     return true
@@ -56,7 +56,7 @@ function isFirstInsideBlock(position: Position, currentLine: string): boolean {
   return (
     matchArray.length === 1 &&
     matchArray.index !== undefined &&
-    stringTillPosition.length - matchArray.index - matchArray[0].length === 0
+    stringTilPosition.length - matchArray.index - matchArray[0].length === 0
   )
 }
 
@@ -361,9 +361,11 @@ export function handleCompletionRequest(
         ) {
           return
         }
-        return getSuggestionsForAttributes(
-          foundBlock.type,
+        return getSuggestionForFieldAttribute(
+          foundBlock,
           getCurrentLine(document, position.line),
+          lines,
+          position,
         )
       case '"':
         return getSuggestionForSupportedFields(
@@ -391,7 +393,12 @@ export function handleCompletionRequest(
     if (!positionIsAfterFieldAndType(currentLine, position, document)) {
       return getSuggestionsForTypes(foundBlock, lines)
     }
-    return getSuggestionsForAttributes(foundBlock.type, lines[position.line])
+    return getSuggestionForFieldAttribute(
+      foundBlock,
+      lines[position.line],
+      lines,
+      position,
+    )
   }
 }
 
