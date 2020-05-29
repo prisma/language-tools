@@ -23,16 +23,20 @@ function toCompletionItems(
   return allowedTypes.map((label) => ({ label, kind }))
 }
 
+/***
+ * @param brackets expects either '()' or '[]'
+ */
 export function isInsideAttribute(
   currentLineUntrimmed: string,
   position: Position,
+  brackets: string
 ): boolean {
   let numberOfOpenBrackets = 0
   let numberOfClosedBrackets = 0
   for (let i = 0; i < position.character; i++) {
-    if (currentLineUntrimmed[i] === '(') {
+    if (currentLineUntrimmed[i] === brackets[0]) {
       numberOfOpenBrackets++
-    } else if (currentLineUntrimmed[i] === ')') {
+    } else if (currentLineUntrimmed[i] === brackets[1]) {
       numberOfClosedBrackets++
     }
   }
@@ -65,11 +69,11 @@ export function positionIsAfterFieldAndType(
   const symbolBeforePosition = getSymbolBeforePosition(document, position)
   const symbolBeforeIsWhiteSpace = symbolBeforePosition.search(/\s/)
 
-  return (
-    wordsBeforePosition.length > 2 ||
-    (wordsBeforePosition.length === 2 &&
-      (symbolBeforeIsWhiteSpace !== -1 || symbolBeforePosition === '@'))
-  )
+  const hasAtRelation = wordsBeforePosition.length === 2 && symbolBeforePosition === '@'
+  const hasWhiteSpaceBeforePosition = wordsBeforePosition.length === 2 && symbolBeforeIsWhiteSpace !== -1
+
+  return wordsBeforePosition.length > 2 || hasAtRelation || hasWhiteSpaceBeforePosition
+
 }
 
 /**
@@ -366,19 +370,29 @@ function getFunctions(currentLine: string): Array<string> {
 
 // checks if e.g. inside 'fields' or 'references' attribute
 function isInsideFieldsOrReferences(
+  currentLineUntrimmed: string,
   wordsBeforePosition: Array<string>,
   attributeName: string,
+  position: Position
 ): boolean {
-  for (const c of wordsBeforePosition.reverse()) {
-    if (c.includes(']')) {
-      break
-    }
-    if (c.includes(attributeName)) {
-      wordsBeforePosition.reverse()
-      return true
-    }
+  if (!isInsideAttribute(currentLineUntrimmed, position, '[]')) {
+    return false
   }
-  wordsBeforePosition.reverse()
+  // check if in fields or references
+  const indexOfFields = wordsBeforePosition.findIndex(word => word === 'fields')
+  const indexOfReferences = wordsBeforePosition.findIndex(word => word.includes('references'))
+  if (indexOfFields === -1 && indexOfReferences === -1) {
+    return false
+  }
+  if ((indexOfFields === -1 && attributeName === 'fields') || indexOfReferences === -1 && attributeName === 'references') {
+    return false
+  }
+  if (attributeName === 'references') {
+    return indexOfReferences > indexOfFields
+  }
+  if (attributeName === 'fields') {
+    return indexOfFields > indexOfReferences
+  }
   return false
 }
 
@@ -400,9 +414,7 @@ function getFieldsFromCurrentBlock(
     if (key === block.end.line) {
       break
     }
-    if (!position) {
-      suggestions.push(item.replace(/ .*/, ''))
-    } else if (key !== position.line) {
+    if (!position || key !== position.line) {
       suggestions.push(item.replace(/ .*/, ''))
     }
   }
@@ -417,7 +429,7 @@ function getSuggestionsForRelationDirective(
   position: Position,
 ): CompletionList | undefined {
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
-  const stringTillPosition = currentLineUntrimmed
+  const stringTilPosition = currentLineUntrimmed
     .slice(0, position.character)
     .trim()
 
@@ -430,7 +442,7 @@ function getSuggestionsForRelationDirective(
       isIncomplete: false,
     }
   }
-  if (isInsideFieldsOrReferences(wordsBeforePosition, 'fields')) {
+  if (isInsideFieldsOrReferences(currentLineUntrimmed, wordsBeforePosition, 'fields', position)) {
     return {
       items: toCompletionItems(
         getFieldsFromCurrentBlock(lines, block, position),
@@ -439,7 +451,7 @@ function getSuggestionsForRelationDirective(
       isIncomplete: false,
     }
   }
-  if (isInsideFieldsOrReferences(wordsBeforePosition, 'references')) {
+  if (isInsideFieldsOrReferences(currentLineUntrimmed, wordsBeforePosition, 'references', position)) {
     const referencedModelName = wordsBeforePosition[1]
     const referencedBlock = getModelOrEnumBlock(referencedModelName, lines)
 
@@ -455,7 +467,7 @@ function getSuggestionsForRelationDirective(
       isIncomplete: false,
     }
   }
-  if (stringTillPosition.endsWith(',')) {
+  if (stringTilPosition.endsWith(',')) {
     const referencesExist = wordsBeforePosition.some((a) =>
       a.includes('references'),
     )

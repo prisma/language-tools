@@ -380,7 +380,7 @@ export function handleCompletionRequest(
     const currentLineUntrimmed = getCurrentLine(document, position.line)
 
     // check if inside attribute
-    if (isInsideAttribute(currentLineUntrimmed, position)) {
+    if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
       return getSuggestionsForInsideAttributes(
         currentLineUntrimmed,
         lines,
