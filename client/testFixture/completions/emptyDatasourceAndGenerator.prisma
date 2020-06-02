@@ -1,0 +1,7 @@
+datasource db {
+    
+}
+
+generator gen {
+    
+}

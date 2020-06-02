@@ -21,8 +21,6 @@ async function testCompletion(
   assert.deepStrictEqual(actualCompletions.items.length, expectedCompletionList.items.length)
   assert.deepStrictEqual(actualCompletions.items.map(items => items.label), expectedCompletionList.items.map(items => items.label))
   assert.deepStrictEqual(actualCompletions.items.map(item => item.kind), expectedCompletionList.items.map(item => item.kind))
-  assert.deepStrictEqual(actualCompletions.items.map(item => item.documentation), expectedCompletionList.items.map(item => item.documentation))
-  assert.deepStrictEqual(actualCompletions.items.map(item => item.detail), expectedCompletionList.items.map(item => item.detail))
 }
 
 suite('Should auto-complete', () => {
@@ -35,10 +33,10 @@ suite('Should auto-complete', () => {
       emptyDocUri,
       new vscode.Position(0, 0),
       new vscode.CompletionList([
-        { label: 'datasource', kind: vscode.CompletionItemKind.Class, documentation: 'The datasource block tells the schema where the models are backed.' },
-        { label: 'enum', kind: vscode.CompletionItemKind.Class, documentation: 'Enums are defined via the enum block. You can define enums in your data model if they\'re supported by the data source you use:\nâ€¢ PostgreSQL: Supported\nâ€¢ MySQL: Supported\nâ€¢ MariaDB: Supported\nâ€¢ SQLite: Not supported' },
-        { label: 'generator', kind: vscode.CompletionItemKind.Class, documentation: 'Generator blocks configure which clients are generated and how they\'re generated. Language preferences and binary configuration will go in here.' },
-        { label: 'model', kind: vscode.CompletionItemKind.Class, documentation: 'Models represent the entities of your application domain. They are defined using model blocks in the data model.' },
+        { label: 'datasource', kind: vscode.CompletionItemKind.Class },
+        { label: 'enum', kind: vscode.CompletionItemKind.Class },
+        { label: 'generator', kind: vscode.CompletionItemKind.Class },
+        { label: 'model', kind: vscode.CompletionItemKind.Class },
         { label: 'type_alias', kind: vscode.CompletionItemKind.Class },
       ], false)
     )
@@ -50,26 +48,26 @@ suite('Should auto-complete', () => {
       sqliteDocUri,
       new vscode.Position(4, 0),
       new vscode.CompletionList([
-        { label: 'datasource', kind: vscode.CompletionItemKind.Class, documentation: 'The datasource block tells the schema where the models are backed.' },
-        { label: 'generator', kind: vscode.CompletionItemKind.Class, documentation: 'Generator blocks configure which clients are generated and how they\'re generated. Language preferences and binary configuration will go in here.' },
-        { label: 'model', kind: vscode.CompletionItemKind.Class, documentation: 'Models represent the entities of your application domain. They are defined using model blocks in the data model.' },
+        { label: 'datasource', kind: vscode.CompletionItemKind.Class },
+        { label: 'generator', kind: vscode.CompletionItemKind.Class },
+        { label: 'model', kind: vscode.CompletionItemKind.Class },
         { label: 'type_alias', kind: vscode.CompletionItemKind.Class },
       ], false)
     )
   })
 
   // DATASOURCE BLOCK
-/*
-  const dataSourceFieldProvider = { label: 'provider', kind: vscode.CompletionItemKind.Field, documentation: 'Can be one of the following built in datasource providers:\n•`postgresql`\n•`mysql`\n•`sqlite`' }
-  const dataSourceFieldUrl = { label: 'url', kind: vscode.CompletionItemKind.Field, documentation: 'Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database. (more information see https://github.com/prisma/specs/blob/master/schema/datasource_urls.md)' }
-  const dataSourceEmptyDocUri = getDocUri('completions/datasourceEmpty.prisma')
+
+  const fieldProvider = { label: 'provider', kind: vscode.CompletionItemKind.Field }
+  const fieldUrl = { label: 'url', kind: vscode.CompletionItemKind.Field }
+  const dataSourceAndGeneratorEmptyDocUri = getDocUri('completions/emptyDatasourceAndGenerator.prisma')
   test('Diagnoses datasource field suggestions in empty block', async () => {
     await testCompletion(
-      dataSourceEmptyDocUri,
+      dataSourceAndGeneratorEmptyDocUri,
       new vscode.Position(1, 0),
       new vscode.CompletionList([
-        dataSourceFieldProvider,
-        dataSourceFieldUrl
+        fieldProvider,
+        fieldUrl
       ])
     )
   })
@@ -79,7 +77,7 @@ suite('Should auto-complete', () => {
       sqliteDocUri,
       new vscode.Position(2, 0),
       new vscode.CompletionList([
-        dataSourceFieldUrl
+        fieldUrl
       ])
     )
   })
@@ -90,10 +88,26 @@ suite('Should auto-complete', () => {
       dataSourceWithUrl,
       new vscode.Position(2, 0),
       new vscode.CompletionList([
-        dataSourceFieldProvider
+        fieldProvider
       ])
     )
-  })*/
+  })
 
-  // ... BLOCK
+  // GENERATOR BLOCK
+
+  const fieldOutput = { label: 'output', kind: vscode.CompletionItemKind.Field }
+  const fieldPlatforms = { label: 'platforms', kind: vscode.CompletionItemKind.Field }
+  const fieldPinnedPlatform = { label: 'pinnedPlatform', kind: vscode.CompletionItemKind.Field }
+  test('Diagnoses generator field suggestions in empty block', async () => {
+    await testCompletion(
+      dataSourceAndGeneratorEmptyDocUri,
+      new vscode.Position(5, 0),
+      new vscode.CompletionList([
+        fieldOutput,
+        fieldPinnedPlatform,
+        fieldPlatforms,
+        fieldProvider,
+      ])
+    )
+  })
 })
