@@ -1,0 +1,22 @@
+{
+  "StringType": {
+    "label": "String",
+    "documentation": "Variable length text"
+  },
+  "BooleanType": {
+    "label": "Boolean",
+    "documentation": "True or false value"
+  },
+  "IntType": {
+    "label": "Int",
+    "documentation": "Integer value"
+  },
+  "FloatType": {
+    "label": "Float",
+    "documentation": "Floating point number"
+  },
+  "DateTimeType": {
+    "label": "DateTime",
+    "documentation": "Timestamp"
+  }
+}

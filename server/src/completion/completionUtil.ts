@@ -3,22 +3,23 @@ import {
   CompletionItemKind,
   MarkupKind,
 } from 'vscode-languageserver'
+import * as completions from './completions.json'
 
 export const corePrimitiveTypes: CompletionItem[] = [
   {
-    label: 'String',
+    label: completions.StringType.label,
     kind: CompletionItemKind.TypeParameter,
-    documentation: 'Variable length text',
+    documentation: completions.StringType.documentation,
   },
   {
-    label: 'Boolean',
+    label: completions.BooleanType.label,
     kind: CompletionItemKind.TypeParameter,
-    documentation: 'True or false value',
+    documentation: completions.BooleanType.documentation,
   },
   {
-    label: 'Int',
+    label: completions.IntType.label,
     kind: CompletionItemKind.TypeParameter,
-    documentation: 'Integer value',
+    documentation: completions.IntType.documentation,
   },
   {
     label: 'Float',
