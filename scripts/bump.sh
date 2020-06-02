@@ -28,10 +28,8 @@ else
     echo "$NPM_VERSION" > scripts/prisma_version_stable
 fi
 
-
-# If the channel is dev, we need to change the name, displayName, description and preview flag to the Insider extension
+# If the RELEASE_CHANNEL is dev, we need to change the name, displayName, description and preview flag to the Insider extension
 if [ "$RELEASE_CHANNEL" = "dev" ]; then
->>>>>>> rename_unstable_version
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma-insider\" | \
         .displayName = \"Prisma - Insider\" | \
