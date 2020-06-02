@@ -52,7 +52,7 @@ elif [ "$PRODUCTION" = "1" ] && [ "$RELEASE_CHANNEL" = "latest" ]; then
     # to be able to track the Prisma version against which the current stable channel extension was published
     git reset origin/master
     git add ./scripts/prisma_version_stable
-    git commit -m "bump npm_version to $NPM_VERSION"
+    git commit -m "bump prisma_version to $NPM_VERSION"
     git tag -a "$NEXT_EXTENSION_VERSION" -m "$NEXT_EXTENSION_VERSION" -m "Prisma version: $NPM_VERSION"
     git push github HEAD:"${GITHUB_REF}" --follow-tags
     # TODO: Create a release linked to this tag for stable
