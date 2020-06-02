@@ -60,7 +60,9 @@ suite('Should auto-complete', () => {
 
   const fieldProvider = { label: 'provider', kind: vscode.CompletionItemKind.Field }
   const fieldUrl = { label: 'url', kind: vscode.CompletionItemKind.Field }
+  const dataSourceWithUrl = getDocUri('completions/datasourceWithUrl.prisma')
   const dataSourceAndGeneratorEmptyDocUri = getDocUri('completions/emptyDatasourceAndGenerator.prisma')
+
   test('Diagnoses datasource field suggestions in empty block', async () => {
     await testCompletion(
       dataSourceAndGeneratorEmptyDocUri,
@@ -72,7 +74,7 @@ suite('Should auto-complete', () => {
     )
   })
 
-  test('Diagnoses datasource field suggestions with existing provider', async () => {
+  test('Diagnoses datasource field suggestions with existing field', async () => {
     await testCompletion(
       sqliteDocUri,
       new vscode.Position(2, 0),
@@ -80,10 +82,6 @@ suite('Should auto-complete', () => {
         fieldUrl
       ])
     )
-  })
-
-  const dataSourceWithUrl = getDocUri('completions/datasourceWithUrl.prisma')
-  test('Diagnoses datasource field suggestions with existing url', async () => {
     await testCompletion(
       dataSourceWithUrl,
       new vscode.Position(2, 0),
@@ -96,18 +94,34 @@ suite('Should auto-complete', () => {
   // GENERATOR BLOCK
 
   const fieldOutput = { label: 'output', kind: vscode.CompletionItemKind.Field }
-  const fieldPlatforms = { label: 'platforms', kind: vscode.CompletionItemKind.Field }
-  const fieldPinnedPlatform = { label: 'pinnedPlatform', kind: vscode.CompletionItemKind.Field }
+
+  const generatorWithExistingFieldsUri = getDocUri('completions/generatorWithExistingFields.prisma')
   test('Diagnoses generator field suggestions in empty block', async () => {
     await testCompletion(
       dataSourceAndGeneratorEmptyDocUri,
       new vscode.Position(5, 0),
       new vscode.CompletionList([
         fieldOutput,
-        fieldPinnedPlatform,
-        fieldPlatforms,
         fieldProvider,
       ])
     )
   })
+
+  test('Diagnoses generator field suggestions with existing fields', async () => {
+    await testCompletion(
+      generatorWithExistingFieldsUri,
+      new vscode.Position(2, 0),
+      new vscode.CompletionList([
+        fieldOutput
+      ])
+    )
+    await testCompletion(
+      generatorWithExistingFieldsUri,
+      new vscode.Position(7, 0),
+      new vscode.CompletionList([
+        fieldProvider
+      ])
+    )
+  })
+
 })

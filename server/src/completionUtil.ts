@@ -150,18 +150,4 @@ export const supportedGeneratorFields: CompletionItem[] = [
     kind: CompletionItemKind.Field,
     documentation: 'Path for the generated client.',
   },
-  {
-    label: 'platforms',
-    kind: CompletionItemKind.Field,
-    detail: 'Declarative way to download the required binaries.',
-    documentation:
-      '(optional) An array of binaries that are required by the application, string for known platforms and path for custom binaries.',
-  },
-  {
-    label: 'pinnedPlatform',
-    kind: CompletionItemKind.Field,
-    detail: 'Declarative way to choose the runtime binary.',
-    documentation:
-      '(optional) A string that points to the name of an object in the platforms field, usually an environment variable.\nWhen a custom binary is provided the pinnedPlatform is required.',
-  },
 ]
