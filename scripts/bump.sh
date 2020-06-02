@@ -5,7 +5,7 @@ set -eu
 RELEASE_CHANNEL=$1
 echo "RELEASE_CHANNEL: $RELEASE_CHANNEL"
 
-PRISMA_VERSION=$2
+NPM_VERSION=$2
 echo "NPM_VERSION: $NPM_VERSION"
 
 # TODO: remove this if-condition once we move to dev
