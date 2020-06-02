@@ -239,7 +239,8 @@ export const supportedDataSourceFields: CompletionItem[] = [
     kind: CompletionItemKind.Field,
     documentation: {
       kind: MarkupKind.Markdown,
-      value: 'Describes which data source connector to use.',
+      value:
+        'Describes which data source connector to use. Can be one of the following built in datasource providers: `postgresql`, `mysql` or `sqlite`.',
     },
   },
   {
