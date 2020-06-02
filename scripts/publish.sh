@@ -16,11 +16,11 @@ echo "AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
 echo "PRODUCTION: $PRODUCTION"
 echo "============================"
 
-NPM_TAG=$1
-echo "NPM_TAG: $NPM_TAG"
+RELEASE_CHANNEL=$1
+echo "RELEASE_CHANNEL: $RELEASE_CHANNEL"
 
-PRISMA_VERSION=$2
-echo "PRISMA_VERSION: $PRISMA_VERSION"
+NPM_VERSION=$2
+echo "NPM_VERSION: $NPM_VERSION"
 
 NEXT_EXTENSION_VERSION=$3
 echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
@@ -30,7 +30,7 @@ if [ -z "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
     echo "\$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN is empty. Please set the value of $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
 elif [ -n "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
     if [ "$PRODUCTION" = "1" ]; then
-        echo "Publishing $NPM_TAG release"
+        echo "Publishing $RELEASE_CHANNEL release"
         ./node_modules/.bin/vsce publish "$NEXT_EXTENSION_VERSION" --pat "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
     else
         echo "Printing the command because PRODUCTION is not set"
@@ -39,12 +39,12 @@ elif [ -n "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
     fi
 fi
 
-if [ "$PRODUCTION" = "1" ] && [ "$NPM_TAG" = "dev" ]; then
+if [ "$PRODUCTION" = "1" ] && [ "$RELEASE_CHANNEL" = "dev" ]; then
     echo "Sync with ${GITHUB_REF} and push to it"
     git pull github "${GITHUB_REF}" --ff-only
-    git tag -a "dev/$NEXT_EXTENSION_VERSION" -m "dev/$NEXT_EXTENSION_VERSION" -m "Prisma version: $PRISMA_VERSION"
+    git tag -a "dev/$NEXT_EXTENSION_VERSION" -m "dev/$NEXT_EXTENSION_VERSION" -m "Prisma version: $NPM_VERSION"
     git push github HEAD:"${GITHUB_REF}" --follow-tags
-elif [ "$PRODUCTION" = "1" ] && [ "$NPM_TAG" = "latest" ]; then
+elif [ "$PRODUCTION" = "1" ] && [ "$RELEASE_CHANNEL" = "latest" ]; then
     echo "Sync with ${GITHUB_REF} and push to it"
     git pull github "${GITHUB_REF}" --ff-only
 
@@ -52,8 +52,8 @@ elif [ "$PRODUCTION" = "1" ] && [ "$NPM_TAG" = "latest" ]; then
     # to be able to track the Prisma version against which the current stable channel extension was published
     git reset origin/master
     git add ./scripts/prisma_version_stable
-    git commit -m "bump prisma_version to $PRISMA_VERSION"
-    git tag -a "$NEXT_EXTENSION_VERSION" -m "$NEXT_EXTENSION_VERSION" -m "Prisma version: $PRISMA_VERSION"
+    git commit -m "bump npm_version to $NPM_VERSION"
+    git tag -a "$NEXT_EXTENSION_VERSION" -m "$NEXT_EXTENSION_VERSION" -m "Prisma version: $NPM_VERSION"
     git push github HEAD:"${GITHUB_REF}" --follow-tags
     # TODO: Create a release linked to this tag for stable
 else 

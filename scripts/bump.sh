@@ -2,14 +2,14 @@
 
 set -eu
 
-NPM_TAG=$1
-echo "NPM_TAG: $NPM_TAG"
+RELEASE_CHANNEL=$1
+echo "RELEASE_CHANNEL: $RELEASE_CHANNEL"
 
 PRISMA_VERSION=$2
-echo "PRISMA_VERSION: $PRISMA_VERSION"
+echo "NPM_VERSION: $NPM_VERSION"
 
 # TODO: remove this if-condition once we move to dev
-if [ "$NPM_TAG" = "dev" ]; then
+if [ "$RELEASE_CHANNEL" = "dev" ]; then
     PRISMA_CHANNEL="alpha"
 else
     PRISMA_CHANNEL="latest"
@@ -22,14 +22,14 @@ SHA=$(npx -q -p @prisma/cli@"$PRISMA_CHANNEL" prisma --version | grep "Query Eng
 NEXT_EXTENSION_VERSION=$3
 echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
 
-if [ "$NPM_TAG" = "dev" ]; then
-    echo "$PRISMA_VERSION" > scripts/prisma_version_insider
+if [ "$RELEASE_CHANNEL" = "dev" ]; then
+    echo "$NPM_VERSION" > scripts/prisma_version_insider
 else
-    echo "$PRISMA_VERSION" > scripts/prisma_version_stable
+    echo "$NPM_VERSION" > scripts/prisma_version_stable
 fi
 
-# If the npm_tag is dev, we need to change the name, displayName to the dev extension
-if [ "$NPM_TAG" = "dev" ]; then
+# If the RELEASE_CHANNEL is dev, we need to change the name, displayName to the dev extension
+if [ "$RELEASE_CHANNEL" = "dev" ]; then
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma-insider\" | \
         .displayName = \"Prisma - Insider\" | \
@@ -47,7 +47,7 @@ fi
 
 jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
     .prisma.version = \"$SHA\" | \
-    .dependencies[\"@prisma/get-platform\"] = \"$PRISMA_VERSION\"" \
+    .dependencies[\"@prisma/get-platform\"] = \"$NPM_VERSION\"" \
     ./server/package.json > ./server/package.json.bk
 
 jq ".version = \"$NEXT_EXTENSION_VERSION\"" \
