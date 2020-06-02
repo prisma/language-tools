@@ -29,7 +29,7 @@ function toCompletionItems(
 export function isInsideAttribute(
   currentLineUntrimmed: string,
   position: Position,
-  brackets: string
+  brackets: string,
 ): boolean {
   let numberOfOpenBrackets = 0
   let numberOfClosedBrackets = 0
@@ -69,11 +69,16 @@ export function positionIsAfterFieldAndType(
   const symbolBeforePosition = getSymbolBeforePosition(document, position)
   const symbolBeforeIsWhiteSpace = symbolBeforePosition.search(/\s/)
 
-  const hasAtRelation = wordsBeforePosition.length === 2 && symbolBeforePosition === '@'
-  const hasWhiteSpaceBeforePosition = wordsBeforePosition.length === 2 && symbolBeforeIsWhiteSpace !== -1
+  const hasAtRelation =
+    wordsBeforePosition.length === 2 && symbolBeforePosition === '@'
+  const hasWhiteSpaceBeforePosition =
+    wordsBeforePosition.length === 2 && symbolBeforeIsWhiteSpace !== -1
 
-  return wordsBeforePosition.length > 2 || hasAtRelation || hasWhiteSpaceBeforePosition
-
+  return (
+    wordsBeforePosition.length > 2 ||
+    hasAtRelation ||
+    hasWhiteSpaceBeforePosition
+  )
 }
 
 /**
@@ -122,11 +127,7 @@ function getSuggestionForBlockAttribute(
   // create deep copy
   let suggestions: CompletionItem[] = klona(blockAttributes)
 
-  suggestions = removeInvalidAttributeSuggestions(
-    suggestions,
-    block,
-    lines,
-  )
+  suggestions = removeInvalidAttributeSuggestions(suggestions, block, lines)
 
   return suggestions
 }
@@ -148,11 +149,7 @@ export function getSuggestionForFieldAttribute(
     suggestions = suggestions.filter((sugg) => sugg.label !== 'id')
   }
 
-  suggestions = removeInvalidAttributeSuggestions(
-    suggestions,
-    block,
-    lines,
-  )
+  suggestions = removeInvalidAttributeSuggestions(suggestions, block, lines)
 
   return {
     items: suggestions,
@@ -373,18 +370,25 @@ function isInsideFieldsOrReferences(
   currentLineUntrimmed: string,
   wordsBeforePosition: Array<string>,
   attributeName: string,
-  position: Position
+  position: Position,
 ): boolean {
   if (!isInsideAttribute(currentLineUntrimmed, position, '[]')) {
     return false
   }
   // check if in fields or references
-  const indexOfFields = wordsBeforePosition.findIndex(word => word === 'fields')
-  const indexOfReferences = wordsBeforePosition.findIndex(word => word.includes('references'))
+  const indexOfFields = wordsBeforePosition.findIndex(
+    (word) => word === 'fields',
+  )
+  const indexOfReferences = wordsBeforePosition.findIndex((word) =>
+    word.includes('references'),
+  )
   if (indexOfFields === -1 && indexOfReferences === -1) {
     return false
   }
-  if ((indexOfFields === -1 && attributeName === 'fields') || indexOfReferences === -1 && attributeName === 'references') {
+  if (
+    (indexOfFields === -1 && attributeName === 'fields') ||
+    (indexOfReferences === -1 && attributeName === 'references')
+  ) {
     return false
   }
   if (attributeName === 'references') {
@@ -442,7 +446,14 @@ function getSuggestionsForRelationDirective(
       isIncomplete: false,
     }
   }
-  if (isInsideFieldsOrReferences(currentLineUntrimmed, wordsBeforePosition, 'fields', position)) {
+  if (
+    isInsideFieldsOrReferences(
+      currentLineUntrimmed,
+      wordsBeforePosition,
+      'fields',
+      position,
+    )
+  ) {
     return {
       items: toCompletionItems(
         getFieldsFromCurrentBlock(lines, block, position),
@@ -451,7 +462,14 @@ function getSuggestionsForRelationDirective(
       isIncomplete: false,
     }
   }
-  if (isInsideFieldsOrReferences(currentLineUntrimmed, wordsBeforePosition, 'references', position)) {
+  if (
+    isInsideFieldsOrReferences(
+      currentLineUntrimmed,
+      wordsBeforePosition,
+      'references',
+      position,
+    )
+  ) {
     const referencedModelName = wordsBeforePosition[1]
     const referencedBlock = getModelOrEnumBlock(referencedModelName, lines)
 
