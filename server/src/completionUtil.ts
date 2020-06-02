@@ -1,4 +1,8 @@
-import { CompletionItem, CompletionItemKind } from 'vscode-languageserver'
+import {
+  CompletionItem,
+  CompletionItemKind,
+  MarkupKind,
+} from 'vscode-languageserver'
 
 export const corePrimitiveTypes: CompletionItem[] = [
   {
@@ -45,7 +49,7 @@ export const allowedBlockTypes: CompletionItem[] = [
     label: 'model',
     kind: CompletionItemKind.Class,
     documentation:
-      'Models represent the entities of your application domain. They are defined using model blocks in the data model. ',
+      'Models represent the entities of your application domain. They are defined using model blocks in the data model.',
   },
   {
     label: 'type_alias',
@@ -63,35 +67,74 @@ export const blockAttributes: CompletionItem[] = [
   {
     label: '@@map([])',
     kind: CompletionItemKind.Property,
-    detail: '@@map(_ name: String)',
     insertTextFormat: 2,
     insertText: '@@map([$0])',
-    documentation:
-      'Defines the name of the underlying table or collection name.',
+    documentation: {
+      kind: MarkupKind.Markdown,
+      value: [
+        '```prisma',
+        '@@map(_ name: String)',
+        '```',
+        '___',
+        'Maps a model name from the Prisma schema to a different table name.',
+        '',
+        '_@param_ `name` The name of the target database table',
+      ].join('\n'),
+    },
   },
   {
     label: '@@id([])',
     kind: CompletionItemKind.Property,
-    detail: '@@id(_ fields: Identifier[])',
     insertTextFormat: 2,
     insertText: '@@id([$0])',
-    documentation: 'Defines a composite primary key across fields.',
+    documentation: {
+      kind: MarkupKind.Markdown,
+      value: [
+        '```prisma',
+        '@@id(_ fields: FieldReference[])',
+        '```',
+        '___',
+        'Defines a multi-field ID on the model.',
+        '',
+        '_@param_ `fields` A list of references',
+      ].join('\n'),
+    },
   },
   {
     label: '@@unique([])',
     kind: CompletionItemKind.Property,
-    detail: '@@unique(_ fields: Identifier[], name: String?)',
     insertTextFormat: 2,
     insertText: '@@unique([$0])',
-    documentation: 'Defines a composite unique constraint across fields.',
+    documentation: {
+      kind: MarkupKind.Markdown,
+      value: [
+        '```prisma',
+        '@@unique(_ fields: FieldReference[])',
+        '```',
+        '___',
+        'Defines a compound unique constraint for the specified fields.',
+        '',
+        '_@param_ `fields` A list of references',
+      ].join('\n'),
+    },
   },
   {
     label: '@@index([])',
     kind: CompletionItemKind.Property,
     insertTextFormat: 2,
     insertText: '@@index([$0])',
-    detail: '@@index(_ fields: Identifier[], name: String?)',
-    documentation: 'Defines an index for multiple fields.',
+    documentation: {
+      kind: MarkupKind.Markdown,
+      value: [
+        '```prisma',
+        '@@index(_ fields: FieldReference[])',
+        '```',
+        '___',
+        'Defines an index.',
+        '',
+        '_@param_ `fields` A list of references',
+      ].join('\n'),
+    },
   },
 ]
 
@@ -99,41 +142,94 @@ export const fieldAttributes: CompletionItem[] = [
   {
     label: '@id',
     kind: CompletionItemKind.Property,
-    detail: '@id',
-    documentation:
-      'Defines the primary key. There must be exactly one field @id or block @id',
+    documentation: {
+      kind: MarkupKind.Markdown,
+      value: [
+        '```prisma',
+        '@id',
+        '```',
+        '___',
+        'Defines a single-field ID on the model.',
+      ].join('\n'),
+    },
   },
   {
     label: '@unique',
     kind: CompletionItemKind.Property,
-    detail: '@unique',
-    documentation: 'Defines the unique constraint.',
+    documentation: {
+      kind: MarkupKind.Markdown,
+      value: [
+        '```prisma',
+        '@unique',
+        '```',
+        '___',
+        'Defines a unique constraint for this field.',
+      ].join('\n'),
+    },
   },
   {
     label: '@map()',
     kind: CompletionItemKind.Property,
-    detail: '@map(_ name: String)',
     insertTextFormat: 2,
     insertText: '@map($0)',
-    documentation: 'Defines the raw column name the field is mapped to.',
+    documentation: {
+      kind: MarkupKind.Markdown,
+      value: [
+        '```prisma',
+        '@map(_ name: String)',
+        '```',
+        '___',
+        'Maps a field name from the Prisma schema to a different column name.',
+        '',
+        '_@param_ `name` The name of the target database column',
+      ].join('\n'),
+    },
   },
   {
     label: '@default()',
     kind: CompletionItemKind.Property,
-    detail: '@default(_ expr: Expr)',
     insertTextFormat: 2,
     insertText: '@default(0)',
-    documentation: 'Specifies a default value if null is provided.',
+    documentation: {
+      kind: MarkupKind.Markdown,
+      value: [
+        '```prisma',
+        '@default(_ expression: Expression)',
+        '```',
+        '___',
+        'Defines a default value for this field. `@default` takes an expression as an argument.',
+        '',
+        '_@param_ `expression` An expression (e.g. `5`, `true`, `now()`)',
+      ].join('\n'),
+    },
   },
   {
     label: '@relation()',
     kind: CompletionItemKind.Property,
     insertTextFormat: 2,
     insertText: '@relation($0)',
-    detail:
-      '@relation(_ name?: String, references?: Identifier[], onDelete?: CascadeEnum)\nArguments:\n•name: (optional, except when required for disambiguation) defines the name of the relationship. The name of the relation needs to be explicitly given to resolve amibiguities when the model contains two or more fields that refer to the same model (another model or itself).\n•references: (optional) list of field names to reference',
+    documentation: {
+      kind: MarkupKind.Markdown,
+      value: [
+        '```prisma',
+        '@relation(_ name: String?, fields: FieldReference[]?, references: FieldReference[]?)',
+        '```',
+        '___',
+        'Defines meta information about the relation. [Learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema/relations#the-relation-attribute).',
+        '',
+        '_@param_ `name` A name of field references',
+        '',
+        '_@param_ `fields` A list of field references',
+        '',
+        '_@param_ `references` A list of field references',
+      ].join('\n'),
+    },
+  },
+  {
+    label: '@updatedAt',
+    kind: CompletionItemKind.Property,
     documentation:
-      'Specifies and disambiguates relationships when needed. Where possible on relational databases, the @relation annotation will translate to a foreign key constraint, but not an index.',
+      'Automatically stores the time when a record was last updated.',
   },
 ]
 
@@ -141,14 +237,19 @@ export const supportedDataSourceFields: CompletionItem[] = [
   {
     label: 'provider',
     kind: CompletionItemKind.Field,
-    documentation:
-      'Can be one of the following built in datasource providers:\n•`postgresql`\n•`mysql`\n•`sqlite`',
+    documentation: {
+      kind: MarkupKind.Markdown,
+      value: 'Describes which data source connector to use.',
+    },
   },
   {
     label: 'url',
     kind: CompletionItemKind.Field,
-    documentation:
-      'Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database. (more information see https://github.com/prisma/specs/blob/master/schema/datasource_urls.md)',
+    documentation: {
+      kind: MarkupKind.Markdown,
+      value:
+        'Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database, [learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema).',
+    },
   },
 ]
 
@@ -156,26 +257,29 @@ export const supportedGeneratorFields: CompletionItem[] = [
   {
     label: 'provider',
     kind: CompletionItemKind.Field,
-    documentation:
-      'Can be a path or one of the following built in datasource providers:\n•`prisma-client-js`\n•`prisma-client-go` (This is not implemented yet.)',
+    documentation: {
+      kind: MarkupKind.Markdown,
+      value:
+        'Describes which generator to use. This can point to a file that implements a generator or specify a built-in generator directly.',
+    },
   },
   {
     label: 'output',
     kind: CompletionItemKind.Field,
-    documentation: 'Path for the generated client.',
+    documentation: {
+      kind: MarkupKind.Markdown,
+      value:
+        'Determines the location for the generated client, [learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema)',
+    },
   },
   {
-    label: 'platforms',
+    label: 'binaryTargets',
     kind: CompletionItemKind.Field,
-    detail: 'Declarative way to download the required binaries.',
-    documentation:
-      '(optional) An array of binaries that are required by the application, string for known platforms and path for custom binaries.',
-  },
-  {
-    label: 'pinnedPlatform',
-    kind: CompletionItemKind.Field,
-    detail: 'Declarative way to choose the runtime binary.',
-    documentation:
-      '(optional) A string that points to the name of an object in the platforms field, usually an environment variable.\nWhen a custom binary is provided the pinnedPlatform is required.',
+    documentation: {
+      kind: MarkupKind.Markdown,
+      value: [
+        'Specifies the OS on which the Prisma Client will run to ensure binary compatibility of the query engine.',
+      ].join('\n'),
+    },
   },
 ]
