@@ -14,8 +14,6 @@ import * as util from './util'
 import lint from './lint'
 import fs from 'fs'
 import install from './install'
-import path from 'path'
-
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -61,18 +59,15 @@ connection.onInitialize(async (params: InitializeParams) => {
 
   connection.console.info(
     'Installed version of Prisma binary `prisma-fmt`: ' +
-    (await util.getVersion()),
+      (await util.getVersion()),
   )
 
-  const pj = require('../../package.json')
+  const pj = util.tryRequire('../../package.json')
   connection.console.info(
-    'Extension name ' + pj.name + ' with version ' + pj.version
+    'Extension name ' + pj.name + ' with version ' + pj.version,
   )
-  const prismaCLIVersion = util.getCLIVersion(pj.name)
-  connection.console.info(
-    'Prisma CLI version: ' + prismaCLIVersion
-  )
-
+  const prismaCLIVersion = await util.getCLIVersion()
+  connection.console.info('Prisma CLI version: ' + prismaCLIVersion)
 
   const result: InitializeResult = {
     capabilities: {
@@ -82,6 +77,7 @@ connection.onInitialize(async (params: InitializeParams) => {
         resolveProvider: true,
         triggerCharacters: ['@', '"'],
       },
+      hoverProvider: true,
     },
   }
 
@@ -146,6 +142,10 @@ connection.onCompletion((params) =>
 
 connection.onCompletionResolve((params) =>
   MessageHandler.handleCompletionResolveRequest(params),
+)
+
+connection.onHover((params) =>
+  MessageHandler.handleHoverRequest(documents, params),
 )
 
 // Make the text document manager listen on the connection

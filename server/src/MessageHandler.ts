@@ -9,25 +9,29 @@ import {
   CompletionList,
   CompletionItem,
   Position,
+  HoverParams,
+  Hover,
 } from 'vscode-languageserver'
 import * as util from './util'
 import { fullDocumentRange } from './provider'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import format from './format'
 import {
-  getSuggestionsForAttributes,
+  getSuggestionForFieldAttribute,
   getSuggestionsForTypes,
   getSuggestionForBlockTypes,
   getSuggestionForFirstInsideBlock,
   getSuggestionForSupportedFields,
   getSuggestionsForInsideAttributes,
+  positionIsAfterFieldAndType,
+  isInsideAttribute,
 } from './completions'
 import { listenerCount } from 'cluster'
 
-function getCurrentLine(document: TextDocument, line: number) {
+function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
     start: { line: line, character: 0 },
-    end: { line: line, character: 9999 },
+    end: { line: line, character: Number.MAX_SAFE_INTEGER },
   })
 }
 
@@ -44,8 +48,8 @@ function isFirstInsideBlock(position: Position, currentLine: string): boolean {
     return true
   }
 
-  const stringTillPosition = currentLine.slice(0, position.character)
-  const matchArray = /\w+/.exec(stringTillPosition)
+  const stringTilPosition = currentLine.slice(0, position.character)
+  const matchArray = /\w+/.exec(stringTilPosition)
 
   if (!matchArray) {
     return true
@@ -53,7 +57,7 @@ function isFirstInsideBlock(position: Position, currentLine: string): boolean {
   return (
     matchArray.length === 1 &&
     matchArray.index !== undefined &&
-    stringTillPosition.length - matchArray.index - matchArray[0].length === 0
+    stringTilPosition.length - matchArray.index - matchArray[0].length === 0
   )
 }
 
@@ -131,6 +135,46 @@ function getBlockAtPosition(line: number, lines: Array<string>): Block | void {
     }
   }
   return
+}
+
+export function getModelOrEnumBlock(
+  blockName: string,
+  lines: string[],
+): Block | void {
+  // get start position of model type
+  const results: number[] = lines
+    .map((line, index) => {
+      if (
+        (line.includes('model') && line.includes(blockName)) ||
+        (line.includes('enum') && line.includes(blockName))
+      ) {
+        return index
+      }
+    })
+    .filter((index) => index !== undefined) as number[]
+
+  if (results.length === 0) {
+    return
+  }
+
+  const foundBlocks: Block[] = results
+    .map((result) => {
+      const block = getBlockAtPosition(result, lines)
+      if (block && block.name === blockName) {
+        return block
+      }
+    })
+    .filter((block) => block !== undefined) as Block[]
+
+  if (foundBlocks.length !== 1) {
+    return
+  }
+
+  if (!foundBlocks[0]) {
+    return
+  }
+
+  return foundBlocks[0]
 }
 
 /**
@@ -228,6 +272,51 @@ export async function handleDocumentFormatting(
   ])
 }
 
+export function handleHoverRequest(
+  documents: TextDocuments<TextDocument>,
+  params: HoverParams,
+): Hover | undefined {
+  const textDocument = params.textDocument
+  const position = params.position
+
+  const document = documents.get(textDocument.uri)
+
+  if (!document) {
+    return
+  }
+
+  const lines = convertDocumentTextToTrimmedLineArray(document)
+  const word = getWordAtPosition(document, position)
+
+  if (word === '') {
+    return
+  }
+
+  const foundBlock = getModelOrEnumBlock(word, lines)
+  if (!foundBlock) {
+    return
+  }
+
+  const commentLine = foundBlock.start.line - 1
+  const docComments = document.getText({
+    start: { line: commentLine, character: 0 },
+    end: { line: commentLine, character: Number.MAX_SAFE_INTEGER },
+  })
+  if (docComments.startsWith('///')) {
+    return {
+      contents: docComments.slice(4).trim(),
+    }
+  }
+  // TODO uncomment once https://github.com/prisma/prisma/issues/2546 is resolved!
+  /*if (docComments.startsWith('//')) {
+    return {
+      contents: docComments.slice(3).trim(),
+    }
+  } */
+
+  return
+}
+
 /**
  *
  * This handler provides the initial list of the completion items.
@@ -237,6 +326,7 @@ export function handleCompletionRequest(
   documents: TextDocuments<TextDocument>,
 ): CompletionList | undefined {
   const context = params.context
+  const position = params.position
   if (!context) {
     return
   }
@@ -248,21 +338,16 @@ export function handleCompletionRequest(
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
 
-  const foundBlock = getBlockAtPosition(params.position.line, lines)
+  const foundBlock = getBlockAtPosition(position.line, lines)
   if (!foundBlock) {
     return getSuggestionForBlockTypes(lines)
   }
 
-  if (
-    isFirstInsideBlock(
-      params.position,
-      getCurrentLine(document, params.position.line),
-    )
-  ) {
+  if (isFirstInsideBlock(position, getCurrentLine(document, position.line))) {
     return getSuggestionForFirstInsideBlock(
       foundBlock.type,
       lines,
-      params.position,
+      position,
       foundBlock,
       document,
     )
@@ -272,54 +357,48 @@ export function handleCompletionRequest(
   if (context.triggerKind === 2) {
     switch (context.triggerCharacter) {
       case '@':
-        return getSuggestionsForAttributes(
-          foundBlock.type,
-          params.position,
-          document,
-          lines[params.position.line],
+        if (
+          !positionIsAfterFieldAndType(lines[position.line], position, document)
+        ) {
+          return
+        }
+        return getSuggestionForFieldAttribute(
+          foundBlock,
+          getCurrentLine(document, position.line),
+          lines,
+          position,
         )
       case '"':
         return getSuggestionForSupportedFields(
           foundBlock.type,
-          lines[params.position.line],
+          lines[position.line],
         )
     }
   }
 
   if (foundBlock.type === 'model') {
-    const symbolBeforePosition = document.getText({
-      start: {
-        line: params.position.line,
-        character: params.position.character - 1,
-      },
-      end: { line: params.position.line, character: params.position.character },
-    })
-    const currentLine = lines[params.position.line]
-    const wordsBeforePosition: string[] = currentLine
-      .slice(0, params.position.character - 1)
-      .trim()
-      .split(/\s+/)
+    const currentLine = lines[position.line]
+    const currentLineUntrimmed = getCurrentLine(document, position.line)
 
-    if (currentLine.includes('(')) {
+    // check if inside attribute
+    if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
       return getSuggestionsForInsideAttributes(
+        currentLineUntrimmed,
         lines,
-        params.position,
+        position,
         foundBlock,
       )
     }
 
     // check if type
-    if (
-      wordsBeforePosition.length < 2 ||
-      (wordsBeforePosition.length === 2 && symbolBeforePosition !== ' ')
-    ) {
+    if (!positionIsAfterFieldAndType(currentLine, position, document)) {
       return getSuggestionsForTypes(foundBlock, lines)
     }
-    return getSuggestionsForAttributes(
-      foundBlock.type,
-      params.position,
-      document,
-      lines[params.position.line],
+    return getSuggestionForFieldAttribute(
+      foundBlock,
+      lines[position.line],
+      lines,
+      position,
     )
   }
 }
