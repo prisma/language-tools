@@ -130,7 +130,7 @@ export const blockAttributes: CompletionItem[] = [
         '@@index(_ fields: FieldReference[])',
         '```',
         '___',
-        'Defines an index.',
+        'Defines an index on the model.',
         '',
         '_@param_ `fields` A list of references',
       ].join('\n'),
