@@ -17,11 +17,12 @@ async function testJumpToDefinition(
   assert.deepEqual(actualLocation[0].range, expectedLocation.range)
 }
 
-suite('Should jump-to-definition', async () => {
+suite('Should jump-to-definition', () => {
   const docUri = getDocUri('correct.prisma')
-  await activate(docUri)
 
   test('Diagnoses jump from attribute to model', async () => {
+    await activate(docUri)
+
     await testJumpToDefinition(
       docUri,
       new vscode.Position(22, 9),
