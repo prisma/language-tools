@@ -10,13 +10,16 @@ import { exec } from 'child_process';
 
 let client: LanguageClient
 let generatePrismaStatusBarItem: vscode.StatusBarItem
-let prismaVersionStatusBarItem : vscode.StatusBarItem
+let prismaVersionStatusBarItem: vscode.StatusBarItem
+let introspectPrismaStatusBarItem: vscode.StatusBarItem
 
 export function activate(context: vscode.ExtensionContext): void {
   // register a command that is invoked when the status bar
-	// item is selected
+  // item is selected
   const generatePrismaCommandId = 'prisma.generate';
   const prismaVersionCommandId = 'prisma.version';
+  const introspectPrismaCommandId = 'prisma.introspect'
+
   context.subscriptions.push(vscode.commands.registerCommand(generatePrismaCommandId, () => {
     exec('npx prisma generate', (err, stdout, stderr) => {
       if (err) {
@@ -27,7 +30,8 @@ export function activate(context: vscode.ExtensionContext): void {
       vscode.window.showErrorMessage(stderr)
       console.log('stdout: ' + stdout)
       console.log('stderr: ' + stderr)
-  })}));
+    })
+  }));
   context.subscriptions.push(vscode.commands.registerCommand(prismaVersionCommandId, () => {
     exec('npx prisma -v', (err, stdout, stderr) => {
       if (err) {
@@ -40,8 +44,20 @@ export function activate(context: vscode.ExtensionContext): void {
       console.log('stderr: ' + stderr)
     })
   }))
+  context.subscriptions.push(vscode.commands.registerCommand(introspectPrismaCommandId, () => {
+    exec('npx prisma introspect', (err, stdout, stderr) => {
+      if (err) {
+        vscode.window.showErrorMessage(err.message)
+        return
+      }
+      vscode.window.showInformationMessage(stdout)
+      vscode.window.showErrorMessage(stderr)
+      console.log('stdout: ' + stdout)
+      console.log('stderr: ' + stderr)
+    })
+  }))
 
-	// create a new status bar item that we can now manage
+  // create new status bar items that we can now manage
   generatePrismaStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 200)
   generatePrismaStatusBarItem.text = '$(triangle-right) Prisma Generate'
   generatePrismaStatusBarItem.tooltip = 'Run this command to install and generate Prisma Client in your project.'
@@ -52,6 +68,11 @@ export function activate(context: vscode.ExtensionContext): void {
   prismaVersionStatusBarItem.text = '$(triangle-right) Prisma Version'
   prismaVersionStatusBarItem.command = prismaVersionCommandId
   context.subscriptions.push(prismaVersionStatusBarItem)
+
+  introspectPrismaStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 200)
+  introspectPrismaStatusBarItem.text = '$(triangle-right) Prisma Introspect'
+  introspectPrismaStatusBarItem.command = introspectPrismaCommandId
+  context.subscriptions.push(introspectPrismaStatusBarItem)
 
 
   // The server is implemented in node
@@ -88,7 +109,8 @@ export function activate(context: vscode.ExtensionContext): void {
   )
 
   prismaVersionStatusBarItem.show()
- generatePrismaStatusBarItem.show()
+  generatePrismaStatusBarItem.show()
+  introspectPrismaStatusBarItem.show()
   // Start the client. This will also launch the server
   context.subscriptions.push(client.start())
 }
