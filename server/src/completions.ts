@@ -144,9 +144,9 @@ export function getSuggestionForFieldAttribute(
   // create deep copy
   let suggestions: CompletionItem[] = klona(fieldAttributes)
 
-  if (!currentLine.includes('Int')) {
+  if (!(currentLine.includes('Int') || currentLine.includes('String'))) {
     // id not allowed
-    suggestions = suggestions.filter((sugg) => sugg.label !== 'id')
+    suggestions = suggestions.filter((sugg) => sugg.label !== '@id')
   }
 
   suggestions = removeInvalidAttributeSuggestions(suggestions, block, lines)

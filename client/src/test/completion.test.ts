@@ -137,7 +137,7 @@ suite('Should auto-complete', () => {
   const blockAttributeIndex = {label: '@@index([])', kind: vscode.CompletionItemKind.Property}
 
 
-  test('Diagnoses block attribute suggestions', async () => {
+  test('Diagnoses block attribute suggestions first in a line', async () => {
     await testCompletion(
       emptyBlocksUri,
       new vscode.Position(9, 0),
@@ -148,7 +148,8 @@ suite('Should auto-complete', () => {
         blockAttributeUnique,
       ])
     )})
-    test('Diagnoses block attribute suggestions with existing attributes', async () => {
+
+    test('Diagnoses block attribute suggestions with existing attributes first in a line', async () => {
     await testCompletion(
       modelBlocksUri,
       new vscode.Position(5, 0),
@@ -166,6 +167,38 @@ suite('Should auto-complete', () => {
         blockAttributeMap,
       ])
     )})
+
+    // FIELD ATTRIBUTES
+
+      const fieldAttributeId = {label: '@id', kind: vscode.CompletionItemKind.Property}
+      const fieldAttributeUnique = {label: '@unique', kind:vscode.CompletionItemKind.Property}
+      const fieldAttributeMap = {label: '@map()', kind: vscode.CompletionItemKind.Property}
+      const fieldAttributeDefault = {label: '@default()', kind: vscode.CompletionItemKind.Property}
+      const fieldAttributeRelation = {label: '@relation()', kind: vscode.CompletionItemKind.Property}
+
+    test('Diagnoses field and block attribute suggestions', async () => {
+      await testCompletion(
+        modelBlocksUri,
+        new vscode.Position(18, 14),
+        new vscode.CompletionList([
+          fieldAttributeDefault,
+          fieldAttributeId,
+          fieldAttributeMap,
+          fieldAttributeRelation,
+          fieldAttributeUnique
+        ])
+      )
+      await testCompletion(
+        modelBlocksUri,
+        new vscode.Position(19, 14),
+        new vscode.CompletionList([
+          fieldAttributeDefault,
+          fieldAttributeMap,
+          fieldAttributeRelation,
+          fieldAttributeUnique
+        ])
+      )
+    })
   
 
 })
