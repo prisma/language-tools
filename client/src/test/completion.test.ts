@@ -24,7 +24,15 @@ async function testCompletion(
 }
 
 suite('Should auto-complete', () => {
+
+  // Uri's
+
   const emptyDocUri = getDocUri('completions/empty.prisma')
+  const sqliteDocUri = getDocUri('completions/datasourceWithSqlite.prisma')
+  const dataSourceWithUri = getDocUri('completions/datasourceWithUrl.prisma')
+  const emptyBlocksUri = getDocUri('completions/emptyBlocks.prisma')
+  const modelBlocksUri = getDocUri('completions/modelBlocks.prisma')
+
 
   // ALL BLOCKS
 
@@ -42,7 +50,6 @@ suite('Should auto-complete', () => {
     )
   })
 
-  const sqliteDocUri = getDocUri('completions/datasourceWithSqlite.prisma')
   test('Diagnoses block type suggestions with sqlite as provider', async () => {
     await testCompletion(
       sqliteDocUri,
@@ -60,12 +67,10 @@ suite('Should auto-complete', () => {
 
   const fieldProvider = { label: 'provider', kind: vscode.CompletionItemKind.Field }
   const fieldUrl = { label: 'url', kind: vscode.CompletionItemKind.Field }
-  const dataSourceWithUrl = getDocUri('completions/datasourceWithUrl.prisma')
-  const dataSourceAndGeneratorEmptyDocUri = getDocUri('completions/emptyDatasourceAndGenerator.prisma')
 
   test('Diagnoses datasource field suggestions in empty block', async () => {
     await testCompletion(
-      dataSourceAndGeneratorEmptyDocUri,
+      emptyBlocksUri,
       new vscode.Position(1, 0),
       new vscode.CompletionList([
         fieldProvider,
@@ -83,7 +88,7 @@ suite('Should auto-complete', () => {
       ])
     )
     await testCompletion(
-      dataSourceWithUrl,
+      dataSourceWithUri,
       new vscode.Position(2, 0),
       new vscode.CompletionList([
         fieldProvider
@@ -98,7 +103,7 @@ suite('Should auto-complete', () => {
   const generatorWithExistingFieldsUri = getDocUri('completions/generatorWithExistingFields.prisma')
   test('Diagnoses generator field suggestions in empty block', async () => {
     await testCompletion(
-      dataSourceAndGeneratorEmptyDocUri,
+      emptyBlocksUri,
       new vscode.Position(5, 0),
       new vscode.CompletionList([
         fieldOutput,
@@ -123,5 +128,44 @@ suite('Should auto-complete', () => {
       ])
     )
   })
+
+  // BLOCK ATTRIBUTES
+
+  const blockAttributeId = {label: '@@id([])', kind: vscode.CompletionItemKind.Property}
+  const blockAttributeMap = {label: '@@map([])', kind: vscode.CompletionItemKind.Property}
+  const blockAttributeUnique = {label: '@@unique([])', kind: vscode.CompletionItemKind.Property}
+  const blockAttributeIndex = {label: '@@index([])', kind: vscode.CompletionItemKind.Property}
+
+
+  test('Diagnoses block attribute suggestions', async () => {
+    await testCompletion(
+      emptyBlocksUri,
+      new vscode.Position(9, 0),
+      new vscode.CompletionList([
+        blockAttributeId,
+        blockAttributeIndex,
+        blockAttributeMap,
+        blockAttributeUnique,
+      ])
+    )})
+    test('Diagnoses block attribute suggestions with existing attributes', async () => {
+    await testCompletion(
+      modelBlocksUri,
+      new vscode.Position(5, 0),
+      new vscode.CompletionList([
+        blockAttributeId, 
+        blockAttributeIndex,
+        blockAttributeMap,
+      ])
+    )
+    await testCompletion(
+      modelBlocksUri,
+      new vscode.Position(14, 0),
+      new vscode.CompletionList([
+        blockAttributeIndex,
+        blockAttributeMap,
+      ])
+    )})
+  
 
 })

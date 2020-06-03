@@ -1,0 +1,16 @@
+model User {
+    firstName String
+    lastName String
+    email String @unique
+    isAdmin Boolean @default(false)
+
+
+}
+
+
+model Post {
+    id Int @id @default(autoincrement())
+    email String? @unique
+    name String
+    
+}
