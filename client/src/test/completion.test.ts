@@ -17,17 +17,28 @@ async function testCompletion(
     'vscode.executeCompletionItemProvider',
     docUri,
     position,
-    triggerCharacter
+    triggerCharacter,
   )) as vscode.CompletionList
 
-  assert.deepStrictEqual(actualCompletions.isIncomplete, expectedCompletionList.isIncomplete)
-  assert.deepStrictEqual(actualCompletions.items.length, expectedCompletionList.items.length)
-  assert.deepStrictEqual(actualCompletions.items.map(items => items.label), expectedCompletionList.items.map(items => items.label))
-  assert.deepStrictEqual(actualCompletions.items.map(item => item.kind), expectedCompletionList.items.map(item => item.kind))
+  assert.deepStrictEqual(
+    actualCompletions.isIncomplete,
+    expectedCompletionList.isIncomplete,
+  )
+  assert.deepStrictEqual(
+    actualCompletions.items.length,
+    expectedCompletionList.items.length,
+  )
+  assert.deepStrictEqual(
+    actualCompletions.items.map((items) => items.label),
+    expectedCompletionList.items.map((items) => items.label),
+  )
+  assert.deepStrictEqual(
+    actualCompletions.items.map((item) => item.kind),
+    expectedCompletionList.items.map((item) => item.kind),
+  )
 }
 
 suite('Should auto-complete', () => {
-
   // Uri's
 
   const emptyDocUri = getDocUri('completions/empty.prisma')
@@ -36,20 +47,22 @@ suite('Should auto-complete', () => {
   const emptyBlocksUri = getDocUri('completions/emptyBlocks.prisma')
   const modelBlocksUri = getDocUri('completions/modelBlocks.prisma')
 
-
   // ALL BLOCKS
 
   test('Diagnoses block type suggestions with sqlite as provider', async () => {
     await testCompletion(
       sqliteDocUri,
       new vscode.Position(4, 0),
-      new vscode.CompletionList([
-        { label: 'datasource', kind: vscode.CompletionItemKind.Class },
-        { label: 'generator', kind: vscode.CompletionItemKind.Class },
-        { label: 'model', kind: vscode.CompletionItemKind.Class },
-        { label: 'type_alias', kind: vscode.CompletionItemKind.Class },
-      ], false),
-      false
+      new vscode.CompletionList(
+        [
+          { label: 'datasource', kind: vscode.CompletionItemKind.Class },
+          { label: 'generator', kind: vscode.CompletionItemKind.Class },
+          { label: 'model', kind: vscode.CompletionItemKind.Class },
+          { label: 'type_alias', kind: vscode.CompletionItemKind.Class },
+        ],
+        false,
+      ),
+      false,
     )
   })
 
@@ -57,32 +70,34 @@ suite('Should auto-complete', () => {
     await testCompletion(
       emptyDocUri,
       new vscode.Position(0, 0),
-      new vscode.CompletionList([
-        { label: 'datasource', kind: vscode.CompletionItemKind.Class },
-        { label: 'enum', kind: vscode.CompletionItemKind.Class },
-        { label: 'generator', kind: vscode.CompletionItemKind.Class },
-        { label: 'model', kind: vscode.CompletionItemKind.Class },
-        { label: 'type_alias', kind: vscode.CompletionItemKind.Class },
-      ], false),
-      false
+      new vscode.CompletionList(
+        [
+          { label: 'datasource', kind: vscode.CompletionItemKind.Class },
+          { label: 'enum', kind: vscode.CompletionItemKind.Class },
+          { label: 'generator', kind: vscode.CompletionItemKind.Class },
+          { label: 'model', kind: vscode.CompletionItemKind.Class },
+          { label: 'type_alias', kind: vscode.CompletionItemKind.Class },
+        ],
+        false,
+      ),
+      false,
     )
   })
 
-
   // DATASOURCE BLOCK
 
-  const fieldProvider = { label: 'provider', kind: vscode.CompletionItemKind.Field }
+  const fieldProvider = {
+    label: 'provider',
+    kind: vscode.CompletionItemKind.Field,
+  }
   const fieldUrl = { label: 'url', kind: vscode.CompletionItemKind.Field }
 
   test('Diagnoses datasource field suggestions in empty block', async () => {
     await testCompletion(
       emptyBlocksUri,
       new vscode.Position(1, 0),
-      new vscode.CompletionList([
-        fieldProvider,
-        fieldUrl
-      ]),
-      false
+      new vscode.CompletionList([fieldProvider, fieldUrl]),
+      false,
     )
   })
 
@@ -90,18 +105,14 @@ suite('Should auto-complete', () => {
     await testCompletion(
       sqliteDocUri,
       new vscode.Position(2, 0),
-      new vscode.CompletionList([
-        fieldUrl
-      ]),
-      false
+      new vscode.CompletionList([fieldUrl]),
+      false,
     )
     await testCompletion(
       dataSourceWithUri,
       new vscode.Position(2, 0),
-      new vscode.CompletionList([
-        fieldProvider
-      ]),
-      false
+      new vscode.CompletionList([fieldProvider]),
+      false,
     )
   })
 
@@ -109,15 +120,15 @@ suite('Should auto-complete', () => {
 
   const fieldOutput = { label: 'output', kind: vscode.CompletionItemKind.Field }
 
-  const generatorWithExistingFieldsUri = getDocUri('completions/generatorWithExistingFields.prisma')
+  const generatorWithExistingFieldsUri = getDocUri(
+    'completions/generatorWithExistingFields.prisma',
+  )
   test('Diagnoses generator field suggestions in empty block', async () => {
     await testCompletion(
       emptyBlocksUri,
       new vscode.Position(5, 0),
-      new vscode.CompletionList([
-        fieldOutput,
-        fieldProvider,
-      ]), false
+      new vscode.CompletionList([fieldOutput, fieldProvider]),
+      false,
     )
   })
 
@@ -126,26 +137,35 @@ suite('Should auto-complete', () => {
     await testCompletion(
       generatorWithExistingFieldsUri,
       new vscode.Position(2, 0),
-      new vscode.CompletionList([
-        fieldOutput
-      ]), true
+      new vscode.CompletionList([fieldOutput]),
+      true,
     )
     await testCompletion(
       generatorWithExistingFieldsUri,
       new vscode.Position(7, 0),
-      new vscode.CompletionList([
-        fieldProvider
-      ]), true
+      new vscode.CompletionList([fieldProvider]),
+      true,
     )
   })
 
   // BLOCK ATTRIBUTES
 
-  const blockAttributeId = { label: '@@id([])', kind: vscode.CompletionItemKind.Property }
-  const blockAttributeMap = { label: '@@map([])', kind: vscode.CompletionItemKind.Property }
-  const blockAttributeUnique = { label: '@@unique([])', kind: vscode.CompletionItemKind.Property }
-  const blockAttributeIndex = { label: '@@index([])', kind: vscode.CompletionItemKind.Property }
-
+  const blockAttributeId = {
+    label: '@@id([])',
+    kind: vscode.CompletionItemKind.Property,
+  }
+  const blockAttributeMap = {
+    label: '@@map([])',
+    kind: vscode.CompletionItemKind.Property,
+  }
+  const blockAttributeUnique = {
+    label: '@@unique([])',
+    kind: vscode.CompletionItemKind.Property,
+  }
+  const blockAttributeIndex = {
+    label: '@@index([])',
+    kind: vscode.CompletionItemKind.Property,
+  }
 
   test('Diagnoses block attribute suggestions first in a line', async () => {
     await testCompletion(
@@ -156,7 +176,8 @@ suite('Should auto-complete', () => {
         blockAttributeIndex,
         blockAttributeMap,
         blockAttributeUnique,
-      ]), false
+      ]),
+      false,
     )
   })
 
@@ -169,35 +190,73 @@ suite('Should auto-complete', () => {
         blockAttributeId,
         blockAttributeIndex,
         blockAttributeMap,
-      ]), true
+      ]),
+      true,
     )
     await testCompletion(
       modelBlocksUri,
       new vscode.Position(14, 0),
-      new vscode.CompletionList([
-        blockAttributeIndex,
-        blockAttributeMap,
-      ]), true
+      new vscode.CompletionList([blockAttributeIndex, blockAttributeMap]),
+      true,
     )
   })
 
   // FIELD ATTRIBUTES
 
-  const fieldAttributeId = { label: '@id', kind: vscode.CompletionItemKind.Property }
-  const fieldAttributeUnique = { label: '@unique', kind: vscode.CompletionItemKind.Property }
-  const fieldAttributeMap = { label: '@map()', kind: vscode.CompletionItemKind.Property }
-  const fieldAttributeDefault = { label: '@default()', kind: vscode.CompletionItemKind.Property }
-  const fieldAttributeRelation = { label: '@relation()', kind: vscode.CompletionItemKind.Property }
+  const fieldAttributeId = {
+    label: '@id',
+    kind: vscode.CompletionItemKind.Property,
+  }
+  const fieldAttributeUnique = {
+    label: '@unique',
+    kind: vscode.CompletionItemKind.Property,
+  }
+  const fieldAttributeMap = {
+    label: '@map()',
+    kind: vscode.CompletionItemKind.Property,
+  }
+  const fieldAttributeDefault = {
+    label: '@default()',
+    kind: vscode.CompletionItemKind.Property,
+  }
+  const fieldAttributeRelation = {
+    label: '@relation()',
+    kind: vscode.CompletionItemKind.Property,
+  }
 
-  const functionCuid = { label: 'cuid()', kind: vscode.CompletionItemKind.Function }
-  const functionUuid = { label: 'uuid()', kind: vscode.CompletionItemKind.Function }
-  const functionAutoInc = { label: 'autoincrement()', kind: vscode.CompletionItemKind.Function }
-  const functionNow = { label: 'now()', kind: vscode.CompletionItemKind.Function }
-  const staticValueTrue = { label: 'true', kind: vscode.CompletionItemKind.Value }
-  const staticValueFalse = { label: 'false', kind: vscode.CompletionItemKind.Value }
+  const functionCuid = {
+    label: 'cuid()',
+    kind: vscode.CompletionItemKind.Function,
+  }
+  const functionUuid = {
+    label: 'uuid()',
+    kind: vscode.CompletionItemKind.Function,
+  }
+  const functionAutoInc = {
+    label: 'autoincrement()',
+    kind: vscode.CompletionItemKind.Function,
+  }
+  const functionNow = {
+    label: 'now()',
+    kind: vscode.CompletionItemKind.Function,
+  }
+  const staticValueTrue = {
+    label: 'true',
+    kind: vscode.CompletionItemKind.Value,
+  }
+  const staticValueFalse = {
+    label: 'false',
+    kind: vscode.CompletionItemKind.Value,
+  }
 
-  const fieldsProperty = { label: 'fields: []', kind: vscode.CompletionItemKind.Property }
-  const referencesProperty = { label: 'references: []', kind: vscode.CompletionItemKind.Property }
+  const fieldsProperty = {
+    label: 'fields: []',
+    kind: vscode.CompletionItemKind.Property,
+  }
+  const referencesProperty = {
+    label: 'references: []',
+    kind: vscode.CompletionItemKind.Property,
+  }
 
   test('Diagnoses field and block attribute suggestions', async () => {
     await testCompletion(
@@ -208,8 +267,9 @@ suite('Should auto-complete', () => {
         fieldAttributeId,
         fieldAttributeMap,
         fieldAttributeRelation,
-        fieldAttributeUnique
-      ]), true
+        fieldAttributeUnique,
+      ]),
+      true,
     )
     await testCompletion(
       modelBlocksUri,
@@ -218,8 +278,9 @@ suite('Should auto-complete', () => {
         fieldAttributeDefault,
         fieldAttributeMap,
         fieldAttributeRelation,
-        fieldAttributeUnique
-      ]), true
+        fieldAttributeUnique,
+      ]),
+      true,
     )
   })
 
@@ -227,24 +288,20 @@ suite('Should auto-complete', () => {
     await testCompletion(
       modelBlocksUri,
       new vscode.Position(11, 24),
-      new vscode.CompletionList([
-        functionAutoInc,
-      ]), true
+      new vscode.CompletionList([functionAutoInc]),
+      true,
     )
     await testCompletion(
       modelBlocksUri,
       new vscode.Position(28, 27),
-      new vscode.CompletionList([
-        functionCuid,
-        functionUuid
-      ]), true
+      new vscode.CompletionList([functionCuid, functionUuid]),
+      true,
     )
     await testCompletion(
       modelBlocksUri,
       new vscode.Position(30, 36),
-      new vscode.CompletionList([
-        functionNow
-      ]), true
+      new vscode.CompletionList([functionNow]),
+      true,
     )
   })
 
@@ -252,10 +309,8 @@ suite('Should auto-complete', () => {
     await testCompletion(
       modelBlocksUri,
       new vscode.Position(24, 28),
-      new vscode.CompletionList([
-        staticValueFalse,
-        staticValueTrue
-      ]), true
+      new vscode.CompletionList([staticValueFalse, staticValueTrue]),
+      true,
     )
   })
 
@@ -266,8 +321,9 @@ suite('Should auto-complete', () => {
       new vscode.CompletionList([
         { label: 'firstName', kind: vscode.CompletionItemKind.Field },
         { label: 'isAdmin', kind: vscode.CompletionItemKind.Field },
-        { label: 'lastName', kind: vscode.CompletionItemKind.Field }
-      ]), true
+        { label: 'lastName', kind: vscode.CompletionItemKind.Field },
+      ]),
+      true,
     )
   })
 
@@ -278,8 +334,9 @@ suite('Should auto-complete', () => {
       new vscode.CompletionList([
         { label: 'firstName', kind: vscode.CompletionItemKind.Field },
         { label: 'isAdmin', kind: vscode.CompletionItemKind.Field },
-        { label: 'lastName', kind: vscode.CompletionItemKind.Field }
-      ]), true
+        { label: 'lastName', kind: vscode.CompletionItemKind.Field },
+      ]),
+      true,
     )
   })
 
@@ -290,8 +347,9 @@ suite('Should auto-complete', () => {
       new vscode.CompletionList([
         { label: 'firstName', kind: vscode.CompletionItemKind.Field },
         { label: 'isAdmin', kind: vscode.CompletionItemKind.Field },
-        { label: 'lastName', kind: vscode.CompletionItemKind.Field }
-      ]), true
+        { label: 'lastName', kind: vscode.CompletionItemKind.Field },
+      ]),
+      true,
     )
   })
 
@@ -304,8 +362,9 @@ suite('Should auto-complete', () => {
       new vscode.CompletionList([
         { label: '""', kind: vscode.CompletionItemKind.Property },
         fieldsProperty,
-        referencesProperty
-      ]), true
+        referencesProperty,
+      ]),
+      true,
     )
     await testCompletion(
       relationDirectiveUri,
@@ -313,22 +372,21 @@ suite('Should auto-complete', () => {
       new vscode.CompletionList([
         { label: 'id', kind: vscode.CompletionItemKind.Field },
         { label: 'items', kind: vscode.CompletionItemKind.Field },
-        { label: 'total', kind: vscode.CompletionItemKind.Field }
-      ]), true
+        { label: 'total', kind: vscode.CompletionItemKind.Field },
+      ]),
+      true,
     )
     await testCompletion(
       relationDirectiveUri,
       new vscode.Position(30, 44),
-      new vscode.CompletionList([
-        fieldsProperty
-      ]), true
+      new vscode.CompletionList([fieldsProperty]),
+      true,
     )
     await testCompletion(
       relationDirectiveUri,
       new vscode.Position(39, 45),
-      new vscode.CompletionList([
-        referencesProperty
-      ]), true
+      new vscode.CompletionList([referencesProperty]),
+      true,
     )
     await testCompletion(
       relationDirectiveUri,
@@ -338,12 +396,9 @@ suite('Should auto-complete', () => {
         { label: 'orderId', kind: vscode.CompletionItemKind.Field },
         { label: 'productName', kind: vscode.CompletionItemKind.Field },
         { label: 'productPrice', kind: vscode.CompletionItemKind.Field },
-        { label: 'quantity', kind: vscode.CompletionItemKind.Field }
-      ]), true
+        { label: 'quantity', kind: vscode.CompletionItemKind.Field },
+      ]),
+      true,
     )
   })
-
-
-  // TODO test with triggerCharacters !!!
-
 })

@@ -7,7 +7,6 @@ async function testHover(
   position: vscode.Position,
   expectedHover: string,
 ): Promise<void> {
-
   const actualHover: Hover[] = (await vscode.commands.executeCommand(
     'vscode.executeHoverProvider',
     docUri,
