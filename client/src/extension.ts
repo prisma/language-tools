@@ -13,6 +13,19 @@ let generatePrismaStatusBarItem: vscode.StatusBarItem
 let prismaVersionStatusBarItem: vscode.StatusBarItem
 let introspectPrismaStatusBarItem: vscode.StatusBarItem
 
+function executeCommand(command: string) {
+  exec('cd ' + vscode.workspace.rootPath + ' && ' + command, (err, stdout, stderr) => {
+    if (err) {
+      vscode.window.showErrorMessage(err.message)
+      return
+    }
+    vscode.window.showInformationMessage(stdout)
+    vscode.window.showErrorMessage(stderr)
+    console.log('stdout: ' + stdout)
+    console.log('stderr: ' + stderr)
+  })
+}
+
 export function activate(context: vscode.ExtensionContext): void {
   // register a command that is invoked when the status bar
   // item is selected
@@ -20,41 +33,15 @@ export function activate(context: vscode.ExtensionContext): void {
   const prismaVersionCommandId = 'prisma.version';
   const introspectPrismaCommandId = 'prisma.introspect'
 
+  // TODO wrong working directory! 
   context.subscriptions.push(vscode.commands.registerCommand(generatePrismaCommandId, () => {
-    exec('npx prisma generate', (err, stdout, stderr) => {
-      if (err) {
-        vscode.window.showErrorMessage(err.message)
-        return
-      }
-      vscode.window.showInformationMessage(stdout)
-      vscode.window.showErrorMessage(stderr)
-      console.log('stdout: ' + stdout)
-      console.log('stderr: ' + stderr)
-    })
+    executeCommand('prisma generate')
   }));
   context.subscriptions.push(vscode.commands.registerCommand(prismaVersionCommandId, () => {
-    exec('npx prisma -v', (err, stdout, stderr) => {
-      if (err) {
-        vscode.window.showErrorMessage(err.message)
-        return
-      }
-      vscode.window.showInformationMessage(stdout)
-      vscode.window.showErrorMessage(stderr)
-      console.log('stdout: ' + stdout)
-      console.log('stderr: ' + stderr)
-    })
+    executeCommand('npx prisma -v')
   }))
   context.subscriptions.push(vscode.commands.registerCommand(introspectPrismaCommandId, () => {
-    exec('npx prisma introspect', (err, stdout, stderr) => {
-      if (err) {
-        vscode.window.showErrorMessage(err.message)
-        return
-      }
-      vscode.window.showInformationMessage(stdout)
-      vscode.window.showErrorMessage(stderr)
-      console.log('stdout: ' + stdout)
-      console.log('stderr: ' + stderr)
-    })
+    executeCommand('npx prisma introspect')
   }))
 
   // create new status bar items that we can now manage
@@ -72,6 +59,7 @@ export function activate(context: vscode.ExtensionContext): void {
   introspectPrismaStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 200)
   introspectPrismaStatusBarItem.text = '$(triangle-right) Prisma Introspect'
   introspectPrismaStatusBarItem.command = introspectPrismaCommandId
+  introspectPrismaStatusBarItem.tooltip = 'This command introspects your database and for each table adds a Prisma model to the Prisma schema.'
   context.subscriptions.push(introspectPrismaStatusBarItem)
 
 
