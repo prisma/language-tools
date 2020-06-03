@@ -47,3 +47,12 @@ model ThirdUser {
     @@id([])
     @@index([])
 }
+
+model TypeCheck {
+    hi 
+}
+
+enum Hello {
+    Hey
+    Hallo
+}

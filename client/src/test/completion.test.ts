@@ -201,6 +201,32 @@ suite('Should auto-complete', () => {
     )
   })
 
+
+  // TYPES
+
+  test('Diagnoses type suggestions in model block', async () => {
+    await testCompletion(
+      modelBlocksUri,
+      new vscode.Position(51, 7),
+      new vscode.CompletionList([
+        { label: 'Boolean', kind: vscode.CompletionItemKind.TypeParameter },
+        { label: 'Cat', kind: vscode.CompletionItemKind.Reference },
+        { label: 'DateTime', kind: vscode.CompletionItemKind.TypeParameter },
+        { label: 'Float', kind: vscode.CompletionItemKind.TypeParameter },
+        { label: 'Hello', kind: vscode.CompletionItemKind.Reference },
+        { label: 'Int', kind: vscode.CompletionItemKind.TypeParameter },
+        { label: 'Person', kind: vscode.CompletionItemKind.Reference },
+        { label: 'Post', kind: vscode.CompletionItemKind.Reference },
+        { label: 'SecondUser', kind: vscode.CompletionItemKind.Reference },
+        { label: 'String', kind: vscode.CompletionItemKind.TypeParameter },
+        { label: 'Test', kind: vscode.CompletionItemKind.Reference },
+        { label: 'ThirdUser', kind: vscode.CompletionItemKind.Reference },
+        { label: 'TypeCheck', kind: vscode.CompletionItemKind.Reference },
+        { label: 'User', kind: vscode.CompletionItemKind.Reference }
+      ]), true
+    )
+  })
+
   // FIELD ATTRIBUTES
 
   const fieldAttributeId = {
@@ -401,4 +427,5 @@ suite('Should auto-complete', () => {
       true,
     )
   })
+
 })
