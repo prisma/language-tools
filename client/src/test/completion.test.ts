@@ -1,6 +1,7 @@
 import vscode, { CompletionList } from 'vscode'
 import assert from 'assert'
 import { getDocUri, activate } from './helper'
+import { CompletionItemKind } from 'vscode-languageclient'
 
 async function testCompletion(
   docUri: vscode.Uri,
@@ -232,7 +233,6 @@ suite('Should auto-complete', () => {
         functionNow
       ])
     )
-   
   })
 
   test('Diagnoses static default values', async () => {
@@ -247,8 +247,41 @@ suite('Should auto-complete', () => {
   })
 
 
+  test('Diagnoses arguments of @@unique', async () => {
+    await testCompletion(
+      modelBlocksUri,
+      new vscode.Position(38, 15),
+      new vscode.CompletionList([
+        {label: 'firstName', kind: vscode.CompletionItemKind.Field},
+        {label: 'isAdmin', kind: vscode.CompletionItemKind.Field},
+        {label: 'lastName', kind: vscode.CompletionItemKind.Field}
+      ])
+    )
+  })
 
+  test('Diagnoses arguments of @@id', async () => {
+    await testCompletion(
+      modelBlocksUri,
+      new vscode.Position(46, 10),
+      new vscode.CompletionList([
+        {label: 'firstName', kind: vscode.CompletionItemKind.Field},
+        {label: 'isAdmin', kind: vscode.CompletionItemKind.Field},
+        {label: 'lastName', kind: vscode.CompletionItemKind.Field}
+      ])
+    )
+  })
 
+  test('Diagnoses arguments of @@index', async () => {
+    await testCompletion(
+      modelBlocksUri,
+      new vscode.Position(47, 13),
+      new vscode.CompletionList([
+        {label: 'firstName', kind: vscode.CompletionItemKind.Field},
+        {label: 'isAdmin', kind: vscode.CompletionItemKind.Field},
+        {label: 'lastName', kind: vscode.CompletionItemKind.Field}
+      ])
+    )
+  })
 
 
 })

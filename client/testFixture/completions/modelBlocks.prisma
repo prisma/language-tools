@@ -30,3 +30,20 @@ model Cat {
     name String
     createdAt  DateTime    @default()
 }
+
+model SecondUser {
+    firstName String
+    lastName String
+    isAdmin Boolean @default(false)
+     
+     @@unique([])
+}
+
+model ThirdUser {
+    firstName String
+    lastName String
+    isAdmin Boolean @default(false)
+
+    @@id([])
+    @@index([])
+}

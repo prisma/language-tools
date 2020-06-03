@@ -430,7 +430,7 @@ function getFieldsFromCurrentBlock(
     if (key === block.end.line) {
       break
     }
-    if (!position || key !== position.line) {
+    if (!item.startsWith('@@') && (!position || key !== position.line)) {
       suggestions.push(item.replace(/ .*/, ''))
     }
   }
