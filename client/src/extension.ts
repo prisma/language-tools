@@ -35,7 +35,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // TODO wrong working directory! 
   context.subscriptions.push(vscode.commands.registerCommand(generatePrismaCommandId, () => {
-    executeCommand('prisma generate')
+    executeCommand('npx prisma generate')
   }));
   context.subscriptions.push(vscode.commands.registerCommand(prismaVersionCommandId, () => {
     executeCommand('npx prisma -v')
