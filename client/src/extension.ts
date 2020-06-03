@@ -14,16 +14,14 @@ let prismaVersionStatusBarItem: vscode.StatusBarItem
 let introspectPrismaStatusBarItem: vscode.StatusBarItem
 
 function executeCommand(command: string) {
-  exec('cd ' + vscode.workspace.rootPath + ' && ' + command, (err, stdout, stderr) => {
-    if (err) {
-      vscode.window.showErrorMessage(err.message)
-      return
-    }
-    vscode.window.showInformationMessage(stdout)
-    vscode.window.showErrorMessage(stderr)
-    console.log('stdout: ' + stdout)
-    console.log('stderr: ' + stderr)
-  })
+  if (vscode.window.activeTerminal) {
+    vscode.window.activeTerminal.show()
+    vscode.window.activeTerminal.sendText(command)
+  } else {
+    const terminal = vscode.window.createTerminal()
+    terminal.show()
+    terminal.sendText(command)
+  }
 }
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -33,7 +31,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const prismaVersionCommandId = 'prisma.version';
   const introspectPrismaCommandId = 'prisma.introspect'
 
-  // TODO wrong working directory! 
+
   context.subscriptions.push(vscode.commands.registerCommand(generatePrismaCommandId, () => {
     executeCommand('npx prisma generate')
   }));
@@ -43,6 +41,12 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(vscode.commands.registerCommand(introspectPrismaCommandId, () => {
     executeCommand('npx prisma introspect')
   }))
+
+  if (vscode.window.activeTerminal) {
+    vscode.window.activeTerminal.sendText('npx prisma -v')
+  } else {
+    vscode.window.createTerminal().sendText('npx prisma -v')
+  }
 
   // create new status bar items that we can now manage
   generatePrismaStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 200)
