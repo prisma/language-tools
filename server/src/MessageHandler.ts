@@ -26,7 +26,6 @@ import {
   positionIsAfterFieldAndType,
   isInsideAttribute,
 } from './completions'
-import { listenerCount } from 'cluster'
 
 function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({

@@ -9,7 +9,7 @@ model User {
 
 
 model Post {
-    id Int @id @default(autoincrement())
+    id Int @id @default()
     email String? @unique
     name String
 
@@ -18,4 +18,15 @@ model Post {
 model Person {
     id String 
     name Post 
+}
+
+model Test {
+  email    String  @unique
+  isAdmin  Boolean @default()
+}
+
+model Cat {
+    id String @id @default()
+    name String
+    createdAt  DateTime    @default()
 }

@@ -131,10 +131,10 @@ suite('Should auto-complete', () => {
 
   // BLOCK ATTRIBUTES
 
-  const blockAttributeId = {label: '@@id([])', kind: vscode.CompletionItemKind.Property}
-  const blockAttributeMap = {label: '@@map([])', kind: vscode.CompletionItemKind.Property}
-  const blockAttributeUnique = {label: '@@unique([])', kind: vscode.CompletionItemKind.Property}
-  const blockAttributeIndex = {label: '@@index([])', kind: vscode.CompletionItemKind.Property}
+  const blockAttributeId = { label: '@@id([])', kind: vscode.CompletionItemKind.Property }
+  const blockAttributeMap = { label: '@@map([])', kind: vscode.CompletionItemKind.Property }
+  const blockAttributeUnique = { label: '@@unique([])', kind: vscode.CompletionItemKind.Property }
+  const blockAttributeIndex = { label: '@@index([])', kind: vscode.CompletionItemKind.Property }
 
 
   test('Diagnoses block attribute suggestions first in a line', async () => {
@@ -147,14 +147,15 @@ suite('Should auto-complete', () => {
         blockAttributeMap,
         blockAttributeUnique,
       ])
-    )})
+    )
+  })
 
-    test('Diagnoses block attribute suggestions with existing attributes first in a line', async () => {
+  test('Diagnoses block attribute suggestions with existing attributes first in a line', async () => {
     await testCompletion(
       modelBlocksUri,
       new vscode.Position(5, 0),
       new vscode.CompletionList([
-        blockAttributeId, 
+        blockAttributeId,
         blockAttributeIndex,
         blockAttributeMap,
       ])
@@ -166,39 +167,88 @@ suite('Should auto-complete', () => {
         blockAttributeIndex,
         blockAttributeMap,
       ])
-    )})
+    )
+  })
 
-    // FIELD ATTRIBUTES
+  // FIELD ATTRIBUTES
 
-      const fieldAttributeId = {label: '@id', kind: vscode.CompletionItemKind.Property}
-      const fieldAttributeUnique = {label: '@unique', kind:vscode.CompletionItemKind.Property}
-      const fieldAttributeMap = {label: '@map()', kind: vscode.CompletionItemKind.Property}
-      const fieldAttributeDefault = {label: '@default()', kind: vscode.CompletionItemKind.Property}
-      const fieldAttributeRelation = {label: '@relation()', kind: vscode.CompletionItemKind.Property}
+  const fieldAttributeId = { label: '@id', kind: vscode.CompletionItemKind.Property }
+  const fieldAttributeUnique = { label: '@unique', kind: vscode.CompletionItemKind.Property }
+  const fieldAttributeMap = { label: '@map()', kind: vscode.CompletionItemKind.Property }
+  const fieldAttributeDefault = { label: '@default()', kind: vscode.CompletionItemKind.Property }
+  const fieldAttributeRelation = { label: '@relation()', kind: vscode.CompletionItemKind.Property }
 
-    test('Diagnoses field and block attribute suggestions', async () => {
-      await testCompletion(
-        modelBlocksUri,
-        new vscode.Position(18, 14),
-        new vscode.CompletionList([
-          fieldAttributeDefault,
-          fieldAttributeId,
-          fieldAttributeMap,
-          fieldAttributeRelation,
-          fieldAttributeUnique
-        ])
-      )
-      await testCompletion(
-        modelBlocksUri,
-        new vscode.Position(19, 14),
-        new vscode.CompletionList([
-          fieldAttributeDefault,
-          fieldAttributeMap,
-          fieldAttributeRelation,
-          fieldAttributeUnique
-        ])
-      )
-    })
-  
+  const functionCuid = { label: 'cuid()', kind: vscode.CompletionItemKind.Function}
+  const functionUuid = { label: 'uuid()', kind: vscode.CompletionItemKind.Function}
+  const functionAutoInc = {label: 'autoincrement()', kind: vscode.CompletionItemKind.Function}
+  const functionNow = {label: 'now()', kind: vscode.CompletionItemKind.Function}
+  const staticValueTrue = {label: 'true', kind: vscode.CompletionItemKind.Value}
+  const staticValueFalse = {label: 'false', kind: vscode.CompletionItemKind.Value}
+
+  test('Diagnoses field and block attribute suggestions', async () => {
+    await testCompletion(
+      modelBlocksUri,
+      new vscode.Position(18, 14),
+      new vscode.CompletionList([
+        fieldAttributeDefault,
+        fieldAttributeId,
+        fieldAttributeMap,
+        fieldAttributeRelation,
+        fieldAttributeUnique
+      ])
+    )
+    await testCompletion(
+      modelBlocksUri,
+      new vscode.Position(19, 14),
+      new vscode.CompletionList([
+        fieldAttributeDefault,
+        fieldAttributeMap,
+        fieldAttributeRelation,
+        fieldAttributeUnique
+      ])
+    )
+  })
+
+  test('Diagnoses functions as default values', async () => {
+    await testCompletion(
+      modelBlocksUri,
+      new vscode.Position(11, 24),
+      new vscode.CompletionList([
+        functionAutoInc,
+      ])
+    )
+    await testCompletion(
+      modelBlocksUri,
+      new vscode.Position(28, 27),
+      new vscode.CompletionList([
+        functionCuid,
+        functionUuid
+      ])
+    )
+    await testCompletion(
+      modelBlocksUri,
+      new vscode.Position(30, 36),
+      new vscode.CompletionList([
+        functionNow
+      ])
+    )
+   
+  })
+
+  test('Diagnoses static default values', async () => {
+    await testCompletion(
+      modelBlocksUri,
+      new vscode.Position(24, 28),
+      new vscode.CompletionList([
+        staticValueFalse,
+        staticValueTrue
+      ])
+    )
+  })
+
+
+
+
+
 
 })
