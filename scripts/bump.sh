@@ -28,16 +28,20 @@ else
     echo "$PRISMA_VERSION" > scripts/prisma_version_stable
 fi
 
-# If the channel is dev, we need to change the name, displayName to the dev extension
+# If the channel is dev, we need to change the name, displayName, description and preview flag to the Insider extension
 if [ "$CHANNEL" = "dev" ]; then
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
-        .name = \"prisma-dev\" | \
-        .displayName = \"Prisma Dev\"" \
+        .name = \"prisma-insider\" | \
+        .displayName = \"Prisma - Insider\" | \
+        .description = \"This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the $(dev) version of the CLI.\" | \
+        .preview = true" \
         ./package.json > ./package.json.bk
 else
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma\" | \
-        .displayName = \"Prisma\"" \
+        .displayName = \"Prisma\"| \
+        .description = \"Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.\" | \
+        .preview = false" \
         ./package.json > ./package.json.bk
 fi
 
