@@ -388,8 +388,8 @@ function isInsideFieldsOrReferences(
     return false
   }
   // check if in fields or references
-  const indexOfFields = wordsBeforePosition.findIndex(
-    (word) => word === 'fields',
+  const indexOfFields = wordsBeforePosition.findIndex((word) =>
+    word.includes('fields'),
   )
   const indexOfReferences = wordsBeforePosition.findIndex((word) =>
     word.includes('references'),

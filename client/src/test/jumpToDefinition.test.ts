@@ -7,8 +7,6 @@ async function testJumpToDefinition(
   position: vscode.Position,
   expectedLocation: vscode.Location,
 ): Promise<void> {
-  await activate(docUri)
-
   const actualLocation: vscode.Location[] = (await vscode.commands.executeCommand(
     'vscode.executeDefinitionProvider',
     docUri,
@@ -19,8 +17,9 @@ async function testJumpToDefinition(
   assert.deepEqual(actualLocation[0].range, expectedLocation.range)
 }
 
-suite('Should jump-to-definition', () => {
+suite('Should jump-to-definition', async () => {
   const docUri = getDocUri('correct.prisma')
+  await activate(docUri)
 
   test('Diagnoses jump from attribute to model', async () => {
     await testJumpToDefinition(
