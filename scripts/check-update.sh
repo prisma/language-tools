@@ -9,6 +9,7 @@ if [ -f ".envrc" ]; then
     . .envrc
 else
     echo "No .envrc"
+fi
 
 RELEASE_CHANNEL=$1
 echo "RELEASE_CHANNEL: $RELEASE_CHANNEL"
