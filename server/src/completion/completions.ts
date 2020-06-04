@@ -144,9 +144,9 @@ export function getSuggestionForFieldAttribute(
   // create deep copy
   let suggestions: CompletionItem[] = klona(fieldAttributes)
 
-  if (!currentLine.includes('Int')) {
+  if (!(currentLine.includes('Int') || currentLine.includes('String'))) {
     // id not allowed
-    suggestions = suggestions.filter((sugg) => sugg.label !== 'id')
+    suggestions = suggestions.filter((sugg) => sugg.label !== '@id')
   }
 
   suggestions = removeInvalidAttributeSuggestions(suggestions, block, lines)
@@ -354,13 +354,25 @@ export function getSuggestionForSupportedFields(
   }
 }
 
-function getFunctions(currentLine: string): Array<string> {
-  const suggestions: Array<string> = ['uuid()', 'cuid()']
+function getDefaultValues(currentLine: string): CompletionItem[] {
+  const suggestions: CompletionItem[] = []
   if (currentLine.includes('Int') && currentLine.includes('id')) {
-    suggestions.push('autoincrement()')
-  }
-  if (currentLine.includes('DateTime')) {
-    suggestions.push('now()')
+    suggestions.push({
+      label: 'autoincrement()',
+      kind: CompletionItemKind.Function,
+    })
+  } else if (currentLine.includes('DateTime')) {
+    suggestions.push({ label: 'now()', kind: CompletionItemKind.Function })
+  } else if (currentLine.includes('String')) {
+    suggestions.push(
+      { label: 'uuid()', kind: CompletionItemKind.Function },
+      { label: 'cuid()', kind: CompletionItemKind.Function },
+    )
+  } else if (currentLine.includes('Boolean')) {
+    suggestions.push(
+      { label: 'true', kind: CompletionItemKind.Value },
+      { label: 'false', kind: CompletionItemKind.Value },
+    )
   }
   return suggestions
 }
@@ -376,8 +388,8 @@ function isInsideFieldsOrReferences(
     return false
   }
   // check if in fields or references
-  const indexOfFields = wordsBeforePosition.findIndex(
-    (word) => word === 'fields',
+  const indexOfFields = wordsBeforePosition.findIndex((word) =>
+    word.includes('fields'),
   )
   const indexOfReferences = wordsBeforePosition.findIndex((word) =>
     word.includes('references'),
@@ -418,7 +430,7 @@ function getFieldsFromCurrentBlock(
     if (key === block.end.line) {
       break
     }
-    if (!position || key !== position.line) {
+    if (!item.startsWith('@@') && (!position || key !== position.line)) {
       suggestions.push(item.replace(/ .*/, ''))
     }
   }
@@ -524,7 +536,10 @@ export function getSuggestionsForInsideAttributes(
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
 
   if (wordBeforePosition.includes('@default')) {
-    suggestions = getFunctions(lines[position.line])
+    return {
+      items: getDefaultValues(lines[position.line]),
+      isIncomplete: false,
+    }
   } else if (
     wordBeforePosition.includes('@@unique') ||
     wordBeforePosition.includes('@@id') ||

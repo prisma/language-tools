@@ -45,7 +45,7 @@
   ],
   "dataSourceFields": [
     {
-      "label": "datasource",
+      "label": "provider",
       "documentation": "Describes which data source connector to use. Can be one of the following built in datasource providers: `postgresql`, `mysql` or `sqlite`."
     },
     {
@@ -127,7 +127,7 @@
       "params": []
     },
     {
-      "label": "@map([])",
+      "label": "@map()",
       "documentation": "Maps a field name from the Prisma schema to a different column name.",
       "fullSignature": "@map(_ name: String)",
       "params": [
@@ -138,7 +138,7 @@
       ]
     },
     {
-      "label": "@default([])",
+      "label": "@default()",
       "documentation": "Defines a default value for this field. `@default` takes an expression as an argument.",
       "fullSignature": "@default(_ expression: Expression)",
       "params": [
