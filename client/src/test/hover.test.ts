@@ -7,8 +7,6 @@ async function testHover(
   position: vscode.Position,
   expectedHover: string,
 ): Promise<void> {
-  await activate(docUri)
-
   const actualHover: Hover[] = (await vscode.commands.executeCommand(
     'vscode.executeHoverProvider',
     docUri,
@@ -25,6 +23,7 @@ suite('Should show /// documentation comments for', () => {
   const docUri = getDocUri('hover.prisma')
 
   test('model', async () => {
+    await activate(docUri)
     await testHover(
       docUri,
       new vscode.Position(23, 10),

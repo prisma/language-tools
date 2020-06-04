@@ -7,8 +7,6 @@ async function testJumpToDefinition(
   position: vscode.Position,
   expectedLocation: vscode.Location,
 ): Promise<void> {
-  await activate(docUri)
-
   const actualLocation: vscode.Location[] = (await vscode.commands.executeCommand(
     'vscode.executeDefinitionProvider',
     docUri,
@@ -23,6 +21,8 @@ suite('Should jump-to-definition', () => {
   const docUri = getDocUri('correct.prisma')
 
   test('Diagnoses jump from attribute to model', async () => {
+    await activate(docUri)
+
     await testJumpToDefinition(
       docUri,
       new vscode.Position(22, 9),
