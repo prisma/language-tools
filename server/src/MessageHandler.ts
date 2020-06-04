@@ -25,7 +25,7 @@ import {
   getSuggestionsForInsideAttributes,
   positionIsAfterFieldAndType,
   isInsideAttribute,
-} from './completions'
+} from './completion/completions'
 
 function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({

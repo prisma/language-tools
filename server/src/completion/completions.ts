@@ -5,7 +5,7 @@ import {
   Position,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { Block, getModelOrEnumBlock } from './MessageHandler'
+import { Block, getModelOrEnumBlock } from '../MessageHandler'
 import {
   blockAttributes,
   fieldAttributes,
