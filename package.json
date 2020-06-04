@@ -60,6 +60,16 @@
           "description": "Traces the communication between VS Code and the language server."
         }
       }
+    },
+    "commands": [{
+      "command": "prisma.executeCommand",
+      "title": "Prisma Shortcuts"
+    }],
+    "views": {
+      "explorer": [{
+        "id": "prismaScripts",
+        "name": "Prisma Shortcuts"
+      }]
     }
   },
   "scripts": {
