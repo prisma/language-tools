@@ -20,6 +20,10 @@ jobs:
     if: endsWith(github.ref, '/master')
     steps:
       - uses: actions/checkout@v2
+      - uses: 8398a7/action-slack@v3
+          with:
+          status: ${{ job.status }}
+            fields: repo,message,commit,author,action,eventName,ref,workflow 
       - name: Install Dependencies
         run: npm install
       - name: Check for Update
@@ -38,17 +42,10 @@ jobs:
         uses: GabrielBB/xvfb-action@v1.0
         with:
           run: npm run test
-        uses: 8398a7/action-slack@v3
-          with:
-          status: ${{ job.status }}
-            fields: repo,message,commit,author,action,eventName,ref,workflow 
       - name: Publish Extension as Patch
         if: steps.check_for_updates.outputs.new_updates
         run: yarn vsce:publish "latest"
-        uses: 8398a7/action-slack@v3
-          with:
-          status: ${{ job.status }}
-            fields: repo,message,commit,author,action,eventName,ref,workflow 
+
       
 
   publish-insider:
@@ -57,6 +54,10 @@ jobs:
     if: endsWith(github.ref, '/master')
     steps:
       - uses: actions/checkout@v2
+      - uses: 8398a7/action-slack@v3
+          with:
+          status: ${{ job.status }}
+            fields: repo,message,commit,author,action,eventName,ref,workflow 
       - name: Install Dependencies
         run: npm install
       - name: Check for Update
@@ -75,15 +76,8 @@ jobs:
         uses: GabrielBB/xvfb-action@v1.0
         with:
           run: npm run test
-        uses: 8398a7/action-slack@v3
-          with:
-          status: ${{ job.status }}
-            fields: repo,message,commit,author,action,eventName,ref,workflow 
       - name: Publish Extension as Patch
         if: steps.check_for_updates.outputs.new_updates
         run: yarn vsce:publish "dev"
-        uses: 8398a7/action-slack@v3
-          with:
-          status: ${{ job.status }}
-            fields: repo,message,commit,author,action,eventName,ref,workflow 
+        
 
