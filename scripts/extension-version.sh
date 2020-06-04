@@ -2,11 +2,11 @@
 
 set -eu
 
-CHANNEL="$1"
+NPM_TAG="$1"
 NEXT="$2"
 
-if [ "$CHANNEL" = "dev" ]; then
-    EXTENSION_VERSION=$(vsce show Prisma.prisma-dev --json | jq ".versions[0].version" | tr -d '"')
+if [ "$NPM_TAG" = "dev" ]; then
+    EXTENSION_VERSION=$(vsce show Prisma.prisma-insider --json | jq ".versions[0].version" | tr -d '"')
 else
     EXTENSION_VERSION=$(vsce show Prisma.prisma --json | jq ".versions[0].version" | tr -d '"')
 fi
