@@ -119,6 +119,7 @@ suite('Should auto-complete', () => {
   // GENERATOR BLOCK
 
   const fieldOutput = { label: 'output', kind: vscode.CompletionItemKind.Field }
+  const fieldBinaryTargets = {label: 'binaryTargets', kind: vscode.CompletionItemKind.Field}
 
   const generatorWithExistingFieldsUri = getDocUri(
     'completions/generatorWithExistingFields.prisma',
@@ -127,7 +128,7 @@ suite('Should auto-complete', () => {
     await testCompletion(
       emptyBlocksUri,
       new vscode.Position(5, 0),
-      new vscode.CompletionList([fieldOutput, fieldProvider]),
+      new vscode.CompletionList([fieldBinaryTargets, fieldOutput, fieldProvider]),
       false,
     )
   })
@@ -137,13 +138,13 @@ suite('Should auto-complete', () => {
     await testCompletion(
       generatorWithExistingFieldsUri,
       new vscode.Position(2, 0),
-      new vscode.CompletionList([fieldOutput]),
+      new vscode.CompletionList([fieldBinaryTargets, fieldOutput]),
       true,
     )
     await testCompletion(
       generatorWithExistingFieldsUri,
       new vscode.Position(7, 0),
-      new vscode.CompletionList([fieldProvider]),
+      new vscode.CompletionList([fieldBinaryTargets, fieldProvider]),
       true,
     )
   })

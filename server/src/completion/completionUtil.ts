@@ -80,7 +80,7 @@ export const supportedDataSourceFields: CompletionItem[] = convertToCompletionIt
 )
 
 export const supportedGeneratorFields: CompletionItem[] = convertToCompletionItems(
-  completions.dataSourceFields,
+  completions.generatorFields,
   CompletionItemKind.Field,
 )
 
