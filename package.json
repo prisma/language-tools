@@ -61,15 +61,19 @@
         }
       }
     },
-    "commands": [{
-      "command": "prisma.executeCommand",
-      "title": "Prisma Shortcuts"
-    }],
+    "commands": [
+      {
+        "command": "prisma.executeCommand",
+        "title": "Prisma Shortcuts"
+      }
+    ],
     "views": {
-      "explorer": [{
-        "id": "prismaScripts",
-        "name": "Prisma Shortcuts"
-      }]
+      "explorer": [
+        {
+          "id": "prismaScripts",
+          "name": "Prisma Shortcuts"
+        }
+      ]
     }
   },
   "scripts": {
