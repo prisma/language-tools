@@ -9,12 +9,16 @@ export default async function format(
   try {
     return await exec(execPath, ['format', '-s', identWidth.toString()], text)
   } catch (errors) {
-    const errorMessage =
-      "prisma-fmt error'd during formatting. This was likely due to a syntax error. Please see linter output."
     if (onError) {
-      onError(errorMessage)
+      onError(
+        "prisma-fmt error'd during formatting. To get a more detailed output please see Prisma Language Server output. To see the output, go to View > Output from the toolbar, then select 'Prisma Language Server' in the Output panel.",
+      )
     }
-    console.warn(errorMessage)
+    console.warn(
+      "\nprisma-fmt error'd during formatting. Please report this issue on [Prisma VSCode](https://github.com/prisma/vscode/issues). \nLinter output:\n",
+    )
+    console.warn(errors)
+
     return text
   }
 }

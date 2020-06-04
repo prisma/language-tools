@@ -28,24 +28,26 @@ else
     echo "$PRISMA_VERSION" > scripts/prisma_version_stable
 fi
 
-# If the channel is dev, we need to change the name, displayName to the dev extension
+# If the channel is dev, we need to change the name, displayName, description and preview flag to the Insider extension
 if [ "$CHANNEL" = "dev" ]; then
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
-        .name = \"prisma-dev\" | \
-        .displayName = \"Prisma Dev\"" \
+        .name = \"prisma-insider\" | \
+        .displayName = \"Prisma - Insider\" | \
+        .description = \"This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the $(dev) version of the CLI.\" | \
+        .preview = true" \
         ./clients/vscode/package.json > ./clients/vscode/package.json.bk
 else
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma\" | \
-        .displayName = \"Prisma\"" \
+        .displayName = \"Prisma\"| \
+        .description = \"Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.\" | \
+        .preview = false" \
         ./clients/vscode/package.json > ./clients/vscode/package.json.bk
 fi
 
 jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
     .prisma.version = \"$SHA\" | \
-    .dependencies[\"@prisma/get-platform\"] = \"$PRISMA_VERSION\" | \
-    .dependencies[\"@prisma/fetch-engine\"] = \"$PRISMA_VERSION\" | \
-    .dependencies[\"@prisma/sdk\"] = \"$PRISMA_VERSION\"" \
+    .dependencies[\"@prisma/get-platform\"] = \"$PRISMA_VERSION\"" \
     ./server/package.json > ./server/package.json.bk
 
 mv ./server/package.json.bk ./server/package.json
