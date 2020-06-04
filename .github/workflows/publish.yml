@@ -20,10 +20,12 @@ jobs:
     if: endsWith(github.ref, '/master')
     steps:
       - uses: actions/checkout@v2
+
       - uses: 8398a7/action-slack@v3
-          with:
-            status: ${{ job.status }}
-            fields: repo,message,commit,author,action,eventName,ref,workflow 
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow 
+
       - name: Install Dependencies
         run: npm install
       - name: Check for Update
@@ -55,9 +57,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: 8398a7/action-slack@v3
-          with:
-            status: ${{ job.status }}
-            fields: repo,message,commit,author,action,eventName,ref,workflow 
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow 
       - name: Install Dependencies
         run: npm install
       - name: Check for Update
