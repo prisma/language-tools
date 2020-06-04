@@ -20,12 +20,6 @@ jobs:
     if: endsWith(github.ref, '/master')
     steps:
       - uses: actions/checkout@v2
-
-      - uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          fields: repo,message,commit,author,action,eventName,ref,workflow 
-
       - name: Install Dependencies
         run: npm install
       - name: Check for Update
@@ -47,7 +41,20 @@ jobs:
       - name: Publish Extension as Patch
         if: steps.check_for_updates.outputs.new_updates
         run: yarn vsce:publish "latest"
-
+      - name: Slack Notification
+        if: ${{ failure() }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_CHANNEL: feed-vscode
+          SLACK_MESSAGE: ":x:"
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      - name: Slack Notification
+        if: ${{ success() }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_CHANNEL: feed-vscode
+          SLACK_MESSAGE: ":white_check_mark:"
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
       
 
   publish-insider:
@@ -56,10 +63,6 @@ jobs:
     if: endsWith(github.ref, '/master')
     steps:
       - uses: actions/checkout@v2
-      - uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          fields: repo,message,commit,author,action,eventName,ref,workflow 
       - name: Install Dependencies
         run: npm install
       - name: Check for Update
@@ -81,4 +84,18 @@ jobs:
       - name: Publish Extension as Patch
         if: steps.check_for_updates.outputs.new_updates
         run: yarn vsce:publish "dev"
+      - name: Slack Notification
+        if: ${{ failure() }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_CHANNEL: feed-vscode
+          SLACK_MESSAGE: ":x:"
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      - name: Slack Notification
+        if: ${{ success() }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_CHANNEL: feed-vscode
+          SLACK_MESSAGE: ":white_check_mark:"
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         
