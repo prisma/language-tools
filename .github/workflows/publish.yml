@@ -41,8 +41,8 @@ jobs:
         if: steps.check_for_updates.outputs.new_updates
         run: yarn vsce:publish "latest"
 
-  publish-dev:
-    name: Publish Dev
+  publish-insider:
+    name: Publish Insider
     runs-on: ubuntu-latest
     if: endsWith(github.ref, '/master')
     steps:
