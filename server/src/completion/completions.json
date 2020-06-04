@@ -1,0 +1,171 @@
+{
+  "primitiveTypes": [
+    {
+      "label": "String",
+      "documentation": "Variable length text"
+    },
+    {
+      "label": "Boolean",
+      "documentation": "True or false value"
+    },
+    {
+      "label": "Int",
+      "documentation": "Integer value"
+    },
+    {
+      "label": "Float",
+      "documentation": "Floating point number"
+    },
+    {
+      "label": "DateTime",
+      "documentation": "Timestamp"
+    }
+  ],
+  "blockTypes": [
+    {
+      "label": "datasource",
+      "documentation": "The datasource block tells the schema where the models are backed."
+    },
+    {
+      "label": "generator",
+      "documentation": "Generator blocks configure which clients are generated and how they're generated. Language preferences and binary configuration will go in here."
+    },
+    {
+      "label": "model",
+      "documentation": "Models represent the entities of your application domain. They are defined using model blocks in the data model."
+    },
+    {
+      "label": "type_alias",
+      "documentation": ""
+    },
+    {
+      "label": "enum",
+      "documentation": "Enums are defined via the enum block. You can define enums in your data model if they're supported by the data source you use:\n• PostgreSQL: Supported\n• MySQL: Supported\n• MariaDB: Supported\n• SQLite: Not supported"
+    }
+  ],
+  "dataSourceFields": [
+    {
+      "label": "provider",
+      "documentation": "Describes which data source connector to use. Can be one of the following built in datasource providers: `postgresql`, `mysql` or `sqlite`."
+    },
+    {
+      "label": "url",
+      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database, [learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema)."
+    }
+  ],
+  "generatorFields": [
+    {
+      "label": "provider",
+      "documentation": "Describes which generator to use. This can point to a file that implements a generator or specify a built-in generator directly."
+    },
+    {
+      "label": "output",
+      "documentation": "Determines the location for the generated client, [learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema)"
+    },
+    {
+      "label": "binaryTargets",
+      "documentation": "Specifies the OS on which the Prisma Client will run to ensure binary compatibility of the query engine."
+    }
+  ],
+  "blockAttributes": [
+    {
+      "label": "@@map([])",
+      "documentation": "Maps a model name from the Prisma schema to a different table name.",
+      "fullSignature": "@@map(_ name: String)",
+      "params": [
+        {
+          "label": "name",
+          "documentation": "The name of the target database table."
+        }
+      ]
+    },
+    {
+      "label": "@@id([])",
+      "documentation": "Defines a multi-field ID on the model.",
+      "fullSignature": "@id(_ fields: FieldReference[])",
+      "params": [
+        {
+          "label": "fields",
+          "documentation": "A list of references."
+        }
+      ]
+    },
+    {
+      "label": "@@unique([])",
+      "documentation": "Defines a compound unique constraint for the specified fields.",
+      "fullSignature": "@@unique(_ fields: FieldReference[])",
+      "params": [
+        {
+          "label": "fields",
+          "documentation": "A list of references."
+        }
+      ]
+    },
+    {
+      "label": "@@index([])",
+      "documentation": "Defines an index on the model.",
+      "fullSignature": "@@index(_ fields: FieldReference[])",
+      "params": [
+        {
+          "label": "fields",
+          "documentation": "A list of references."
+        }
+      ]
+    }
+  ],
+  "fieldAttributes": [
+    {
+      "label": "@id",
+      "fullSignature": "@id",
+      "documentation": "Defines a single-field ID on the model.",
+      "params": []
+    },
+    {
+      "label": "@unique",
+      "fullSignature": "@unique",
+      "documentation": "Defines a unique constraint for this field.",
+      "params": []
+    },
+    {
+      "label": "@map()",
+      "documentation": "Maps a field name from the Prisma schema to a different column name.",
+      "fullSignature": "@map(_ name: String)",
+      "params": [
+        {
+          "label": "name",
+          "documentation": "The name of the target database column."
+        }
+      ]
+    },
+    {
+      "label": "@default()",
+      "documentation": "Defines a default value for this field. `@default` takes an expression as an argument.",
+      "fullSignature": "@default(_ expression: Expression)",
+      "params": [
+        {
+          "label": "expression",
+          "documentation": "An expression (e.g. `5`, `true`, `now()`)."
+        }
+      ]
+    },
+    {
+      "label": "@relation()",
+      "documentation": "Defines meta information about the relation. [Learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema/relations#the-relation-attribute).",
+      "fullSignature": "@relation(_ name: String?, fields: FieldReference[]?, references: FieldReference[]?)",
+      "params": [
+        {
+          "label": "name",
+          "documentation": "A name of field references."
+        },
+        {
+          "label": "fields",
+          "documentation": "A list of field references."
+        },
+        {
+          "label": "references",
+          "documentation": "A list of field references."
+        }
+      ]
+    }
+  ]
+}

@@ -2,11 +2,11 @@
 
 set -eu
 
-CHANNEL="$1"
+NPM_TAG="$1"
 
 # TODO: remove this if-condition once we move to dev
-if [ "$CHANNEL" = "dev" ]; then
-    CHANNEL="alpha"
+if [ "$NPM_TAG" = "dev" ]; then
+    NPM_TAG="alpha"
 fi
 
-yarn info "@prisma/cli@$CHANNEL" --json | jq ".data[\"dist-tags\"].$CHANNEL" | tr -d '"'
+yarn info "@prisma/cli@$NPM_TAG" --json | jq ".data[\"dist-tags\"].$NPM_TAG" | tr -d '"'
