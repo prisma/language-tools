@@ -225,7 +225,7 @@ suite('Should auto-complete', () => {
         { label: 'ThirdUser', kind: vscode.CompletionItemKind.Reference },
         { label: 'TypeCheck', kind: vscode.CompletionItemKind.Reference },
         { label: 'User', kind: vscode.CompletionItemKind.Reference }
-      ]), true
+      ], true), true
     )
   })
 
