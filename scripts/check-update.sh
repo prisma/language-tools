@@ -11,20 +11,20 @@ else
     echo "No .envrc"
 fi
 
-CHANNEL=$1
-echo "CHANNEL: $CHANNEL"
+RELEASE_CHANNEL=$1
+echo "RELEASE_CHANNEL: $RELEASE_CHANNEL"
 
-if [ "$CHANNEL" = "dev" ]; then
-    CURRENT_VERSION=$(cat scripts/prisma_version_unstable)
+if [ "$RELEASE_CHANNEL" = "dev" ]; then
+    CURRENT_VERSION=$(cat scripts/prisma_version_insider)
 else
     CURRENT_VERSION=$(cat scripts/prisma_version_stable)
 fi
 echo "CURRENT_VERSION: $CURRENT_VERSION"
 
-NPM_VERSION=$(sh scripts/prisma-version.sh "$CHANNEL")
+NPM_VERSION=$(sh scripts/prisma-version.sh "$RELEASE_CHANNEL")
 echo "NPM_VERSION: $NPM_VERSION"
 
-EXTENSION_VERSION=$(sh scripts/extension-version.sh "$CHANNEL" "")
+EXTENSION_VERSION=$(sh scripts/extension-version.sh "$RELEASE_CHANNEL" "")
 echo "EXTENSION_VERSION: $EXTENSION_VERSION"
 
 # Setup the repo with GH_TOKEN to avoid running jobs when CI commits
@@ -42,14 +42,14 @@ if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then
     NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
     echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
 
-    sh ./scripts/bump.sh "$CHANNEL" "$NPM_VERSION" "$NEXT_EXTENSION_VERSION"
+    sh ./scripts/bump.sh "$RELEASE_CHANNEL" "$NPM_VERSION" "$NEXT_EXTENSION_VERSION"
     if [ "$PRODUCTION" = "1" ]; then
         git add -A .
         git commit -m "bump prisma_version to $NPM_VERSION"
     else
         echo "Not committing because production is not set"
     fi
-    yarn run vsce:publish "$CHANNEL" "$NPM_VERSION" "$NEXT_EXTENSION_VERSION"
+    yarn run vsce:publish "$RELEASE_CHANNEL" "$NPM_VERSION" "$NEXT_EXTENSION_VERSION"
 else
     echo "CURRENT_VERSION ($CURRENT_VERSION) and NPM_VERSION ($NPM_VERSION) are same"
 fi

@@ -103,6 +103,18 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   })
 
   const diagnostics: Diagnostic[] = []
+  if (
+    res.some(
+      (err) =>
+        err.text === "Field declarations don't require a `:`." ||
+        err.text ===
+          'Model declarations have to be indicated with the `model` keyword.',
+    )
+  ) {
+    connection.window.showErrorMessage(
+      "You are currently viewing a Prisma 1 datamodel which is based on the GraphQL syntax. The current Prisma VSCode extension doesn't support this syntax. To get proper syntax highlighting for this file, please change the file extension to `.graphql` and download the [GraphQL VSCode extension](https://marketplace.visualstudio.com/items?itemName=Prisma.vscode-graphql). Learn more [here](https://pris.ly/prisma1-vscode).",
+    )
+  }
 
   for (const error of res) {
     const diagnostic: Diagnostic = {

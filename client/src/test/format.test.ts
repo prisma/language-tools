@@ -25,7 +25,7 @@ async function testAutoFormat(
 }
 
 suite('Should auto-format', () => {
-  const docUri = getDocUri('autoFormat.prisma')
+  const docUri = getDocUri('formatting/autoFormat.prisma')
 
   const docUriExpected = getDocUri('correct.prisma')
   const textDocument = fs.readFileSync(docUriExpected.fsPath, 'utf8')
