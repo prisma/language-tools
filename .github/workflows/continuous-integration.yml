@@ -17,3 +17,5 @@ jobs:
         uses: GabrielBB/xvfb-action@v1.0
         with:
           run: npm run test
+      - name: Catch shell script issues
+        run: yarn shell:lint
