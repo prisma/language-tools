@@ -19,6 +19,10 @@
     {
       "label": "DateTime",
       "documentation": "Timestamp"
+    },
+    {
+      "label": "Json",
+      "documentation": "A JSON object"
     }
   ],
   "blockTypes": [

@@ -391,7 +391,12 @@ export function handleCompletionRequest(
 
     // check if type
     if (!positionIsAfterFieldAndType(currentLine, position, document)) {
-      return getSuggestionsForTypes(foundBlock, lines)
+      return getSuggestionsForTypes(
+        foundBlock,
+        lines,
+        position,
+        currentLineUntrimmed,
+      )
     }
     return getSuggestionForFieldAttribute(
       foundBlock,

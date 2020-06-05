@@ -2,7 +2,7 @@
   "name": "prisma-insider",
   "displayName": "Prisma - Insider",
   "description": "This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the  version of the CLI.",
-  "version": "0.0.1297",
+  "version": "0.0.1305",
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
@@ -79,5 +79,6 @@
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "preview": true
 }

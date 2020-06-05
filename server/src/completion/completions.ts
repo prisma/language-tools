@@ -5,7 +5,11 @@ import {
   Position,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { Block, getModelOrEnumBlock } from '../MessageHandler'
+import {
+  Block,
+  getModelOrEnumBlock,
+  getWordAtPosition,
+} from '../MessageHandler'
 import {
   blockAttributes,
   fieldAttributes,
@@ -178,8 +182,11 @@ export function getAllRelationNames(lines: Array<string>): Array<string> {
 export function getSuggestionsForTypes(
   foundBlock: Block,
   lines: Array<string>,
+  position: Position,
+  currentLineUntrimmed: string,
 ): CompletionList {
   // create deep copy
+
   const suggestions: CompletionItem[] = klona(corePrimitiveTypes)
   if (foundBlock instanceof Block) {
     // get all model names
@@ -189,9 +196,33 @@ export function getSuggestionsForTypes(
     )
   }
 
+  const wordsBeforePosition = currentLineUntrimmed
+    .slice(0, position.character)
+    .split(' ')
+  const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
+  const completeSuggestions = suggestions.filter(
+    (s) => s.label.length === wordBeforePosition.length,
+  )
+  if (completeSuggestions.length !== 0) {
+    for (const sugg of completeSuggestions) {
+      suggestions.push(
+        {
+          label: sugg.label + '?',
+          kind: sugg.kind,
+          documentation: sugg.documentation,
+        },
+        {
+          label: sugg.label + '[]',
+          kind: sugg.kind,
+          documentation: sugg.documentation,
+        },
+      )
+    }
+  }
+
   return {
     items: suggestions,
-    isIncomplete: false,
+    isIncomplete: true,
   }
 }
 
