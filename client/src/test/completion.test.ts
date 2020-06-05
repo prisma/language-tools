@@ -119,7 +119,7 @@ suite('Should auto-complete', () => {
   // GENERATOR BLOCK
 
   const fieldOutput = { label: 'output', kind: vscode.CompletionItemKind.Field }
-  const fieldBinaryTargets = {label: 'binaryTargets', kind: vscode.CompletionItemKind.Field}
+  const fieldBinaryTargets = { label: 'binaryTargets', kind: vscode.CompletionItemKind.Field }
 
   const generatorWithExistingFieldsUri = getDocUri(
     'completions/generatorWithExistingFields.prisma',
@@ -223,7 +223,8 @@ suite('Should auto-complete', () => {
         { label: 'Test', kind: vscode.CompletionItemKind.Reference },
         { label: 'ThirdUser', kind: vscode.CompletionItemKind.Reference },
         { label: 'TypeCheck', kind: vscode.CompletionItemKind.Reference },
-        { label: 'User', kind: vscode.CompletionItemKind.Reference }
+        { label: 'User', kind: vscode.CompletionItemKind.Reference },
+        { label: 'Json', kind: vscode.CompletionItemKind.TypeParameter }
       ]), true
     )
   })
