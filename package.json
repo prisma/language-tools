@@ -73,7 +73,8 @@
     "vsce:bump": "sh scripts/bump.sh",
     "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "sh ./scripts/e2e.sh",
-    "test-scripts": "mocha scripts/extension-version.test.js"
+    "test-scripts": "mocha scripts/extension-version.test.js",
+    "testReturnValue": "sh test.sh"
   },
   "activationEvents": [
     "onLanguage:prisma"
