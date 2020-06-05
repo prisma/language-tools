@@ -216,6 +216,7 @@ suite('Should auto-complete', () => {
         { label: 'Float', kind: vscode.CompletionItemKind.TypeParameter },
         { label: 'Hello', kind: vscode.CompletionItemKind.Reference },
         { label: 'Int', kind: vscode.CompletionItemKind.TypeParameter },
+        { label: 'Json', kind: vscode.CompletionItemKind.TypeParameter },
         { label: 'Person', kind: vscode.CompletionItemKind.Reference },
         { label: 'Post', kind: vscode.CompletionItemKind.Reference },
         { label: 'SecondUser', kind: vscode.CompletionItemKind.Reference },
@@ -223,8 +224,7 @@ suite('Should auto-complete', () => {
         { label: 'Test', kind: vscode.CompletionItemKind.Reference },
         { label: 'ThirdUser', kind: vscode.CompletionItemKind.Reference },
         { label: 'TypeCheck', kind: vscode.CompletionItemKind.Reference },
-        { label: 'User', kind: vscode.CompletionItemKind.Reference },
-        { label: 'Json', kind: vscode.CompletionItemKind.TypeParameter }
+        { label: 'User', kind: vscode.CompletionItemKind.Reference }
       ]), true
     )
   })
