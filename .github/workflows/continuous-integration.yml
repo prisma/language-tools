@@ -19,12 +19,3 @@ jobs:
           run: npm run test
       - name: Catch shell script issues
         run: yarn shell:lint
-      - name: Check for Update
-          run: yarn vsce:check "dev"
-          id: check_for_updates
-          outputs: 
-            new_updates: # id of the output
-              description: 'True if new updates are available'
-        - name: test Return Value
-          if: {{ $steps.check_for_updates.outputs.new_updates}}
-          run : npm run testReturnValue
