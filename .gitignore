@@ -1,8 +1,8 @@
-out/
+dist/
 node_modules/
 .envrc
 client/server
 .vscode-test
-out
+dist
 *.vsix
 *.exe

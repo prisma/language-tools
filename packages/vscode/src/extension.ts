@@ -4,13 +4,15 @@ import {
   ServerOptions,
   TransportKind,
 } from 'vscode-languageclient'
-import { ExtensionContext } from 'vscode'
+import {
+  ExtensionContext,
+  commands,
+  window,
+} from 'vscode'
 
-let client: LanguageClient
-
-const serverModule = require.resolve('@prisma/language-server')
 
 export function activate(context: ExtensionContext) {
+  const serverModule = require.resolve('@prisma/language-server/bin/server.js')
 
   // The debug options for the server
   // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
@@ -36,22 +38,26 @@ export function activate(context: ExtensionContext) {
     documentSelector: [{ scheme: 'file', language: 'prisma' }],
   }
 
-  // Create the language client and start the client.
-  client = new LanguageClient(
-    'prisma',
-    'Prisma Language Server',
-    serverOptions,
-    clientOptions,
-  )
+  // Create the language client
+  let client = createLanguageServer(serverOptions, clientOptions)
 
   // Start the client. This will also launch the server
-  client.start()
+  context.subscriptions.push(client.start())
+
+  context.subscriptions.push(
+    commands.registerCommand('prisma.restartLanguageServer', async () => {
+        await client.stop();
+        client = createLanguageServer(serverOptions, clientOptions);
+        context.subscriptions.push(client.start());
+        await client.onReady();
+        window.showInformationMessage('Prisma language server restarted.');
+    }),
+);
 }
 
-export function deactivate(): Thenable<void> | void {
-  if (!client) {
-    return undefined
-  }
-
-  return client.stop()
+function createLanguageServer(serverOptions: ServerOptions, clientOptions: LanguageClientOptions) {
+  return new LanguageClient('prisma',
+    'Prisma Language Server',
+    serverOptions,
+    clientOptions)
 }

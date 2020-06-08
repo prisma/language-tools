@@ -1,4 +1,11 @@
 {
+  "name": "@prisma/language-support",
+  "version": "1.0.0",
+  "author": "Prisma",
+  "license": "Apache-2.0",
+  "workspaces": [
+    "packages/*"
+  ],
   "devDependencies": {
     "prettier": "2.0.5",
     "lint-staged": "10.1.2",
@@ -11,28 +18,13 @@
     "@types/node": "12.12.0",
     "@commitlint/cli": "^8.1.0",
     "@commitlint/config-conventional": "^8.1.0",
-    "@commitlint/config-lerna-scopes": "^8.1.0",
-    "semver": "7.3.2",
-    "typescript": "3.8.3",
-    "vsce": "1.75.0",
-    "@types/mocha": "5.2.7",
-    "mocha": "7.1.1",
-    "lerna": "3.20.2"
+    "@commitlint/config-lerna-scopes": "^8.1.0"
   },
   "scripts": {
-    "build": "tsc -b ./server ./clients/vscode",
-    "format": "prettier  \"**/*.{ts,js,json,md}\"   --write",
-    "lint": "eslint */**/**/*.{js,ts,css,json,md} --fix --ext",
-    "watch": "npm run build -- -w",
-    "compile": "tsc -b ./server ./clients/vscode",
-    "vscode:prepublish": "npm run build",
-    "vsce:publish": "sh scripts/publish.sh",
-    "vsce:postpublish": "(cd ./clients/vscode && npm i && sh scripts/publish.sh)",
-    "postinstall": "lerna exec npm install",
-    "vsce:check": "yarn shell:lint && sh scripts/check-update.sh",
-    "shell:lint": "shellcheck -x scripts/*.sh",
-    "test": "sh ./scripts/e2e.sh",
-    "test-scripts": "mocha scripts/extension-version.test.js"
+    "build": "tsc -b",
+    "format": "prettier   \"packages/**/*.{ts,js,json,md}\"   --write",
+    "lint": "eslint  \"packages/**/*.{js,ts,css,json,md} --fix --ext",
+    "watch": "npm run build -- -w"
   },
   "husky": {
     "hooks": {
@@ -43,11 +35,11 @@
     "access": "public"
   },
   "lint-staged": {
-    "*/**/**/*.{js,ts,css,json,md}": [
+    "packages/**/*.{js,ts,css,json,md}": [
       "prettier --write",
       "git add"
     ],
-    "*/**/**/*.{js,ts}": [
+    "packages/**/*.{js,ts}": [
       "eslint --fix"
     ]
   }

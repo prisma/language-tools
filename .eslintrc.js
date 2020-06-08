@@ -1,6 +1,10 @@
 module.exports = {
+  root: true,
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'prettier'],
+  plugins: [
+    '@typescript-eslint', 
+    'prettier'
+  ],
   env: {
     node: true,
     es6: true,
@@ -15,6 +19,6 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2020,
     sourceType: 'module',
-    project: ['./tsconfig.base.json', './**/**/tsconfig.json']
+    project: ['./tsconfig.json', './packages/**/tsconfig.json']
   }
 }
