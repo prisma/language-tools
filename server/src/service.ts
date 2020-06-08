@@ -3,25 +3,14 @@ import {
   TextDocuments,
   DiagnosticSeverity,
   Diagnostic,
-  Definition,
-  TextDocumentPositionParams,
-  Range,
-  TextEdit,
-  Position,
-  DocumentFormattingParams,
 } from 'vscode-languageserver'
-import { URI } from 'vscode-uri'
 import { TextDocument } from 'vscode-languageserver-textdocument'
+import * as MessageHandler from './MessageHandler'
+import { fullDocumentRange } from './provider'
 import * as util from './util'
 import lint from './lint'
 import fs from 'fs'
 import install from './install'
-import { Schema } from 'prismafile/dist/ast'
-import { parse } from 'prismafile'
-import { fullDocumentRange } from './provider'
-import format from './format'
-
-let ast: Schema
 
 export class PLS {
   public static start(connection: IConnection) {
@@ -39,18 +28,50 @@ export class PLS {
 
   constructor(private connection: IConnection) {
     this.connection = connection
+
+    // Make the text document manager listen on the connection
+    // for open, change and close text document events
     this.documents.listen(connection)
+
+    // Listen on the connection
     connection.listen()
 
     this.documents.onDidChangeContent((change) =>
-      this.queueValidation(change.document),
+      this.queueValidation(change.document)
+
     )
 
-    this.documents.onDidOpen((change) => this.queueValidation(change.document))
+    this.documents.onDidOpen((change) =>
+      this.queueValidation(change.document)
+    )
 
     connection.onInitialize(async () => {
-      connection.onDocumentFormatting(this.onDocumentFormatting)
-      connection.onDefinition(this.onDefinition)
+
+      connection.onDocumentFormatting((params) => MessageHandler.handleDocumentFormatting(
+        params,
+        this.documents,
+        (errorMessage: string) => {
+          connection.window.showErrorMessage(errorMessage)
+        },
+      ))
+
+      connection.onDefinition((params) =>
+        MessageHandler.handleDefinitionRequest(this.documents, params)
+      )
+
+      connection.onCompletion((params) =>
+        MessageHandler.handleCompletionRequest(params, this.documents)
+      )
+
+      connection.onCompletionResolve((params) =>
+        MessageHandler.handleCompletionResolveRequest(params)
+      )
+
+      connection.onHover((params) =>
+        MessageHandler.handleHoverRequest(this.documents, params)
+      )
+
+
       this.documents.all().forEach((doc) => this.queueValidation(doc))
 
       const binPathPrismaFmt = await util.getBinPath()
@@ -65,10 +86,27 @@ export class PLS {
         }
       }
 
+      connection.console.info(
+        'Installed version of Prisma binary `prisma-fmt`: ' +
+        (await util.getVersion()),
+      )
+
+      const pj = util.tryRequire('../../package.json')
+      connection.console.info(
+        'Extension name ' + pj.name + ' with version ' + pj.version,
+      )
+      const prismaCLIVersion = await util.getCLIVersion()
+      connection.console.info('Prisma CLI version: ' + prismaCLIVersion)
+
       return {
         capabilities: {
-          documentFormattingProvider: true,
           definitionProvider: true,
+          documentFormattingProvider: true,
+          completionProvider: {
+            resolveProvider: true,
+            triggerCharacters: ['@', '"'],
+          },
+          hoverProvider: true,
         },
       }
     })
@@ -77,12 +115,6 @@ export class PLS {
   public async validateTextDocument(
     textDocument: TextDocument,
   ): Promise<Diagnostic[]> {
-    const { fsPath, scheme } = URI.parse(textDocument.uri)
-
-    if (scheme !== 'file') {
-      return []
-    }
-
     const text = textDocument.getText(fullDocumentRange(textDocument))
     const binPath = await util.getBinPath()
 
@@ -91,6 +123,18 @@ export class PLS {
     })
 
     const diagnostics: Diagnostic[] = []
+    if (
+      res.some(
+        (err) =>
+          err.text === "Field declarations don't require a `:`." ||
+          err.text ===
+          'Model declarations have to be indicated with the `model` keyword.',
+      )
+    ) {
+      this.connection.window.showErrorMessage(
+        "You are currently viewing a Prisma 1 datamodel which is based on the GraphQL syntax. The current Prisma VSCode extension doesn't support this syntax. To get proper syntax highlighting for this file, please change the file extension to `.graphql` and download the [GraphQL VSCode extension](https://marketplace.visualstudio.com/items?itemName=Prisma.vscode-graphql). Learn more [here](https://pris.ly/prisma1-vscode).",
+      )
+    }
 
     for (const error of res) {
       const diagnostic: Diagnostic = {
@@ -104,73 +148,9 @@ export class PLS {
       }
       diagnostics.push(diagnostic)
     }
-
-    if (diagnostics.length === 0) {
-      ast = parse(text)
-    }
     return diagnostics
   }
 
-  public onDocumentFormatting = async ({
-    textDocument,
-    options,
-  }: DocumentFormattingParams): Promise<TextEdit[]> => {
-    const document = this.documents.get(textDocument.uri)
-    if (!document) {
-      return []
-    }
-    const binPath = await util.getBinPath()
-    return format(
-      binPath,
-      options.tabSize,
-      document.getText(),
-      (errorMessage: string) => {
-        this.connection.window.showErrorMessage(errorMessage)
-      },
-    ).then((formatted) => [
-      TextEdit.replace(fullDocumentRange(document), formatted),
-    ])
-  }
-
-  public onDefinition = (params: TextDocumentPositionParams): Definition => {
-    const textDocument = params.textDocument
-    const position = params.position
-
-    const document = this.documents.get(textDocument.uri)
-
-    if (!document) {
-      return []
-    }
-
-    const documentText = document.getText()
-
-    const word = this.getWordAtPosition(document, position)
-
-    if (word === '') {
-      return []
-    }
-
-    const found = ast.blocks.find((b) => b.type === 'model' && b.name === word)
-
-    // selected word is not a model type
-    if (!found) {
-      return []
-    }
-
-    const startPosition = {
-      line: found.start.line - 1,
-      character: found.start.column - 1,
-    }
-    const endPosition = {
-      line: found.end.line,
-      character: found.end.column,
-    }
-
-    return {
-      uri: textDocument.uri,
-      range: Range.create(startPosition, endPosition),
-    }
-  }
 
   private async queueValidation(textDocument: TextDocument): Promise<void> {
     const previousRequest = this.pendingValidationRequests[textDocument.uri]
@@ -188,37 +168,4 @@ export class PLS {
     }, this.validationDelayMs)
   }
 
-  private displayMessage(type: 'info' | 'warning' | 'error', msg: string) {
-    this.connection.sendNotification(
-      `$ / display${type[0].toUpperCase() + type.slice(1)} `,
-      msg,
-    )
-  }
-
-  private getCurrentLine(document: TextDocument, line: number): string {
-    return document.getText({
-      start: { line: line, character: 0 },
-      end: { line: line, character: 9999 },
-    })
-  }
-
-  private getWordAtPosition(
-    document: TextDocument,
-    position: Position,
-  ): string {
-    const currentLine = this.getCurrentLine(document, position.line)
-
-    if (currentLine.slice(0, position.character).endsWith('@@')) {
-      return '@@'
-    }
-    // search for the word's beginning and end
-    const beginning = currentLine
-      .slice(0, position.character + 1)
-      .search(/\S+$/)
-    const end = currentLine.slice(position.character).search(/\W/)
-    if (end < 0) {
-      return ''
-    }
-    return currentLine.slice(beginning, end + position.character)
-  }
 }
