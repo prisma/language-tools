@@ -1,0 +1,9 @@
+{
+  "references": [
+    {"path": "./packages/vscode"},
+    {"path": "./packages/server"}
+  ],
+  "exclude": ["**/node_modules", ".vscode-test"],
+  "files": [],
+  "include": []
+}

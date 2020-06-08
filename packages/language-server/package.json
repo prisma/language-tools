@@ -1,0 +1,54 @@
+{
+  "name": "@prisma/language-server",
+  "description": "Implementation of a language server in node.",
+  "displayName": "Prisma Language Server",
+  "version": "0.0.1307",
+  "author": "Prisma",
+  "license": "Apache-2.0",
+  "publisher": "Prisma",
+  "engines": {
+    "node": ">=10"
+  },
+  "prisma": {
+    "version": "02109fb558eac1f56fe7804ea3498a43c541d72b"
+  },
+  "bin": {
+    "prisma-language-server": "/bin/server.js"
+  },
+  "repository": {
+    "type": "github",
+    "url": "git+https://github.com/prisma/vscode.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "npm run build -- -w"
+  },
+  "main": "./dist/index.js",
+  "typings": "dist/src/index",
+  "dependencies": {
+    "@prisma/get-platform": "2.0.0-alpha.1306",
+    "klona": "1.1.1",
+    "pkg-dir": "4.2.0",
+    "vscode-languageserver": "6.1.1",
+    "vscode-languageserver-textdocument": "1.0.1",
+    "vscode-uri": "2.1.1"
+  },
+  "devDependencies": {
+    "vsce": "1.75.0"
+  },
+  "keywords": [
+    "autocomplete",
+    "intellisense",
+    "language",
+    "prisma",
+    "server",
+    "formatting",
+    "linting"
+  ],
+  "bugs": {
+    "url": "https://github.com/prisma/vscode/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
