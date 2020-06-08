@@ -1,10 +1,4 @@
 {
-  "command": {
-    "publish": {
-      "conventionalCommits": true,
-      "message": "chore: publish"
-    }
-  },
   "version": "independent",
   "packages": ["server", "clients/vscode"],
   "ignoreChanges": ["**/package-lock.json", "**/*.md"]
