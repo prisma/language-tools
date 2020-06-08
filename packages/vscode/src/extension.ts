@@ -10,9 +10,19 @@ import {
   window,
 } from 'vscode'
 
+function tryRequire(path: any) {
+  try {
+    return require(path)
+  } catch (err) {
+    console.error(err)
+    return
+  }
+}
 
 export function activate(context: ExtensionContext) {
-  const serverModule = require.resolve('@prisma/language-server/bin/server.js')
+  //const serverModule = require.resolve('@prisma/language-server/bin/server.js')
+  const serverModule = tryRequire('../../language-server/bin/server.js')
+  // TODO unsupported server configuration?? 
 
   // The debug options for the server
   // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging

@@ -34,16 +34,10 @@
       "runtimeExecutable": "${execPath}",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode",
-        "--extensionTestsPath=${workspaceFolder}/packages/vscode/dist/test/index",
-        "${workspaceFolder}/clients/vscode/testFixture"
+        "--extensionTestsPath=${workspaceFolder}/packages/vscode/dist/src/test/index",
+        "${workspaceFolder}/packages/vscode/testFixture"
       ],
-      "outFiles": ["${workspaceFolder}/packages/vscode/dist/test/**/*.js"]
-    }
-  ],
-  "compounds": [
-    {
-      "name": "Client + Server",
-      "configurations": ["Launch Client", "Attach to Server"]
+      "outFiles": ["${workspaceFolder}/packages/vscode/dist/src/test/**/*.js"]
     }
   ]
 }

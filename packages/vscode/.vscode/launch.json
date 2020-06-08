@@ -15,18 +15,6 @@
                 "${workspaceFolder}/dist/**/*.js"
             ],
             "preLaunchTask": "npm: watch"
-        },
-        {
-            "name": "Language Server E2E Test",
-            "type": "extensionHost",
-            "request": "launch",
-            "runtimeExecutable": "${execPath}",
-            "args": [
-              "--extensionDevelopmentPath=${workspaceFolder}",
-              "--extensionTestsPath=${workspaceFolder}/dist/test/index",
-              "${workspaceFolder}/testFixture"
-            ],
-            "outFiles": ["${workspaceFolder}/dist/test/**/*.js"]
-          }
+        }
     ]
 }

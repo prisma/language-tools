@@ -24,7 +24,8 @@
     "build": "tsc -b",
     "format": "prettier   \"packages/**/*.{ts,js,json,md}\"   --write",
     "lint": "eslint  \"packages/**/*.{js,ts,css,json,md} --fix --ext",
-    "watch": "npm run build -- -w"
+    "watch": "npm run build -- -w",
+    "test": "sh ./packages/vscode/scripts/e2e.sh"
   },
   "husky": {
     "hooks": {

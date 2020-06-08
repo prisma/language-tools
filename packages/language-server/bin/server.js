@@ -1,5 +1,14 @@
 #! /usr/bin/env node
 
-import { startServer } from '../dist/src/server';
+function tryRequire(path) {
+    try {
+        return require(path)
+    } catch (err) {
+        console.error(err)
+        return
+    }
+}
 
-startServer();
+const server = tryRequire('../src/server')
+
+server.startServer()

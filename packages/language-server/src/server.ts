@@ -30,7 +30,7 @@ export interface LSOptions {
  */
 export function startServer(options?: LSOptions) {
     let connection = options?.connection;
-    if (!connection || connection === undefined) {
+    if (!connection) {
         connection = process.argv.includes('--stdio')
             ? createConnection(process.stdin, process.stdout)
             : createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
@@ -43,25 +43,25 @@ export function startServer(options?: LSOptions) {
         if (!fs.existsSync(binPathPrismaFmt)) {
             try {
                 await install(binPathPrismaFmt)
-                connection.console.info(
+                connection!.console.info(
                     'Prisma plugin prisma-fmt installation succeeded.',
                 )
             } catch (err) {
-                connection.console.error('Cannot install prisma-fmt: ' + err)
+                connection!.console.error('Cannot install prisma-fmt: ' + err)
             }
         }
 
-        connection.console.info(
+        connection!.console.info(
             'Installed version of Prisma binary `prisma-fmt`: ' +
             (await util.getVersion()),
         )
 
         const pj = util.tryRequire('../../package.json')
-        connection.console.info(
+        connection!.console.info(
             'Extension name ' + pj.name + ' with version ' + pj.version,
         )
         const prismaCLIVersion = await util.getCLIVersion()
-        connection.console.info('Prisma CLI version: ' + prismaCLIVersion)
+        connection!.console.info('Prisma CLI version: ' + prismaCLIVersion)
 
         return {
             capabilities: {
@@ -106,7 +106,7 @@ export function startServer(options?: LSOptions) {
             params,
             documents,
             (errorMessage: string) => {
-                connection.window.showErrorMessage(errorMessage)
+                connection!.window.showErrorMessage(errorMessage)
             },
         ),
     )
@@ -116,7 +116,7 @@ export function startServer(options?: LSOptions) {
         const binPath = await util.getBinPath()
 
         const res = await lint(binPath, text, (errorMessage: string) => {
-            connection.window.showErrorMessage(errorMessage)
+            connection!.window.showErrorMessage(errorMessage)
         })
 
         const diagnostics: Diagnostic[] = []
@@ -128,7 +128,7 @@ export function startServer(options?: LSOptions) {
                     'Model declarations have to be indicated with the `model` keyword.',
             )
         ) {
-            connection.window.showErrorMessage(
+            connection!.window.showErrorMessage(
                 "You are currently viewing a Prisma 1 datamodel which is based on the GraphQL syntax. The current Prisma VSCode extension doesn't support this syntax. To get proper syntax highlighting for this file, please change the file extension to `.graphql` and download the [GraphQL VSCode extension](https://marketplace.visualstudio.com/items?itemName=Prisma.vscode-graphql). Learn more [here](https://pris.ly/prisma1-vscode).",
             )
         }
@@ -145,7 +145,7 @@ export function startServer(options?: LSOptions) {
             }
             diagnostics.push(diagnostic)
         }
-        connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
+        connection!.sendDiagnostics({ uri: textDocument.uri, diagnostics })
     }
 
     // Make the text document manager listen on the connection

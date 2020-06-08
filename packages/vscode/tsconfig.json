@@ -8,6 +8,9 @@
     "sourceMap": true,
     "esModuleInterop": true,
     "strict": true,
-    "composite": true
+    "composite": true,
+    "declaration": true
   },
+  "include": ["src"],
+  "exclude": ["node_modules", ".vscode-test"]
 }

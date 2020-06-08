@@ -6,7 +6,7 @@ async function main(): Promise<void> {
   try {
     // The folder containing the Extension Manifest package.json
     // Passed to `--extensionDevelopmentPath`
-    const extensionDevelopmentPath = path.resolve(__dirname, '../../')
+    const extensionDevelopmentPath = path.resolve(__dirname, '../../../')
 
     // The path to test runner
     // Passed to --extensionTestsPath
@@ -26,5 +26,3 @@ async function main(): Promise<void> {
     process.exit(1)
   }
 }
-
-main()

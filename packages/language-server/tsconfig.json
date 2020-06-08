@@ -7,8 +7,10 @@
     "lib": ["es6"],
     "sourceMap": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
-    "composite": true,
-    "resolveJsonModule": true
-  }
+    "strict": true,
+    "resolveJsonModule": true,
+    "composite": true
+  },
+  "include": ["src/**/*", "src/**/*.json"],
+  "exclude": ["node_modules", ".vscode-test"]
 }
