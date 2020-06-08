@@ -11,7 +11,7 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionDevelopmentPath=${workspaceFolder}/clients/vscode",
         "--disable-extensions"
       ],
       "outFiles": ["${workspaceFolder}/clients/vscode/out/**/*.js"]
@@ -31,7 +31,7 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionDevelopmentPath=${workspaceFolder}/clients/vscode",
         "--extensionTestsPath=${workspaceFolder}/clients/vscode/out/test/index",
         "${workspaceFolder}/clients/vscode/testFixture"
       ],
