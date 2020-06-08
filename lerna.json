@@ -1,5 +1,5 @@
 {
   "version": "independent",
-  "packages": ["server", "clients/vscode"],
+  "packages": ["server"],
   "ignoreChanges": ["**/package-lock.json", "**/*.md"]
 }
