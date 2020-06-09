@@ -28,7 +28,7 @@
     "lint": "eslint  \"packages/**/*.{js,ts,css,json,md} --fix --ext",
     "compile": "cd packages/language-server && npm run build && cd ../vscode && npm run build && cd .. && cd ..",
     "watch": "npm run build -- -w",
-    "test": "sh ./packages/vscode/scripts/e2e.sh"
+    "test": "sh ./scripts/e2e.sh"
   },
   "husky": {
     "hooks": {

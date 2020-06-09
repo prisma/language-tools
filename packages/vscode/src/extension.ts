@@ -20,11 +20,11 @@ function createLanguageServer(
 }
 
 export function activate(context: ExtensionContext) {
-  //const serverModule = require.resolve('@prisma/language-server/bin/server.js')
+  const serverModule = require.resolve('@prisma/language-server/src/cli')
   // for debugging the server
-  const serverModule = context.asAbsolutePath(
-    path.join('../../packages/language-server/dist/src/cli.js'),
-  )
+  //const serverModule = context.asAbsolutePath(
+  //  path.join('../../packages/language-server/dist/src/cli.js'),
+  //)
 
   // The debug options for the server
   // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
