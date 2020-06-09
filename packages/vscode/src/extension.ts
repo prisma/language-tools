@@ -5,7 +5,6 @@ import {
   TransportKind,
 } from 'vscode-languageclient'
 import { ExtensionContext, commands, window } from 'vscode'
-import path from 'path'
 
 function createLanguageServer(
   serverOptions: ServerOptions,

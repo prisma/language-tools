@@ -9,18 +9,18 @@
 ![CI tests](https://img.shields.io/github/workflow/status/prisma/vscode/CI%20tests/master.svg?label=CI%20tests&logo=github)
 ![Check for Update + Automated Publish](https://img.shields.io/github/workflow/status/prisma/vscode/Check%20for%20Update%20%2B%20Automated%20Publish/master.svg?label=Check%20for%20Update%20%2B%20Automated%20Publish&logo=github)
 
-
 </div>
 <hr>
 Adds syntax highlighting, formatting, jump-to-definition and linting for `.prisma` files.
 
 ## Features
 
-* Syntax highlighting
-* Auto-formatting
-* Linting
-* Jump-to-definition
-* Auto-completion
+- Syntax highlighting
+- Auto-formatting
+- Linting
+- Jump-to-definition
+- Auto-completion
+- On-Hover
 
 It also includes an End-to-End test.
 
@@ -30,7 +30,7 @@ Get the Prisma Extension from the [Visual Studio Marketplace](https://marketplac
 
 ## Preview
 
-![Preview](https://imgur.com/W80iRwE)
+![Preview Schema](https://i.imgur.com/W80iRwE.png)
 
 ## Contributing
 
