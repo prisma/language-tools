@@ -19,9 +19,6 @@ echo "============================"
 RELEASE_CHANNEL=$1
 echo "RELEASE_CHANNEL: $RELEASE_CHANNEL"
 
-PRISMA_VERSION=$(sh scripts/prisma-version.sh "$CHANNEL")
-echo "PRISMA_VERSION: $PRISMA_VERSION"
-
 NPM_VERSION=$(sh scripts/prisma-version.sh "$CHANNEL")
 echo "NPM_VERSION: $NPM_VERSION"
 
@@ -48,7 +45,7 @@ fi
 if [ "$PRODUCTION" = "1" ] && [ "$RELEASE_CHANNEL" = "dev" ]; then
     echo "Sync with ${GITHUB_REF} and push to it"
     git pull github "${GITHUB_REF}" --ff-only
-    git tag -a "dev/$NEXT_EXTENSION_VERSION" -m "dev/$NEXT_EXTENSION_VERSION" -m "Prisma version: $NPM_VERSION"
+    git tag -a "insider/$NEXT_EXTENSION_VERSION" -m "insider/$NEXT_EXTENSION_VERSION" -m "Prisma version: $NPM_VERSION"
     git push github HEAD:"${GITHUB_REF}" --follow-tags
 elif [ "$PRODUCTION" = "1" ] && [ "$RELEASE_CHANNEL" = "latest" ]; then
     echo "Sync with ${GITHUB_REF} and push to it"

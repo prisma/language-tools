@@ -29,17 +29,17 @@ jobs:
           new_updates: # id of the output
             description: 'True if new updates are available'
       - name: Bump versions
-        if: steps.check_for_updates.outputs.new_updates
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: yarn vsce:bump "dev"
       - name: Compile
         run: yarn compile
       - name: Run headless e2e tests
-        if: steps.check_for_updates.outputs.new_updates
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
         uses: GabrielBB/xvfb-action@v1.0
         with:
           run: npm run test
       - name: Publish Extension as Patch
-        if: steps.check_for_updates.outputs.new_updates
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: yarn vsce:publish "latest"
       - name: Slack Notification
         if: ${{ failure() }}
@@ -72,17 +72,17 @@ jobs:
           new_updates: # id of the output
             description: 'True if new updates are available'
       - name: Bump versions
-        if: steps.check_for_updates.outputs.new_updates
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: yarn vsce:bump "dev"
       - name: Compile
         run: yarn compile
       - name: Run headless e2e tests
-        if: steps.check_for_updates.outputs.new_updates
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
         uses: GabrielBB/xvfb-action@v1.0
         with:
           run: npm run test
       - name: Publish Extension as Patch
-        if: steps.check_for_updates.outputs.new_updates
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: yarn vsce:publish "dev"
       - name: Slack Notification
         if: ${{ failure() }}
