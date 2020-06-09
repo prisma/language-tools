@@ -6,7 +6,7 @@ set -eu
 if [ -f ".envrc" ]; then
     echo "Loading .envrc"
     # shellcheck disable=SC1091
-    . .envrc
+    . ./.envrc
 else
     echo "No .envrc"
 fi
@@ -37,10 +37,8 @@ else
 fi
 
 if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then
-    ::set-output name=new_updates::true
     echo "::set-output name=new_updates::true"
 else
-    ::set-output name=new_updates::false
     echo "::set-output name=new_updates::false"
     echo "CURRENT_VERSION ($CURRENT_VERSION) and NPM_VERSION ($NPM_VERSION) are same"
 fi
