@@ -16,7 +16,6 @@
         "--disable-extensions"
       ],
       "outFiles": ["${workspaceFolder}/packages/vscode/dist/**/*.js"],
-      "preLaunchTask": "npm: watch"
     },
     {
       "type": "node",

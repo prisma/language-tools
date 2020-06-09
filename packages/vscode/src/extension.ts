@@ -9,6 +9,7 @@ import {
   commands,
   window,
 } from 'vscode'
+import path from 'path'
 
 function tryRequire(path: any) {
   try {
@@ -20,9 +21,9 @@ function tryRequire(path: any) {
 }
 
 export function activate(context: ExtensionContext) {
-  //const serverModule = require.resolve('@prisma/language-server/bin/server.js')
-  const serverModule = tryRequire('../../language-server/bin/server.js')
-  // TODO unsupported server configuration?? 
+  const serverModule = require.resolve('@prisma/language-server/bin/server.js')
+  // for debugging the server
+  //const serverModule = require(path.join(__dirname, '../../../language-server/bin/server.js'))
 
   // The debug options for the server
   // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging

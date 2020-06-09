@@ -9,6 +9,6 @@ function tryRequire(path) {
     }
 }
 
-const server = tryRequire('../src/server')
+const server = tryRequire('../dist/src/server')
 
 server.startServer()
