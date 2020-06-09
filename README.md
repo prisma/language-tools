@@ -32,7 +32,7 @@ It also includes an End-to-End test.
 
 ## Preview
 
-![Imgur](https://i.imgur.com/W80iRwE.png)
+![Preview Schema](https://i.imgur.com/W80iRwE.png)
 
 ## Contributing
 
