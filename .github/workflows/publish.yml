@@ -42,14 +42,14 @@ jobs:
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: yarn vsce:publish "latest"
       - name: Slack Notification
-        if: ${{ failure() }}
+        if: ${{ failure() }} && ${{ steps.check_for_updates.outputs.new_updates }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
           SLACK_CHANNEL: feed-vscode
           SLACK_MESSAGE: ":x:"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
       - name: Slack Notification
-        if: ${{ success() }}
+        if: ${{ success() }} && ${{ steps.check_for_updates.outputs.new_updates }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
           SLACK_CHANNEL: feed-vscode
@@ -85,14 +85,14 @@ jobs:
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: yarn vsce:publish "dev"
       - name: Slack Notification
-        if: ${{ failure() }}
+        if: ${{ failure() }} && ${{ steps.check_for_updates.outputs.new_updates }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
           SLACK_CHANNEL: feed-vscode
           SLACK_MESSAGE: ":x:"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
       - name: Slack Notification
-        if: ${{ success() }}
+        if: ${{ success() }} && ${{ steps.check_for_updates.outputs.new_updates }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
           SLACK_CHANNEL: feed-vscode
