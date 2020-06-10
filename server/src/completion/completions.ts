@@ -539,7 +539,7 @@ function getSuggestionsForRelationDirective(
       position,
     )
   ) {
-    const referencedModelName = wordsBeforePosition[1]
+    const referencedModelName = wordsBeforePosition[1].replace('?', '')
     const referencedBlock = getModelOrEnumBlock(referencedModelName, lines)
 
     // referenced model does not exist
@@ -590,7 +590,7 @@ export function getSuggestionsForInsideAttributes(
   const wordsBeforePosition = untrimmedCurrentLine
     .slice(0, position.character)
     .trimLeft()
-    .split(' ')
+    .split(/\s+/)
 
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
 
