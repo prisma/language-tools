@@ -589,6 +589,7 @@ export function getSuggestionsForInsideAttributes(
   let suggestions: Array<string> = []
   const wordsBeforePosition = untrimmedCurrentLine
     .slice(0, position.character)
+    .trimLeft()
     .split(' ')
 
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
