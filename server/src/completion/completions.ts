@@ -3,6 +3,7 @@ import {
   CompletionList,
   CompletionItemKind,
   Position,
+  MarkupKind,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import {
@@ -391,13 +392,38 @@ function getDefaultValues(currentLine: string): CompletionItem[] {
     suggestions.push({
       label: 'autoincrement()',
       kind: CompletionItemKind.Function,
+      documentation:
+        'Create a sequence of integers in the underlying database and assign the incremented values to the ID values of the created records based on the sequence.',
     })
   } else if (currentLine.includes('DateTime')) {
-    suggestions.push({ label: 'now()', kind: CompletionItemKind.Function })
+    suggestions.push({
+      label: 'now()',
+      kind: CompletionItemKind.Function,
+      documentation: {
+        kind: MarkupKind.Markdown,
+        value: 'Set a timestamp of the time when a record is created.',
+      },
+    })
   } else if (currentLine.includes('String')) {
     suggestions.push(
-      { label: 'uuid()', kind: CompletionItemKind.Function },
-      { label: 'cuid()', kind: CompletionItemKind.Function },
+      {
+        label: 'uuid()',
+        kind: CompletionItemKind.Function,
+        documentation: {
+          kind: MarkupKind.Markdown,
+          value:
+            'Generate a globally unique identifier based on the [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier) spec.',
+        },
+      },
+      {
+        label: 'cuid()',
+        kind: CompletionItemKind.Function,
+        documentation: {
+          kind: MarkupKind.Markdown,
+          value:
+            'Generate a globally unique identifier based on the [cuid](https://github.com/ericelliott/cuid) spec.',
+        },
+      },
     )
   } else if (currentLine.includes('Boolean')) {
     suggestions.push(
@@ -561,8 +587,9 @@ export function getSuggestionsForInsideAttributes(
   block: Block,
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
-  const wordsBeforePosition = lines[position.line]
+  const wordsBeforePosition = untrimmedCurrentLine
     .slice(0, position.character)
+    .trimLeft()
     .split(' ')
 
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
