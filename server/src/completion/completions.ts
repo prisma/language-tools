@@ -562,8 +562,9 @@ export function getSuggestionsForInsideAttributes(
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
   const wordsBeforePosition = lines[position.line]
+    .slice(0, position.character)
     .split(' ')
-    .slice(0, position.character - 2)
+
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
 
   if (wordBeforePosition.includes('@default')) {
