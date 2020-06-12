@@ -27,7 +27,7 @@ async function testCompletion(
   assert.deepStrictEqual(
     actualCompletions.items.length,
     expectedCompletionList.items.length,
-  )
+  ) 
   assert.deepStrictEqual(
     actualCompletions.items.map((items) => items.label),
     expectedCompletionList.items.map((items) => items.label),
@@ -58,7 +58,6 @@ suite('Should auto-complete', () => {
           { label: 'datasource', kind: vscode.CompletionItemKind.Class },
           { label: 'generator', kind: vscode.CompletionItemKind.Class },
           { label: 'model', kind: vscode.CompletionItemKind.Class },
-          { label: 'type_alias', kind: vscode.CompletionItemKind.Class },
         ],
         false,
       ),
@@ -76,7 +75,6 @@ suite('Should auto-complete', () => {
           { label: 'enum', kind: vscode.CompletionItemKind.Class },
           { label: 'generator', kind: vscode.CompletionItemKind.Class },
           { label: 'model', kind: vscode.CompletionItemKind.Class },
-          { label: 'type_alias', kind: vscode.CompletionItemKind.Class },
         ],
         false,
       ),
@@ -119,7 +117,10 @@ suite('Should auto-complete', () => {
   // GENERATOR BLOCK
 
   const fieldOutput = { label: 'output', kind: vscode.CompletionItemKind.Field }
-  const fieldBinaryTargets = { label: 'binaryTargets', kind: vscode.CompletionItemKind.Field }
+  const fieldBinaryTargets = {
+    label: 'binaryTargets',
+    kind: vscode.CompletionItemKind.Field,
+  }
 
   const generatorWithExistingFieldsUri = getDocUri(
     'completions/generatorWithExistingFields.prisma',
@@ -128,7 +129,11 @@ suite('Should auto-complete', () => {
     await testCompletion(
       emptyBlocksUri,
       new vscode.Position(5, 0),
-      new vscode.CompletionList([fieldBinaryTargets, fieldOutput, fieldProvider]),
+      new vscode.CompletionList([
+        fieldBinaryTargets,
+        fieldOutput,
+        fieldProvider,
+      ]),
       false,
     )
   })
@@ -202,30 +207,33 @@ suite('Should auto-complete', () => {
     )
   })
 
-
   // TYPES
 
   test('Diagnoses type suggestions in model block', async () => {
     await testCompletion(
       modelBlocksUri,
       new vscode.Position(51, 7),
-      new vscode.CompletionList([
-        { label: 'Boolean', kind: vscode.CompletionItemKind.TypeParameter },
-        { label: 'Cat', kind: vscode.CompletionItemKind.Reference },
-        { label: 'DateTime', kind: vscode.CompletionItemKind.TypeParameter },
-        { label: 'Float', kind: vscode.CompletionItemKind.TypeParameter },
-        { label: 'Hello', kind: vscode.CompletionItemKind.Reference },
-        { label: 'Int', kind: vscode.CompletionItemKind.TypeParameter },
-        { label: 'Json', kind: vscode.CompletionItemKind.TypeParameter },
-        { label: 'Person', kind: vscode.CompletionItemKind.Reference },
-        { label: 'Post', kind: vscode.CompletionItemKind.Reference },
-        { label: 'SecondUser', kind: vscode.CompletionItemKind.Reference },
-        { label: 'String', kind: vscode.CompletionItemKind.TypeParameter },
-        { label: 'Test', kind: vscode.CompletionItemKind.Reference },
-        { label: 'ThirdUser', kind: vscode.CompletionItemKind.Reference },
-        { label: 'TypeCheck', kind: vscode.CompletionItemKind.Reference },
-        { label: 'User', kind: vscode.CompletionItemKind.Reference }
-      ], true), true
+      new vscode.CompletionList(
+        [
+          { label: 'Boolean', kind: vscode.CompletionItemKind.TypeParameter },
+          { label: 'Cat', kind: vscode.CompletionItemKind.Reference },
+          { label: 'DateTime', kind: vscode.CompletionItemKind.TypeParameter },
+          { label: 'Float', kind: vscode.CompletionItemKind.TypeParameter },
+          { label: 'Hello', kind: vscode.CompletionItemKind.Reference },
+          { label: 'Int', kind: vscode.CompletionItemKind.TypeParameter },
+          { label: 'Json', kind: vscode.CompletionItemKind.TypeParameter },
+          { label: 'Person', kind: vscode.CompletionItemKind.Reference },
+          { label: 'Post', kind: vscode.CompletionItemKind.Reference },
+          { label: 'SecondUser', kind: vscode.CompletionItemKind.Reference },
+          { label: 'String', kind: vscode.CompletionItemKind.TypeParameter },
+          { label: 'Test', kind: vscode.CompletionItemKind.Reference },
+          { label: 'ThirdUser', kind: vscode.CompletionItemKind.Reference },
+          { label: 'TypeCheck', kind: vscode.CompletionItemKind.Reference },
+          { label: 'User', kind: vscode.CompletionItemKind.Reference },
+        ],
+        true,
+      ),
+      true,
     )
   })
 
@@ -283,6 +291,11 @@ suite('Should auto-complete', () => {
   }
   const referencesProperty = {
     label: 'references: []',
+    kind: vscode.CompletionItemKind.Property,
+  }
+
+  const nameProperty = {
+    label: '""',
     kind: vscode.CompletionItemKind.Property,
   }
 
@@ -388,7 +401,7 @@ suite('Should auto-complete', () => {
       relationDirectiveUri,
       new vscode.Position(12, 26),
       new vscode.CompletionList([
-        { label: '""', kind: vscode.CompletionItemKind.Property },
+        nameProperty,
         fieldsProperty,
         referencesProperty,
       ]),
@@ -407,13 +420,13 @@ suite('Should auto-complete', () => {
     await testCompletion(
       relationDirectiveUri,
       new vscode.Position(30, 44),
-      new vscode.CompletionList([fieldsProperty]),
+      new vscode.CompletionList([nameProperty, fieldsProperty]),
       true,
     )
     await testCompletion(
       relationDirectiveUri,
       new vscode.Position(39, 45),
-      new vscode.CompletionList([referencesProperty]),
+      new vscode.CompletionList([nameProperty, referencesProperty]),
       true,
     )
     await testCompletion(
@@ -429,5 +442,4 @@ suite('Should auto-complete', () => {
       true,
     )
   })
-
 })

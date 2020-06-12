@@ -20,12 +20,7 @@ echo "UPDATING to $PRISMA_VERSION"
 echo "PRISMA_VERSION: $PRISMA_VERSION"
 
 
-# TODO: remove this if-condition once we move to dev
-if [ "$RELEASE_CHANNEL" = "dev" ]; then
-    PRISMA_CHANNEL="alpha"
-else
-    PRISMA_CHANNEL="latest"
-fi
+PRISMA_CHANNEL=$RELEASE_CHANNEL
 echo "PRISMA_CHANNEL=$PRISMA_CHANNEL"
 
 OLD_SHA=$(jq ".prisma.version" ./package.json)

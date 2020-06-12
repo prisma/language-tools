@@ -25,6 +25,8 @@ import {
   getSuggestionsForInsideAttributes,
   positionIsAfterFieldAndType,
   isInsideAttribute,
+  getSymbolBeforePosition,
+  suggestEqualSymbol,
 } from './completion/completions'
 
 function getCurrentLine(document: TextDocument, line: number): string {
@@ -316,6 +318,11 @@ export function handleHoverRequest(
   return
 }
 
+function isFirstInLine(currentLine: string, position: Position): boolean {
+  const lineTillPosition = currentLine.slice(0, position.character)
+  return lineTillPosition.trim() === ''
+}
+
 /**
  *
  * This handler provides the initial list of the completion items.
@@ -336,9 +343,13 @@ export function handleCompletionRequest(
   }
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
+  const currentLineUntrimmed = getCurrentLine(document, position.line)
 
   const foundBlock = getBlockAtPosition(position.line, lines)
   if (!foundBlock) {
+    if (!isFirstInLine(currentLineUntrimmed, position)) {
+      return
+    }
     return getSuggestionForBlockTypes(lines)
   }
 
@@ -352,12 +363,17 @@ export function handleCompletionRequest(
     )
   }
 
+  const currentLineTillPosition = currentLineUntrimmed
+    .slice(0, position.character - 1)
+    .trim()
+  const wordsBeforePosition: string[] = currentLineTillPosition.split(/\s+/)
+
   // Completion was triggered by a triggerCharacter
   if (context.triggerKind === 2) {
     switch (context.triggerCharacter) {
       case '@':
         if (
-          !positionIsAfterFieldAndType(lines[position.line], position, document)
+          !positionIsAfterFieldAndType(position, document, wordsBeforePosition)
         ) {
           return
         }
@@ -371,39 +387,68 @@ export function handleCompletionRequest(
         return getSuggestionForSupportedFields(
           foundBlock.type,
           lines[position.line],
+          currentLineUntrimmed,
+          position,
+          true,
         )
     }
   }
 
-  if (foundBlock.type === 'model') {
-    const currentLine = lines[position.line]
-    const currentLineUntrimmed = getCurrentLine(document, position.line)
+  const symbolBeforePositionIsWhiteSpace =
+    getSymbolBeforePosition(document, position).search(/\s/) !== -1
 
-    // check if inside attribute
-    if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
-      return getSuggestionsForInsideAttributes(
-        currentLineUntrimmed,
+  switch (foundBlock.type) {
+    case 'model':
+      // check if inside attribute
+      if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
+        return getSuggestionsForInsideAttributes(
+          currentLineUntrimmed,
+          lines,
+          position,
+          foundBlock,
+        )
+      }
+
+      // check if type
+      if (
+        !positionIsAfterFieldAndType(position, document, wordsBeforePosition)
+      ) {
+        return getSuggestionsForTypes(
+          foundBlock,
+          lines,
+          position,
+          currentLineUntrimmed,
+        )
+      }
+      return getSuggestionForFieldAttribute(
+        foundBlock,
+        lines[position.line],
         lines,
         position,
-        foundBlock,
       )
-    }
-
-    // check if type
-    if (!positionIsAfterFieldAndType(currentLine, position, document)) {
-      return getSuggestionsForTypes(
-        foundBlock,
-        lines,
-        position,
-        currentLineUntrimmed,
-      )
-    }
-    return getSuggestionForFieldAttribute(
-      foundBlock,
-      lines[position.line],
-      lines,
-      position,
-    )
+    case 'datasource':
+    case 'generator':
+      if (
+        wordsBeforePosition.length === 1 &&
+        symbolBeforePositionIsWhiteSpace
+      ) {
+        return suggestEqualSymbol(foundBlock.type)
+      }
+      if (
+        currentLineTillPosition.endsWith('=') &&
+        symbolBeforePositionIsWhiteSpace
+      ) {
+        return getSuggestionForSupportedFields(
+          foundBlock.type,
+          lines[position.line],
+          currentLineUntrimmed,
+          position,
+          false,
+        )
+      }
+      break
+    case 'enum':
+      break
   }
 }
 

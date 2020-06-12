@@ -37,6 +37,7 @@ function convertAttributesToCompletionItems(
     params: { label: string; documentation: string }[]
   }[],
   itemKind: CompletionItemKind,
+  insertTextFunc: (label: string) => string,
 ): CompletionItem[] {
   const result: CompletionItem[] = []
   for (const item of completionItems) {
@@ -53,7 +54,7 @@ function convertAttributesToCompletionItems(
     result.push({
       label: item.label,
       kind: itemKind,
-      insertText: item.label.replace('[]', '[$0]'),
+      insertText: insertTextFunc(item.label),
       insertTextFormat: 2,
       documentation: {
         kind: MarkupKind.Markdown,
@@ -87,9 +88,23 @@ export const supportedGeneratorFields: CompletionItem[] = convertToCompletionIte
 export const blockAttributes: CompletionItem[] = convertAttributesToCompletionItems(
   completions.blockAttributes,
   CompletionItemKind.Property,
+  (label: string) => label.replace('[]', '[$0]'),
 )
 
 export const fieldAttributes: CompletionItem[] = convertAttributesToCompletionItems(
   completions.fieldAttributes,
   CompletionItemKind.Property,
+  (label: string) => label.replace('()', '($0)'),
+)
+
+export const relationArguments: CompletionItem[] = convertAttributesToCompletionItems(
+  completions.relationArguments,
+  CompletionItemKind.Property,
+  (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
+)
+
+export const dataSourceUrlArguments: CompletionItem[] = convertAttributesToCompletionItems(
+  completions.datasourceUrlArguments,
+  CompletionItemKind.Property,
+  (label: string) => label.replace('()', '($0)').replace('""', '"$0"'),
 )
