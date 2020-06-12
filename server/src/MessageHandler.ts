@@ -316,6 +316,11 @@ export function handleHoverRequest(
   return
 }
 
+function isFirstInLine(currentLine: string, position: Position): boolean {
+  const lineTillPosition = currentLine.slice(0, position.character)
+  return lineTillPosition.trim() === ''
+}
+
 /**
  *
  * This handler provides the initial list of the completion items.
@@ -336,9 +341,13 @@ export function handleCompletionRequest(
   }
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
+  const currentLineUntrimmed = getCurrentLine(document, position.line)
 
   const foundBlock = getBlockAtPosition(position.line, lines)
   if (!foundBlock) {
+    if (!isFirstInLine(currentLineUntrimmed, position)) {
+      return
+    }
     return getSuggestionForBlockTypes(lines)
   }
 
@@ -377,7 +386,6 @@ export function handleCompletionRequest(
 
   if (foundBlock.type === 'model') {
     const currentLine = lines[position.line]
-    const currentLineUntrimmed = getCurrentLine(document, position.line)
 
     // check if inside attribute
     if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
