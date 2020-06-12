@@ -102,3 +102,9 @@ export const relationArguments: CompletionItem[] = convertAttributesToCompletion
   CompletionItemKind.Property,
   (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
 )
+
+export const dataSourceUrlArguments: CompletionItem[] = convertAttributesToCompletionItems(
+  completions.datasourceUrlArguments,
+  CompletionItemKind.Property,
+  (label: string) => label.replace('()', '($0)').replace('""', '"$0"'),
+)

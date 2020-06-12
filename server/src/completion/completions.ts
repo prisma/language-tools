@@ -6,11 +6,7 @@ import {
   MarkupKind,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import {
-  Block,
-  getModelOrEnumBlock,
-  getWordAtPosition,
-} from '../MessageHandler'
+import { Block, getModelOrEnumBlock } from '../MessageHandler'
 import {
   blockAttributes,
   fieldAttributes,
@@ -19,6 +15,7 @@ import {
   supportedDataSourceFields,
   supportedGeneratorFields,
   relationArguments,
+  dataSourceUrlArguments,
 } from './completionUtil'
 import klona from 'klona'
 
@@ -49,7 +46,7 @@ export function isInsideAttribute(
   return numberOfOpenBrackets > numberOfClosedBrackets
 }
 
-function getSymbolBeforePosition(
+export function getSymbolBeforePosition(
   document: TextDocument,
   position: Position,
 ): string {
@@ -63,15 +60,10 @@ function getSymbolBeforePosition(
 }
 
 export function positionIsAfterFieldAndType(
-  currentLine: string,
   position: Position,
   document: TextDocument,
+  wordsBeforePosition: string[],
 ): boolean {
-  const wordsBeforePosition: string[] = currentLine
-    .slice(0, position.character - 1)
-    .trim()
-    .split(/\s+/)
-
   const symbolBeforePosition = getSymbolBeforePosition(document, position)
   const symbolBeforeIsWhiteSpace = symbolBeforePosition.search(/\s/)
 
@@ -123,9 +115,7 @@ function removeInvalidAttributeSuggestions(
 
 function getSuggestionForBlockAttribute(
   block: Block,
-  document: TextDocument,
   lines: string[],
-  position: Position,
 ): CompletionItem[] {
   if (block.type !== 'model') {
     return []
@@ -314,12 +304,7 @@ export function getSuggestionForFirstInsideBlock(
       suggestions = getSuggestionForGeneratorField(block, lines, position)
       break
     case 'model':
-      suggestions = getSuggestionForBlockAttribute(
-        block,
-        document,
-        lines,
-        position,
-      )
+      suggestions = getSuggestionForBlockAttribute(block, lines)
       break
   }
 
@@ -361,21 +346,53 @@ export function getSuggestionForBlockTypes(
   }
 }
 
+export function suggestEqualSymbol(
+  blockType: string,
+): CompletionList | undefined {
+  if (!(blockType == 'datasource' || blockType == 'generator')) {
+    return
+  }
+  const equalSymbol: CompletionItem = { label: '=' }
+  return {
+    items: [equalSymbol],
+    isIncomplete: false,
+  }
+}
+
 export function getSuggestionForSupportedFields(
   blockType: string,
   currentLine: string,
+  currentLineUntrimmed: string,
+  position: Position,
+  gotTriggered: boolean,
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
 
   switch (blockType) {
     case 'generator':
       if (currentLine.startsWith('provider')) {
-        suggestions = ['prisma-client-js'] // TODO add prisma-client-go when implemented!
+        suggestions = gotTriggered
+          ? ['prisma-client-js']
+          : ['"prisma-client-js"'] // TODO add prisma-client-go when implemented!
       }
       break
     case 'datasource':
       if (currentLine.startsWith('provider')) {
-        suggestions = ['postgresql', 'mysql', 'sqlite']
+        suggestions = gotTriggered
+          ? ['postgresql', 'mysql', 'sqlite']
+          : ['"postgresql"', '"mysql"', '"sqlite"']
+      } else if (currentLine.startsWith('url')) {
+        // check if inside env
+        if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
+          suggestions = gotTriggered ? ['DATABASE_URL'] : ['"DATABASE_URL"']
+        } else {
+          return {
+            items: gotTriggered
+              ? dataSourceUrlArguments.filter((a) => !a.label.includes('env'))
+              : dataSourceUrlArguments,
+            isIncomplete: false,
+          }
+        }
       }
       break
   }
