@@ -163,13 +163,27 @@
         },
         {
           "label": "fields",
-          "documentation": "A list of field references."
+          "documentation": "A list of field references of the *current* model."
         },
         {
           "label": "references",
-          "documentation": "A list of field references."
+          "documentation": "A list of field references of the model on *the other side of the relation*."
         }
       ]
+    }
+  ],
+  "relationArguments": [
+    {
+      "label": "references: []",
+      "fullSignature": "references: []",
+      "documentation": "A list of field references of the model on *the other side of the relation*.",
+      "params": []
+    },
+    {
+      "label": "fields: []",
+      "fullSignature": "fields: []",
+      "documentation": "A list of field references of the *current* model.",
+      "params": []
     }
   ]
 }

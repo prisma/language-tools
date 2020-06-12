@@ -96,3 +96,9 @@ export const fieldAttributes: CompletionItem[] = convertAttributesToCompletionIt
   CompletionItemKind.Property,
   (label: string) => label.replace('()', '($0)'),
 )
+
+export const relationArguments: CompletionItem[] = convertAttributesToCompletionItems(
+  completions.relationArguments,
+  CompletionItemKind.Property,
+  (label: string) => label.replace('[]', '[$0]'),
+)
