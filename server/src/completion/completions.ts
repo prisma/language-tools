@@ -144,7 +144,7 @@ export function getSuggestionForFieldAttribute(
   lines: string[],
   position: Position,
 ): CompletionList | undefined {
-  if (block.type !== 'model' && block.type !== 'type_alias') {
+  if (block.type !== 'model') {
     return
   }
   // create deep copy
@@ -314,7 +314,6 @@ export function getSuggestionForFirstInsideBlock(
       suggestions = getSuggestionForGeneratorField(block, lines, position)
       break
     case 'model':
-    case 'type_alias':
       suggestions = getSuggestionForBlockAttribute(
         block,
         document,
