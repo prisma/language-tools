@@ -4,7 +4,6 @@
 import { getPlatform, Platform } from '@prisma/get-platform'
 import pkgdir from 'pkg-dir'
 import path from 'path'
-import fs from 'fs'
 
 /**
  * Lookup Cache
