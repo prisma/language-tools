@@ -2,9 +2,9 @@
 <h2 align="center">Prisma VS Code Extension</h2>
 <div align="center">
 
-[![Version](https://vsmarketplacebadge.apphb.com/version/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
-[![Installs](https://vsmarketplacebadge.apphb.com/installs/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
-[![Ratings](https://vsmarketplacebadge.apphb.com/rating/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
+[![Version](https://vsmarketplacebadge.apphb.com/version/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider)
+[![Installs](https://vsmarketplacebadge.apphb.com/installs/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider)
+[![Ratings](https://vsmarketplacebadge.apphb.com/rating/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider)
 
 ![CI tests](https://img.shields.io/github/workflow/status/prisma/vscode/CI%20tests/master.svg?label=CI%20tests&logo=github)
 ![Check for Update + Automated Publish](https://img.shields.io/github/workflow/status/prisma/vscode/Check%20for%20Update%20%2B%20Automated%20Publish/master.svg?label=Check%20for%20Update%20%2B%20Automated%20Publish&logo=github)
@@ -14,25 +14,18 @@
 <hr>
 Adds syntax highlighting, formatting, jump-to-definition and linting for `.prisma` files.
 
-This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-prisma-2-zq1s745db8i5). Information about the new datamodel syntax can be found [here](https://github.com/prisma/prisma2/blob/master/docs/data-modeling.md).
+## Insider Build
 
-## Features
+This is the Insider Build of the [Prisma VSCode extension](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma). Most users should not use this version, but instead install
+the regular version of the extension.This version of the extension may contain unstable prerelease code and is directly built from the master branch. 
 
-* Syntax highlighting
-* Auto-formatting
-* Linting
-* Jump-to-definition
-* Auto-completion
+**Only use this extension if you are also using the dev version of the CLI.**
 
-It also includes an End-to-End test.
+Please note that you should not have the regular and insider version of the extension installed at the same time.
 
-## Install
+## Build information
 
-* Get the Prisma Extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma).
-
-## Preview
-
-![Preview Schema](https://i.imgur.com/W80iRwE.png)
+This version is built from commit [$commit-sha$]($commit-sha$).
 
 ## Contributing
 
