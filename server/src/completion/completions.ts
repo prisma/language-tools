@@ -478,6 +478,7 @@ function getFieldsFromCurrentBlock(
   const suggestions: Array<string> = []
 
   let reachedStartLine = false
+  let field = ''
   for (const [key, item] of lines.entries()) {
     if (key === block.start.line + 1) {
       reachedStartLine = true
@@ -489,7 +490,10 @@ function getFieldsFromCurrentBlock(
       break
     }
     if (!item.startsWith('@@') && (!position || key !== position.line)) {
-      suggestions.push(item.replace(/ .*/, ''))
+      field = item.replace(/ .*/, '')
+      if (field !== '') {
+        suggestions.push(field)
+      }
     }
   }
   return suggestions
