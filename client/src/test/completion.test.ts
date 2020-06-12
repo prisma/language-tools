@@ -286,6 +286,11 @@ suite('Should auto-complete', () => {
     kind: vscode.CompletionItemKind.Property,
   }
 
+  const nameProperty = {
+    label: '\"\"',
+    kind: vscode.CompletionItemKind.Property
+  }
+
   test('Diagnoses field and block attribute suggestions', async () => {
     await testCompletion(
       modelBlocksUri,
@@ -388,7 +393,7 @@ suite('Should auto-complete', () => {
       relationDirectiveUri,
       new vscode.Position(12, 26),
       new vscode.CompletionList([
-        { label: '""', kind: vscode.CompletionItemKind.Property },
+        nameProperty,
         fieldsProperty,
         referencesProperty,
       ]),
@@ -407,13 +412,13 @@ suite('Should auto-complete', () => {
     await testCompletion(
       relationDirectiveUri,
       new vscode.Position(30, 44),
-      new vscode.CompletionList([fieldsProperty]),
+      new vscode.CompletionList([nameProperty, fieldsProperty]),
       true,
     )
     await testCompletion(
       relationDirectiveUri,
       new vscode.Position(39, 45),
-      new vscode.CompletionList([referencesProperty]),
+      new vscode.CompletionList([nameProperty, referencesProperty]),
       true,
     )
     await testCompletion(

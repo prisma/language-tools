@@ -18,7 +18,7 @@ import {
   corePrimitiveTypes,
   supportedDataSourceFields,
   supportedGeneratorFields,
-  relationArguments
+  relationArguments,
 } from './completionUtil'
 import klona from 'klona'
 
@@ -502,8 +502,8 @@ function getSuggestionsForRelationDirective(
   block: Block,
   position: Position,
 ): CompletionList | undefined {
-   // create deep copy
-   const suggestions: CompletionItem[] = klona(relationArguments)
+  // create deep copy
+  const suggestions: CompletionItem[] = klona(relationArguments)
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
   const stringTilPosition = currentLineUntrimmed
     .slice(0, position.character)
@@ -564,13 +564,13 @@ function getSuggestionsForRelationDirective(
     }
     if (referencesExist) {
       return {
-        items: suggestions.filter(sugg => sugg.label.includes('fields')),
+        items: suggestions.filter((sugg) => !sugg.label.includes('references')),
         isIncomplete: false,
       }
     }
     if (fieldsExist) {
       return {
-        items: suggestions.filter(sugg => sugg.label.includes('references')),
+        items: suggestions.filter((sugg) => !sugg.label.includes('fields')),
         isIncomplete: false,
       }
     }
