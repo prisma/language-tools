@@ -38,7 +38,7 @@ else
         .description = \"Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.\" | \
         .preview = false" \
         ./package.json > ./package.json.bk
-    $(node scripts/change-readme.js "$RELEASE_CHANNEL")
+    node scripts/change-readme.js "$RELEASE_CHANNEL"
 fi
 
 jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
