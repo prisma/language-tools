@@ -39,10 +39,6 @@
       "documentation": "Models represent the entities of your application domain. They are defined using model blocks in the data model."
     },
     {
-      "label": "type_alias",
-      "documentation": ""
-    },
-    {
       "label": "enum",
       "documentation": "Enums are defined via the enum block. You can define enums in your data model if they're supported by the data source you use:\n• PostgreSQL: Supported\n• MySQL: Supported\n• MariaDB: Supported\n• SQLite: Not supported"
     }
@@ -159,15 +155,54 @@
       "params": [
         {
           "label": "name",
-          "documentation": "A name of field references."
+          "documentation": "Defines the name of the relationship. In an m-n-relation, it also determines the name of the underlying relation table."
         },
         {
           "label": "fields",
-          "documentation": "A list of field references."
+          "documentation": "A list of field references of the *current* model."
         },
         {
           "label": "references",
-          "documentation": "A list of field references."
+          "documentation": "A list of field references of the model on *the other side of the relation*."
+        }
+      ]
+    }
+  ],
+  "relationArguments": [
+    {
+      "label": "references: []",
+      "fullSignature": "references: []",
+      "documentation": "A list of field references of the model on *the other side of the relation*.",
+      "params": []
+    },
+    {
+      "label": "fields: []",
+      "fullSignature": "fields: []",
+      "documentation": "A list of field references of the *current* model.",
+      "params": []
+    },
+    {
+      "label": "\"\"",
+      "fullSignature": "\"\"",
+      "documentation": "Defines the name of the relationship. In an m-n-relation, it also determines the name of the underlying relation table.",
+      "params": []
+    }
+  ],
+  "datasourceUrlArguments": [
+    {
+      "label": "\"\"",
+      "fullSignature": "\"\"",
+      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database, [learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema).",
+      "params": []
+    },
+    {
+      "label": "env()",
+      "fullSignature": "env(_ environmentVariable: string)",
+      "documentation": "Specifies a data source via an environment variable. When running a Prisma CLI command that needs the database connection URL (e.g. `prisma generate`), you need to make sure that the `DATABASE_URL` environment variable is set. One way to do so is by creating a `.env` file. Note that the file must be in the same directory as your schema.prisma file to automatically be picked up by the Prisma CLI.",
+      "params": [
+        {
+          "label": "environmentVariable",
+          "documentation": "The environment variable in which the database connection URL is stored."
         }
       ]
     }
