@@ -32,4 +32,4 @@ It also includes an End-to-End test.
 
 ## Contributing
 
-Read more about [how to contribute to the Prisma VSCode extension](CONTRIBUTING.md)
+Read more about [how to contribute to the Prisma VSCode extension](../CONTRIBUTING.md)
