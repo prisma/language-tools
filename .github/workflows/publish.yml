@@ -22,7 +22,7 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Check for Update
-        run: yarn vsce:check "dev"
+        run: yarn vsce:check "latest"
         id: check_for_updates
         outputs: 
           new_updates: # id of the output
