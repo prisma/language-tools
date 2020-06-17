@@ -7,7 +7,7 @@ function changeReadme({
 }) {
   if (releaseChannel === 'dev') {
     let content = fs.readFileSync(
-      "./README.md",
+      join(__dirname, "./scripts/README_INSIDER_BUILD.md"),
       {
         encoding: "utf-8",
       }

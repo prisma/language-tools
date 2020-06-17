@@ -1,4 +1,4 @@
-<h1 align="center"><img src="./logo_white.png" alt="Logo" height="128" /></h1>
+<h1 align="center"><img src="../logo_white.png" alt="Logo" height="128" /></h1>
 <h2 align="center">Prisma VS Code Extension</h2>
 <div align="center">
 
@@ -14,22 +14,19 @@
 <hr>
 Adds syntax highlighting, formatting, jump-to-definition and linting for `.prisma` files.
 
-This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-prisma-2-zq1s745db8i5). Information about the new datamodel syntax can be found [here](https://github.com/prisma/prisma2/blob/master/docs/data-modeling.md).
+## Insider Build
 
-## Features
+This is the Insider Build of the [Prisma VSCode extension](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma). Most users should not use this version, but instead install
+the regular version of the extension.This version of the extension may contain unstable prerelease code and is directly built from the master branch. 
 
-* Syntax highlighting
-* Auto-formatting
-* Linting
-* Jump-to-definition
-* Auto-completion
+**Only use this extension if you are also using the dev version of the CLI.**
 
-It also includes an End-to-End test.
+Please note that you should not have the regular and insider version of the extension installed at the same time.
 
-## Preview
+## Build information
 
-![Preview Schema](https://i.imgur.com/W80iRwE.png)
+This version is built from commit [$commit-sha$]($commit-sha$).
 
 ## Contributing
 
-Read more about [how to contribute to the Prisma VSCode extension](CONTRIBUTING.md)
+Read more about [how to contribute to the Prisma VSCode extension](../CONTRIBUTING.md)
