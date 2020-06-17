@@ -55,7 +55,7 @@ export async function getDownloadURL(): Promise<string> {
   platform = platform || (await getPlatform())
   version = version || (await getVersion())
   const extension = platform === 'windows' ? '.exe.gz' : '.gz'
-  return `https://binaries.prisma.sh/master/${version}/${platform}/prisma-fmt${extension}`
+  return `https://binaries.prisma.sh/all_commits/${version}/${platform}/prisma-fmt${extension}`
 }
 
 export async function getCLIVersion(): Promise<string> {

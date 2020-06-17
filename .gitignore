@@ -1,7 +1,6 @@
 dist/
 node_modules/
 .envrc
-client/server
 .vscode-test
 dist
 *.vsix

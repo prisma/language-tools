@@ -11,7 +11,7 @@ echo "NPM_VERSION: $NPM_VERSION"
 PRISMA_CHANNEL=$RELEASE_CHANNEL
 echo "PRISMA_CHANNEL=$PRISMA_CHANNEL"
 
-OLD_SHA=$(jq ".prisma.version" ./clients/vscode/package.json)
+OLD_SHA=$(jq ".prisma.version" ./packages/vscode/package.json)
 SHA=$(npx -q -p @prisma/cli@"$PRISMA_CHANNEL" prisma --version | grep "Query Engine" | awk '{print $5}')
 
 NEXT_EXTENSION_VERSION=$3
@@ -43,21 +43,21 @@ fi
 jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
     .prisma.version = \"$SHA\" | \
     .dependencies[\"@prisma/get-platform\"] = \"$NPM_VERSION\"" \
-    ./server/package.json > ./server/package.json.bk
+    ./packages/language-server/package.json > ./packages/language-server/package.json.bk
 
-mv ./server/package.json.bk ./server/package.json
-mv ./clients/vscode/package.json.bk ./clients/vscode/package.json
+mv ./packages/language-server/package.json.bk ./packages/language-server/package.json
+mv ./packages/vscode/package.json.bk ./packages/vscode/package.json
 
 npm install
 
 (
-cd ./clients/vscode
+cd ./packages/vscode
 npm install
 )
 
 (
-cd ./server
+cd ./packages/language-server
 npm install
 )
 
-echo "Bumped prisma.version in clients/vscode/package.json from $OLD_SHA to $SHA"
+echo "Bumped prisma.version in packlages/vscode/package.json from $OLD_SHA to $SHA"
