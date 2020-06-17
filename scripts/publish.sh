@@ -22,7 +22,7 @@ echo "RELEASE_CHANNEL: $RELEASE_CHANNEL"
 NPM_VERSION=$(sh scripts/prisma-version.sh "$RELEASE_CHANNEL")
 echo "NPM_VERSION: $NPM_VERSION"
 
-EXTENSION_VERSION=$(sh scripts/extension-version.sh "$CHANNEL" "")
+EXTENSION_VERSION=$(sh scripts/extension-version.sh "$RELEASE_CHANNEL" "")
 echo "EXTENSION_VERSION: $EXTENSION_VERSION"
 
 NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
