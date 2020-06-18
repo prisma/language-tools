@@ -24,9 +24,6 @@ jobs:
       - name: Check for Update
         run: yarn vsce:check "latest"
         id: check_for_updates
-        outputs: 
-          new_updates: # id of the output
-            description: 'True if new updates are available'
       - name: Bump versions
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: yarn vsce:bump "latest"
@@ -52,9 +49,6 @@ jobs:
       - name: Check for Update
         run: yarn vsce:check "dev"
         id: check_for_updates
-        outputs: 
-          new_updates: # id of the output
-            description: 'True if new updates are available'
       - name: Bump versions
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: yarn vsce:bump "dev"

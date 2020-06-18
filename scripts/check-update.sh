@@ -41,6 +41,5 @@ if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then
     echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
     echo "::set-output name=new_updates::true"
 else
-    echo "::set-output name=new_updates::false"
     echo "CURRENT_VERSION ($CURRENT_VERSION) and NPM_VERSION ($NPM_VERSION) are same"
 fi
