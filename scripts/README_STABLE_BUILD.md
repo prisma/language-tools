@@ -22,10 +22,6 @@ This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-pri
 
 It also includes an End-to-End test.
 
-## Install
-
-* Get the Prisma Extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma).
-
 ## Preview
 
 ![Preview Schema](https://i.imgur.com/W80iRwE.png)
@@ -33,3 +29,7 @@ It also includes an End-to-End test.
 ## Contributing
 
 Read more about [how to contribute to the Prisma VSCode extension](../CONTRIBUTING.md)
+
+## Security
+
+If you have a security issue to report, please contact us at [security@prisma.io](mailto:security@prisma.io?subject=[GitHub]%20Prisma%202%20Security%20Report%20VSCode)
