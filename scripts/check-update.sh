@@ -6,7 +6,7 @@ set -eu
 if [ -f ".envrc" ]; then
     echo "Loading .envrc"
     # shellcheck disable=SC1091
-    . .envrc
+    . ./.envrc
 else
     echo "No .envrc"
 fi
@@ -37,19 +37,9 @@ else
 fi
 
 if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then
-    echo "UPDATING to $NPM_VERSION"
-
     NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
     echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
-
-    sh ./scripts/bump.sh "$RELEASE_CHANNEL" "$NPM_VERSION" "$NEXT_EXTENSION_VERSION"
-    if [ "$PRODUCTION" = "1" ]; then
-        git add -A .
-        git commit -m "bump prisma_version to $NPM_VERSION"
-    else
-        echo "Not committing because production is not set"
-    fi
-    yarn run vsce:publish "$RELEASE_CHANNEL" "$NPM_VERSION" "$NEXT_EXTENSION_VERSION"
+    echo "::set-output name=new_updates::true"
 else
     echo "CURRENT_VERSION ($CURRENT_VERSION) and NPM_VERSION ($NPM_VERSION) are same"
 fi
