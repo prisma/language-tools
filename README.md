@@ -2,9 +2,9 @@
 <h2 align="center">Prisma VS Code Extension</h2>
 <div align="center">
 
-[![Version](https://vsmarketplacebadge.apphb.com/version/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider)
-[![Installs](https://vsmarketplacebadge.apphb.com/installs/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider)
-[![Ratings](https://vsmarketplacebadge.apphb.com/rating/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider)
+[![Version](https://vsmarketplacebadge.apphb.com/version/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
+[![Installs](https://vsmarketplacebadge.apphb.com/installs/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
+[![Ratings](https://vsmarketplacebadge.apphb.com/rating/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
 
 ![CI tests](https://img.shields.io/github/workflow/status/prisma/vscode/CI%20tests/master.svg?label=CI%20tests&logo=github)
 ![Check for Update + Automated Publish](https://img.shields.io/github/workflow/status/prisma/vscode/Check%20for%20Update%20%2B%20Automated%20Publish/master.svg?label=Check%20for%20Update%20%2B%20Automated%20Publish&logo=github)
@@ -25,6 +25,10 @@ This plugin is designed for [Prisma 2](https://www.prisma.io/blog/announcing-pri
 * Auto-completion
 
 It also includes an End-to-End test.
+
+## Install
+
+* Get the Prisma Extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma).
 
 ## Preview
 
