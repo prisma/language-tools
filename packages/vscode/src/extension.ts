@@ -19,7 +19,7 @@ function createLanguageServer(
 }
 
 export function activate(context: ExtensionContext) {
-  const serverModule = require.resolve('@prisma/language-server/src/cli')
+  const serverModule = require.resolve('@prisma/language-server/bin/server.js')
   // for debugging the server
   //const serverModule = context.asAbsolutePath(
   //  path.join('../../packages/language-server/dist/src/cli.js'),
