@@ -345,9 +345,20 @@ export function handleCompletionRequest(
   const lines = convertDocumentTextToTrimmedLineArray(document)
   const currentLineUntrimmed = getCurrentLine(document, position.line)
 
+  const currentLineTillPosition = currentLineUntrimmed
+    .slice(0, position.character - 1)
+    .trim()
+  const wordsBeforePosition: string[] = currentLineTillPosition.split(/\s+/)
+
+  const symbolBeforePositionIsWhiteSpace =
+    getSymbolBeforePosition(document, position).search(/\s/) !== -1
+
   const foundBlock = getBlockAtPosition(position.line, lines)
   if (!foundBlock) {
-    if (!isFirstInLine(currentLineUntrimmed, position)) {
+    if (
+      wordsBeforePosition.length > 1 ||
+      (wordsBeforePosition.length === 1 && symbolBeforePositionIsWhiteSpace)
+    ) {
       return
     }
     return getSuggestionForBlockTypes(lines)
@@ -362,11 +373,6 @@ export function handleCompletionRequest(
       document,
     )
   }
-
-  const currentLineTillPosition = currentLineUntrimmed
-    .slice(0, position.character - 1)
-    .trim()
-  const wordsBeforePosition: string[] = currentLineTillPosition.split(/\s+/)
 
   // Completion was triggered by a triggerCharacter
   if (context.triggerKind === 2) {
@@ -393,9 +399,6 @@ export function handleCompletionRequest(
         )
     }
   }
-
-  const symbolBeforePositionIsWhiteSpace =
-    getSymbolBeforePosition(document, position).search(/\s/) !== -1
 
   switch (foundBlock.type) {
     case 'model':
