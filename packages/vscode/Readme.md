@@ -20,13 +20,12 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for `.prism
 - Linting
 - Jump-to-definition
 - Auto-completion
-- On-Hover
 
 It also includes an End-to-End test.
 
 ## Install
 
-Get the Prisma Extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma).
+- Get the Prisma Extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma).
 
 ## Preview
 
