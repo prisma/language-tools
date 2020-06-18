@@ -15,17 +15,6 @@ fi
 RELEASE_CHANNEL=$1
 echo "RELEASE_CHANNEL: $RELEASE_CHANNEL"
 
-PRISMA_VERSION=$(sh scripts/prisma-version.sh "$RELEASE_CHANNEL")
-echo "UPDATING to $PRISMA_VERSION"
-echo "PRISMA_VERSION: $PRISMA_VERSION"
-
-
-# TODO: remove this if-condition once we move to dev
-if [ "$RELEASE_CHANNEL" = "dev" ]; then
-    PRISMA_CHANNEL="alpha"
-else
-    PRISMA_CHANNEL="latest"
-fi
 echo "PRISMA_CHANNEL=$PRISMA_CHANNEL"
 
 OLD_SHA=$(jq ".prisma.version" ./package.json)
@@ -33,6 +22,7 @@ SHA=$(npx -q -p @prisma/cli@"$PRISMA_CHANNEL" prisma --version | grep "Query Eng
 
 NPM_VERSION=$(sh scripts/prisma-version.sh "$RELEASE_CHANNEL")
 echo "NPM_VERSION: $NPM_VERSION"
+echo "UPDATING to $NPM_VERSION"
 
 EXTENSION_VERSION=$(sh scripts/extension-version.sh "$RELEASE_CHANNEL" "")
 echo "EXTENSION_VERSION: $EXTENSION_VERSION"
@@ -61,6 +51,7 @@ else
         .description = \"Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.\" | \
         .preview = false" \
         ./package.json > ./package.json.bk
+    node scripts/change-readme.js "$RELEASE_CHANNEL"
 fi
 
 jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
@@ -92,7 +83,7 @@ echo "Bumped prisma.version in package.json from $OLD_SHA to $SHA"
 
 if [ "$PRODUCTION" = "1" ]; then
         git add -A .
-        git commit -m "bump prisma_version to $PRISMA_VERSION"
+        git commit -m "bump prisma_version to $NPM_VERSION"
 else
         echo "Not committing because production is not set"
 fi

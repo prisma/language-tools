@@ -23,14 +23,11 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Check for Update
-        run: yarn vsce:check "dev"
+        run: yarn vsce:check "latest"
         id: check_for_updates
-        outputs: 
-          new_updates: # id of the output
-            description: 'True if new updates are available'
       - name: Bump versions
         if: ${{ steps.check_for_updates.outputs.new_updates }}
-        run: yarn vsce:bump "dev"
+        run: yarn vsce:bump "latest"
       - name: Compile
         run: yarn compile
       - name: Run headless e2e tests
@@ -55,7 +52,6 @@ jobs:
           SLACK_CHANNEL: feed-vscode
           SLACK_MESSAGE: ":white_check_mark:"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-      
 
   publish-insider:
     name: Publish Insider
@@ -68,9 +64,6 @@ jobs:
       - name: Check for Update
         run: yarn vsce:check "dev"
         id: check_for_updates
-        outputs: 
-          new_updates: # id of the output
-            description: 'True if new updates are available'
       - name: Bump versions
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: yarn vsce:bump "dev"
@@ -98,4 +91,4 @@ jobs:
           SLACK_CHANNEL: feed-vscode
           SLACK_MESSAGE: ":white_check_mark:"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-        
+      

@@ -3,13 +3,10 @@ import {
   CompletionList,
   CompletionItemKind,
   Position,
+  MarkupKind,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import {
-  Block,
-  getModelOrEnumBlock,
-  getWordAtPosition,
-} from '../MessageHandler'
+import { Block, getModelOrEnumBlock } from '../MessageHandler'
 import {
   blockAttributes,
   fieldAttributes,
@@ -17,6 +14,8 @@ import {
   corePrimitiveTypes,
   supportedDataSourceFields,
   supportedGeneratorFields,
+  relationArguments,
+  dataSourceUrlArguments,
 } from './completionUtil'
 import klona from 'klona'
 
@@ -47,7 +46,7 @@ export function isInsideAttribute(
   return numberOfOpenBrackets > numberOfClosedBrackets
 }
 
-function getSymbolBeforePosition(
+export function getSymbolBeforePosition(
   document: TextDocument,
   position: Position,
 ): string {
@@ -61,15 +60,10 @@ function getSymbolBeforePosition(
 }
 
 export function positionIsAfterFieldAndType(
-  currentLine: string,
   position: Position,
   document: TextDocument,
+  wordsBeforePosition: string[],
 ): boolean {
-  const wordsBeforePosition: string[] = currentLine
-    .slice(0, position.character - 1)
-    .trim()
-    .split(/\s+/)
-
   const symbolBeforePosition = getSymbolBeforePosition(document, position)
   const symbolBeforeIsWhiteSpace = symbolBeforePosition.search(/\s/)
 
@@ -121,9 +115,7 @@ function removeInvalidAttributeSuggestions(
 
 function getSuggestionForBlockAttribute(
   block: Block,
-  document: TextDocument,
   lines: string[],
-  position: Position,
 ): CompletionItem[] {
   if (block.type !== 'model') {
     return []
@@ -142,7 +134,7 @@ export function getSuggestionForFieldAttribute(
   lines: string[],
   position: Position,
 ): CompletionList | undefined {
-  if (block.type !== 'model' && block.type !== 'type_alias') {
+  if (block.type !== 'model') {
     return
   }
   // create deep copy
@@ -312,13 +304,7 @@ export function getSuggestionForFirstInsideBlock(
       suggestions = getSuggestionForGeneratorField(block, lines, position)
       break
     case 'model':
-    case 'type_alias':
-      suggestions = getSuggestionForBlockAttribute(
-        block,
-        document,
-        lines,
-        position,
-      )
+      suggestions = getSuggestionForBlockAttribute(block, lines)
       break
   }
 
@@ -360,21 +346,53 @@ export function getSuggestionForBlockTypes(
   }
 }
 
+export function suggestEqualSymbol(
+  blockType: string,
+): CompletionList | undefined {
+  if (!(blockType == 'datasource' || blockType == 'generator')) {
+    return
+  }
+  const equalSymbol: CompletionItem = { label: '=' }
+  return {
+    items: [equalSymbol],
+    isIncomplete: false,
+  }
+}
+
 export function getSuggestionForSupportedFields(
   blockType: string,
   currentLine: string,
+  currentLineUntrimmed: string,
+  position: Position,
+  gotTriggered: boolean,
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
 
   switch (blockType) {
     case 'generator':
       if (currentLine.startsWith('provider')) {
-        suggestions = ['prisma-client-js'] // TODO add prisma-client-go when implemented!
+        suggestions = gotTriggered
+          ? ['prisma-client-js']
+          : ['"prisma-client-js"'] // TODO add prisma-client-go when implemented!
       }
       break
     case 'datasource':
       if (currentLine.startsWith('provider')) {
-        suggestions = ['postgresql', 'mysql', 'sqlite']
+        suggestions = gotTriggered
+          ? ['postgresql', 'mysql', 'sqlite']
+          : ['"postgresql"', '"mysql"', '"sqlite"']
+      } else if (currentLine.startsWith('url')) {
+        // check if inside env
+        if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
+          suggestions = gotTriggered ? ['DATABASE_URL'] : ['"DATABASE_URL"']
+        } else {
+          return {
+            items: gotTriggered
+              ? dataSourceUrlArguments.filter((a) => !a.label.includes('env'))
+              : dataSourceUrlArguments,
+            isIncomplete: false,
+          }
+        }
       }
       break
   }
@@ -391,13 +409,38 @@ function getDefaultValues(currentLine: string): CompletionItem[] {
     suggestions.push({
       label: 'autoincrement()',
       kind: CompletionItemKind.Function,
+      documentation:
+        'Create a sequence of integers in the underlying database and assign the incremented values to the ID values of the created records based on the sequence.',
     })
   } else if (currentLine.includes('DateTime')) {
-    suggestions.push({ label: 'now()', kind: CompletionItemKind.Function })
+    suggestions.push({
+      label: 'now()',
+      kind: CompletionItemKind.Function,
+      documentation: {
+        kind: MarkupKind.Markdown,
+        value: 'Set a timestamp of the time when a record is created.',
+      },
+    })
   } else if (currentLine.includes('String')) {
     suggestions.push(
-      { label: 'uuid()', kind: CompletionItemKind.Function },
-      { label: 'cuid()', kind: CompletionItemKind.Function },
+      {
+        label: 'uuid()',
+        kind: CompletionItemKind.Function,
+        documentation: {
+          kind: MarkupKind.Markdown,
+          value:
+            'Generate a globally unique identifier based on the [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier) spec.',
+        },
+      },
+      {
+        label: 'cuid()',
+        kind: CompletionItemKind.Function,
+        documentation: {
+          kind: MarkupKind.Markdown,
+          value:
+            'Generate a globally unique identifier based on the [cuid](https://github.com/ericelliott/cuid) spec.',
+        },
+      },
     )
   } else if (currentLine.includes('Boolean')) {
     suggestions.push(
@@ -451,6 +494,7 @@ function getFieldsFromCurrentBlock(
   const suggestions: Array<string> = []
 
   let reachedStartLine = false
+  let field = ''
   for (const [key, item] of lines.entries()) {
     if (key === block.start.line + 1) {
       reachedStartLine = true
@@ -462,7 +506,10 @@ function getFieldsFromCurrentBlock(
       break
     }
     if (!item.startsWith('@@') && (!position || key !== position.line)) {
-      suggestions.push(item.replace(/ .*/, ''))
+      field = item.replace(/ .*/, '')
+      if (field !== '') {
+        suggestions.push(field)
+      }
     }
   }
   return suggestions
@@ -475,6 +522,8 @@ function getSuggestionsForRelationDirective(
   block: Block,
   position: Position,
 ): CompletionList | undefined {
+  // create deep copy
+  const suggestions: CompletionItem[] = klona(relationArguments)
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
   const stringTilPosition = currentLineUntrimmed
     .slice(0, position.character)
@@ -482,10 +531,7 @@ function getSuggestionsForRelationDirective(
 
   if (wordBeforePosition.includes('@relation')) {
     return {
-      items: toCompletionItems(
-        ['references: []', 'fields: []', '""'],
-        CompletionItemKind.Property,
-      ),
+      items: suggestions,
       isIncomplete: false,
     }
   }
@@ -513,7 +559,7 @@ function getSuggestionsForRelationDirective(
       position,
     )
   ) {
-    const referencedModelName = wordsBeforePosition[1]
+    const referencedModelName = wordsBeforePosition[1].replace('?', '')
     const referencedBlock = getModelOrEnumBlock(referencedModelName, lines)
 
     // referenced model does not exist
@@ -538,16 +584,13 @@ function getSuggestionsForRelationDirective(
     }
     if (referencesExist) {
       return {
-        items: toCompletionItems(['fields: []'], CompletionItemKind.Property),
+        items: suggestions.filter((sugg) => !sugg.label.includes('references')),
         isIncomplete: false,
       }
     }
     if (fieldsExist) {
       return {
-        items: toCompletionItems(
-          ['references: []'],
-          CompletionItemKind.Property,
-        ),
+        items: suggestions.filter((sugg) => !sugg.label.includes('fields')),
         isIncomplete: false,
       }
     }
@@ -561,9 +604,11 @@ export function getSuggestionsForInsideAttributes(
   block: Block,
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
-  const wordsBeforePosition = lines[position.line]
-    .split(' ')
-    .slice(0, position.character - 2)
+  const wordsBeforePosition = untrimmedCurrentLine
+    .slice(0, position.character)
+    .trimLeft()
+    .split(/\s+/)
+
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
 
   if (wordBeforePosition.includes('@default')) {
