@@ -39,18 +39,18 @@ jobs:
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: yarn vsce:publish "latest"
       - name: Slack Notification
-        if: ${{ failure() }} && ${{ steps.check_for_updates.outputs.new_updates }}
+        if: ${{ failure() && steps.check_for_updates.outputs.new_updates }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
           SLACK_CHANNEL: feed-vscode
-          SLACK_MESSAGE: ":x:"
+          SLACK_MESSAGE: "Publishing stable failed :x:"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
       - name: Slack Notification
-        if: ${{ success() }} && ${{ steps.check_for_updates.outputs.new_updates }}
+        if: ${{ success() && steps.check_for_updates.outputs.new_updates }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
           SLACK_CHANNEL: feed-vscode
-          SLACK_MESSAGE: ":white_check_mark:"
+          SLACK_MESSAGE: "Published Stable :white_check_mark:"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
   publish-insider:
@@ -78,17 +78,17 @@ jobs:
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: yarn vsce:publish "dev"
       - name: Slack Notification
-        if: ${{ failure() }} && ${{ steps.check_for_updates.outputs.new_updates }}
+        if: ${{ failure() && steps.check_for_updates.outputs.new_updates }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
           SLACK_CHANNEL: feed-vscode
-          SLACK_MESSAGE: ":x:"
+          SLACK_MESSAGE: "Publishing Insider failed :x:"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
       - name: Slack Notification
-        if: ${{ success() }} && ${{ steps.check_for_updates.outputs.new_updates }}
+        if: ${{ success() && steps.check_for_updates.outputs.new_updates }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
           SLACK_CHANNEL: feed-vscode
-          SLACK_MESSAGE: ":white_check_mark:"
+          SLACK_MESSAGE: "Published Insider :white_check_mark:"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
       
