@@ -45,7 +45,7 @@ jobs:
           SLACK_CHANNEL: feed-vscode
           SLACK_MESSAGE: "Publishing stable failed :x:"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_ICON_EMOJI: :roboter:
+          SLACK_ICON_EMOJI: ":roboter:"
           SLACK_USERNAME: vscode-actions
           SLACK_COLOR: '#FF0000'
 
@@ -56,7 +56,7 @@ jobs:
           SLACK_CHANNEL: feed-vscode
           SLACK_MESSAGE: "Published Stable :white_check_mark:"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_ICON_EMOJI: :roboter:
+          SLACK_ICON_EMOJI: ":roboter:"
           SLACK_USERNAME: vscode-actions
           SLACK_COLOR: '#008000'
 
