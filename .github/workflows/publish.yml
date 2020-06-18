@@ -45,6 +45,10 @@ jobs:
           SLACK_CHANNEL: feed-vscode
           SLACK_MESSAGE: "Publishing stable failed :x:"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_ICON_EMOJI: :roboter:
+          SLACK_USERNAME: vscode-actions
+          SLACK_COLOR: '#FF0000'
+
       - name: Slack Notification
         if: ${{ success() && steps.check_for_updates.outputs.new_updates }}
         uses: rtCamp/action-slack-notify@v2.0.2
@@ -52,6 +56,9 @@ jobs:
           SLACK_CHANNEL: feed-vscode
           SLACK_MESSAGE: "Published Stable :white_check_mark:"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_ICON_EMOJI: :roboter:
+          SLACK_USERNAME: vscode-actions
+          SLACK_COLOR: '#008000'
 
   publish-insider:
     name: Publish Insider
@@ -84,6 +91,9 @@ jobs:
           SLACK_CHANNEL: feed-vscode
           SLACK_MESSAGE: "Publishing Insider failed :x:"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_ICON_EMOJI: :roboter:
+          SLACK_USERNAME: vscode-actions
+          SLACK_COLOR: '#FF0000'
       - name: Slack Notification
         if: ${{ success() && steps.check_for_updates.outputs.new_updates }}
         uses: rtCamp/action-slack-notify@v2.0.2
@@ -91,4 +101,8 @@ jobs:
           SLACK_CHANNEL: feed-vscode
           SLACK_MESSAGE: "Published Insider :white_check_mark:"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_ICON_EMOJI: :roboter:
+          SLACK_USERNAME: vscode-actions
+          SLACK_COLOR: '#008000'
+
       
