@@ -49,7 +49,7 @@ jobs:
           SLACK_USERNAME: vscode-actions
           SLACK_COLOR: '#FF0000'
 
-      - name: Slack Notification
+      - name: Slack Notification on Success
         if: ${{ success() && steps.check_for_updates.outputs.new_updates }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
