@@ -38,7 +38,7 @@ jobs:
       - name: Publish Extension as Patch
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: yarn vsce:publish "latest"
-      - name: Slack Notification
+      - name: Slack Notification on Failure
         if: ${{ failure() && steps.check_for_updates.outputs.new_updates }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
