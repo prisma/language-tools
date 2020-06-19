@@ -19,6 +19,7 @@ echo "============================"
 RELEASE_CHANNEL=$1
 echo "RELEASE_CHANNEL: $RELEASE_CHANNEL"
 
+
 NPM_VERSION=$(sh scripts/prisma-version.sh "$RELEASE_CHANNEL")
 echo "NPM_VERSION: $NPM_VERSION"
 
