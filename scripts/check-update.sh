@@ -37,6 +37,7 @@ else
 fi
 
 if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then
+
     NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
     echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
     echo "::set-output name=new_updates::true"

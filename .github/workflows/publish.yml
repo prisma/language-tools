@@ -11,6 +11,7 @@ env:
   AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   PRODUCTION: ${{ secrets.PRODUCTION }}
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 jobs:
   publish:
@@ -37,6 +38,27 @@ jobs:
       - name: Publish Extension as Patch
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: yarn vsce:publish "latest"
+      - name: Slack Notification on Failure
+        if: ${{ failure() && steps.check_for_updates.outputs.new_updates }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_CHANNEL: feed-vscode
+          SLACK_MESSAGE: "Publishing stable failed :x:"
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_ICON_EMOJI: ":ship:"
+          SLACK_USERNAME: vscode-actions
+          SLACK_COLOR: '#FF0000'
+
+      - name: Slack Notification on Success
+        if: ${{ success() && steps.check_for_updates.outputs.new_updates }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_CHANNEL: feed-vscode
+          SLACK_MESSAGE: "Published stable :white_check_mark:"
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_ICON_EMOJI: ":ship:"
+          SLACK_USERNAME: vscode-actions
+          SLACK_COLOR: '#008000'
 
   publish-insider:
     name: Publish Insider
@@ -62,3 +84,25 @@ jobs:
       - name: Publish Extension as Patch
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: yarn vsce:publish "dev"
+      - name: Slack Notification on Failure
+        if: ${{ failure() && steps.check_for_updates.outputs.new_updates }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_CHANNEL: feed-vscode
+          SLACK_MESSAGE: "Publishing Insider failed :x:"
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_ICON_EMOJI: ":ship:"
+          SLACK_USERNAME: vscode-actions
+          SLACK_COLOR: '#FF0000'
+      - name: Slack Notification on Success
+        if: ${{ success() && steps.check_for_updates.outputs.new_updates }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_CHANNEL: feed-vscode
+          SLACK_MESSAGE: "Published Insider :white_check_mark:"
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_ICON_EMOJI: ":ship:"
+          SLACK_USERNAME: vscode-actions
+          SLACK_COLOR: '#008000'
+
+      
