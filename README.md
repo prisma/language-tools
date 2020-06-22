@@ -17,12 +17,17 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for `.prism
 ## Features
 
 * Syntax highlighting
-* Auto-formatting
+* Auto-formatting*
 * Linting
 * Jump-to-definition
 * Auto-completion
 
 It also includes an End-to-End test.
+
+**To automatically format on save, add the following to your `settings.json` file:*
+```
+"editor.formatOnSave": true
+```
 
 ## Install
 
