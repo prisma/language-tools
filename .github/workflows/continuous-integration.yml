@@ -21,4 +21,5 @@ jobs:
         with:
           run: npm run test
       - name: Catch shell script issues
+        if: matrix.os != 'windows-latest'
         run: yarn shell:lint
