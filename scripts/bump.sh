@@ -52,6 +52,8 @@ else
     node scripts/change-readme.js "$RELEASE_CHANNEL"
 fi
 
+    echo "::set-output name=version::$NEXT_EXTENSION_VERSION"
+
 jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
     .prisma.version = \"$SHA\" | \
     .dependencies[\"@prisma/get-platform\"] = \"$NPM_VERSION\"" \
