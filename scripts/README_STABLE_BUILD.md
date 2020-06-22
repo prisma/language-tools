@@ -20,6 +20,11 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
 
 It also includes an End-to-End test.
 
+**To automatically format on save, add the following to your `settings.json` file:*
+```
+"editor.formatOnSave": true
+```
+
 ## Preview
 
 ![Preview Schema](https://i.imgur.com/W80iRwE.png)
