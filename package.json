@@ -64,7 +64,7 @@
   },
   "scripts": {
     "package": "vsce package",
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "tsc --build --clean && npm run compile",
     "watch": "tsc -b -w",
     "compile": "tsc -b",
     "postinstall": "cd client && npm install && cd ../server && npm install && cd .. ",
