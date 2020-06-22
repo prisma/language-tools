@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 CODE_TESTS_PATH="$(pwd)/client/out/test"
 export CODE_TESTS_PATH
