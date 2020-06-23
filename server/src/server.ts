@@ -12,7 +12,6 @@ import * as MessageHandler from './MessageHandler'
 import { fullDocumentRange } from './provider'
 import * as util from './util'
 import lint from './lint'
-import fs from 'fs'
 import install from './install'
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
@@ -45,7 +44,7 @@ connection.onInitialize(async (params: InitializeParams) => {
   )
 
   const binPathPrismaFmt = await util.getBinPath()
-  if (!fs.existsSync(binPathPrismaFmt)) {
+  if (await util.binaryIsNeeded(binPathPrismaFmt)) {
     try {
       await install(binPathPrismaFmt)
       connection.console.info(
