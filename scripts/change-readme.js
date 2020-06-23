@@ -1,5 +1,6 @@
 const fs = require('fs')
 const githubAction = require('@actions/github')
+const path = require('path')
 
 
 function changeReadme({
@@ -7,7 +8,7 @@ function changeReadme({
 }) {
   if (releaseChannel === 'dev') {
     let content = fs.readFileSync(
-      join(__dirname, "./scripts/README_INSIDER_BUILD.md"),
+      path.join(__dirname, "./README_INSIDER_BUILD.md"),
       {
         encoding: "utf-8",
       }
@@ -16,7 +17,7 @@ function changeReadme({
     fs.writeFileSync( "./README.md", content);
   } else {
      content = fs.readFileSync(
-      join(__dirname, "./scripts/README_STABLE_BUILD.md"),
+      path.join(__dirname, "./README_STABLE_BUILD.md"),
       {
         encoding: "utf-8",
       }
