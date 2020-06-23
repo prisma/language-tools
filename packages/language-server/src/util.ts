@@ -4,6 +4,8 @@
 import { getPlatform, Platform } from '@prisma/get-platform'
 import pkgdir from 'pkg-dir'
 import path from 'path'
+import fs from 'fs'
+import exec from './exec'
 
 /**
  * Lookup Cache
@@ -65,4 +67,21 @@ export async function getCLIVersion(): Promise<string> {
   }
   const pkg = tryRequire(path.join(pkgPath, 'package.json'))
   return pkg['dependencies']['@prisma/get-platform']
+}
+
+export async function binaryIsNeeded(path: string): Promise<boolean> {
+  if (!fs.existsSync(path)) {
+    return true
+  }
+
+  // try to execute version command
+  try {
+    await exec(path, ['--version'], '')
+    console.log('Binary test successful.')
+    return false
+  } catch (errors) {
+    console.log('Binary test failed. Re-attempting a download.')
+    console.log(errors)
+    return true
+  }
 }

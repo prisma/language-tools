@@ -42,6 +42,7 @@ if [ "$RELEASE_CHANNEL" = "dev" ]; then
         .description = \"This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the $(dev) version of the CLI.\" | \
         .preview = true" \
         ./packages/vscode/package.json > ./packages/vscode/package.json.bk
+    node scripts/change-readme.js "$RELEASE_CHANNEL"
 else
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma\" | \
