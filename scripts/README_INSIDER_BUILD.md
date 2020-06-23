@@ -14,6 +14,11 @@
 <hr>
 Adds syntax highlighting, formatting, jump-to-definition and linting for `.prisma` files.
 
+**To automatically format on save, add the following to your `settings.json` file:*
+```
+"editor.formatOnSave": true
+```
+
 ## Insider Build
 
 This is the Insider Build of the [Prisma VSCode extension](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma). Most users should not use this version, but instead install
