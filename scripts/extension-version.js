@@ -11,6 +11,7 @@ function nextExtensionVersion({
     isBeta,
   )
 
+  console.log(extensionVersion)
   const existingExtensionVersion = coerceExtensionVersion(
     extensionVersion,
     isBeta,
@@ -66,12 +67,14 @@ function coerceExtensionVersion(version, isBeta = false) {
   if (isBeta) {
     tokens[1] = 1
   }
-
+  console.log(version)
   return semVer.coerce(tokens.join('.')).toString()
 }
 
 function bumpExtensionOnlyVersion(version) {
   const tokens = version.split('.')
+  console.log(version)
+  console.log(tokens.length)
   if (tokens.length === 3) {
     return tokens.join('.') + '.1'
   }
@@ -86,10 +89,11 @@ function bumpExtensionOnlyVersion(version) {
 module.exports = { nextExtensionVersion }
 
 if (require.main === module) {
-  const args = process.argv.slice(2)
+  const args = process.argv.slice(3)
   const version = nextExtensionVersion({
     prismaVersion: args[0],
     extensionVersion: args[1],
+    extensionOnlyPublish: args[2]
   })
   console.log(version)
 }
