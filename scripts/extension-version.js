@@ -31,11 +31,14 @@ function stripPreReleaseText(version) {
 function getDerivedExtensionVersion(version) {
   const tokens = version.split('.')
 
+  if (tokens.length === 4) {
+    return tokens.slice(1).join('.')
+  }
   if (tokens.length === 3) {
     return tokens.join('.')
   }
   throw new Error(
-    `Version ${version} must have 3 tokens separated by "." character`,
+    `Version ${version} must have 3 or 4 tokens separated by "." character`,
   )
 }
 
