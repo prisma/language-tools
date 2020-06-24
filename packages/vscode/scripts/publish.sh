@@ -36,7 +36,7 @@ if [ -z "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
 elif [ -n "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
     if [ "$PRODUCTION" = "1" ]; then
         echo "Publishing $RELEASE_CHANNEL release"
-        ./packages/vscode/node_modules/.bin/vsce publish "$NEXT_EXTENSION_VERSION" --pat "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
+        ./node_modules/.bin/vsce publish "$NEXT_EXTENSION_VERSION" --pat "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
     else
         echo "Printing the command because PRODUCTION is not set"
         echo "sh ./scripts/bump.sh" # The actual execution of this command is in check-update.sh becuase git working tree must be clean before calling `vsce publish`
