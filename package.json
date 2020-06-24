@@ -29,12 +29,7 @@
     "format": "prettier   \"packages/**/*.{ts,js,json,md}\"   --write",
     "lint": "eslint  \"packages/**/*.{js,ts,css,json,md} --fix --ext",
     "compile": "cd packages/language-server && npm run build && cd ../vscode && npm run build && cd .. && cd ..",
-    "watch": "npm run build -- -w",
-    "test": "cd packages/vscode &&  sh ./scripts/e2e.sh && cd .. && cd ..",
-    "vsce:publish": "(cd packages/vscode; sh scripts/publish.sh)",
-    "vsce:check": "(cd packages/vscode; yarn shell:lint; sh scripts/check-update.sh)",
-    "vsce:bump": "(cd packages/vscode; sh scripts/bump.sh)",
-    "shell:lint": "(cd packages/vscode; shellcheck -x scripts/*.sh)"
+    "watch": "npm run build -- -w"
   },
   "husky": {
     "hooks": {

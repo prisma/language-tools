@@ -23,11 +23,11 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Check for Update
-        run: yarn vsce:check "latest"
+        run: (cd packages/vscode; yarn vsce:check "latest")
         id: check_for_updates
       - name: Bump versions
         if: ${{ steps.check_for_updates.outputs.new_updates }}
-        run: yarn vsce:bump "latest"
+        run: (cd packages/vscode; yarn vsce:bump "latest")
         id: bump_versions
       - name: Compile
         run: yarn compile
@@ -35,10 +35,10 @@ jobs:
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         uses: GabrielBB/xvfb-action@v1.0
         with:
-          run: npm run test
+          run: (cd packages/vscode; npm run test)
       - name: Publish Extension as Patch
         if: ${{ steps.check_for_updates.outputs.new_updates }}
-        run: yarn vsce:publish "latest"
+        run: (cd packages/vscode; yarn vsce:publish "latest")
       - name: Slack Notification on Failure
         if: ${{ failure() && steps.check_for_updates.outputs.new_updates }}
         uses: rtCamp/action-slack-notify@v2.0.2
@@ -72,11 +72,11 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Check for Update
-        run: yarn vsce:check "dev"
+        run: (cd packages/vscode; yarn vsce:check "dev")
         id: check_for_updates
       - name: Bump versions
         if: ${{ steps.check_for_updates.outputs.new_updates }}
-        run: yarn vsce:bump "dev"
+        run: (cd packages/vscode; yarn vsce:bump "dev")
         id: bump_versions
       - name: Compile
         run: yarn compile
@@ -84,10 +84,10 @@ jobs:
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         uses: GabrielBB/xvfb-action@v1.0
         with:
-          run: npm run test
+          run: (cd packages/vscode; npm run test)
       - name: Publish Extension as Patch
         if: ${{ steps.check_for_updates.outputs.new_updates }}
-        run: yarn vsce:publish "dev"
+        run: (cd packages/vscode; yarn vsce:publish "dev")
       - name: Slack Notification on Failure
         if: ${{ failure() && steps.check_for_updates.outputs.new_updates }}
         uses: rtCamp/action-slack-notify@v2.0.2
