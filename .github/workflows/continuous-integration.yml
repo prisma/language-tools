@@ -22,4 +22,4 @@ jobs:
           run: cd packages/vscode && npm run test
       - name: Catch shell script issues
         if: matrix.os == 'ubuntu-latest'
-        run: yarn shell:lint
+        run: cd packages/vscode && yarn shell:lint
