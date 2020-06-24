@@ -25,7 +25,7 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "postinstall": "lerna bootstrap",
+    "postinstall": "lerna exec npm install",
     "format": "prettier   \"packages/**/*.{ts,js,json,md}\"   --write",
     "lint": "eslint  \"packages/**/*.{js,ts,css,json,md} --fix --ext",
     "compile": "cd packages/language-server && npm run build && cd ../vscode && npm run build && cd .. && cd ..",
