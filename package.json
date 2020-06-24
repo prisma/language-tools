@@ -29,7 +29,8 @@
     "format": "prettier   \"packages/**/*.{ts,js,json,md}\"   --write",
     "lint": "eslint  \"packages/**/*.{js,ts,css,json,md} --fix --ext",
     "compile": "cd packages/language-server && npm run build && cd ../vscode && npm run build && cd .. && cd ..",
-    "watch": "npm run build -- -w"
+    "watch": "npm run build -- -w",
+    "test": "cd packages/vscode && npm run test"
   },
   "husky": {
     "hooks": {
