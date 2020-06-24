@@ -15,7 +15,7 @@ fi
 RELEASE_CHANNEL=$1
 echo "RELEASE_CHANNEL: $RELEASE_CHANNEL"
 
-OLD_SHA=$(jq ".prisma.version" ./package.json)
+OLD_SHA=$(jq ".prisma.version" ./packages/vscode/package.json)
 SHA=$(npx -q -p @prisma/cli@"$RELEASE_CHANNEL" prisma --version | grep "Query Engine" | awk '{print $5}')
 
 NPM_VERSION=$(sh scripts/prisma-version.sh "$RELEASE_CHANNEL")
@@ -41,7 +41,7 @@ if [ "$RELEASE_CHANNEL" = "dev" ]; then
         .displayName = \"Prisma - Insider\" | \
         .description = \"This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the $(dev) version of the CLI.\" | \
         .preview = true" \
-        ./package.json > ./package.json.bk
+        ./packages/vscode/package.json > ./packages/vscode/package.json.bk
     node scripts/change-readme.js "$RELEASE_CHANNEL"
 else
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
@@ -49,7 +49,8 @@ else
         .displayName = \"Prisma\"| \
         .description = \"Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.\" | \
         .preview = false" \
-        ./package.json > ./package.json.bk
+        ./packages/vscode/package.json > ./packages/vscode/package.json.bk
+
     node scripts/change-readme.js "$RELEASE_CHANNEL"
 fi
 
@@ -58,24 +59,20 @@ echo "::set-output name=version::$NEXT_EXTENSION_VERSION"
 jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
     .prisma.version = \"$SHA\" | \
     .dependencies[\"@prisma/get-platform\"] = \"$NPM_VERSION\"" \
-    ./server/package.json > ./server/package.json.bk
+    ./packages/language-server/package.json > ./packages/language-server/package.json.bk
 
-jq ".version = \"$NEXT_EXTENSION_VERSION\"" \
-    ./client/package.json > ./client/package.json.bk
-
-mv ./package.json.bk ./package.json
-mv ./server/package.json.bk ./server/package.json
-mv ./client/package.json.bk ./client/package.json
+mv ./packages/language-server/package.json.bk ./packages/language-server/package.json
+mv ./packages/vscode/package.json.bk ./packages/vscode/package.json
 
 npm install
 
 (
-cd ./client
+cd ./packages/vscode
 npm install
 )
 
 (
-cd ./server
+cd ./packages/language-server
 npm install
 )
 

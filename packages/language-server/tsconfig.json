@@ -1,14 +1,16 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "module": "commonjs",
     "target": "es6",
-    "outDir": "out",
-    "rootDir": "src",
+    "outDir": "dist",
+    "lib": ["es6"],
     "sourceMap": true,
     "esModuleInterop": true,
     "strict": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "composite": true
   },
-  "include": ["src"],
+  "include": ["src/**/*", "src/**/*.json"],
   "exclude": ["node_modules", ".vscode-test"]
 }

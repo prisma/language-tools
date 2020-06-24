@@ -4,19 +4,20 @@
 
 The `master` branch of this repository contains the VS Code extension for Prisma schema files. Prisma package dependencies are kept up to date with a GitHub Action workflow, that updates them every time a new version of them is released.
 
-There is a stable version `prisma` and an unstable version `prisma-dev`. The stable one is published as ["Prisma" in the VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma), the unstable one as ["Prisma Dev"](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-dev). An automated publish runs every 5 minutes calling the `check-update.sh` script. 
+There is a stable version `prisma` and an unstable version `prisma-dev`. The stable one is published as ["Prisma" in the VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma), the unstable one as ["Prisma Dev"](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-dev). An automated publish runs every 5 minutes calling the `check-update.sh` script.
 In the beginning of this run, the CI job checks for Prisma stable version and `scripts/prisma_version_stable` contents to be the same. If they are not the same, it makes the required version changes and proceeds further in the job. `scripts/prisma_version_stable` is a file that is committed by the stable CI job. That enables the future runs to know if an extension version is already published for a specific Prisma CLI version. The same workflow is done for Prisma unstable version, where the file checked in that case is `scripts/prisma_version_unstable` and in addition the respective `package.json` files are committed.
 
 ## Structure
 
 ```
 .
-├── client               // Language Client
-│   └── src
-│       └── extension.ts // Language Client entry point
-├── server               // Language Server
-│   └── src
-│       └── server.ts    // Language Server entry point
+├── packages
+│   └── vscode
+│       └── src
+|           └── extension.ts // Language Client entry point
+|   └── language-server      // Language Server
+│       └── src
+│           └── cli.ts    // Language Server CLI entry point
 └── package.json         // The extension manifest
 ```
 
@@ -65,4 +66,3 @@ To do a manual publish, please follow these steps:
 6. Drag `prisma-x.x.x.vsix` into the browser and click upload.
 
 This will take about an hour before the update is available.
-
