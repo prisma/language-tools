@@ -23,7 +23,7 @@ In the beginning of this run, the CI job checks for Prisma stable version and `s
 
 ## Development
 
-- Run `npm install` in this folder. This installs all necessary npm modules in both the client and server folder.
+- Run `npm install` in the root folder. This installs all necessary npm modules in both the vscode and language-server folder.
 - Run `npm run watch`.
 - Open VS Code on this folder.
 - Switch to the debug viewlet.
@@ -41,7 +41,7 @@ Instructions on manual testing can be found [here](TESTING.md).
 
 End-to-End tests:
 
-- Run `npm install` in this folder.
+- Run `npm install` in the root folder.
 - Open VS Code on this folder.
 - Switch to the debug viewlet.
 - Select `Language Server E2E Test` from the drop down.
@@ -58,11 +58,12 @@ Note that the personal access token is only valid for a year and will need to be
 
 To do a manual publish, please follow these steps:
 
-1. Increment the package version
-2. Update to latest pinned binary release in the [Prisma CLI's package.json](https://github.com/prisma/prisma2/blob/master/cli/prisma2/package.json) under **prisma.version**.
-3. Run `yarn package`
-4. Go to https://marketplace.visualstudio.com/manage/publishers/Prisma
-5. Click the **��� More Actions**
-6. Drag `prisma-x.x.x.vsix` into the browser and click upload.
+1. Go to the vscode folder.
+2. Increment the package version
+3. Update to latest pinned binary release in the [Prisma CLI's package.json](https://github.com/prisma/prisma2/blob/master/cli/prisma2/package.json) under **prisma.version**.
+4. Run `yarn package`
+5. Go to https://marketplace.visualstudio.com/manage/publishers/Prisma
+6. Click the **��� More Actions**
+7. Drag `prisma-x.x.x.vsix` into the browser and click upload.
 
 This will take about an hour before the update is available.
