@@ -6,9 +6,9 @@ NPM_TAG="$1"
 NEXT="$2"
 
 if [ "$NPM_TAG" = "dev" ]; then
-    EXTENSION_VERSION=$(vsce show Prisma.prisma-insider --json | jq ".versions[0].version" | tr -d '"')
+    EXTENSION_VERSION=$(./packages/vscode/node_modules/.bin/vsce show Prisma.prisma-insider --json | jq ".versions[0].version" | tr -d '"')
 else
-    EXTENSION_VERSION=$(vsce show Prisma.prisma --json | jq ".versions[0].version" | tr -d '"')
+    EXTENSION_VERSION=$(./packages/vscode/node_modules/.bin/vsce show Prisma.prisma --json | jq ".versions[0].version" | tr -d '"')
 fi
 
 if [ "$NEXT" = "patch" ]; then

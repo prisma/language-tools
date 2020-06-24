@@ -6,15 +6,16 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch Client",
+      "name": "Launch VSCode extension",
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
+      "sourceMaps": true,
       "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode",
         "--disable-extensions"
       ],
-      "outFiles": ["${workspaceFolder}/client/out/**/*.js"]
+      "outFiles": ["${workspaceFolder}/packages/vscode/dist/**/*.js"],
     },
     {
       "type": "node",
@@ -23,7 +24,7 @@
       "port": 6009,
       "restart": true,
       "timeout": 50000,
-      "outFiles": ["${workspaceFolder}/server/out/**/*.js"]
+      "outFiles": ["${workspaceFolder}/packages/language-server/dist/**/*.js"]
     },
     {
       "name": "Language Server E2E Test",
@@ -31,17 +32,11 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/client/out/test/index",
-        "${workspaceFolder}/client/testFixture"
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode",
+        "--extensionTestsPath=${workspaceFolder}/packages/vscode/dist/src/test/index",
+        "${workspaceFolder}/packages/vscode/testFixture"
       ],
-      "outFiles": ["${workspaceFolder}/client/out/test/**/*.js"]
-    }
-  ],
-  "compounds": [
-    {
-      "name": "Client + Server",
-      "configurations": ["Launch Client", "Attach to Server"]
+      "outFiles": ["${workspaceFolder}/packages/vscode/dist/src/test/**/*.js"]
     }
   ]
 }

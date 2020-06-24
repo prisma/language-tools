@@ -1,91 +1,57 @@
 {
-  "name": "prisma-insider",
-  "displayName": "Prisma - Insider",
-  "description": "This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the  version of the CLI.",
-  "version": "1.0.59",
+  "name": "@prisma/language-support",
+  "version": "1.0.0",
+  "author": "Prisma",
   "license": "Apache-2.0",
-  "icon": "logo_white.png",
-  "engines": {
-    "vscode": "^1.43.0"
-  },
-  "publisher": "Prisma",
-  "categories": [
-    "Programming Languages"
+  "workspaces": [
+    "packages/*"
   ],
-  "repository": {
-    "type": "github",
-    "url": "https://github.com/prisma/vscode"
-  },
-  "main": "./client/out/extension",
-  "contributes": {
-    "languages": [
-      {
-        "id": "prisma",
-        "aliases": [
-          "Prisma",
-          "prisma"
-        ],
-        "extensions": [
-          ".prisma"
-        ],
-        "configuration": "./language-configuration.json"
-      }
-    ],
-    "grammars": [
-      {
-        "language": "prisma",
-        "scopeName": "source.prisma",
-        "path": "./syntaxes/prisma.tmLanguage.json"
-      }
-    ],
-    "configuration": {
-      "type": "object",
-      "title": "Language server configuration",
-      "properties": {
-        "languageServerExample.maxNumberOfProblems": {
-          "scope": "resource",
-          "type": "number",
-          "default": 100,
-          "description": "Controls the maximum number of problems produced by the server."
-        },
-        "languageServerExample.trace.server": {
-          "scope": "window",
-          "type": "string",
-          "enum": [
-            "off",
-            "messages",
-            "verbose"
-          ],
-          "default": "off",
-          "description": "Traces the communication between VS Code and the language server."
-        }
-      }
-    }
+  "devDependencies": {
+    "@commitlint/cli": "^8.1.0",
+    "@commitlint/config-conventional": "^8.1.0",
+    "@commitlint/config-lerna-scopes": "^8.1.0",
+    "@types/node": "14.0.13",
+    "@typescript-eslint/eslint-plugin": "2.27.0",
+    "@actions/github": "3.0.0",
+    "@typescript-eslint/parser": "2.27.0",
+    "eslint": "6.8.0",
+    "eslint-config-prettier": "6.10.1",
+    "eslint-plugin-prettier": "3.1.2",
+    "husky": "4.2.3",
+    "lerna": "^3.22.1",
+    "lint-staged": "10.1.2",
+    "prettier": "2.0.5",
+    "typescript": "3.8.3"
   },
   "scripts": {
-    "package": "vsce package",
+    "build": "tsc -b",
+    "postinstall": "lerna bootstrap",
+    "format": "prettier   \"packages/**/*.{ts,js,json,md}\"   --write",
+    "lint": "eslint  \"packages/**/*.{js,ts,css,json,md} --fix --ext",
+    "compile": "cd packages/language-server && npm run build && cd ../vscode && npm run build && cd .. && cd ..",
+    "watch": "npm run build -- -w",
     "vscode:prepublish": "tsc --build --clean && npm run compile",
-    "watch": "tsc -b -w",
-    "compile": "tsc -b",
-    "postinstall": "cd client && npm install && cd ../server && npm install && cd .. ",
     "vsce:publish": "sh scripts/publish.sh",
     "vsce:check": "yarn shell:lint && sh scripts/check-update.sh",
     "vsce:bump": "sh scripts/bump.sh",
-    "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "sh ./scripts/e2e.sh",
-    "test-scripts": "mocha scripts/extension-version.test.js"
+    "shell:lint": "shellcheck -x scripts/*.sh"
   },
-  "activationEvents": [
-    "onLanguage:prisma"
-  ],
-  "devDependencies": {
-    "@types/mocha": "5.2.7",
-    "@types/node": "12.12.0",
-    "chai": "4.2.0",
-    "mocha": "7.1.1",
-    "semver": "7.3.2",
-    "typescript": "3.8.3",
-    "vsce": "1.75.0"
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   },
-  "preview": true
+  "publishConfig": {
+    "access": "public"
+  },
+  "lint-staged": {
+    "packages/**/*.{js,ts,css,json,md}": [
+      "prettier --write",
+      "git add"
+    ],
+    "packages/**/*.{js,ts}": [
+      "eslint --fix"
+    ]
+  }
 }

@@ -21,7 +21,7 @@ export function tryRequire(path: string): any {
     return require(path)
   } catch (err) {
     console.error(err)
-    return
+    throw new Error(err)
   }
 }
 

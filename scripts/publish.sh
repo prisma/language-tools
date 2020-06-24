@@ -29,6 +29,7 @@ echo "EXTENSION_VERSION: $EXTENSION_VERSION"
 NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
 echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
 
+
 # Try to publish if $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN (Personal Access Token - https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) exists 
 if [ -z "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
     echo "\$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN is empty. Please set the value of $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
@@ -39,7 +40,7 @@ elif [ -n "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
     else
         echo "Printing the command because PRODUCTION is not set"
         echo "sh ./scripts/bump.sh" # The actual execution of this command is in check-update.sh becuase git working tree must be clean before calling `vsce publish`
-        echo "./node_modules/.bin/vsce publish \"$NEXT_EXTENSION_VERSION\" --pat $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
+        echo "./packages/vscode/node_modules/.bin/vsce publish \"$NEXT_EXTENSION_VERSION\" --pat $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
     fi
 fi
 
