@@ -67,13 +67,11 @@ mv ./package.json.bk ./package.json
 npm install
 
 (
-cd ./../language-server
-npm install
+npm install -C ../language-server
 )
 
 (
-cd ./../..
-npm install
+npm install -C ../..
 )
 
 echo "Bumped prisma.version in package.json from $OLD_SHA to $SHA"

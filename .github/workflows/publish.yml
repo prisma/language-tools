@@ -23,11 +23,11 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Check for Update
-        run: cd packages/vscode; yarn vsce:check "latest" 
+        run: yarn --cwd packages/vscode vsce:check "latest" 
         id: check_for_updates
       - name: Bump versions
         if: ${{ steps.check_for_updates.outputs.new_updates }}
-        run: cd packages/vscode; yarn vsce:bump "latest" 
+        run: yarn --cwd packages/vscode vsce:bump "latest" 
         id: bump_versions
       - name: Compile
         run: yarn compile
@@ -38,7 +38,7 @@ jobs:
           run: npm run test
       - name: Publish Extension as Patch
         if: ${{ steps.check_for_updates.outputs.new_updates }}
-        run: cd packages/vscode; yarn vsce:publish "latest"
+        run: yarn --cwd packages/vscode vsce:publish "latest"
       - name: Slack Notification on Failure
         if: ${{ failure() && steps.check_for_updates.outputs.new_updates }}
         uses: rtCamp/action-slack-notify@v2.0.2
@@ -72,11 +72,11 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Check for Update
-        run: cd packages/vscode; yarn vsce:check "dev"
+        run: yarn --cwd packages/vscode vsce:check "dev"
         id: check_for_updates
       - name: Bump versions
         if: ${{ steps.check_for_updates.outputs.new_updates }}
-        run: cd packages/vscode; yarn vsce:bump "dev"
+        run: yarn --cwd packages/vscode vsce:bump "dev"
         id: bump_versions
       - name: Compile
         run: yarn compile
@@ -87,7 +87,7 @@ jobs:
           run: npm run test
       - name: Publish Extension as Patch
         if: ${{ steps.check_for_updates.outputs.new_updates }}
-        run:  cd packages/vscode; yarn vsce:publish "dev"
+        run:  yarn --cwd packages/vscode vsce:publish "dev"
       - name: Slack Notification on Failure
         if: ${{ failure() && steps.check_for_updates.outputs.new_updates }}
         uses: rtCamp/action-slack-notify@v2.0.2

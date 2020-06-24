@@ -25,12 +25,12 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "postinstall": "cd packages/language-server && npm install && cd ../vscode && npm install && cd .. && cd .. ",
+    "postinstall": "npm i -C packages/language-server && npm i -C packages/vs-code",
     "format": "prettier   \"packages/**/*.{ts,js,json,md}\"   --write",
     "lint": "eslint  \"packages/**/*.{js,ts,css,json,md} --fix --ext",
-    "compile": "cd packages/language-server && npm run build && cd ../vscode && npm run build && cd .. && cd ..",
+    "compile": "npm run build -C packages/language-server && npm run build -C packages/vs-code",
     "watch": "npm run build -- -w",
-    "test": "cd packages/vscode && npm run test"
+    "test": "npm run test -C packages/vscode"
   },
   "husky": {
     "hooks": {
