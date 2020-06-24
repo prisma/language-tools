@@ -67,33 +67,30 @@ function coerceExtensionVersion(version, isBeta = false) {
   if (isBeta) {
     tokens[1] = 1
   }
-  console.log(version)
   return semVer.coerce(tokens.join('.')).toString()
 }
 
 function bumpExtensionOnlyVersion(version) {
   const tokens = version.split('.')
-  console.log(version)
-  console.log(tokens.length)
+  console.log(tokens)
   if (tokens.length === 3) {
-    return tokens.join('.') + '.1'
-  }
-  if (tokens.length === 4) {
-    return tokens.slice(0, 3).join('.') + '.' + (parseInt(tokens[3]) + 1)
+    ++tokens[2]
+    return tokens.join('.')
   }
   throw new Error(
-    `Version ${version} must have 3 or 4 tokens separated by "." character`,
+    `Version ${version} must have 3 tokens separated by "." character`,
   )
 }
 
 module.exports = { nextExtensionVersion }
 
 if (require.main === module) {
-  const args = process.argv.slice(3)
+  const args = process.argv.slice(2)
+  console.log(args)
   const version = nextExtensionVersion({
     prismaVersion: args[0],
     extensionVersion: args[1],
-    extensionOnlyPublish: args[2]
+    isExtensionOnlyCommit: args.length === 3 ? args[2] : false
   })
   console.log(version)
 }
