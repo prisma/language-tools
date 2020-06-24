@@ -23,11 +23,12 @@
   "scripts": {
     "build": "tsc -p ./",
     "watch": "npm run build -- -w",
-    "vscode:prepublish": "npm run build",
+    "vscode:prepublish": "tsc --build --clean && npm run compile",
     "vsce:publish": "sh scripts/publish.sh",
     "vsce:check": "yarn shell:lint && sh scripts/check-update.sh",
-    "shell:lint": "shellcheck -x scripts/*.sh",
-    "test": "sh ./scripts/e2e.sh"
+    "vsce:bump": "sh scripts/bump.sh",
+    "test": "sh ./scripts/e2e.sh",
+    "shell:lint": "shellcheck -x scripts/*.sh"
   },
   "main": "./dist/src/extension.js",
   "activationEvents": [
