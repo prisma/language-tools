@@ -12,7 +12,7 @@ env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   PRODUCTION: ${{ secrets.PRODUCTION }}
   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-  NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+  NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
 jobs:
   publish:
