@@ -41,7 +41,7 @@ if [ "$RELEASE_CHANNEL" = "dev" ]; then
         .displayName = \"Prisma - Insider\" | \
         .description = \"This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the $(dev) version of the CLI.\" | \
         .preview = true" \
-        ./package.json > ./package.json.bk
+        ./packages/vscode/package.json > ./packages/vscode/package.json.bk
     node scripts/change-readme.js "$RELEASE_CHANNEL"
 else
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
@@ -49,7 +49,7 @@ else
         .displayName = \"Prisma\"| \
         .description = \"Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.\" | \
         .preview = false" \
-        ./package.json > ./package.json.bk
+        ./packages/vscode/package.json > ./packages/vscode/package.json.bk
 
     node scripts/change-readme.js "$RELEASE_CHANNEL"
 fi
@@ -59,20 +59,36 @@ echo "::set-output name=version::$NEXT_EXTENSION_VERSION"
 jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
     .prisma.version = \"$SHA\" | \
     .dependencies[\"@prisma/get-platform\"] = \"$NPM_VERSION\"" \
-    ./../language-server/package.json > ./../language-server/package.json.bk
+    ./packages/language-server/package.json > ./packages/language-server/package.json.bk
 
-mv ./../language-server/package.json.bk ./../language-server/package.json
-mv ./package.json.bk ./package.json
+jq ".dependencies[\"@prisma/language-server\"] = \"$NEXT_EXTENSION_VERSION\"" \
+    ./packages/vscode/package.json > ./packages/vscode/package.json.bk
 
-npm install
+mv ./packages/language-server/package.json.bk ./packages/language-server/package.json
+mv ./packages/vscode/package.json.bk ./packages/vscode/package.json
 
 (
-cd ./../language-server
+cd ./packages/language-server
 npm install
 )
 
+if [ -z "$NODE_AUTH_TOKEN" ]; then
+    echo "\$NODE_AUTH_TOKEN is empty. Please set the value of $NODE_AUTH_TOKEN"
+elif [ -n "$NODE_AUTH_TOKEN" ]; then
+    if [ "$PRODUCTION" = "1" ]; then
+        echo "Publishing $RELEASE_CHANNEL language-server"
+        cd ./packages/language-server && ./node_modules/.bin/npm publish && cd ../..
+    else
+        echo "Printing the command because PRODUCTION is not set"
+        echo "cd ./packages/language-server && ./node_modules/.bin/npm publish && cd ../.."
+    fi
+fi
+
+
+npm install
+
 (
-cd ./../..
+cd ./packages/..
 npm install
 )
 

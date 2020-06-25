@@ -14,7 +14,7 @@ function changeReadme({
       }
     );
     content = content.replace(/\$commit-sha\$/g, githubAction.context.sha)
-    fs.writeFileSync( "./README.md", content);
+    fs.writeFileSync( "./packages/vscode/README.md", content);
   } else {
      content = fs.readFileSync(
       path.join(__dirname, "./README_STABLE_BUILD.md"),
@@ -22,7 +22,7 @@ function changeReadme({
         encoding: "utf-8",
       }
     )
-    fs.writeFileSync("./README.md", content);
+    fs.writeFileSync("./packages/vscode/README.md", content);
   }
 }
 

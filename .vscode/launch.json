@@ -15,7 +15,9 @@
         "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode",
         "--disable-extensions"
       ],
-      "outFiles": ["${workspaceFolder}/packages/vscode/dist/**/*.js"],
+      "outFiles": [
+        "${workspaceFolder}/packages/vscode/dist/**/*.js"
+      ],
     },
     {
       "type": "node",
@@ -24,7 +26,9 @@
       "port": 6009,
       "restart": true,
       "timeout": 50000,
-      "outFiles": ["${workspaceFolder}/packages/language-server/dist/**/*.js"]
+      "outFiles": [
+        "${workspaceFolder}/packages/language-server/dist/**/*.js"
+      ]
     },
     {
       "name": "Language Server E2E Test",
@@ -36,7 +40,9 @@
         "--extensionTestsPath=${workspaceFolder}/packages/vscode/dist/src/test/index",
         "${workspaceFolder}/packages/vscode/testFixture"
       ],
-      "outFiles": ["${workspaceFolder}/packages/vscode/dist/src/test/**/*.js"]
+      "outFiles": [
+        "${workspaceFolder}/packages/vscode/dist/src/test/**/*.js"
+      ]
     }
   ]
 }
