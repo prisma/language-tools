@@ -26,7 +26,13 @@ EXTENSION_VERSION=$(sh scripts/extension-version.sh "$RELEASE_CHANNEL" "")
 echo "EXTENSION_VERSION: $EXTENSION_VERSION"
 
 NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
-echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
+
+(
+    cd ./packages/language-server
+    npm install
+    npm run build
+)
+
 
 # Try to publish the language server to npm if $NODE_AUTH_TOKEN exists
 if [ -z "$NODE_AUTH_TOKEN" ]; then

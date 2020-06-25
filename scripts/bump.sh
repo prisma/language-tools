@@ -65,10 +65,4 @@ jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
 mv ./packages/language-server/package.json.bk ./packages/language-server/package.json
 mv ./packages/vscode/package.json.bk ./packages/vscode/package.json
 
-(
-    cd ./packages/language-server
-    npm install
-    npm run build
-)
-
 echo "Bumped prisma.version in package.json from $OLD_SHA to $SHA"
