@@ -70,13 +70,14 @@ mv ./packages/vscode/package.json.bk ./packages/vscode/package.json
 (
 cd ./packages/language-server
 npm install
+npm run build
 )
 
 if [ -z "$NODE_AUTH_TOKEN" ]; then
     echo "\$NODE_AUTH_TOKEN is empty. Please set the value of $NODE_AUTH_TOKEN"
 elif [ -n "$NODE_AUTH_TOKEN" ]; then
     if [ "$PRODUCTION" = "1" ]; then
-        echo "Publishing $RELEASE_CHANNEL language-server"
+        echo "Publishing language-server"
         cd ./packages/language-server && ./node_modules/.bin/npm publish && cd ../..
     else
         echo "Printing the command because PRODUCTION is not set"
