@@ -88,7 +88,7 @@ fi
 npm install
 
 (
-cd ./packages/..
+cd ./packages/vscode
 npm install
 )
 
