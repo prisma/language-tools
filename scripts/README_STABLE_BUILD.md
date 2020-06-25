@@ -1,4 +1,4 @@
-<h1 align="center"><img src="../packages/vscode/logo_white.png" alt="Logo" height="128" /></h1>
+<h1 align="center"><img src="./logo_white.png" alt="Logo" height="128" /></h1>
 <h2 align="center">Prisma VS Code Extension</h2>
 <div align="center">
 
@@ -31,7 +31,7 @@ It also includes an End-to-End test.
 
 ## Contributing
 
-Read more about [how to contribute to the Prisma VSCode extension](../packages/vscode/CONTRIBUTING.md)
+Read more about [how to contribute to the Prisma VSCode extension](./CONTRIBUTING.md)
 
 ## Security
 
