@@ -1,4 +1,4 @@
-<h1 align="center"><img src="../logo_white.png" alt="Logo" height="128" /></h1>
+<h1 align="center"><img src="./logo_white.png" alt="Logo" height="128" /></h1>
 <h2 align="center">Prisma VS Code Extension</h2>
 <div align="center">
 
@@ -34,7 +34,7 @@ This version is built from commit [$commit-sha$]($commit-sha$).
 
 ## Contributing
 
-Read more about [how to contribute to the Prisma VSCode extension](../CONTRIBUTING.md)
+Read more about [how to contribute to the Prisma VSCode extension](./CONTRIBUTING.md)
 
 ## Security
 

@@ -28,8 +28,7 @@ function tryRequire(path: string): any {
  */
 export async function activate(docUri: vscode.Uri): Promise<void> {
   // The extensionId is `publisher.name` from package.json
-
-  const pj = tryRequire('../../package.json')
+  const pj = tryRequire('../../../package.json')
   if (!pj) {
     return
   }
@@ -60,9 +59,7 @@ export function toRange(
 }
 
 export const getDocPath = (p: string): string => {
-  const t = path.join(__dirname, '../../../../testFixture', p)
-  const tr = path.join(__dirname, '../../../testFixture', p)
-  return path.join(__dirname, '../../../../testFixture', p)
+  return path.join(__dirname, '../../../testFixture', p)
 }
 export const getDocUri = (p: string): vscode.Uri => {
   return vscode.Uri.file(getDocPath(p))

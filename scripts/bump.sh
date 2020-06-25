@@ -11,11 +11,10 @@ else
     echo "No .envrc"
 fi
 
-
 RELEASE_CHANNEL=$1
 echo "RELEASE_CHANNEL: $RELEASE_CHANNEL"
 
-OLD_SHA=$(jq ".prisma.version" ./package.json)
+OLD_SHA=$(jq ".prisma.version" ./packages/vscode/package.json)
 SHA=$(npx -q -p @prisma/cli@"$RELEASE_CHANNEL" prisma --version | grep "Query Engine" | awk '{print $5}')
 
 NPM_VERSION=$(sh scripts/prisma-version.sh "$RELEASE_CHANNEL")
@@ -29,9 +28,9 @@ NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTE
 echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
 
 if [ "$RELEASE_CHANNEL" = "dev" ]; then
-    echo "$NPM_VERSION" > scripts/prisma_version_insider
+    echo "$NPM_VERSION" >scripts/prisma_version_insider
 else
-    echo "$NPM_VERSION" > scripts/prisma_version_stable
+    echo "$NPM_VERSION" >scripts/prisma_version_stable
 fi
 
 # If the RELEASE_CHANNEL is dev, we need to change the name, displayName, description and preview flag to the Insider extension
@@ -39,17 +38,19 @@ if [ "$RELEASE_CHANNEL" = "dev" ]; then
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma-insider\" | \
         .displayName = \"Prisma - Insider\" | \
-        .description = \"This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the $(dev) version of the CLI.\" | \
+        .description = \"This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the dev version of the CLI.\" | \
+        .dependencies[\"@prisma/language-server\"] = \"$NEXT_EXTENSION_VERSION\" | \
         .preview = true" \
-        ./package.json > ./package.json.bk
+    ./packages/vscode/package.json >./packages/vscode/package.json.bk
     node scripts/change-readme.js "$RELEASE_CHANNEL"
 else
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma\" | \
         .displayName = \"Prisma\"| \
         .description = \"Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.\" | \
+        .dependencies[\"@prisma/language-server\"] = \"$NEXT_EXTENSION_VERSION\" | \
         .preview = false" \
-        ./package.json > ./package.json.bk
+    ./packages/vscode/package.json >./packages/vscode/package.json.bk
 
     node scripts/change-readme.js "$RELEASE_CHANNEL"
 fi
@@ -59,29 +60,9 @@ echo "::set-output name=version::$NEXT_EXTENSION_VERSION"
 jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
     .prisma.version = \"$SHA\" | \
     .dependencies[\"@prisma/get-platform\"] = \"$NPM_VERSION\"" \
-    ./../language-server/package.json > ./../language-server/package.json.bk
+./packages/language-server/package.json >./packages/language-server/package.json.bk
 
-mv ./../language-server/package.json.bk ./../language-server/package.json
-mv ./package.json.bk ./package.json
-
-npm install
-
-(
-cd ./../language-server
-npm install
-)
-
-(
-cd ./../..
-npm install
-)
+mv ./packages/language-server/package.json.bk ./packages/language-server/package.json
+mv ./packages/vscode/package.json.bk ./packages/vscode/package.json
 
 echo "Bumped prisma.version in package.json from $OLD_SHA to $SHA"
-
-
-if [ "$PRODUCTION" = "1" ]; then
-        git add -A .
-        git commit -m "bump prisma_version to $NPM_VERSION"
-else
-        echo "Not committing because production is not set"
-fi
