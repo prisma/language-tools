@@ -38,7 +38,7 @@ if [ "$RELEASE_CHANNEL" = "dev" ]; then
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma-insider\" | \
         .displayName = \"Prisma - Insider\" | \
-        .description = \"This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the $(dev) version of the CLI.\" | \
+        .description = \"This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the dev version of the CLI.\" | \
         .dependencies[\"@prisma/language-server\"] = \"$NEXT_EXTENSION_VERSION\" | \
         .preview = true" \
     ./packages/vscode/package.json >./packages/vscode/package.json.bk
