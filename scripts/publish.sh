@@ -40,10 +40,10 @@ if [ -z "$NODE_AUTH_TOKEN" ]; then
 elif [ -n "$NODE_AUTH_TOKEN" ]; then
     if [ "$PRODUCTION" = "1" ]; then
         echo "Publishing language-server"
-        cd ./packages/language-server && ./node_modules/.bin/npm publish --verbose && cd ../..
+        cd ./packages/language-server && npm publish --verbose && cd ../..
     else
         echo "Printing the command because PRODUCTION is not set"
-        echo "cd ./packages/language-server && ./node_modules/.bin/npm publish && cd ../.."
+        echo "cd ./packages/language-server && npm publish && cd ../.."
     fi
 fi
 

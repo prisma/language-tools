@@ -24,14 +24,14 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Check for Update
-        run: yarn vsce:check "latest" 
+        run: npm run vsce:check "latest" 
         id: check_for_updates
       - name: Bump versions
         if: ${{ steps.check_for_updates.outputs.new_updates }}
-        run: yarn vsce:bump "latest" 
+        run: npm run vsce:bump "latest" 
         id: bump_versions
       - name: Compile
-        run: yarn compile
+        run: npm run compile
       - name: Run headless e2e tests
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         uses: GabrielBB/xvfb-action@v1.0
@@ -39,7 +39,7 @@ jobs:
           run: npm run test
       - name: Publish Extension as Patch
         if: ${{ steps.check_for_updates.outputs.new_updates }}
-        run: yarn vsce:publish "latest"
+        run: npm run vsce:publish "latest"
       - name: Slack Notification on Failure
         if: ${{ failure() && steps.check_for_updates.outputs.new_updates }}
         uses: rtCamp/action-slack-notify@v2.0.2
@@ -73,14 +73,14 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Check for Update
-        run: yarn vsce:check "dev"
+        run: npm run vsce:check "dev"
         id: check_for_updates
       - name: Bump versions
         if: ${{ steps.check_for_updates.outputs.new_updates }}
-        run: yarn vsce:bump "dev"
+        run: npm run vsce:bump "dev"
         id: bump_versions
       - name: Compile
-        run: yarn compile
+        run: npm run compile
       - name: Run headless e2e tests
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         uses: GabrielBB/xvfb-action@v1.0
@@ -88,7 +88,7 @@ jobs:
           run: npm run test
       - name: Publish Extension as Patch
         if: ${{ steps.check_for_updates.outputs.new_updates }}
-        run:  yarn vsce:publish "dev"
+        run:  npm run vsce:publish "dev"
       - name: Slack Notification on Failure
         if: ${{ failure() && steps.check_for_updates.outputs.new_updates }}
         uses: rtCamp/action-slack-notify@v2.0.2
