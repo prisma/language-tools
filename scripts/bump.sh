@@ -14,7 +14,7 @@ fi
 RELEASE_CHANNEL=$1
 echo "RELEASE_CHANNEL: $RELEASE_CHANNEL"
 
-OLD_SHA=$(jq ".prisma.version" ./package.json)
+OLD_SHA=$(jq ".prisma.version" ./packages/vscode/package.json)
 SHA=$(npx -q -p @prisma/cli@"$RELEASE_CHANNEL" prisma --version | grep "Query Engine" | awk '{print $5}')
 
 NPM_VERSION=$(sh scripts/prisma-version.sh "$RELEASE_CHANNEL")
