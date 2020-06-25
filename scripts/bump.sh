@@ -40,6 +40,7 @@ if [ "$RELEASE_CHANNEL" = "dev" ]; then
         .name = \"prisma-insider\" | \
         .displayName = \"Prisma - Insider\" | \
         .description = \"This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the $(dev) version of the CLI.\" | \
+        .dependencies[\"@prisma/language-server\"] = \"$NEXT_EXTENSION_VERSION\" | \
         .preview = true" \
         ./packages/vscode/package.json > ./packages/vscode/package.json.bk
     node scripts/change-readme.js "$RELEASE_CHANNEL"
@@ -48,6 +49,7 @@ else
         .name = \"prisma\" | \
         .displayName = \"Prisma\"| \
         .description = \"Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.\" | \
+        .dependencies[\"@prisma/language-server\"] = \"$NEXT_EXTENSION_VERSION\" | \
         .preview = false" \
         ./packages/vscode/package.json > ./packages/vscode/package.json.bk
 
@@ -60,9 +62,6 @@ jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
     .prisma.version = \"$SHA\" | \
     .dependencies[\"@prisma/get-platform\"] = \"$NPM_VERSION\"" \
     ./packages/language-server/package.json > ./packages/language-server/package.json.bk
-
-jq ".dependencies[\"@prisma/language-server\"] = \"$NEXT_EXTENSION_VERSION\"" \
-    ./packages/vscode/package.json > ./packages/vscode/package.json.bk
 
 mv ./packages/language-server/package.json.bk ./packages/language-server/package.json
 mv ./packages/vscode/package.json.bk ./packages/vscode/package.json
