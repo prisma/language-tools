@@ -58,12 +58,19 @@ Note that the personal access token is only valid for a year and will need to be
 
 To do a manual publish, please follow these steps:
 
-1. Go to the vscode folder.
+1. Go to the language-server folder.
 2. Increment the package version
 3. Update to latest pinned binary release in the [Prisma CLI's package.json](https://github.com/prisma/prisma2/blob/master/cli/prisma2/package.json) under **prisma.version**.
-4. Run `yarn package`
-5. Go to https://marketplace.visualstudio.com/manage/publishers/Prisma
-6. Click the **��� More Actions**
-7. Drag `prisma-x.x.x.vsix` into the browser and click upload.
+4. Run `npm install`
+5. Run `npm run build`
+6. Run `npm publish`
+7. Go to the vscode folder.
+8. Incremement the package version.
+9. Update to latest pinned binary release in the [Prisma CLI's package.json](https://github.com/prisma/prisma2/blob/master/cli/prisma2/package.json) under **prisma.version**.
+10. Update the language server version to the version from step 2
+10. Run `npm run package`
+11. Go to https://marketplace.visualstudio.com/manage/publishers/Prisma
+12. Click the **��� More Actions**
+13. Drag `prisma-x.x.x.vsix` into the browser and click upload.
 
 This will take about an hour before the update is available.
