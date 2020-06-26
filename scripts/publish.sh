@@ -27,32 +27,6 @@ echo "EXTENSION_VERSION: $EXTENSION_VERSION"
 
 NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
 
-(
-    cd ./packages/language-server
-    npm install
-    npm run build
-)
-
-
-# Try to publish the language server to npm if $NODE_AUTH_TOKEN exists
-if [ -z "$NODE_AUTH_TOKEN" ]; then
-    echo "\$NODE_AUTH_TOKEN is empty. Please set the value of $NODE_AUTH_TOKEN"
-elif [ -n "$NODE_AUTH_TOKEN" ]; then
-    if [ "$PRODUCTION" = "1" ]; then
-        echo "Publishing language-server"
-        cd ./packages/language-server && npm publish --verbose && cd ../..
-    else
-        echo "Printing the command because PRODUCTION is not set"
-        echo "cd ./packages/language-server && npm publish && cd ../.."
-    fi
-fi
-
-npm install
-
-(
-    cd ./packages/vscode
-    npm install
-)
 
 # Try to publish if $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN (Personal Access Token - https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) exists
 if [ -z "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then

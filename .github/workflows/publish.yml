@@ -12,7 +12,6 @@ env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   PRODUCTION: ${{ secrets.PRODUCTION }}
   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-  NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
 jobs:
   publish:
@@ -30,6 +29,18 @@ jobs:
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: npm run vsce:bump "latest" 
         id: bump_versions
+      - name: Publish LSP to npm
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
+        # Setup .npmrc file to publish to npm
+        uses: actions/setup-node@v1
+        with: 
+          node-version: '12.x'
+          registry-url: 'https://registry.npmjs.org'
+        run: cd packages/language-server && npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN}}
+      - name: Install Dependencies
+        run: npm install
       - name: Compile
         run: npm run compile
       - name: Run headless e2e tests
@@ -79,6 +90,18 @@ jobs:
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: npm run vsce:bump "dev"
         id: bump_versions
+      - name: Publish LSP to npm
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
+        # Setup .npmrc file to publish to npm
+        uses: actions/setup-node@v1
+        with: 
+          node-version: '12.x'
+          registry-url: 'https://registry.npmjs.org'
+        run: cd packages/language-server && npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN}}
+      - name: Install Dependencies
+        run: npm install
       - name: Compile
         run: npm run compile
       - name: Run headless e2e tests
