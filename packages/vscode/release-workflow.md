@@ -6,7 +6,7 @@ Schedule (every 5 minutes) or push to `master` branch.
 
 ## Development
 
-With `PRODUCTION=0` in environment, the script doesn't publish but outputs the commands that would be run. A publish is only triggered when `PRODUCTION=1` is set.
+With `ENVIRONMENT=DEBUG` in environment, the script doesn't publish but outputs the commands that would be run. A publish is only triggered when `ENVIRONMENT=PRODUCTION` is set.
 
 Entry point to test development is `npm run vsce:check <channel>`, where `channel=dev|latest`.
 
