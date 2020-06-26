@@ -13,7 +13,7 @@ fi
 
 echo "============================"
 echo "AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
-echo "PRODUCTION: $PRODUCTION"
+echo "ENVIRONMENT: $ENVIRONMENT"
 echo "============================"
 
 RELEASE_CHANNEL=$1
@@ -32,29 +32,29 @@ NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTE
 if [ -z "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
     echo "\$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN is empty. Please set the value of $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
 elif [ -n "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" ]; then
-    if [ "$PRODUCTION" = "1" ]; then
+    if [ "$ENVIRONMENT" = "PRODUCTION" ]; then
         echo "Publishing $RELEASE_CHANNEL release"
         cd packages/vscode && ./node_modules/.bin/vsce publish "$NEXT_EXTENSION_VERSION" --pat "$AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN" && cd ../..
     else
-        echo "Printing the command because PRODUCTION is not set"
+        echo "Printing the command because ENVIRONMENT is not set"
         echo "sh ./scripts/bump.sh" # The actual execution of this command is in check-update.sh becuase git working tree must be clean before calling `vsce publish`
         echo "cd packages/vscode && ./node_modules/.bin/vsce publish \"$NEXT_EXTENSION_VERSION\" --pat $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN && cd ../.."
     fi
 fi
 
-if [ "$PRODUCTION" = "1" ]; then
+if [ "$ENVIRONMENT" = "PRODUCTION" ]; then
     git add -A .
     git commit -m "bump prisma_version to $NPM_VERSION"
 else
-    echo "Not committing because production is not set"
+    echo "Not committing because ENVIRONMENT is not set"
 fi
 
-if [ "$PRODUCTION" = "1" ] && [ "$RELEASE_CHANNEL" = "dev" ]; then
+if [ "$ENVIRONMENT" = "PRODUCTION" ] && [ "$RELEASE_CHANNEL" = "dev" ]; then
     echo "Sync with ${GITHUB_REF} and push to it"
     git pull github "${GITHUB_REF}" --ff-only
     git tag -a "insider/$NEXT_EXTENSION_VERSION" -m "insider/$NEXT_EXTENSION_VERSION" -m "Prisma version: $NPM_VERSION"
     git push github HEAD:"${GITHUB_REF}" --follow-tags
-elif [ "$PRODUCTION" = "1" ] && [ "$RELEASE_CHANNEL" = "latest" ]; then
+elif [ "$ENVIRONMENT" = "PRODUCTION" ] && [ "$RELEASE_CHANNEL" = "latest" ]; then
     echo "Sync with ${GITHUB_REF} and push to it"
     git pull github "${GITHUB_REF}" --ff-only
 
@@ -67,5 +67,5 @@ elif [ "$PRODUCTION" = "1" ] && [ "$RELEASE_CHANNEL" = "latest" ]; then
     git push github HEAD:"${GITHUB_REF}" --follow-tags
     # TODO: Create a release linked to this tag for stable
 else
-    echo "Not pushing because PRODUCTION is not set"
+    echo "Not pushing because ENVIRONMENT is not set"
 fi

@@ -28,12 +28,12 @@ EXTENSION_VERSION=$(sh scripts/extension-version.sh "$RELEASE_CHANNEL" "")
 echo "EXTENSION_VERSION: $EXTENSION_VERSION"
 
 # Setup the repo with GH_TOKEN to avoid running jobs when CI commits
-if [ "$PRODUCTION" = "1" ]; then
+if [ "$ENVIRONMENT" = "PRODUCTION" ]; then
     git config --global user.email "prismabots@gmail.com"
     git config --global user.name "Prismo"
     git remote add github "https://$GITHUB_ACTOR:$GH_TOKEN@github.com/$GITHUB_REPOSITORY.git" || true
 else
-    echo "Not setting up repo because PRODUCTION is not set"
+    echo "Not setting up repo because ENVIRONMENT is not set"
 fi
 
 if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then
