@@ -37,6 +37,7 @@ jobs:
           node-version: '12.x'
           registry-url: 'https://registry.npmjs.org'
       - run: cd packages/language-server && npm publish --access public
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN}}
       - name: Install Dependencies
@@ -98,6 +99,7 @@ jobs:
           node-version: '12.x'
           registry-url: 'https://registry.npmjs.org'
       - run: cd packages/language-server && npm publish --access public
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN}}
       - name: Install Dependencies
