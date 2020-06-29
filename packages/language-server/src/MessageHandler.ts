@@ -42,7 +42,7 @@ function getCurrentLine(document: TextDocument, line: number): string {
   })
 }
 
-function convertDocumentTextToTrimmedLineArray(
+export function convertDocumentTextToTrimmedLineArray(
   document: TextDocument,
 ): Array<string> {
   return Array(document.lineCount)
