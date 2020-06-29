@@ -11,6 +11,8 @@ import {
   Position,
   HoverParams,
   Hover,
+  CodeActionParams,
+  CodeAction,
 } from 'vscode-languageserver'
 import * as util from './util'
 import { fullDocumentRange } from './provider'
@@ -28,6 +30,10 @@ import {
   getSymbolBeforePosition,
   suggestEqualSymbol,
 } from './completion/completions'
+import {
+  quickFix
+} from './codeActionProvider'
+import { isNullOrUndefined } from 'util'
 
 function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
@@ -463,4 +469,19 @@ export function handleCompletionResolveRequest(
   item: CompletionItem,
 ): CompletionItem {
   return item
+}
+
+export function handleCodeActions(
+  params: CodeActionParams,
+  documents: TextDocuments<TextDocument>
+): CodeAction[] {
+  if (!params.context.diagnostics.length) {
+    return []
+  }
+  const document = documents.get(params.textDocument.uri)
+  if (isNullOrUndefined(document)) {
+    return []
+  }
+
+  return quickFix(document, params)
 }

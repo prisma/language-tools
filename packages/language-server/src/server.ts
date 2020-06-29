@@ -6,6 +6,10 @@ import {
   createConnection,
   IPCMessageReader,
   IPCMessageWriter,
+  InitializeParams,
+  InitializeResult,
+  CodeActionKind,
+  CodeActionParams,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
@@ -29,9 +33,9 @@ function getConnection(options?: LSOptions): IConnection {
     connection = process.argv.includes('--stdio')
       ? createConnection(process.stdin, process.stdout)
       : createConnection(
-          new IPCMessageReader(process),
-          new IPCMessageWriter(process),
-        )
+        new IPCMessageReader(process),
+        new IPCMessageWriter(process),
+      )
   }
   return connection
 }
@@ -45,7 +49,19 @@ export function startServer(options?: LSOptions) {
   const connection: IConnection = getConnection(options)
   const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
-  connection.onInitialize(async () => {
+  // Does the clients accepts diagnostics with related information?
+  let hasCodeActionLiteralsCapability: boolean = false;
+
+  connection.onInitialize(async (params: InitializeParams) => {
+    const capabilities = params.capabilities
+
+    hasCodeActionLiteralsCapability = !!(
+      capabilities.textDocument &&
+      capabilities.textDocument.codeAction &&
+      capabilities.textDocument.codeAction.codeActionLiteralSupport
+    );
+
+
     const binPathPrismaFmt = await util.getBinPath()
     if (!fs.existsSync(binPathPrismaFmt)) {
       try {
@@ -60,7 +76,7 @@ export function startServer(options?: LSOptions) {
 
     connection.console.info(
       'Installed version of Prisma binary `prisma-fmt`: ' +
-        (await util.getVersion()),
+      (await util.getVersion()),
     )
 
     const pj = util.tryRequire('../../package.json')
@@ -70,7 +86,7 @@ export function startServer(options?: LSOptions) {
     const prismaCLIVersion = await util.getCLIVersion()
     connection.console.info('Prisma CLI version: ' + prismaCLIVersion)
 
-    return {
+    const result: InitializeResult = {
       capabilities: {
         definitionProvider: true,
         documentFormattingProvider: true,
@@ -81,6 +97,14 @@ export function startServer(options?: LSOptions) {
         hoverProvider: true,
       },
     }
+
+    if (hasCodeActionLiteralsCapability) {
+      result.capabilities.codeActionProvider = {
+        codeActionKinds: [CodeActionKind.QuickFix]
+      }
+    }
+
+    return result
   })
 
   async function validateTextDocument(
@@ -99,7 +123,7 @@ export function startServer(options?: LSOptions) {
         (err) =>
           err.text === "Field declarations don't require a `:`." ||
           err.text ===
-            'Model declarations have to be indicated with the `model` keyword.',
+          'Model declarations have to be indicated with the `model` keyword.',
       )
     ) {
       connection.window.showErrorMessage(
@@ -154,6 +178,10 @@ export function startServer(options?: LSOptions) {
         connection.window.showErrorMessage(errorMessage)
       },
     ),
+  )
+
+  connection.onCodeAction((params: CodeActionParams) => 
+      MessageHandler.handleCodeActions(params, documents)
   )
 
   // Make the text document manager listen on the connection
