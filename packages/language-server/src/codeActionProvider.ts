@@ -1,6 +1,13 @@
-import { TextDocument } from "vscode-languageserver-textdocument";
-import { CodeActionParams, CodeAction, Diagnostic, DiagnosticSeverity, CodeActionKind, Range } from "vscode-languageserver";
-import { isNullOrUndefined } from "util";
+import { TextDocument } from 'vscode-languageserver-textdocument'
+import {
+  CodeActionParams,
+  CodeAction,
+  Diagnostic,
+  DiagnosticSeverity,
+  CodeActionKind,
+  Range,
+} from 'vscode-languageserver'
+import { isNullOrUndefined } from 'util'
 import { getAllRelationNames } from './completion/completions'
 import { convertDocumentTextToTrimmedLineArray } from './MessageHandler'
 
@@ -41,7 +48,6 @@ function levenshtein(word1: string, word2: string): number {
   return dp[n]
 }
 
-
 /**
  * Given a name and a list of symbols whose names are *not* equal to the name, return a spelling suggestion if there is one that is close enough.
  * Names less than length 3 only check for case-insensitive equality, not levenshtein distance.
@@ -57,58 +63,77 @@ function levenshtein(word1: string, word2: string): number {
  *        (0.4 allows 1 substitution/transposition for every 5 characters,
  *         and 1 insertion/deletion at 3 characters)
  */
-function getSpellingSuggestionForModelAndEnumName(name: string, relations: string[]): string | undefined {
-  const maximumLengthDifference = Math.min(2, Math.floor(name.length * 0.34));
-  let bestDistance = Math.floor(name.length * 0.4) + 1; // If the best result isn't better than this, don't bother.
-  let bestCandidate: string | undefined;
-  let justCheckExactMatches = false;
-  const nameLowerCase = name.toLowerCase();
+function getSpellingSuggestionForModelAndEnumName(
+  name: string,
+  relations: string[],
+): string | undefined {
+  const maximumLengthDifference = Math.min(2, Math.floor(name.length * 0.34))
+  let bestDistance = Math.floor(name.length * 0.4) + 1 // If the best result isn't better than this, don't bother.
+  let bestCandidate: string | undefined
+  let justCheckExactMatches = false
+  const nameLowerCase = name.toLowerCase()
   for (const candidate of relations) {
-    if (!(Math.abs(candidate.length - nameLowerCase.length) <= maximumLengthDifference)) {
-      continue;
+    if (
+      !(
+        Math.abs(candidate.length - nameLowerCase.length) <=
+        maximumLengthDifference
+      )
+    ) {
+      continue
     }
-    const candidateNameLowerCase = candidate.toLowerCase();
+    const candidateNameLowerCase = candidate.toLowerCase()
     if (candidateNameLowerCase === nameLowerCase) {
-      return candidate;
+      return candidate
     }
     if (justCheckExactMatches) {
-      continue;
+      continue
     }
     if (candidate.length < 3) {
       // Don't bother, user would have noticed a 2-character name having an extra character
-      continue;
+      continue
     }
     // Only care about a result better than the best so far.
-    const distance = levenshtein(nameLowerCase, candidateNameLowerCase);
+    const distance = levenshtein(nameLowerCase, candidateNameLowerCase)
     if (distance > bestDistance) {
-      continue;
+      continue
     }
     if (distance < 3) {
-      justCheckExactMatches = true;
-      bestCandidate = candidate;
-    }
-    else {
-      bestDistance = distance;
-      bestCandidate = candidate;
+      justCheckExactMatches = true
+      bestCandidate = candidate
+    } else {
+      bestDistance = distance
+      bestCandidate = candidate
     }
   }
-  return bestCandidate;
+  return bestCandidate
 }
 
-export function quickFix(textDocument: TextDocument, params: CodeActionParams): CodeAction[] {
+export function quickFix(
+  textDocument: TextDocument,
+  params: CodeActionParams,
+): CodeAction[] {
   const lines: string[] = convertDocumentTextToTrimmedLineArray(textDocument)
   const diagnostics: Diagnostic[] = params.context.diagnostics
 
   if (isNullOrUndefined(diagnostics) || diagnostics.length === 0) {
-    return [];
+    return []
   }
 
   const codeActions: CodeAction[] = []
 
   diagnostics.forEach((diag) => {
-    if (diag.severity === DiagnosticSeverity.Error && diag.message.startsWith('Type') && diag.message.includes('is neither a built-in type, nor refers to another model, custom type, or enum.')) {
+    if (
+      diag.severity === DiagnosticSeverity.Error &&
+      diag.message.startsWith('Type') &&
+      diag.message.includes(
+        'is neither a built-in type, nor refers to another model, custom type, or enum.',
+      )
+    ) {
       const diagText = textDocument.getText(diag.range)
-      const spellingSuggestion = getSpellingSuggestionForModelAndEnumName(diagText, getAllRelationNames(lines))
+      const spellingSuggestion = getSpellingSuggestionForModelAndEnumName(
+        diagText,
+        getAllRelationNames(lines),
+      )
       if (spellingSuggestion) {
         codeActions.push({
           title: "Change spelling to '" + spellingSuggestion + "'",
@@ -116,38 +141,47 @@ export function quickFix(textDocument: TextDocument, params: CodeActionParams): 
           diagnostics: [diag],
           edit: {
             changes: {
-              [params.textDocument.uri]: [{
-                range: diag.range, newText: spellingSuggestion
-              }]
-            }
-          }
+              [params.textDocument.uri]: [
+                {
+                  range: diag.range,
+                  newText: spellingSuggestion,
+                },
+              ],
+            },
+          },
         })
       }
       codeActions.push({
-        title: "Make this relation and create model",
+        title: 'Make this relation and create model',
         kind: CodeActionKind.QuickFix,
         diagnostics: [diag],
         edit: {
           changes: {
-            [params.textDocument.uri]: [{
-              range: insertModelOrEnumAtRange(textDocument), newText: '\nmodel ' + diagText + ' {\n\n}\n'
-            }]
-          }
-        }
-      });
+            [params.textDocument.uri]: [
+              {
+                range: insertModelOrEnumAtRange(textDocument),
+                newText: '\nmodel ' + diagText + ' {\n\n}\n',
+              },
+            ],
+          },
+        },
+      })
       codeActions.push({
-        title: "Make this relation and create enum",
+        title: 'Make this relation and create enum',
         kind: CodeActionKind.QuickFix,
         diagnostics: [diag],
         edit: {
           changes: {
-            [params.textDocument.uri]: [{
-              range: insertModelOrEnumAtRange(textDocument), newText: '\nenum ' + diagText + ' {\n\n}\n'
-            }]
-          }
-        }
-      });
-      return;
+            [params.textDocument.uri]: [
+              {
+                range: insertModelOrEnumAtRange(textDocument),
+                newText: '\nenum ' + diagText + ' {\n\n}\n',
+              },
+            ],
+          },
+        },
+      })
+      return
     }
   })
 

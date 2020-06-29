@@ -30,9 +30,7 @@ import {
   getSymbolBeforePosition,
   suggestEqualSymbol,
 } from './completion/completions'
-import {
-  quickFix
-} from './codeActionProvider'
+import { quickFix } from './codeActionProvider'
 import { isNullOrUndefined } from 'util'
 
 function getCurrentLine(document: TextDocument, line: number): string {
@@ -473,7 +471,7 @@ export function handleCompletionResolveRequest(
 
 export function handleCodeActions(
   params: CodeActionParams,
-  documents: TextDocuments<TextDocument>
+  documents: TextDocuments<TextDocument>,
 ): CodeAction[] {
   if (!params.context.diagnostics.length) {
     return []
