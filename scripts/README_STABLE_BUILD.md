@@ -13,17 +13,13 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
 ## Features
 
 * Syntax highlighting
-* Auto-formatting
-* Linting
-* Jump-to-definition
-* Auto-completion
+* IntelliSense
+* Code Navigation
+* Code Editing
+* Diagnostics
 
-It also includes an End-to-End test.
+For more detail, see the [full feature breakdown](./features).
 
-**To automatically format on save, add the following to your `settings.json` file:*
-```
-"editor.formatOnSave": true
-```
 
 ## Preview
 
