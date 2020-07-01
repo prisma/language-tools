@@ -31,8 +31,6 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
     * Diagnostic tools are used to surface errors and warnings in your schema file as you type.
 
 
-It also includes an End-to-End test.
-
 ## Preview
 
 ![Preview Schema](https://i.imgur.com/W80iRwE.png)
