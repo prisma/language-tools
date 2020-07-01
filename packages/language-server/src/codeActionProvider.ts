@@ -9,42 +9,12 @@ import {
 } from 'vscode-languageserver'
 import { getAllRelationNames } from './completion/completions'
 import { convertDocumentTextToTrimmedLineArray } from './MessageHandler'
+import levenshtein from 'js-levenshtein'
 
 function insertModelOrEnumAtRange(document: TextDocument): Range {
   // to insert text into a document create a range where start === end.
   const start = { line: document.lineCount, character: 0 }
   return { start, end: start }
-}
-
-/**
- * Calculates the Levenshtein Distance
- * https://en.wikipedia.org/wiki/Levenshtein_distance
- * adapted from https://leetcode.com/problems/edit-distance/discuss/25846/C%2B%2B-O(n)-space-DP
- */
-function levenshtein(word1: string, word2: string): number {
-  const m = word1.length
-  const n = word2.length
-  let pre = 0
-
-  const dp: number[] = new Array<number>(n + 1)
-  for (let j = 0; j <= n; j++) {
-    dp[j] = j
-  }
-
-  for (let i = 1; i <= m; i++) {
-    pre = dp[0]
-    dp[0] = i
-    for (let j = 1; j <= n; j++) {
-      let tmp = dp[j]
-      if (word1[i - 1] == word2[j - 1]) {
-        dp[j] = pre
-      } else {
-        dp[j] = Math.min(pre, dp[j - 1], dp[j]) + 1
-      }
-      pre = tmp
-    }
-  }
-  return dp[n]
 }
 
 /**
