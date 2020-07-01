@@ -50,6 +50,9 @@ else
 fi
 
 if [ "$ENVIRONMENT" = "PRODUCTION" ] && [ "$RELEASE_CHANNEL" = "dev" ]; then
+    # Do not push readme for marketplace
+    git reset -- packages/vscode/README.md
+    
     echo "Sync with ${GITHUB_REF} and push to it"
     git pull github "${GITHUB_REF}" --ff-only
     git tag -a "insider/$NEXT_EXTENSION_VERSION" -m "insider/$NEXT_EXTENSION_VERSION" -m "Prisma version: $NPM_VERSION"
