@@ -90,7 +90,7 @@ export function quickFix(
 
   const codeActions: CodeAction[] = []
 
-  diagnostics.forEach((diag) => {
+  for (const diag of diagnostics) {
     if (
       diag.severity === DiagnosticSeverity.Error &&
       diag.message.startsWith('Type') &&
@@ -150,9 +150,8 @@ export function quickFix(
           },
         },
       })
-      return
     }
-  })
+  }
 
   return codeActions
 }
