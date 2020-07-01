@@ -6,6 +6,10 @@ import {
   createConnection,
   IPCMessageReader,
   IPCMessageWriter,
+  InitializeParams,
+  InitializeResult,
+  CodeActionKind,
+  CodeActionParams,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
@@ -45,7 +49,14 @@ export function startServer(options?: LSOptions) {
   const connection: IConnection = getConnection(options)
   const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
-  connection.onInitialize(async () => {
+  // Does the clients accepts diagnostics with related information?
+  let hasCodeActionLiteralsCapability: boolean = false
+
+  connection.onInitialize(async (params: InitializeParams) => {
+    const capabilities = params.capabilities
+
+    hasCodeActionLiteralsCapability = Boolean(capabilities?.textDocument?.codeAction?.codeActionLiteralSupport)
+
     const binPathPrismaFmt = await util.getBinPath()
     if (!fs.existsSync(binPathPrismaFmt)) {
       try {
@@ -70,7 +81,7 @@ export function startServer(options?: LSOptions) {
     const prismaCLIVersion = await util.getCLIVersion()
     connection.console.info('Prisma CLI version: ' + prismaCLIVersion)
 
-    return {
+    const result: InitializeResult = {
       capabilities: {
         definitionProvider: true,
         documentFormattingProvider: true,
@@ -81,6 +92,14 @@ export function startServer(options?: LSOptions) {
         hoverProvider: true,
       },
     }
+
+    if (hasCodeActionLiteralsCapability) {
+      result.capabilities.codeActionProvider = {
+        codeActionKinds: [CodeActionKind.QuickFix],
+      }
+    }
+
+    return result
   })
 
   async function validateTextDocument(
@@ -154,6 +173,10 @@ export function startServer(options?: LSOptions) {
         connection.window.showErrorMessage(errorMessage)
       },
     ),
+  )
+
+  connection.onCodeAction((params: CodeActionParams) =>
+    MessageHandler.handleCodeActions(params, documents),
   )
 
   // Make the text document manager listen on the connection
