@@ -11,12 +11,6 @@
 
 </div>
 <hr>
-Adds syntax highlighting, formatting, jump-to-definition and linting for `.prisma` files.
-
-**To automatically format on save, add the following to your `settings.json` file:*
-```
-"editor.formatOnSave": true
-```
 
 ## Insider Build
 
