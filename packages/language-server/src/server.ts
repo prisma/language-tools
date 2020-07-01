@@ -55,11 +55,7 @@ export function startServer(options?: LSOptions) {
   connection.onInitialize(async (params: InitializeParams) => {
     const capabilities = params.capabilities
 
-    hasCodeActionLiteralsCapability = !!(
-      capabilities.textDocument &&
-      capabilities.textDocument.codeAction &&
-      capabilities.textDocument.codeAction.codeActionLiteralSupport
-    )
+    hasCodeActionLiteralsCapability = Boolean(capabilities?.textDocument?.codeAction?.codeActionLiteralSupport)
 
     const binPathPrismaFmt = await util.getBinPath()
     if (!fs.existsSync(binPathPrismaFmt)) {
