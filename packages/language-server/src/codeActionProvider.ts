@@ -11,7 +11,7 @@ import { getAllRelationNames } from './completion/completions'
 import { convertDocumentTextToTrimmedLineArray } from './MessageHandler'
 import levenshtein from 'js-levenshtein'
 
-function insertModelOrEnumAtRange(document: TextDocument): Range {
+function getInsertRange(document: TextDocument): Range {
   // to insert text into a document create a range where start === end.
   const start = { line: document.lineCount, character: 0 }
   return { start, end: start }
@@ -128,7 +128,7 @@ export function quickFix(
           changes: {
             [params.textDocument.uri]: [
               {
-                range: insertModelOrEnumAtRange(textDocument),
+                range: getInsertRange(textDocument),
                 newText: '\nmodel ' + diagText + ' {\n\n}\n',
               },
             ],
@@ -143,7 +143,7 @@ export function quickFix(
           changes: {
             [params.textDocument.uri]: [
               {
-                range: insertModelOrEnumAtRange(textDocument),
+                range: getInsertRange(textDocument),
                 newText: '\nenum ' + diagText + ' {\n\n}\n',
               },
             ],
