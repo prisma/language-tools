@@ -27,8 +27,8 @@ function levenshtein(word1: string, word2: string): number {
   const n = word2.length
   let pre = 0
 
-  const dp = Array(n + 1).fill(0)
-  for (let j = 1; j <= n; j++) {
+  const dp: number[] = new Array<number>(n + 1)
+  for (let j = 0; j <= n; j++) {
     dp[j] = j
   }
 
@@ -40,7 +40,7 @@ function levenshtein(word1: string, word2: string): number {
       if (word1[i - 1] == word2[j - 1]) {
         dp[j] = pre
       } else {
-        dp[j] = Math.min(pre, Math.min(dp[j - 1])) + 1
+        dp[j] = Math.min(pre, dp[j - 1], dp[j]) + 1
       }
       pre = tmp
     }
@@ -129,7 +129,7 @@ export function quickFix(
         'is neither a built-in type, nor refers to another model, custom type, or enum.',
       )
     ) {
-      const diagText = textDocument.getText(diag.range)
+      const diagText = textDocument.getText(diag.range).replace('?', '').replace('[]', '')
       const spellingSuggestion = getSpellingSuggestionForModelAndEnumName(
         diagText,
         getAllRelationNames(lines),
