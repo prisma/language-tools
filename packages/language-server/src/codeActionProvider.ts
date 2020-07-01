@@ -121,7 +121,7 @@ export function quickFix(
         })
       }
       codeActions.push({
-        title: 'Make this relation and create model',
+        title: "Create new model '" + diagText + "'" ,
         kind: CodeActionKind.QuickFix,
         diagnostics: [diag],
         edit: {
@@ -136,7 +136,7 @@ export function quickFix(
         },
       })
       codeActions.push({
-        title: 'Make this relation and create enum',
+        title: "Create new enum '" + diagText + "'",
         kind: CodeActionKind.QuickFix,
         diagnostics: [diag],
         edit: {
