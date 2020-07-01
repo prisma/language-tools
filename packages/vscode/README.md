@@ -13,12 +13,24 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
 ## Features
 
 * Syntax highlighting
-* IntelliSense
-* Code Navigation
-* Code Editing
-* Diagnostics
+* Code Completion
+    * Completion results appear for symbols as you type. 
+    * You can trigger this manually with the Ctrl+Space shortcut.
+* Documentation help
+    * Information about the documentation of a completion result pops up as completion results are provided.
+* Quick info on hover
+    * Documentation Comments (`///`) of models and enums appear anywhere you hover over their usages.
+* Go to Definition
+    * Jump to or peek a model or enum's declaration.
+* Formatting
+    * Format code either manually or on save (if configured). 
+    * *To automatically format on save, add the following to your `settings.json` file:*
+        ```
+        "editor.formatOnSave": true
+        ```
+* Linting
+    * Diagnostic tools are used to surface errors and warnings in your schema file as you type.
 
-For more detail, see the [full feature breakdown](./features).
 
 It also includes an End-to-End test.
 
