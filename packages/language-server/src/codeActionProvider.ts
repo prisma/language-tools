@@ -7,7 +7,6 @@ import {
   CodeActionKind,
   Range,
 } from 'vscode-languageserver'
-import { isNullOrUndefined } from 'util'
 import { getAllRelationNames } from './completion/completions'
 import { convertDocumentTextToTrimmedLineArray } from './MessageHandler'
 
@@ -115,7 +114,7 @@ export function quickFix(
   const lines: string[] = convertDocumentTextToTrimmedLineArray(textDocument)
   const diagnostics: Diagnostic[] = params.context.diagnostics
 
-  if (isNullOrUndefined(diagnostics) || diagnostics.length === 0) {
+  if (!diagnostics || diagnostics.length === 0) {
     return []
   }
 
