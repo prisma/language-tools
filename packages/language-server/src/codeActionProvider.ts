@@ -14,7 +14,7 @@ import { convertDocumentTextToTrimmedLineArray } from './MessageHandler'
 function insertModelOrEnumAtRange(document: TextDocument): Range {
   // to insert text into a document create a range where start === end.
   const start = { line: document.lineCount, character: 0 }
-  return { start: start, end: start }
+  return { start, end: start }
 }
 
 /**
