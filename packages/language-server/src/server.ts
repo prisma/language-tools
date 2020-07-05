@@ -33,9 +33,9 @@ function getConnection(options?: LSOptions): IConnection {
     connection = process.argv.includes('--stdio')
       ? createConnection(process.stdin, process.stdout)
       : createConnection(
-          new IPCMessageReader(process),
-          new IPCMessageWriter(process),
-        )
+        new IPCMessageReader(process),
+        new IPCMessageWriter(process),
+      )
   }
   return connection
 }
@@ -71,7 +71,7 @@ export function startServer(options?: LSOptions) {
 
     connection.console.info(
       'Installed version of Prisma binary `prisma-fmt`: ' +
-        (await util.getVersion()),
+      (await util.getVersion()),
     )
 
     const pj = util.tryRequire('../../package.json')
@@ -87,7 +87,7 @@ export function startServer(options?: LSOptions) {
         documentFormattingProvider: true,
         completionProvider: {
           resolveProvider: true,
-          triggerCharacters: ['@', '"'],
+          triggerCharacters: ['@'],
         },
         hoverProvider: true,
       },
@@ -118,7 +118,7 @@ export function startServer(options?: LSOptions) {
         (err) =>
           err.text === "Field declarations don't require a `:`." ||
           err.text ===
-            'Model declarations have to be indicated with the `model` keyword.',
+          'Model declarations have to be indicated with the `model` keyword.',
       )
     ) {
       connection.window.showErrorMessage(

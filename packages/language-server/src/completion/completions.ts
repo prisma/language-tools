@@ -16,6 +16,7 @@ import {
   supportedGeneratorFields,
   relationArguments,
   dataSourceUrlArguments,
+  dataSourceProviders
 } from './completionUtil'
 import klona from 'klona'
 
@@ -359,39 +360,68 @@ export function suggestEqualSymbol(
   }
 }
 
+function getValuesInsideBrackets(line: string): string[] {
+  var regexp = /\[([^\]]+)\]/
+  var matches = regexp.exec(line)
+  if (!matches || !matches[1]) {
+    return []
+  }
+  let result = matches[1].split(',')
+  return result.map(v => v.trim())
+}
+
 export function getSuggestionForSupportedFields(
   blockType: string,
   currentLine: string,
   currentLineUntrimmed: string,
   position: Position,
-  gotTriggered: boolean,
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
 
   switch (blockType) {
     case 'generator':
       if (currentLine.startsWith('provider')) {
-        suggestions = gotTriggered
-          ? ['prisma-client-js']
-          : ['"prisma-client-js"'] // TODO add prisma-client-go when implemented!
+        suggestions = ['"prisma-client-js"'] // TODO add prisma-client-go when implemented!
       }
       break
     case 'datasource':
       if (currentLine.startsWith('provider')) {
-        suggestions = gotTriggered
-          ? ['postgresql', 'mysql', 'sqlite']
-          : ['"postgresql"', '"mysql"', '"sqlite"']
+        let providers: CompletionItem[] = klona(dataSourceProviders)
+        if (isInsideAttribute(currentLineUntrimmed, position, "[]")) {
+          // return providers that haven't been used yet
+          const usedValues = getValuesInsideBrackets(currentLineUntrimmed)
+          return {
+            items: providers.filter(t => !usedValues.includes(t.label)),
+            isIncomplete: true
+          }
+        } else {
+          providers.push({
+            label: "[]",
+            insertText: "[$0]",
+            insertTextFormat: 2,
+            kind: CompletionItemKind.Constant
+          })
+          return {
+            items: providers,
+            isIncomplete: true
+          }
+        }
       } else if (currentLine.startsWith('url')) {
         // check if inside env
         if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
-          suggestions = gotTriggered ? ['DATABASE_URL'] : ['"DATABASE_URL"']
+          suggestions = ['"DATABASE_URL"']
         } else {
-          return {
-            items: gotTriggered
-              ? dataSourceUrlArguments.filter((a) => !a.label.includes('env'))
-              : dataSourceUrlArguments,
-            isIncomplete: false,
+          if (currentLine.includes("env")) {
+            return {
+              items: dataSourceUrlArguments.filter((a) => !a.label.includes('env')),
+              isIncomplete: true,
+            }
           }
+          return {
+            items: dataSourceUrlArguments,
+            isIncomplete: true
+          }
+
         }
       }
       break

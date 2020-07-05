@@ -108,3 +108,8 @@ export const dataSourceUrlArguments: CompletionItem[] = convertAttributesToCompl
   CompletionItemKind.Property,
   (label: string) => label.replace('()', '($0)').replace('""', '"$0"'),
 )
+
+export const dataSourceProviders: CompletionItem[] = convertToCompletionItems(
+  completions.datasourceProviders,
+  CompletionItemKind.Constant
+)
