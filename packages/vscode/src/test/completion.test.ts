@@ -1,6 +1,7 @@
 import vscode, { CompletionList } from 'vscode'
 import assert from 'assert'
 import { getDocUri, activate } from './helper'
+import { CompletionItemKind } from 'vscode-languageclient'
 
 async function testCompletion(
   docUri: vscode.Uri,
@@ -89,6 +90,9 @@ suite('Should auto-complete', () => {
     kind: vscode.CompletionItemKind.Field,
   }
   const fieldUrl = { label: 'url', kind: vscode.CompletionItemKind.Field }
+  const sqlite = { label: '"sqlite"', kind: vscode.CompletionItemKind.Constant }
+  const mysql = { label: '"mysql"', kind: vscode.CompletionItemKind.Constant }
+  const postgresql = { label: '"postgresql"', kind: vscode.CompletionItemKind.Constant }
 
   test('Diagnoses datasource field suggestions in empty block', async () => {
     await testCompletion(
@@ -111,6 +115,28 @@ suite('Should auto-complete', () => {
       new vscode.Position(2, 0),
       new vscode.CompletionList([fieldProvider]),
       false,
+    )
+  })
+
+  test('Diagnoses multiple provider suggestions for datasource block', async () => {
+    await testCompletion(
+      sqliteDocUri,
+      new vscode.Position(6, 14),
+      new vscode.CompletionList([
+        mysql,
+        postgresql,
+        sqlite
+      ], true),
+      false
+    )
+    await testCompletion(
+      sqliteDocUri,
+      new vscode.Position(10, 24),
+      new vscode.CompletionList([
+        mysql,
+        postgresql
+      ], true),
+      true
     )
   })
 

@@ -2,3 +2,11 @@ datasource db {
   provider = "sqlite"
   
 }
+
+datasource db1 {
+  provider = []
+}
+
+datasource db2 {
+  provider = ["sqlite", ]
+}
