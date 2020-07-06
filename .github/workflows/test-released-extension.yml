@@ -30,7 +30,7 @@ jobs:
       - name: Install extension via CLI
         if: ${{ steps.check_last_tested_version.outputs.new_version }}
         # Use --force to avoid prompts
-        run: code --install-extension Prisma.prisma --force 
+        run: code --install-extension Prisma.prisma@${{ steps.check_last_tested_version.outputs.version }} --force 
       - name: Run test
         if: ${{ steps.check_last_tested_version.outputs.new_version}}
         uses: GabrielBB/xvfb-action@v1.0
@@ -70,7 +70,7 @@ jobs:
       - name: Install extension via CLI
         if: ${{ steps.check_last_tested_version.outputs.new_version }}
         # Use --force to avoid prompts
-        run: code --install-extension Prisma.prisma-insider --force
+        run: code --install-extension Prisma.prisma-insider@${{ steps.check_last_tested_version.outputs.version }} --force
       - name: Run test
         if: ${{ steps.check_last_tested_version.outputs.new_version}}
         uses: GabrielBB/xvfb-action@v1.0
