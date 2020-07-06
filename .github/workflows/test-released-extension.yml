@@ -1,0 +1,96 @@
+name: Run integration tests on an extension release
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  SLACK-USERNAME: vscode-actions
+  SLACK_CHANNEL: feed-vscode
+  SLACK_ICON_EMOJI: ":robot:"
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
+
+jobs:
+  test-stable:
+    name: Test released stable extension
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    if: endsWith(github.ref, '/master')
+    steps:
+      - uses: actions/checkout@v2
+      - name: Check new release of stable 
+        run: npm run test:check "stable"
+        id: check_last_tested_version
+      - name: Install extension via CLI
+        if: ${{ steps.check_last_tested_version.outputs.new_version }}
+        # Use --force to avoid prompts
+        run: code --install-extension Prisma.prisma@${{ steps.check_last_tested_version.outputs.version }} --force 
+      - name: Run test
+        if: ${{ steps.check_last_tested_version.outputs.new_version}}
+        uses: GabrielBB/xvfb-action@v1.0
+        with:
+          run: npm run test:released matrix.os "stable"
+      - name: Bump version
+        if: ${{ success() && steps.check_last_tested_version.outputs.new_version }}
+        run: npm run test:bump "latest"
+      - name: Slack Notification on Failure
+        if: ${{ failure() && steps.check_last_tested_version.outputs.new_version }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_TITLE: "Testing released stable extension failed :x:"
+          SLACK_MESSAGE: ${{ steps.check_last_tested_version.outputs.version }}
+          SLACK_COLOR: '#FF0000'
+
+      - name: Slack Notification on Success
+        if: ${{ success() && steps.check_last_tested_version.outputs.new_version }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_TITLE: "Tested released stable extension :white_check_mark:"
+          SLACK_MESSAGE: ${{ steps.check_last_tested_version.outputs.version }}
+          SLACK_COLOR: '#008000'
+      
+  test-insider:
+    name: Test released insider extension
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    if: endsWith(github.ref, '/master')
+    steps:
+      - uses: actions/checkout@v2
+      - name: Check new release of insider 
+        run: npm run test:check "insider"
+        id: check_last_tested_version
+      - name: Install extension via CLI
+        if: ${{ steps.check_last_tested_version.outputs.new_version }}
+        # Use --force to avoid prompts
+        run: code --install-extension Prisma.prisma-insider@${{ steps.check_last_tested_version.outputs.version }} --force
+      - name: Run test
+        if: ${{ steps.check_last_tested_version.outputs.new_version}}
+        uses: GabrielBB/xvfb-action@v1.0
+        with:
+          run: npm run test:released matrix.os "insider"
+      - name: Bump version "dev"
+        if: ${{ success() && steps.check_last_tested_version.outputs.new_version }}
+        run: npm run test:bump
+      - name: Slack Notification on Failure
+        if: ${{ failure() && steps.check_last_tested_version.outputs.new_version }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_TITLE: "Testing released insider extension failed :x:"
+          SLACK_MESSAGE: ${{ steps.check_last_tested_version.outputs.version }}
+          SLACK_COLOR: '#FF0000'
+
+      - name: Slack Notification on Success
+        if: ${{ success() && steps.check_last_tested_version.outputs.new_version }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_TITLE: "Tested released insider extension :white_check_mark:"
+          SLACK_MESSAGE: ${{ steps.check_last_tested_version.outputs.version }}
+          SLACK_COLOR: '#008000'
