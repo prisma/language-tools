@@ -16,7 +16,8 @@ import {
   supportedGeneratorFields,
   relationArguments,
   dataSourceUrlArguments,
-  dataSourceProviders
+  dataSourceProviders,
+  dataSourceProviderArguments
 } from './completionUtil'
 import klona from 'klona'
 
@@ -28,23 +29,40 @@ function toCompletionItems(
 }
 
 /***
- * @param brackets expects either '()' or '[]'
+ * @param symbols expects e.g. '()', '[]' or '""'
  */
 export function isInsideAttribute(
   currentLineUntrimmed: string,
   position: Position,
-  brackets: string,
+  symbols: string,
 ): boolean {
   let numberOfOpenBrackets = 0
   let numberOfClosedBrackets = 0
   for (let i = 0; i < position.character; i++) {
-    if (currentLineUntrimmed[i] === brackets[0]) {
+    if (currentLineUntrimmed[i] === symbols[0]) {
       numberOfOpenBrackets++
-    } else if (currentLineUntrimmed[i] === brackets[1]) {
+    } else if (currentLineUntrimmed[i] === symbols[1]) {
       numberOfClosedBrackets++
     }
   }
   return numberOfOpenBrackets > numberOfClosedBrackets
+}
+
+/***
+ * Checks if inside e.g. "here"
+ * Does not check for escaped quotation marks.
+ */
+export function isInsideQuotationMark(
+  currentLineUntrimmed: string,
+  position: Position,
+): boolean {
+  let insideQuotation: boolean = false
+  for (let i = 0; i < position.character; i++) {
+    if (currentLineUntrimmed[i] === "\"") {
+      insideQuotation = !insideQuotation
+    }
+  }
+  return insideQuotation
 }
 
 export function getSymbolBeforePosition(
@@ -387,22 +405,29 @@ export function getSuggestionForSupportedFields(
     case 'datasource':
       if (currentLine.startsWith('provider')) {
         let providers: CompletionItem[] = klona(dataSourceProviders)
+        const isInsideQuotation: boolean = isInsideQuotationMark(currentLineUntrimmed, position)
         if (isInsideAttribute(currentLineUntrimmed, position, "[]")) {
           // return providers that haven't been used yet
-          const usedValues = getValuesInsideBrackets(currentLineUntrimmed)
-          return {
-            items: providers.filter(t => !usedValues.includes(t.label)),
-            isIncomplete: true
+          if (isInsideQuotation) {
+            const usedValues = getValuesInsideBrackets(currentLineUntrimmed)
+            return {
+              items: providers.filter(t => !usedValues.includes(t.label)),
+              isIncomplete: true
+            }
+          } else {
+            return {
+              items: dataSourceProviderArguments.filter(arg => !arg.label.includes("[")),
+              isIncomplete: false
+            }
           }
-        } else {
-          providers.push({
-            label: "[]",
-            insertText: "[$0]",
-            insertTextFormat: 2,
-            kind: CompletionItemKind.Constant
-          })
+        } else if (isInsideQuotation) { 
           return {
             items: providers,
+            isIncomplete: false
+          }
+        } else {
+          return {
+            items: dataSourceProviderArguments,
             isIncomplete: true
           }
         }

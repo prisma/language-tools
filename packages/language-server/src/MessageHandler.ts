@@ -358,6 +358,8 @@ export function handleCompletionRequest(
   const symbolBeforePositionIsWhiteSpace =
     symbolBeforePosition.search(/\s/) !== -1
 
+  const positionIsAfterArray: boolean = (wordsBeforePosition.length >= 3 && !currentLineTillPosition.includes("["))
+
   const foundBlock = getBlockAtPosition(position.line, lines)
   if (!foundBlock) {
     if (
@@ -434,10 +436,9 @@ export function handleCompletionRequest(
       ) {
         return suggestEqualSymbol(foundBlock.type)
       }
-      if (
-        (currentLineTillPosition.endsWith('=') &&
-          symbolBeforePositionIsWhiteSpace) ||
-        (currentLineTillPosition.includes('=') && (symbolBeforePosition === ',' || symbolBeforePosition === '[' || symbolBeforePositionIsWhiteSpace))
+      if (currentLineTillPosition.includes('=') 
+      && !currentLineTillPosition.includes("]") 
+      && !positionIsAfterArray && symbolBeforePosition !== ","
       ) {
         return getSuggestionForSupportedFields(
           foundBlock.type,
