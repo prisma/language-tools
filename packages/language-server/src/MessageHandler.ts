@@ -358,7 +358,7 @@ export function handleCompletionRequest(
   const symbolBeforePositionIsWhiteSpace =
     symbolBeforePosition.search(/\s/) !== -1
 
-  const positionIsAfterArray: boolean = (wordsBeforePosition.length >= 3 && !currentLineTillPosition.includes("["))
+  const positionIsAfterArray: boolean = (wordsBeforePosition.length >= 3 && !currentLineTillPosition.includes("[")) && symbolBeforePositionIsWhiteSpace
 
   const foundBlock = getBlockAtPosition(position.line, lines)
   if (!foundBlock) {

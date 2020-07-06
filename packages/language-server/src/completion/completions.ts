@@ -417,13 +417,13 @@ export function getSuggestionForSupportedFields(
           } else {
             return {
               items: dataSourceProviderArguments.filter(arg => !arg.label.includes("[")),
-              isIncomplete: false
+              isIncomplete: true
             }
           }
         } else if (isInsideQuotation) { 
           return {
             items: providers,
-            isIncomplete: false
+            isIncomplete: true
           }
         } else {
           return {
