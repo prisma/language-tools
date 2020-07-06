@@ -77,6 +77,18 @@ function getSpellingSuggestionForModelAndEnumName(
   return bestCandidate
 }
 
+function removeTypeModifiers(hasTypeModifierArray: boolean, hasTypeModifierOptional: boolean, input: string): string {
+  if (hasTypeModifierArray) return input.replace('[]', '')
+  if (hasTypeModifierOptional) return input.replace('?', '')
+  return input
+}
+
+function addTypeModifiers(hasTypeModifierArray: boolean, hasTypeModifierOptional: boolean, suggestion: string): string {
+  if (hasTypeModifierArray) return suggestion + '[]'
+  if (hasTypeModifierOptional) return suggestion + '?'
+  return suggestion
+}
+
 export function quickFix(
   textDocument: TextDocument,
   params: CodeActionParams,
@@ -98,7 +110,10 @@ export function quickFix(
         'is neither a built-in type, nor refers to another model, custom type, or enum.',
       )
     ) {
-      const diagText = textDocument.getText(diag.range).replace('?', '').replace('[]', '')
+      let diagText = textDocument.getText(diag.range)
+      const hasTypeModifierArray: boolean = diagText.endsWith("[]")
+      const hasTypeModifierOptional: boolean = diagText.endsWith("?")
+      diagText = removeTypeModifiers(hasTypeModifierArray, hasTypeModifierOptional, diagText)
       const spellingSuggestion = getSpellingSuggestionForModelAndEnumName(
         diagText,
         getAllRelationNames(lines),
@@ -113,7 +128,7 @@ export function quickFix(
               [params.textDocument.uri]: [
                 {
                   range: diag.range,
-                  newText: spellingSuggestion,
+                  newText: addTypeModifiers(hasTypeModifierArray, hasTypeModifierOptional, spellingSuggestion),
                 },
               ],
             },
@@ -121,7 +136,7 @@ export function quickFix(
         })
       }
       codeActions.push({
-        title: "Create new model '" + diagText + "'" ,
+        title: "Create new model '" + diagText + "'",
         kind: CodeActionKind.QuickFix,
         diagnostics: [diag],
         edit: {
