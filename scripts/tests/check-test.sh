@@ -6,10 +6,10 @@ EXTENSION_TYPE=$1
 echo "EXTENSION_TYPE: $EXTENSION_TYPE"
 
 if [ "$EXTENSION_TYPE" = "insider" ]; then
-    TESTED_VERSION=$(cat scripts/tested_prisma_version_insider)
+    TESTED_VERSION=$(cat scripts/tests/tested_prisma_version_insider)
     RELEASE_CHANNEL="dev"
 else
-    TESTED_VERSION=$(cat scripts/tested_prisma_version_stable)
+    TESTED_VERSION=$(cat scripts/tests/tested_prisma_version_stable)
     RELEASE_CHANNEL="latest"
 fi
 echo "Last tested extension version: $TESTED_VERSION"

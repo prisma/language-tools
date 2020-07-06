@@ -39,7 +39,7 @@
     "shell:lint": "shellcheck -x scripts/**/*.sh",
     "test:check": "sh scripts/tests/check-test.sh",
     "test:released": "sh scripts/tests/test-released.sh",
-    "test:bump": "sh scripts/tests/bump-version.sh"
+    "test:bump": "sh scripts/tests/bump-test.sh"
   },
   "husky": {
     "hooks": {
