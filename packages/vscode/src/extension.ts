@@ -5,7 +5,6 @@ import {
   TransportKind,
 } from 'vscode-languageclient'
 import { ExtensionContext, commands, window } from 'vscode'
-import path from 'path'
 
 function createLanguageServer(
   serverOptions: ServerOptions,
@@ -20,7 +19,7 @@ function createLanguageServer(
 }
 
 export function activate(context: ExtensionContext) {
-  const serverModule = context.asAbsolutePath(path.join('../../packages/language-server/dist/src/cli'))
+  const serverModule = require.resolve('@prisma/language-server/dist/src/cli')
 
 
   // The debug options for the server

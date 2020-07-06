@@ -396,6 +396,8 @@ export function handleCompletionRequest(
           lines,
           position,
         )
+      case '"':
+        return getSuggestionForSupportedFields(foundBlock.type, lines[position.line], currentLineUntrimmed, position)
     }
   }
 
