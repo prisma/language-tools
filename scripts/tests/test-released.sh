@@ -23,7 +23,7 @@ echo "EXTENSION_FOLDER_NAME: $EXTENSION_FOLDER_NAME"
 if [ "$OS" = "windows-latest" ]; then
     EXTENSION_INSTALL_PATH="%USERPROFILE%\.vscode\extensions\\$EXTENSION_FOLDER_NAME"
 else
-    EXTENSION_INSTALL_PATH="~/.vscode/extensions/$EXTENSION_FOLDER_NAME"
+    EXTENSION_INSTALL_PATH="$HOME/.vscode/extensions/$EXTENSION_FOLDER_NAME"
 fi
 echo "Path to installed extension $EXTENSION_INSTALL_PATH"
 
