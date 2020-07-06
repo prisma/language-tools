@@ -21,16 +21,16 @@ fi
 echo "EXTENSION_FOLDER_NAME: $EXTENSION_FOLDER_NAME"
 
 if [ "$OS" = "windows-latest" ]; then
-    PATH="%USERPROFILE%\.vscode\extensions\\$EXTENSION_FOLDER_NAME"
+    EXTENSION_INSTALL_PATH="%USERPROFILE%\.vscode\extensions\\$EXTENSION_FOLDER_NAME"
 else
-    PATH="~/.vscode/extensions/$EXTENSION_FOLDER_NAME"
+    EXTENSION_INSTALL_PATH="~/.vscode/extensions/$EXTENSION_FOLDER_NAME"
 fi
-echo "Path to installed extension $PATH"
+echo "Path to installed extension $EXTENSION_INSTALL_PATH"
 
-CODE_TESTS_PATH="$PATH/dist/src/test"
+CODE_TESTS_PATH="$EXTENSION_INSTALL_PATH/dist/src/test"
 export CODE_TESTS_PATH
 
-CODE_TESTS_WORKSPACE="$PATH/testFixture"
+CODE_TESTS_WORKSPACE="$EXTENSION_INSTALL_PATH/testFixture"
 export CODE_TESTS_WORKSPACE
 
-node "$PATH/dist/src/test/runTest"
+node "$EXTENSION_INSTALL_PATH/dist/src/test/runTest"
