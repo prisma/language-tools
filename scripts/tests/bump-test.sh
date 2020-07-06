@@ -5,6 +5,9 @@ set -eu
 RELEASE_CHANNEL=$1
 echo "RELEASE_CHANNEL: $RELEASE_CHANNEL"
 
+echo "ENVIRONMENT: $ENVIRONMENT"
+echo "============================"
+
 if [ "$RELEASE_CHANNEL" = "dev" ]; then
     OLD_TESTED_VERSION=$(cat scripts/tests/tested_prisma_version_insider)
 else
@@ -21,3 +24,14 @@ else
 fi
 
 echo "Bumped tested_prisma_version from $OLD_TESTED_VERSION to $EXTENSION_VERSION"
+
+if [ "$ENVIRONMENT" = "PRODUCTION" ]; then
+    git add -A .
+    git commit -m "bump tested_prisma_version to $EXTENSION_VERSION"
+    echo "Sync with ${GITHUB_REF} and push to it"
+    git pull github "${GITHUB_REF}" --ff-only
+    git add ./scripts/tests/
+    git push github HEAD:"${GITHUB_REF}"
+else
+    echo "Not committing because ENVIRONMENT is not set"
+fi
