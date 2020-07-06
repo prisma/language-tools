@@ -24,6 +24,8 @@ jobs:
     if: endsWith(github.ref, '/master')
     steps:
       - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: npm install
       - name: Check new release of stable 
         run: npm run test:check "stable"
         id: check_last_tested_version
@@ -64,6 +66,8 @@ jobs:
     if: endsWith(github.ref, '/master')
     steps:
       - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: npm install
       - name: Check new release of insider 
         run: npm run test:check "insider"
         id: check_last_tested_version
