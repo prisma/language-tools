@@ -120,6 +120,6 @@ export const dataSourceProviders: CompletionItem[] = convertToCompletionItems(
 
 export const dataSourceProviderArguments: CompletionItem[] = convertToCompletionItems(
   completions.datasourceProviderArguments,
-  CompletionItemKind.Constant,
+  CompletionItemKind.Property,
   (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
 )

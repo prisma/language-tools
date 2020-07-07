@@ -385,7 +385,7 @@ function getValuesInsideBrackets(line: string): string[] {
     return []
   }
   let result = matches[1].split(',')
-  return result.map(v => v.trim())
+  return result.map(v => v.trim().replace('"', '').replace('"', ''))
 }
 
 export function getSuggestionForSupportedFields(
@@ -410,8 +410,9 @@ export function getSuggestionForSupportedFields(
           // return providers that haven't been used yet
           if (isInsideQuotation) {
             const usedValues = getValuesInsideBrackets(currentLineUntrimmed)
+            providers = providers.filter(t => !usedValues.includes(t.label))
             return {
-              items: providers.filter(t => !usedValues.includes(t.label)),
+              items: providers,
               isIncomplete: true
             }
           } else {
@@ -434,7 +435,7 @@ export function getSuggestionForSupportedFields(
       } else if (currentLine.startsWith('url')) {
         // check if inside env
         if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
-          suggestions = ['"DATABASE_URL"']
+          suggestions = ['DATABASE_URL']
         } else {
           if (currentLine.includes("env")) {
             return {
@@ -453,7 +454,7 @@ export function getSuggestionForSupportedFields(
   }
 
   return {
-    items: toCompletionItems(suggestions, CompletionItemKind.Field),
+    items: toCompletionItems(suggestions, CompletionItemKind.Constant),
     isIncomplete: false,
   }
 }

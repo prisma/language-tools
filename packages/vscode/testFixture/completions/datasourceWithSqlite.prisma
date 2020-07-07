@@ -4,9 +4,21 @@ datasource db {
 }
 
 datasource db1 {
-  provider = []
+  provider = [""]
 }
 
 datasource db2 {
-  provider = ["sqlite", ]
+  provider = ["sqlite", ""]
+}
+
+datasource db4 {
+  provider = ""
+}
+
+datasource db5 {
+  provider = 
+}
+
+datasource db6 {
+  provider = []
 }

@@ -2,3 +2,12 @@ datasource db {
     url      = env("DATABASE_URL")
     
 }
+
+
+datasource db {
+    url = 
+}
+
+datasource db {
+    url = env("")
+}
