@@ -206,5 +206,30 @@
         }
       ]
     }
+  ],
+  "datasourceProviders": [
+    {
+      "label": "mysql",
+      "documentation": "Specifies a MySQL data source. Learn more about the MySQL data source connector [here](https://www.prisma.io/docs/reference/database-connectors/mysql)."
+    },
+    {
+      "label": "postgresql",
+      "documentation": "Specifies a PostGreSQL data source. Learn more about the PostgreSQL data source connector [here](https://www.prisma.io/docs/reference/database-connectors/postgresql)."
+    },
+    {
+      "label": "sqlite",
+      "documentation": "Specifies a SQLite data source. Learn more about the SQLite data source connector [here](https://www.prisma.io/docs/reference/database-connectors/sqlite)."
+    }
+  ],
+  "datasourceProviderArguments": [
+    {
+      "label": "[]",
+      "documentation": "Specifies multiple providers."
+    },
+    {
+      
+      "label": "\"\"",
+      "documentation": "Specifies a single provider."
+    }
   ]
 }

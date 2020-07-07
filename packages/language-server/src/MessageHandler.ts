@@ -354,8 +354,11 @@ export function handleCompletionRequest(
     .trim()
   const wordsBeforePosition: string[] = currentLineTillPosition.split(/\s+/)
 
+  const symbolBeforePosition = getSymbolBeforePosition(document, position)
   const symbolBeforePositionIsWhiteSpace =
-    getSymbolBeforePosition(document, position).search(/\s/) !== -1
+    symbolBeforePosition.search(/\s/) !== -1
+
+  const positionIsAfterArray: boolean = (wordsBeforePosition.length >= 3 && !currentLineTillPosition.includes("[")) && symbolBeforePositionIsWhiteSpace
 
   const foundBlock = getBlockAtPosition(position.line, lines)
   if (!foundBlock) {
@@ -394,13 +397,7 @@ export function handleCompletionRequest(
           position,
         )
       case '"':
-        return getSuggestionForSupportedFields(
-          foundBlock.type,
-          lines[position.line],
-          currentLineUntrimmed,
-          position,
-          true,
-        )
+        return getSuggestionForSupportedFields(foundBlock.type, lines[position.line], currentLineUntrimmed, position)
     }
   }
 
@@ -441,16 +438,15 @@ export function handleCompletionRequest(
       ) {
         return suggestEqualSymbol(foundBlock.type)
       }
-      if (
-        currentLineTillPosition.endsWith('=') &&
-        symbolBeforePositionIsWhiteSpace
+      if (currentLineTillPosition.includes('=') 
+      && !currentLineTillPosition.includes("]") 
+      && !positionIsAfterArray && symbolBeforePosition !== ","
       ) {
         return getSuggestionForSupportedFields(
           foundBlock.type,
           lines[position.line],
           currentLineUntrimmed,
           position,
-          false,
         )
       }
       break

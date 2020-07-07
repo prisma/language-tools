@@ -16,6 +16,8 @@ import {
   supportedGeneratorFields,
   relationArguments,
   dataSourceUrlArguments,
+  dataSourceProviders,
+  dataSourceProviderArguments
 } from './completionUtil'
 import klona from 'klona'
 
@@ -27,23 +29,40 @@ function toCompletionItems(
 }
 
 /***
- * @param brackets expects either '()' or '[]'
+ * @param symbols expects e.g. '()', '[]' or '""'
  */
 export function isInsideAttribute(
   currentLineUntrimmed: string,
   position: Position,
-  brackets: string,
+  symbols: string,
 ): boolean {
   let numberOfOpenBrackets = 0
   let numberOfClosedBrackets = 0
   for (let i = 0; i < position.character; i++) {
-    if (currentLineUntrimmed[i] === brackets[0]) {
+    if (currentLineUntrimmed[i] === symbols[0]) {
       numberOfOpenBrackets++
-    } else if (currentLineUntrimmed[i] === brackets[1]) {
+    } else if (currentLineUntrimmed[i] === symbols[1]) {
       numberOfClosedBrackets++
     }
   }
   return numberOfOpenBrackets > numberOfClosedBrackets
+}
+
+/***
+ * Checks if inside e.g. "here"
+ * Does not check for escaped quotation marks.
+ */
+export function isInsideQuotationMark(
+  currentLineUntrimmed: string,
+  position: Position,
+): boolean {
+  let insideQuotation: boolean = false
+  for (let i = 0; i < position.character; i++) {
+    if (currentLineUntrimmed[i] === "\"") {
+      insideQuotation = !insideQuotation
+    }
+  }
+  return insideQuotation
 }
 
 export function getSymbolBeforePosition(
@@ -359,46 +378,83 @@ export function suggestEqualSymbol(
   }
 }
 
+function getValuesInsideBrackets(line: string): string[] {
+  var regexp = /\[([^\]]+)\]/
+  var matches = regexp.exec(line)
+  if (!matches || !matches[1]) {
+    return []
+  }
+  let result = matches[1].split(',')
+  return result.map(v => v.trim().replace('"', '').replace('"', ''))
+}
+
 export function getSuggestionForSupportedFields(
   blockType: string,
   currentLine: string,
   currentLineUntrimmed: string,
   position: Position,
-  gotTriggered: boolean,
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
 
   switch (blockType) {
     case 'generator':
       if (currentLine.startsWith('provider')) {
-        suggestions = gotTriggered
-          ? ['prisma-client-js']
-          : ['"prisma-client-js"'] // TODO add prisma-client-go when implemented!
+        suggestions = ['"prisma-client-js"'] // TODO add prisma-client-go when implemented!
       }
       break
     case 'datasource':
       if (currentLine.startsWith('provider')) {
-        suggestions = gotTriggered
-          ? ['postgresql', 'mysql', 'sqlite']
-          : ['"postgresql"', '"mysql"', '"sqlite"']
+        let providers: CompletionItem[] = klona(dataSourceProviders)
+        const isInsideQuotation: boolean = isInsideQuotationMark(currentLineUntrimmed, position)
+        if (isInsideAttribute(currentLineUntrimmed, position, "[]")) {
+          // return providers that haven't been used yet
+          if (isInsideQuotation) {
+            const usedValues = getValuesInsideBrackets(currentLineUntrimmed)
+            providers = providers.filter(t => !usedValues.includes(t.label))
+            return {
+              items: providers,
+              isIncomplete: true
+            }
+          } else {
+            return {
+              items: dataSourceProviderArguments.filter(arg => !arg.label.includes("[")),
+              isIncomplete: true
+            }
+          }
+        } else if (isInsideQuotation) { 
+          return {
+            items: providers,
+            isIncomplete: true
+          }
+        } else {
+          return {
+            items: dataSourceProviderArguments,
+            isIncomplete: true
+          }
+        }
       } else if (currentLine.startsWith('url')) {
         // check if inside env
         if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
-          suggestions = gotTriggered ? ['DATABASE_URL'] : ['"DATABASE_URL"']
+          suggestions = ['DATABASE_URL']
         } else {
-          return {
-            items: gotTriggered
-              ? dataSourceUrlArguments.filter((a) => !a.label.includes('env'))
-              : dataSourceUrlArguments,
-            isIncomplete: false,
+          if (currentLine.includes("env")) {
+            return {
+              items: dataSourceUrlArguments.filter((a) => !a.label.includes('env')),
+              isIncomplete: true,
+            }
           }
+          return {
+            items: dataSourceUrlArguments,
+            isIncomplete: true
+          }
+
         }
       }
       break
   }
 
   return {
-    items: toCompletionItems(suggestions, CompletionItemKind.Field),
+    items: toCompletionItems(suggestions, CompletionItemKind.Constant),
     isIncomplete: false,
   }
 }
