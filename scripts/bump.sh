@@ -64,7 +64,7 @@ jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
 
 jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
     .prisma.version = \"$SHA\"" \
-./package.json >./package.json.bk
+./package.json > ./package.json.bk
 
 mv ./packages/language-server/package.json.bk ./packages/language-server/package.json
 mv ./packages/vscode/package.json.bk ./packages/vscode/package.json
