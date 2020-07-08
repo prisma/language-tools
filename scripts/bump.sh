@@ -62,8 +62,13 @@ jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
     .dependencies[\"@prisma/get-platform\"] = \"$NPM_VERSION\"" \
 ./packages/language-server/package.json >./packages/language-server/package.json.bk
 
+jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
+    .prisma.version = \"$SHA\"" \
+./package.json > ./package.json.bk
+
 mv ./packages/language-server/package.json.bk ./packages/language-server/package.json
 mv ./packages/vscode/package.json.bk ./packages/vscode/package.json
+mv ./package.json.bk ./package.json
 
 (
     cd ./packages/language-server
