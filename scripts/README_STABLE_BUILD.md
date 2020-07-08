@@ -33,7 +33,17 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
 
 ## Preview
 
+<details>
+  <summary>Syntax-Highlighting</summary>
+
 ![Preview Schema](https://i.imgur.com/W80iRwE.png)
+
+</details>
+<details>
+  <summary>Quick-Fixes</summary>
+  
+![Quick-Fixes](https://media.giphy.com/media/iGGCF9JWOHx7SAKQlu/giphy.gif)
+</details>
 
 ## Contributing
 
