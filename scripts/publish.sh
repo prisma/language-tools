@@ -67,7 +67,7 @@ elif [ "$ENVIRONMENT" = "PRODUCTION" ] && [ "$RELEASE_CHANNEL" = "latest" ]; the
     git add ./scripts/prisma_version_stable
     git commit -m "bump prisma_version to $NPM_VERSION"
     git tag -a "$NEXT_EXTENSION_VERSION" -m "$NEXT_EXTENSION_VERSION" -m "Prisma version: $NPM_VERSION"
-    git push github HEAD:"${GITHUB_REF}" --rebase
+    git push github HEAD:"${GITHUB_REF}" --follow-tags
     # TODO: Create a release linked to this tag for stable
 else
     echo "Not pushing because ENVIRONMENT is not set"
