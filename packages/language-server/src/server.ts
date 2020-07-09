@@ -11,6 +11,8 @@ import {
   CodeActionKind,
   CodeActionParams,
 } from 'vscode-languageserver'
+import * as checkpoint from 'checkpoint-client'
+import { sendTelemetry, sendException } from './telemetry'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
 import { fullDocumentRange } from './provider'
@@ -33,9 +35,9 @@ function getConnection(options?: LSOptions): IConnection {
     connection = process.argv.includes('--stdio')
       ? createConnection(process.stdin, process.stdout)
       : createConnection(
-        new IPCMessageReader(process),
-        new IPCMessageWriter(process),
-      )
+          new IPCMessageReader(process),
+          new IPCMessageWriter(process),
+        )
   }
   return connection
 }
@@ -50,12 +52,14 @@ export function startServer(options?: LSOptions) {
   const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
   // Does the clients accepts diagnostics with related information?
-  let hasCodeActionLiteralsCapability: boolean = false
+  let hasCodeActionLiteralsCapability = false
 
   connection.onInitialize(async (params: InitializeParams) => {
     const capabilities = params.capabilities
 
-    hasCodeActionLiteralsCapability = Boolean(capabilities?.textDocument?.codeAction?.codeActionLiteralSupport)
+    hasCodeActionLiteralsCapability = Boolean(
+      capabilities?.textDocument?.codeAction?.codeActionLiteralSupport,
+    )
 
     const binPathPrismaFmt = await util.getBinPath()
     if (!fs.existsSync(binPathPrismaFmt)) {
@@ -65,13 +69,18 @@ export function startServer(options?: LSOptions) {
           'Prisma plugin prisma-fmt installation succeeded.',
         )
       } catch (err) {
+        sendException(
+          await checkpoint.getSignature(),
+          err,
+          'Cannot install prisma-fmt.',
+        )
         connection.console.error('Cannot install prisma-fmt: ' + err)
       }
     }
 
     connection.console.info(
       'Installed version of Prisma binary `prisma-fmt`: ' +
-      (await util.getVersion()),
+        (await util.getVersion()),
     )
 
     const pj = util.tryRequire('../../package.json')
@@ -118,7 +127,7 @@ export function startServer(options?: LSOptions) {
         (err) =>
           err.text === "Field declarations don't require a `:`." ||
           err.text ===
-          'Model declarations have to be indicated with the `model` keyword.',
+            'Model declarations have to be indicated with the `model` keyword.',
       )
     ) {
       connection.window.showErrorMessage(

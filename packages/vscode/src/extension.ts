@@ -5,6 +5,28 @@ import {
   TransportKind,
 } from 'vscode-languageclient'
 import { ExtensionContext, commands, window } from 'vscode'
+import { Telemetry, TelemetryPayload, ExceptionPayload } from './telemetry'
+
+let client: LanguageClient
+let telemetry: Telemetry
+
+class GenericLanguageServerException extends Error {
+  constructor(message: string, stack: string) {
+    super()
+    this.name = 'GenericLanguageServerException'
+    this.stack = stack
+    this.message = message
+  }
+}
+
+function tryRequire(path: string): any {
+  try {
+    return require(path)
+  } catch (err) {
+    console.error(err)
+    return
+  }
+}
 
 function createLanguageServer(
   serverOptions: ServerOptions,
@@ -21,6 +43,13 @@ function createLanguageServer(
 export function activate(context: ExtensionContext) {
   const serverModule = require.resolve('@prisma/language-server/dist/src/cli')
 
+  const pj = tryRequire('../package.json')
+  if (!pj) {
+    return
+  }
+  const extensionId = 'prisma.' + pj.name
+  const extensionVersion = pj.version
+  telemetry = new Telemetry(extensionId, extensionVersion)
 
   // The debug options for the server
   // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
@@ -47,10 +76,32 @@ export function activate(context: ExtensionContext) {
   }
 
   // Create the language client
-  let client = createLanguageServer(serverOptions, clientOptions)
+  client = createLanguageServer(serverOptions, clientOptions)
+
+  const disposable = client.start()
+
+  client.onReady().then(() => {
+    client.onNotification('prisma/telemetry', (payload: TelemetryPayload) => {
+      // eslint-disable-next-line no-console
+      telemetry.sendEvent(payload.action, payload.attributes)
+    })
+    client.onNotification(
+      'prisma/telemetryException',
+      (payload: ExceptionPayload) => {
+        const error = new GenericLanguageServerException(
+          payload.message,
+          payload.stack,
+        )
+        telemetry.sendException(error, {
+          signature: payload.signature,
+        })
+      },
+    )
+  })
 
   // Start the client. This will also launch the server
-  context.subscriptions.push(client.start())
+  context.subscriptions.push(disposable)
+  context.subscriptions.push(telemetry.reporter)
 
   context.subscriptions.push(
     commands.registerCommand('prisma.restartLanguageServer', async () => {
@@ -61,4 +112,15 @@ export function activate(context: ExtensionContext) {
       window.showInformationMessage('Prisma language server restarted.')
     }),
   )
+
+  telemetry.sendEvent('activated', {})
+}
+
+export function deactivate(): Thenable<void> | undefined {
+  if (!client) {
+    return undefined
+  }
+  telemetry.sendEvent('deactivated', {})
+  telemetry.reporter.dispose()
+  return client.stop()
 }

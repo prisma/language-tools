@@ -27,6 +27,7 @@
   "typings": "dist/src/index",
   "dependencies": {
     "@prisma/get-platform": "2.3.0-dev.6",
+    "checkpoint-client": "1.1.2",
     "klona": "1.1.1",
     "pkg-dir": "4.2.0",
     "vscode-languageserver": "6.1.1",
