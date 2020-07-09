@@ -15,9 +15,6 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
 * Code Completion
     * Completion results appear for symbols as you type. 
     * You can trigger this manually with the Ctrl+Space shortcut.
-* Quick Fixes
-    * Quickly fix typos in model names
-    * Suggests to create new models/enums with a single click
 * Documentation help
     * Information about the documentation of a completion result pops up as completion results are provided.
 * Quick info on hover
@@ -47,7 +44,6 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
   
 ![Quick-Fixes](https://media.giphy.com/media/iGGCF9JWOHx7SAKQlu/giphy.gif)
 </details>
-
 
 ## Contributing
 

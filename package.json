@@ -1,6 +1,6 @@
 {
   "name": "@prisma/language-support",
-  "version": "1.0.0",
+  "version": "3.0.5",
   "author": "Prisma",
   "license": "Apache-2.0",
   "workspaces": [
@@ -54,5 +54,8 @@
     "packages/**/*.{js,ts}": [
       "eslint --fix"
     ]
+  },
+  "prisma": {
+    "version": "7c61a28fce591bca9794f84bada575727c8d3a81"
   }
 }
