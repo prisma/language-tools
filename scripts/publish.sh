@@ -54,12 +54,12 @@ if [ "$ENVIRONMENT" = "PRODUCTION" ] && [ "$RELEASE_CHANNEL" = "dev" ]; then
     git reset -- packages/vscode/README.md
     
     echo "Sync with ${GITHUB_REF} and push to it"
-    git pull github "${GITHUB_REF}" --ff-only
+    git pull github "${GITHUB_REF}" --rebase
     git tag -a "insider/$NEXT_EXTENSION_VERSION" -m "insider/$NEXT_EXTENSION_VERSION" -m "Prisma version: $NPM_VERSION"
     git push github HEAD:"${GITHUB_REF}" --follow-tags
 elif [ "$ENVIRONMENT" = "PRODUCTION" ] && [ "$RELEASE_CHANNEL" = "latest" ]; then
     echo "Sync with ${GITHUB_REF} and push to it"
-    git pull github "${GITHUB_REF}" --ff-only
+    git pull github "${GITHUB_REF}" --rebase
 
     # In the stable channel, we just need to commit the prisma_version_stable file
     # to be able to track the Prisma version against which the current stable channel extension was published
@@ -67,7 +67,7 @@ elif [ "$ENVIRONMENT" = "PRODUCTION" ] && [ "$RELEASE_CHANNEL" = "latest" ]; the
     git add ./scripts/prisma_version_stable
     git commit -m "bump prisma_version to $NPM_VERSION"
     git tag -a "$NEXT_EXTENSION_VERSION" -m "$NEXT_EXTENSION_VERSION" -m "Prisma version: $NPM_VERSION"
-    git push github HEAD:"${GITHUB_REF}" --follow-tags
+    git push github HEAD:"${GITHUB_REF}" --rebase
     # TODO: Create a release linked to this tag for stable
 else
     echo "Not pushing because ENVIRONMENT is not set"
