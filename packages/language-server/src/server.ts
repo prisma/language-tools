@@ -10,6 +10,11 @@ import {
   InitializeResult,
   CodeActionKind,
   CodeActionParams,
+  DocumentFormattingParams,
+  HoverParams,
+  CompletionItem,
+  CompletionParams,
+  DeclarationParams,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
@@ -33,9 +38,9 @@ function getConnection(options?: LSOptions): IConnection {
     connection = process.argv.includes('--stdio')
       ? createConnection(process.stdin, process.stdout)
       : createConnection(
-        new IPCMessageReader(process),
-        new IPCMessageWriter(process),
-      )
+          new IPCMessageReader(process),
+          new IPCMessageWriter(process),
+        )
   }
   return connection
 }
@@ -45,17 +50,19 @@ function getConnection(options?: LSOptions): IConnection {
  *
  * @param options Options to customize behavior
  */
-export function startServer(options?: LSOptions) {
+export function startServer(options?: LSOptions): void {
   const connection: IConnection = getConnection(options)
   const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
   // Does the clients accepts diagnostics with related information?
-  let hasCodeActionLiteralsCapability: boolean = false
+  let hasCodeActionLiteralsCapability = false
 
   connection.onInitialize(async (params: InitializeParams) => {
     const capabilities = params.capabilities
 
-    hasCodeActionLiteralsCapability = Boolean(capabilities?.textDocument?.codeAction?.codeActionLiteralSupport)
+    hasCodeActionLiteralsCapability = Boolean(
+      capabilities?.textDocument?.codeAction?.codeActionLiteralSupport,
+    )
 
     const binPathPrismaFmt = await util.getBinPath()
     if (!fs.existsSync(binPathPrismaFmt)) {
@@ -71,7 +78,7 @@ export function startServer(options?: LSOptions) {
 
     connection.console.info(
       'Installed version of Prisma binary `prisma-fmt`: ' +
-      (await util.getVersion()),
+        (await util.getVersion()),
     )
 
     const pj = util.tryRequire('../../package.json')
@@ -118,7 +125,7 @@ export function startServer(options?: LSOptions) {
         (err) =>
           err.text === "Field declarations don't require a `:`." ||
           err.text ===
-          'Model declarations have to be indicated with the `model` keyword.',
+            'Model declarations have to be indicated with the `model` keyword.',
       )
     ) {
       connection.window.showErrorMessage(
@@ -141,31 +148,31 @@ export function startServer(options?: LSOptions) {
     connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
   }
 
-  documents.onDidChangeContent((change: { document: any }) => {
+  documents.onDidChangeContent((change: { document: TextDocument }) => {
     validateTextDocument(change.document)
   })
 
-  documents.onDidOpen((open: { document: any }) => {
+  documents.onDidOpen((open: { document: TextDocument }) => {
     validateTextDocument(open.document)
   })
 
-  connection.onDefinition((params: any) =>
+  connection.onDefinition((params: DeclarationParams) =>
     MessageHandler.handleDefinitionRequest(documents, params),
   )
 
-  connection.onCompletion((params: any) =>
+  connection.onCompletion((params: CompletionParams) =>
     MessageHandler.handleCompletionRequest(params, documents),
   )
 
-  connection.onCompletionResolve((params: any) =>
-    MessageHandler.handleCompletionResolveRequest(params),
+  connection.onCompletionResolve((completionItem: CompletionItem) =>
+    MessageHandler.handleCompletionResolveRequest(completionItem),
   )
 
-  connection.onHover((params: any) =>
+  connection.onHover((params: HoverParams) =>
     MessageHandler.handleHoverRequest(documents, params),
   )
 
-  connection.onDocumentFormatting((params: any) =>
+  connection.onDocumentFormatting((params: DocumentFormattingParams) =>
     MessageHandler.handleDocumentFormatting(
       params,
       documents,

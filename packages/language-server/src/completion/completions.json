@@ -227,7 +227,6 @@
       "documentation": "Specifies multiple providers."
     },
     {
-      
       "label": "\"\"",
       "documentation": "Specifies a single provider."
     }

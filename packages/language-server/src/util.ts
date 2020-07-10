@@ -16,6 +16,7 @@ let version: string | undefined
 /**
  * Try requiring
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function tryRequire(path: string): any {
   try {
     return require(path)

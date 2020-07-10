@@ -68,9 +68,9 @@ To do a manual publish, please follow these steps:
 8. Incremement the package version.
 9. Update to latest pinned binary release in the [Prisma CLI's package.json](https://github.com/prisma/prisma2/blob/master/cli/prisma2/package.json) under **prisma.version**.
 10. Update the language server version to the version from step 2
-10. Run `npm run package`
-11. Go to https://marketplace.visualstudio.com/manage/publishers/Prisma
-12. Click the **��� More Actions**
-13. Drag `prisma-x.x.x.vsix` into the browser and click upload.
+11. Run `npm run package`
+12. Go to https://marketplace.visualstudio.com/manage/publishers/Prisma
+13. Click the **��� More Actions**
+14. Drag `prisma-x.x.x.vsix` into the browser and click upload.
 
 This will take about an hour before the update is available.

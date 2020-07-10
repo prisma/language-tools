@@ -29,7 +29,7 @@
     "build": "tsc -b",
     "postinstall": "cd packages/language-server && npm install && cd ../vscode && npm install && cd .. && cd .. ",
     "format": "prettier   \"packages/**/*.{ts,js,json,md}\"   --write",
-    "lint": "eslint  \"packages/**/*.{js,ts,css,json,md} --fix --ext",
+    "lint": "eslint  \"packages/**/*.{js,ts}\" --fix",
     "compile": "cd packages/language-server && npm run build && cd ../vscode && npm run build && cd .. && cd ..",
     "watch": "npm run build -- -w",
     "test": "sh scripts/e2e.sh",
@@ -48,8 +48,7 @@
   },
   "lint-staged": {
     "packages/**/*.{js,ts,css,json,md}": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ],
     "packages/**/*.{js,ts}": [
       "eslint --fix"
