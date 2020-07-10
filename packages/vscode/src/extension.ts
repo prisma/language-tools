@@ -41,7 +41,7 @@ function createLanguageServer(
   )
 }
 
-export function activate(context: ExtensionContext) {
+export async function activate(context: ExtensionContext) {
   const serverModule = require.resolve('@prisma/language-server/dist/src/cli')
 
   const pj = tryRequire(path.join(__dirname, '../../package.json'))
@@ -114,14 +114,18 @@ export function activate(context: ExtensionContext) {
     }),
   )
 
-  telemetry.sendEvent('activated', {})
+  telemetry.sendEvent('activated', {
+    signature: await telemetry.getSignature(),
+  })
 }
 
-export function deactivate(): Thenable<void> | undefined {
+export async function deactivate(): Promise<void> {
   if (!client) {
     return undefined
   }
-  telemetry.sendEvent('deactivated', {})
+  telemetry.sendEvent('deactivated', {
+    signature: await telemetry.getSignature(),
+  })
   telemetry.reporter.dispose()
   return client.stop()
 }
