@@ -6,6 +6,7 @@ import {
 } from 'vscode-languageclient'
 import { ExtensionContext, commands, window } from 'vscode'
 import { Telemetry, TelemetryPayload, ExceptionPayload } from './telemetry'
+import path from 'path'
 
 let client: LanguageClient
 let telemetry: Telemetry
@@ -43,7 +44,7 @@ function createLanguageServer(
 export function activate(context: ExtensionContext) {
   const serverModule = require.resolve('@prisma/language-server/dist/src/cli')
 
-  const pj = tryRequire('../package.json')
+  const pj = tryRequire(path.join(__dirname, '../../package.json'))
   if (!pj) {
     return
   }
