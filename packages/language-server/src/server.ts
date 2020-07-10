@@ -10,6 +10,8 @@ import {
   InitializeResult,
   CodeActionKind,
   CodeActionParams,
+  CompletionItem,
+  HoverParams,
 } from 'vscode-languageserver'
 import { getSignature } from 'checkpoint-client'
 import { sendTelemetry, sendException } from './telemetry'
@@ -126,6 +128,10 @@ export function startServer(options?: LSOptions) {
             'Model declarations have to be indicated with the `model` keyword.',
       )
     ) {
+      sendTelemetry({
+        action: 'Prisma 1 datamodel',
+        attributes: {},
+      })
       connection.window.showErrorMessage(
         "You are currently viewing a Prisma 1 datamodel which is based on the GraphQL syntax. The current Prisma VSCode extension doesn't support this syntax. To get proper syntax highlighting for this file, please change the file extension to `.graphql` and download the [GraphQL VSCode extension](https://marketplace.visualstudio.com/items?itemName=Prisma.vscode-graphql). Learn more [here](https://pris.ly/prisma1-vscode).",
       )
@@ -154,35 +160,57 @@ export function startServer(options?: LSOptions) {
     validateTextDocument(open.document)
   })
 
-  connection.onDefinition((params: any) =>
-    MessageHandler.handleDefinitionRequest(documents, params),
-  )
+  connection.onDefinition((params: any) => {
+    sendTelemetry({
+      action: 'definition',
+      attributes: {},
+    })
+    return MessageHandler.handleDefinitionRequest(documents, params)
+  })
 
   connection.onCompletion((params: any) =>
     MessageHandler.handleCompletionRequest(params, documents),
   )
 
-  connection.onCompletionResolve((params: any) =>
-    MessageHandler.handleCompletionResolveRequest(params),
-  )
+  connection.onCompletionResolve((params: CompletionItem) => {
+    sendTelemetry({
+      action: 'resolveCompletion',
+      attributes: {
+        label: params.label,
+      },
+    })
+    return MessageHandler.handleCompletionResolveRequest(params)
+  })
 
-  connection.onHover((params: any) =>
-    MessageHandler.handleHoverRequest(documents, params),
-  )
+  connection.onHover((params: HoverParams) => {
+    sendTelemetry({
+      action: 'hover',
+      attributes: {},
+    })
+    return MessageHandler.handleHoverRequest(documents, params)
+  })
 
-  connection.onDocumentFormatting((params: any) =>
-    MessageHandler.handleDocumentFormatting(
+  connection.onDocumentFormatting((params: any) => {
+    sendTelemetry({
+      action: 'format',
+      attributes: {},
+    })
+    return MessageHandler.handleDocumentFormatting(
       params,
       documents,
       (errorMessage: string) => {
         connection.window.showErrorMessage(errorMessage)
       },
-    ),
-  )
+    )
+  })
 
-  connection.onCodeAction((params: CodeActionParams) =>
-    MessageHandler.handleCodeActions(params, documents),
-  )
+  connection.onCodeAction((params: CodeActionParams) => {
+    sendTelemetry({
+      action: 'codeAction',
+      attributes: {},
+    })
+    return MessageHandler.handleCodeActions(params, documents)
+  })
 
   // Make the text document manager listen on the connection
   // for open, change and close text document events
