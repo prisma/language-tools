@@ -11,7 +11,7 @@ import {
   CodeActionKind,
   CodeActionParams,
 } from 'vscode-languageserver'
-import * as checkpoint from 'checkpoint-client'
+import { getSignature } from 'checkpoint-client'
 import { sendTelemetry, sendException } from './telemetry'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
@@ -52,7 +52,7 @@ export function startServer(options?: LSOptions) {
   const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
   // Does the clients accepts diagnostics with related information?
-  let hasCodeActionLiteralsCapability: boolean = false
+  let hasCodeActionLiteralsCapability = false
 
   connection.onInitialize(async (params: InitializeParams) => {
     const capabilities = params.capabilities
@@ -69,11 +69,7 @@ export function startServer(options?: LSOptions) {
           'Prisma plugin prisma-fmt installation succeeded.',
         )
       } catch (err) {
-        sendException(
-          await checkpoint.getSignature(),
-          err,
-          'Cannot install prisma-fmt.',
-        )
+        sendException(await getSignature(), err, 'Cannot install prisma-fmt.')
         connection.console.error('Cannot install prisma-fmt: ' + err)
       }
     }

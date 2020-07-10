@@ -1,5 +1,5 @@
 import TelemetryReporter from 'vscode-extension-telemetry'
-import * as checkpoint from 'checkpoint-client'
+import { getSignature } from 'checkpoint-client'
 
 export class Telemetry {
   private readonly key: string = 'fe968a4a-7cbf-4c43-bf6e-3e968f3c4519'
@@ -14,7 +14,7 @@ export class Telemetry {
   }
 
   public getSignature(): Promise<string> {
-    return checkpoint.getSignature()
+    return getSignature()
   }
 
   public sendEvent(
