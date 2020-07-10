@@ -1,7 +1,7 @@
 import TelemetryReporter from 'vscode-extension-telemetry'
 
 export class Telemetry {
-  private readonly key: string = ''
+  private readonly key: string = 'fe968a4a-7cbf-4c43-bf6e-3e968f3c4519'
   public reporter: TelemetryReporter
 
   constructor(extensionId: string, extensionVersion: string) {
