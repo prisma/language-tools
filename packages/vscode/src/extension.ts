@@ -4,7 +4,7 @@ import {
   ServerOptions,
   TransportKind,
 } from 'vscode-languageclient'
-import { ExtensionContext, commands, window } from 'vscode'
+import { ExtensionContext, commands, window, env } from 'vscode'
 import { Telemetry, TelemetryPayload, ExceptionPayload } from './telemetry'
 import path from 'path'
 
@@ -18,6 +18,10 @@ class GenericLanguageServerException extends Error {
     this.stack = stack
     this.message = message
   }
+}
+
+function isDebugOrTestSession(): boolean {
+  return env.sessionId === 'someValue.sessionId'
 }
 
 function tryRequire(path: string): any {
@@ -50,7 +54,9 @@ export async function activate(context: ExtensionContext) {
   }
   const extensionId = 'prisma.' + pj.name
   const extensionVersion = pj.version
-  telemetry = new Telemetry(extensionId, extensionVersion)
+  if (!isDebugOrTestSession()) {
+    telemetry = new Telemetry(extensionId, extensionVersion)
+  }
 
   // The debug options for the server
   // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
@@ -82,27 +88,31 @@ export async function activate(context: ExtensionContext) {
   const disposable = client.start()
 
   client.onReady().then(() => {
-    client.onNotification('prisma/telemetry', (payload: TelemetryPayload) => {
-      // eslint-disable-next-line no-console
-      telemetry.sendEvent(payload.action, payload.attributes)
-    })
-    client.onNotification(
-      'prisma/telemetryException',
-      (payload: ExceptionPayload) => {
-        const error = new GenericLanguageServerException(
-          payload.message,
-          payload.stack,
-        )
-        telemetry.sendException(error, {
-          signature: payload.signature,
-        })
-      },
-    )
+    if (!isDebugOrTestSession()) {
+      client.onNotification('prisma/telemetry', (payload: TelemetryPayload) => {
+        // eslint-disable-next-line no-console
+        telemetry.sendEvent(payload.action, payload.attributes)
+      })
+      client.onNotification(
+        'prisma/telemetryException',
+        (payload: ExceptionPayload) => {
+          const error = new GenericLanguageServerException(
+            payload.message,
+            payload.stack,
+          )
+          telemetry.sendException(error, {
+            signature: payload.signature,
+          })
+        },
+      )
+    }
   })
 
   // Start the client. This will also launch the server
   context.subscriptions.push(disposable)
-  context.subscriptions.push(telemetry.reporter)
+  if (!isDebugOrTestSession()) {
+    context.subscriptions.push(telemetry.reporter)
+  }
 
   context.subscriptions.push(
     commands.registerCommand('prisma.restartLanguageServer', async () => {
@@ -113,19 +123,23 @@ export async function activate(context: ExtensionContext) {
       window.showInformationMessage('Prisma language server restarted.')
     }),
   )
-
-  telemetry.sendEvent('activated', {
-    signature: await telemetry.getSignature(),
-  })
+  if (!isDebugOrTestSession()) {
+    telemetry.sendEvent('activated', {
+      signature: await telemetry.getSignature(),
+    })
+  }
 }
 
 export async function deactivate(): Promise<void> {
   if (!client) {
     return undefined
   }
-  telemetry.sendEvent('deactivated', {
-    signature: await telemetry.getSignature(),
-  })
-  telemetry.reporter.dispose()
+  if (!isDebugOrTestSession()) {
+    telemetry.sendEvent('deactivated', {
+      signature: await telemetry.getSignature(),
+    })
+    telemetry.reporter.dispose()
+  }
+
   return client.stop()
 }
