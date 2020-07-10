@@ -49,7 +49,7 @@
     "linting"
   ],
   "bugs": {
-    "url": "https://github.com/prisma/vscode/issues"
+    "url": "https://github.com/prisma/language-tools/issues"
   },
   "publishConfig": {
     "access": "public"

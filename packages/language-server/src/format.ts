@@ -15,7 +15,7 @@ export default async function format(
       )
     }
     console.warn(
-      "\nprisma-fmt error'd during formatting. Please report this issue on [Prisma VSCode](https://github.com/prisma/vscode/issues). \nLinter output:\n",
+      "\nprisma-fmt error'd during formatting. Please report this issue on [Prisma Language Tools](https://github.com/prisma/language-tools/issues). \nLinter output:\n",
     )
     console.warn(errors)
 
