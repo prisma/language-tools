@@ -50,7 +50,7 @@ Read more about [how to contribute to the Prisma VSCode extension](./CONTRIBUTIN
 
 ## Telemetry
 
-This extension collects telemetry data using Azure Application Insights to help us better the usage of the extension.
+This extension collects telemetry data using [Azure Application Insights](https://www.npmjs.com/package/vscode-extension-telemetry) to help us better the usage of the extension.
 The extension respects the `telemetry.enableTelemetry` setting in VSCode.
 
 ## Security
