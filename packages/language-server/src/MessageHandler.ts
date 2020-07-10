@@ -358,10 +358,7 @@ export function handleCompletionRequest(
   const symbolBeforePositionIsWhiteSpace =
     symbolBeforePosition.search(/\s/) !== -1
 
-  const positionIsAfterArray: boolean =
-    wordsBeforePosition.length >= 3 &&
-    !currentLineTillPosition.includes('[') &&
-    symbolBeforePositionIsWhiteSpace
+  const positionIsAfterArray: boolean = (wordsBeforePosition.length >= 3 && !currentLineTillPosition.includes("[")) && symbolBeforePositionIsWhiteSpace
 
   const foundBlock = getBlockAtPosition(position.line, lines)
   if (!foundBlock) {
@@ -400,12 +397,7 @@ export function handleCompletionRequest(
           position,
         )
       case '"':
-        return getSuggestionForSupportedFields(
-          foundBlock.type,
-          lines[position.line],
-          currentLineUntrimmed,
-          position,
-        )
+        return getSuggestionForSupportedFields(foundBlock.type, lines[position.line], currentLineUntrimmed, position)
     }
   }
 
@@ -446,11 +438,9 @@ export function handleCompletionRequest(
       ) {
         return suggestEqualSymbol(foundBlock.type)
       }
-      if (
-        currentLineTillPosition.includes('=') &&
-        !currentLineTillPosition.includes(']') &&
-        !positionIsAfterArray &&
-        symbolBeforePosition !== ','
+      if (currentLineTillPosition.includes('=') 
+      && !currentLineTillPosition.includes("]") 
+      && !positionIsAfterArray && symbolBeforePosition !== ","
       ) {
         return getSuggestionForSupportedFields(
           foundBlock.type,
