@@ -52,7 +52,7 @@ export function startServer(options?: LSOptions) {
   const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
   // Does the clients accepts diagnostics with related information?
-  let hasCodeActionLiteralsCapability = false
+  let hasCodeActionLiteralsCapability: boolean = false
 
   connection.onInitialize(async (params: InitializeParams) => {
     const capabilities = params.capabilities
