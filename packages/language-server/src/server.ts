@@ -21,7 +21,6 @@ import * as MessageHandler from './MessageHandler'
 import { fullDocumentRange } from './provider'
 import * as util from './util'
 import lint from './lint'
-import fs from 'fs'
 import install from './install'
 
 export interface LSOptions {
@@ -65,7 +64,7 @@ export function startServer(options?: LSOptions): void {
     )
 
     const binPathPrismaFmt = await util.getBinPath()
-    if (!fs.existsSync(binPathPrismaFmt)) {
+    if (await util.binaryIsNeeded(binPathPrismaFmt)) {
       try {
         await install(binPathPrismaFmt)
         connection.console.info(
