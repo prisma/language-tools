@@ -14,11 +14,11 @@ export interface ExceptionPayload {
 
 let connection: IConnection
 
-export const initializeTelemetry = (serverConnection: IConnection) => {
+export const initializeTelemetry = (serverConnection: IConnection): void => {
   connection = serverConnection
 }
 
-export const sendTelemetry = (payload: TelemetryPayload) => {
+export const sendTelemetry = (payload: TelemetryPayload): void => {
   if (connection) {
     connection.sendNotification('prisma/telemetry', payload)
   }
@@ -28,7 +28,7 @@ export const sendException = (
   signature: string,
   error: Error,
   message = '',
-) => {
+): void => {
   if (connection) {
     connection.sendNotification('prisma/telemetryException', {
       signature: signature,

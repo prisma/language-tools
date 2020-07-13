@@ -24,6 +24,7 @@ function isDebugOrTestSession(): boolean {
   return env.sessionId === 'someValue.sessionId'
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function tryRequire(path: string): any {
   try {
     return require(path)
@@ -45,7 +46,7 @@ function createLanguageServer(
   )
 }
 
-export async function activate(context: ExtensionContext) {
+export async function activate(context: ExtensionContext): Promise<void> {
   const serverModule = require.resolve('@prisma/language-server/dist/src/cli')
 
   const pj = tryRequire(path.join(__dirname, '../../package.json'))

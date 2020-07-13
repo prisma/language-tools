@@ -13,9 +13,11 @@ import {
   HoverParams,
   CompletionItem,
   CompletionParams,
+  DeclarationParams,
+  DocumentFormattingParams,
 } from 'vscode-languageserver'
 import { getSignature } from 'checkpoint-client'
-import { sendTelemetry, sendException } from './telemetry'
+import { sendTelemetry, sendException, initializeTelemetry } from './telemetry'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
 import { fullDocumentRange } from './provider'
@@ -58,6 +60,7 @@ export function startServer(options?: LSOptions): void {
   let hasCodeActionLiteralsCapability = false
 
   connection.onInitialize(async (params: InitializeParams) => {
+    initializeTelemetry(connection)
     const capabilities = params.capabilities
 
     hasCodeActionLiteralsCapability = Boolean(
@@ -161,7 +164,7 @@ export function startServer(options?: LSOptions): void {
     validateTextDocument(open.document)
   })
 
-  connection.onDefinition((params: any) => {
+  connection.onDefinition((params: DeclarationParams) => {
     sendTelemetry({
       action: 'definition',
       attributes: {},
@@ -191,7 +194,7 @@ export function startServer(options?: LSOptions): void {
     return MessageHandler.handleHoverRequest(documents, params)
   })
 
-  connection.onDocumentFormatting((params: any) => {
+  connection.onDocumentFormatting((params: DocumentFormattingParams) => {
     sendTelemetry({
       action: 'format',
       attributes: {},

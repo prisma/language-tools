@@ -21,7 +21,7 @@ export class Telemetry {
     eventName: string,
     properties?: { [key: string]: string },
     measurements?: { [key: string]: number },
-  ) {
+  ): void {
     this.reporter.sendTelemetryEvent(eventName, properties, measurements)
   }
 
@@ -30,7 +30,7 @@ export class Telemetry {
     properties?: { [key: string]: string },
     measurements?: { [key: string]: number },
     errorProps?: string[],
-  ) {
+  ): void {
     this.reporter.sendTelemetryErrorEvent(
       eventName,
       properties,
@@ -43,7 +43,7 @@ export class Telemetry {
     error: Error,
     properties?: { [key: string]: string },
     measurements?: { [key: string]: number },
-  ) {
+  ): void {
     this.reporter.sendTelemetryException(error, properties, measurements)
   }
 }
