@@ -65,7 +65,7 @@ export function startServer(options?: LSOptions): void {
     )
 
     const binPathPrismaFmt = await util.getBinPath()
-    if (!fs.existsSync(binPathPrismaFmt)) {
+    if (await util.binaryIsNeeded(binPathPrismaFmt)) {
       try {
         await install(binPathPrismaFmt)
         connection.console.info(
