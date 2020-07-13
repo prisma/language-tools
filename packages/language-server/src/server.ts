@@ -21,7 +21,6 @@ import * as MessageHandler from './MessageHandler'
 import { fullDocumentRange } from './provider'
 import * as util from './util'
 import lint from './lint'
-import fs from 'fs'
 import install from './install'
 
 export interface LSOptions {
