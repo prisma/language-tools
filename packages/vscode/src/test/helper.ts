@@ -13,6 +13,7 @@ export async function sleep(ms: number): Promise<NodeJS.Timeout> {
 /**
  * Try requiring
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function tryRequire(path: string): any {
   try {
     return require(path)

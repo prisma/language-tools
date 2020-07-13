@@ -9,7 +9,7 @@ import { ExtensionContext, commands, window } from 'vscode'
 function createLanguageServer(
   serverOptions: ServerOptions,
   clientOptions: LanguageClientOptions,
-) {
+): LanguageClient {
   return new LanguageClient(
     'prisma',
     'Prisma Language Server',
@@ -18,9 +18,8 @@ function createLanguageServer(
   )
 }
 
-export function activate(context: ExtensionContext) {
+export function activate(context: ExtensionContext): void {
   const serverModule = require.resolve('@prisma/language-server/dist/src/cli')
-
 
   // The debug options for the server
   // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging

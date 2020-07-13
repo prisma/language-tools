@@ -77,13 +77,21 @@ function getSpellingSuggestionForModelAndEnumName(
   return bestCandidate
 }
 
-function removeTypeModifiers(hasTypeModifierArray: boolean, hasTypeModifierOptional: boolean, input: string): string {
+function removeTypeModifiers(
+  hasTypeModifierArray: boolean,
+  hasTypeModifierOptional: boolean,
+  input: string,
+): string {
   if (hasTypeModifierArray) return input.replace('[]', '')
   if (hasTypeModifierOptional) return input.replace('?', '')
   return input
 }
 
-function addTypeModifiers(hasTypeModifierArray: boolean, hasTypeModifierOptional: boolean, suggestion: string): string {
+function addTypeModifiers(
+  hasTypeModifierArray: boolean,
+  hasTypeModifierOptional: boolean,
+  suggestion: string,
+): string {
   if (hasTypeModifierArray) return suggestion + '[]'
   if (hasTypeModifierOptional) return suggestion + '?'
   return suggestion
@@ -111,9 +119,13 @@ export function quickFix(
       )
     ) {
       let diagText = textDocument.getText(diag.range)
-      const hasTypeModifierArray: boolean = diagText.endsWith("[]")
-      const hasTypeModifierOptional: boolean = diagText.endsWith("?")
-      diagText = removeTypeModifiers(hasTypeModifierArray, hasTypeModifierOptional, diagText)
+      const hasTypeModifierArray: boolean = diagText.endsWith('[]')
+      const hasTypeModifierOptional: boolean = diagText.endsWith('?')
+      diagText = removeTypeModifiers(
+        hasTypeModifierArray,
+        hasTypeModifierOptional,
+        diagText,
+      )
       const spellingSuggestion = getSpellingSuggestionForModelAndEnumName(
         diagText,
         getAllRelationNames(lines),
@@ -128,7 +140,11 @@ export function quickFix(
               [params.textDocument.uri]: [
                 {
                   range: diag.range,
-                  newText: addTypeModifiers(hasTypeModifierArray, hasTypeModifierOptional, spellingSuggestion),
+                  newText: addTypeModifiers(
+                    hasTypeModifierArray,
+                    hasTypeModifierOptional,
+                    spellingSuggestion,
+                  ),
                 },
               ],
             },

@@ -17,7 +17,7 @@ import {
   relationArguments,
   dataSourceUrlArguments,
   dataSourceProviders,
-  dataSourceProviderArguments
+  dataSourceProviderArguments,
 } from './completionUtil'
 import klona from 'klona'
 
@@ -56,9 +56,9 @@ export function isInsideQuotationMark(
   currentLineUntrimmed: string,
   position: Position,
 ): boolean {
-  let insideQuotation: boolean = false
+  let insideQuotation = false
   for (let i = 0; i < position.character; i++) {
-    if (currentLineUntrimmed[i] === "\"") {
+    if (currentLineUntrimmed[i] === '"') {
       insideQuotation = !insideQuotation
     }
   }
@@ -151,7 +151,6 @@ export function getSuggestionForFieldAttribute(
   block: Block,
   currentLine: string,
   lines: string[],
-  position: Position,
 ): CompletionList | undefined {
   if (block.type !== 'model') {
     return
@@ -312,7 +311,6 @@ export function getSuggestionForFirstInsideBlock(
   lines: Array<string>,
   position: Position,
   block: Block,
-  document: TextDocument,
 ): CompletionList {
   let suggestions: CompletionItem[] = []
   switch (blockType) {
@@ -379,13 +377,13 @@ export function suggestEqualSymbol(
 }
 
 function getValuesInsideBrackets(line: string): string[] {
-  var regexp = /\[([^\]]+)\]/
-  var matches = regexp.exec(line)
+  const regexp = /\[([^\]]+)\]/
+  const matches = regexp.exec(line)
   if (!matches || !matches[1]) {
     return []
   }
-  let result = matches[1].split(',')
-  return result.map(v => v.trim().replace('"', '').replace('"', ''))
+  const result = matches[1].split(',')
+  return result.map((v) => v.trim().replace('"', '').replace('"', ''))
 }
 
 export function getSuggestionForSupportedFields(
@@ -405,31 +403,36 @@ export function getSuggestionForSupportedFields(
     case 'datasource':
       if (currentLine.startsWith('provider')) {
         let providers: CompletionItem[] = klona(dataSourceProviders)
-        const isInsideQuotation: boolean = isInsideQuotationMark(currentLineUntrimmed, position)
-        if (isInsideAttribute(currentLineUntrimmed, position, "[]")) {
+        const isInsideQuotation: boolean = isInsideQuotationMark(
+          currentLineUntrimmed,
+          position,
+        )
+        if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
           // return providers that haven't been used yet
           if (isInsideQuotation) {
             const usedValues = getValuesInsideBrackets(currentLineUntrimmed)
-            providers = providers.filter(t => !usedValues.includes(t.label))
+            providers = providers.filter((t) => !usedValues.includes(t.label))
             return {
               items: providers,
-              isIncomplete: true
+              isIncomplete: true,
             }
           } else {
             return {
-              items: dataSourceProviderArguments.filter(arg => !arg.label.includes("[")),
-              isIncomplete: true
+              items: dataSourceProviderArguments.filter(
+                (arg) => !arg.label.includes('['),
+              ),
+              isIncomplete: true,
             }
           }
-        } else if (isInsideQuotation) { 
+        } else if (isInsideQuotation) {
           return {
             items: providers,
-            isIncomplete: true
+            isIncomplete: true,
           }
         } else {
           return {
             items: dataSourceProviderArguments,
-            isIncomplete: true
+            isIncomplete: true,
           }
         }
       } else if (currentLine.startsWith('url')) {
@@ -437,17 +440,18 @@ export function getSuggestionForSupportedFields(
         if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
           suggestions = ['DATABASE_URL']
         } else {
-          if (currentLine.includes("env")) {
+          if (currentLine.includes('env')) {
             return {
-              items: dataSourceUrlArguments.filter((a) => !a.label.includes('env')),
+              items: dataSourceUrlArguments.filter(
+                (a) => !a.label.includes('env'),
+              ),
               isIncomplete: true,
             }
           }
           return {
             items: dataSourceUrlArguments,
-            isIncomplete: true
+            isIncomplete: true,
           }
-
         }
       }
       break
