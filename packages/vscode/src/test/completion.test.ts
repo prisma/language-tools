@@ -91,10 +91,19 @@ suite('Should auto-complete', () => {
   const fieldUrl = { label: 'url', kind: vscode.CompletionItemKind.Field }
   const sqlite = { label: 'sqlite', kind: vscode.CompletionItemKind.Constant }
   const mysql = { label: 'mysql', kind: vscode.CompletionItemKind.Constant }
-  const postgresql = { label: 'postgresql', kind: vscode.CompletionItemKind.Constant }
+  const postgresql = {
+    label: 'postgresql',
+    kind: vscode.CompletionItemKind.Constant,
+  }
   const array = { label: '[]', kind: vscode.CompletionItemKind.Property }
-  const quotationMarks = { label: '""', kind: vscode.CompletionItemKind.Property }
-  const envArgument = { label: 'DATABASE_URL', kind: vscode.CompletionItemKind.Constant }
+  const quotationMarks = {
+    label: '""',
+    kind: vscode.CompletionItemKind.Property,
+  }
+  const envArgument = {
+    label: 'DATABASE_URL',
+    kind: vscode.CompletionItemKind.Constant,
+  }
   const env = { label: 'env()', kind: vscode.CompletionItemKind.Property }
 
   test('Diagnoses datasource field suggestions in empty block', async () => {
@@ -125,19 +134,14 @@ suite('Should auto-complete', () => {
     await testCompletion(
       dataSourceWithUri,
       new vscode.Position(7, 10),
-      new vscode.CompletionList([
-        quotationMarks,
-        env
-      ], true),
-      false
+      new vscode.CompletionList([quotationMarks, env], true),
+      false,
     ),
       await testCompletion(
         dataSourceWithUri,
         new vscode.Position(11, 15),
-        new vscode.CompletionList([
-          envArgument
-        ], false),
-        true
+        new vscode.CompletionList([envArgument], false),
+        true,
       )
   })
 
@@ -145,21 +149,14 @@ suite('Should auto-complete', () => {
     await testCompletion(
       sqliteDocUri,
       new vscode.Position(14, 14),
-      new vscode.CompletionList([
-        mysql,
-        postgresql,
-        sqlite,
-      ], true),
-      false
+      new vscode.CompletionList([mysql, postgresql, sqlite], true),
+      false,
     ),
       await testCompletion(
         sqliteDocUri,
         new vscode.Position(18, 13),
-        new vscode.CompletionList([
-          quotationMarks,
-          array
-        ], true),
-        false
+        new vscode.CompletionList([quotationMarks, array], true),
+        false,
       )
   })
 
@@ -167,29 +164,20 @@ suite('Should auto-complete', () => {
     await testCompletion(
       sqliteDocUri,
       new vscode.Position(6, 15),
-      new vscode.CompletionList([
-        mysql,
-        postgresql,
-        sqlite
-      ], true),
-      true
+      new vscode.CompletionList([mysql, postgresql, sqlite], true),
+      true,
     ),
       await testCompletion(
         sqliteDocUri,
         new vscode.Position(22, 14),
-        new vscode.CompletionList([
-          quotationMarks
-        ], true),
-        true
+        new vscode.CompletionList([quotationMarks], true),
+        true,
       )
     await testCompletion(
       sqliteDocUri,
       new vscode.Position(10, 25),
-      new vscode.CompletionList([
-        mysql,
-        postgresql
-      ], true),
-      true
+      new vscode.CompletionList([mysql, postgresql], true),
+      true,
     )
   })
 

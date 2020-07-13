@@ -2,7 +2,6 @@ import {
   CompletionItem,
   CompletionItemKind,
   MarkupKind,
-  InsertTextFormat,
 } from 'vscode-languageserver'
 import * as completions from './completions.json'
 
@@ -12,7 +11,7 @@ import * as completions from './completions.json'
 function convertToCompletionItems(
   completionItems: {
     label: string
-    documentation?: string,
+    documentation?: string
   }[],
   itemKind: CompletionItemKind,
   insertTextFunc?: (label: string) => string,
@@ -24,7 +23,9 @@ function convertToCompletionItems(
       kind: itemKind,
       insertText: insertTextFunc ? insertTextFunc(item.label) : undefined,
       insertTextFormat: insertTextFunc ? 2 : 1,
-      documentation: item.documentation ? { kind: MarkupKind.Markdown, value: item.documentation } : undefined,
+      documentation: item.documentation
+        ? { kind: MarkupKind.Markdown, value: item.documentation }
+        : undefined,
     })
   }
   return result
@@ -115,7 +116,7 @@ export const dataSourceUrlArguments: CompletionItem[] = convertAttributesToCompl
 
 export const dataSourceProviders: CompletionItem[] = convertToCompletionItems(
   completions.datasourceProviders,
-  CompletionItemKind.Constant
+  CompletionItemKind.Constant,
 )
 
 export const dataSourceProviderArguments: CompletionItem[] = convertToCompletionItems(

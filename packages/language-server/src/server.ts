@@ -10,8 +10,9 @@ import {
   InitializeResult,
   CodeActionKind,
   CodeActionParams,
-  CompletionItem,
   HoverParams,
+  CompletionItem,
+  CompletionParams,
 } from 'vscode-languageserver'
 import { getSignature } from 'checkpoint-client'
 import { sendTelemetry, sendException } from './telemetry'
@@ -49,7 +50,7 @@ function getConnection(options?: LSOptions): IConnection {
  *
  * @param options Options to customize behavior
  */
-export function startServer(options?: LSOptions) {
+export function startServer(options?: LSOptions): void {
   const connection: IConnection = getConnection(options)
   const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
@@ -133,7 +134,7 @@ export function startServer(options?: LSOptions) {
         attributes: {},
       })
       connection.window.showErrorMessage(
-        "You are currently viewing a Prisma 1 datamodel which is based on the GraphQL syntax. The current Prisma VSCode extension doesn't support this syntax. To get proper syntax highlighting for this file, please change the file extension to `.graphql` and download the [GraphQL VSCode extension](https://marketplace.visualstudio.com/items?itemName=Prisma.vscode-graphql). Learn more [here](https://pris.ly/prisma1-vscode).",
+        "You are currently viewing a Prisma 1 datamodel which is based on the GraphQL syntax. The current Prisma Language Server doesn't support this syntax. Please change the file extension to `.graphql` so the Prisma Language Server does not get triggered anymore.",
       )
     }
 
@@ -152,11 +153,11 @@ export function startServer(options?: LSOptions) {
     connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
   }
 
-  documents.onDidChangeContent((change: { document: any }) => {
+  documents.onDidChangeContent((change: { document: TextDocument }) => {
     validateTextDocument(change.document)
   })
 
-  documents.onDidOpen((open: { document: any }) => {
+  documents.onDidOpen((open: { document: TextDocument }) => {
     validateTextDocument(open.document)
   })
 
@@ -168,18 +169,18 @@ export function startServer(options?: LSOptions) {
     return MessageHandler.handleDefinitionRequest(documents, params)
   })
 
-  connection.onCompletion((params: any) =>
+  connection.onCompletion((params: CompletionParams) =>
     MessageHandler.handleCompletionRequest(params, documents),
   )
 
-  connection.onCompletionResolve((params: CompletionItem) => {
+  connection.onCompletionResolve((completionItem: CompletionItem) => {
     sendTelemetry({
       action: 'resolveCompletion',
       attributes: {
-        label: params.label,
+        label: completionItem.label,
       },
     })
-    return MessageHandler.handleCompletionResolveRequest(params)
+    return MessageHandler.handleCompletionResolveRequest(completionItem)
   })
 
   connection.onHover((params: HoverParams) => {

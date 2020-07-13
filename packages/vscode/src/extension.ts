@@ -36,7 +36,7 @@ function tryRequire(path: string): any {
 function createLanguageServer(
   serverOptions: ServerOptions,
   clientOptions: LanguageClientOptions,
-) {
+): LanguageClient {
   return new LanguageClient(
     'prisma',
     'Prisma Language Server',

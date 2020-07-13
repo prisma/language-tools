@@ -1,6 +1,6 @@
 {
   "name": "@prisma/language-support",
-  "version": "3.0.8",
+  "version": "3.0.11",
   "author": "Prisma",
   "license": "Apache-2.0",
   "workspaces": [
@@ -29,7 +29,7 @@
     "build": "tsc -b",
     "postinstall": "cd packages/language-server && npm install && cd ../vscode && npm install && cd .. && cd .. ",
     "format": "prettier   \"packages/**/*.{ts,js,json,md}\"   --write",
-    "lint": "eslint  \"packages/**/*.{js,ts,css,json,md} --fix --ext",
+    "lint": "eslint  \"packages/**/*.{js,ts}\" --fix",
     "compile": "cd packages/language-server && npm run build && cd ../vscode && npm run build && cd .. && cd ..",
     "watch": "npm run build -- -w",
     "test": "sh scripts/e2e.sh",
@@ -48,14 +48,13 @@
   },
   "lint-staged": {
     "packages/**/*.{js,ts,css,json,md}": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ],
     "packages/**/*.{js,ts}": [
       "eslint --fix"
     ]
   },
   "prisma": {
-    "version": "6b4130069651151477456fde7c6f1adce7e5aba1"
+    "version": "9fa0e57d0617e4e18ceae3b23280702f90b18412"
   }
 }
