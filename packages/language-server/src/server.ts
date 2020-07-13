@@ -33,9 +33,9 @@ function getConnection(options?: LSOptions): IConnection {
     connection = process.argv.includes('--stdio')
       ? createConnection(process.stdin, process.stdout)
       : createConnection(
-        new IPCMessageReader(process),
-        new IPCMessageWriter(process),
-      )
+          new IPCMessageReader(process),
+          new IPCMessageWriter(process),
+        )
   }
   return connection
 }
@@ -50,12 +50,14 @@ export function startServer(options?: LSOptions) {
   const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
   // Does the clients accepts diagnostics with related information?
-  let hasCodeActionLiteralsCapability: boolean = false
+  let hasCodeActionLiteralsCapability = false
 
   connection.onInitialize(async (params: InitializeParams) => {
     const capabilities = params.capabilities
 
-    hasCodeActionLiteralsCapability = Boolean(capabilities?.textDocument?.codeAction?.codeActionLiteralSupport)
+    hasCodeActionLiteralsCapability = Boolean(
+      capabilities?.textDocument?.codeAction?.codeActionLiteralSupport,
+    )
 
     const binPathPrismaFmt = await util.getBinPath()
     if (!fs.existsSync(binPathPrismaFmt)) {
@@ -71,7 +73,7 @@ export function startServer(options?: LSOptions) {
 
     connection.console.info(
       'Installed version of Prisma binary `prisma-fmt`: ' +
-      (await util.getVersion()),
+        (await util.getVersion()),
     )
 
     const pj = util.tryRequire('../../package.json')
@@ -118,11 +120,11 @@ export function startServer(options?: LSOptions) {
         (err) =>
           err.text === "Field declarations don't require a `:`." ||
           err.text ===
-          'Model declarations have to be indicated with the `model` keyword.',
+            'Model declarations have to be indicated with the `model` keyword.',
       )
     ) {
       connection.window.showErrorMessage(
-        "You are currently viewing a Prisma 1 datamodel which is based on the GraphQL syntax. The current Prisma VSCode extension doesn't support this syntax. To get proper syntax highlighting for this file, please change the file extension to `.graphql` and download the [GraphQL VSCode extension](https://marketplace.visualstudio.com/items?itemName=Prisma.vscode-graphql). Learn more [here](https://pris.ly/prisma1-vscode).",
+        "You are currently viewing a Prisma 1 datamodel which is based on the GraphQL syntax. The current Prisma Language Server doesn't support this syntax. Please change the file extension to `.graphql` so the Prisma Language Server does not get triggered anymore.",
       )
     }
 
