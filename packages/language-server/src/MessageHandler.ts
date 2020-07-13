@@ -1,5 +1,4 @@
 import {
-  TextDocuments,
   DocumentFormattingParams,
   TextEdit,
   Range,
@@ -31,7 +30,6 @@ import {
   suggestEqualSymbol,
 } from './completion/completions'
 import { quickFix } from './codeActionProvider'
-import { isNullOrUndefined } from 'util'
 
 function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
@@ -186,17 +184,11 @@ export function getModelOrEnumBlock(
  * @todo Use official schema.prisma parser. This is a workaround!
  */
 export function handleDefinitionRequest(
-  documents: TextDocuments<TextDocument>,
+  document: TextDocument,
   params: DeclarationParams,
 ): Location | undefined {
   const textDocument = params.textDocument
   const position = params.position
-
-  const document = documents.get(textDocument.uri)
-
-  if (!document) {
-    return
-  }
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
   const word = getWordAtPosition(document, position)
@@ -258,14 +250,11 @@ export function handleDefinitionRequest(
  */
 export async function handleDocumentFormatting(
   params: DocumentFormattingParams,
-  documents: TextDocuments<TextDocument>,
+  document: TextDocument,
   onError?: (errorMessage: string) => void,
 ): Promise<TextEdit[]> {
   const options = params.options
-  const document = documents.get(params.textDocument.uri)
-  if (!document) {
-    return []
-  }
+
   const binPath = await util.getBinPath()
   return format(
     binPath,
@@ -278,17 +267,10 @@ export async function handleDocumentFormatting(
 }
 
 export function handleHoverRequest(
-  documents: TextDocuments<TextDocument>,
+  document: TextDocument,
   params: HoverParams,
 ): Hover | undefined {
-  const textDocument = params.textDocument
   const position = params.position
-
-  const document = documents.get(textDocument.uri)
-
-  if (!document) {
-    return
-  }
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
   const word = getWordAtPosition(document, position)
@@ -328,16 +310,11 @@ export function handleHoverRequest(
  */
 export function handleCompletionRequest(
   params: CompletionParams,
-  documents: TextDocuments<TextDocument>,
+  document: TextDocument,
 ): CompletionList | undefined {
   const context = params.context
   const position = params.position
   if (!context) {
-    return
-  }
-
-  const document = documents.get(params.textDocument.uri)
-  if (!document) {
     return
   }
 
@@ -469,13 +446,9 @@ export function handleCompletionResolveRequest(
 
 export function handleCodeActions(
   params: CodeActionParams,
-  documents: TextDocuments<TextDocument>,
+  document: TextDocument,
 ): CodeAction[] {
   if (!params.context.diagnostics.length) {
-    return []
-  }
-  const document = documents.get(params.textDocument.uri)
-  if (isNullOrUndefined(document)) {
     return []
   }
 

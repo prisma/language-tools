@@ -43,6 +43,31 @@
       "outFiles": [
         "${workspaceFolder}/packages/vscode/dist/src/test/**/*.js"
       ]
+    },
+    {
+      "name": "Unit Tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/packages/language-server/node_modules/mocha/bin/_mocha",
+      "stopOnEntry": false,
+      "args": [
+        "--timeout",
+        "999999",
+        "--colors",
+        "--ui",
+        "tdd",
+        "--useColors",
+        "true",
+        "./dist/src/test/**/*.test.js"
+      ],
+      "cwd": "${workspaceRoot}/packages/language-server",
+      "runtimeExecutable": null,
+      "runtimeArgs": [
+        
+      ],
+			"env": {},
+			"outFiles": [ "${workspaceRoot}/packages/language-server/dist/src/test/**/*.js" ],
+			"preLaunchTask": "npm: watch"
     }
   ]
 }

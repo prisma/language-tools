@@ -156,35 +156,54 @@ export function startServer(options?: LSOptions): void {
     validateTextDocument(open.document)
   })
 
-  connection.onDefinition((params: DeclarationParams) =>
-    MessageHandler.handleDefinitionRequest(documents, params),
-  )
+  function getDocument(uri: string): TextDocument | undefined {
+    return documents.get(uri)
+  }
 
-  connection.onCompletion((params: CompletionParams) =>
-    MessageHandler.handleCompletionRequest(params, documents),
-  )
+  connection.onDefinition((params: DeclarationParams) => {
+    const doc = getDocument(params.textDocument.uri)
+    if (doc) {
+      return MessageHandler.handleDefinitionRequest(doc, params)
+    }
+  })
+
+  connection.onCompletion((params: CompletionParams) => {
+    const doc = getDocument(params.textDocument.uri)
+    if (doc) {
+      return MessageHandler.handleCompletionRequest(params, doc)
+    }
+  })
 
   connection.onCompletionResolve((completionItem: CompletionItem) =>
     MessageHandler.handleCompletionResolveRequest(completionItem),
   )
 
-  connection.onHover((params: HoverParams) =>
-    MessageHandler.handleHoverRequest(documents, params),
-  )
+  connection.onHover((params: HoverParams) => {
+    const doc = getDocument(params.textDocument.uri)
+    if (doc) {
+      return MessageHandler.handleHoverRequest(doc, params)
+    }
+  })
 
-  connection.onDocumentFormatting((params: DocumentFormattingParams) =>
-    MessageHandler.handleDocumentFormatting(
-      params,
-      documents,
-      (errorMessage: string) => {
-        connection.window.showErrorMessage(errorMessage)
-      },
-    ),
-  )
+  connection.onDocumentFormatting((params: DocumentFormattingParams) => {
+    const doc = getDocument(params.textDocument.uri)
+    if (doc) {
+      return MessageHandler.handleDocumentFormatting(
+        params,
+        doc,
+        (errorMessage: string) => {
+          connection.window.showErrorMessage(errorMessage)
+        },
+      )
+    }
+  })
 
-  connection.onCodeAction((params: CodeActionParams) =>
-    MessageHandler.handleCodeActions(params, documents),
-  )
+  connection.onCodeAction((params: CodeActionParams) => {
+    const doc = getDocument(params.textDocument.uri)
+    if (doc) {
+      return MessageHandler.handleCodeActions(params, doc)
+    }
+  })
 
   // Make the text document manager listen on the connection
   // for open, change and close text document events
