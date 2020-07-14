@@ -1,20 +1,15 @@
 import { TextDocument, Position } from 'vscode-languageserver-textdocument'
 import { handleHoverRequest } from '../MessageHandler'
-import * as fs from 'fs'
-import * as path from 'path'
 import { Hover } from 'vscode-languageserver'
 import * as assert from 'assert'
+import { getTextDocument } from './helper'
 
 function assertHover(
   position: Position,
   expected: Hover,
   fixturePath: string,
 ): void {
-  const content: string = fs.readFileSync(
-    path.join(__dirname, '../../../test/fixtures', fixturePath),
-    'utf8',
-  )
-  const document = TextDocument.create(fixturePath, 'prisma', 1, content)
+  const document: TextDocument = getTextDocument(fixturePath)
 
   const params = {
     textDocument: document,

@@ -2,20 +2,15 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import { handleDiagnosticsRequest } from '../MessageHandler'
 import { getBinPath, binaryIsNeeded } from '../util'
 import install from '../install'
-import * as fs from 'fs'
-import * as path from 'path'
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver'
 import * as assert from 'assert'
+import { getTextDocument } from './helper'
 
 async function assertLinting(
   expected: Diagnostic[],
   fixturePath: string,
 ): Promise<void> {
-  const content: string = fs.readFileSync(
-    path.join(__dirname, '../../../test/fixtures', fixturePath),
-    'utf8',
-  )
-  const document = TextDocument.create(fixturePath, 'prisma', 1, content)
+  const document: TextDocument = getTextDocument(fixturePath)
 
   const diagnosticsResults: Diagnostic[] = await handleDiagnosticsRequest(
     document,
