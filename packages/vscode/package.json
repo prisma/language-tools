@@ -24,7 +24,6 @@
     "build": "tsc -p ./",
     "watch": "npm run build -- -w",
     "vscode:prepublish": "cd .. && cd .. && tsc --build --clean && npm run compile",
-    "test": "sh ./scripts/e2e.sh",
     "package": "vsce package"
   },
   "main": "./dist/src/extension.js",

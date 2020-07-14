@@ -39,15 +39,6 @@ In the beginning of this run, the CI job checks for Prisma stable version and `s
 
 Instructions on manual testing can be found [here](TESTING.md).
 
-End-to-End tests:
-
-- Run `npm install` in the root folder.
-- Open VS Code on this folder.
-- Switch to the debug viewlet.
-- Select `Language Server E2E Test` from the drop down.
-- Run the launch config.
-- Open the debug console to view the test results.
-
 ## Publishing
 
 The extension is automatically published using a [Azure Devops Personal Access Token](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) via Github actions (see `.github/workflows/publish.yml`).

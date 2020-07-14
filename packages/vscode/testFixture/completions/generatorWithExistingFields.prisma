@@ -1,9 +1,0 @@
-generator provider {
-    provider = 'sqlite'
-
-}
-
-generator output {
-    output  = "node_modules/@prisma/client"
-
-}
