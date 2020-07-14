@@ -51,7 +51,7 @@ jobs:
           run: npm run test
       - name: Remove binaries
         if: ${{ steps.check_for_updates.outputs.new_updates }}
-        run: rm packages/vscode/node_modules/@prisma/language-server/dist/src/prisma-fmt*
+        run: rm -rf packages/vscode/node_modules/@prisma/language-server/dist/src/prisma-fmt*
       - name: Publish Extension as Patch
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: npm run vsce:publish "latest"
@@ -116,7 +116,7 @@ jobs:
           run: npm run test
       - name: Remove binaries
         if: ${{ steps.check_for_updates.outputs.new_updates }}
-        run: rm packages/vscode/node_modules/@prisma/language-server/dist/src/prisma-fmt*
+        run: rm -rf packages/vscode/node_modules/@prisma/language-server/dist/src/prisma-fmt*
       - name: Publish Extension as Patch
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run:  npm run vsce:publish "dev"
