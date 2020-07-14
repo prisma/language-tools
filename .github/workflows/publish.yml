@@ -29,6 +29,18 @@ jobs:
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: npm run vsce:bump "latest" 
         id: bump_versions
+      - name: Install Dependencies in LSP
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
+        run: cd packages/language-server && npm install
+      - name: Compile LSP
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
+        run: cd packages/language-server && npm run build
+      - name: Run LSP unit tests
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
+        run: cd packages/language-server && npm test
+      - name: Remove binaries in LSP
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
+        run: rm -rf packages/language-server/dist/src/prisma-fmt*
       - name: Publish LSP to npm
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         # Setup .npmrc file to publish to npm
@@ -44,14 +56,6 @@ jobs:
         run: npm install
       - name: Compile
         run: npm run compile
-      - name: Run headless e2e tests
-        if: ${{ steps.check_for_updates.outputs.new_updates }}
-        uses: GabrielBB/xvfb-action@v1.0
-        with:
-          run: npm run test
-      - name: Remove binaries
-        if: ${{ steps.check_for_updates.outputs.new_updates }}
-        run: rm -rf packages/vscode/node_modules/@prisma/language-server/dist/src/prisma-fmt*
       - name: Publish Extension as Patch
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: npm run vsce:publish "latest"
@@ -94,6 +98,18 @@ jobs:
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: npm run vsce:bump "dev"
         id: bump_versions
+      - name: Install Dependencies in LSP
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
+        run: cd packages/language-server && npm install
+      - name: Compile LSP
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
+        run: cd packages/language-server && npm run build
+      - name: Run LSP unit tests
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
+        run: cd packages/language-server && npm test
+      - name: Remove binaries in LSP
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
+        run: rm -rf packages/language-server/dist/src/prisma-fmt*
       - name: Publish LSP to npm
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         # Setup .npmrc file to publish to npm
@@ -109,14 +125,6 @@ jobs:
         run: npm install
       - name: Compile
         run: npm run compile
-      - name: Run headless e2e tests
-        if: ${{ steps.check_for_updates.outputs.new_updates }}
-        uses: GabrielBB/xvfb-action@v1.0
-        with:
-          run: npm run test
-      - name: Remove binaries
-        if: ${{ steps.check_for_updates.outputs.new_updates }}
-        run: rm -rf packages/vscode/node_modules/@prisma/language-server/dist/src/prisma-fmt*
       - name: Publish Extension as Patch
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run:  npm run vsce:publish "dev"

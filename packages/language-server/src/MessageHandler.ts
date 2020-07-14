@@ -12,6 +12,8 @@ import {
   Hover,
   CodeActionParams,
   CodeAction,
+  Diagnostic,
+  DiagnosticSeverity,
 } from 'vscode-languageserver'
 import * as util from './util'
 import { fullDocumentRange } from './provider'
@@ -30,6 +32,7 @@ import {
   suggestEqualSymbol,
 } from './completion/completions'
 import { quickFix } from './codeActionProvider'
+import lint from './lint'
 
 function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
@@ -178,6 +181,50 @@ export function getModelOrEnumBlock(
   }
 
   return foundBlocks[0]
+}
+
+export async function handleDiagnosticsRequest(
+  document: TextDocument,
+  onError?: (errorMessage: string) => void,
+): Promise<Diagnostic[]> {
+  const text = document.getText(fullDocumentRange(document))
+  const binPath = await util.getBinPath()
+
+  const res = await lint(binPath, text, (errorMessage: string) => {
+    if (onError) {
+      onError(errorMessage)
+    }
+  })
+
+  const diagnostics: Diagnostic[] = []
+  if (
+    res.some(
+      (err) =>
+        err.text === "Field declarations don't require a `:`." ||
+        err.text ===
+          'Model declarations have to be indicated with the `model` keyword.',
+    )
+  ) {
+    if (onError) {
+      onError(
+        "You are currently viewing a Prisma 1 datamodel which is based on the GraphQL syntax. The current Prisma Language Server doesn't support this syntax. Please change the file extension to `.graphql` so the Prisma Language Server does not get triggered anymore.",
+      )
+    }
+  }
+
+  for (const error of res) {
+    const diagnostic: Diagnostic = {
+      severity: DiagnosticSeverity.Error,
+      range: {
+        start: document.positionAt(error.start),
+        end: document.positionAt(error.end),
+      },
+      message: error.text,
+      source: '',
+    }
+    diagnostics.push(diagnostic)
+  }
+  return diagnostics
 }
 
 /**
