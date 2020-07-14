@@ -4,8 +4,8 @@ on: [push]
     
 
 jobs:
-  integration-tests:
-    name: Integration Tests
+  test:
+    name: Unit Tests + Shellcheck
     runs-on:  ${{ matrix.os }}
     strategy:
       matrix:
