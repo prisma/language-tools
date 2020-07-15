@@ -5,17 +5,17 @@ on:
     - cron: '*/5 * * * *'
 
 env:
-  AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
 
 jobs:
-  publish:
-    name: Publish
+  setup:
+    name: Check for Updates
     runs-on: ubuntu-latest
     if: endsWith(github.ref, '/master')
     outputs:
       version: ${{ steps.bump_versions.outputs.version }}
+      lsp-not-published: ${{ steps.check_lsp_version.outputs.lsp-not-published }}
     steps:
       - uses: actions/checkout@v2
       - name: Install Dependencies
@@ -31,68 +31,90 @@ jobs:
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         id: check_lsp_version
         run: npm run check:lsp ${{ steps.bump_versions.outputs.version }}
+  
+  test-lsp:
+    name: Test LSP
+    needs: setup
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    if: ${{ needs.setup.outputs.lsp-not-published }}
+    steps:
+      - uses: actions/checkout@v2
       - name: Install Dependencies in LSP
-        if: ${{ steps.check_lsp_version.outputs.lsp-not-published }}
         run: cd packages/language-server && npm install
       - name: Compile LSP
-        if: ${{ steps.check_lsp_version.outputs.lsp-not-published }}
         run: cd packages/language-server && npm run build
       - name: LSP unit tests
-        if: ${{ steps.check_lsp_version.outputs.lsp-not-published }}
         run: cd packages/language-server && npm test
       - name: Remove binaries in LSP
-        if: ${{ steps.check_lsp_version.outputs.lsp-not-published }}
         run: rm -rf packages/language-server/dist/src/prisma-fmt*
+
+  publish-lsp:
+    name: Publish LSP to npm
+    needs: [setup, test-lsp]
+    runs-on: ubuntu-latest
+    if: ${{ needs.setup.outputs.lsp-not-published }}
+    steps:
+      - uses: actions/checkout@v2
       - name: Publish LSP to npm
-        if: ${{ steps.check_lsp_version.outputs.lsp-not-published }}
         # Setup .npmrc file to publish to npm
         uses: actions/setup-node@v1
         with: 
           node-version: '12.x'
           registry-url: 'https://registry.npmjs.org'
       - run: cd packages/language-server && npm publish --access public
-        if: ${{ steps.check_lsp_version.outputs.lsp-not-published }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN}}
+
+  test-extension:
+    name: Extension integration tests
+    needs: [setup, test-lsp, publish-lsp]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    if: endsWith(github.ref, '/master')
+    steps: 
+      - uses: actions/checkout@v2
       - name: Install Dependencies
         run: npm install
       - name: Compile
         run: npm run compile
       - name: Headless e2e tests
-        if: ${{ steps.check_for_updates.outputs.new_updates }}
         uses: GabrielBB/xvfb-action@v1.0
         with:
           run: npm run test
       - name: Remove binaries
-        if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: rm -rf packages/vscode/node_modules/@prisma/language-server/dist/src/prisma-fmt*
-      - name: Publish Extension as Patch
-        if: ${{ steps.check_for_updates.outputs.new_updates }}
-        run: npm run vsce:publish "latest"
 
-  slack: 
+  publish-slack: 
     name: Slack Notification
     runs-on: ubuntu-latest
-    needs: publish
+    needs: [setup, tset-lsp, publish-lsp, test-extension]
     if: always()
     env: 
+      AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
       SLACK_CHANNEL: feed-vscode
       SLACK_USERNAME: vscode-actions
       SLACK_ICON_EMOJI: ":ship:"
-      SLACK_MESSAGE: ${{ needs.publish.outputs.version }}
+      SLACK_MESSAGE: ${{ needs.setup.outputs.version }}
     if: endsWith(github.ref, '/master')
     steps:
       - uses: actions/checkout@v2
+      - name: Publish Extension as Patch
+        run: npm run vsce:publish "latest"
       - name: Slack Notification on Failure
-        if: ${{ needs.publish.result == 'failure' }}
+        if: ${{ needs.setup.result == 'failure' }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
           SLACK_TITLE: "Publishing stable failed :x:"
           SLACK_COLOR: '#FF0000'
 
       - name: Slack Notification on Success
-        if: ${{ needs.publish.result == 'success' && needs.publish.outputs.version }}
+        if: ${{ needs.setup.result == 'success' && needs.setup.outputs.version }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
           SLACK_TITLE: "Published stable :white_check_mark:"
