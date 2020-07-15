@@ -35,7 +35,7 @@ jobs:
       - name: Compile LSP
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: cd packages/language-server && npm run build
-      - name: Run LSP unit tests
+      - name: LSP unit tests
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: cd packages/language-server && npm test
       - name: Remove binaries in LSP
@@ -56,6 +56,14 @@ jobs:
         run: npm install
       - name: Compile
         run: npm run compile
+      - name: Headless e2e tests
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
+        uses: GabrielBB/xvfb-action@v1.0
+        with:
+          run: npm run test
+      - name: Remove binaries
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
+        run: rm -rf packages/vscode/node_modules/@prisma/language-server/dist/src/prisma-fmt*
       - name: Publish Extension as Patch
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: npm run vsce:publish "latest"
@@ -125,6 +133,14 @@ jobs:
         run: npm install
       - name: Compile
         run: npm run compile
+      - name: Headless e2e tests
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
+        uses: GabrielBB/xvfb-action@v1.0
+        with:
+          run: npm test
+      - name: Remove binaries
+        if: ${{ steps.check_for_updates.outputs.new_updates }}
+        run: rm -rf packages/vscode/node_modules/@prisma/language-server/dist/src/prisma-fmt*
       - name: Publish Extension as Patch
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run:  npm run vsce:publish "dev"

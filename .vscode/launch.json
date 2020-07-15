@@ -48,12 +48,26 @@
       ],
       "cwd": "${workspaceRoot}/packages/language-server",
       "runtimeExecutable": null,
-      "runtimeArgs": [
-        
+      "runtimeArgs": [],
+      "env": {},
+      "outFiles": [
+        "${workspaceRoot}/packages/language-server/dist/src/test/**/*.js"
       ],
-			"env": {},
-			"outFiles": [ "${workspaceRoot}/packages/language-server/dist/src/test/**/*.js" ],
-			"preLaunchTask": "npm: watch"
+      "preLaunchTask": "npm: watch"
+    },
+    {
+      "name": "Integration Tests",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode",
+        "--extensionTestsPath=${workspaceFolder}/packages/vscode/dist/src/test/index",
+        "${workspaceFolder}/packages/vscode/testFixture"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/packages/vscode/dist/src/test/**/*.js"
+      ]
     }
   ]
 }
