@@ -27,27 +27,31 @@ jobs:
         if: ${{ steps.check_for_updates.outputs.new_updates }}
         run: npm run vsce:bump "dev"
         id: bump_versions
-      - name: Install Dependencies in LSP
+      - name: Check existing LSP version
         if: ${{ steps.check_for_updates.outputs.new_updates }}
+        id: check_lsp_version
+        run: npm run check:lsp ${{ steps.bump_versions.outputs.version }}
+      - name: Install Dependencies in LSP
+        if: ${{ steps.check_lsp_version.outputs.lsp-not-published }}
         run: cd packages/language-server && npm install
       - name: Compile LSP
-        if: ${{ steps.check_for_updates.outputs.new_updates }}
+        if: ${{ steps.check_lsp_version.outputs.lsp-not-published }}
         run: cd packages/language-server && npm run build
       - name: Run LSP unit tests
-        if: ${{ steps.check_for_updates.outputs.new_updates }}
+        if: ${{ steps.check_lsp_version.outputs.lsp-not-published }}
         run: cd packages/language-server && npm test
       - name: Remove binaries in LSP
-        if: ${{ steps.check_for_updates.outputs.new_updates }}
+        if: ${{ steps.check_lsp_version.outputs.lsp-not-published }}
         run: rm -rf packages/language-server/dist/src/prisma-fmt*
       - name: Publish LSP to npm
-        if: ${{ steps.check_for_updates.outputs.new_updates }}
+        if: ${{ steps.check_lsp_version.outputs.lsp-not-published }}
         # Setup .npmrc file to publish to npm
         uses: actions/setup-node@v1
         with: 
           node-version: '12.x'
           registry-url: 'https://registry.npmjs.org'
       - run: cd packages/language-server && npm publish --access public
-        if: ${{ steps.check_for_updates.outputs.new_updates }}
+        if: ${{ steps.check_lsp_version.outputs.lsp-not-published }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN}}
       - name: Install Dependencies
