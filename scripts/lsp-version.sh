@@ -4,7 +4,7 @@ set -eu
 
 VERSION=$1
 
-REGISTRY_INFO=$(npm view @prisma/language-server@$VERSION)
+REGISTRY_INFO=$(npm view @prisma/language-server@"$VERSION")
 
 echo "$REGISTRY_INFO"
 
