@@ -162,6 +162,10 @@ export function getSuggestionForFieldAttribute(
     // id not allowed
     suggestions = suggestions.filter((sugg) => sugg.label !== '@id')
   }
+  if (!currentLine.includes('DateTime')) {
+    // updatedAt not allowed
+    suggestions = suggestions.filter((sugg) => sugg.label !== '@updatedAt')
+  }
 
   suggestions = removeInvalidAttributeSuggestions(suggestions, block, lines)
 
