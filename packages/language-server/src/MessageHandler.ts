@@ -1,5 +1,4 @@
 import {
-  TextDocuments,
   DocumentFormattingParams,
   TextEdit,
   Range,
@@ -13,6 +12,8 @@ import {
   Hover,
   CodeActionParams,
   CodeAction,
+  Diagnostic,
+  DiagnosticSeverity,
 } from 'vscode-languageserver'
 import * as util from './util'
 import { fullDocumentRange } from './provider'
@@ -31,7 +32,7 @@ import {
   suggestEqualSymbol,
 } from './completion/completions'
 import { quickFix } from './codeActionProvider'
-import { isNullOrUndefined } from 'util'
+import lint from './lint'
 
 function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
@@ -182,21 +183,59 @@ export function getModelOrEnumBlock(
   return foundBlocks[0]
 }
 
+export async function handleDiagnosticsRequest(
+  document: TextDocument,
+  onError?: (errorMessage: string) => void,
+): Promise<Diagnostic[]> {
+  const text = document.getText(fullDocumentRange(document))
+  const binPath = await util.getBinPath()
+
+  const res = await lint(binPath, text, (errorMessage: string) => {
+    if (onError) {
+      onError(errorMessage)
+    }
+  })
+
+  const diagnostics: Diagnostic[] = []
+  if (
+    res.some(
+      (err) =>
+        err.text === "Field declarations don't require a `:`." ||
+        err.text ===
+          'Model declarations have to be indicated with the `model` keyword.',
+    )
+  ) {
+    if (onError) {
+      onError(
+        "You are currently viewing a Prisma 1 datamodel which is based on the GraphQL syntax. The current Prisma Language Server doesn't support this syntax. Please change the file extension to `.graphql` so the Prisma Language Server does not get triggered anymore.",
+      )
+    }
+  }
+
+  for (const error of res) {
+    const diagnostic: Diagnostic = {
+      severity: DiagnosticSeverity.Error,
+      range: {
+        start: document.positionAt(error.start),
+        end: document.positionAt(error.end),
+      },
+      message: error.text,
+      source: '',
+    }
+    diagnostics.push(diagnostic)
+  }
+  return diagnostics
+}
+
 /**
  * @todo Use official schema.prisma parser. This is a workaround!
  */
 export function handleDefinitionRequest(
-  documents: TextDocuments<TextDocument>,
+  document: TextDocument,
   params: DeclarationParams,
 ): Location | undefined {
   const textDocument = params.textDocument
   const position = params.position
-
-  const document = documents.get(textDocument.uri)
-
-  if (!document) {
-    return
-  }
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
   const word = getWordAtPosition(document, position)
@@ -258,14 +297,11 @@ export function handleDefinitionRequest(
  */
 export async function handleDocumentFormatting(
   params: DocumentFormattingParams,
-  documents: TextDocuments<TextDocument>,
+  document: TextDocument,
   onError?: (errorMessage: string) => void,
 ): Promise<TextEdit[]> {
   const options = params.options
-  const document = documents.get(params.textDocument.uri)
-  if (!document) {
-    return []
-  }
+
   const binPath = await util.getBinPath()
   return format(
     binPath,
@@ -278,17 +314,10 @@ export async function handleDocumentFormatting(
 }
 
 export function handleHoverRequest(
-  documents: TextDocuments<TextDocument>,
+  document: TextDocument,
   params: HoverParams,
 ): Hover | undefined {
-  const textDocument = params.textDocument
   const position = params.position
-
-  const document = documents.get(textDocument.uri)
-
-  if (!document) {
-    return
-  }
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
   const word = getWordAtPosition(document, position)
@@ -328,16 +357,11 @@ export function handleHoverRequest(
  */
 export function handleCompletionRequest(
   params: CompletionParams,
-  documents: TextDocuments<TextDocument>,
+  document: TextDocument,
 ): CompletionList | undefined {
   const context = params.context
   const position = params.position
   if (!context) {
-    return
-  }
-
-  const document = documents.get(params.textDocument.uri)
-  if (!document) {
     return
   }
 
@@ -469,13 +493,9 @@ export function handleCompletionResolveRequest(
 
 export function handleCodeActions(
   params: CodeActionParams,
-  documents: TextDocuments<TextDocument>,
+  document: TextDocument,
 ): CodeAction[] {
   if (!params.context.diagnostics.length) {
-    return []
-  }
-  const document = documents.get(params.textDocument.uri)
-  if (isNullOrUndefined(document)) {
     return []
   }
 

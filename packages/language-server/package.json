@@ -21,7 +21,9 @@
   },
   "scripts": {
     "build": "tsc",
-    "watch": "npm run build -- -w"
+    "watch": "npm run build -- -w",
+    "test": "mocha --ui tdd --useColors true  ./dist/src/test/**/*.test.js",
+    "pretest": "tsc"
   },
   "main": "./dist/index.js",
   "typings": "dist/src/index",
@@ -37,7 +39,10 @@
     "@types/js-levenshtein": "1.1.0"
   },
   "devDependencies": {
-    "vsce": "1.75.0"
+    "vsce": "1.75.0",
+    "@types/mocha": "5.2.7",
+    "mocha": "8.0.1",
+    "typescript": "3.8.3"
   },
   "keywords": [
     "autocomplete",

@@ -1,0 +1,86 @@
+import { TextDocument } from 'vscode-languageserver-textdocument'
+import { handleDiagnosticsRequest } from '../MessageHandler'
+import { getBinPath, binaryIsNeeded } from '../util'
+import install from '../install'
+import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver'
+import * as assert from 'assert'
+import { getTextDocument } from './helper'
+
+async function assertLinting(
+  expected: Diagnostic[],
+  fixturePath: string,
+): Promise<void> {
+  const document: TextDocument = getTextDocument(fixturePath)
+
+  const diagnosticsResults: Diagnostic[] = await handleDiagnosticsRequest(
+    document,
+  )
+
+  assert.ok(diagnosticsResults.length != 0)
+  expected.forEach((expectedDiagnostic, i) => {
+    const actualDiagnostic = diagnosticsResults[i]
+    assert.equal(actualDiagnostic.message, expectedDiagnostic.message)
+    assert.deepEqual(actualDiagnostic.range, expectedDiagnostic.range)
+    assert.equal(actualDiagnostic.severity, expectedDiagnostic.severity)
+  })
+}
+
+suite('Linting', () => {
+  suiteSetup(async () => {
+    // install prisma-fmt binary
+    const binPathPrismaFmt = await getBinPath()
+    if (await binaryIsNeeded(binPathPrismaFmt)) await install(binPathPrismaFmt)
+  })
+
+  const fixturePathMissingArgument = './linting/missingArgument.prisma'
+  const fixturePathWrongType = './linting/wrongType.prisma'
+  const fixturePathRequiredField = './linting/requiredField.prisma'
+
+  test('Missing argument', async () => {
+    await assertLinting(
+      [
+        {
+          message: 'Argument "provider" is missing in data source block "db".',
+          range: {
+            start: { line: 0, character: 0 },
+            end: { line: 2, character: 1 },
+          },
+          severity: DiagnosticSeverity.Error,
+        },
+      ],
+      fixturePathMissingArgument,
+    )
+  })
+  test('Wrong type', async () => {
+    await assertLinting(
+      [
+        {
+          message:
+            'Type "Use" is neither a built-in type, nor refers to another model, custom type, or enum.',
+          range: {
+            start: { line: 14, character: 12 },
+            end: { line: 14, character: 16 },
+          },
+          severity: DiagnosticSeverity.Error,
+        },
+      ],
+      fixturePathWrongType,
+    )
+  })
+  test('Required field', async () => {
+    await assertLinting(
+      [
+        {
+          message:
+            'Error validating: The relation field `author` uses the scalar fields authorId. At least one of those fields is required. Hence the relation field must be required as well.',
+          range: {
+            start: { line: 14, character: 2 },
+            end: { line: 15, character: 0 },
+          },
+          severity: DiagnosticSeverity.Error,
+        },
+      ],
+      fixturePathRequiredField,
+    )
+  })
+})

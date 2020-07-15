@@ -1,7 +1,6 @@
 import {
   IConnection,
   TextDocuments,
-  DiagnosticSeverity,
   Diagnostic,
   createConnection,
   IPCMessageReader,
@@ -18,9 +17,7 @@ import {
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
-import { fullDocumentRange } from './provider'
 import * as util from './util'
-import lint from './lint'
 import install from './install'
 
 export interface LSOptions {
@@ -111,39 +108,12 @@ export function startServer(options?: LSOptions): void {
   async function validateTextDocument(
     textDocument: TextDocument,
   ): Promise<void> {
-    const text = textDocument.getText(fullDocumentRange(textDocument))
-    const binPath = await util.getBinPath()
-
-    const res = await lint(binPath, text, (errorMessage: string) => {
-      connection.window.showErrorMessage(errorMessage)
-    })
-
-    const diagnostics: Diagnostic[] = []
-    if (
-      res.some(
-        (err) =>
-          err.text === "Field declarations don't require a `:`." ||
-          err.text ===
-            'Model declarations have to be indicated with the `model` keyword.',
-      )
-    ) {
-      connection.window.showErrorMessage(
-        "You are currently viewing a Prisma 1 datamodel which is based on the GraphQL syntax. The current Prisma Language Server doesn't support this syntax. Please change the file extension to `.graphql` so the Prisma Language Server does not get triggered anymore.",
-      )
-    }
-
-    for (const error of res) {
-      const diagnostic: Diagnostic = {
-        severity: DiagnosticSeverity.Error,
-        range: {
-          start: textDocument.positionAt(error.start),
-          end: textDocument.positionAt(error.end),
-        },
-        message: error.text,
-        source: '',
-      }
-      diagnostics.push(diagnostic)
-    }
+    const diagnostics: Diagnostic[] = await MessageHandler.handleDiagnosticsRequest(
+      textDocument,
+      (errorMessage: string) => {
+        connection.window.showErrorMessage(errorMessage)
+      },
+    )
     connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
   }
 
@@ -155,35 +125,54 @@ export function startServer(options?: LSOptions): void {
     validateTextDocument(open.document)
   })
 
-  connection.onDefinition((params: DeclarationParams) =>
-    MessageHandler.handleDefinitionRequest(documents, params),
-  )
+  function getDocument(uri: string): TextDocument | undefined {
+    return documents.get(uri)
+  }
 
-  connection.onCompletion((params: CompletionParams) =>
-    MessageHandler.handleCompletionRequest(params, documents),
-  )
+  connection.onDefinition((params: DeclarationParams) => {
+    const doc = getDocument(params.textDocument.uri)
+    if (doc) {
+      return MessageHandler.handleDefinitionRequest(doc, params)
+    }
+  })
+
+  connection.onCompletion((params: CompletionParams) => {
+    const doc = getDocument(params.textDocument.uri)
+    if (doc) {
+      return MessageHandler.handleCompletionRequest(params, doc)
+    }
+  })
 
   connection.onCompletionResolve((completionItem: CompletionItem) =>
     MessageHandler.handleCompletionResolveRequest(completionItem),
   )
 
-  connection.onHover((params: HoverParams) =>
-    MessageHandler.handleHoverRequest(documents, params),
-  )
+  connection.onHover((params: HoverParams) => {
+    const doc = getDocument(params.textDocument.uri)
+    if (doc) {
+      return MessageHandler.handleHoverRequest(doc, params)
+    }
+  })
 
-  connection.onDocumentFormatting((params: DocumentFormattingParams) =>
-    MessageHandler.handleDocumentFormatting(
-      params,
-      documents,
-      (errorMessage: string) => {
-        connection.window.showErrorMessage(errorMessage)
-      },
-    ),
-  )
+  connection.onDocumentFormatting((params: DocumentFormattingParams) => {
+    const doc = getDocument(params.textDocument.uri)
+    if (doc) {
+      return MessageHandler.handleDocumentFormatting(
+        params,
+        doc,
+        (errorMessage: string) => {
+          connection.window.showErrorMessage(errorMessage)
+        },
+      )
+    }
+  })
 
-  connection.onCodeAction((params: CodeActionParams) =>
-    MessageHandler.handleCodeActions(params, documents),
-  )
+  connection.onCodeAction((params: CodeActionParams) => {
+    const doc = getDocument(params.textDocument.uri)
+    if (doc) {
+      return MessageHandler.handleCodeActions(params, doc)
+    }
+  })
 
   // Make the text document manager listen on the connection
   // for open, change and close text document events

@@ -4,8 +4,8 @@ on: [push]
     
 
 jobs:
-  integration-tests:
-    name: Integration Tests
+  test:
+    name: Tests + Shellcheck
     runs-on:  ${{ matrix.os }}
     strategy:
       matrix:
@@ -16,10 +16,12 @@ jobs:
         run: npm install
       - name: Compile
         run: npm run compile
+      - name: Unit tests
+        run: cd packages/language-server && npm test
       - name: Run headless test
         uses: GabrielBB/xvfb-action@v1.0
         with:
-          run: npm run test
+          run: npm test 
       - name: Catch shell script issues
         if: matrix.os == 'ubuntu-latest'
         run: npm run shell:lint

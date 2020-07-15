@@ -44,7 +44,7 @@ End-to-End tests:
 - Run `npm install` in the root folder.
 - Open VS Code on this folder.
 - Switch to the debug viewlet.
-- Select `Language Server E2E Test` from the drop down.
+- Select `Integration Tests` from the drop down.
 - Run the launch config.
 - Open the debug console to view the test results.
 
