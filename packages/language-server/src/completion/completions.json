@@ -166,6 +166,12 @@
           "documentation": "A list of field references of the model on *the other side of the relation*."
         }
       ]
+    },
+    {
+      "label": "@updatedAt",
+      "fullSignature": "@updatedAt",
+      "documentation": "Automatically stores the time when a record was last updated.",
+      "params": []
     }
   ],
   "relationArguments": [

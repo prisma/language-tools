@@ -320,6 +320,7 @@ suite('Quick Fix', () => {
           { label: 'ThirdUser', kind: CompletionItemKind.Reference },
           { label: 'TypeCheck', kind: CompletionItemKind.Reference },
           { label: 'Hello', kind: CompletionItemKind.Reference },
+          { label: 'DateTest', kind: CompletionItemKind.Reference },
         ],
       },
     )
@@ -345,6 +346,10 @@ suite('Quick Fix', () => {
   }
   const fieldAttributeRelation = {
     label: '@relation()',
+    kind: CompletionItemKind.Property,
+  }
+  const fieldAttributeUpdatedAt = {
+    label: '@updatedAt',
     kind: CompletionItemKind.Property,
   }
 
@@ -412,6 +417,20 @@ suite('Quick Fix', () => {
           fieldAttributeMap,
           fieldAttributeDefault,
           fieldAttributeRelation,
+        ],
+      },
+    )
+    assertCompletion(
+      modelBlocksUri,
+      { line: 61, character: 20 },
+      {
+        isIncomplete: false,
+        items: [
+          fieldAttributeUnique,
+          fieldAttributeMap,
+          fieldAttributeDefault,
+          fieldAttributeRelation,
+          fieldAttributeUpdatedAt,
         ],
       },
     )

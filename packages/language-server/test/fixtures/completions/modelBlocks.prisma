@@ -56,3 +56,8 @@ enum Hello {
     Hey
     Hallo
 }
+
+model DateTest {
+    id Int @id @default(autoincrement())
+    update DateTime  
+}
