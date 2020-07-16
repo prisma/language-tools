@@ -502,7 +502,6 @@ export function handleRenameRequest(
 
   if (isModelName(currentLine, params.position)) {
     const currentName = extractModelName(currentLine)
-    // rename model name
     const edits: TextEdit[] = []
     for (const [index, value] of lines.entries()) {
       if (
@@ -511,7 +510,6 @@ export function handleRenameRequest(
       ) {
         const currentLineUntrimmed = getCurrentLine(document, index)
         const indexOfCurrentName = currentLineUntrimmed.indexOf(currentName)
-        // new edit here
         edits.push({
           range: {
             start: {
@@ -527,8 +525,6 @@ export function handleRenameRequest(
         })
       }
     }
-
-    // add all edits where model name is referenced as type
     return {
       changes: {
         [document.uri]: edits,
