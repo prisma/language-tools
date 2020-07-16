@@ -14,6 +14,8 @@ import {
   CodeAction,
   Diagnostic,
   DiagnosticSeverity,
+  RenameParams,
+  WorkspaceEdit,
 } from 'vscode-languageserver'
 import * as util from './util'
 import { fullDocumentRange } from './provider'
@@ -30,6 +32,7 @@ import {
   isInsideAttribute,
   getSymbolBeforePosition,
   suggestEqualSymbol,
+  extractModelName,
 } from './completion/completions'
 import { quickFix } from './codeActionProvider'
 import lint from './lint'
@@ -479,6 +482,52 @@ export function handleCompletionRequest(
     case 'enum':
       break
   }
+}
+
+function isModelName(line: string, position: Position): boolean {
+  const model = 'model'
+  if (!(line.startsWith(model) && line.includes('{'))) {
+    return false
+  }
+  return position.character > model.length
+}
+
+export function handleRenameRequest(
+  params: RenameParams,
+  document: TextDocument,
+): WorkspaceEdit | undefined {
+  const lines: string[] = convertDocumentTextToTrimmedLineArray(document)
+  const position = params.position
+  const currentLine: string = lines[position.line]
+  const currentLineUntrimmed = getCurrentLine(document, position.line)
+
+  if (isModelName(currentLine, params.position)) {
+    const currentName = extractModelName(currentLine)
+    const indexOfCurrentName = currentLineUntrimmed.indexOf(currentName)
+    // rename model name
+
+    return {
+      changes: {
+        [document.uri]: [
+          {
+            range: {
+              start: {
+                line: params.position.line,
+                character: indexOfCurrentName,
+              },
+              end: {
+                line: params.position.line,
+                character: indexOfCurrentName + currentName.length,
+              },
+            },
+            newText: params.newName,
+          }, // TODO rename all references (where used as type)
+        ],
+      },
+    }
+  }
+
+  return
 }
 
 /**

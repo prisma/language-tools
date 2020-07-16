@@ -175,6 +175,11 @@ export function getSuggestionForFieldAttribute(
   }
 }
 
+export function extractModelName(line: string): string {
+  const blockType = line.replace(/ .*/, '')
+  return line.slice(blockType.length, line.length - 1).trim()
+}
+
 export function getAllRelationNames(lines: Array<string>): Array<string> {
   const modelNames: Array<string> = []
   for (const item of lines) {
@@ -183,8 +188,7 @@ export function getAllRelationNames(lines: Array<string>): Array<string> {
       item.includes('{')
     ) {
       // found a block
-      const blockType = item.replace(/ .*/, '')
-      const blockName = item.slice(blockType.length, item.length - 1).trim()
+      const blockName = extractModelName(item)
 
       modelNames.push(blockName)
       // block is at least 2 lines long

@@ -14,6 +14,7 @@ import {
   CompletionItem,
   CompletionParams,
   DeclarationParams,
+  RenameParams,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
@@ -93,6 +94,7 @@ export function startServer(options?: LSOptions): void {
           triggerCharacters: ['@', '"'],
         },
         hoverProvider: true,
+        renameProvider: true,
       },
     }
 
@@ -171,6 +173,13 @@ export function startServer(options?: LSOptions): void {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
       return MessageHandler.handleCodeActions(params, doc)
+    }
+  })
+
+  connection.onRenameRequest((params: RenameParams) => {
+    const doc = getDocument(params.textDocument.uri)
+    if (doc) {
+      return MessageHandler.handleRenameRequest(params, doc)
     }
   })
 
