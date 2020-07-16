@@ -525,6 +525,7 @@ export function handleRenameRequest(
         })
       }
     }
+    // TODO add @@MAP(oldName)!
     return {
       changes: {
         [document.uri]: edits,
