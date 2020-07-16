@@ -11,6 +11,17 @@ else
     echo "No .envrc"
 fi
 
+
+# Setup the repo with GITHUB_TOKEN to avoid running jobs when CI commits
+if [ "$ENVIRONMENT" = "PRODUCTION" ]; then
+    git config --global user.email "prismabots@gmail.com"
+    git config --global user.name "Prismo"
+    git remote add github "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" || true
+else
+    echo "Not setting up repo because ENVIRONMENT is not set"
+fi
+
+
 RELEASE_CHANNEL=$1
 echo "RELEASE_CHANNEL: $RELEASE_CHANNEL"
 
