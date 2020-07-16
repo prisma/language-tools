@@ -3,80 +3,38 @@ const semVer = require('semver')
 function nextExtensionVersion({
   prismaVersion,
   extensionVersion,
-  isExtensionOnlyCommit = false,
 }) {
-  const isBeta = prismaVersion.includes('beta')
   const derivedExtensionVersion = getDerivedExtensionVersion(
-    stripPreReleaseText(prismaVersion),
-    isBeta,
+    stripPreReleaseText(prismaVersion)
   )
+  console.log(derivedExtensionVersion)
 
-  const existingExtensionVersion = coerceExtensionVersion(
-    extensionVersion,
-    isBeta,
-  )
-
-  if (
-    derivedExtensionVersion === existingExtensionVersion &&
-    isExtensionOnlyCommit
-  ) {
-    // Extension only publish
-    return bumpExtensionOnlyVersion(extensionVersion)
-  } else if (
-    derivedExtensionVersion === existingExtensionVersion &&
-    !isExtensionOnlyCommit
-  ) {
-    throw new Error(
-      `derivedExtensionVersion === existingExtensionVersion but isExtensionOnlyCommit is false. This can happen if there were multiple versions of Prisma CLI released in a quick succession.`,
-    )
+  if (isMajorBump(extensionVersion, derivedExtensionVersion)) {
+    return derivedExtensionVersion
   }
-  return derivedExtensionVersion
+
+  return semVer.inc(extensionVersion, 'patch')
 }
 
 function stripPreReleaseText(version) {
-  return version.replace('-alpha', '').replace('-beta', '').replace('-dev', '')
+  return version.replace('-dev', '')
 }
 
-function getDerivedExtensionVersion(version, isBeta = false) {
-  const tokens = version.split('.')
+function isMajorBump(prismaVersion, derivedExtensionVersion) {
+  const prismaVersionTokens = prismaVersion.split('.')
+  const derivedExtensionVersionTokens = derivedExtensionVersion.split('.')
 
-  // Because https://github.com/prisma/vscode/issues/121#issuecomment-623327393
-  if (isBeta && tokens.length === 4) {
-    tokens[2] = 1
-  }
-  if (isBeta && tokens.length === 3) {
-    tokens[1] = 1
-  }
+  return prismaVersionTokens[0] !== derivedExtensionVersionTokens[0]
+}
+
+function getDerivedExtensionVersion(version) {
+  const tokens = version.split('.')
 
   if (tokens.length === 4) {
     return tokens.slice(1).join('.')
   }
   if (tokens.length === 3) {
     return tokens.join('.')
-  }
-  throw new Error(
-    `Version ${version} must have 3 or 4 tokens separated by "." character`,
-  )
-}
-
-function coerceExtensionVersion(version, isBeta = false) {
-  const tokens = version.split('.') //?
-
-  // Because https://github.com/prisma/vscode/issues/121#issuecomment-623327393
-  if (isBeta) {
-    tokens[1] = 1
-  }
-
-  return semVer.coerce(tokens.join('.')).toString()
-}
-
-function bumpExtensionOnlyVersion(version) {
-  const tokens = version.split('.')
-  if (tokens.length === 3) {
-    return tokens.join('.') + '.1'
-  }
-  if (tokens.length === 4) {
-    return tokens.slice(0, 3).join('.') + '.' + (parseInt(tokens[3]) + 1)
   }
   throw new Error(
     `Version ${version} must have 3 or 4 tokens separated by "." character`,
