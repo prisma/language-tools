@@ -499,30 +499,39 @@ export function handleRenameRequest(
   const lines: string[] = convertDocumentTextToTrimmedLineArray(document)
   const position = params.position
   const currentLine: string = lines[position.line]
-  const currentLineUntrimmed = getCurrentLine(document, position.line)
 
   if (isModelName(currentLine, params.position)) {
     const currentName = extractModelName(currentLine)
-    const indexOfCurrentName = currentLineUntrimmed.indexOf(currentName)
     // rename model name
+    const edits: TextEdit[] = []
+    for (const [index, value] of lines.entries()) {
+      if (
+        value.includes(currentName) &&
+        extractModelName(currentLine) === currentName
+      ) {
+        const currentLineUntrimmed = getCurrentLine(document, index)
+        const indexOfCurrentName = currentLineUntrimmed.indexOf(currentName)
+        // new edit here
+        edits.push({
+          range: {
+            start: {
+              line: index,
+              character: indexOfCurrentName,
+            },
+            end: {
+              line: index,
+              character: indexOfCurrentName + currentName.length,
+            },
+          },
+          newText: params.newName,
+        })
+      }
+    }
 
+    // add all edits where model name is referenced as type
     return {
       changes: {
-        [document.uri]: [
-          {
-            range: {
-              start: {
-                line: params.position.line,
-                character: indexOfCurrentName,
-              },
-              end: {
-                line: params.position.line,
-                character: indexOfCurrentName + currentName.length,
-              },
-            },
-            newText: params.newName,
-          }, // TODO rename all references (where used as type)
-        ],
+        [document.uri]: edits,
       },
     }
   }
