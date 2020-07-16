@@ -3,7 +3,13 @@ const semVer = require('semver')
 function nextExtensionVersion({
   prismaVersion,
   extensionVersion,
+  patchRelease = false
 }) {
+
+  if(patchRelease) {
+    return semVer.inc(extensionVersion, 'patch')
+  }
+
   const derivedExtensionVersion = getDerivedExtensionVersion(
     stripPreReleaseText(prismaVersion)
   )
@@ -45,9 +51,19 @@ module.exports = { nextExtensionVersion }
 
 if (require.main === module) {
   const args = process.argv.slice(2)
-  const version = nextExtensionVersion({
-    prismaVersion: args[0],
-    extensionVersion: args[1],
-  })
+  const version = ""
+  if (args.length == 2) {
+    version = nextExtensionVersion({
+      prismaVersion: args[0],
+      extensionVersion: args[1],
+    })
+  } else {
+    version = nextExtensionVersion({
+      prismaVersion: args[0],
+      extensionVersion: args[1],
+      patchRelease: true
+    }) 
+  }
+  
   console.log(version)
 }

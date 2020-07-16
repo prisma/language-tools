@@ -25,6 +25,9 @@ fi
 RELEASE_CHANNEL=$1
 echo "RELEASE_CHANNEL: $RELEASE_CHANNEL"
 
+NEXT_EXTENSION_VERSION=$2
+echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
+
 OLD_SHA=$(jq ".prisma.version" ./packages/vscode/package.json)
 SHA=$(npx -q -p @prisma/cli@"$RELEASE_CHANNEL" prisma --version | grep "Query Engine" | awk '{print $5}')
 
@@ -32,16 +35,23 @@ NPM_VERSION=$(sh scripts/prisma-version.sh "$RELEASE_CHANNEL")
 echo "NPM_VERSION: $NPM_VERSION"
 echo "UPDATING to $NPM_VERSION"
 
-EXTENSION_VERSION=$(sh scripts/extension-version.sh "$RELEASE_CHANNEL" "")
-echo "EXTENSION_VERSION: $EXTENSION_VERSION"
-
-NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
-echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
+if [ "$NEXT_EXTENSION_VERSION" = "" ]; then
+    if [ "$RELEASE_CHANNEL" = 'patch-dev' ]; then 
+        NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION" "true")
+    else 
+        NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
+    fi
+    
+    echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
+    echo "::set-output name=version::$NEXT_EXTENSION_VERSION"
+fi
 
 if [ "$RELEASE_CHANNEL" = "dev" ]; then
     echo "$NPM_VERSION" >scripts/prisma_version_insider
-else
+elif [ "$RELEASE_CHANNEL" = "latest" ]; then
     echo "$NPM_VERSION" >scripts/prisma_version_stable
+else 
+    echo "$NPM_VERSION" >scripts/prisma_version_patch_dev
 fi
 
 # If the RELEASE_CHANNEL is dev, we need to change the name, displayName, description and preview flag to the Insider extension
@@ -66,7 +76,6 @@ else
     node scripts/change-readme.js "$RELEASE_CHANNEL"
 fi
 
-echo "::set-output name=version::$NEXT_EXTENSION_VERSION"
 
 jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
     .prisma.version = \"$SHA\" | \

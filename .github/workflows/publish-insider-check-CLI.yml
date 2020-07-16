@@ -1,8 +1,8 @@
-name: Stable Check for Update + Automated Publish
+name: Insider Check for Update + Automated Publish
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '*/10 * * * *'
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -21,12 +21,11 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Check for Update
-        run: npm run vsce:check "latest" 
+        run: npm run vsce:check "dev" 
         id: check_for_updates
       - name: Bump versions
         if: ${{ steps.check_for_updates.outputs.version }}
-        run: npm run vsce:bump "latest" ${{ steps.check_for_updates.outputs.version }}
-        id: bump_versions
+        run: npm run vsce:bump "dev" ${{ steps.check_for_updates.outputs.version }}
       - name: Check existing LSP version
         if: ${{ steps.check_for_updates.outputs.version }}
         id: check_lsp_version
@@ -47,7 +46,7 @@ jobs:
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
         if: ${{ needs.setup.outputs.version }}
-        run: npm run vsce:bump "latest" ${{ needs.setup.outputs.version }}
+        run: npm run vsce:bump "dev" ${{ needs.setup.outputs.version }}
       - name: Install Dependencies in LSP
         run: cd packages/language-server && npm install
       - name: Compile LSP
@@ -67,7 +66,7 @@ jobs:
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
         if: ${{ needs.setup.outputs.version }}
-        run: npm run vsce:bump "latest" ${{ needs.setup.outputs.version }}
+        run: npm run vsce:bump "dev" ${{ needs.setup.outputs.version }}
       - name: Install Dependencies in LSP
         run: cd packages/language-server && npm install
       - name: Compile LSP
@@ -78,7 +77,7 @@ jobs:
         with: 
           node-version: '12.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: cd packages/language-server && npm publish --access public
+      - run: cd packages/language-server && npm publish --tag dev  --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN}}
 
@@ -97,7 +96,7 @@ jobs:
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
         if: ${{ needs.setup.outputs.version }}
-        run: npm run vsce:bump "latest" ${{ needs.setup.outputs.version }}
+        run: npm run vsce:bump "dev" ${{ needs.setup.outputs.version }}
       - name: Install Dependencies
         run: npm install
       - name: Compile
@@ -127,24 +126,24 @@ jobs:
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
         if: ${{ needs.setup.outputs.version }}
-        run: npm run vsce:bump "latest" ${{ needs.setup.outputs.version }}
+        run: npm run vsce:bump "dev" ${{ needs.setup.outputs.version }}
       - name: Install Dependencies
         run: npm install
       - name: Compile
         run: npm run compile
       - name: Publish Extension as Patch
-        run: npm run vsce:publish "latest"
+        run: npm run vsce:publish "dev"
       - name: Slack Notification on Failure
         if: ${{ needs.setup.result == 'failure' || needs.test-lsp.result == 'failure' || needs.publish-lsp.result == 'failure' || needs.test-extension.result == 'failure' || failure() }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "Publishing stable failed :x:"
+          SLACK_TITLE: "Publishing insider failed :x:"
           SLACK_COLOR: '#FF0000'
 
       - name: Slack Notification on Success
         if: ${{ needs.test-extension.result == 'success' && success() && needs.setup.outputs.version }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "Published stable :white_check_mark:"
+          SLACK_TITLE: "Published insider :white_check_mark:"
           SLACK_COLOR: '#008000'
       

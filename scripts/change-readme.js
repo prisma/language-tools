@@ -6,7 +6,7 @@ const path = require('path')
 function changeReadme({
   releaseChannel
 }) {
-  if (releaseChannel === 'dev') {
+  if (releaseChannel === 'dev' || releaseChannel === 'patch-dev') {
     let content = fs.readFileSync(
       path.join(__dirname, "./README_INSIDER_BUILD.md"),
       {

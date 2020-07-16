@@ -16,31 +16,46 @@ echo "RELEASE_CHANNEL: $RELEASE_CHANNEL"
 
 if [ "$RELEASE_CHANNEL" = "dev" ]; then
     CURRENT_VERSION=$(cat scripts/prisma_version_insider)
-else
+elif [ "$RELEASE_CHANNEL" = "latest" ]; then
     CURRENT_VERSION=$(cat scripts/prisma_version_stable)
+else 
+    CURRENT_VERSION=$(cat scripts/prisma_version_patch_dev)
 fi
+
 echo "CURRENT_VERSION: $CURRENT_VERSION"
 
 NPM_VERSION=$(sh scripts/prisma-version.sh "$RELEASE_CHANNEL")
 echo "NPM_VERSION: $NPM_VERSION"
 
-if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then
-    if [ "$RELEASE_CHANNEL" = "dev" ]; then
+
+if [ "$RELEASE_CHANNEL" = "dev" ]; then
+    if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then   
         EXTENSION_VERSION=$(sh scripts/extension-version.sh "$RELEASE_CHANNEL" "")
         echo "EXTENSION_VERSION: $EXTENSION_VERSION"
 
         NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
         echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
-        echo "::set-output name=new_updates::true"
+        echo "::set-output name=version::$NEXT_EXTENSION_VERSION"
     else 
-        IS_MINOR_RELEASE=$(node scripts/is-minor-release.js "$NPM_VERSION")
-        if [ "$IS_MINOR_RELEASE" = "true" ]; then
-            echo "NEXT_EXTENSION_VERSION: $NPM_VERSION"
-            echo "::set-output name=new_updates::true"
-        else
-            echo "Not a minor release of Prisma CLI."
-        fi
+        echo "CURRENT_VERSION ($CURRENT_VERSION) and NPM_VERSION ($NPM_VERSION) are same"
+    fi
+elif [ "$RELEASE_CHANNEL" = "latest" ]; then 
+    IS_MINOR_RELEASE=$(node scripts/is-minor-release.js "$NPM_VERSION")
+    if [ "$IS_MINOR_RELEASE" = "true" ]; then
+        echo "NEXT_EXTENSION_VERSION: $NPM_VERSION"
+        echo "::set-output name=version::$NPM_VERSION"
+    else
+        echo "Not a minor release of Prisma CLI."
     fi
 else 
-    echo "CURRENT_VERSION ($CURRENT_VERSION) and NPM_VERSION ($NPM_VERSION) are same"
+    if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then 
+        EXTENSION_VERSION=$(sh scripts/extension-version.sh "latest" "")
+        echo "current stable EXTENSION_VERSION: $EXTENSION_VERSION"
+
+        NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION" "true")
+        echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
+        echo "::set-output name=version::$NEXT_EXTENSION_VERSION"
+    else 
+        echo "CURRENT_VERSION ($CURRENT_VERSION) and NPM_VERSION ($NPM_VERSION) are same" 
+    fi
 fi
