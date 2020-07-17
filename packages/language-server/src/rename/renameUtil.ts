@@ -305,9 +305,12 @@ export function renameReferencesForModelName(
             const currentLineUntrimmed = getCurrentLine(document, line)
             const wordsInLine: string[] = lines[line].split(/\s+/)
             // get the index of the second word
+            const indexOfFirstWord = currentLineUntrimmed.indexOf(
+              wordsInLine[0],
+            )
             const indexOfCurrentName = currentLineUntrimmed.indexOf(
               currentName,
-              wordsInLine[0].length,
+              indexOfFirstWord + wordsInLine[0].length,
             )
             edits.push({
               range: {
