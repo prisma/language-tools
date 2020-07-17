@@ -36,8 +36,15 @@ import {
 } from './completion/completions'
 import { quickFix } from './codeActionProvider'
 import lint from './lint'
+import {
+  isModelName,
+  insertMapBlockAttribute,
+  insertBlockRename,
+  mapBlockAttributeExistsAlready,
+  renameReferencesForModelName,
+} from './rename/renameUtil'
 
-function getCurrentLine(document: TextDocument, line: number): string {
+export function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
     start: { line: line, character: 0 },
     end: { line: line, character: Number.MAX_SAFE_INTEGER },
@@ -101,7 +108,10 @@ export class Block {
   }
 }
 
-function getBlockAtPosition(line: number, lines: Array<string>): Block | void {
+export function getBlockAtPosition(
+  line: number,
+  lines: Array<string>,
+): Block | void {
   let blockType = ''
   let blockName = ''
   let blockStart: Position = Position.create(0, 0)
@@ -484,14 +494,6 @@ export function handleCompletionRequest(
   }
 }
 
-function isModelName(line: string, position: Position): boolean {
-  const model = 'model'
-  if (!(line.startsWith(model) && line.includes('{'))) {
-    return false
-  }
-  return position.character > model.length
-}
-
 export function handleRenameRequest(
   params: RenameParams,
   document: TextDocument,
@@ -499,33 +501,34 @@ export function handleRenameRequest(
   const lines: string[] = convertDocumentTextToTrimmedLineArray(document)
   const position = params.position
   const currentLine: string = lines[position.line]
+  const currentBlock = getBlockAtPosition(position.line, lines)
+  if (!currentBlock) {
+    return
+  }
 
   if (isModelName(currentLine, params.position)) {
     const currentName = extractModelName(currentLine)
     const edits: TextEdit[] = []
-    for (const [index, value] of lines.entries()) {
-      if (
-        value.includes(currentName) &&
-        extractModelName(currentLine) === currentName
-      ) {
-        const currentLineUntrimmed = getCurrentLine(document, index)
-        const indexOfCurrentName = currentLineUntrimmed.indexOf(currentName)
-        edits.push({
-          range: {
-            start: {
-              line: index,
-              character: indexOfCurrentName,
-            },
-            end: {
-              line: index,
-              character: indexOfCurrentName + currentName.length,
-            },
-          },
-          newText: params.newName,
-        })
-      }
+    // rename model
+    edits.push(
+      insertBlockRename(params.newName, currentName, document, position.line),
+    )
+
+    // add @@map('oldName')
+    if (!mapBlockAttributeExistsAlready(currentBlock, lines)) {
+      edits.push(insertMapBlockAttribute(currentName, currentBlock))
     }
-    // TODO add @@MAP(oldName)!
+
+    // rename references
+    edits.push(
+      ...renameReferencesForModelName(
+        currentName,
+        params.newName,
+        document,
+        lines,
+      ),
+    )
+
     return {
       changes: {
         [document.uri]: edits,

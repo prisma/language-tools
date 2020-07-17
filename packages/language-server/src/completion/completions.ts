@@ -583,6 +583,36 @@ function getFieldsFromCurrentBlock(
   return suggestions
 }
 
+export function getTypesFromCurrentBlock(
+  lines: Array<string>,
+  block: Block,
+  position?: Position,
+): Map<string, number> {
+  const suggestions: Map<string, number> = new Map()
+
+  let reachedStartLine = false
+  let type = ''
+  for (const [key, item] of lines.entries()) {
+    if (key === block.start.line + 1) {
+      reachedStartLine = true
+    }
+    if (!reachedStartLine) {
+      continue
+    }
+    if (key === block.end.line) {
+      break
+    }
+    if (!item.startsWith('@@') && (!position || key !== position.line)) {
+      const wordsInLine: string[] = item.split(/\s+/)
+      type = wordsInLine[1]
+      if (type !== '') {
+        suggestions.set(type, key)
+      }
+    }
+  }
+  return suggestions
+}
+
 function getSuggestionsForRelationDirective(
   wordsBeforePosition: string[],
   currentLineUntrimmed: string,
