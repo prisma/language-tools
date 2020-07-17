@@ -37,16 +37,15 @@ import { quickFix } from './codeActionProvider'
 import lint from './lint'
 import {
   isModelOrEnumName,
-  insertMapBlockAttribute,
   insertBasicRename,
-  mapBlockAttributeExistsAlready,
   renameReferencesForModelName,
   isEnumValue,
-  insertInlineRename,
-  mapFieldAttributeExistsAlready,
   renameReferencesForEnumValue,
-  extractModelName,
-  extractFirstWord,
+  isFieldName,
+  extractCurrentName,
+  mapExistsAlready,
+  insertMapAttribute,
+  renameReferencesForFieldValue,
 } from './rename/renameUtil'
 
 export function getCurrentLine(document: TextDocument, line: number): string {
@@ -512,55 +511,82 @@ export function handleRenameRequest(
     return
   }
 
-  if (isModelOrEnumName(params.position, currentBlock)) {
-    const currentName = extractModelName(currentLine)
-    // rename model
+  const isModelOrEnumRename: boolean = isModelOrEnumName(
+    params.position,
+    currentBlock,
+  )
+  const isEnumValueRename: boolean = isEnumValue(
+    currentLine,
+    params.position,
+    currentBlock,
+    document,
+  )
+  const isFieldRename: boolean = isFieldName(
+    currentLine,
+    params.position,
+    currentBlock,
+    document,
+  )
+
+  if (isModelOrEnumRename || isEnumValueRename || isFieldRename) {
+    const currentName = extractCurrentName(
+      currentLine,
+      isModelOrEnumRename,
+      isEnumValueRename,
+      isFieldRename,
+    )
+
+    // rename marked string
     edits.push(
       insertBasicRename(params.newName, currentName, document, position.line),
     )
 
-    // add @@map('oldName')
-    if (!mapBlockAttributeExistsAlready(currentBlock, lines)) {
-      edits.push(insertMapBlockAttribute(currentName, currentBlock))
+    // check if map exists already
+    if (
+      !mapExistsAlready(currentLine, lines, currentBlock, isModelOrEnumRename)
+    ) {
+      // add map attribute
+      edits.push(
+        insertMapAttribute(
+          currentName,
+          position,
+          currentBlock,
+          isModelOrEnumRename,
+        ),
+      )
     }
 
     // rename references
-    edits.push(
-      ...renameReferencesForModelName(
-        currentName,
-        params.newName,
-        document,
-        lines,
-      ),
-    )
-
-    return {
-      changes: {
-        [document.uri]: edits,
-      },
+    if (isModelOrEnumRename) {
+      edits.push(
+        ...renameReferencesForModelName(
+          currentName,
+          params.newName,
+          document,
+          lines,
+        ),
+      )
+    } else if (isEnumValueRename) {
+      edits.push(
+        ...renameReferencesForEnumValue(
+          currentName,
+          params.newName,
+          document,
+          lines,
+          currentBlock.name,
+        ),
+      )
+    } else if (isFieldRename) {
+      edits.push(
+        ...renameReferencesForFieldValue(
+          currentName,
+          params.newName,
+          document,
+          lines,
+          currentBlock,
+        ),
+      )
     }
-  }
-
-  if (isEnumValue(currentLine, params.position, currentBlock, document)) {
-    const currentValue = extractFirstWord(currentLine)
-    // rename enum value
-    edits.push(
-      insertBasicRename(params.newName, currentValue, document, position.line),
-    )
-    // add @map in case it does not exist yet
-    if (!mapFieldAttributeExistsAlready(currentLine)) {
-      edits.push(insertInlineRename(currentValue, position.line))
-    }
-    // rename references inside @default() field attribute in model blocks
-    edits.push(
-      ...renameReferencesForEnumValue(
-        currentValue,
-        params.newName,
-        document,
-        lines,
-        currentBlock.name,
-      ),
-    )
 
     return {
       changes: {
