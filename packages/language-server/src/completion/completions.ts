@@ -20,6 +20,7 @@ import {
   dataSourceProviderArguments,
 } from './completionUtil'
 import klona from 'klona'
+import { extractModelName } from '../rename/renameUtil'
 
 function toCompletionItems(
   allowedTypes: string[],
@@ -173,11 +174,6 @@ export function getSuggestionForFieldAttribute(
     items: suggestions,
     isIncomplete: false,
   }
-}
-
-export function extractModelName(line: string): string {
-  const blockType = line.replace(/ .*/, '')
-  return line.slice(blockType.length, line.length - 1).trim()
 }
 
 export function getAllRelationNames(lines: Array<string>): Array<string> {

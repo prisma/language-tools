@@ -32,16 +32,21 @@ import {
   isInsideAttribute,
   getSymbolBeforePosition,
   suggestEqualSymbol,
-  extractModelName as extractName,
 } from './completion/completions'
 import { quickFix } from './codeActionProvider'
 import lint from './lint'
 import {
   isModelOrEnumName,
   insertMapBlockAttribute,
-  insertBlockRename,
+  insertBasicRename,
   mapBlockAttributeExistsAlready,
   renameReferencesForModelName,
+  isEnumValue,
+  insertInlineRename,
+  mapFieldAttributeExistsAlready,
+  renameReferencesForEnumValue,
+  extractModelName,
+  extractFirstWord,
 } from './rename/renameUtil'
 
 export function getCurrentLine(document: TextDocument, line: number): string {
@@ -502,16 +507,16 @@ export function handleRenameRequest(
   const position = params.position
   const currentLine: string = lines[position.line]
   const currentBlock = getBlockAtPosition(position.line, lines)
+  const edits: TextEdit[] = []
   if (!currentBlock) {
     return
   }
 
-  if (isModelOrEnumName(currentLine, params.position)) {
-    const currentName = extractName(currentLine)
-    const edits: TextEdit[] = []
+  if (isModelOrEnumName(params.position, currentBlock)) {
+    const currentName = extractModelName(currentLine)
     // rename model
     edits.push(
-      insertBlockRename(params.newName, currentName, document, position.line),
+      insertBasicRename(params.newName, currentName, document, position.line),
     )
 
     // add @@map('oldName')
@@ -526,6 +531,34 @@ export function handleRenameRequest(
         params.newName,
         document,
         lines,
+      ),
+    )
+
+    return {
+      changes: {
+        [document.uri]: edits,
+      },
+    }
+  }
+
+  if (isEnumValue(currentLine, params.position, currentBlock, document)) {
+    const currentValue = extractFirstWord(currentLine)
+    // rename enum value
+    edits.push(
+      insertBasicRename(params.newName, currentValue, document, position.line),
+    )
+    // add @map in case it does not exist yet
+    if (!mapFieldAttributeExistsAlready(currentLine)) {
+      edits.push(insertInlineRename(currentValue, position.line))
+    }
+    // rename references inside @default() field attribute in model blocks
+    edits.push(
+      ...renameReferencesForEnumValue(
+        currentValue,
+        params.newName,
+        document,
+        lines,
+        currentBlock.name,
       ),
     )
 
