@@ -32,12 +32,12 @@ import {
   isInsideAttribute,
   getSymbolBeforePosition,
   suggestEqualSymbol,
-  extractModelName,
+  extractModelName as extractName,
 } from './completion/completions'
 import { quickFix } from './codeActionProvider'
 import lint from './lint'
 import {
-  isModelName,
+  isModelOrEnumName,
   insertMapBlockAttribute,
   insertBlockRename,
   mapBlockAttributeExistsAlready,
@@ -506,8 +506,8 @@ export function handleRenameRequest(
     return
   }
 
-  if (isModelName(currentLine, params.position)) {
-    const currentName = extractModelName(currentLine)
+  if (isModelOrEnumName(currentLine, params.position)) {
+    const currentName = extractName(currentLine)
     const edits: TextEdit[] = []
     // rename model
     edits.push(

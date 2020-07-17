@@ -3,12 +3,19 @@ import { TextEdit, TextDocument } from 'vscode-languageserver-textdocument'
 import { getCurrentLine, Block, getBlockAtPosition } from '../MessageHandler'
 import { getTypesFromCurrentBlock } from '../completion/completions'
 
-export function isModelName(line: string, position: Position): boolean {
-  const model = 'model'
-  if (!(line.startsWith(model) && line.includes('{'))) {
+export function isModelOrEnumName(line: string, position: Position): boolean {
+  const modelString = 'model'
+  const enumString = 'enum'
+  const startsWithEnum = line.startsWith(enumString)
+  const startsWithModel = line.startsWith(modelString)
+  if (!((startsWithEnum || startsWithModel) && line.includes('{'))) {
     return false
   }
-  return position.character > model.length
+  return startsWithEnum
+    ? position.character > enumString.length
+    : startsWithModel
+    ? position.character > modelString.length
+    : false
 }
 
 export function insertMapBlockAttribute(
@@ -34,8 +41,8 @@ function positionIsNotInsideSearchedBlocks(
   if (searchedBlocks.length === 0) {
     return true
   }
-  return searchedBlocks.some(
-    (block) => !(line >= block.start.line && line <= block.end.line),
+  return !searchedBlocks.some(
+    (block) => line >= block.start.line && line <= block.end.line,
   )
 }
 
@@ -55,7 +62,7 @@ export function renameReferencesForModelName(
       positionIsNotInsideSearchedBlocks(index, searchedBlocks)
     ) {
       const block = getBlockAtPosition(index, lines)
-      if (block) {
+      if (block && block.type == 'model') {
         searchedBlocks.push(block)
         // search block for references
         const types: Map<string, number> = getTypesFromCurrentBlock(
@@ -70,7 +77,7 @@ export function renameReferencesForModelName(
               return edits
             }
             const currentLineUntrimmed = getCurrentLine(document, line)
-            const wordsInLine: string[] = value.split(/\s+/)
+            const wordsInLine: string[] = lines[line].split(/\s+/)
             // get the index of the second word
             const indexOfCurrentName = currentLineUntrimmed.indexOf(
               currentName,
