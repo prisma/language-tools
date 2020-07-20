@@ -601,7 +601,7 @@ export function getTypesFromCurrentBlock(
     if (!item.startsWith('@@') && (!position || key !== position.line)) {
       const wordsInLine: string[] = item.split(/\s+/)
       type = wordsInLine[1]
-      if (type !== '') {
+      if (type !== '' && type !== undefined) {
         suggestions.set(type, key)
       }
     }
