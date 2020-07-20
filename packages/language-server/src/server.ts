@@ -9,12 +9,14 @@ import {
   InitializeResult,
   CodeActionKind,
   CodeActionParams,
-  DocumentFormattingParams,
   HoverParams,
   CompletionItem,
   CompletionParams,
   DeclarationParams,
+  DocumentFormattingParams,
 } from 'vscode-languageserver'
+import { getSignature } from 'checkpoint-client'
+import { sendTelemetry, sendException, initializeTelemetry } from './telemetry'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
 import * as util from './util'
@@ -54,6 +56,7 @@ export function startServer(options?: LSOptions): void {
   let hasCodeActionLiteralsCapability = false
 
   connection.onInitialize(async (params: InitializeParams) => {
+    initializeTelemetry(connection)
     const capabilities = params.capabilities
 
     hasCodeActionLiteralsCapability = Boolean(
@@ -68,6 +71,7 @@ export function startServer(options?: LSOptions): void {
           'Prisma plugin prisma-fmt installation succeeded.',
         )
       } catch (err) {
+        sendException(await getSignature(), err, 'Cannot install prisma-fmt.')
         connection.console.error('Cannot install prisma-fmt: ' + err)
       }
     }
@@ -131,6 +135,10 @@ export function startServer(options?: LSOptions): void {
 
   connection.onDefinition((params: DeclarationParams) => {
     const doc = getDocument(params.textDocument.uri)
+    sendTelemetry({
+      action: 'definition',
+      attributes: {},
+    })
     if (doc) {
       return MessageHandler.handleDefinitionRequest(doc, params)
     }
@@ -143,11 +151,21 @@ export function startServer(options?: LSOptions): void {
     }
   })
 
-  connection.onCompletionResolve((completionItem: CompletionItem) =>
-    MessageHandler.handleCompletionResolveRequest(completionItem),
-  )
+  connection.onCompletionResolve((completionItem: CompletionItem) => {
+    sendTelemetry({
+      action: 'resolveCompletion',
+      attributes: {
+        label: completionItem.label,
+      },
+    })
+    return MessageHandler.handleCompletionResolveRequest(completionItem)
+  })
 
   connection.onHover((params: HoverParams) => {
+    sendTelemetry({
+      action: 'hover',
+      attributes: {},
+    })
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
       return MessageHandler.handleHoverRequest(doc, params)
@@ -157,6 +175,10 @@ export function startServer(options?: LSOptions): void {
   connection.onDocumentFormatting((params: DocumentFormattingParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
+      sendTelemetry({
+        action: 'format',
+        attributes: {},
+      })
       return MessageHandler.handleDocumentFormatting(
         params,
         doc,
@@ -170,6 +192,10 @@ export function startServer(options?: LSOptions): void {
   connection.onCodeAction((params: CodeActionParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
+      sendTelemetry({
+        action: 'codeAction',
+        attributes: {},
+      })
       return MessageHandler.handleCodeActions(params, doc)
     }
   })

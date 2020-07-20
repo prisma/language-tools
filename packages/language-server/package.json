@@ -28,6 +28,7 @@
   "main": "./dist/index.js",
   "typings": "dist/src/index",
   "dependencies": {
+    "checkpoint-client": "1.1.2",
     "@prisma/get-platform": "2.3.0-dev.43",
     "klona": "1.1.1",
     "pkg-dir": "4.2.0",

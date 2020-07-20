@@ -13,6 +13,8 @@
     "Programming Languages"
   ],
   "dependencies": {
+    "vscode-extension-telemetry": "0.1.6",
+    "checkpoint-client": "1.1.2",
     "@prisma/language-server": "3.0.43",
     "vscode-languageclient": "6.1.3"
   },
