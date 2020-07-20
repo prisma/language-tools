@@ -3,10 +3,30 @@ import {
   LanguageClientOptions,
   ServerOptions,
   TransportKind,
+  CodeActionParams,
+  ProvideCodeActionsSignature,
+  CodeActionRequest,
+  CodeAction as lsCodeAction,
 } from 'vscode-languageclient'
-import { ExtensionContext, commands, window, env } from 'vscode'
+import {
+  ExtensionContext,
+  commands,
+  window,
+  TextDocument,
+  Range,
+  CodeActionContext,
+  CancellationToken,
+  CodeAction,
+  Command,
+} from 'vscode'
 import { Telemetry, TelemetryPayload, ExceptionPayload } from './telemetry'
 import path from 'path'
+import {
+  applySnippetWorkspaceEdit,
+  isSnippetEdit,
+  tryRequire,
+  isDebugOrTestSession,
+} from './util'
 
 let client: LanguageClient
 let telemetry: Telemetry
@@ -17,20 +37,6 @@ class GenericLanguageServerException extends Error {
     this.name = 'GenericLanguageServerException'
     this.stack = stack
     this.message = message
-  }
-}
-
-function isDebugOrTestSession(): boolean {
-  return env.sessionId === 'someValue.sessionId'
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function tryRequire(path: string): any {
-  try {
-    return require(path)
-  } catch (err) {
-    console.error(err)
-    return
   }
 }
 
@@ -81,6 +87,56 @@ export async function activate(context: ExtensionContext): Promise<void> {
   const clientOptions: LanguageClientOptions = {
     // Register the server for prisma documents
     documentSelector: [{ scheme: 'file', language: 'prisma' }],
+    middleware: {
+      async provideCodeActions(
+        document: TextDocument,
+        range: Range,
+        context: CodeActionContext,
+        token: CancellationToken,
+        _next: ProvideCodeActionsSignature,
+      ) {
+        const params: CodeActionParams = {
+          textDocument: client.code2ProtocolConverter.asTextDocumentIdentifier(
+            document,
+          ),
+          range: client.code2ProtocolConverter.asRange(range),
+          context: client.code2ProtocolConverter.asCodeActionContext(context),
+        }
+        return client.sendRequest(CodeActionRequest.type, params, token).then(
+          (values) => {
+            if (values === null) return undefined
+            const result: (CodeAction | Command)[] = []
+            for (const item of values) {
+              if (lsCodeAction.is(item)) {
+                const action = client.protocol2CodeConverter.asCodeAction(item)
+                if (
+                  isSnippetEdit(
+                    item,
+                    client.code2ProtocolConverter.asTextDocumentIdentifier(
+                      document,
+                    ),
+                  ) &&
+                  item.edit !== undefined
+                ) {
+                  action.command = {
+                    command: 'prisma.applySnippetWorkspaceEdit',
+                    title: '',
+                    arguments: [action.edit],
+                  }
+                  action.edit = undefined
+                }
+                result.push(action)
+              } else {
+                const command = client.protocol2CodeConverter.asCommand(item)
+                result.push(command)
+              }
+            }
+            return result
+          },
+          (_error) => undefined,
+        )
+      },
+    } as any,
   }
 
   // Create the language client
@@ -123,6 +179,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
       await client.onReady()
       window.showInformationMessage('Prisma language server restarted.')
     }),
+    commands.registerCommand(
+      'prisma.applySnippetWorkspaceEdit',
+      applySnippetWorkspaceEdit(),
+    ),
   )
   if (!isDebugOrTestSession()) {
     telemetry.sendEvent('activated', {
