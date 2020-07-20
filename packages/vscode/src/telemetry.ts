@@ -2,14 +2,15 @@ import TelemetryReporter from 'vscode-extension-telemetry'
 import { getSignature } from 'checkpoint-client'
 
 export class Telemetry {
-  private readonly key: string = 'fe968a4a-7cbf-4c43-bf6e-3e968f3c4519'
+  private readonly insiderKey: string = 'fe968a4a-7cbf-4c43-bf6e-3e968f3c4519'
+  private readonly stableKey: string = '91c49d99-7e49-4fcd-92b7-dda955c77fcb'
   public reporter: TelemetryReporter
 
   constructor(extensionId: string, extensionVersion: string) {
     this.reporter = new TelemetryReporter(
       extensionId,
       extensionVersion,
-      this.key,
+      extensionId === 'prisma.prisma' ? this.stableKey : this.insiderKey,
     )
   }
 
