@@ -20,6 +20,7 @@ import {
   dataSourceProviderArguments,
 } from './completionUtil'
 import klona from 'klona'
+import { extractModelName } from '../rename/renameUtil'
 
 function toCompletionItems(
   allowedTypes: string[],
@@ -183,8 +184,7 @@ export function getAllRelationNames(lines: Array<string>): Array<string> {
       item.includes('{')
     ) {
       // found a block
-      const blockType = item.replace(/ .*/, '')
-      const blockName = item.slice(blockType.length, item.length - 1).trim()
+      const blockName = extractModelName(item)
 
       modelNames.push(blockName)
       // block is at least 2 lines long
@@ -573,6 +573,36 @@ function getFieldsFromCurrentBlock(
       field = item.replace(/ .*/, '')
       if (field !== '') {
         suggestions.push(field)
+      }
+    }
+  }
+  return suggestions
+}
+
+export function getTypesFromCurrentBlock(
+  lines: Array<string>,
+  block: Block,
+  position?: Position,
+): Map<string, number> {
+  const suggestions: Map<string, number> = new Map()
+
+  let reachedStartLine = false
+  let type = ''
+  for (const [key, item] of lines.entries()) {
+    if (key === block.start.line + 1) {
+      reachedStartLine = true
+    }
+    if (!reachedStartLine) {
+      continue
+    }
+    if (key === block.end.line) {
+      break
+    }
+    if (!item.startsWith('@@') && (!position || key !== position.line)) {
+      const wordsInLine: string[] = item.split(/\s+/)
+      type = wordsInLine[1]
+      if (type !== '' && type !== undefined) {
+        suggestions.set(type, key)
       }
     }
   }

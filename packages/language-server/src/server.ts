@@ -13,6 +13,7 @@ import {
   CompletionItem,
   CompletionParams,
   DeclarationParams,
+  RenameParams,
   DocumentFormattingParams,
 } from 'vscode-languageserver'
 import { getSignature } from 'checkpoint-client'
@@ -97,6 +98,7 @@ export function startServer(options?: LSOptions): void {
           triggerCharacters: ['@', '"'],
         },
         hoverProvider: true,
+        renameProvider: true,
       },
     }
 
@@ -197,6 +199,13 @@ export function startServer(options?: LSOptions): void {
         attributes: {},
       })
       return MessageHandler.handleCodeActions(params, doc)
+    }
+  })
+
+  connection.onRenameRequest((params: RenameParams) => {
+    const doc = getDocument(params.textDocument.uri)
+    if (doc) {
+      return MessageHandler.handleRenameRequest(params, doc)
     }
   })
 
