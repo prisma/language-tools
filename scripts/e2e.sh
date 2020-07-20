@@ -7,4 +7,4 @@ CODE_TESTS_WORKSPACE="$(pwd)/packages/vscode/testFixture"
 export CODE_TESTS_WORKSPACE
 
 
-node "$(pwd)/packages/vscode/dist/src/test/runTest"
+node "$(pwd)/packages/vscode/dist/src/test/runTest" 

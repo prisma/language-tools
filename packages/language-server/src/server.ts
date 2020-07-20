@@ -1,7 +1,6 @@
 import {
   IConnection,
   TextDocuments,
-  DiagnosticSeverity,
   Diagnostic,
   createConnection,
   IPCMessageReader,
@@ -20,10 +19,7 @@ import { getSignature } from 'checkpoint-client'
 import { sendTelemetry, sendException, initializeTelemetry } from './telemetry'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
-import { fullDocumentRange } from './provider'
 import * as util from './util'
-import lint from './lint'
-import fs from 'fs'
 import install from './install'
 
 export interface LSOptions {
@@ -68,7 +64,7 @@ export function startServer(options?: LSOptions): void {
     )
 
     const binPathPrismaFmt = await util.getBinPath()
-    if (!fs.existsSync(binPathPrismaFmt)) {
+    if (await util.binaryIsNeeded(binPathPrismaFmt)) {
       try {
         await install(binPathPrismaFmt)
         connection.console.info(
@@ -116,43 +112,12 @@ export function startServer(options?: LSOptions): void {
   async function validateTextDocument(
     textDocument: TextDocument,
   ): Promise<void> {
-    const text = textDocument.getText(fullDocumentRange(textDocument))
-    const binPath = await util.getBinPath()
-
-    const res = await lint(binPath, text, (errorMessage: string) => {
-      connection.window.showErrorMessage(errorMessage)
-    })
-
-    const diagnostics: Diagnostic[] = []
-    if (
-      res.some(
-        (err) =>
-          err.text === "Field declarations don't require a `:`." ||
-          err.text ===
-            'Model declarations have to be indicated with the `model` keyword.',
-      )
-    ) {
-      sendTelemetry({
-        action: 'Prisma 1 datamodel',
-        attributes: {},
-      })
-      connection.window.showErrorMessage(
-        "You are currently viewing a Prisma 1 datamodel which is based on the GraphQL syntax. The current Prisma Language Server doesn't support this syntax. Please change the file extension to `.graphql` so the Prisma Language Server does not get triggered anymore.",
-      )
-    }
-
-    for (const error of res) {
-      const diagnostic: Diagnostic = {
-        severity: DiagnosticSeverity.Error,
-        range: {
-          start: textDocument.positionAt(error.start),
-          end: textDocument.positionAt(error.end),
-        },
-        message: error.text,
-        source: '',
-      }
-      diagnostics.push(diagnostic)
-    }
+    const diagnostics: Diagnostic[] = await MessageHandler.handleDiagnosticsRequest(
+      textDocument,
+      (errorMessage: string) => {
+        connection.window.showErrorMessage(errorMessage)
+      },
+    )
     connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
   }
 
@@ -164,17 +129,27 @@ export function startServer(options?: LSOptions): void {
     validateTextDocument(open.document)
   })
 
+  function getDocument(uri: string): TextDocument | undefined {
+    return documents.get(uri)
+  }
+
   connection.onDefinition((params: DeclarationParams) => {
+    const doc = getDocument(params.textDocument.uri)
     sendTelemetry({
       action: 'definition',
       attributes: {},
     })
-    return MessageHandler.handleDefinitionRequest(documents, params)
+    if (doc) {
+      return MessageHandler.handleDefinitionRequest(doc, params)
+    }
   })
 
-  connection.onCompletion((params: CompletionParams) =>
-    MessageHandler.handleCompletionRequest(params, documents),
-  )
+  connection.onCompletion((params: CompletionParams) => {
+    const doc = getDocument(params.textDocument.uri)
+    if (doc) {
+      return MessageHandler.handleCompletionRequest(params, doc)
+    }
+  })
 
   connection.onCompletionResolve((completionItem: CompletionItem) => {
     sendTelemetry({
@@ -191,29 +166,38 @@ export function startServer(options?: LSOptions): void {
       action: 'hover',
       attributes: {},
     })
-    return MessageHandler.handleHoverRequest(documents, params)
+    const doc = getDocument(params.textDocument.uri)
+    if (doc) {
+      return MessageHandler.handleHoverRequest(doc, params)
+    }
   })
 
   connection.onDocumentFormatting((params: DocumentFormattingParams) => {
-    sendTelemetry({
-      action: 'format',
-      attributes: {},
-    })
-    return MessageHandler.handleDocumentFormatting(
-      params,
-      documents,
-      (errorMessage: string) => {
-        connection.window.showErrorMessage(errorMessage)
-      },
-    )
+    const doc = getDocument(params.textDocument.uri)
+    if (doc) {
+      sendTelemetry({
+        action: 'format',
+        attributes: {},
+      })
+      return MessageHandler.handleDocumentFormatting(
+        params,
+        doc,
+        (errorMessage: string) => {
+          connection.window.showErrorMessage(errorMessage)
+        },
+      )
+    }
   })
 
   connection.onCodeAction((params: CodeActionParams) => {
-    sendTelemetry({
-      action: 'codeAction',
-      attributes: {},
-    })
-    return MessageHandler.handleCodeActions(params, documents)
+    const doc = getDocument(params.textDocument.uri)
+    if (doc) {
+      sendTelemetry({
+        action: 'codeAction',
+        attributes: {},
+      })
+      return MessageHandler.handleCodeActions(params, doc)
+    }
   })
 
   // Make the text document manager listen on the connection

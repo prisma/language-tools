@@ -1,0 +1,12 @@
+datasource db {
+    
+}
+
+generator gen {
+    
+}
+
+model Post {
+
+    
+}

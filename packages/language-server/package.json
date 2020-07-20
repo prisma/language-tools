@@ -2,7 +2,7 @@
   "name": "@prisma/language-server",
   "description": "Implementation of a language server in node.",
   "displayName": "Prisma Language Server",
-  "version": "3.0.11",
+  "version": "3.0.43",
   "author": "Prisma",
   "license": "Apache-2.0",
   "publisher": "Prisma",
@@ -10,7 +10,7 @@
     "node": ">=10"
   },
   "prisma": {
-    "version": "9fa0e57d0617e4e18ceae3b23280702f90b18412"
+    "version": "f7829d796be36394ee9a64f1fc67c643aae046f2"
   },
   "bin": {
     "prisma-language-server": "dist/src/cli.js"
@@ -21,13 +21,15 @@
   },
   "scripts": {
     "build": "tsc",
-    "watch": "npm run build -- -w"
+    "watch": "npm run build -- -w",
+    "test": "mocha --ui tdd --useColors true  ./dist/src/test/**/*.test.js",
+    "pretest": "tsc"
   },
   "main": "./dist/index.js",
   "typings": "dist/src/index",
   "dependencies": {
     "checkpoint-client": "1.1.2",
-    "@prisma/get-platform": "2.3.0-dev.11",
+    "@prisma/get-platform": "2.3.0-dev.43",
     "klona": "1.1.1",
     "pkg-dir": "4.2.0",
     "vscode-languageserver": "6.1.1",
@@ -38,7 +40,10 @@
     "@types/js-levenshtein": "1.1.0"
   },
   "devDependencies": {
-    "vsce": "1.75.0"
+    "vsce": "1.75.0",
+    "@types/mocha": "5.2.7",
+    "mocha": "8.0.1",
+    "typescript": "3.8.3"
   },
   "keywords": [
     "autocomplete",
