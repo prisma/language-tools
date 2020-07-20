@@ -27,6 +27,9 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
         ```
         "editor.formatOnSave": true
         ```
+* Rename
+    * Rename models, enums, fields and enum values
+    * Automatically applies `@map` or `@@map` on the schema 
 * Linting
     * Diagnostic tools are used to surface errors and warnings in your schema file as you type.
 
