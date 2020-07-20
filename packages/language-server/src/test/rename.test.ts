@@ -21,7 +21,7 @@ function assertRename(
     document,
   )
 
-  assert.ok(renameResult !== undefined)
+  assert.notEqual(renameResult, undefined)
   assert.deepEqual(renameResult, expected)
 }
 
