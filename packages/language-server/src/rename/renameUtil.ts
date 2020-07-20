@@ -45,17 +45,40 @@ export function isFieldName(
   )
 }
 
-export function isModelOrEnumName(position: Position, block: Block): boolean {
+export function isModelName(position: Position, block: Block): boolean {
   if (position.line !== block.start.line) {
     return false
   }
-  switch (block.type) {
-    case 'model':
-      return position.character > 5
-    case 'enum':
-      return position.character > 4
+  return position.character > 5
+}
+
+export function printLogMessage(
+  currentName: string,
+  newName: string,
+  isEnumRename: boolean,
+  isModelRename: boolean,
+  isFieldRename: boolean,
+  isEnumValueRename: boolean,
+): void {
+  const message = `'${currentName}' was renamed to '${newName}'`
+  let typeOfRename = ''
+  if (isEnumRename) {
+    typeOfRename = 'Enum '
+  } else if (isFieldRename) {
+    typeOfRename = 'Field '
+  } else if (isModelRename) {
+    typeOfRename = 'Model '
+  } else if (isEnumValueRename) {
+    typeOfRename = 'Enum value '
   }
-  return false
+  console.log(typeOfRename + message)
+}
+
+export function isEnumName(position: Position, block: Block): boolean {
+  if (position.line !== block.start.line) {
+    return false
+  }
+  return position.character > 4
 }
 
 export function isEnumValue(

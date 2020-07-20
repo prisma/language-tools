@@ -36,7 +36,7 @@ import {
 import { quickFix } from './codeActionProvider'
 import lint from './lint'
 import {
-  isModelOrEnumName,
+  isModelName,
   insertBasicRename,
   renameReferencesForModelName,
   isEnumValue,
@@ -46,6 +46,8 @@ import {
   mapExistsAlready,
   insertMapAttribute,
   renameReferencesForFieldValue,
+  isEnumName,
+  printLogMessage,
 } from './rename/renameUtil'
 
 export function getCurrentLine(document: TextDocument, line: number): string {
@@ -511,10 +513,8 @@ export function handleRenameRequest(
     return
   }
 
-  const isModelOrEnumRename: boolean = isModelOrEnumName(
-    params.position,
-    currentBlock,
-  )
+  const isModelRename: boolean = isModelName(params.position, currentBlock)
+  const isEnumRename: boolean = isEnumName(params.position, currentBlock)
   const isEnumValueRename: boolean = isEnumValue(
     currentLine,
     params.position,
@@ -528,10 +528,10 @@ export function handleRenameRequest(
     document,
   )
 
-  if (isModelOrEnumRename || isEnumValueRename || isFieldRename) {
+  if (isModelRename || isEnumRename || isEnumValueRename || isFieldRename) {
     const currentName = extractCurrentName(
       currentLine,
-      isModelOrEnumRename,
+      isModelRename || isEnumRename,
       isEnumValueRename,
       isFieldRename,
     )
@@ -543,7 +543,12 @@ export function handleRenameRequest(
 
     // check if map exists already
     if (
-      !mapExistsAlready(currentLine, lines, currentBlock, isModelOrEnumRename)
+      !mapExistsAlready(
+        currentLine,
+        lines,
+        currentBlock,
+        isModelRename || isEnumRename,
+      )
     ) {
       // add map attribute
       edits.push(
@@ -551,13 +556,13 @@ export function handleRenameRequest(
           currentName,
           position,
           currentBlock,
-          isModelOrEnumRename,
+          isModelRename || isEnumRename,
         ),
       )
     }
 
     // rename references
-    if (isModelOrEnumRename) {
+    if (isModelRename || isEnumRename) {
       edits.push(
         ...renameReferencesForModelName(
           currentName,
@@ -588,6 +593,14 @@ export function handleRenameRequest(
       )
     }
 
+    printLogMessage(
+      currentName,
+      params.newName,
+      isEnumRename,
+      isModelRename,
+      isFieldRename,
+      isEnumValueRename,
+    )
     return {
       changes: {
         [document.uri]: edits,
