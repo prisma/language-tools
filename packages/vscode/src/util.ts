@@ -4,8 +4,23 @@ import {
   TextEdit,
   SnippetString,
   TextEditorEdit,
+  env,
 } from 'vscode'
 import { CodeAction, TextDocumentIdentifier } from 'vscode-languageclient'
+
+export function isDebugOrTestSession(): boolean {
+  return env.sessionId === 'someValue.sessionId'
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function tryRequire(path: string): any {
+  try {
+    return require(path)
+  } catch (err) {
+    console.error(err)
+    return
+  }
+}
 
 export function isSnippetEdit(
   action: CodeAction,

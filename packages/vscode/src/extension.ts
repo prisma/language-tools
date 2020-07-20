@@ -12,7 +12,6 @@ import {
   ExtensionContext,
   commands,
   window,
-  env,
   TextDocument,
   Range,
   CodeActionContext,
@@ -22,7 +21,12 @@ import {
 } from 'vscode'
 import { Telemetry, TelemetryPayload, ExceptionPayload } from './telemetry'
 import path from 'path'
-import { applySnippetWorkspaceEdit, isSnippetEdit } from './util'
+import {
+  applySnippetWorkspaceEdit,
+  isSnippetEdit,
+  tryRequire,
+  isDebugOrTestSession,
+} from './util'
 
 let client: LanguageClient
 let telemetry: Telemetry
@@ -33,20 +37,6 @@ class GenericLanguageServerException extends Error {
     this.name = 'GenericLanguageServerException'
     this.stack = stack
     this.message = message
-  }
-}
-
-function isDebugOrTestSession(): boolean {
-  return env.sessionId === 'someValue.sessionId'
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function tryRequire(path: string): any {
-  try {
-    return require(path)
-  } catch (err) {
-    console.error(err)
-    return
   }
 }
 
