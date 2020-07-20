@@ -11,27 +11,28 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
 
 ## Features
 
-- Syntax highlighting
-- Code Completion
-  - Completion results appear for symbols as you type.
-  - You can trigger this manually with the Ctrl+Space shortcut.
-- Documentation help
-  - Information about the documentation of a completion result pops up as completion results are provided.
-- Quick info on hover
-  - Documentation Comments (`///`) of models and enums appear anywhere you hover over their usages.
-- Go to Definition
-  - Jump to or peek a model or enum's declaration.
-- Formatting
-  - Format code either manually or on save (if configured).
-  - _To automatically format on save, add the following to your `settings.json` file:_
-    ```
-    "editor.formatOnSave": true
-    ```
-- Rename
-  - Rename models, enums, fields and enum values
-  - Automatically applies `@map` or `@@map` on the schema
-- Linting
-  - Diagnostic tools are used to surface errors and warnings in your schema file as you type.
+* Syntax highlighting
+* Code Completion
+    * Completion results appear for symbols as you type. 
+    * You can trigger this manually with the Ctrl+Space shortcut.
+* Documentation help
+    * Information about the documentation of a completion result pops up as completion results are provided.
+* Quick info on hover
+    * Documentation Comments (`///`) of models and enums appear anywhere you hover over their usages.
+* Go to Definition
+    * Jump to or peek a model or enum's declaration.
+* Formatting
+    * Format code either manually or on save (if configured). 
+    * *To automatically format on save, add the following to your `settings.json` file:*
+        ```
+        "editor.formatOnSave": true
+        ```
+* Rename
+    * Rename models, enums, fields and enum values
+    * Automatically applies `@map` or `@@map` on the schema 
+* Linting
+    * Diagnostic tools are used to surface errors and warnings in your schema file as you type.
+
 
 ## Preview
 
