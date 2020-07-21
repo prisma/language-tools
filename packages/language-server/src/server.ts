@@ -139,7 +139,9 @@ export function startServer(options?: LSOptions): void {
     const doc = getDocument(params.textDocument.uri)
     sendTelemetry({
       action: 'definition',
-      attributes: {},
+      attributes: {
+        signature: getSignature(),
+      },
     })
     if (doc) {
       return MessageHandler.handleDefinitionRequest(doc, params)
@@ -158,6 +160,7 @@ export function startServer(options?: LSOptions): void {
       action: 'resolveCompletion',
       attributes: {
         label: completionItem.label,
+        signature: getSignature(),
       },
     })
     return MessageHandler.handleCompletionResolveRequest(completionItem)
@@ -166,7 +169,9 @@ export function startServer(options?: LSOptions): void {
   connection.onHover((params: HoverParams) => {
     sendTelemetry({
       action: 'hover',
-      attributes: {},
+      attributes: {
+        signature: getSignature(),
+      },
     })
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
@@ -179,7 +184,9 @@ export function startServer(options?: LSOptions): void {
     if (doc) {
       sendTelemetry({
         action: 'format',
-        attributes: {},
+        attributes: {
+          signature: getSignature(),
+        },
       })
       return MessageHandler.handleDocumentFormatting(
         params,
@@ -196,7 +203,9 @@ export function startServer(options?: LSOptions): void {
     if (doc) {
       sendTelemetry({
         action: 'codeAction',
-        attributes: {},
+        attributes: {
+          signature: getSignature(),
+        },
       })
       return MessageHandler.handleCodeActions(params, doc)
     }
@@ -205,6 +214,12 @@ export function startServer(options?: LSOptions): void {
   connection.onRenameRequest((params: RenameParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
+      sendTelemetry({
+        action: 'rename',
+        attributes: {
+          signature: getSignature(),
+        },
+      })
       return MessageHandler.handleRenameRequest(params, doc)
     }
   })
