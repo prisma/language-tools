@@ -18,6 +18,8 @@ import {
   dataSourceUrlArguments,
   dataSourceProviders,
   dataSourceProviderArguments,
+  generatorProviders,
+  generatorProviderArguments,
 } from './completionUtil'
 import klona from 'klona'
 import { extractModelName } from '../rename/renameUtil'
@@ -397,20 +399,32 @@ export function getSuggestionForSupportedFields(
   position: Position,
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
+  const isInsideQuotation: boolean = isInsideQuotationMark(
+    currentLineUntrimmed,
+    position,
+  )
 
   switch (blockType) {
     case 'generator':
       if (currentLine.startsWith('provider')) {
-        suggestions = ['"prisma-client-js"'] // TODO add prisma-client-go when implemented!
+        const providers: CompletionItem[] = generatorProviders
+        if (isInsideQuotation) {
+          return {
+            items: providers,
+            isIncomplete: true,
+          }
+        } else {
+          return {
+            items: generatorProviderArguments,
+            isIncomplete: true,
+          }
+        }
       }
       break
     case 'datasource':
       if (currentLine.startsWith('provider')) {
         let providers: CompletionItem[] = klona(dataSourceProviders)
-        const isInsideQuotation: boolean = isInsideQuotationMark(
-          currentLineUntrimmed,
-          position,
-        )
+
         if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
           // return providers that haven't been used yet
           if (isInsideQuotation) {
