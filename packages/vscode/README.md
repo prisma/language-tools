@@ -23,11 +23,11 @@ Please note that you should not have the regular and insider version of the exte
 
 ## Build information
 
-This version is built from commit [b671cf21afe945608e4048cbabb84b62bfa05448](b671cf21afe945608e4048cbabb84b62bfa05448).
+This version is built from commit [4ad9b38cd4f484eb59bd7ba33dd06de878b6674d](4ad9b38cd4f484eb59bd7ba33dd06de878b6674d).
 
 ## Contributing
 
-Read more about [how to contribute to the Prisma VSCode extension](./CONTRIBUTING.md)
+Read more about [how to contribute to the Prisma VSCode extension](./packages/vscode/CONTRIBUTING.md)
 
 ## Telemetry
 
