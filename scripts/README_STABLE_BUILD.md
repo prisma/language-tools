@@ -53,7 +53,7 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
 
 ## Contributing
 
-Read more about [how to contribute to the Prisma VSCode extension](./CONTRIBUTING.md)
+Read more about [how to contribute to the Prisma VSCode extension](./packages/vscode/CONTRIBUTING.md)
 
 ## Telemetry
 

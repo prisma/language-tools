@@ -27,7 +27,7 @@ This version is built from commit [$commit-sha$]($commit-sha$).
 
 ## Contributing
 
-Read more about [how to contribute to the Prisma VSCode extension](./CONTRIBUTING.md)
+Read more about [how to contribute to the Prisma VSCode extension](./packages/vscode/CONTRIBUTING.md)
 
 ## Telemetry
 
