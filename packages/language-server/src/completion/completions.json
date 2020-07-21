@@ -213,6 +213,18 @@
       ]
     }
   ],
+  "generatorProviders": [
+    {
+      "label": "prisma-client-js",
+      "documentation": "Built-in generator."
+    }
+  ],
+  "generatorProviderArguments": [
+    {
+      "label": "\"\"",
+      "documentation": "Specifies a single provider."
+    }
+  ],
   "datasourceProviders": [
     {
       "label": "mysql",
