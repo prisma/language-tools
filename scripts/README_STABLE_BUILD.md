@@ -32,6 +32,9 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
     * Automatically applies `@map` or `@@map` on the schema 
 * Linting
     * Diagnostic tools are used to surface errors and warnings in your schema file as you type.
+* Quick-fixes
+    * Quickly fix typos in model and enum names
+    * Create new models and enums with a single click
 
 
 ## Preview
