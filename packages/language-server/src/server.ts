@@ -135,12 +135,12 @@ export function startServer(options?: LSOptions): void {
     return documents.get(uri)
   }
 
-  connection.onDefinition((params: DeclarationParams) => {
+  connection.onDefinition(async (params: DeclarationParams) => {
     const doc = getDocument(params.textDocument.uri)
     sendTelemetry({
       action: 'definition',
       attributes: {
-        signature: getSignature(),
+        signature: await getSignature(),
       },
     })
     if (doc) {
@@ -155,22 +155,22 @@ export function startServer(options?: LSOptions): void {
     }
   })
 
-  connection.onCompletionResolve((completionItem: CompletionItem) => {
+  connection.onCompletionResolve(async (completionItem: CompletionItem) => {
     sendTelemetry({
       action: 'resolveCompletion',
       attributes: {
         label: completionItem.label,
-        signature: getSignature(),
+        signature: await getSignature(),
       },
     })
     return MessageHandler.handleCompletionResolveRequest(completionItem)
   })
 
-  connection.onHover((params: HoverParams) => {
+  connection.onHover(async (params: HoverParams) => {
     sendTelemetry({
       action: 'hover',
       attributes: {
-        signature: getSignature(),
+        signature: await getSignature(),
       },
     })
     const doc = getDocument(params.textDocument.uri)
@@ -179,13 +179,13 @@ export function startServer(options?: LSOptions): void {
     }
   })
 
-  connection.onDocumentFormatting((params: DocumentFormattingParams) => {
+  connection.onDocumentFormatting(async (params: DocumentFormattingParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
       sendTelemetry({
         action: 'format',
         attributes: {
-          signature: getSignature(),
+          signature: await getSignature(),
         },
       })
       return MessageHandler.handleDocumentFormatting(
@@ -198,26 +198,26 @@ export function startServer(options?: LSOptions): void {
     }
   })
 
-  connection.onCodeAction((params: CodeActionParams) => {
+  connection.onCodeAction(async (params: CodeActionParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
       sendTelemetry({
         action: 'codeAction',
         attributes: {
-          signature: getSignature(),
+          signature: await getSignature(),
         },
       })
       return MessageHandler.handleCodeActions(params, doc)
     }
   })
 
-  connection.onRenameRequest((params: RenameParams) => {
+  connection.onRenameRequest(async (params: RenameParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
       sendTelemetry({
         action: 'rename',
         attributes: {
-          signature: getSignature(),
+          signature: await getSignature(),
         },
       })
       return MessageHandler.handleRenameRequest(params, doc)
