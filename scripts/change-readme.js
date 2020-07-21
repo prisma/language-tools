@@ -30,7 +30,7 @@ function changeReadme({
 module.exports = { changeReadme }
 
 if (require.main === module) {
-  const args = process.argv.slice(1)
+  const args = process.argv.slice(2)
   changeReadme({
     releaseChannel: args[0]
   })
