@@ -1,6 +1,6 @@
 {
   "name": "@prisma/language-support",
-  "version": "3.0.56",
+  "version": "3.0.57",
   "author": "Prisma",
   "license": "Apache-2.0",
   "workspaces": [
@@ -56,6 +56,6 @@
     ]
   },
   "prisma": {
-    "version": "b1c5396ac9832eb8481b3c7f36c393ab1747211d"
+    "version": "e11114fa1ea826f9e7b4fa1ced34e78892fe8e0e"
   }
 }
