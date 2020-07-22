@@ -80,7 +80,7 @@ elif [ "$ENVIRONMENT" = "PRODUCTION" ] && [ "$RELEASE_CHANNEL" = "patch" ]; then
     PATCH_BRANCH=$(node scripts/patch/patch-branch.js "$NPM_VERSION")
     echo "PATCH_BRANCH: $PATCH_BRANCH"
 
-    git push -u origin $PATCH_BRANCH --follow-tags
+    git push -u origin "$PATCH_BRANCH" --follow-tags
 else
     echo "Not pushing because ENVIRONMENT is not set"
 fi
