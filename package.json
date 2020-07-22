@@ -37,7 +37,8 @@
     "vsce:bump": "sh scripts/bump.sh",
     "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "sh scripts/e2e.sh",
-    "check:lsp": "sh scripts/lsp-version.sh"
+    "check:lsp": "sh scripts/lsp-version.sh",
+    "setup:patch": "sh scripts/patch/setup.sh"
   },
   "husky": {
     "hooks": {

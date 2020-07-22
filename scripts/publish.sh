@@ -19,13 +19,17 @@ echo "============================"
 RELEASE_CHANNEL=$1
 echo "RELEASE_CHANNEL: $RELEASE_CHANNEL"
 
-NPM_VERSION=$(sh scripts/prisma-version.sh "$RELEASE_CHANNEL")
+
+if [ "$RELEASE_CHANNEL" = "patch" ]; then
+    NPM_VERSION=$(sh scripts/prisma-version.sh "latest")
+else 
+    NPM_VERSION=$(sh scripts/prisma-version.sh "$RELEASE_CHANNEL")
+fi
+
 echo "NPM_VERSION: $NPM_VERSION"
 
 EXTENSION_VERSION=$(sh scripts/extension-version.sh "$RELEASE_CHANNEL" "")
 echo "EXTENSION_VERSION: $EXTENSION_VERSION"
-
-NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
 
 
 # Try to publish if $AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN (Personal Access Token - https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) exists
@@ -68,7 +72,15 @@ elif [ "$ENVIRONMENT" = "PRODUCTION" ] && [ "$RELEASE_CHANNEL" = "latest" ]; the
     git commit -m "bump prisma_version to $NPM_VERSION"
     git tag -a "$NEXT_EXTENSION_VERSION" -m "$NEXT_EXTENSION_VERSION" -m "Prisma version: $NPM_VERSION"
     git push github HEAD:"${GITHUB_REF}" --follow-tags
-    # TODO: Create a release linked to this tag for stable
+elif [ "$ENVIRONMENT" = "PRODUCTION" ] && [ "$RELEASE_CHANNEL" = "patch" ]; then
+    git add ./scripts/prisma_version_stable
+    git commit -m "patch prisma_version to $NPM_VERSION"
+    git tag -a "$NEXT_EXTENSION_VERSION" -m "$NEXT_EXTENSION_VERSION" -m "Prisma version: $NPM_VERSION"
+
+    PATCH_BRANCH=$(node scripts/patch/patch-branch.js "$NPM_VERSION")
+    echo "PATCH_BRANCH: $PATCH_BRANCH"
+
+    git push -u origin $PATCH_BRANCH --follow-tags
 else
     echo "Not pushing because ENVIRONMENT is not set"
 fi

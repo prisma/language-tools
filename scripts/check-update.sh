@@ -6,7 +6,7 @@ set -eu
 if [ -f ".envrc" ]; then
     echo "Loading .envrc"
     # shellcheck disable=SC1091
-    . .envrc
+    . ./.envrc
 else
     echo "No .envrc"
 fi
@@ -43,6 +43,9 @@ if [ "$RELEASE_CHANNEL" = "latest" ]; then
         echo "::set-output name=version::$NPM_VERSION"
     else
         echo "Not a minor release of Prisma CLI."
+        PATCH_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
+        echo "PATCH_VERSION: $PATCH_VERSION"
+        echo "::set-output name=patch-version::$PATCH_VERSION"
     fi
 elif [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then
 
