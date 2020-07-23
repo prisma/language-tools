@@ -40,7 +40,7 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Setup patch branch
-        if: ${{ steps.check_for_update.outputs.patch-version }}
+        if: ${{ needs.setup.outputs.patch-version }}
         run: npm run setup:patch
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
@@ -63,7 +63,7 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Setup patch branch
-        if: ${{ steps.check_for_update.outputs.patch-version }}
+        if: ${{ needs.setup.outputs.patch-version }}
         run: npm run setup:patch
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
@@ -95,7 +95,7 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Setup patch branch
-        if: ${{ steps.check_for_update.outputs.patch-version }}
+        if: ${{ needs.setup.outputs.patch-version }}
         run: npm run setup:patch
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again

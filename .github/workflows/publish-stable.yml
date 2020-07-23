@@ -26,7 +26,6 @@ jobs:
       - name: Bump versions
         if: ${{ steps.check_for_updates.outputs.version }}
         run: npm run vsce:bump "latest" ${{ steps.check_for_updates.outputs.version }}
-        id: bump_versions
       - name: Check existing LSP version
         if: ${{ steps.check_for_updates.outputs.version }}
         id: check_lsp_version

@@ -22,7 +22,6 @@ jobs:
       - name: Checkout patch branch
         run: npm run setup:patch
       - name: Bump versions
-      # TODO not yet finished
         run: npm run vsce:bump "latest" ""
         id: bump_versions
       - name: Check existing LSP version
