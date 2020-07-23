@@ -278,11 +278,11 @@
   "generatorPreviewFeaturesArguments": [
     {
       "label": "[]",
-      "documentation": "Specifies feature flags."
+      "documentation": "Specifies a list of preview feature flags."
     },
     {
       "label": "\"\"",
-      "documentation": "Specifies a single feature flag."
+      "documentation": "Specifies a single preview feature flag."
     }
   ]
 }
