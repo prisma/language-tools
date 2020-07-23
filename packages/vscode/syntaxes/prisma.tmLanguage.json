@@ -202,7 +202,7 @@
     "enum_value_definition": {
       "patterns": [
         {
-          "match": "^\\s*(\\w+)\\s*$",
+          "match": "^\\s*(\\w+)\\s*",
           "captures": {
             "1": {
               "name": "variable.other.assignment.prisma"
