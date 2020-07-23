@@ -126,11 +126,6 @@ function removeInvalidAttributeSuggestions(
         (attribute) => !attribute.label.includes('id'),
       )
     }
-    if (item.includes('@unique')) {
-      supportedAttributes = supportedAttributes.filter(
-        (attribute) => !attribute.label.includes('unique'),
-      )
-    }
   }
   return supportedAttributes
 }
