@@ -39,7 +39,10 @@ if [ "$NEXT_EXTENSION_VERSION" = "" ]; then
     if [ "$RELEASE_CHANNEL" = 'patch-dev' ]; then 
         NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION" "true")
     else 
-        NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
+        # Release channel = dev on push to master 
+        NPM_VERSION_STABLE=$(sh scripts/prisma-version.sh "latest")
+        IS_MINOR_RELEASE=$(node scripts/is-minor-release.js "$NPM_VERSION_STABLE")
+        NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION" "false" "$NPM_VERSION_STABLE" "$IS_MINOR_RELEASE")
     fi
     
     echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"

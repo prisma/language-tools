@@ -1,4 +1,4 @@
-name: Insider Check for Update + Automated Publish
+name: Insider Automated Publish
 
 on:
   push:
@@ -11,7 +11,7 @@ env:
 
 jobs:
   setup:
-    name: Check for Updates
+    name: Setup
     runs-on: ubuntu-latest
     if: endsWith(github.ref, '/master')
     outputs:
@@ -130,13 +130,13 @@ jobs:
         if: ${{ needs.setup.result == 'failure' || needs.test-lsp.result == 'failure' || needs.publish-lsp.result == 'failure' || needs.test-extension.result == 'failure' || failure() }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "Publishing insider failed :x:"
+          SLACK_TITLE: "Publishing insider on push to master failed :x:"
           SLACK_COLOR: '#FF0000'
 
       - name: Slack Notification on Success
         if: ${{ needs.test-extension.result == 'success' && success() && needs.setup.outputs.version }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "Published insider :white_check_mark:"
+          SLACK_TITLE: "Published insider on push to master :white_check_mark:"
           SLACK_COLOR: '#008000'
       

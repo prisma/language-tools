@@ -1,8 +1,8 @@
-name: Stable Check for Update + Automated Publish
+name: Stable Check for Minor Update + Automated Publish
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '*/15 * * * *'
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -78,7 +78,7 @@ jobs:
         with: 
           node-version: '12.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: cd packages/language-server && npm publish --access public
+      - run: cd packages/language-server && npm publish --tag latest --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN}}
 

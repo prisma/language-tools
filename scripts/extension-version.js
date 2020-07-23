@@ -3,17 +3,32 @@ const semVer = require('semver')
 function nextExtensionVersion({
   prismaVersion,
   extensionVersion,
-  patchRelease = false
+  patchRelease = false,
+  prismaStableVersion = '',
+  stableMinorRelease = false
 }) {
 
   if(patchRelease) {
     return semVer.inc(extensionVersion, 'patch')
   }
 
+  if(stableMinorRelease === 'true' && prismaStableVersion !== '') {
+    // check if there already was a insider release after the stable minor release
+    const extensionTokens = extensionVersion.split('.')
+    const prismaStableTokens = prismaStableVersion.split('.')
+
+    if (extensionTokens[0] === prismaStableTokens[1]) {
+      // first new release after stable minor bump --> extensionVersion from x.y.z to (x+1).0.1
+      let bumpMajor = semVer.inc(extensionVersion, 'major').split('.')
+
+      return bumpMajor[0] + '.0.1'
+    }
+
+  }
+
   const derivedExtensionVersion = getDerivedExtensionVersion(
     stripPreReleaseText(prismaVersion)
   )
-  console.log(derivedExtensionVersion)
 
   if (isMajorBump(extensionVersion, derivedExtensionVersion)) {
     return derivedExtensionVersion
@@ -51,18 +66,26 @@ module.exports = { nextExtensionVersion }
 
 if (require.main === module) {
   const args = process.argv.slice(2)
-  const version = ""
+  let version = ""
   if (args.length == 2) {
     version = nextExtensionVersion({
       prismaVersion: args[0],
       extensionVersion: args[1],
     })
-  } else {
+  } else if (args.length === 3) {
     version = nextExtensionVersion({
       prismaVersion: args[0],
       extensionVersion: args[1],
       patchRelease: true
     }) 
+  } else {
+    version = nextExtensionVersion({
+      prismaVersion: args[0],
+      extensionVersion: args[1],
+      patchRelease: false,
+      prismaStableVersion: args[3],
+      stableMinorRelease: args[4]
+    })
   }
   
   console.log(version)

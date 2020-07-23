@@ -77,7 +77,7 @@ jobs:
         with: 
           node-version: '12.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: cd packages/language-server && npm publish --tag dev  --access public
+      - run: cd packages/language-server && npm publish --tag dev --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN}}
 
@@ -137,13 +137,13 @@ jobs:
         if: ${{ needs.setup.result == 'failure' || needs.test-lsp.result == 'failure' || needs.publish-lsp.result == 'failure' || needs.test-extension.result == 'failure' || failure() }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "Publishing insider failed :x:"
+          SLACK_TITLE: "Publishing insider on new Prisma CLI version failed :x:"
           SLACK_COLOR: '#FF0000'
 
       - name: Slack Notification on Success
         if: ${{ needs.test-extension.result == 'success' && success() && needs.setup.outputs.version }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "Published insider :white_check_mark:"
+          SLACK_TITLE: "Published insider on new Prisma CLI version :white_check_mark:"
           SLACK_COLOR: '#008000'
       
