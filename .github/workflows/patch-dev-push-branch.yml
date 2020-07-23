@@ -91,7 +91,7 @@ jobs:
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
         if: ${{ needs.setup.outputs.new_updates }}
-        run: npm run vsce:bump "patch-dev"  ${{ needs.setup.outputs.patch-version }}
+        run: npm run vsce:bump "patch-dev"  ""
       - name: Install Dependencies
         run: npm install
       - name: Compile
