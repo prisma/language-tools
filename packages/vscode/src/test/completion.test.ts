@@ -263,13 +263,18 @@ suite('Should auto-complete', () => {
         blockAttributeId,
         blockAttributeIndex,
         blockAttributeMap,
+        blockAttributeUnique,
       ]),
       true,
     )
     await testCompletion(
       modelBlocksUri,
       new vscode.Position(14, 0),
-      new vscode.CompletionList([blockAttributeIndex, blockAttributeMap]),
+      new vscode.CompletionList([
+        blockAttributeIndex,
+        blockAttributeMap,
+        blockAttributeUnique,
+      ]),
       true,
     )
   })

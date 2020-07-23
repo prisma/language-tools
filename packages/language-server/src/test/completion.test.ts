@@ -283,7 +283,12 @@ suite('Quick Fix', () => {
       { line: 5, character: 0 },
       {
         isIncomplete: false,
-        items: [blockAttributeMap, blockAttributeId, blockAttributeIndex],
+        items: [
+          blockAttributeMap,
+          blockAttributeId,
+          blockAttributeUnique,
+          blockAttributeIndex,
+        ],
       },
     )
     assertCompletion(
@@ -291,7 +296,7 @@ suite('Quick Fix', () => {
       { line: 14, character: 0 },
       {
         isIncomplete: false,
-        items: [blockAttributeMap, blockAttributeIndex],
+        items: [blockAttributeMap, blockAttributeUnique, blockAttributeIndex],
       },
     )
   })
@@ -431,6 +436,19 @@ suite('Quick Fix', () => {
           fieldAttributeDefault,
           fieldAttributeRelation,
           fieldAttributeUpdatedAt,
+        ],
+      },
+    )
+    assertCompletion(
+      modelBlocksUri,
+      { line: 13, character: 16 },
+      {
+        isIncomplete: false,
+        items: [
+          fieldAttributeUnique,
+          fieldAttributeMap,
+          fieldAttributeDefault,
+          fieldAttributeRelation,
         ],
       },
     )

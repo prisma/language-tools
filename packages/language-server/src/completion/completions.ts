@@ -18,8 +18,11 @@ import {
   dataSourceUrlArguments,
   dataSourceProviders,
   dataSourceProviderArguments,
+  generatorProviders,
+  generatorProviderArguments,
 } from './completionUtil'
 import klona from 'klona'
+import { extractModelName } from '../rename/renameUtil'
 
 function toCompletionItems(
   allowedTypes: string[],
@@ -123,11 +126,6 @@ function removeInvalidAttributeSuggestions(
         (attribute) => !attribute.label.includes('id'),
       )
     }
-    if (item.includes('@unique')) {
-      supportedAttributes = supportedAttributes.filter(
-        (attribute) => !attribute.label.includes('unique'),
-      )
-    }
   }
   return supportedAttributes
 }
@@ -183,8 +181,7 @@ export function getAllRelationNames(lines: Array<string>): Array<string> {
       item.includes('{')
     ) {
       // found a block
-      const blockType = item.replace(/ .*/, '')
-      const blockName = item.slice(blockType.length, item.length - 1).trim()
+      const blockName = extractModelName(item)
 
       modelNames.push(blockName)
       // block is at least 2 lines long
@@ -397,20 +394,32 @@ export function getSuggestionForSupportedFields(
   position: Position,
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
+  const isInsideQuotation: boolean = isInsideQuotationMark(
+    currentLineUntrimmed,
+    position,
+  )
 
   switch (blockType) {
     case 'generator':
       if (currentLine.startsWith('provider')) {
-        suggestions = ['"prisma-client-js"'] // TODO add prisma-client-go when implemented!
+        const providers: CompletionItem[] = generatorProviders
+        if (isInsideQuotation) {
+          return {
+            items: providers,
+            isIncomplete: true,
+          }
+        } else {
+          return {
+            items: generatorProviderArguments,
+            isIncomplete: true,
+          }
+        }
       }
       break
     case 'datasource':
       if (currentLine.startsWith('provider')) {
         let providers: CompletionItem[] = klona(dataSourceProviders)
-        const isInsideQuotation: boolean = isInsideQuotationMark(
-          currentLineUntrimmed,
-          position,
-        )
+
         if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
           // return providers that haven't been used yet
           if (isInsideQuotation) {
@@ -573,6 +582,36 @@ function getFieldsFromCurrentBlock(
       field = item.replace(/ .*/, '')
       if (field !== '') {
         suggestions.push(field)
+      }
+    }
+  }
+  return suggestions
+}
+
+export function getTypesFromCurrentBlock(
+  lines: Array<string>,
+  block: Block,
+  position?: Position,
+): Map<string, number> {
+  const suggestions: Map<string, number> = new Map()
+
+  let reachedStartLine = false
+  let type = ''
+  for (const [key, item] of lines.entries()) {
+    if (key === block.start.line + 1) {
+      reachedStartLine = true
+    }
+    if (!reachedStartLine) {
+      continue
+    }
+    if (key === block.end.line) {
+      break
+    }
+    if (!item.startsWith('@@') && (!position || key !== position.line)) {
+      const wordsInLine: string[] = item.split(/\s+/)
+      type = wordsInLine[1]
+      if (type !== '' && type !== undefined) {
+        suggestions.set(type, key)
       }
     }
   }

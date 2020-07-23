@@ -14,6 +14,8 @@ import {
   CodeAction,
   Diagnostic,
   DiagnosticSeverity,
+  RenameParams,
+  WorkspaceEdit,
 } from 'vscode-languageserver'
 import * as util from './util'
 import { fullDocumentRange } from './provider'
@@ -33,8 +35,22 @@ import {
 } from './completion/completions'
 import { quickFix } from './codeActionProvider'
 import lint from './lint'
+import {
+  isModelName,
+  insertBasicRename,
+  renameReferencesForModelName,
+  isEnumValue,
+  renameReferencesForEnumValue,
+  isFieldName,
+  extractCurrentName,
+  mapExistsAlready,
+  insertMapAttribute,
+  renameReferencesForFieldValue,
+  isEnumName,
+  printLogMessage,
+} from './rename/renameUtil'
 
-function getCurrentLine(document: TextDocument, line: number): string {
+export function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
     start: { line: line, character: 0 },
     end: { line: line, character: Number.MAX_SAFE_INTEGER },
@@ -98,7 +114,10 @@ export class Block {
   }
 }
 
-function getBlockAtPosition(line: number, lines: Array<string>): Block | void {
+export function getBlockAtPosition(
+  line: number,
+  lines: Array<string>,
+): Block | void {
   let blockType = ''
   let blockName = ''
   let blockStart: Position = Position.create(0, 0)
@@ -479,6 +498,117 @@ export function handleCompletionRequest(
     case 'enum':
       break
   }
+}
+
+export function handleRenameRequest(
+  params: RenameParams,
+  document: TextDocument,
+): WorkspaceEdit | undefined {
+  const lines: string[] = convertDocumentTextToTrimmedLineArray(document)
+  const position = params.position
+  const currentLine: string = lines[position.line]
+  const currentBlock = getBlockAtPosition(position.line, lines)
+  const edits: TextEdit[] = []
+  if (!currentBlock) {
+    return
+  }
+
+  const isModelRename: boolean = isModelName(params.position, currentBlock)
+  const isEnumRename: boolean = isEnumName(params.position, currentBlock)
+  const isEnumValueRename: boolean = isEnumValue(
+    currentLine,
+    params.position,
+    currentBlock,
+    document,
+  )
+  const isFieldRename: boolean = isFieldName(
+    currentLine,
+    params.position,
+    currentBlock,
+    document,
+  )
+
+  if (isModelRename || isEnumRename || isEnumValueRename || isFieldRename) {
+    const currentName = extractCurrentName(
+      currentLine,
+      isModelRename || isEnumRename,
+      isEnumValueRename,
+      isFieldRename,
+    )
+
+    // rename marked string
+    edits.push(
+      insertBasicRename(params.newName, currentName, document, position.line),
+    )
+
+    // check if map exists already
+    if (
+      !mapExistsAlready(
+        currentLine,
+        lines,
+        currentBlock,
+        isModelRename || isEnumRename,
+      )
+    ) {
+      // add map attribute
+      edits.push(
+        insertMapAttribute(
+          currentName,
+          position,
+          currentBlock,
+          isModelRename || isEnumRename,
+        ),
+      )
+    }
+
+    // rename references
+    if (isModelRename || isEnumRename) {
+      edits.push(
+        ...renameReferencesForModelName(
+          currentName,
+          params.newName,
+          document,
+          lines,
+        ),
+      )
+    } else if (isEnumValueRename) {
+      edits.push(
+        ...renameReferencesForEnumValue(
+          currentName,
+          params.newName,
+          document,
+          lines,
+          currentBlock.name,
+        ),
+      )
+    } else if (isFieldRename) {
+      edits.push(
+        ...renameReferencesForFieldValue(
+          currentName,
+          params.newName,
+          document,
+          lines,
+          currentBlock,
+        ),
+      )
+    }
+
+    printLogMessage(
+      currentName,
+      params.newName,
+      isEnumRename,
+      isModelRename,
+      isFieldRename,
+      isEnumValueRename,
+    )
+    return {
+      changes: {
+        [document.uri]: edits,
+      },
+    }
+  }
+
+  return
 }
 
 /**

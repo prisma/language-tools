@@ -27,8 +27,14 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
         ```
         "editor.formatOnSave": true
         ```
+* Rename
+    * Rename models, enums, fields and enum values
+    * Automatically applies `@map` or `@@map` on the schema 
 * Linting
     * Diagnostic tools are used to surface errors and warnings in your schema file as you type.
+* Quick-fixes
+    * Quickly fix typos in model and enum names
+    * Create new models and enums with a single click
 
 
 ## Preview
@@ -47,7 +53,12 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
 
 ## Contributing
 
-Read more about [how to contribute to the Prisma VSCode extension](./CONTRIBUTING.md)
+Read more about [how to contribute to the Prisma VSCode extension](./packages/vscode/CONTRIBUTING.md)
+
+## Telemetry
+
+This extension collects telemetry data using [Azure Application Insights](https://www.npmjs.com/package/vscode-extension-telemetry) to help us better the usage of the extension.
+The extension respects the `telemetry.enableTelemetry` setting in VSCode.
 
 ## Build information
 

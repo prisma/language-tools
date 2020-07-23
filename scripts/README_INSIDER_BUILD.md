@@ -28,7 +28,12 @@ This is for Prisma CLI [$prisma-cli-version$]($prisma-cli-version$).
 
 ## Contributing
 
-Read more about [how to contribute to the Prisma VSCode extension](./CONTRIBUTING.md)
+Read more about [how to contribute to the Prisma VSCode extension](./packages/vscode/CONTRIBUTING.md)
+
+## Telemetry
+
+This extension collects telemetry data using [Azure Application Insights](https://www.npmjs.com/package/vscode-extension-telemetry) to help us better the usage of the extension.
+The extension respects the `telemetry.enableTelemetry` setting in VSCode.
 
 ## Security
 

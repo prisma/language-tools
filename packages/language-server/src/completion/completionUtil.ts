@@ -124,3 +124,14 @@ export const dataSourceProviderArguments: CompletionItem[] = convertToCompletion
   CompletionItemKind.Property,
   (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
 )
+
+export const generatorProviders: CompletionItem[] = convertToCompletionItems(
+  completions.generatorProviders,
+  CompletionItemKind.Constant,
+)
+
+export const generatorProviderArguments: CompletionItem[] = convertToCompletionItems(
+  completions.generatorProviderArguments,
+  CompletionItemKind.Property,
+  (label: string) => label.replace('""', '"$0"'),
+)
