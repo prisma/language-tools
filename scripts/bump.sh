@@ -66,7 +66,7 @@ if [ "$RELEASE_CHANNEL" = "dev" ]; then
         .dependencies[\"@prisma/language-server\"] = \"$NEXT_EXTENSION_VERSION\" | \
         .preview = true" \
     ./packages/vscode/package.json >./packages/vscode/package.json.bk
-    node scripts/change-readme.js "$RELEASE_CHANNEL"
+    node scripts/change-readme.js "$RELEASE_CHANNEL" "$NPM_VERSION"
 else
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma\" | \
@@ -76,7 +76,7 @@ else
         .preview = false" \
     ./packages/vscode/package.json >./packages/vscode/package.json.bk
 
-    node scripts/change-readme.js "$RELEASE_CHANNEL"
+    node scripts/change-readme.js "$RELEASE_CHANNEL" "$NPM_VERSION"
 fi
 
 
