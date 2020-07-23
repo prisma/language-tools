@@ -208,6 +208,10 @@ suite('Quick Fix', () => {
     label: 'binaryTargets',
     kind: CompletionItemKind.Field,
   }
+  const fieldPreviewFeatures = {
+    label: 'previewFeatures',
+    kind: CompletionItemKind.Field,
+  }
 
   const generatorWithExistingFieldsUri =
     'completions/generatorWithExistingFields.prisma'
@@ -218,7 +222,12 @@ suite('Quick Fix', () => {
       { line: 5, character: 0 },
       {
         isIncomplete: false,
-        items: [fieldProvider, fieldOutput, fieldBinaryTargets],
+        items: [
+          fieldProvider,
+          fieldOutput,
+          fieldBinaryTargets,
+          fieldPreviewFeatures,
+        ],
       },
     )
   })
@@ -229,7 +238,7 @@ suite('Quick Fix', () => {
       { line: 2, character: 0 },
       {
         isIncomplete: false,
-        items: [fieldOutput, fieldBinaryTargets],
+        items: [fieldOutput, fieldBinaryTargets, fieldPreviewFeatures],
       },
     )
     assertCompletion(
@@ -237,7 +246,7 @@ suite('Quick Fix', () => {
       { line: 7, character: 0 },
       {
         isIncomplete: false,
-        items: [fieldProvider, fieldBinaryTargets],
+        items: [fieldProvider, fieldBinaryTargets, fieldPreviewFeatures],
       },
     )
   })
