@@ -278,7 +278,7 @@
   "generatorPreviewFeaturesArguments": [
     {
       "label": "[]",
-      "documentation": "Specifies feature flags."
+      "documentation": "Specifies a list of preview feature flags."
     },
     {
       "label": "\"\"",
