@@ -6,7 +6,7 @@ set -eu
 if [ -f ".envrc" ]; then
     echo "Loading .envrc"
     # shellcheck disable=SC1091
-    . .envrc
+    . ./.envrc
 else
     echo "No .envrc"
 fi
@@ -48,13 +48,13 @@ elif [ "$RELEASE_CHANNEL" = "latest" ]; then
         echo "Not a minor release of Prisma CLI."
     fi
 else 
+    # check for new patch-dev Prisma CLI version
     if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then 
-        EXTENSION_VERSION=$(sh scripts/extension-version.sh "latest" "")
-        echo "current stable EXTENSION_VERSION: $EXTENSION_VERSION"
+        LAST_PATCH_EXTENSION_VERSION=$(cat scripts/extension_version_patch_dev)
 
-        NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION" "true")
+        NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$LAST_PATCH_EXTENSION_VERSION" "true")
         echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
-        echo "::set-output name=version::$NEXT_EXTENSION_VERSION"
+        echo "::set-output name=patch-version::$NEXT_EXTENSION_VERSION"
     else 
         echo "CURRENT_VERSION ($CURRENT_VERSION) and NPM_VERSION ($NPM_VERSION) are same" 
     fi

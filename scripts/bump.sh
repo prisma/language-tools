@@ -6,7 +6,7 @@ set -eu
 if [ -f ".envrc" ]; then
     echo "Loading .envrc"
     # shellcheck disable=SC1091
-    . .envrc
+    . ./.envrc
 else
     echo "No .envrc"
 fi
@@ -28,26 +28,35 @@ echo "RELEASE_CHANNEL: $RELEASE_CHANNEL"
 NEXT_EXTENSION_VERSION=$2
 echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
 
-OLD_SHA=$(jq ".prisma.version" ./packages/vscode/package.json)
-SHA=$(npx -q -p @prisma/cli@"$RELEASE_CHANNEL" prisma --version | grep "Query Engine" | awk '{print $5}')
-
 NPM_VERSION=$(sh scripts/prisma-version.sh "$RELEASE_CHANNEL")
 echo "NPM_VERSION: $NPM_VERSION"
 echo "UPDATING to $NPM_VERSION"
 
+EXTENSION_VERSION=$(sh scripts/extension-version.sh "$RELEASE_CHANNEL" "")
+echo "EXTENSION_VERSION: $EXTENSION_VERSION"
+
+
+OLD_SHA=$(jq ".prisma.version" ./packages/vscode/package.json)
+SHA=$(npx -q -p @prisma/cli@"$RELEASE_CHANNEL" prisma --version | grep "Query Engine" | awk '{print $5}')
+
+
 if [ "$NEXT_EXTENSION_VERSION" = "" ]; then
-    if [ "$RELEASE_CHANNEL" = 'patch-dev' ]; then 
+    if [ "$RELEASE_CHANNEL" = "patch-dev" ]; then 
+        # insider patch extension release
+        LAST_PATCH_EXTENSION_VERSION=$(cat scripts/extension_version_patch_dev)
+        NPM_VERSION_STABLE=$(sh scripts/prisma-version.sh "latest")
+        NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION_STABLE" "$LAST_PATCH_EXTENSION_VERSION" "true")
+    elif [ "$RELEASE_CHANNEL" = "latest" ]; then 
         NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION" "true")
-    else 
+    else
         # Release channel = dev on push to master 
         NPM_VERSION_STABLE=$(sh scripts/prisma-version.sh "latest")
         IS_MINOR_RELEASE=$(node scripts/is-minor-release.js "$NPM_VERSION_STABLE")
         NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION" "false" "$NPM_VERSION_STABLE" "$IS_MINOR_RELEASE")
     fi
-    
-    echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
-    echo "::set-output name=version::$NEXT_EXTENSION_VERSION"
 fi
+echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
+echo "::set-output name=version::$NEXT_EXTENSION_VERSION"
 
 if [ "$RELEASE_CHANNEL" = "dev" ]; then
     echo "$NPM_VERSION" >scripts/prisma_version_insider
@@ -55,10 +64,11 @@ elif [ "$RELEASE_CHANNEL" = "latest" ]; then
     echo "$NPM_VERSION" >scripts/prisma_version_stable
 else 
     echo "$NPM_VERSION" >scripts/prisma_version_patch_dev
+    echo "$NEXT_EXTENSION_VERSION"> scripts/extension_version_patch_dev
 fi
 
 # If the RELEASE_CHANNEL is dev, we need to change the name, displayName, description and preview flag to the Insider extension
-if [ "$RELEASE_CHANNEL" = "dev" ]; then
+if [ "$RELEASE_CHANNEL" = "dev" ] || [ "$RELEASE_CHANNEL" = "patch-dev" ]; then
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma-insider\" | \
         .displayName = \"Prisma - Insider\" | \

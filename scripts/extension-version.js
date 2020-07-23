@@ -8,11 +8,39 @@ function nextExtensionVersion({
   stableMinorRelease = false
 }) {
 
-  if(patchRelease) {
+  const derivedExtensionVersion = getDerivedExtensionVersion(
+    stripPreReleaseText(prismaVersion)
+  )
+
+  if (patchRelease) {
+    // new Prisma patch
+    const prismaTokens = prismaVersion.split('.')
+    const extensionTokens = extensionVersion.split('.')
+
+    if (prismaTokens.length === 3) {
+      // extension only patch
+      
+      if (extensionTokens[0] !== prismaTokens[1]) {
+        return prismaTokens[1] + '.1.1'
+      }
+
+      return semVer.inc(extensionVersion, 'patch')
+    }
+        
+    // Prisma CLI patch
+    if (derivedExtensionVersion !== prismaVersion) {
+      // insider release
+      const derivedExtensionTokens = derivedExtensionVersion.split('.')
+
+      if (extensionTokens[0] !== derivedExtensionTokens[0] || extensionTokens[1] !== derivedExtensionTokens[1]) {
+        return derivedExtensionVersion
+      }
+
+    }
     return semVer.inc(extensionVersion, 'patch')
   }
 
-  if(stableMinorRelease === 'true' && prismaStableVersion !== '') {
+  if (stableMinorRelease === 'true' && prismaStableVersion !== '') {
     // check if there already was a insider release after the stable minor release
     const extensionTokens = extensionVersion.split('.')
     const prismaStableTokens = prismaStableVersion.split('.')
@@ -25,10 +53,6 @@ function nextExtensionVersion({
     }
 
   }
-
-  const derivedExtensionVersion = getDerivedExtensionVersion(
-    stripPreReleaseText(prismaVersion)
-  )
 
   if (isMajorBump(extensionVersion, derivedExtensionVersion)) {
     return derivedExtensionVersion
@@ -77,7 +101,7 @@ if (require.main === module) {
       prismaVersion: args[0],
       extensionVersion: args[1],
       patchRelease: true
-    }) 
+    })
   } else {
     version = nextExtensionVersion({
       prismaVersion: args[0],
@@ -87,6 +111,6 @@ if (require.main === module) {
       stableMinorRelease: args[4]
     })
   }
-  
+
   console.log(version)
 }
