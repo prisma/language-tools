@@ -282,7 +282,7 @@
     },
     {
       "label": "\"\"",
-      "documentation": "Specifies a single feature flag."
+      "documentation": "Specifies a single preview feature flag."
     }
   ]
 }
