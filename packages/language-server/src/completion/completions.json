@@ -68,7 +68,7 @@
     },
     {
       "label": "previewFeatures",
-      "documentation": "Enables feature flags. This enables us to hide functionality from the *default* API that *all* users get when installing Prisma and Prisma Client. Instead, users can *explicitly* opt-in to certain features by enabling them in this field."
+      "documentation": "Enables preview features fresh from our developers for you to try out."
     }
   ],
   "blockAttributes": [
