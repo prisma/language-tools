@@ -11,7 +11,7 @@ model User {
 model Post {
     id Int @id @default()
     email String? @unique
-    name String
+    name String 
 
 }
 
