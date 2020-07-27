@@ -68,7 +68,7 @@
     },
     {
       "label": "previewFeatures",
-      "documentation": "Enables preview features fresh from our developers for you to try out."
+      "documentation": "Enables preview feature flags."
     }
   ],
   "blockAttributes": [
