@@ -188,6 +188,10 @@ suite('Should auto-complete', () => {
     label: 'binaryTargets',
     kind: vscode.CompletionItemKind.Field,
   }
+  const fieldPreviewFeatures = {
+    label: 'previewFeatures',
+    kind: vscode.CompletionItemKind.Field,
+  }
 
   const generatorWithExistingFieldsUri = getDocUri(
     'completions/generatorWithExistingFields.prisma',
@@ -199,6 +203,7 @@ suite('Should auto-complete', () => {
       new vscode.CompletionList([
         fieldBinaryTargets,
         fieldOutput,
+        fieldPreviewFeatures,
         fieldProvider,
       ]),
       false,
@@ -216,7 +221,11 @@ suite('Should auto-complete', () => {
     await testCompletion(
       generatorWithExistingFieldsUri,
       new vscode.Position(7, 0),
-      new vscode.CompletionList([fieldBinaryTargets, fieldProvider]),
+      new vscode.CompletionList([
+        fieldBinaryTargets,
+        fieldPreviewFeatures,
+        fieldProvider,
+      ]),
       true,
     )
   })
