@@ -187,7 +187,7 @@ export function quickFix(
       diag.message.includes('previewFeatures')
     ) {
       codeActions.push({
-        title: "Rename to 'previewFeatures'",
+        title: "Rename property to 'previewFeatures'",
         kind: CodeActionKind.QuickFix,
         diagnostics: [diag],
         edit: {
