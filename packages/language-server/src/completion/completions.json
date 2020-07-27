@@ -228,7 +228,7 @@
     },
     {
       "label": "connectOrCreate",
-      "documentation": "While Prisma Client already provides an `upsert` query, which is available on the top-level of the Prisma Client API, we now also support `upsert`s in a *nested* manner. When writing data with Prisma Client, both in `update` and `create`, you can now provide an `upsert` operation on a related row by using this feature flag.\n\nPlease [share](https://github.com/prisma/prisma-client-js/issues/336) your feedback on how this feature works for you. We are interested in both positive and negative feedback, so we know if this feature is already ready for production! (If encounter any problems, please open a new issue here)."
+      "documentation": "While Prisma Client already provides an `upsert` query, which is available on the top-level of the Prisma Client API, we now also support `upsert`s in a *nested* manner. When writing data with Prisma Client, both in `update` and `create`, you can now provide an `upsert` operation on a related row by using this feature flag.\n\nPlease [share](https://github.com/prisma/prisma-client-js/issues/336) your feedback on how this feature works for you. We are interested in both positive and negative feedback to help us gauge when this feature is ready for production! (If encounter any problems, please open a new issue here)."
     },
     {
       "label": "transactionApi",
