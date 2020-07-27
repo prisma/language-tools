@@ -92,7 +92,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     documentSelector: [{ scheme: 'file', language: 'prisma' }],
     synchronize: {
       fileEvents: workspace.createFileSystemWatcher(
-        '**/node_modules/.prisma/client/schema.prisma',
+        'node_modules/@prisma/client/*.d.ts',
       ),
     },
     middleware: {
