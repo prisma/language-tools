@@ -224,7 +224,7 @@
     },
     {
       "label": "middlewares",
-      "documentation": "Enables the Middlewares API allowing you to hook into the control flow of Prisma Client. Middlewares allows you to manipulate the parameters and interrogate the result of each query.\n\nPlease [share your feedback](https://github.com/prisma/prisma-client-js/issues/770) on how this feature works for you. We are interested in both positive and negative feedback, so we know if this feature is already ready for production! (If encounter any problems, please open a new issue [here](https://github.com/prisma/prisma/issues/new/choose))."
+      "documentation": "Enables the Middlewares API allowing you to hook into the control flow of Prisma Client. Middlewares allows you to manipulate the parameters and interrogate the result of each query.\n\nPlease [share your feedback](https://github.com/prisma/prisma-client-js/issues/770) on how this feature works for you. We are interested in both positive and negative feedback to help us gauge when this feature is ready for production! (If encounter any problems, please open a new issue [here](https://github.com/prisma/prisma/issues/new/choose))."
     },
     {
       "label": "connectOrCreate",
