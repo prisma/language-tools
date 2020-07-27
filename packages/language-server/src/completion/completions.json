@@ -220,7 +220,7 @@
   "generatorPreviewFeatures": [
     {
       "label": "distinct",
-      "documentation": "Enables distinct querying capabilities to Prisma Client. It allows you to query for distinct (unique) rows of a model. In other words: The fields you provide in the `distinct` argument will be duplicate free.\nDistinct is only a filter and doesn't change the return type of the `findMany` query.\n\nPlease [share your feedback](https://github.com/prisma/prisma/issues/2835) on how this feature works for you. We are interested in both positive and negative feedback, so we know if this feature is already ready for production! (If encounter any problems, please open a new issue [here](https://github.com/prisma/prisma/issues/new/choose))."
+      "documentation": "Enables distinct querying capabilities within Prisma Client. This feature allows you to query for distinct (unique) rows of a model and returns only one record per unique field value.\nDistinct is only a filter and does not change the return type of the `findMany` query.\n\nPlease [share your feedback](https://github.com/prisma/prisma/issues/2835) on how this feature works for you. We are interested in both positive and negative feedback to help us gauge when this feature is ready for production! (If encounter any problems, please open a new issue [here](https://github.com/prisma/prisma/issues/new/choose))."
     },
     {
       "label": "middlewares",
