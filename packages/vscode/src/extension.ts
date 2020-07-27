@@ -18,6 +18,7 @@ import {
   CancellationToken,
   CodeAction,
   Command,
+  workspace,
 } from 'vscode'
 import { Telemetry, TelemetryPayload, ExceptionPayload } from './telemetry'
 import path from 'path'
@@ -53,7 +54,9 @@ function createLanguageServer(
 }
 
 export async function activate(context: ExtensionContext): Promise<void> {
-  const serverModule = require.resolve('@prisma/language-server/dist/src/cli')
+  const serverModule = context.asAbsolutePath(
+    path.join('../../packages/language-server/dist/src/cli'),
+  )
 
   const pj = tryRequire(path.join(__dirname, '../../package.json'))
   if (!pj) {
@@ -87,6 +90,11 @@ export async function activate(context: ExtensionContext): Promise<void> {
   const clientOptions: LanguageClientOptions = {
     // Register the server for prisma documents
     documentSelector: [{ scheme: 'file', language: 'prisma' }],
+    synchronize: {
+      fileEvents: workspace.createFileSystemWatcher(
+        '**/node_modules/.prisma/client/schema.prisma',
+      ),
+    },
     middleware: {
       async provideCodeActions(
         document: TextDocument,

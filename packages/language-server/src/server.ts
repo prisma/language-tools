@@ -166,6 +166,11 @@ export function startServer(options?: LSOptions): void {
     return MessageHandler.handleCompletionResolveRequest(completionItem)
   })
 
+  connection.onDidChangeWatchedFiles((_change) => {
+    // Monitored files have changed in VS Code
+    connection.console.log('We have received a file change event.')
+  })
+
   connection.onHover(async (params: HoverParams) => {
     sendTelemetry({
       action: 'hover',
