@@ -215,7 +215,11 @@ suite('Should auto-complete', () => {
     await testCompletion(
       generatorWithExistingFieldsUri,
       new vscode.Position(2, 0),
-      new vscode.CompletionList([fieldBinaryTargets, fieldOutput]),
+      new vscode.CompletionList([
+        fieldBinaryTargets,
+        fieldOutput,
+        fieldPreviewFeatures,
+      ]),
       true,
     )
     await testCompletion(
