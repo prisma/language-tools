@@ -51,6 +51,20 @@
         "language": "prisma",
         "scopeName": "source.prisma",
         "path": "./syntaxes/prisma.tmLanguage.json"
+      },
+      {
+        "injectTo": [
+          "source.js",
+          "source.ts",
+          "source.js.jsx",
+          "source.tsx",
+          "source.vue"
+        ],
+        "scopeName": "inline.prisma",
+        "path": "./syntaxes/prisma.js.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.prisma": "prisma"
+        }
       }
     ],
     "configuration": {
