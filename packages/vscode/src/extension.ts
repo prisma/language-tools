@@ -54,9 +54,7 @@ function createLanguageServer(
 }
 
 export async function activate(context: ExtensionContext): Promise<void> {
-  const serverModule = context.asAbsolutePath(
-    path.join('../../packages/language-server/dist/src/cli'),
-  )
+  const serverModule = require.resolve('@prisma/language-server/dist/src/cli')
 
   const pj = tryRequire(path.join(__dirname, '../../package.json'))
   if (!pj) {
@@ -91,9 +89,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     // Register the server for prisma documents
     documentSelector: [{ scheme: 'file', language: 'prisma' }],
     synchronize: {
-      fileEvents: workspace.createFileSystemWatcher(
-        'node_modules/@prisma/client/*.d.ts',
-      ),
+      fileEvents: workspace.createFileSystemWatcher('**/.prisma/client/*.d.ts'),
     },
     middleware: {
       async provideCodeActions(
@@ -153,6 +149,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
   const disposable = client.start()
 
   client.onReady().then(() => {
+    client.onNotification('prisma/didChangeWatchedFiles', () => {
+      console.log('Restarting TS Language Server..')
+      commands.executeCommand('typescript.restartTsServer')
+    })
     if (!isDebugOrTestSession()) {
       client.onNotification('prisma/telemetry', (payload: TelemetryPayload) => {
         // eslint-disable-next-line no-console

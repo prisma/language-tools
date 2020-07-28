@@ -168,7 +168,11 @@ export function startServer(options?: LSOptions): void {
 
   connection.onDidChangeWatchedFiles((_change) => {
     // Monitored files have changed in VS Code
-    connection.console.log('We have received a file change event.')
+    connection.console.log(
+      'Types have changed. Sending request to restart TS Language Server.',
+    )
+    // Restart TS Language Server
+    connection.sendNotification('prisma/didChangeWatchedFiles', {})
   })
 
   connection.onHover(async (params: HoverParams) => {
