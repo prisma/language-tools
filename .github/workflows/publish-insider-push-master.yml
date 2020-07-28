@@ -100,8 +100,8 @@ jobs:
         with:
           run: npm run test
 
-  publish-slack: 
-    name: Slack Notification
+  publish: 
+    name: Publish to marketplace
     runs-on: ubuntu-latest
     needs: [setup, test-lsp, publish-lsp, test-extension]
     if: always()
