@@ -2,7 +2,7 @@ name: Insider Check for Update + Automated Publish
 
 on:
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: '*/5 * * * *'
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
