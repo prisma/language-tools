@@ -23,7 +23,7 @@ Please note that you should not have the regular and insider version of the exte
 
 ## Build information
 
-This version is built from commit [f72b64d80419e0c61606f86e5d4a45c3b35b7ec9](f72b64d80419e0c61606f86e5d4a45c3b35b7ec9).
+This version is built from commit [fa107ebf26ab3d86e266e415570b5634d092e9fd](fa107ebf26ab3d86e266e415570b5634d092e9fd).
 
 ## Contributing
 
