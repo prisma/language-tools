@@ -17,7 +17,7 @@ PATCH_BRANCH=$(node scripts/patch/patch-branch.js "$NPM_VERSION")
 echo "PATCH_BRANCH: $PATCH_BRANCH"
 
 
-EXISTS_ALREADY=$(git ls-remote --heads origin $PATCH_BRANCH)
+EXISTS_ALREADY=$(git ls-remote --heads origin "$PATCH_BRANCH")
 echo "$EXISTS_ALREADY"
 
 if [ "${EXISTS_ALREADY}" = "" ]; then
@@ -26,7 +26,7 @@ if [ "${EXISTS_ALREADY}" = "" ]; then
     if [ "$ENVIRONMENT" = "PRODUCTION" ]; then
         git config --global user.email "prismabots@gmail.com"
         git config --global user.name "Prismo"
-        git checkout -b $PATCH_BRANCH $NPM_VERSION
+        git checkout -b "$PATCH_BRANCH" "$NPM_VERSION"
         git remote add github "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" || true
     else
         echo "Not setting up repo because ENVIRONMENT is not set"
