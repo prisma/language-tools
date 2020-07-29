@@ -83,19 +83,24 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    if: always() && ${{ needs.setup.outputs.version }}
+    if: always() 
     steps: 
       - uses: actions/checkout@v2
       - name: Install Dependencies
+        if: ${{ needs.setup.outputs.version }}
         run: npm install
       - name: Bump versions
+        if: ${{ needs.setup.outputs.version }}
         # Jobs do not share workspace --> bump versions again
         run: npm run vsce:bump "dev" "toBeCreated"
       - name: Install Dependencies
+        if: ${{ needs.setup.outputs.version }}
         run: npm install
       - name: Compile
+        if: ${{ needs.setup.outputs.version }}
         run: npm run compile
       - name: Headless e2e tests
+        if: ${{ needs.setup.outputs.version }}
         uses: GabrielBB/xvfb-action@v1.0
         with:
           run: npm run test

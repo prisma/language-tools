@@ -69,7 +69,7 @@ jobs:
         run: npm run setup:patch
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
-        if: ${{ needs.setup.outputs.new_updates }}
+        if: ${{ needs.setup.outputs.patch-version }}
         run: npm run vsce:bump "patch-dev"  ${{ needs.setup.outputs.patch-version }}
       - name: Install Dependencies in LSP
         run: cd packages/language-server && npm install
@@ -96,23 +96,23 @@ jobs:
     steps: 
       - uses: actions/checkout@v2
       - name: Install Dependencies
-        if: ${{ needs.setup.outputs.new_updates }}
+        if: ${{ needs.setup.outputs.patch-version }}
         run: npm install
       - name: Setup patch branch
         if: ${{ needs.setup.outputs.patch-version }}
         run: npm run setup:patch
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
-        if: ${{ needs.setup.outputs.new_updates }}
+        if: ${{ needs.setup.outputs.patch-version }}
         run: npm run vsce:bump "patch-dev"  ${{ needs.setup.outputs.patch-version }}
       - name: Install Dependencies
-        if: ${{ needs.setup.outputs.new_updates }}
+        if: ${{ needs.setup.outputs.patch-version }}
         run: npm install
       - name: Compile
-        if: ${{ needs.setup.outputs.new_updates }}
+        if: ${{ needs.setup.outputs.patch-version }}
         run: npm run compile
       - name: Headless e2e tests
-        if: ${{ needs.setup.outputs.new_updates }}
+        if: ${{ needs.setup.outputs.patch-version }}
         uses: GabrielBB/xvfb-action@v1.0
         with:
           run: npm run test
@@ -138,14 +138,14 @@ jobs:
         run: npm run setup:patch
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
-        if: ${{ needs.setup.outputs.new_updates }}
+        if: ${{ needs.setup.outputs.patch-version }}
         run: npm run vsce:bump "patch-dev"  ${{ needs.setup.outputs.patch-version }}
       - name: Install Dependencies
         run: npm install
       - name: Compile
         run: npm run compile
       - name: Publish Extension as Patch
-        if: ${{ needs.setup.outputs.new_updates }}
+        if: ${{ needs.setup.outputs.patch-version }}
         run: npm run vsce:publish "patch-dev" ${{ needs.setup.outputs.patch-version }}
       - name: Slack Notification on Failure
         if: ${{ needs.setup.result == 'failure' || needs.test-extension.result == 'failure' || failure() }}
@@ -180,7 +180,7 @@ jobs:
         run: npm run setup:patch
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
-        if: ${{ needs.setup.outputs.new_updates }}
+        if: ${{ needs.setup.outputs.patch-version }}
         id: bump
         run: npm run vsce:bump "latest"  "toBeCreated"
       - name: Compile
