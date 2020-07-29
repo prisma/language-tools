@@ -43,6 +43,7 @@ elif [ "$RELEASE_CHANNEL" = "latest" ]; then
     IS_MINOR_RELEASE=$(node scripts/is-minor-release.js "$NPM_VERSION")
     if [ "$IS_MINOR_RELEASE" = "true" ]; then
         echo "NEXT_EXTENSION_VERSION: $NPM_VERSION"
+        echo "::set-output name=is-minor-release::true"
         echo "::set-output name=version::$NPM_VERSION"
     else
         echo "Not a minor release of Prisma CLI."

@@ -15,6 +15,7 @@ jobs:
     if: endsWith(github.ref, '/master')
     outputs:
       version: ${{ steps.check_for_updates.outputs.version }}
+      is-minor-release: ${{ steps.check_for_updates.outputs.is-minor-release }}
       lsp-not-published: ${{ steps.check_lsp_version.outputs.lsp-not-published }}
     steps:
       - uses: actions/checkout@v2
@@ -24,10 +25,10 @@ jobs:
         run: npm run vsce:check "latest" 
         id: check_for_updates
       - name: Bump versions
-        if: ${{ steps.check_for_updates.outputs.version }}
+        if: ${{ steps.check_for_updates.outputs.is-minor-release }}
         run: npm run vsce:bump "latest" ${{ steps.check_for_updates.outputs.version }}
       - name: Check existing LSP version
-        if: ${{ steps.check_for_updates.outputs.version }}
+        if: ${{ steps.check_for_updates.outputs.is-minor-release }}
         id: check_lsp_version
         run: npm run check:lsp ${{ steps.check_for_updates.outputs.version }}
   
@@ -45,7 +46,7 @@ jobs:
         run: npm install
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
-        if: ${{ needs.setup.outputs.version }}
+        if: ${{ needs.setup.outputs.is-minor-release }}
         run: npm run vsce:bump "latest" ${{ needs.setup.outputs.version }}
       - name: Install Dependencies in LSP
         run: cd packages/language-server && npm install
@@ -65,7 +66,7 @@ jobs:
         run: npm install
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
-        if: ${{ needs.setup.outputs.version }}
+        if: ${{ needs.setup.outputs.is-minor-release }}
         run: npm run vsce:bump "latest" ${{ needs.setup.outputs.version }}
       - name: Install Dependencies in LSP
         run: cd packages/language-server && npm install
@@ -95,7 +96,7 @@ jobs:
         run: npm install
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
-        if: ${{ needs.setup.outputs.version }}
+        if: ${{ needs.setup.outputs.is-minor-release }}
         run: npm run vsce:bump "latest" ${{ needs.setup.outputs.version }}
       - name: Install Dependencies
         run: npm install
@@ -125,7 +126,7 @@ jobs:
         run: npm install
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
-        if: ${{ needs.setup.outputs.version }}
+        if: ${{ needs.setup.outputs.is-minor-release }}
         run: npm run vsce:bump "latest" ${{ needs.setup.outputs.version }}
       - name: Install Dependencies
         run: npm install
@@ -141,7 +142,7 @@ jobs:
           SLACK_COLOR: '#FF0000'
 
       - name: Slack Notification on Success
-        if: ${{ needs.test-extension.result == 'success' && success() && needs.setup.outputs.version }}
+        if: ${{ needs.test-extension.result == 'success' && success() && needs.setup.outputs.is-minor-release }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
           SLACK_TITLE: "Published stable :white_check_mark:"
