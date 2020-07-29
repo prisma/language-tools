@@ -22,7 +22,7 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Bump versions
-        run: npm run vsce:bump "dev" ""
+        run: npm run vsce:bump "dev" "toBeCreated"
         id: bump_versions
       - name: Check existing LSP version
         id: check_lsp_version
@@ -42,7 +42,7 @@ jobs:
         run: npm install
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
-        run: npm run vsce:bump "dev" ""
+        run: npm run vsce:bump "dev" "toBeCreated"
       - name: Install Dependencies in LSP
         run: cd packages/language-server && npm install
       - name: Compile LSP
@@ -61,7 +61,7 @@ jobs:
         run: npm install
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
-        run: npm run vsce:bump "dev" ""
+        run: npm run vsce:bump "dev" "toBeCreated"
       - name: Install Dependencies in LSP
         run: cd packages/language-server && npm install
       - name: Compile LSP
@@ -90,7 +90,7 @@ jobs:
         run: npm install
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
-        run: npm run vsce:bump "dev" ""
+        run: npm run vsce:bump "dev" "toBeCreated"
       - name: Install Dependencies
         run: npm install
       - name: Compile
@@ -104,7 +104,7 @@ jobs:
     name: Publish to marketplace
     runs-on: ubuntu-latest
     needs: [setup, test-lsp, publish-lsp, test-extension]
-    if: always()
+    if: ${{ needs.setup.outputs.version }}
     env: 
       AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
@@ -118,7 +118,7 @@ jobs:
         run: npm install
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
-        run: npm run vsce:bump "dev" ""
+        run: npm run vsce:bump "dev" "toBeCreated"
       - name: Install Dependencies
         run: npm install
       - name: Compile
