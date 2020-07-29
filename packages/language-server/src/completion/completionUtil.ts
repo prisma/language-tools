@@ -135,3 +135,14 @@ export const generatorProviderArguments: CompletionItem[] = convertToCompletionI
   CompletionItemKind.Property,
   (label: string) => label.replace('""', '"$0"'),
 )
+
+export const generatorPreviewFeatures: CompletionItem[] = convertToCompletionItems(
+  completions.generatorPreviewFeatures,
+  CompletionItemKind.Constant,
+)
+
+export const generatorPreviewFeaturesArguments: CompletionItem[] = convertToCompletionItems(
+  completions.generatorPreviewFeaturesArguments,
+  CompletionItemKind.Property,
+  (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
+)

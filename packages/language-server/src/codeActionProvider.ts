@@ -182,6 +182,26 @@ export function quickFix(
         },
       })
     }
+    if (
+      diag.severity === DiagnosticSeverity.Warning &&
+      diag.message.includes('previewFeatures')
+    ) {
+      codeActions.push({
+        title: "Rename property to 'previewFeatures'",
+        kind: CodeActionKind.QuickFix,
+        diagnostics: [diag],
+        edit: {
+          changes: {
+            [params.textDocument.uri]: [
+              {
+                range: diag.range,
+                newText: 'previewFeatures',
+              },
+            ],
+          },
+        },
+      })
+    }
   }
 
   return codeActions

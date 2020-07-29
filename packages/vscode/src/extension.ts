@@ -18,6 +18,7 @@ import {
   CancellationToken,
   CodeAction,
   Command,
+  workspace,
 } from 'vscode'
 import { Telemetry, TelemetryPayload, ExceptionPayload } from './telemetry'
 import path from 'path'
@@ -87,6 +88,9 @@ export async function activate(context: ExtensionContext): Promise<void> {
   const clientOptions: LanguageClientOptions = {
     // Register the server for prisma documents
     documentSelector: [{ scheme: 'file', language: 'prisma' }],
+    synchronize: {
+      fileEvents: workspace.createFileSystemWatcher('**/.prisma/client/*.d.ts'),
+    },
     middleware: {
       async provideCodeActions(
         document: TextDocument,
@@ -145,6 +149,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
   const disposable = client.start()
 
   client.onReady().then(() => {
+    client.onNotification('prisma/didChangeWatchedFiles', () => {
+      console.log('Restarting TS Language Server..')
+      commands.executeCommand('typescript.restartTsServer')
+    })
     if (!isDebugOrTestSession()) {
       client.onNotification('prisma/telemetry', (payload: TelemetryPayload) => {
         // eslint-disable-next-line no-console

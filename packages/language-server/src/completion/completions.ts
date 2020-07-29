@@ -20,6 +20,8 @@ import {
   dataSourceProviderArguments,
   generatorProviders,
   generatorProviderArguments,
+  generatorPreviewFeaturesArguments,
+  generatorPreviewFeatures,
 } from './completionUtil'
 import klona from 'klona'
 import { extractModelName } from '../rename/renameUtil'
@@ -411,6 +413,35 @@ export function getSuggestionForSupportedFields(
         } else {
           return {
             items: generatorProviderArguments,
+            isIncomplete: true,
+          }
+        }
+      }
+      if (currentLine.startsWith('previewFeatures')) {
+        let previewFeatures: CompletionItem[] = klona(generatorPreviewFeatures)
+        if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
+          if (isInsideQuotation) {
+            const usedValues = getValuesInsideBrackets(currentLineUntrimmed)
+            previewFeatures = previewFeatures.filter(
+              (t) => !usedValues.includes(t.label),
+            )
+            return {
+              items: previewFeatures,
+              isIncomplete: true,
+            }
+          } else {
+            return {
+              items: generatorPreviewFeaturesArguments.filter(
+                (arg) => !arg.label.includes('['),
+              ),
+              isIncomplete: true,
+            }
+          }
+        } else {
+          return {
+            items: generatorPreviewFeaturesArguments.filter(
+              (arg) => !arg.label.includes('"'),
+            ),
             isIncomplete: true,
           }
         }

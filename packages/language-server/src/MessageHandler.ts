@@ -202,6 +202,35 @@ export function getModelOrEnumBlock(
   return foundBlocks[0]
 }
 
+function getExperimentalFeaturesRange(
+  document: TextDocument,
+): Range | undefined {
+  const lines = convertDocumentTextToTrimmedLineArray(document)
+  const experimentalFeatures = 'experimentalFeatures'
+  let reachedStartLine = false
+  for (const [key, item] of lines.entries()) {
+    if (item.startsWith('generator') && item.includes('{')) {
+      reachedStartLine = true
+    }
+    if (!reachedStartLine) {
+      continue
+    }
+    if (reachedStartLine && item.startsWith('}')) {
+      return
+    }
+
+    if (item.startsWith(experimentalFeatures)) {
+      const startIndex = getCurrentLine(document, key).indexOf(
+        experimentalFeatures,
+      )
+      return {
+        start: { line: key, character: startIndex },
+        end: { line: key, character: startIndex + experimentalFeatures.length },
+      }
+    }
+  }
+}
+
 export async function handleDiagnosticsRequest(
   document: TextDocument,
   onError?: (errorMessage: string) => void,
@@ -243,6 +272,23 @@ export async function handleDiagnosticsRequest(
     }
     diagnostics.push(diagnostic)
   }
+
+  // check for experimentalFeatures inside generator block
+  if (document.getText().includes('experimentalFeatures')) {
+    const experimentalFeaturesRange:
+      | Range
+      | undefined = getExperimentalFeaturesRange(document)
+    if (experimentalFeaturesRange) {
+      diagnostics.push({
+        severity: DiagnosticSeverity.Warning,
+        range: experimentalFeaturesRange,
+        message:
+          "This property has been renamed to 'previewFeatures' to better communicate what they are.",
+        source: '',
+      })
+    }
+  }
+
   return diagnostics
 }
 
