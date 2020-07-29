@@ -2,7 +2,7 @@ name: Stable Check for Minor Update + Automated Publish
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '*/10 * * * *'
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
