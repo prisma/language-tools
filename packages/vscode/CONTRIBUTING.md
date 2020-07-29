@@ -64,5 +64,5 @@ To do an extension only publish, please follow these steps:
 
 1. Create a patch branch ending with `.x` if it doesn't exist yet.
 2. Push to the patch branch with the changes.
-3. Step 2 will trigger the script `patch-dev-push-branch`, creating an Insider release
-4. If you were satisfied, manually trigger GH action workflow `publish-patch-manual` to release the patch to the stable extension
+3. Step 2 will trigger the script `patch-extension-only`, creating an Insider release
+4. If you were satisfied, manually trigger GH action workflow `publish-patch-branch-to-stable` to release the patch to the stable extension
