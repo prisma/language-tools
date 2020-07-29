@@ -60,21 +60,9 @@ Note that the personal access token is only valid for a year and will need to be
 
 ### Manual Publishing
 
-To do a manual publish, please follow these steps:
+To do an extension only publish, please follow these steps:
 
-1. Go to the language-server folder.
-2. Increment the package version
-3. Update to latest pinned binary release in the [Prisma CLI's package.json](https://github.com/prisma/prisma2/blob/master/cli/prisma2/package.json) under **prisma.version**.
-4. Run `npm install`
-5. Run `npm run build`
-6. Run `npm publish`
-7. Go to the vscode folder.
-8. Incremement the package version.
-9. Update to latest pinned binary release in the [Prisma CLI's package.json](https://github.com/prisma/prisma2/blob/master/cli/prisma2/package.json) under **prisma.version**.
-10. Update the language server version to the version from step 2
-11. Run `npm run package`
-12. Go to https://marketplace.visualstudio.com/manage/publishers/Prisma
-13. Click the **��� More Actions**
-14. Drag `prisma-x.x.x.vsix` into the browser and click upload.
-
-This will take about an hour before the update is available.
+1. Create a patch branch ending with `.x` if it doesn't exist yet.
+2. Push to the patch branch with the changes.
+3. Step 2 will trigger the script `patch-dev-push-branch`, creating an Insider release
+4. If you were satisfied, manually trigger GH action workflow `publish-patch-manual` to release the patch to the stable extension
