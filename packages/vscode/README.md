@@ -1,28 +1,55 @@
 <h2 align="center">Prisma VS Code Extension</h2>
 <div align="center">
 
-[![Version](https://vsmarketplacebadge.apphb.com/version/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider)
-[![Installs](https://vsmarketplacebadge.apphb.com/installs/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider)
-[![Ratings](https://vsmarketplacebadge.apphb.com/rating/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider)
-
-![CI tests](https://img.shields.io/github/workflow/status/prisma/vscode/CI%20tests/master.svg?label=CI%20tests&logo=github)
-![Check for Update + Automated Publish](https://img.shields.io/github/workflow/status/prisma/vscode/Check%20for%20Update%20%2B%20Automated%20Publish/master.svg?label=Check%20for%20Update%20%2B%20Automated%20Publish&logo=github)
+[![Version](https://vsmarketplacebadge.apphb.com/version/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
+[![Installs](https://vsmarketplacebadge.apphb.com/installs/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
+[![Ratings](https://vsmarketplacebadge.apphb.com/rating/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
 
 </div>
 <hr>
+Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma Schema files.
 
-## Insider Build
+## Features
 
-This is the Insider Build of the [Prisma VSCode extension](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma). Most users should not use this version, but instead install
-the regular version of the extension.This version of the extension may contain unstable prerelease code and is directly built from the master branch.
+* Syntax highlighting
+* Code Completion
+    * Completion results appear for symbols as you type. 
+    * You can trigger this manually with the Ctrl+Space shortcut.
+* Documentation help
+    * Information about the documentation of a completion result pops up as completion results are provided.
+* Quick info on hover
+    * Documentation Comments (`///`) of models and enums appear anywhere you hover over their usages.
+* Go to Definition
+    * Jump to or peek a model or enum's declaration.
+* Formatting
+    * Format code either manually or on save (if configured). 
+    * *To automatically format on save, add the following to your `settings.json` file:*
+        ```
+        "editor.formatOnSave": true
+        ```
+* Rename
+    * Rename models, enums, fields and enum values
+    * Automatically applies `@map` or `@@map` on the schema 
+* Linting
+    * Diagnostic tools are used to surface errors and warnings in your schema file as you type.
+* Quick-fixes
+    * Quickly fix typos in model and enum names
+    * Create new models and enums with a single click
 
-**Only use this extension if you are also using the dev version of the CLI.**
 
-Please note that you should not have the regular and insider version of the extension installed at the same time.
+## Preview
 
-## Build information
+<details>
+  <summary>Syntax-Highlighting</summary>
 
-This version is built from commit [5e9088c26f6ec172637b2476ae22f1b014c124c2](5e9088c26f6ec172637b2476ae22f1b014c124c2).
+![Preview Schema](https://i.imgur.com/W80iRwE.png)
+
+</details>
+<details>
+  <summary>Quick-Fixes</summary>
+  
+![Quick-Fixes](https://media.giphy.com/media/iGGCF9JWOHx7SAKQlu/giphy.gif)
+</details>
 
 ## Contributing
 
@@ -32,6 +59,10 @@ Read more about [how to contribute to the Prisma VSCode extension](./packages/vs
 
 This extension collects telemetry data using [Azure Application Insights](https://www.npmjs.com/package/vscode-extension-telemetry) to help us better the usage of the extension.
 The extension respects the `telemetry.enableTelemetry` setting in VSCode.
+
+## Build information
+
+This is for Prisma CLI [undefined](undefined).
 
 ## Security
 
