@@ -124,6 +124,7 @@ jobs:
       - name: Compile
         run: npm run compile
       - name: Publish Extension as Patch ${{ needs.setup.outputs.version }}
+        if: ${{ needs.setup.outputs.version }}
         run: npm run vsce:publish "dev" 
       - name: Slack Notification on Failure
         if: ${{ needs.setup.result == 'failure' || needs.test-lsp.result == 'failure' || needs.publish-lsp.result == 'failure' || needs.test-extension.result == 'failure' || failure() }}
