@@ -5,7 +5,7 @@ const { nextExtensionVersion } = require('./../extension-version')
 describe('next extension version', () => {
 
   // normal insider release
-  it('it sohuld work with an insider release triggered by Prisma CLI', () => {
+  it('it should work with an insider release triggered by Prisma CLI', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.5.0-dev.2',
@@ -14,7 +14,7 @@ describe('next extension version', () => {
     ).to.eq('5.0.2')
   })
 
-  it('it sohuld work with an insider release triggered by Prisma CLI after an extension only release', () => {
+  it('it should work with an insider release triggered by Prisma CLI after an extension only release', () => {
     expect(
       nextExtensionVersion({
         prismaVersion: '2.5.0-dev.2',
