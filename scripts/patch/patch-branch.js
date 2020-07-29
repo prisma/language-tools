@@ -4,7 +4,7 @@ function patchBranchName({
     const tokens = version.split('.')
     if (tokens.length !== 3) {
         throw new Error(
-            `Version ${prismaVersion} must have 3 tokens separated by "." character.`
+            `Version ${version} must have 3 tokens separated by "." character.`
         )
     }
     // remove last digit

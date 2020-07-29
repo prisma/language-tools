@@ -23,7 +23,9 @@
     "yarn": "1.22.4",
     "lint-staged": "10.1.2",
     "prettier": "2.0.5",
-    "typescript": "3.8.3"
+    "typescript": "3.8.3",
+    "mocha": "8.0.1",
+    "chai": "4.2.0"
   },
   "scripts": {
     "build": "tsc -b",
@@ -37,6 +39,7 @@
     "vsce:bump": "sh scripts/bump.sh",
     "shell:lint": "shellcheck -x scripts/**/*.sh",
     "test": "sh scripts/e2e.sh",
+    "testScripts": "mocha 'scripts/tests/*.js'",
     "check:lsp": "sh scripts/lsp-version.sh",
     "setup:patch": "sh scripts/patch/setup.sh"
   },
@@ -58,5 +61,8 @@
   },
   "prisma": {
     "version": "70bbce05e86a6109ced7ad133bd5dca095b3fa58"
+  },
+  "dependencies": {
+    "chai": "^4.2.0"
   }
 }

@@ -15,6 +15,7 @@ function nextExtensionVersion({
   if (patchRelease) {
     // new Prisma patch
     const prismaTokens = prismaVersion.split('.')
+    
     const extensionTokens = extensionVersion.split('.')
 
     if (prismaTokens.length === 3) {
@@ -40,10 +41,16 @@ function nextExtensionVersion({
     return semVer.inc(extensionVersion, 'patch')
   }
 
-  if (stableMinorRelease === 'true' && prismaStableVersion !== '') {
+  if (stableMinorRelease && prismaStableVersion !== '') {
     // check if there already was a insider release after the stable minor release
     const extensionTokens = extensionVersion.split('.')
     const prismaStableTokens = prismaStableVersion.split('.')
+
+    if (prismaStableTokens.length !== 3) {
+      throw new Error(
+        `Prisma CLI stable Version ${prismaStableVersion} must have 3 tokens separated by "." character`,
+      )
+    }
 
     if (extensionTokens[0] === prismaStableTokens[1]) {
       // first new release after stable minor bump --> extensionVersion from x.y.z to (x+1).0.1
