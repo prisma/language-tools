@@ -3,9 +3,10 @@ const githubAction = require('@actions/github')
 const path = require('path')
 
 
-function changeReadme({
+function getNewReadMeContent({
   releaseChannel,
-  npmVersion
+  npmVersion,
+  githubActionContextSha
 }) {
   if (releaseChannel === 'dev' || releaseChannel === 'patch-dev') {
     let content = fs.readFileSync(
@@ -14,28 +15,36 @@ function changeReadme({
         encoding: "utf-8",
       }
     );
-    content = content.replace(/\$commit-sha\$/g, githubAction.context.sha)
-    content = content.replace(/\$prisma-cli-version\$/g, npmVersion)
-    fs.writeFileSync( "./packages/vscode/README.md", content);
+    content = content.replace(/\$commit-sha\$/g, githubActionContextSha)
+    return content.replace(/\$prisma-cli-version\$/g, npmVersion)
   } else {
-     content = fs.readFileSync(
+    content = fs.readFileSync(
       path.join(__dirname, "./README_STABLE_BUILD.md"),
       {
         encoding: "utf-8",
       }
     )
-    content = content.replace(/\$prisma-cli-version\$/g, npmVersion)
-    fs.writeFileSync("./packages/vscode/README.md", content);
+    return content.replace(/\$prisma-cli-version\$/g, npmVersion)
   }
 }
 
 
-module.exports = { changeReadme }
+
+function changeReadme({
+  releaseChannel,
+  npmVersion
+}) {
+  const content = getNewReadMeContent(releaseChannel, npmVersion, githubAction.context.sha)
+  fs.writeFileSync("./packages/vscode/README.md", content);
+}
+
+
+module.exports = { changeReadme, getNewReadMeContent }
 
 if (require.main === module) {
   const args = process.argv.slice(2)
   changeReadme({
     releaseChannel: args[0],
-    npmVersion: args[1] 
+    npmVersion: args[1]
   })
 }
