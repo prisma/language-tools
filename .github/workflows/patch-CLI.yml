@@ -25,6 +25,7 @@ jobs:
         run: npm run vsce:check "patch-dev" 
         id: check_for_updates
       - name: Check existing LSP version
+        if: ${{ steps.check_for_updates.outputs.patch-version }}
         id: check_lsp_version
         run: npm run check:lsp ${{ steps.check_for_updates.outputs.patch-version }}
   
