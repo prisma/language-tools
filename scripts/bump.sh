@@ -47,7 +47,7 @@ if [ "$NEXT_EXTENSION_VERSION" = "" ]; then
         NPM_VERSION_STABLE=$(sh scripts/prisma-version.sh "latest")
         NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION_STABLE" "$LAST_PATCH_EXTENSION_VERSION" "true")
     elif [ "$RELEASE_CHANNEL" = "latest" ]; then 
-        NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION" "true")
+        NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
     else
         # Release channel = dev on push to master 
         NPM_VERSION_STABLE=$(sh scripts/prisma-version.sh "latest")

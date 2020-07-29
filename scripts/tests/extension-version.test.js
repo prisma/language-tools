@@ -44,6 +44,24 @@ describe('next extension version', () => {
     ).to.eq('3.1.2')
   })
 
+  it ('it should work with a first Prisma CLI patch on stable', () => {
+    expect(
+      nextExtensionVersion({
+        prismaVersion: '2.5.1',
+        extensionVersion: '2.5.0',
+      })
+    ).to.eq('2.5.1')
+  })
+
+  it ('it should work with a Prisma CLI patch on stable', () => {
+    expect(
+      nextExtensionVersion({
+        prismaVersion: '2.5.1',
+        extensionVersion: '2.5.1',
+      })
+    ).to.eq('2.5.2')
+  })
+
   // first extension release after Prisma CLI minor update
 
   it('it should work with the first extension release after a minor Prisma CLI update', () => {
