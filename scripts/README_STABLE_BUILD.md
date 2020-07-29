@@ -60,6 +60,10 @@ Read more about [how to contribute to the Prisma VSCode extension](./packages/vs
 This extension collects telemetry data using [Azure Application Insights](https://www.npmjs.com/package/vscode-extension-telemetry) to help us better the usage of the extension.
 The extension respects the `telemetry.enableTelemetry` setting in VSCode.
 
+## Build information
+
+This is for Prisma CLI [$prisma-cli-version$]($prisma-cli-version$).
+
 ## Security
 
 If you have a security issue to report, please contact us at [security@prisma.io](mailto:security@prisma.io?subject=[GitHub]%20Prisma%202%20Security%20Report%20VSCode)

@@ -5,7 +5,11 @@
 The `master` branch of this repository contains the VS Code extension for Prisma schema files. Prisma package dependencies are kept up to date with a GitHub Action workflow, that updates them every time a new version of them is released.
 
 There is a stable version `prisma` and an unstable version `prisma-dev`. The stable one is published as ["Prisma" in the VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma), the unstable one as ["Prisma Dev"](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-dev). An automated publish runs every 5 minutes calling the `check-update.sh` script.
-In the beginning of this run, the CI job checks for Prisma stable version and `scripts/prisma_version_stable` contents to be the same. If they are not the same, it makes the required version changes and proceeds further in the job. `scripts/prisma_version_stable` is a file that is committed by the stable CI job. That enables the future runs to know if an extension version is already published for a specific Prisma CLI version. The same workflow is done for Prisma unstable version, where the file checked in that case is `scripts/prisma_version_unstable` and in addition the respective `package.json` files are committed.
+In the beginning of this run, the CI job checks for Prisma stable version and `scripts/prisma_version_stable` contents to be the same. If the Prisma stable version is a new minor release, it makes the required version changes and proceeds further in the job. `scripts/prisma_version_stable` is a file that is committed by the stable CI job. That enables the future runs to know if an extension version is already published for a specific Prisma CLI version.
+
+If there is a new Prisma Patch, a new patch branch from the last stable release tag is created if it does not exist yet. It then makes the required version changes and releases a new Insider extension. This script also triggers the release of a new Stable extension, incrementing the version number each time.
+If the patch branch is created manually and something is pushed to it, another script runs, releasing what is on the patch branch to the Insider extension, incrementing the version number each time.
+On push to the master branch, a new Insider extension is released, with an incremented version number each time.
 
 ## Structure
 
@@ -56,21 +60,9 @@ Note that the personal access token is only valid for a year and will need to be
 
 ### Manual Publishing
 
-To do a manual publish, please follow these steps:
+To do an extension only publish, please follow these steps:
 
-1. Go to the language-server folder.
-2. Increment the package version
-3. Update to latest pinned binary release in the [Prisma CLI's package.json](https://github.com/prisma/prisma2/blob/master/cli/prisma2/package.json) under **prisma.version**.
-4. Run `npm install`
-5. Run `npm run build`
-6. Run `npm publish`
-7. Go to the vscode folder.
-8. Incremement the package version.
-9. Update to latest pinned binary release in the [Prisma CLI's package.json](https://github.com/prisma/prisma2/blob/master/cli/prisma2/package.json) under **prisma.version**.
-10. Update the language server version to the version from step 2
-11. Run `npm run package`
-12. Go to https://marketplace.visualstudio.com/manage/publishers/Prisma
-13. Click the **��� More Actions**
-14. Drag `prisma-x.x.x.vsix` into the browser and click upload.
-
-This will take about an hour before the update is available.
+1. Create a patch branch ending with `.x` if it doesn't exist yet.
+2. Push to the patch branch with the changes.
+3. Step 2 will trigger the script `patch-extension-only`, creating an Insider release
+4. If you were satisfied, manually trigger GH action workflow `publish-patch-branch-to-stable` to release the patch to the stable extension

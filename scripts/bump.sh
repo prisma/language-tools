@@ -6,16 +6,27 @@ set -eu
 if [ -f ".envrc" ]; then
     echo "Loading .envrc"
     # shellcheck disable=SC1091
-    . .envrc
+    . ./.envrc
 else
     echo "No .envrc"
 fi
 
+
+# Setup the repo with GITHUB_TOKEN to avoid running jobs when CI commits
+if [ "$ENVIRONMENT" = "PRODUCTION" ]; then
+    git config --global user.email "prismabots@gmail.com"
+    git config --global user.name "Prismo"
+    git remote add github "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" || true
+else
+    echo "Not setting up repo because ENVIRONMENT is not set"
+fi
+
+
 RELEASE_CHANNEL=$1
 echo "RELEASE_CHANNEL: $RELEASE_CHANNEL"
 
-OLD_SHA=$(jq ".prisma.version" ./packages/vscode/package.json)
-SHA=$(npx -q -p @prisma/cli@"$RELEASE_CHANNEL" prisma --version | grep "Query Engine" | awk '{print $5}')
+NEXT_EXTENSION_VERSION=$2
+echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
 
 NPM_VERSION=$(sh scripts/prisma-version.sh "$RELEASE_CHANNEL")
 echo "NPM_VERSION: $NPM_VERSION"
@@ -24,17 +35,40 @@ echo "UPDATING to $NPM_VERSION"
 EXTENSION_VERSION=$(sh scripts/extension-version.sh "$RELEASE_CHANNEL" "")
 echo "EXTENSION_VERSION: $EXTENSION_VERSION"
 
-NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
+
+OLD_SHA=$(jq ".prisma.version" ./packages/vscode/package.json)
+SHA=$(npx -q -p @prisma/cli@"$RELEASE_CHANNEL" prisma --version | grep "Query Engine" | awk '{print $5}')
+
+
+if [ "$NEXT_EXTENSION_VERSION" = "" ]; then
+    if [ "$RELEASE_CHANNEL" = "patch-dev" ]; then 
+        # insider patch extension release
+        LAST_PATCH_EXTENSION_VERSION=$(cat scripts/extension_version_patch_dev)
+        NPM_VERSION_STABLE=$(sh scripts/prisma-version.sh "latest")
+        NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION_STABLE" "$LAST_PATCH_EXTENSION_VERSION" "true")
+    elif [ "$RELEASE_CHANNEL" = "latest" ]; then 
+        NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")
+    else
+        # Release channel = dev on push to master 
+        NPM_VERSION_STABLE=$(sh scripts/prisma-version.sh "latest")
+        IS_MINOR_RELEASE=$(node scripts/is-minor-release.js "$NPM_VERSION_STABLE")
+        NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION" "false" "$NPM_VERSION_STABLE" "$IS_MINOR_RELEASE")
+    fi
+fi
 echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
+echo "::set-output name=version::$NEXT_EXTENSION_VERSION"
 
 if [ "$RELEASE_CHANNEL" = "dev" ]; then
     echo "$NPM_VERSION" >scripts/prisma_version_insider
-else
+elif [ "$RELEASE_CHANNEL" = "latest" ]; then
     echo "$NPM_VERSION" >scripts/prisma_version_stable
+else 
+    echo "$NPM_VERSION" >scripts/prisma_version_patch_dev
+    echo "$NEXT_EXTENSION_VERSION"> scripts/extension_version_patch_dev
 fi
 
 # If the RELEASE_CHANNEL is dev, we need to change the name, displayName, description and preview flag to the Insider extension
-if [ "$RELEASE_CHANNEL" = "dev" ]; then
+if [ "$RELEASE_CHANNEL" = "dev" ] || [ "$RELEASE_CHANNEL" = "patch-dev" ]; then
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma-insider\" | \
         .displayName = \"Prisma - Insider\" | \
@@ -42,7 +76,7 @@ if [ "$RELEASE_CHANNEL" = "dev" ]; then
         .dependencies[\"@prisma/language-server\"] = \"$NEXT_EXTENSION_VERSION\" | \
         .preview = true" \
     ./packages/vscode/package.json >./packages/vscode/package.json.bk
-    node scripts/change-readme.js "$RELEASE_CHANNEL"
+    node scripts/change-readme.js "$RELEASE_CHANNEL" "$NPM_VERSION"
 else
     jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
         .name = \"prisma\" | \
@@ -52,10 +86,9 @@ else
         .preview = false" \
     ./packages/vscode/package.json >./packages/vscode/package.json.bk
 
-    node scripts/change-readme.js "$RELEASE_CHANNEL"
+    node scripts/change-readme.js "$RELEASE_CHANNEL" "$NPM_VERSION"
 fi
 
-echo "::set-output name=version::$NEXT_EXTENSION_VERSION"
 
 jq ".version = \"$NEXT_EXTENSION_VERSION\" | \
     .prisma.version = \"$SHA\" | \

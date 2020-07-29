@@ -3,50 +3,84 @@ const semVer = require('semver')
 function nextExtensionVersion({
   prismaVersion,
   extensionVersion,
-  isExtensionOnlyCommit = false,
+  patchRelease = false,
+  prismaStableVersion = '',
+  stableMinorRelease = false
 }) {
-  const isBeta = prismaVersion.includes('beta')
+
   const derivedExtensionVersion = getDerivedExtensionVersion(
-    stripPreReleaseText(prismaVersion),
-    isBeta,
+    stripPreReleaseText(prismaVersion)
   )
 
-  const existingExtensionVersion = coerceExtensionVersion(
-    extensionVersion,
-    isBeta,
-  )
+  if (patchRelease) {
+    // new Prisma patch
+    const prismaTokens = prismaVersion.split('.')
+    
+    const extensionTokens = extensionVersion.split('.')
 
-  if (
-    derivedExtensionVersion === existingExtensionVersion &&
-    isExtensionOnlyCommit
-  ) {
-    // Extension only publish
-    return bumpExtensionOnlyVersion(extensionVersion)
-  } else if (
-    derivedExtensionVersion === existingExtensionVersion &&
-    !isExtensionOnlyCommit
-  ) {
-    throw new Error(
-      `derivedExtensionVersion === existingExtensionVersion but isExtensionOnlyCommit is false. This can happen if there were multiple versions of Prisma CLI released in a quick succession.`,
-    )
+    if (prismaTokens.length === 3) {
+      // extension only patch
+      
+      if (extensionTokens[0] !== prismaTokens[1]) {
+        return prismaTokens[1] + '.1.1'
+      }
+
+      return semVer.inc(extensionVersion, 'patch')
+    }
+        
+    // Prisma CLI patch
+    if (derivedExtensionVersion !== prismaVersion) {
+      // insider release
+      const derivedExtensionTokens = derivedExtensionVersion.split('.')
+
+      if (extensionTokens[0] !== derivedExtensionTokens[0] || extensionTokens[1] !== derivedExtensionTokens[1]) {
+        return derivedExtensionVersion
+      }
+
+    }
+    return semVer.inc(extensionVersion, 'patch')
   }
-  return derivedExtensionVersion
+
+  if (stableMinorRelease && prismaStableVersion !== '') {
+    // check if there already was a insider release after the stable minor release
+    const extensionTokens = extensionVersion.split('.')
+    const prismaStableTokens = prismaStableVersion.split('.')
+
+    if (prismaStableTokens.length !== 3) {
+      throw new Error(
+        `Prisma CLI stable Version ${prismaStableVersion} must have 3 tokens separated by "." character`,
+      )
+    }
+
+    if (extensionTokens[0] === prismaStableTokens[1]) {
+      // first new release after stable minor bump --> extensionVersion from x.y.z to (x+1).0.1
+      let bumpMajor = semVer.inc(extensionVersion, 'major').split('.')
+
+      return bumpMajor[0] + '.0.1'
+    }
+
+  }
+
+  if (isMajorBump(extensionVersion, derivedExtensionVersion)) {
+    return derivedExtensionVersion
+  }
+
+  return semVer.inc(extensionVersion, 'patch')
 }
 
 function stripPreReleaseText(version) {
-  return version.replace('-alpha', '').replace('-beta', '').replace('-dev', '')
+  return version.replace('-dev', '')
 }
 
-function getDerivedExtensionVersion(version, isBeta = false) {
-  const tokens = version.split('.')
+function isMajorBump(prismaVersion, derivedExtensionVersion) {
+  const prismaVersionTokens = prismaVersion.split('.')
+  const derivedExtensionVersionTokens = derivedExtensionVersion.split('.')
 
-  // Because https://github.com/prisma/vscode/issues/121#issuecomment-623327393
-  if (isBeta && tokens.length === 4) {
-    tokens[2] = 1
-  }
-  if (isBeta && tokens.length === 3) {
-    tokens[1] = 1
-  }
+  return prismaVersionTokens[0] !== derivedExtensionVersionTokens[0]
+}
+
+function getDerivedExtensionVersion(version) {
+  const tokens = version.split('.')
 
   if (tokens.length === 4) {
     return tokens.slice(1).join('.')
@@ -59,37 +93,31 @@ function getDerivedExtensionVersion(version, isBeta = false) {
   )
 }
 
-function coerceExtensionVersion(version, isBeta = false) {
-  const tokens = version.split('.') //?
-
-  // Because https://github.com/prisma/vscode/issues/121#issuecomment-623327393
-  if (isBeta) {
-    tokens[1] = 1
-  }
-
-  return semVer.coerce(tokens.join('.')).toString()
-}
-
-function bumpExtensionOnlyVersion(version) {
-  const tokens = version.split('.')
-  if (tokens.length === 3) {
-    return tokens.join('.') + '.1'
-  }
-  if (tokens.length === 4) {
-    return tokens.slice(0, 3).join('.') + '.' + (parseInt(tokens[3]) + 1)
-  }
-  throw new Error(
-    `Version ${version} must have 3 or 4 tokens separated by "." character`,
-  )
-}
-
 module.exports = { nextExtensionVersion }
 
 if (require.main === module) {
   const args = process.argv.slice(2)
-  const version = nextExtensionVersion({
-    prismaVersion: args[0],
-    extensionVersion: args[1],
-  })
+  let version = ""
+  if (args.length == 2) {
+    version = nextExtensionVersion({
+      prismaVersion: args[0],
+      extensionVersion: args[1],
+    })
+  } else if (args.length === 3) {
+    version = nextExtensionVersion({
+      prismaVersion: args[0],
+      extensionVersion: args[1],
+      patchRelease: true
+    })
+  } else {
+    version = nextExtensionVersion({
+      prismaVersion: args[0],
+      extensionVersion: args[1],
+      patchRelease: false,
+      prismaStableVersion: args[3],
+      stableMinorRelease: args[4]
+    })
+  }
+
   console.log(version)
 }
