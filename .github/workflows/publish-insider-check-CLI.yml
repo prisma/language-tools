@@ -83,7 +83,7 @@ jobs:
 
   test-extension:
     name: Extension integration tests
-    needs: [setup, test-lsp, publish-lsp]
+    needs: [setup]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -109,7 +109,7 @@ jobs:
   publish: 
     name: Publish to Marketplace
     runs-on: ubuntu-latest
-    needs: [setup, test-lsp, publish-lsp, test-extension]
+    needs: [setup, test-extension]
     if: ${{ needs.setup.outputs.version }}
     env: 
       AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
@@ -134,7 +134,7 @@ jobs:
         if: ${{ needs.setup.outputs.version }}
         run: npm run vsce:publish "dev" ${{ needs.setup.outputs.version }}
       - name: Slack Notification on Failure
-        if: ${{ needs.setup.result == 'failure' || needs.test-lsp.result == 'failure' || needs.publish-lsp.result == 'failure' || needs.test-extension.result == 'failure' || failure() }}
+        if: ${{ needs.setup.result == 'failure' || needs.test-extension.result == 'failure' || failure() }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
           SLACK_TITLE: "Publishing insider on new Prisma CLI version failed :x:"
