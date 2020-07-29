@@ -87,14 +87,16 @@ jobs:
 
   test-extension:
     name: Extension integration tests
-    needs: [setup]
+    needs: [setup, test-lsp, publish-lsp]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+    if: always()
     steps: 
       - uses: actions/checkout@v2
       - name: Install Dependencies
+        if: ${{ needs.setup.outputs.new_updates }}
         run: npm install
       - name: Setup patch branch
         if: ${{ needs.setup.outputs.patch-version }}
@@ -104,10 +106,13 @@ jobs:
         if: ${{ needs.setup.outputs.new_updates }}
         run: npm run vsce:bump "patch-dev"  ${{ needs.setup.outputs.patch-version }}
       - name: Install Dependencies
+        if: ${{ needs.setup.outputs.new_updates }}
         run: npm install
       - name: Compile
+        if: ${{ needs.setup.outputs.new_updates }}
         run: npm run compile
       - name: Headless e2e tests
+        if: ${{ needs.setup.outputs.new_updates }}
         uses: GabrielBB/xvfb-action@v1.0
         with:
           run: npm run test
@@ -115,8 +120,8 @@ jobs:
   publish-insider: 
     name: Publish insider extension to Marketplace
     runs-on: ubuntu-latest
-    needs: [setup, test-extension]
-    if: ${{ needs.setup.outputs.version }}
+    needs: [setup, test-lsp, publish-lsp, test-extension]
+    if: always() && ${{ needs.setup.outputs.version }}
     env: 
       AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

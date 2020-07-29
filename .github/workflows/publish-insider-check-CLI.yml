@@ -84,12 +84,12 @@ jobs:
 
   test-extension:
     name: Extension integration tests
-    needs: [setup]
+    needs: [setup, test-lsp, publish-lsp]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    if: endsWith(github.ref, '/master')
+    if: always() && ${{ needs.setup.outputs.version }}
     steps: 
       - uses: actions/checkout@v2
       - name: Install Dependencies
