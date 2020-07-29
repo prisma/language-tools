@@ -30,7 +30,7 @@ echo "NPM_VERSION: $NPM_VERSION"
 
 if [ "$RELEASE_CHANNEL" = "dev" ]; then
     if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then   
-        EXTENSION_VERSION=$(sh scripts/extension-version.sh "$RELEASE_CHANNEL" "")
+        EXTENSION_VERSION=$(sh scripts/extension-version.sh "$RELEASE_CHANNEL" "toBeCreated")
         echo "EXTENSION_VERSION: $EXTENSION_VERSION"
 
         NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION" "$EXTENSION_VERSION")

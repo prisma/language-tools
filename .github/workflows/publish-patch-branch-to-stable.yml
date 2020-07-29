@@ -22,7 +22,7 @@ jobs:
       - name: Checkout patch branch
         run: npm run setup:patch
       - name: Bump versions
-        run: npm run vsce:bump "latest" ""
+        run: npm run vsce:bump "latest" "toBeCreated"
         id: bump_versions
       - name: Check existing LSP version
         id: check_lsp_version
@@ -45,7 +45,7 @@ jobs:
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
         if: ${{ needs.setup.outputs.new_updates }}
-        run: npm run vsce:bump "latest" ""
+        run: npm run vsce:bump "latest" "toBeCreated"
       - name: Install Dependencies in LSP
         run: cd packages/language-server && npm install
       - name: Compile LSP
@@ -67,7 +67,7 @@ jobs:
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
         if: ${{ needs.setup.outputs.new_updates }}
-        run: npm run vsce:bump "latest" ""
+        run: npm run vsce:bump "latest" "toBeCreated"
       - name: Install Dependencies in LSP
         run: cd packages/language-server && npm install
       - name: Compile LSP
@@ -99,7 +99,7 @@ jobs:
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
         if: ${{ needs.setup.outputs.new_updates }}
-        run: npm run vsce:bump "latest" ""
+        run: npm run vsce:bump "latest" "toBeCreated"
       - name: Install Dependencies
         run: npm install
       - name: Compile
@@ -130,7 +130,7 @@ jobs:
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
         if: ${{ needs.setup.outputs.version }}
-        run: npm run vsce:bump "latest" ""
+        run: npm run vsce:bump "latest" "toBeCreated"
       - name: Install Dependencies
         run: npm install
       - name: Compile

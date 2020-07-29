@@ -32,7 +32,7 @@ NPM_VERSION=$(sh scripts/prisma-version.sh "$RELEASE_CHANNEL")
 echo "NPM_VERSION: $NPM_VERSION"
 echo "UPDATING to $NPM_VERSION"
 
-EXTENSION_VERSION=$(sh scripts/extension-version.sh "$RELEASE_CHANNEL" "")
+EXTENSION_VERSION=$(sh scripts/extension-version.sh "$RELEASE_CHANNEL" "toBeCreated")
 echo "EXTENSION_VERSION: $EXTENSION_VERSION"
 
 
@@ -40,7 +40,7 @@ OLD_SHA=$(jq ".prisma.version" ./packages/vscode/package.json)
 SHA=$(npx -q -p @prisma/cli@"$RELEASE_CHANNEL" prisma --version | grep "Query Engine" | awk '{print $5}')
 
 
-if [ "$NEXT_EXTENSION_VERSION" = "" ]; then
+if [ "$NEXT_EXTENSION_VERSION" = "toBeCreated" ]; then
     if [ "$RELEASE_CHANNEL" = "patch-dev" ]; then 
         # insider patch extension release
         LAST_PATCH_EXTENSION_VERSION=$(cat scripts/extension_version_patch_dev)

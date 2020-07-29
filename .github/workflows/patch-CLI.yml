@@ -175,7 +175,7 @@ jobs:
         # Jobs do not share workspace --> bump versions again
         if: ${{ needs.setup.outputs.new_updates }}
         id: bump
-        run: npm run vsce:bump "latest"  ""
+        run: npm run vsce:bump "latest"  "toBeCreated"
       - name: Compile
         run: npm run compile
       - name: Publish LSP to npm
