@@ -114,7 +114,7 @@ jobs:
     name: Publish insider extension to Marketplace
     runs-on: ubuntu-latest
     needs: [setup, test-lsp, publish-lsp, test-extension]
-    if: always()
+    if: ${{ needs.setup.outputs.version }}
     env: 
       AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
@@ -158,7 +158,7 @@ jobs:
     name: Publish Patch on Stable
     runs-on: ubuntu-latest
     needs: [setup, test-lsp, publish-lsp, test-extension, publish-slack]
-    if: ${{ needs.setup.outputs.patch-version }}
+    if: ${{ needs.setup.outputs.version }}
     env:
       AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
