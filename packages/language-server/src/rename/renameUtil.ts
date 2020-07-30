@@ -6,7 +6,11 @@ import {
   getBlockAtPosition,
   getWordAtPosition,
 } from '../MessageHandler'
-import { getTypesFromCurrentBlock } from '../completion/completions'
+import {
+  getTypesFromCurrentBlock,
+  getValuesInsideBrackets,
+  getAllRelationNames,
+} from '../completion/completions'
 
 function extractFirstWord(line: string): string {
   return line.replace(/ .*/, '')
@@ -17,11 +21,12 @@ export function extractModelName(line: string): string {
   return line.slice(blockType.length, line.length - 1).trim()
 }
 
-export function isFieldName(
+export function isValidFieldName(
   currentLine: string,
   position: Position,
   currentBlock: Block,
   document: TextDocument,
+  lines: string[],
 ): boolean {
   if (
     currentBlock.type !== 'model' ||
@@ -39,10 +44,24 @@ export function isFieldName(
   const firstWord = extractFirstWord(currentLine)
   const indexOfFirstWord = currentLineUntrimmed.indexOf(firstWord)
 
-  return (
+  const isFieldName: boolean =
     indexOfFirstWord <= position.character &&
     indexOfFirstWord + firstWord.length >= position.character
-  )
+
+  if (!isFieldName) {
+    return false
+  }
+
+  // rename not allowed on relation fields
+  const relationNames = getAllRelationNames(lines)
+  const wordsInLine: string[] = currentLine.split(/\s+/)
+  // remove type modifiers
+  const type = wordsInLine[1].replace('?', '').replace('[]', '')
+  if (type !== '' && type !== undefined && relationNames.includes(type)) {
+    return false
+  }
+
+  return true
 }
 
 export function isModelName(position: Position, block: Block): boolean {
@@ -172,10 +191,11 @@ export function renameReferencesForFieldValue(
         indexOfFieldsStart
       const fields = currentLineUntrimmed.slice(
         indexOfFieldsStart,
-        indexOfFieldEnd,
+        indexOfFieldEnd + 1,
       )
       const indexOfFoundValue = fields.indexOf(currentValue)
-      if (indexOfFoundValue !== -1) {
+      const fieldValues = getValuesInsideBrackets(fields)
+      if (indexOfFoundValue !== -1 && fieldValues.includes(currentValue)) {
         // found a referenced field
         edits.push({
           range: {
@@ -199,20 +219,23 @@ export function renameReferencesForFieldValue(
       item.includes(currentValue)
     ) {
       const currentLineUntrimmed = getCurrentLine(document, key)
-      const indexOfCurrentValue = currentLineUntrimmed.indexOf(currentValue)
-      edits.push({
-        range: {
-          start: {
-            line: key,
-            character: indexOfCurrentValue,
+      const valuesInsideBracket = getValuesInsideBrackets(currentLineUntrimmed)
+      if (valuesInsideBracket.includes(currentValue)) {
+        const indexOfCurrentValue = currentLineUntrimmed.indexOf(currentValue)
+        edits.push({
+          range: {
+            start: {
+              line: key,
+              character: indexOfCurrentValue,
+            },
+            end: {
+              line: key,
+              character: indexOfCurrentValue + currentValue.length,
+            },
           },
-          end: {
-            line: key,
-            character: indexOfCurrentValue + currentValue.length,
-          },
-        },
-        newText: newName,
-      })
+          newText: newName,
+        })
+      }
     }
   }
 
@@ -231,10 +254,11 @@ export function renameReferencesForFieldValue(
         indexOfReferences
       const references = currentLineUntrimmed.slice(
         indexOfReferences,
-        indexOfReferencesEnd,
+        indexOfReferencesEnd + 1,
       )
       const indexOfFoundValue = references.indexOf(currentValue)
-      if (references.includes(currentValue)) {
+      const referenceValues = getValuesInsideBrackets(references)
+      if (indexOfFoundValue !== -1 && referenceValues.includes(currentValue)) {
         edits.push({
           range: {
             start: {

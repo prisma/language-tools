@@ -41,7 +41,7 @@ import {
   renameReferencesForModelName,
   isEnumValue,
   renameReferencesForEnumValue,
-  isFieldName,
+  isValidFieldName,
   extractCurrentName,
   mapExistsAlready,
   insertMapAttribute,
@@ -567,19 +567,25 @@ export function handleRenameRequest(
     currentBlock,
     document,
   )
-  const isFieldRename: boolean = isFieldName(
+  const isValidFieldRename: boolean = isValidFieldName(
     currentLine,
     params.position,
     currentBlock,
     document,
+    lines,
   )
 
-  if (isModelRename || isEnumRename || isEnumValueRename || isFieldRename) {
+  if (
+    isModelRename ||
+    isEnumRename ||
+    isEnumValueRename ||
+    isValidFieldRename
+  ) {
     const currentName = extractCurrentName(
       currentLine,
       isModelRename || isEnumRename,
       isEnumValueRename,
-      isFieldRename,
+      isValidFieldRename,
     )
 
     // rename marked string
@@ -627,7 +633,7 @@ export function handleRenameRequest(
           currentBlock.name,
         ),
       )
-    } else if (isFieldRename) {
+    } else if (isValidFieldRename) {
       edits.push(
         ...renameReferencesForFieldValue(
           currentName,
@@ -644,7 +650,7 @@ export function handleRenameRequest(
       params.newName,
       isEnumRename,
       isModelRename,
-      isFieldRename,
+      isValidFieldRename,
       isEnumValueRename,
     )
     return {

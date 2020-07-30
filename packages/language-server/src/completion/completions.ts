@@ -379,7 +379,7 @@ export function suggestEqualSymbol(
   }
 }
 
-function getValuesInsideBrackets(line: string): string[] {
+export function getValuesInsideBrackets(line: string): string[] {
   const regexp = /\[([^\]]+)\]/
   const matches = regexp.exec(line)
   if (!matches || !matches[1]) {
