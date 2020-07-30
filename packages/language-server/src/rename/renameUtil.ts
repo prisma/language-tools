@@ -9,6 +9,7 @@ import {
 import {
   getTypesFromCurrentBlock,
   getValuesInsideBrackets,
+  getAllRelationNames,
 } from '../completion/completions'
 
 function extractFirstWord(line: string): string {
@@ -20,11 +21,12 @@ export function extractModelName(line: string): string {
   return line.slice(blockType.length, line.length - 1).trim()
 }
 
-export function isFieldName(
+export function isValidFieldName(
   currentLine: string,
   position: Position,
   currentBlock: Block,
   document: TextDocument,
+  lines: string[],
 ): boolean {
   if (
     currentBlock.type !== 'model' ||
@@ -42,10 +44,24 @@ export function isFieldName(
   const firstWord = extractFirstWord(currentLine)
   const indexOfFirstWord = currentLineUntrimmed.indexOf(firstWord)
 
-  return (
+  const isFieldName: boolean =
     indexOfFirstWord <= position.character &&
     indexOfFirstWord + firstWord.length >= position.character
-  )
+
+  if (!isFieldName) {
+    return false
+  }
+
+  // rename not allowed on relation fields
+  const relationNames = getAllRelationNames(lines)
+  const wordsInLine: string[] = currentLine.split(/\s+/)
+  // remove type modifiers
+  const type = wordsInLine[1].replace('?', '').replace('[]', '')
+  if (type !== '' && type !== undefined && relationNames.includes(type)) {
+    return false
+  }
+
+  return true
 }
 
 export function isModelName(position: Position, block: Block): boolean {
