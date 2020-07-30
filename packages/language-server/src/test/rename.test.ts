@@ -29,10 +29,14 @@ suite('Rename', () => {
   const renameModelPath = './rename/renameModel.prisma'
   const renameFieldPath = './rename/renameFields.prisma'
   const renameEnumPath = './rename/renameEnum.prisma'
+  const renameFieldLargeSchemaPath = './rename/renameFieldLargeSchema.prisma'
 
   const renameModel: TextDocument = getTextDocument(renameModelPath)
   const renameField: TextDocument = getTextDocument(renameFieldPath)
   const renameEnum: TextDocument = getTextDocument(renameEnumPath)
+  const renameFieldLargeSchema: TextDocument = getTextDocument(
+    renameFieldLargeSchemaPath,
+  )
 
   const newModelName = 'Customer'
   const newModelName2 = 'Posts'
@@ -40,6 +44,7 @@ suite('Rename', () => {
   const newFieldName = 'publisherId'
   const newFieldName2 = 'headline'
   const newFieldName3 = 'humanoidId'
+  const newFieldName4 = 'AlbumFoo'
 
   const newEnumName = 'Function'
   const newEnumValue = 'A_VARIANT_WITHOUT_UNDERSCORES'
@@ -108,6 +113,33 @@ suite('Rename', () => {
       renameModel,
       newModelName2,
       { line: 9, character: 10 },
+    )
+  })
+  test('Field not referenced in index block', () => {
+    assertRename(
+      {
+        changes: {
+          [renameFieldLargeSchema.uri]: [
+            {
+              newText: newFieldName4,
+              range: {
+                start: { line: 136, character: 2 },
+                end: { line: 136, character: 7 },
+              },
+            },
+            {
+              newText: ' @map("Album")',
+              range: {
+                start: { line: 136, character: Number.MAX_VALUE },
+                end: { line: 136, character: Number.MAX_VALUE },
+              },
+            },
+          ],
+        },
+      },
+      renameFieldLargeSchema,
+      newFieldName4,
+      { line: 136, character: 7 },
     )
   })
   test('Field referenced in @@id and @relation attributes', () => {

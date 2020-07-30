@@ -6,7 +6,10 @@ import {
   getBlockAtPosition,
   getWordAtPosition,
 } from '../MessageHandler'
-import { getTypesFromCurrentBlock } from '../completion/completions'
+import {
+  getTypesFromCurrentBlock,
+  getValuesInsideBrackets,
+} from '../completion/completions'
 
 function extractFirstWord(line: string): string {
   return line.replace(/ .*/, '')
@@ -172,10 +175,11 @@ export function renameReferencesForFieldValue(
         indexOfFieldsStart
       const fields = currentLineUntrimmed.slice(
         indexOfFieldsStart,
-        indexOfFieldEnd,
+        indexOfFieldEnd + 1,
       )
       const indexOfFoundValue = fields.indexOf(currentValue)
-      if (indexOfFoundValue !== -1) {
+      const fieldValues = getValuesInsideBrackets(fields)
+      if (indexOfFoundValue !== -1 && fieldValues.includes(currentValue)) {
         // found a referenced field
         edits.push({
           range: {
@@ -199,20 +203,23 @@ export function renameReferencesForFieldValue(
       item.includes(currentValue)
     ) {
       const currentLineUntrimmed = getCurrentLine(document, key)
-      const indexOfCurrentValue = currentLineUntrimmed.indexOf(currentValue)
-      edits.push({
-        range: {
-          start: {
-            line: key,
-            character: indexOfCurrentValue,
+      const valuesInsideBracket = getValuesInsideBrackets(currentLineUntrimmed)
+      if (valuesInsideBracket.includes(currentValue)) {
+        const indexOfCurrentValue = currentLineUntrimmed.indexOf(currentValue)
+        edits.push({
+          range: {
+            start: {
+              line: key,
+              character: indexOfCurrentValue,
+            },
+            end: {
+              line: key,
+              character: indexOfCurrentValue + currentValue.length,
+            },
           },
-          end: {
-            line: key,
-            character: indexOfCurrentValue + currentValue.length,
-          },
-        },
-        newText: newName,
-      })
+          newText: newName,
+        })
+      }
     }
   }
 
@@ -231,10 +238,11 @@ export function renameReferencesForFieldValue(
         indexOfReferences
       const references = currentLineUntrimmed.slice(
         indexOfReferences,
-        indexOfReferencesEnd,
+        indexOfReferencesEnd + 1,
       )
       const indexOfFoundValue = references.indexOf(currentValue)
-      if (references.includes(currentValue)) {
+      const referenceValues = getValuesInsideBrackets(references)
+      if (indexOfFoundValue !== -1 && referenceValues.includes(currentValue)) {
         edits.push({
           range: {
             start: {
