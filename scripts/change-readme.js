@@ -34,7 +34,8 @@ function changeReadme({
   releaseChannel,
   npmVersion
 }) {
-  const content = getNewReadMeContent(releaseChannel, npmVersion, githubAction.context.sha)
+  const sha = githubAction.context.sha
+  const content = getNewReadMeContent({releaseChannel, npmVersion, sha})
   fs.writeFileSync("./packages/vscode/README.md", content);
 }
 
