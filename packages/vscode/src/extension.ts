@@ -84,6 +84,26 @@ export async function activate(context: ExtensionContext): Promise<void> {
     },
   }
 
+  // enable fileWatcher to watch .prisma folder inside node_modules
+  const value: string = JSON.stringify(
+    workspace.getConfiguration().get('files.watcherExclude'),
+  )
+  if (value.includes('**/node_modules/*/**')) {
+    const replacedValue = value.replace(
+      '**/node_modules/*/**',
+      '**/node_modules/{[^.],?[^p],??[^r],???[^i],????[^s],?????[^m]}*',
+    )
+    try {
+      await workspace
+        .getConfiguration()
+        .update('files.watcherExclude', replacedValue)
+      console.log('Successfully updated setting files.watcherExclude')
+    } catch (err) {
+      console.error('Updating user setting files.watcherExclude failed')
+      console.error(err)
+    }
+  }
+
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
     // Register the server for prisma documents
