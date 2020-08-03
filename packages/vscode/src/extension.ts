@@ -87,15 +87,16 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   // enable fileWatcher to watch .prisma folder inside node_modules
   const config: WorkspaceConfiguration = workspace.getConfiguration()
-  const value: string = config.get('files.watcherExclude', '')
-  if (value.includes('**/node_modules/*/**')) {
-    const replacedValue = value.replace(
-      '**/node_modules/*/**',
-      // This is a way to except node_modules/.prisma folder from the exclude, see: https://github.com/microsoft/vscode/issues/869#issuecomment-630086813
-      '**/node_modules/{[^.],?[^p],??[^r],???[^i],????[^s],?????[^m]}*',
-    )
+  const filesWatcherConfig = config.get('files.watcherExclude', '')
+  const value = JSON.parse(filesWatcherConfig)
+  if (value['**/node_modules/*/**']) {
+    // Copy boolean value
+    value['**/node_modules/{[^.],?[^p],??[^r],???[^i],????[^s],?????[^m]}*'] =
+      value['**/node_modules/*/**']
+    // Delete original exclude
+    delete value['**/node_modules/*/**']
     try {
-      await config.update('files.watcherExclude', replacedValue)
+      await config.update('files.watcherExclude', JSON.stringify(value))
       console.log('Successfully updated setting files.watcherExclude')
     } catch (err) {
       console.error('Updating user setting files.watcherExclude failed')
