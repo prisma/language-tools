@@ -62,7 +62,7 @@ The extension respects the `telemetry.enableTelemetry` setting in VSCode.
 
 ## Build information
 
-This is for Prisma CLI [$prisma-cli-version$]($prisma-cli-version$).
+This is for Prisma CLI $prisma-cli-version$.
 
 ## Security
 

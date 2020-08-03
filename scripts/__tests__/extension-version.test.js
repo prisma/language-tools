@@ -1,5 +1,3 @@
-const { expect } = require('chai')
-
 const { nextExtensionVersion } = require('./../extension-version')
 
 describe('next extension version', () => {
@@ -11,7 +9,7 @@ describe('next extension version', () => {
         prismaVersion: '2.5.0-dev.2',
         extensionVersion: '5.0.1',
       }),
-    ).to.eq('5.0.2')
+    ).toEqual('5.0.2')
   })
 
   it('it should work with an insider release triggered by Prisma CLI after an extension only release', () => {
@@ -20,7 +18,7 @@ describe('next extension version', () => {
         prismaVersion: '2.5.0-dev.2',
         extensionVersion: '5.0.2',
       }),
-    ).to.eq('5.0.3')
+    ).toEqual('5.0.3')
   })
 
   // patches
@@ -31,7 +29,7 @@ describe('next extension version', () => {
         extensionVersion: '2.2.1',
         patchRelease: true,
       }),
-    ).to.eq('3.1.1')
+    ).toEqual('3.1.1')
   })
 
   it('it should work with a second patch release after Prisma CLI stable on Insider', () => {
@@ -41,7 +39,7 @@ describe('next extension version', () => {
         extensionVersion: '3.1.1',
         patchRelease: true,
       }),
-    ).to.eq('3.1.2')
+    ).toEqual('3.1.2')
   })
 
   it ('it should work with a first Prisma CLI patch on stable', () => {
@@ -50,7 +48,7 @@ describe('next extension version', () => {
         prismaVersion: '2.5.1',
         extensionVersion: '2.5.0',
       })
-    ).to.eq('2.5.1')
+    ).toEqual('2.5.1')
   })
 
   it ('it should work with a Prisma CLI patch on stable', () => {
@@ -59,7 +57,7 @@ describe('next extension version', () => {
         prismaVersion: '2.5.1',
         extensionVersion: '2.5.1',
       })
-    ).to.eq('2.5.2')
+    ).toEqual('2.5.2')
   })
 
   // first extension release after Prisma CLI minor update
@@ -73,7 +71,7 @@ describe('next extension version', () => {
         prismaStableVersion: '2.5.0',
         stableMinorRelease: true
       }),
-    ).to.eq('6.0.1')
+    ).toEqual('6.0.1')
   })
 
   it('it should not work with the first extension release after a minor Prisma CLI update and a dev version for the Prisma stable verison', () => {
@@ -85,7 +83,7 @@ describe('next extension version', () => {
         prismaStableVersion: '2.5.1-dev.0',
         stableMinorRelease: true
       })
-    }).to.throw('')
+    }).toThrow('')
   })
 
 })
