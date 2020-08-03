@@ -50,7 +50,7 @@ fi
 
 if [ "$ENVIRONMENT" = "PRODUCTION" ] && [ "$RELEASE_CHANNEL" = "dev" ]; then
     # Do not push readme for marketplace
-    git reset -- packages/vscode/README.md
+    git reset --packages/vscode/README.md
     
     echo "Sync with ${GITHUB_REF} and push to it"
     git pull github "${GITHUB_REF}" --rebase
