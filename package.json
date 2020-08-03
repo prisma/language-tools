@@ -25,7 +25,8 @@
     "prettier": "2.0.5",
     "typescript": "3.8.3",
     "mocha": "8.0.1",
-    "chai": "4.2.0"
+    "chai": "4.2.0",
+    "jest": "26.2.2"
   },
   "scripts": {
     "build": "tsc -b",
@@ -39,7 +40,7 @@
     "vsce:bump": "sh scripts/bump.sh",
     "shell:lint": "shellcheck -x scripts/**/*.sh",
     "test": "sh scripts/e2e.sh",
-    "testScripts": "mocha 'scripts/tests/*.js'",
+    "testScripts": "jest __tests__",
     "check:lsp": "sh scripts/lsp-version.sh",
     "setup:patch": "sh scripts/patch/setup.sh"
   },
