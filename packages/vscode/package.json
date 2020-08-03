@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
-    "vscode": "^1.43.0"
+    "vscode": "^1.47.0"
   },
   "publisher": "Prisma",
   "categories": [
