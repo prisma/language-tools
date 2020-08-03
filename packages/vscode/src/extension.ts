@@ -31,6 +31,9 @@ import {
 
 let client: LanguageClient
 let telemetry: Telemetry
+let serverModule: string
+
+const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
 
 class GenericLanguageServerException extends Error {
   constructor(message: string, stack: string) {
@@ -54,7 +57,15 @@ function createLanguageServer(
 }
 
 export async function activate(context: ExtensionContext): Promise<void> {
-  const serverModule = require.resolve('@prisma/language-server/dist/src/cli')
+  if (isDebugMode()) {
+    // use LSP from folder for debugging
+    serverModule = context.asAbsolutePath(
+      path.join('../../packages/language-server/dist/src/cli'),
+    )
+  } else {
+    // use published npm package for production
+    serverModule = require.resolve('@prisma/language-server/dist/src/cli')
+  }
 
   const pj = tryRequire(path.join(__dirname, '../../package.json'))
   if (!pj) {

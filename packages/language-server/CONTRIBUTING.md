@@ -2,7 +2,6 @@
 
 ## Development
 
-- In `packages/vscode/src/extension.ts` replace `const serverModule = require.resolve('@prisma/language-server/dist/src/cli')` with `const serverModule = context.asAbsolutePath(path.join('../../packages/language-server/dist/src/cli'))` to use the LSP currently in the repo and not an older version of the LSP.
 - Run `npm install` in the root folder. This installs all necessary npm modules in both the vscode and language-server folder.
 - Run `npm run watch`.
 - Open VS Code on this folder.
