@@ -19,6 +19,7 @@ import {
   CodeAction,
   Command,
   workspace,
+  WorkspaceConfiguration,
 } from 'vscode'
 import { Telemetry, TelemetryPayload, ExceptionPayload } from './telemetry'
 import path from 'path'
@@ -85,9 +86,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
   }
 
   // enable fileWatcher to watch .prisma folder inside node_modules
-  const value: string = JSON.stringify(
-    workspace.getConfiguration().get('files.watcherExclude'),
-  )
+  const config: WorkspaceConfiguration = workspace.getConfiguration()
+  const value: string = JSON.stringify(config.get('files.watcherExclude'))
   if (value.includes('**/node_modules/*/**')) {
     const replacedValue = value.replace(
       '**/node_modules/*/**',
@@ -95,9 +95,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
       '**/node_modules/{[^.],?[^p],??[^r],???[^i],????[^s],?????[^m]}*',
     )
     try {
-      await workspace
-        .getConfiguration()
-        .update('files.watcherExclude', replacedValue)
+      await config.update('files.watcherExclude', replacedValue)
       console.log('Successfully updated setting files.watcherExclude')
     } catch (err) {
       console.error('Updating user setting files.watcherExclude failed')
