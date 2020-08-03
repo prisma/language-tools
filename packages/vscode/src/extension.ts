@@ -91,6 +91,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
   if (value.includes('**/node_modules/*/**')) {
     const replacedValue = value.replace(
       '**/node_modules/*/**',
+      // This is a way to except node_modules/.prisma folder from the exclude, see: https://github.com/microsoft/vscode/issues/869#issuecomment-630086813
       '**/node_modules/{[^.],?[^p],??[^r],???[^i],????[^s],?????[^m]}*',
     )
     try {
