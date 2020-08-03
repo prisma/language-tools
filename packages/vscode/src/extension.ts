@@ -57,6 +57,7 @@ function createLanguageServer(
 }
 
 export async function activate(context: ExtensionContext): Promise<void> {
+  const isDebugOrTest = isDebugOrTestSession()
   if (isDebugMode()) {
     // use LSP from folder for debugging
     serverModule = context.asAbsolutePath(
@@ -73,7 +74,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
   }
   const extensionId = 'prisma.' + pj.name
   const extensionVersion = pj.version
-  if (!isDebugOrTestSession()) {
+  if (!isDebugOrTest) {
     telemetry = new Telemetry(extensionId, extensionVersion)
   }
 
@@ -108,7 +109,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
         range: Range,
         context: CodeActionContext,
         token: CancellationToken,
-        _next: ProvideCodeActionsSignature,
+        _: ProvideCodeActionsSignature,
       ) {
         const params: CodeActionParams = {
           textDocument: client.code2ProtocolConverter.asTextDocumentIdentifier(
@@ -148,7 +149,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
             }
             return result
           },
-          (_error) => undefined,
+          (_) => undefined,
         )
       },
     } as any,
@@ -164,7 +165,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
       console.log('Restarting TS Language Server..')
       commands.executeCommand('typescript.restartTsServer')
     })
-    if (!isDebugOrTestSession()) {
+    if (!isDebugOrTest) {
       client.onNotification('prisma/telemetry', (payload: TelemetryPayload) => {
         // eslint-disable-next-line no-console
         telemetry.sendEvent(payload.action, payload.attributes)
@@ -182,7 +183,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
         },
       )
     }
-  })
+  },
+    () => { })
 
   // Start the client. This will also launch the server
   context.subscriptions.push(disposable)
@@ -203,7 +205,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
       applySnippetWorkspaceEdit(),
     ),
   )
-  if (!isDebugOrTestSession()) {
+  if (!isDebugOrTest) {
     telemetry.sendEvent('activated', {
       signature: await telemetry.getSignature(),
     })
