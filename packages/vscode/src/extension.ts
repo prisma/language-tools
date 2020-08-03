@@ -87,7 +87,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   // enable fileWatcher to watch .prisma folder inside node_modules
   const config: WorkspaceConfiguration = workspace.getConfiguration()
-  const value: string = JSON.stringify(config.get('files.watcherExclude'))
+  const value: string = JSON.stringify(config.get('files.watcherExclude', ''))
   if (value.includes('**/node_modules/*/**')) {
     const replacedValue = value.replace(
       '**/node_modules/*/**',
