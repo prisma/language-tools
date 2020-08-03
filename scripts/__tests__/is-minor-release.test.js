@@ -1,5 +1,3 @@
-const { expect } = require('chai')
-
 const { isMinorRelease } = require('./../is-minor-release.js')
 
 describe('isMinorRelease', () => {
@@ -9,7 +7,7 @@ describe('isMinorRelease', () => {
         isMinorRelease({
           prismaVersion: '2.0.1',
         }),
-      ).to.eq(false)
+      ).toEqual(false)
     })
   
     it('it should not work with a Prisma CLI dev version', () => {
@@ -17,7 +15,7 @@ describe('isMinorRelease', () => {
         isMinorRelease({
           prismaVersion: '2.0.1-dev.1',
         })
-      }).to.throw('')
+      }).toThrow('')
     })
   
     it('it should work with a minor release', () => {
@@ -25,7 +23,7 @@ describe('isMinorRelease', () => {
         isMinorRelease({
           prismaVersion: '2.5.0',
         }),
-      ).to.eq(true)
+      ).toEqual(true)
     })
   
     it('Patch release is not a minor release', () => {
@@ -33,7 +31,7 @@ describe('isMinorRelease', () => {
         isMinorRelease({
           prismaVersion: '2.5.8',
         }),
-      ).to.eq(false)
+      ).toEqual(false)
     })
   })
   

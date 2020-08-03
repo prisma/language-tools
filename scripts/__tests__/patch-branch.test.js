@@ -1,5 +1,3 @@
-const { expect } = require('chai')
-
 const { patchBranchName } = require('./../patch/patch-branch.js')
 
 describe('patchBranchName', () => {
@@ -9,7 +7,7 @@ describe('patchBranchName', () => {
       patchBranchName({
         version: '2.0.1-dev.1',
       })
-    }).to.throw('')
+    }).toThrow('')
   })
 
   it('it should work with a minor release', () => {
@@ -17,7 +15,7 @@ describe('patchBranchName', () => {
       patchBranchName({
         version: '2.5.0',
       }),
-    ).to.eq('2.5.x')
+    ).toEqual('2.5.x')
   })
 
   it('it should work with a patch release', () => {
@@ -25,6 +23,6 @@ describe('patchBranchName', () => {
       patchBranchName({
         version: '2.5.8',
       }),
-    ).to.eq('2.5.x')
+    ).toEqual('2.5.x')
   })
 })
