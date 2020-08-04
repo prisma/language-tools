@@ -41,14 +41,18 @@ if [ "$RELEASE_CHANNEL" = "dev" ]; then
     fi
 elif [ "$RELEASE_CHANNEL" = "latest" ]; then 
     IS_MINOR_RELEASE=$(node scripts/is-minor-release.js "$NPM_VERSION")
-    echo "IS_MINOR_RELEASE: $IS_MINOR_RELEASE"
-    if [ "$IS_MINOR_RELEASE" = true ]; then
-        echo "NEXT_EXTENSION_VERSION: $NPM_VERSION"
-        echo "::set-output name=is-minor-release::true"
-        echo "::set-output name=version::$NPM_VERSION"
-    else
-        echo "Not a minor release of Prisma CLI."
-    fi
+    if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then   
+        echo "IS_MINOR_RELEASE: $IS_MINOR_RELEASE"
+        if [ "$IS_MINOR_RELEASE" = true ]; then
+            echo "NEXT_EXTENSION_VERSION: $NPM_VERSION"
+            echo "::set-output name=is-minor-release::true"
+            echo "::set-output name=version::$NPM_VERSION"
+        else
+            echo "Not a minor release of Prisma CLI."
+        fi
+    else 
+        echo "CURRENT_VERSION ($CURRENT_VERSION) and NPM_VERSION ($NPM_VERSION) are same"
+    fi  
 else 
     # check for new patch-dev Prisma CLI version
     if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then 
