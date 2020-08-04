@@ -22,6 +22,8 @@ jobs:
        # serialize this workflow run
       - name: Turnstyle
         uses: softprops/turnstyle@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Dependencies
         run: npm install
       - name: Check for Update
