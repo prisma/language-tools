@@ -38,9 +38,9 @@ function getConnection(options?: LSOptions): IConnection {
     connection = process.argv.includes('--stdio')
       ? createConnection(process.stdin, process.stdout)
       : createConnection(
-        new IPCMessageReader(process),
-        new IPCMessageWriter(process),
-      )
+          new IPCMessageReader(process),
+          new IPCMessageWriter(process),
+        )
   }
   return connection
 }
@@ -80,7 +80,7 @@ export function startServer(options?: LSOptions): void {
 
     connection.console.info(
       'Installed version of Prisma binary `prisma-fmt`: ' +
-      (await util.getVersion()),
+        (await util.getVersion()),
     )
 
     const pj = util.tryRequire('../../package.json')
