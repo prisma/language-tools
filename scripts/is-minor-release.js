@@ -7,7 +7,6 @@ function isMinorRelease({
             `Version ${prismaVersion} must have 3 tokens separated by "." character.`
         )
       }
-      console.log(tokens)
       return tokens[2] === '0'
   }
 
