@@ -15,6 +15,7 @@ import {
   DeclarationParams,
   RenameParams,
   DocumentFormattingParams,
+  CodeAction,
 } from 'vscode-languageserver'
 import { getSignature } from 'checkpoint-client'
 import { sendTelemetry, sendException, initializeTelemetry } from './telemetry'
@@ -137,14 +138,18 @@ export function startServer(options?: LSOptions): void {
 
   connection.onDefinition(async (params: DeclarationParams) => {
     const doc = getDocument(params.textDocument.uri)
-    sendTelemetry({
-      action: 'definition',
-      attributes: {
-        signature: await getSignature(),
-      },
-    })
+
     if (doc) {
-      return MessageHandler.handleDefinitionRequest(doc, params)
+      const definition = MessageHandler.handleDefinitionRequest(doc, params)
+      if (definition !== undefined) {
+        sendTelemetry({
+          action: 'definition',
+          attributes: {
+            signature: await getSignature(),
+          },
+        })
+      }
+      return definition
     }
   })
 
@@ -176,15 +181,19 @@ export function startServer(options?: LSOptions): void {
   })
 
   connection.onHover(async (params: HoverParams) => {
-    sendTelemetry({
-      action: 'hover',
-      attributes: {
-        signature: await getSignature(),
-      },
-    })
+
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      return MessageHandler.handleHoverRequest(doc, params)
+      const hover = MessageHandler.handleHoverRequest(doc, params)
+      if (hover !== undefined) {
+        sendTelemetry({
+          action: 'hover',
+          attributes: {
+            signature: await getSignature(),
+          },
+        })
+      }
+      return hover
     }
   })
 
@@ -210,26 +219,32 @@ export function startServer(options?: LSOptions): void {
   connection.onCodeAction(async (params: CodeActionParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      sendTelemetry({
-        action: 'codeAction',
-        attributes: {
-          signature: await getSignature(),
-        },
-      })
-      return MessageHandler.handleCodeActions(params, doc)
+      const codeActions: CodeAction[] = MessageHandler.handleCodeActions(params, doc)
+      if (codeActions.length !== 0) {
+        sendTelemetry({
+          action: 'codeAction',
+          attributes: {
+            signature: await getSignature(),
+          },
+        })
+      }
+      return codeActions
     }
   })
 
   connection.onRenameRequest(async (params: RenameParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      sendTelemetry({
-        action: 'rename',
-        attributes: {
-          signature: await getSignature(),
-        },
-      })
-      return MessageHandler.handleRenameRequest(params, doc)
+      const rename = MessageHandler.handleRenameRequest(params, doc)
+      if (rename !== undefined) {
+        sendTelemetry({
+          action: 'rename',
+          attributes: {
+            signature: await getSignature(),
+          },
+        })
+      }
+      return rename
     }
   })
 
