@@ -2,8 +2,8 @@ name: Stable Check for Minor Update + Automated Publish
 
 on:
   schedule:
-   # the script takes about 12 minutes, so in order to not have two processes start together, this is set to 15
-    - cron: '*/15 * * * *'
+   # the script takes about 12-19 minutes, so in order to not have two processes start together, this is set to 20
+    - cron: '*/20 * * * *'
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -2,8 +2,8 @@ name: Insider Check for Update + Automated Publish
 
 on:
   schedule:
-   # the script takes about 12 minutes, so in order to not have two processes start together, this is set to 15
-    - cron: '*/15 * * * *'
+   # the script takes about 12-19 minutes, so in order to not have two processes start together, this is set to 20
+    - cron: '*/20 * * * *'
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -19,6 +19,9 @@ jobs:
       lsp-not-published: ${{ steps.check_lsp_version.outputs.lsp-not-published }}
     steps:
       - uses: actions/checkout@v2
+       # serialize this workflow run
+      - name: Turnstyle
+        uses: softprops/turnstyle@v1
       - name: Install Dependencies
         run: npm install
       - name: Check for Update
