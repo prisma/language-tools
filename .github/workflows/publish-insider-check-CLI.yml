@@ -19,6 +19,9 @@ jobs:
       lsp-not-published: ${{ steps.check_lsp_version.outputs.lsp-not-published }}
     steps:
       - uses: actions/checkout@v2
+       # serialize this workflow run
+      - name: Turnstyle
+        uses: softprops/turnstyle@v1
       - name: Install Dependencies
         run: npm install
       - name: Check for Update
