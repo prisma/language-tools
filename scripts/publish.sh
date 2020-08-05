@@ -60,9 +60,15 @@ elif [ "$ENVIRONMENT" = "PRODUCTION" ] && [ "$RELEASE_CHANNEL" = "latest" ]; the
     echo "Sync with ${GITHUB_REF} and push to it"
     git pull github "${GITHUB_REF}" --rebase
 
+    # Check if current branch is patch branch
+    echo "${GITHUB_REF}" | grep -qE ".x$"
+    if [ "$?" = 1 ]; then 
+        git reset origin/master
+    fi
+
+
     # In the stable channel, we just need to commit the prisma_version_stable file
     # to be able to track the Prisma version against which the current stable channel extension was published
-    git reset origin/master
     git add ./scripts/prisma_version_stable
     git commit -m "bump prisma_version to $NPM_VERSION"
     git tag -a "$NEXT_EXTENSION_VERSION" -m "$NEXT_EXTENSION_VERSION" -m "Prisma version: $NPM_VERSION"
