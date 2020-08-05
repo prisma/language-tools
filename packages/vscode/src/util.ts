@@ -16,8 +16,7 @@ export function isDebugOrTestSession(): boolean {
 
 export async function enablePrismaNodeModulesFolderWatch(): Promise<void> {
   const config: WorkspaceConfiguration = workspace.getConfiguration()
-    const filesWatcherConfig = config.get('files.watcherExclude', '{}')
-    const value = JSON.parse(filesWatcherConfig)
+	const value = config.get<{ [key: string]: string }>('files.watcherExclude', {})
     const newKey = '**/node_modules/{[^.],?[^p],??[^r],???[^i],????[^s],?????[^m]}*'
     const nodeModulesKeys = Object.keys(value).filter(key => key.includes('node_modules') && key !== newKey)
 
