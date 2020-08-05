@@ -15,34 +15,39 @@ export function isDebugOrTestSession(): boolean {
 }
 
 export async function enablePrismaNodeModulesFolderWatch(): Promise<void> {
-  const config: WorkspaceConfiguration = workspace.getConfiguration()
-	const value = config.get<{ [key: string]: string }>('files.watcherExclude', {})
-    const newKey = '**/node_modules/{[^.],?[^p],??[^r],???[^i],????[^s],?????[^m]}*'
-    const nodeModulesKeys = Object.keys(value).filter(key => key.includes('node_modules') && key !== newKey)
+  const config: WorkspaceConfiguration = workspace.getConfiguration(undefined, null)
+  let value = config.get<{ [key: string]: string }>('files.watcherExclude', {})
+  const newKey = '**/node_modules/{[^.],?[^p],??[^r],???[^i],????[^s],?????[^m]}*'
 
-    if (nodeModulesKeys.length !== 0) {
-      // Copy boolean value
-      value[newKey] =
-        value[nodeModulesKeys[0]]
+  if (typeof value === 'string') {
+    value = JSON.parse(value)
+  }
 
-      if (nodeModulesKeys.length === 1) {
-        // Delete original exclude
-        delete value[nodeModulesKeys[0]]
-      } else {
-        // found multiple keys with node_modules
-        console.log("Found multiple keys including 'node_modules' inside 'files.watcherExclude' VSCode setting.")
-        nodeModulesKeys.forEach(key => delete value[key])
-      }
-      try {
-        await config.update('files.watcherExclude', JSON.stringify(value))
-        console.log('Successfully updated setting files.watcherExclude')
-        const filesWatcherConfig1 = config.get('files.watcherExclude', '{}')
-        console.log(filesWatcherConfig1)
-      } catch (err) {
-        console.error('Updating user setting files.watcherExclude failed')
-        console.error(err)
-      }
+  const nodeModulesKeys = Object.keys(value).filter(key => key.includes('node_modules') && key !== newKey)
+
+  if (nodeModulesKeys.length !== 0) {
+    // Copy boolean value
+    value[newKey] =
+      value[nodeModulesKeys[0]]
+
+    if (nodeModulesKeys.length === 1) {
+      // Delete original exclude
+      delete value[nodeModulesKeys[0]]
+    } else {
+      // found multiple keys with node_modules
+      console.log("Found multiple keys including 'node_modules' inside 'files.watcherExclude' VSCode setting.")
+      nodeModulesKeys.forEach(key => delete value[key])
     }
+    try {
+      await config.update('files.watcherExclude', JSON.stringify(value))
+      console.log('Successfully updated setting files.watcherExclude')
+      const filesWatcherConfig1 = config.get('files.watcherExclude', '{}')
+      console.log(filesWatcherConfig1)
+    } catch (err) {
+      console.error('Updating user setting files.watcherExclude failed')
+      console.error(err)
+    }
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
