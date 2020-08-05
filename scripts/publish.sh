@@ -80,7 +80,7 @@ elif [ "$ENVIRONMENT" = "PRODUCTION" ] && [ "$RELEASE_CHANNEL" = "patch-dev" ]; 
   PATCH_BRANCH=$(node scripts/patch/patch-branch.js "$NPM_VERSION")
   echo "PATCH_BRANCH: $PATCH_BRANCH"
 
-  # Check if branch exists yet
+  # Check if branch exists yet, push to patch branch
   echo "$NEXT_EXTENSION_VERSION" | grep -qE "1$"
   if [ "$?" = 0 ]; then
     git push -u origin "$PATCH_BRANCH" --follow-tags
