@@ -109,7 +109,7 @@ jobs:
     name: Publish to Marketplace
     runs-on: ubuntu-latest
     needs: [setup, test-extension]
-    if: ${{ needs.setup.outputs.version }}
+    if: ${{ needs.setup.outputs.patch-version }}
     env: 
       AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
