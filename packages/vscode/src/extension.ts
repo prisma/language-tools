@@ -59,6 +59,8 @@ function createLanguageServer(
 
 export async function activate(context: ExtensionContext): Promise<void> {
   const isDebugOrTest = isDebugOrTestSession()
+  const isTest = isDebugOrTest && !isDebugMode()
+
   if (isDebugMode()) {
     // use LSP from folder for debugging
     serverModule = context.asAbsolutePath(
@@ -98,7 +100,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
   }
 
   // enable fileWatcher to watch .prisma folder inside node_modules
-  if (!isDebugOrTestSession()) {
+  if (!isTest) {
     const config: WorkspaceConfiguration = workspace.getConfiguration()
     const filesWatcherConfig = config.get('files.watcherExclude', '{}')
     const stringifiedValue = JSON.stringify(filesWatcherConfig)
