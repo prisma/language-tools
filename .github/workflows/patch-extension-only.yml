@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     if: endsWith(github.ref, '.x')
     outputs:
-      patch-version: ${{ steps.bump.outputs.patch-version }}
+      patch-version: ${{ steps.bump.outputs.version }}
       lsp-not-published: ${{ steps.check_lsp_version.outputs.lsp-not-published }}
     steps:
       - uses: actions/checkout@v2
@@ -24,7 +24,7 @@ jobs:
         run: npm run vsce:bump "patch-dev" "toBeCreated"
       - name: Check existing LSP version
         id: check_lsp_version
-        run: npm run check:lsp ${{ steps.bump.outputs.patch-version }}
+        run: npm run check:lsp ${{ steps.bump.outputs.version }}
   
   test-lsp:
     name: Test LSP
