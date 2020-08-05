@@ -47,6 +47,8 @@ export async function enablePrismaNodeModulesFolderWatch(): Promise<void> {
       console.error('Updating user setting files.watcherExclude failed')
       console.error(err)
     }
+  } else {
+    console.log('Not updating user setting.')
   }
 }
 
