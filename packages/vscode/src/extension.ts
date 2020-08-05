@@ -101,7 +101,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
   if (!isDebugOrTestSession()) {
     const config: WorkspaceConfiguration = workspace.getConfiguration()
     const filesWatcherConfig = config.get('files.watcherExclude', '{}')
-    const value = JSON.parse(filesWatcherConfig)
+    const stringifiedValue = JSON.stringify(filesWatcherConfig)
+    const value = JSON.parse(stringifiedValue)
     if (value['**/node_modules/*/**']) {
       // Copy boolean value
       value['**/node_modules/{[^.],?[^p],??[^r],???[^i],????[^s],?????[^m]}*'] =
