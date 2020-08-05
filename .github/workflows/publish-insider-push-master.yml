@@ -119,8 +119,8 @@ jobs:
     env: 
       AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-      SLACK_CHANNEL: feed-vscode
-      SLACK_USERNAME: vscode-actions
+      SLACK_CHANNEL: feed-language-tools
+      SLACK_USERNAME: Prismo
       SLACK_ICON_EMOJI: ":ship:"
       SLACK_MESSAGE: ${{ needs.setup.outputs.version }}
     steps:
