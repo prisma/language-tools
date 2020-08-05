@@ -19,7 +19,6 @@ import {
   CodeAction,
   Command,
   workspace,
-  WorkspaceConfiguration,
 } from 'vscode'
 import { Telemetry, TelemetryPayload, ExceptionPayload } from './telemetry'
 import path from 'path'
@@ -28,6 +27,7 @@ import {
   isSnippetEdit,
   tryRequire,
   isDebugOrTestSession,
+  enablePrismaNodeModulesFolderWatch,
 } from './util'
 
 let client: LanguageClient
@@ -101,24 +101,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   // enable fileWatcher to watch .prisma folder inside node_modules
   if (!isTest) {
-    const config: WorkspaceConfiguration = workspace.getConfiguration()
-    const filesWatcherConfig = config.get('files.watcherExclude', '{}')
-    const stringifiedValue = JSON.stringify(filesWatcherConfig)
-    const value = JSON.parse(stringifiedValue)
-    if (value['**/node_modules/*/**']) {
-      // Copy boolean value
-      value['**/node_modules/{[^.],?[^p],??[^r],???[^i],????[^s],?????[^m]}*'] =
-        value['**/node_modules/*/**']
-      // Delete original exclude
-      delete value['**/node_modules/*/**']
-      try {
-        await config.update('files.watcherExclude', JSON.stringify(value))
-        console.log('Successfully updated setting files.watcherExclude')
-      } catch (err) {
-        console.error('Updating user setting files.watcherExclude failed')
-        console.error(err)
-      }
-    }
+    await enablePrismaNodeModulesFolderWatch()
   }
 
   // Options to control the language client
