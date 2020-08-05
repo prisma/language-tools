@@ -14,6 +14,15 @@ export function isDebugOrTestSession(): boolean {
   return env.sessionId === 'someValue.sessionId'
 }
 
+function removeElementFromVSCodeConfig(config: { [key: string]: string }, itemKey: string) {
+  return Object.keys(config)
+    .filter(sKey => sKey != itemKey)
+    .reduce((obj: any, key: string) => {
+      obj[key] = config[key];
+      return obj;
+    }, {});
+}
+
 export async function enablePrismaNodeModulesFolderWatch(): Promise<void> {
   const config: WorkspaceConfiguration = workspace.getConfiguration(undefined, null)
   let value = config.get<{ [key: string]: string }>('files.watcherExclude', {})
@@ -32,17 +41,18 @@ export async function enablePrismaNodeModulesFolderWatch(): Promise<void> {
 
     if (nodeModulesKeys.length === 1) {
       // Delete original exclude
-      delete value[nodeModulesKeys[0]]
+      // workaround from https://github.com/fabiospampinato/vscode-terminals/issues/32#issuecomment-621599992
+      value = removeElementFromVSCodeConfig(value, nodeModulesKeys[0])
     } else {
       // found multiple keys with node_modules
       console.log("Found multiple keys including 'node_modules' inside 'files.watcherExclude' VSCode setting.")
-      nodeModulesKeys.forEach(key => delete value[key])
+      nodeModulesKeys.forEach(key => {
+        value = removeElementFromVSCodeConfig(value, key)
+      })
     }
     try {
-      await config.update('files.watcherExclude', JSON.stringify(value))
+      await config.update('files.watcherExclude', value)
       console.log('Successfully updated setting files.watcherExclude')
-      const filesWatcherConfig1 = config.get('files.watcherExclude', '{}')
-      console.log(filesWatcherConfig1)
     } catch (err) {
       console.error('Updating user setting files.watcherExclude failed')
       console.error(err)
