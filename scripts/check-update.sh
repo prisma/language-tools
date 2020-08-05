@@ -57,7 +57,9 @@ else
     # check for new patch-dev Prisma CLI version
     if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then 
         LAST_PATCH_EXTENSION_VERSION=$(cat scripts/extension_version_patch_dev)
+        echo "LAST_PATCH_EXTENSION_VERSION: $LAST_PATCH_EXTENSION_VERSION"
         NPM_VERSION_STABLE=$(sh scripts/prisma-version.sh "latest")
+        echo "NPM_VERSION_STABLE: $NPM_VERSION_STABLE"
 
         NEXT_EXTENSION_VERSION=$(node scripts/extension-version.js "$NPM_VERSION_STABLE" "$LAST_PATCH_EXTENSION_VERSION" "true")
         echo "NEXT_EXTENSION_VERSION: $NEXT_EXTENSION_VERSION"
