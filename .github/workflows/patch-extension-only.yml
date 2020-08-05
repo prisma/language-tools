@@ -20,7 +20,6 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Bump versions
-        if: ${{ steps.check_for_updates.outputs.version }}
         id: bump
         run: npm run vsce:bump "patch-dev" "toBeCreated"
       - name: Check existing LSP version
