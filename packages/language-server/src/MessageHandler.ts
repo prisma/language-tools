@@ -48,6 +48,7 @@ import {
   renameReferencesForFieldValue,
   isEnumName,
   printLogMessage,
+  isRelationField,
 } from './rename/renameUtil'
 
 export function getCurrentLine(document: TextDocument, line: number): string {
@@ -580,8 +581,9 @@ export function handleRenameRequest(
     params.position,
     currentBlock,
     document,
-    lines,
   )
+  const isRelationFieldRename: boolean =
+    isValidFieldRename && isRelationField(currentLine, lines)
 
   if (
     isModelRename ||
@@ -603,6 +605,7 @@ export function handleRenameRequest(
 
     // check if map exists already
     if (
+      !isRelationFieldRename &&
       !mapExistsAlready(
         currentLine,
         lines,
@@ -649,6 +652,7 @@ export function handleRenameRequest(
           document,
           lines,
           currentBlock,
+          isRelationFieldRename,
         ),
       )
     }
