@@ -74,7 +74,7 @@ elif [ "$ENVIRONMENT" = "PRODUCTION" ] && [ "$RELEASE_CHANNEL" = "latest" ]; the
 elif [ "$ENVIRONMENT" = "PRODUCTION" ] && [ "$RELEASE_CHANNEL" = "patch-dev" ]; then
   git add ./scripts/prisma_version_patch_dev
   git add ./scripts/extension_version_patch_dev
-  git commit -m "patch prisma_version to $NPM_VERSION"
+  git commit -am "patch prisma_version to $NPM_VERSION"
   git tag -a "$NEXT_EXTENSION_VERSION" -m "$NEXT_EXTENSION_VERSION" -m "Prisma version: $NPM_VERSION"
 
   PATCH_BRANCH=$(node scripts/patch/patch-branch.js "$NPM_VERSION")
@@ -83,8 +83,10 @@ elif [ "$ENVIRONMENT" = "PRODUCTION" ] && [ "$RELEASE_CHANNEL" = "patch-dev" ]; 
   # Check if branch exists yet, push to patch branch
   echo "$NEXT_EXTENSION_VERSION" | grep -qE "1$"
   if [ "$?" = 0 ]; then
+    echo "First push to new branch."
     git push -u origin "$PATCH_BRANCH" --follow-tags
   else
+    echo "Pushing to patch branch."
     git push github HEAD:"${GITHUB_REF}" --follow-tags
   fi
 
