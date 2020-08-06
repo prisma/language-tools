@@ -17,6 +17,9 @@ function extractFirstWord(line: string): string {
 }
 
 function getRelationFieldType(currentLine: string): string {
+  if (!currentLine.includes('@relation')) {
+    return ''
+  }
   const wordsInLine: string[] = currentLine.split(/\s+/)
   if (wordsInLine.length < 2) {
     return ''
