@@ -140,8 +140,8 @@ suite('Rename', () => {
             {
               newText: '\t@@map("User")\n}',
               range: {
-                start: { line: 23, character: 0 },
-                end: { line: 23, character: 1 },
+                start: { line: 24, character: 0 },
+                end: { line: 24, character: 1 },
               },
             },
             {
@@ -157,38 +157,6 @@ suite('Rename', () => {
       renameModelWithJsonDefault,
       newModelName,
       { line: 17, character: 10 },
-    )
-    assertRename(
-      {
-        changes: {
-          [renameModel.uri]: [
-            {
-              newText: newModelName2,
-              range: {
-                start: { line: 9, character: 6 },
-                end: { line: 9, character: 10 },
-              },
-            },
-            {
-              newText: '\t@@map("Post")\n}',
-              range: {
-                start: { line: 15, character: 0 },
-                end: { line: 15, character: 1 },
-              },
-            },
-            {
-              newText: newModelName2,
-              range: {
-                start: { line: 21, character: 8 },
-                end: { line: 21, character: 12 },
-              },
-            },
-          ],
-        },
-      },
-      renameModelWithJsonDefault,
-      newModelName,
-      { line: 9, character: 10 },
     )
   })
   test('Field not referenced in index block', () => {
