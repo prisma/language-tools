@@ -112,11 +112,50 @@ jobs:
         with:
           run: npm run test
 
-  publish: 
-    name: Publish stable extension
+  publish-open-vsx: 
+    name: Publish stable extension to open-vsx
     runs-on: ubuntu-latest
     needs: [setup, test-extension]
-    if: ${{ needs.setup.outputs.version }}
+    if: ${{ needs.setup.outputs.is-minor-release }}
+    env: 
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      SLACK_CHANNEL: feed-language-tools
+      SLACK_USERNAME: Prismo
+      SLACK_ICON_EMOJI: ":ship:"
+      SLACK_MESSAGE: ${{ needs.setup.outputs.version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: npm install
+      - name: Bump versions
+        # Jobs do not share workspace --> bump versions again
+        run: npm run vsce:bump "latest" ${{ needs.setup.outputs.version }}
+      - name: Install Dependencies
+        run: npm install
+      - name: Compile
+        run: npm run compile
+      - name: Publish extension to open-vsx.org
+        env:
+          OPEN_VSX_ACCESS_TOKEN: ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
+        run: cd packages/vscode && npx ovsx publish -p "$OPEN_VSX_ACCESS_TOKEN"
+      - name: Slack Notification on Failure
+        if: ${{ needs.setup.result == 'failure' || needs.test-extension.result == 'failure' || failure() }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_TITLE: "Publishing stable to open-vsx failed :x:"
+          SLACK_COLOR: '#FF0000'
+      - name: Slack Notification on Success
+        if: ${{ needs.test-extension.result == 'success' && success() }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_TITLE: "Published stable to open-vsx :white_check_mark:"
+          SLACK_COLOR: '#008000'
+  
+  publish-marketplace: 
+    name: Publish stable extension to marketplace
+    runs-on: ubuntu-latest
+    needs: [setup, test-extension, publish-open-vsx]
+    if: always() && ${{ needs.setup.outputs.is-minor-release }}
     env: 
       AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
@@ -130,30 +169,21 @@ jobs:
         run: npm install
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
-        if: ${{ needs.setup.outputs.is-minor-release }}
         run: npm run vsce:bump "latest" ${{ needs.setup.outputs.version }}
       - name: Install Dependencies
         run: npm install
-      - name: Compile
-        run: npm run compile
-      - name: Publish extension to open-vsx.org
-        env:
-          OPEN_VSX_ACCESS_TOKEN: ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
-        run: cd packages/vscode && npx ovsx publish -p "$OPEN_VSX_ACCESS_TOKEN"
       - name: Publish Extension on Marketplace
-        if: ${{ needs.setup.outputs.is-minor-release }}
         run: npm run vsce:publish "latest" ${{ needs.setup.outputs.version }}
       - name: Slack Notification on Failure
         if: ${{ needs.setup.result == 'failure' || needs.test-extension.result == 'failure' || failure() }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "Publishing stable failed :x:"
+          SLACK_TITLE: "Publishing stable to marketplace failed :x:"
           SLACK_COLOR: '#FF0000'
-
       - name: Slack Notification on Success
-        if: ${{ needs.test-extension.result == 'success' && success() && needs.setup.outputs.is-minor-release }}
+        if: ${{ needs.test-extension.result == 'success' && success() }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "Published stable :white_check_mark:"
+          SLACK_TITLE: "Published stable to marketplace :white_check_mark:"
           SLACK_COLOR: '#008000'
       
