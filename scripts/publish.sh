@@ -61,21 +61,20 @@ elif [ "$ENVIRONMENT" = "PRODUCTION" ] && [ "$RELEASE_CHANNEL" = "latest" ]; the
   # Check if current branch is patch branch
   echo "${GITHUB_REF}" | grep -qE ".x$"
   if [ "$?" = 1 ]; then
+    # In the stable channel, we just need to commit the prisma_version_stable file
+    # to be able to track the Prisma version against which the current stable channel extension was published
     git reset origin/master
+    git add ./scripts/prisma_version_stable
+    git commit -m "bump prisma_version to $NPM_VERSION"
   fi
 
-  # In the stable channel, we just need to commit the prisma_version_stable file
-  # to be able to track the Prisma version against which the current stable channel extension was published
-  git add ./scripts/prisma_version_stable
-  git commit -m "bump prisma_version to $NPM_VERSION"
   git tag -a "$NEXT_EXTENSION_VERSION" -m "$NEXT_EXTENSION_VERSION" -m "Prisma version: $NPM_VERSION"
   git push github HEAD:"${GITHUB_REF}" --follow-tags
   # TODO: Create a release linked to this tag for stable
 elif [ "$ENVIRONMENT" = "PRODUCTION" ] && [ "$RELEASE_CHANNEL" = "patch-dev" ]; then
-  git add ./scripts/prisma_version_patch_dev
-  git add ./scripts/extension_version_patch_dev
-  git commit -am "patch prisma_version to $NPM_VERSION"
-  git tag -a "$NEXT_EXTENSION_VERSION" -m "$NEXT_EXTENSION_VERSION" -m "Prisma version: $NPM_VERSION"
+  echo "Sync with ${GITHUB_REF} and push to it"
+  git pull github "${GITHUB_REF}" --rebase
+  git tag -a "insider/$NEXT_EXTENSION_VERSION" -m "insider/$NEXT_EXTENSION_VERSION" -m "Prisma version: $NPM_VERSION"
 
   PATCH_BRANCH=$(node scripts/patch/patch-branch.js "$NPM_VERSION")
   echo "PATCH_BRANCH: $PATCH_BRANCH"
