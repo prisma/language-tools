@@ -122,6 +122,8 @@ export function getBlockAtPosition(
   let blockName = ''
   let blockStart: Position = Position.create(0, 0)
   let blockEnd: Position = Position.create(0, 0)
+  const allowedBlockIdentifiers = ['model', 'enum', 'datasource', 'generator']
+
   // get block beginning
   let reachedLine = false
   for (const [key, item] of lines.reverse().entries()) {
@@ -132,7 +134,12 @@ export function getBlockAtPosition(
     if (!reachedLine) {
       continue
     }
-    if (item.includes('{')) {
+    if (
+      allowedBlockIdentifiers.some((identifier) =>
+        item.startsWith(identifier),
+      ) &&
+      item.includes('{')
+    ) {
       const index = item.search(/\s+/)
       blockType = ~index ? item.slice(0, index) : item
       blockName = item.slice(blockType.length, item.length - 2).trim()
@@ -154,7 +161,8 @@ export function getBlockAtPosition(
     if (!reachedLine) {
       continue
     }
-    if (item.includes('}')) {
+    // check if block ends here
+    if (item.startsWith('}')) {
       blockEnd = Position.create(key, 1)
       return new Block(blockType, blockStart, blockEnd, blockName)
     }
