@@ -27,7 +27,6 @@ export function extractModelName(line: string): string {
 }
 
 export function isRelationField(currentLine: string, lines: string[]): boolean {
-  // rename not allowed on relation fields
   const relationNames = getAllRelationNames(lines)
   const type = getType(currentLine)
 
