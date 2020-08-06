@@ -16,8 +16,11 @@ function extractFirstWord(line: string): string {
   return line.replace(/ .*/, '')
 }
 
-function getType(currentLine: string): string {
+function getRelationFieldType(currentLine: string): string {
   const wordsInLine: string[] = currentLine.split(/\s+/)
+  if (wordsInLine.length < 2) {
+    return ''
+  }
   return wordsInLine[1].replace('?', '').replace('[]', '')
 }
 
@@ -28,7 +31,11 @@ export function extractModelName(line: string): string {
 
 export function isRelationField(currentLine: string, lines: string[]): boolean {
   const relationNames = getAllRelationNames(lines)
-  const type = getType(currentLine)
+  const type = getRelationFieldType(currentLine)
+
+  if (type == '') {
+    return false
+  }
 
   return relationNames.includes(type)
 }
@@ -64,7 +71,7 @@ export function isValidFieldName(
   }
 
   // remove type modifiers
-  const type = getType(currentLine)
+  const type = getRelationFieldType(currentLine)
   return type !== '' && type !== undefined
 }
 
