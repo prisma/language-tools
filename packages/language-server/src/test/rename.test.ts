@@ -35,10 +35,15 @@ suite('Rename', () => {
   const renameFieldPath = './rename/renameFields.prisma'
   const renameEnumPath = './rename/renameEnum.prisma'
   const renameFieldLargeSchemaPath = './rename/renameFieldLargeSchema.prisma'
+  const renameModelWithJsonDefaultPath =
+    './rename/renameModelWithJsonDefault.prisma'
 
   const renameModel: TextDocument = getTextDocument(renameModelPath)
   const renameField: TextDocument = getTextDocument(renameFieldPath)
   const renameEnum: TextDocument = getTextDocument(renameEnumPath)
+  const renameModelWithJsonDefault: TextDocument = getTextDocument(
+    renameModelWithJsonDefaultPath,
+  )
   const renameFieldLargeSchema: TextDocument = getTextDocument(
     renameFieldLargeSchemaPath,
   )
@@ -117,6 +122,72 @@ suite('Rename', () => {
       },
       renameModel,
       newModelName2,
+      { line: 9, character: 10 },
+    )
+  })
+  test('Model with Json default attribute', () => {
+    assertRename(
+      {
+        changes: {
+          [renameModelWithJsonDefault.uri]: [
+            {
+              newText: newModelName,
+              range: {
+                start: { line: 17, character: 6 },
+                end: { line: 17, character: 10 },
+              },
+            },
+            {
+              newText: '\t@@map("User")\n}',
+              range: {
+                start: { line: 23, character: 0 },
+                end: { line: 23, character: 1 },
+              },
+            },
+            {
+              newText: newModelName,
+              range: {
+                start: { line: 13, character: 12 },
+                end: { line: 13, character: 16 },
+              },
+            },
+          ],
+        },
+      },
+      renameModelWithJsonDefault,
+      newModelName,
+      { line: 17, character: 10 },
+    )
+    assertRename(
+      {
+        changes: {
+          [renameModel.uri]: [
+            {
+              newText: newModelName2,
+              range: {
+                start: { line: 9, character: 6 },
+                end: { line: 9, character: 10 },
+              },
+            },
+            {
+              newText: '\t@@map("Post")\n}',
+              range: {
+                start: { line: 15, character: 0 },
+                end: { line: 15, character: 1 },
+              },
+            },
+            {
+              newText: newModelName2,
+              range: {
+                start: { line: 21, character: 8 },
+                end: { line: 21, character: 12 },
+              },
+            },
+          ],
+        },
+      },
+      renameModelWithJsonDefault,
+      newModelName,
       { line: 9, character: 10 },
     )
   })
