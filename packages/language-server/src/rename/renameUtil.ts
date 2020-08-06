@@ -66,11 +66,7 @@ export function isValidFieldName(
 
   // remove type modifiers
   const type = getType(currentLine)
-  if (type !== '' && type !== undefined) {
-    return false
-  }
-
-  return true
+  return type !== '' && type !== undefined
 }
 
 export function isModelName(position: Position, block: Block): boolean {

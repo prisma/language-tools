@@ -9,7 +9,6 @@ function assertRename(
   document: TextDocument,
   newName: string,
   position: Position,
-  shouldFail = false,
 ): void {
   const params: RenameParams = {
     textDocument: document,
@@ -22,12 +21,8 @@ function assertRename(
     document,
   )
 
-  if (shouldFail) {
-    assert.equal(renameResult, undefined)
-  } else {
-    assert.notEqual(renameResult, undefined)
-    assert.deepEqual(renameResult, expected)
-  }
+  assert.notEqual(renameResult, undefined)
+  assert.deepEqual(renameResult, expected)
 }
 
 suite('Rename', () => {
@@ -147,17 +142,24 @@ suite('Rename', () => {
       { line: 136, character: 7 },
     )
   })
-  test('Field rename not allowed for relation fields', () => {
+  test('Field rename on relation field does not add @map', () => {
     assertRename(
       {
         changes: {
-          [renameField.uri]: [],
+          [renameFieldLargeSchema.uri]: [
+            {
+              newText: newFieldName,
+              range: {
+                start: { line: 137, character: 2 },
+                end: { line: 137, character: 7 },
+              },
+            },
+          ],
         },
       },
       renameFieldLargeSchema,
       newFieldName,
       { line: 137, character: 7 },
-      true,
     )
   })
   test('Field referenced in @@id and @relation attributes', () => {
