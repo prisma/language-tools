@@ -115,7 +115,7 @@ jobs:
           run: npm run test
 
   publish: 
-    name: Publish to marketplace
+    name: Publish patch for stable
     runs-on: ubuntu-latest
     needs: [setup, test-extension]
     if: ${{ needs.setup.outputs.version }}
@@ -140,7 +140,11 @@ jobs:
         run: npm install
       - name: Compile
         run: npm run compile
-      - name: Publish Extension as Patch
+      - name: Publish extension as Patch to open-vsx.org
+        env:
+          OPEN_VSX_ACCESS_TOKEN: ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
+        run: cd packages/vscode && npx ovsx publish -p "$OPEN_VSX_ACCESS_TOKEN"
+      - name: Publish Extension as Patch to Marketplace
         if: ${{ needs.setup.outputs.version }}
         run: npm run vsce:publish "latest" ${{ needs.setup.outputs.version }}
       - name: Slack Notification on Failure

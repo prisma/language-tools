@@ -120,7 +120,7 @@ jobs:
           run: npm run test
 
   publish-insider: 
-    name: Publish insider extension to Marketplace
+    name: Publish insider extension
     runs-on: ubuntu-latest
     needs: [setup, test-lsp, publish-lsp, test-extension]
     if: always() && ${{ needs.setup.outputs.patch-version }}
@@ -146,7 +146,12 @@ jobs:
         run: npm install
       - name: Compile
         run: npm run compile
-      - name: Publish Extension as Patch
+      - name: Publish extension as Patch to open-vsx.org
+        if: ${{ needs.setup.outputs.patch-version }}
+        env:
+          OPEN_VSX_ACCESS_TOKEN: ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
+        run: cd packages/vscode && npx ovsx publish -p "$OPEN_VSX_ACCESS_TOKEN"
+      - name: Publish Extension as Patch to Marketplace
         if: ${{ needs.setup.outputs.patch-version }}
         run: npm run vsce:publish "patch-dev" ${{ needs.setup.outputs.patch-version }}
       - name: Slack Notification on Failure
@@ -200,7 +205,11 @@ jobs:
         run: npm install
       - name: Compile
         run: npm run compile
-      - name: Publish Extension as Patch
+      - name: Publish extension as Patch to open-vsx.org
+        env:
+          OPEN_VSX_ACCESS_TOKEN: ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
+        run: cd packages/vscode && npx ovsx publish -p "$OPEN_VSX_ACCESS_TOKEN"
+      - name: Publish Extension as Patch to Marketplace
         run: npm run vsce:publish "latest" ${{ steps.bump.outputs.version }}
       - name: Slack Notification on Failure
         if: ${{ needs.setup.result == 'failure' || needs.test-extension.result == 'failure' || failure() }}
