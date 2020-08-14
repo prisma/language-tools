@@ -129,8 +129,8 @@ jobs:
         with:
           run: npm run test
   
-  publish-marketplace: 
-    name: Publish insider extension
+  publish: 
+    name: Publish insider extension to Marketplace
     runs-on: ubuntu-latest
     needs: [setup, test-extension]
     if: always() && ${{ needs.setup.outputs.version }}
