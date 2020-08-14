@@ -118,7 +118,7 @@ jobs:
         uses: GabrielBB/xvfb-action@v1.0
         with:
           run: npm run test
-  
+
   publish-insider: 
     name: Publish insider extension to Marketplace
     runs-on: ubuntu-latest
@@ -160,31 +160,6 @@ jobs:
         env:  
           SLACK_TITLE: "Published insider :white_check_mark:"
           SLACK_COLOR: '#008000'
-  
-  publish-stable-lsp:
-    name: Publish stable LSP
-    runs-on: ubuntu-latest
-    needs: [setup, test-extension, publish-insider]
-    if: ${{ needs.setup.outputs.patch-version }}
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install Dependencies
-        run: npm install
-      - name: Checkout patch branch
-        run: npm run setup:patch
-      - name: Bump versions
-        # Jobs do not share workspace --> bump versions again
-        id: bump
-        run: npm run vsce:bump "latest"  "toBeCreated"
-      - name: Publish LSP to npm
-        # Setup .npmrc file to publish to npm
-        uses: actions/setup-node@v1
-        with: 
-          node-version: '12.x'
-          registry-url: 'https://registry.npmjs.org'
-      - run: cd packages/language-server && npm publish --tag latest --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN}}
 
 publish-stable:
     name: Publish Patch on Stable
@@ -207,6 +182,15 @@ publish-stable:
         # Jobs do not share workspace --> bump versions again
         id: bump
         run: npm run vsce:bump "latest"  "toBeCreated"
+       - name: Publish LSP to npm
+        # Setup .npmrc file to publish to npm
+        uses: actions/setup-node@v1
+        with: 
+          node-version: '12.x'
+          registry-url: 'https://registry.npmjs.org'
+      - run: cd packages/language-server && npm publish --tag latest --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN}}
       - name: Install Dependencies
         run: npm install
       - name: Publish Extension as Patch to Marketplace

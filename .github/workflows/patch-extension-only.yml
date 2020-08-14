@@ -134,6 +134,7 @@ jobs:
         env:  
           SLACK_TITLE: "Publishing insider patch failed :x:"
           SLACK_COLOR: '#FF0000'
+
       - name: Slack Notification on Success
         if: ${{ needs.test-extension.result == 'success' && success() }}
         uses: rtCamp/action-slack-notify@v2.0.2
