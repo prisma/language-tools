@@ -160,8 +160,8 @@ jobs:
         env:  
           SLACK_TITLE: "Published insider :white_check_mark:"
           SLACK_COLOR: '#008000'
-
-publish-stable:
+  
+  publish-stable:
     name: Publish Patch on Stable
     runs-on: ubuntu-latest
     needs: [setup, test-extension, publish-insider, publish-stable-lsp]
