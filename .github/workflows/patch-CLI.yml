@@ -94,7 +94,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    if: always()
+    if: always() && ${{ needs.setup.outputs.patch-version }}
     steps: 
       - uses: actions/checkout@v2
       - name: Install Dependencies

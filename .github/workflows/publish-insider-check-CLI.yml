@@ -48,6 +48,12 @@ jobs:
     if: ${{ needs.setup.outputs.lsp-not-published }}
     steps:
       - uses: actions/checkout@v2
+       # serialize this workflow run
+      - name: Turnstyle
+        uses: softprops/turnstyle@v1
+        # https://github.com/softprops/turnstyle/issues/13
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Dependencies
         run: npm install
       - name: Bump versions
@@ -68,6 +74,12 @@ jobs:
     if: ${{ needs.setup.outputs.lsp-not-published }}
     steps:
       - uses: actions/checkout@v2
+       # serialize this workflow run
+      - name: Turnstyle
+        uses: softprops/turnstyle@v1
+        # https://github.com/softprops/turnstyle/issues/13
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Dependencies
         run: npm install
       - name: Bump versions
@@ -95,9 +107,15 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    if: always() 
+    if: always() &&  ${{ needs.setup.outputs.version }}
     steps: 
       - uses: actions/checkout@v2
+       # serialize this workflow run
+      - name: Turnstyle
+        uses: softprops/turnstyle@v1
+        # https://github.com/softprops/turnstyle/issues/13
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Dependencies
         if: ${{ needs.setup.outputs.version }}
         run: npm install
@@ -130,6 +148,12 @@ jobs:
       SLACK_MESSAGE: ${{ needs.setup.outputs.version }}
     steps:
       - uses: actions/checkout@v2
+       # serialize this workflow run
+      - name: Turnstyle
+        uses: softprops/turnstyle@v1
+        # https://github.com/softprops/turnstyle/issues/13
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Dependencies
         run: npm install
       - name: Bump versions
@@ -168,6 +192,12 @@ jobs:
       SLACK_MESSAGE: ${{ needs.setup.outputs.version }}
     steps:
       - uses: actions/checkout@v2
+       # serialize this workflow run
+      - name: Turnstyle
+        uses: softprops/turnstyle@v1
+        # https://github.com/softprops/turnstyle/issues/13
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Dependencies
         run: npm install
       - name: Bump versions
