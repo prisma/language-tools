@@ -44,6 +44,12 @@ jobs:
     if: ${{ needs.setup.outputs.lsp-not-published }}
     steps:
       - uses: actions/checkout@v2
+       # serialize this workflow run
+      - name: Turnstyle
+        uses: softprops/turnstyle@v1
+        # https://github.com/softprops/turnstyle/issues/13
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Dependencies
         run: npm install
       - name: Bump versions
@@ -63,6 +69,12 @@ jobs:
     if: ${{ needs.setup.outputs.lsp-not-published }}
     steps:
       - uses: actions/checkout@v2
+       # serialize this workflow run
+      - name: Turnstyle
+        uses: softprops/turnstyle@v1
+        # https://github.com/softprops/turnstyle/issues/13
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Dependencies
         run: npm install
       - name: Bump versions
@@ -89,9 +101,15 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    if: always() 
+    if: always() && ${{ needs.setup.outputs.version }}
     steps: 
       - uses: actions/checkout@v2
+       # serialize this workflow run
+      - name: Turnstyle
+        uses: softprops/turnstyle@v1
+        # https://github.com/softprops/turnstyle/issues/13
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Dependencies
         if: ${{ needs.setup.outputs.version }}
         run: npm install
@@ -112,10 +130,10 @@ jobs:
           run: npm run test
 
   publish: 
-    name: Publish to marketplace
+    name: Publish insider extension to Marketplace
     runs-on: ubuntu-latest
     needs: [setup, test-extension]
-    if: ${{ needs.setup.outputs.version }}
+    if: always() && ${{ needs.setup.outputs.version }}
     env: 
       AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
@@ -125,17 +143,21 @@ jobs:
       SLACK_MESSAGE: ${{ needs.setup.outputs.version }}
     steps:
       - uses: actions/checkout@v2
+       # serialize this workflow run
+      - name: Turnstyle
+        uses: softprops/turnstyle@v1
+        # https://github.com/softprops/turnstyle/issues/13
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Dependencies
         run: npm install
       - name: Bump versions
+        if: ${{ needs.setup.outputs.version }}
         # Jobs do not share workspace --> bump versions again
         run: npm run vsce:bump "dev" "toBeCreated"
       - name: Install Dependencies
         run: npm install
-      - name: Compile
-        run: npm run compile
-      - name: Publish Extension as Patch
-        if: ${{ needs.setup.outputs.version }}
+      - name: Publish Extension to Marketplace
         run: npm run vsce:publish "dev" ${{ needs.setup.outputs.version }}
       - name: Slack Notification on Failure
         if: ${{ needs.setup.result == 'failure' || needs.test-extension.result == 'failure' || failure() }}
@@ -145,7 +167,7 @@ jobs:
           SLACK_COLOR: '#FF0000'
 
       - name: Slack Notification on Success
-        if: ${{ needs.test-extension.result == 'success' && success() && needs.setup.outputs.version }}
+        if: ${{ needs.test-extension.result == 'success' && success() }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
           SLACK_TITLE: "Published insider on push to master :white_check_mark:"
