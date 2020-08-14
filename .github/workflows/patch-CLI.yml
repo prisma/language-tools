@@ -164,7 +164,7 @@ jobs:
   publish-stable:
     name: Publish Patch on Stable
     runs-on: ubuntu-latest
-    needs: [setup, test-extension, publish-insider, publish-stable-lsp]
+    needs: [setup, test-extension, publish-insider]
     if: always() && ${{ needs.setup.outputs.patch-version }}
     env:
       AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
