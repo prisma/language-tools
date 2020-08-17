@@ -219,24 +219,12 @@
   ],
   "generatorPreviewFeatures": [
     {
-      "label": "distinct",
-      "documentation": "Enables distinct querying capabilities within Prisma Client. This feature allows you to query for distinct (unique) rows of a model and returns only one record per unique field value.\nDistinct is only a filter and does not change the return type of the `findMany` query.\n\nPlease [share your feedback](https://github.com/prisma/prisma/issues/3106) on how this feature works for you. We are interested in both positive and negative feedback to help us gauge when this feature is ready for production! (If encounter any problems, please open a new issue [here](https://github.com/prisma/prisma/issues/new/choose))."
-    },
-    {
-      "label": "middlewares",
-      "documentation": "Enables the Middlewares API allowing you to hook into the control flow of Prisma Client. Middlewares allows you to manipulate the parameters and interrogate the result of each query.\n\nPlease [share your feedback](https://github.com/prisma/prisma/issues/3107) on how this feature works for you. We are interested in both positive and negative feedback to help us gauge when this feature is ready for production! (If encounter any problems, please open a new issue [here](https://github.com/prisma/prisma/issues/new/choose))."
-    },
-    {
       "label": "connectOrCreate",
       "documentation": "While Prisma Client already provides an `upsert` query, which is available on the top-level of the Prisma Client API, we now also support `upsert`s in a *nested* manner. When writing data with Prisma Client, both in `update` and `create`, you can now provide an `upsert` operation on a related row by using this feature flag.\n\nPlease [share](https://github.com/prisma/prisma/issues/3103) your feedback on how this feature works for you. We are interested in both positive and negative feedback to help us gauge when this feature is ready for production! (If encounter any problems, please open a new issue here)."
     },
     {
       "label": "transactionApi",
       "documentation": "While Prisma already ships transactions within [nested writes](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/relation-queries#nested-writes), there are many use cases, where you might want to perform multiple *unrelated* write operations in a transaction and rollback, if one of them fails.\nBy wrapping your write operations in the new `transaction()` function, you can achieve exactly this!\n\n(Note, that these transactions are not long-running and are executed directly after each other. This is an explicit design decision of Prisma. In case this does not cover your use case yet, please chime in on [GitHub](https://github.com/prisma/prisma-client-js/issues/742)).\nAlternatively, you can store the unresolved promises in variables and pass these to the new transaction function.\n\n\n\nPlease [share your feedback](https://github.com/prisma/prisma/issues/3104) on how this feature works for you. We are interested in both positive and negative feedback to help us gauge when this feature is ready for production! (If encounter any problems, please open a new issue [here](https://github.com/prisma/prisma/issues/new/choose))."
-    },
-    {
-      "label": "aggregateApi",
-      "documentation": "While Prisma Client already provides a `count` query for each model, we now introduce further aggregation functionality for number fields.\nIf your model has a field of type `Int` or `Float`, the following aggregations will be available:\n* sum: Sum up all values of a field for the selected rows.\n* min: Get the minimum value for a field for the selected rows.\n* max: Get the maximum value for a field for the selected rows.\n* avg: Get the average value for a field for the selected rows.\n\nPlease [share](https://github.com/prisma/prisma/issues/3105) your feedback on how this feature works for you. We are interested in both positive and negative feedback to help us gauge when this feature is ready for production! (If encounter any problems, please open a new issue [here](https://github.com/prisma/prisma/issues/new/choose))."
     }
   ],
   "generatorProviders": [
