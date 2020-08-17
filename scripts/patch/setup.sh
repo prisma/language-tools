@@ -32,5 +32,6 @@ if [ "${EXISTS_ALREADY}" = "" ]; then
         echo "Not setting up repo because ENVIRONMENT is not set"
     fi
 else 
+    git checkout "$PATCH_BRANCH"
     echo "PATCH_BRANCH exists already."
 fi
