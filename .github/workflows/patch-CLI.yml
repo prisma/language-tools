@@ -271,7 +271,7 @@ jobs:
           SLACK_COLOR: '#008000'
           SLACK_MESSAGE: ${{ steps.bump.outputs.version }}
 
-publish-stable:
+  publish-stable:
     name: Publish Patch on Stable
     runs-on: ubuntu-latest
     needs: [setup, test-extension, publish-insider, publish-insider-marketplace, publish-stable-lsp]
