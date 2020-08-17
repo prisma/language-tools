@@ -26,7 +26,6 @@
     "typescript": "3.9.7",
     "vsce": "1.77.0",
     "yarn": "1.22.4",
-    "npx": "10.2.2",
     "ovsx": "0.1.0-next.dacd2fd"
   },
   "scripts": {
@@ -43,7 +42,8 @@
     "test": "sh scripts/e2e.sh",
     "testScripts": "jest __tests__",
     "check:lsp": "sh scripts/lsp-version.sh",
-    "setup:patch": "sh scripts/patch/setup.sh"
+    "setup:patch": "sh scripts/patch/setup.sh",
+    "openvsx:publish": "ovsx publish -p"
   },
   "husky": {
     "hooks": {
