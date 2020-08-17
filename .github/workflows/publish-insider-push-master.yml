@@ -101,7 +101,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    if: always() && ${{ needs.setup.outputs.version }}
+    if: always()
     steps: 
       - uses: actions/checkout@v2
        # serialize this workflow run

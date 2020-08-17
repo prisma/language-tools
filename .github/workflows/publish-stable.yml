@@ -90,7 +90,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    if: always() && ${{ needs.setup.outputs.is-minor-release }}
+    if: always()
     steps: 
       - uses: actions/checkout@v2
       - name: Install Dependencies
