@@ -94,7 +94,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    if: always()
+    if: always() && ${{ needs.setup.outputs.patch-version }}
     steps: 
       - uses: actions/checkout@v2
       - name: Install Dependencies
@@ -264,7 +264,7 @@ jobs:
           SLACK_COLOR: '#FF0000'
           SLACK_MESSAGE: ${{ steps.bump.outputs.version }}
       - name: Slack Notification on Success
-        if: ${{ needs.test-extension.result == 'success' && success() && needs.setup.outputs.patch-version }}
+        if: ${{ needs.test-extension.result == 'success' && success() }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
           SLACK_TITLE: "Published stable patch to open-vsx :white_check_mark:"

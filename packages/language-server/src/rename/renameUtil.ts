@@ -16,9 +16,28 @@ function extractFirstWord(line: string): string {
   return line.replace(/ .*/, '')
 }
 
+function getType(currentLine: string): string {
+  const wordsInLine: string[] = currentLine.split(/\s+/)
+  if (wordsInLine.length < 2) {
+    return ''
+  }
+  return wordsInLine[1].replace('?', '').replace('[]', '')
+}
+
 export function extractModelName(line: string): string {
   const blockType = extractFirstWord(line)
   return line.slice(blockType.length, line.length - 1).trim()
+}
+
+export function isRelationField(currentLine: string, lines: string[]): boolean {
+  const relationNames = getAllRelationNames(lines)
+  const type = getType(currentLine)
+
+  if (type == '') {
+    return false
+  }
+
+  return relationNames.includes(type)
 }
 
 export function isValidFieldName(
@@ -26,7 +45,6 @@ export function isValidFieldName(
   position: Position,
   currentBlock: Block,
   document: TextDocument,
-  lines: string[],
 ): boolean {
   if (
     currentBlock.type !== 'model' ||
@@ -52,16 +70,9 @@ export function isValidFieldName(
     return false
   }
 
-  // rename not allowed on relation fields
-  const relationNames = getAllRelationNames(lines)
-  const wordsInLine: string[] = currentLine.split(/\s+/)
   // remove type modifiers
-  const type = wordsInLine[1].replace('?', '').replace('[]', '')
-  if (type !== '' && type !== undefined && relationNames.includes(type)) {
-    return false
-  }
-
-  return true
+  const type = getType(currentLine)
+  return type !== '' && type !== undefined
 }
 
 export function isModelName(position: Position, block: Block): boolean {
@@ -166,6 +177,7 @@ export function renameReferencesForFieldValue(
   document: TextDocument,
   lines: string[],
   block: Block,
+  isRelationFieldRename: boolean,
 ): TextEdit[] {
   const edits: TextEdit[] = []
   const searchStringsSameBlock = ['@@index', '@@id', '@@unique']
@@ -182,7 +194,11 @@ export function renameReferencesForFieldValue(
     if (key === block.end.line) {
       break
     }
-    if (item.includes(relationAttribute) && item.includes(currentValue)) {
+    if (
+      item.includes(relationAttribute) &&
+      item.includes(currentValue) &&
+      !isRelationFieldRename
+    ) {
       // search for fields references
       const currentLineUntrimmed = getCurrentLine(document, key)
       const indexOfFieldsStart = currentLineUntrimmed.indexOf('fields:')

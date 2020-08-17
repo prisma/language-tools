@@ -90,7 +90,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    if: always()
+    if: always() && ${{ needs.setup.outputs.is-minor-release }}
     steps: 
       - uses: actions/checkout@v2
       - name: Install Dependencies
@@ -132,8 +132,6 @@ jobs:
         run: npm run vsce:bump "latest" ${{ needs.setup.outputs.version }}
       - name: Install Dependencies
         run: npm install
-      - name: Compile
-        run: npm run compile
       - name: Publish extension to open-vsx.org
         env:
           OPEN_VSX_ACCESS_TOKEN: ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
