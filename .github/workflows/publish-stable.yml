@@ -90,11 +90,11 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    if: always() && ${{ needs.setup.outputs.is-minor-release }}
+    if: always()
     steps: 
       - uses: actions/checkout@v2
       - name: Install Dependencies
-        if: ${{ needs.setup.outputs.version }}
+        if: ${{ needs.setup.outputs.is-minor-release }}
         run: npm install
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
