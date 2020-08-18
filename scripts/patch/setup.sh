@@ -16,6 +16,7 @@ NPM_VERSION=$(sh scripts/prisma-version.sh "latest")
 PATCH_BRANCH=$(node scripts/patch/patch-branch.js "$NPM_VERSION")
 echo "PATCH_BRANCH: $PATCH_BRANCH"
 
+git fetch
 
 EXISTS_ALREADY=$(git ls-remote --heads origin "$PATCH_BRANCH")
 echo "$EXISTS_ALREADY"
@@ -32,5 +33,6 @@ if [ "${EXISTS_ALREADY}" = "" ]; then
         echo "Not setting up repo because ENVIRONMENT is not set"
     fi
 else 
+    git checkout "$PATCH_BRANCH"
     echo "PATCH_BRANCH exists already."
 fi

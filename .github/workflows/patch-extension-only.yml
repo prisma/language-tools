@@ -109,7 +109,7 @@ jobs:
     name: Publish extension as Patch to open-vsx
     runs-on: ubuntu-latest
     needs: [setup, test-extension]
-    if: always() && ${{ needs.setup.outputs.patch-version }}
+    if: ${{ needs.setup.outputs.patch-version }}
     env: 
       SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
       SLACK_CHANNEL: feed-language-tools
@@ -128,7 +128,7 @@ jobs:
       - name: Publish extension as Patch to open-vsx.org
         env:
           OPEN_VSX_ACCESS_TOKEN: ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
-        run: cd packages/vscode && npm run openvsx:publish "$OPEN_VSX_ACCESS_TOKEN"
+        run: npm run openvsx:publish "$OPEN_VSX_ACCESS_TOKEN"
       - name: Slack Notification on Failure
         if: ${{ needs.setup.result == 'failure' || needs.test-extension.result == 'failure' || failure() }}
         uses: rtCamp/action-slack-notify@v2.0.2
