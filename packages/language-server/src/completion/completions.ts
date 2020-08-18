@@ -178,11 +178,15 @@ export function getSuggestionForNativeTypes(
   }
 
   let datasourceName = getFirstDatasourceName(lines)
-  if (!datasourceName || wordsBeforePosition[wordsBeforePosition.length - 1] !== '@' + datasourceName) {
+  if (wordsBeforePosition[wordsBeforePosition.length - 1] !== '@' + datasourceName) {
     return undefined
   }
 
-  let line = lines.findIndex(l => l.startsWith("datasource") && l.includes(datasourceName) && l.includes('{'))
+  if (!datasourceName) {
+    return undefined
+  }
+
+  let line = lines.findIndex(l => l.startsWith("datasource") && l.includes(datasourceName as string) && l.includes('{'))
   let datasourceBlock = getBlockAtPosition(line, lines)
   if (!datasourceBlock) {
     return undefined

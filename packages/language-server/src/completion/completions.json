@@ -280,5 +280,276 @@
       "label": "\"\"",
       "documentation": "Enables a preview feature flag."
     }
-  ]
+  ],
+  "nativeTypes": {
+    "mysql": {
+      "Int": [
+        {
+          "label": "Int",
+          "documentation": "Exact numeric data type. MySQL treats *Int* as a synonym for *Integer*."
+        },
+        {
+          "label": "SmallInt",
+          "documentation": "Exact numeric data type."
+        },
+        {
+          "label": "TinyInt",
+          "documentation": "Exact numeric data type."
+        },
+        {
+          "label": "MediumInt",
+          "documentation": "Exact numeric data type."
+        },
+        {
+          "label": "BigInt",
+          "documentation": "Exact numeric data type."
+        }
+      ],
+      "Decimal": [
+        {
+          "label": "Decimal()",
+          "fullSignature": "Decimal(m: u8, d: u8)",
+          "documentation": "Exact numeric data type. Used when it is important to preserve exact precision, for example with monetary data.",
+          "params": [
+            {
+              "label": "m",
+              "documentation": "*m* is the maximum number of digits (the precision). It has a range of 1 to 65."
+            },
+            {
+              "label": "d",
+              "documentation": "*d* is the number of digits to the right of the decimal point (the scale). It has a range of 0 to 30 and must be no larger than *m*."
+            }
+          ]
+        },
+        {
+          "label": "Numeric()",
+          "fullSignature": "Numeric(m: u8, d: u8)",
+          "documentation": "Exact numeric data type. Used when it is important to preserve exact precision, for example with monetary data. In MYSQL, *Numeric* is implemented as *Decimal*.",
+          "params": [
+            {
+              "label": "m",
+              "documentation": "*m* is the maximum number of digits (the precision). It has a range of 1 to 65."
+            },
+            {
+              "label": "d",
+              "documentation": "*d* is the number of digits to the right of the decimal point (the scale). It has a range of 0 to 30 and must be no larger than *m*."
+            }
+          ]
+        },
+        {
+          "label": "Year",
+          "documentation": "1-byte type used to represent year values with an implicit display width of 4 characters."
+        }
+      ],
+      "Float": [
+        {
+          "label": "Float",
+          "documentation": "Approximate numeric data type."
+        },
+        {
+          "label": "Double",
+          "documentation": "Approximate numeric data type. MySQL treats *Double* as a synonym for *DoublePre"
+        }
+      ],
+      "String": [
+        {
+          "label": "Char()",
+          "fullSignature": "Char(n: u32)",
+          "documentation": "",
+          "params": [
+            {
+              "label": "n",
+              "documentation": "Indicates the maximum number of characters you want to store."
+            }
+          ]
+        },
+        {
+          "label": "VarChar()",
+          "fullSignature": "VarChar(n: u32)",
+          "documentation": "",
+          "params": [
+            {
+              "label": "n",
+              "documentation": "Indicates the maximum number of characters you want to store."
+            }
+          ]
+
+        },
+        {
+          "label": "TinyText"
+        },
+        {
+          "label": "MediumText"
+        },
+        {
+          "label": "LongText"
+        }
+      ],
+      "Bytes": [
+        {
+          "label": "Bit()",
+          "fullSignature": "Bit(m: u32)",
+          "documentation": "",
+          "params": [
+            {
+              "label": "m",
+              "documentation": "A type of Bit(*m*) enables storage of *m*-bit values. *m* can range from 1 to 64."
+            }
+          ]
+        },
+        {
+          "label": "Binary()",
+          "fullSignature": "Binary(m: u32)",
+          "documentation": "",
+          "params": [
+            {
+              "label": "m",
+              "documentation": "Indicates the maximum number of bytes you want to store."
+            }
+          ]
+        },
+        {
+          "label": "VarBinary()",
+          "fullSignature": "VarBinary(m: u32)",
+          "documentation": "",
+          "params": [
+            {
+              "label": "m: u32",
+              "documentation": "Indicates the maximum number of bytes you want to store."
+            }
+          ]
+        },
+        {
+          "label": "TinyBlob"
+        },
+        {
+          "label": "MediumBlob"
+        },
+        {
+          "label": "LongBlob"
+        }
+      ],
+      "DateTime": [
+        {
+          "label": "Date"
+        },
+        {
+          "label": "Time()",
+          "fullSignature": "Time(m: Optional<u32>)",
+          "params": [
+            {
+              "label": "m",
+              "documentation": ""
+            }
+          ]
+        },
+        {
+          "label": "Datetime"
+        },
+        {
+          "label": "Timestamp"
+        }
+      ],
+      "Json": [
+        {
+          "label": "Json"
+        }
+      ]
+    },
+    "postgresql": {
+      "Int": [
+        {
+          "label": "SmallInt"
+        },
+        {
+          "label": "Integer"
+        },
+        {
+          "label": "BigInt"
+        },
+        {
+          "label": "SmallSerial"
+        },
+        {
+          "label": "BigSerial"
+        }
+      ],
+      "Decimal": [
+        {
+          "label": "Decimal"
+        },
+        {
+          "label": "Numeric"
+        }
+      ],
+      "Float": [
+        {
+          "label": "Real"
+        },
+        {
+          "label": "DoublePrecision"
+        }
+      ],
+      "String": [
+        {
+          "label": "VarChar"
+        },
+        {
+          "label": "Char"
+        },
+        {
+          "label": "Text"
+        },
+        {
+          "label": "Bit"
+        },
+        {
+          "label": "VarBit"
+        },
+        {
+          "label": "UUID"
+        }
+      ],
+      "Bytes": [
+        {
+          "label": "ByteA"
+        }
+      ],
+      "DateTime": [
+        {
+          "label": "Timestamp"
+        },
+        {
+          "label": "TimestampWithTimezone"
+        },
+        {
+          "label": "Date"
+        },
+        {
+          "label": "Time"
+        },
+        {
+          "label": "TimeWithTimezone"
+        }
+      ],
+      "Interval": [
+        {
+          "label": "Interval"
+        }
+      ],
+      "XML": [
+        {
+          "label": "XML"
+        }
+      ],
+      "Json": [
+        {
+          "label": "Json"
+        },
+        {
+          "label": "JsonB"
+        }
+      ]
+    }
+  }
 }
