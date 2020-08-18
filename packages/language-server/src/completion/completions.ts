@@ -147,6 +147,41 @@ function getSuggestionForBlockAttribute(
   return suggestions
 }
 
+export function getSuggestionForNativeTypes(
+  foundBlock: Block,
+  currentLineUntrimmed: string,
+  lines: string[],
+  wordsBeforePosition: string[]
+): CompletionList | undefined {
+  if (foundBlock.type !== 'model' || !declaredNativeTypes(lines)) {
+    return undefined
+  }
+
+  let datasourceName = getFirstDatasourceName(lines)
+  if (wordsBeforePosition[wordsBeforePosition.length - 1] !== '@' + datasourceName) {
+    return undefined
+  }
+
+  // TODO get datasource type
+  // TODO check for available native types for current datasource here
+  // TODO check number of needed/optional arguments
+
+   // TODO for compatability of current field type
+
+   let suggestions: CompletionItem[] = [
+     {
+       label: "BigInt",
+     }
+   ]
+
+  return {
+    items: suggestions,
+    isIncomplete: true
+  }
+
+
+}
+
 export function getSuggestionForFieldAttribute(
   block: Block,
   currentLine: string,
@@ -157,6 +192,8 @@ export function getSuggestionForFieldAttribute(
   }
   // create deep copy
   let suggestions: CompletionItem[] = klona(fieldAttributes)
+
+  let enabledNativeTypes = declaredNativeTypes(lines)
 
   if (!(currentLine.includes('Int') || currentLine.includes('String'))) {
     // id not allowed
@@ -169,10 +206,32 @@ export function getSuggestionForFieldAttribute(
 
   suggestions = removeInvalidAttributeSuggestions(suggestions, block, lines)
 
+  if (enabledNativeTypes) {
+    let name = getFirstDatasourceName(lines)
+    if (name) {
+      suggestions.push(
+        {
+          kind: CompletionItemKind.Property,
+          label: '@' + name,
+          documentation: "Defines a custom type that should be used for this field."
+        }
+      )
+    }
+  }
+
   return {
     items: suggestions,
     isIncomplete: false,
   }
+}
+
+function getFirstDatasourceName(lines: string[]): string | undefined {
+  let datasourceBlockFirstLine = lines.find(l => l.startsWith("datasource") && l.includes('{'))
+  if (!datasourceBlockFirstLine) {
+    return undefined
+  }
+  let indexOfBracket = datasourceBlockFirstLine.indexOf("{")
+  return datasourceBlockFirstLine.slice("datasource".length, indexOfBracket).trim()
 }
 
 export function getAllRelationNames(lines: Array<string>): Array<string> {
@@ -387,6 +446,29 @@ export function getValuesInsideBrackets(line: string): string[] {
   }
   const result = matches[1].split(',')
   return result.map((v) => v.trim().replace('"', '').replace('"', ''))
+}
+
+
+function declaredNativeTypes
+  (lines: Array<string>): boolean {
+  let foundDataSourceBlock = false
+  for (const item of lines) {
+    if (item.includes('generator')) {
+      foundDataSourceBlock = true
+      continue
+    }
+    if (foundDataSourceBlock) {
+      if (item.startsWith('}')) {
+        break
+      }
+      if ((item.startsWith('previewFeatures') || item.startsWith('experimentalFeatures'))
+        && item.includes('nativeTypes')) {
+        return true
+      }
+    }
+  }
+
+  return false
 }
 
 export function getSuggestionForSupportedFields(

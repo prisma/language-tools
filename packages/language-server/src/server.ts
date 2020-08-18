@@ -96,7 +96,7 @@ export function startServer(options?: LSOptions): void {
         documentFormattingProvider: true,
         completionProvider: {
           resolveProvider: true,
-          triggerCharacters: ['@', '"'],
+          triggerCharacters: ['@', '"', '.'],
         },
         hoverProvider: true,
         renameProvider: true,

@@ -32,6 +32,7 @@ import {
   isInsideAttribute,
   getSymbolBeforePosition,
   suggestEqualSymbol,
+  getSuggestionForNativeTypes,
 } from './completion/completions'
 import { quickFix } from './codeActionProvider'
 import lint from './lint'
@@ -496,6 +497,13 @@ export function handleCompletionRequest(
           lines[position.line],
           currentLineUntrimmed,
           position,
+        )
+      case '.': 
+        return getSuggestionForNativeTypes(
+          foundBlock,
+          currentLineUntrimmed,
+          lines,
+          wordsBeforePosition
         )
     }
   }
