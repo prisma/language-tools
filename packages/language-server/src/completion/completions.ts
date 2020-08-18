@@ -6,7 +6,7 @@ import {
   MarkupKind,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { Block, getModelOrEnumBlock } from '../MessageHandler'
+import { Block, getModelOrEnumBlock, getBlockAtPosition } from '../MessageHandler'
 import {
   blockAttributes,
   fieldAttributes,
@@ -147,6 +147,26 @@ function getSuggestionForBlockAttribute(
   return suggestions
 }
 
+function getProviders(lines: string[], block: Block): string[] {
+  let reachedStartLine = false
+  for (const [key, item] of lines.entries()) {
+    if (key === block.start.line + 1) {
+      reachedStartLine = true
+    }
+    if (!reachedStartLine) {
+      continue
+    }
+    if (key === block.end.line) {
+      break
+    }
+
+    if (item.startsWith("provider")) {
+      return getValuesInsideBrackets(item)
+    }
+  }
+  return []
+}
+
 export function getSuggestionForNativeTypes(
   foundBlock: Block,
   currentLineUntrimmed: string,
@@ -158,7 +178,18 @@ export function getSuggestionForNativeTypes(
   }
 
   let datasourceName = getFirstDatasourceName(lines)
-  if (wordsBeforePosition[wordsBeforePosition.length - 1] !== '@' + datasourceName) {
+  if (!datasourceName || wordsBeforePosition[wordsBeforePosition.length - 1] !== '@' + datasourceName) {
+    return undefined
+  }
+
+  let line = lines.findIndex(l => l.startsWith("datasource") && l.includes(datasourceName) && l.includes('{'))
+  let datasourceBlock = getBlockAtPosition(line, lines)
+  if (!datasourceBlock) {
+    return undefined
+  }
+
+  let provider = getProviders(lines, datasourceBlock)
+  if (provider.length !== 1) {
     return undefined
   }
 
