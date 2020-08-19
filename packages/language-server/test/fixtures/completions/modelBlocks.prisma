@@ -60,4 +60,10 @@ enum Hello {
 model DateTest {
     id Int @id @default(autoincrement())
     update DateTime  
+    type UserType @default()
+}
+
+enum UserType {
+    ADMIN
+    NORMAL
 }

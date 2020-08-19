@@ -507,51 +507,68 @@ export function getSuggestionForSupportedFields(
   }
 }
 
-function getDefaultValues(currentLine: string): CompletionItem[] {
+function getDefaultValues(currentLine: string, lines: string[]): CompletionItem[] {
   const suggestions: CompletionItem[] = []
-  if (currentLine.includes('Int') && currentLine.includes('id')) {
-    suggestions.push({
-      label: 'autoincrement()',
-      kind: CompletionItemKind.Function,
-      documentation:
-        'Create a sequence of integers in the underlying database and assign the incremented values to the ID values of the created records based on the sequence.',
-    })
-  } else if (currentLine.includes('DateTime')) {
-    suggestions.push({
-      label: 'now()',
-      kind: CompletionItemKind.Function,
-      documentation: {
-        kind: MarkupKind.Markdown,
-        value: 'Set a timestamp of the time when a record is created.',
-      },
-    })
-  } else if (currentLine.includes('String')) {
-    suggestions.push(
-      {
-        label: 'uuid()',
-        kind: CompletionItemKind.Function,
-        documentation: {
-          kind: MarkupKind.Markdown,
-          value:
-            'Generate a globally unique identifier based on the [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier) spec.',
-        },
-      },
-      {
-        label: 'cuid()',
-        kind: CompletionItemKind.Function,
-        documentation: {
-          kind: MarkupKind.Markdown,
-          value:
-            'Generate a globally unique identifier based on the [cuid](https://github.com/ericelliott/cuid) spec.',
-        },
-      },
-    )
-  } else if (currentLine.includes('Boolean')) {
-    suggestions.push(
-      { label: 'true', kind: CompletionItemKind.Value },
-      { label: 'false', kind: CompletionItemKind.Value },
-    )
+  let fieldType = getFieldType(currentLine)
+  if (!fieldType) {
+    return []
   }
+
+  switch (fieldType) {
+    case 'Int':
+      suggestions.push({
+        label: 'autoincrement()',
+        kind: CompletionItemKind.Function,
+        documentation:
+          'Create a sequence of integers in the underlying database and assign the incremented values to the ID values of the created records based on the sequence.',
+      })
+      break
+    case 'DateTime':
+      suggestions.push({
+        label: 'now()',
+        kind: CompletionItemKind.Function,
+        documentation: {
+          kind: MarkupKind.Markdown,
+          value: 'Set a timestamp of the time when a record is created.',
+        },
+      })
+      break
+    case 'String':
+      suggestions.push(
+        {
+          label: 'uuid()',
+          kind: CompletionItemKind.Function,
+          documentation: {
+            kind: MarkupKind.Markdown,
+            value:
+              'Generate a globally unique identifier based on the [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier) spec.',
+          },
+        },
+        {
+          label: 'cuid()',
+          kind: CompletionItemKind.Function,
+          documentation: {
+            kind: MarkupKind.Markdown,
+            value:
+              'Generate a globally unique identifier based on the [cuid](https://github.com/ericelliott/cuid) spec.',
+          },
+        },
+      )
+      break
+    case 'Boolean':
+      suggestions.push(
+        { label: 'true', kind: CompletionItemKind.Value },
+        { label: 'false', kind: CompletionItemKind.Value },
+      )
+      break
+  }
+  let modelOrEnum = getModelOrEnumBlock(fieldType, lines)
+  if (modelOrEnum && modelOrEnum.type === 'enum') {
+    // get fields from enum block for suggestions
+    let values: string[] = getFieldsFromCurrentBlock(lines, modelOrEnum)
+    values.forEach(v => suggestions.push({ label: v, kind: CompletionItemKind.Value}))
+  }
+
   return suggestions
 }
 
@@ -627,7 +644,6 @@ export function getTypesFromCurrentBlock(
   const suggestions: Map<string, number> = new Map()
 
   let reachedStartLine = false
-  let type = ''
   for (const [key, item] of lines.entries()) {
     if (key === block.start.line + 1) {
       reachedStartLine = true
@@ -639,14 +655,26 @@ export function getTypesFromCurrentBlock(
       break
     }
     if (!item.startsWith('@@') && (!position || key !== position.line)) {
-      const wordsInLine: string[] = item.split(/\s+/)
-      type = wordsInLine[1]
-      if (type !== '' && type !== undefined) {
+      let type = getFieldType(item)
+      if (type !== undefined) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         suggestions.set(type, key)
       }
     }
   }
   return suggestions
+}
+
+function getFieldType(line: string): string | undefined {
+  const wordsInLine: string[] = line.split(/\s+/)
+  if (wordsInLine.length < 2) {
+    return undefined
+  }
+  let type = wordsInLine[1]
+  if (type !== '' && type !== undefined) {
+    return type
+  }
+  return undefined
 }
 
 function getSuggestionsForRelationDirective(
@@ -747,7 +775,7 @@ export function getSuggestionsForInsideAttributes(
 
   if (wordBeforePosition.includes('@default')) {
     return {
-      items: getDefaultValues(lines[position.line]),
+      items: getDefaultValues(lines[position.line], lines),
       isIncomplete: false,
     }
   } else if (

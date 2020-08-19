@@ -335,6 +335,7 @@ suite('Quick Fix', () => {
           { label: 'TypeCheck', kind: CompletionItemKind.Reference },
           { label: 'Hello', kind: CompletionItemKind.Reference },
           { label: 'DateTest', kind: CompletionItemKind.Reference },
+          { label: 'UserType', kind: CompletionItemKind.Reference }
         ],
       },
     )
@@ -390,6 +391,14 @@ suite('Quick Fix', () => {
   const staticValueFalse = {
     label: 'false',
     kind: CompletionItemKind.Value,
+  }
+  const enumValueOne = {
+    label: 'ADMIN',
+    kind: CompletionItemKind.Value
+  }
+  const enumValueTwo = {
+    label: 'NORMAL',
+    kind: CompletionItemKind.Value
   }
 
   const fieldsProperty = {
@@ -497,6 +506,17 @@ suite('Quick Fix', () => {
       {
         isIncomplete: false,
         items: [staticValueTrue, staticValueFalse],
+      },
+    )
+  })
+
+  test('Diagnoses default suggestions for enum values', () => {
+    assertCompletion(
+      modelBlocksUri,
+      { line: 62, character: 27 },
+      {
+        isIncomplete: false,
+        items: [enumValueOne, enumValueTwo],
       },
     )
   })
