@@ -1,8 +1,8 @@
 {
-  "name": "prisma-insider",
-  "displayName": "Prisma - Insider",
-  "description": "This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the dev version of the CLI.",
-  "version": "5.1.1",
+  "name": "prisma",
+  "displayName": "Prisma",
+  "description": "Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.",
+  "version": "2.5.1",
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
@@ -15,7 +15,7 @@
   "dependencies": {
     "vscode-extension-telemetry": "0.1.6",
     "checkpoint-client": "1.1.2",
-    "@prisma/language-server": "5.1.1",
+    "@prisma/language-server": "2.5.1",
     "vscode-languageclient": "6.1.3"
   },
   "repository": {
@@ -111,5 +111,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "preview": true
+  "preview": false
 }
