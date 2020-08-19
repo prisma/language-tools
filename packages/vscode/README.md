@@ -24,7 +24,7 @@ Please note that you should not have the regular and insider version of the exte
 ## Build information
 
 This version is built from commit [undefined](undefined).
-This is for Prisma CLI 2.5.0-dev.73.
+This is for Prisma CLI 2.6.0-dev.1.
 
 ## Contributing
 
