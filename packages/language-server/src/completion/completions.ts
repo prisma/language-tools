@@ -22,6 +22,8 @@ import {
   generatorProviderArguments,
   generatorPreviewFeaturesArguments,
   generatorPreviewFeatures,
+  postgresPrismaTypesToNativeTypes,
+  mysqlPrismaTypesToNativeTypes,
 } from './completionUtil'
 import klona from 'klona'
 import { extractModelName } from '../rename/renameUtil'
@@ -147,29 +149,56 @@ function getSuggestionForBlockAttribute(
   return suggestions
 }
 
-function getProviders(lines: string[], block: Block): string[] {
+function getProvider(datasourceName: string, lines: string[]): string | undefined {
+  let line = lines.findIndex(l => l.startsWith("datasource") && l.includes(datasourceName as string) && l.includes('{'))
+  let datasourceBlock = getBlockAtPosition(line, lines)
+  if (!datasourceBlock) {
+    return undefined
+  }
   let reachedStartLine = false
   for (const [key, item] of lines.entries()) {
-    if (key === block.start.line + 1) {
+    if (key === datasourceBlock.start.line + 1) {
       reachedStartLine = true
     }
     if (!reachedStartLine) {
       continue
     }
-    if (key === block.end.line) {
+    if (key === datasourceBlock.end.line) {
       break
     }
 
-    if (item.startsWith("provider")) {
-      return getValuesInsideBrackets(item)
+    if (item.startsWith("provider") && getValuesInsideBrackets(item).length === 0) {
+      // get single prvider
+      const provider = item.slice(item.indexOf('=') + 1).trimLeft().replace(/ .*/, '').slice(1)
+      return provider.replace('"', '')
     }
   }
-  return []
+  return undefined
+}
+
+function getSupportedNativeTypesForProviderAndCurrentLine(provider: string, wordsBeforePosition: string[]): CompletionItem[] | undefined {
+  let prismaScalarToNativeTypes: Map<string, CompletionItem[]>
+
+  switch (provider) {
+    case 'postgresql':
+      prismaScalarToNativeTypes = postgresPrismaTypesToNativeTypes
+      break
+    case 'mysql':
+      prismaScalarToNativeTypes = mysqlPrismaTypesToNativeTypes
+      break
+    case 'mssql':
+    case 'sqlite':
+    default:
+      // Not supported for these connectors yet!
+      return undefined
+  }
+
+  let prismaFieldType = wordsBeforePosition[1].replace('?', '').replace('[]', '')
+  return prismaScalarToNativeTypes.get(prismaFieldType)
 }
 
 export function getSuggestionForNativeTypes(
   foundBlock: Block,
-  currentLineUntrimmed: string,
   lines: string[],
   wordsBeforePosition: string[]
 ): CompletionList | undefined {
@@ -178,49 +207,32 @@ export function getSuggestionForNativeTypes(
   }
 
   let datasourceName = getFirstDatasourceName(lines)
-  if (wordsBeforePosition[wordsBeforePosition.length - 1] !== '@' + datasourceName) {
+  if (!datasourceName || wordsBeforePosition[wordsBeforePosition.length - 1] !== '@' + datasourceName) {
     return undefined
   }
 
-  if (!datasourceName) {
+  let provider = getProvider(datasourceName, lines)
+  if (provider === undefined) {
     return undefined
   }
 
-  let line = lines.findIndex(l => l.startsWith("datasource") && l.includes(datasourceName as string) && l.includes('{'))
-  let datasourceBlock = getBlockAtPosition(line, lines)
-  if (!datasourceBlock) {
+  let suggestions = getSupportedNativeTypesForProviderAndCurrentLine(provider, wordsBeforePosition)
+
+  if (!suggestions) {
     return undefined
   }
-
-  let provider = getProviders(lines, datasourceBlock)
-  if (provider.length !== 1) {
-    return undefined
-  }
-
-  // TODO get datasource type
-  // TODO check for available native types for current datasource here
-  // TODO check number of needed/optional arguments
-
-   // TODO for compatability of current field type
-
-   let suggestions: CompletionItem[] = [
-     {
-       label: "BigInt",
-     }
-   ]
 
   return {
     items: suggestions,
     isIncomplete: true
   }
-
-
 }
 
 export function getSuggestionForFieldAttribute(
   block: Block,
   currentLine: string,
   lines: string[],
+  wordsBeforePosition: string[],
 ): CompletionList | undefined {
   if (block.type !== 'model') {
     return
@@ -244,13 +256,20 @@ export function getSuggestionForFieldAttribute(
   if (enabledNativeTypes) {
     let name = getFirstDatasourceName(lines)
     if (name) {
-      suggestions.push(
-        {
-          kind: CompletionItemKind.Property,
-          label: '@' + name,
-          documentation: "Defines a custom type that should be used for this field."
+      let provider = getProvider(name, lines)
+      if (provider) {
+        let nativeTypeSuggestions = getSupportedNativeTypesForProviderAndCurrentLine(provider, wordsBeforePosition)
+
+        if (name && nativeTypeSuggestions !== undefined && nativeTypeSuggestions.length !== 0 && !currentLine.includes('@' + name)) {
+          suggestions.push(
+            {
+              kind: CompletionItemKind.Property,
+              label: '@' + name,
+              documentation: "Defines a custom type that should be used for this field."
+            }
+          )
         }
-      )
+      }
     }
   }
 

@@ -4,7 +4,6 @@ import {
   MarkupKind,
 } from 'vscode-languageserver'
 import * as completions from './completions.json'
-import { handleCompletionResolveRequest } from '../MessageHandler'
 
 /**
  * Converts a json object containing labels and documentations to CompletionItems.
@@ -148,91 +147,114 @@ export const generatorPreviewFeaturesArguments: CompletionItem[] = convertToComp
   (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
 )
 
-export const mysqlNativeTypesInt: CompletionItem[] = convertToCompletionItems(
+const mysqlNativeTypesInt: CompletionItem[] = convertToCompletionItems(
   completions.nativeTypes.mysql.Int,
   CompletionItemKind.TypeParameter,
 )
 
-export const mysqlNativeTypesDecimal: CompletionItem[] = convertAttributesToCompletionItems(
+const mysqlNativeTypesDecimal: CompletionItem[] = convertAttributesToCompletionItems(
   completions.nativeTypes.mysql.Decimal,
   CompletionItemKind.TypeParameter,
   (label: string) => label.replace('()', '($0)'),
 )
 
-export const mysqlNativeTypesFloat: CompletionItem[] = convertToCompletionItems(
+const mysqlNativeTypesFloat: CompletionItem[] = convertToCompletionItems(
   completions.nativeTypes.mysql.Float,
   CompletionItemKind.TypeParameter,
 )
 
-export const mysqlNativeTypesString: CompletionItem[] = convertAttributesToCompletionItems(
+const mysqlNativeTypesString: CompletionItem[] = convertAttributesToCompletionItems(
   completions.nativeTypes.mysql.String,
   CompletionItemKind.TypeParameter,
   (label: string) => label.replace('()', '($0)'),
 )
 
-export const mysqlNativeTypesBytes: CompletionItem[] = convertAttributesToCompletionItems(
+const mysqlNativeTypesBytes: CompletionItem[] = convertAttributesToCompletionItems(
   completions.nativeTypes.mysql.Bytes,
   CompletionItemKind.TypeParameter,
   (label: string) => label.replace('()', '($0)'),
 )
 
-export const mysqlNativeTypesDatetime: CompletionItem[] = convertAttributesToCompletionItems(
+const mysqlNativeTypesDatetime: CompletionItem[] = convertAttributesToCompletionItems(
   completions.nativeTypes.mysql.DateTime,
   CompletionItemKind.TypeParameter,
   (label: string) => label.replace('()', '($0)'),
 )
 
-export const mysqlNativeTypesJson: CompletionItem[] = convertToCompletionItems(
+const mysqlNativeTypesJson: CompletionItem[] = convertToCompletionItems(
   completions.nativeTypes.mysql.Json,
   CompletionItemKind.TypeParameter,
 )
 
-export const postgresNativeTypesInt: CompletionItem[] = convertToCompletionItems(
+const postgresNativeTypesInt: CompletionItem[] = convertToCompletionItems(
   completions.nativeTypes.postgresql.Int,
   CompletionItemKind.TypeParameter,
 )
 
-export const postgresNativeTypesDecimal: CompletionItem[] = convertAttributesToCompletionItems(
+const postgresNativeTypesDecimal: CompletionItem[] = convertAttributesToCompletionItems(
   completions.nativeTypes.postgresql.Decimal,
   CompletionItemKind.TypeParameter,
   (label: string) => label.replace('()', '($0)'),
 )
 
-export const postgresNativeTypesFloat: CompletionItem[] = convertToCompletionItems(
+const postgresNativeTypesFloat: CompletionItem[] = convertToCompletionItems(
   completions.nativeTypes.postgresql.Float,
   CompletionItemKind.TypeParameter,
   (label: string) => label.replace('()', '($0)'),
 )
 
-export const postgresNativeTypesaString: CompletionItem[] = convertAttributesToCompletionItems(
+const postgresNativeTypesString: CompletionItem[] = convertAttributesToCompletionItems(
   completions.nativeTypes.postgresql.String,
   CompletionItemKind.TypeParameter,
   (label: string) => label.replace('()', '($0)'),
 )
 
-export const postgresNativeTypesBytes: CompletionItem[] = convertToCompletionItems(
+const postgresNativeTypesBytes: CompletionItem[] = convertToCompletionItems(
   completions.nativeTypes.postgresql.Bytes,
   CompletionItemKind.TypeParameter,
 )
 
-export const postgresNativeTypesDatetime: CompletionItem[] = convertAttributesToCompletionItems(
+const postgresNativeTypesDatetime: CompletionItem[] = convertAttributesToCompletionItems(
   completions.nativeTypes.postgresql.DateTime,
   CompletionItemKind.TypeParameter,
   (label: string) => label.replace('()', '($0)'),
 )
 
-export const postgresNativeTypesInterval: CompletionItem[] = convertAttributesToCompletionItems(
+const postgresNativeTypesInterval: CompletionItem[] = convertAttributesToCompletionItems(
   completions.nativeTypes.postgresql.Interval,
   CompletionItemKind.TypeParameter,
   (label: string) => label.replace('()', '($0)'),
 )
 
-export const postgresNativeTypesXML: CompletionItem[] = convertToCompletionItems(
+const postgresNativeTypesXML: CompletionItem[] = convertToCompletionItems(
   completions.nativeTypes.postgresql.XML,
   CompletionItemKind.TypeParameter,
 )
 
-export const postgresNativeTypesJson: CompletionItem[] = convertToCompletionItems(
+const postgresNativeTypesJson: CompletionItem[] = convertToCompletionItems(
   completions.nativeTypes.postgresql.Json,
   CompletionItemKind.TypeParameter,
 )
+
+export const postgresPrismaTypesToNativeTypes = new Map([
+  ["String", postgresNativeTypesString],
+  ["Int", postgresNativeTypesInt],
+  ["Float", postgresNativeTypesFloat],
+  ["Json", postgresNativeTypesJson],
+  ["Duration", postgresNativeTypesInterval],
+  ["XML", postgresNativeTypesXML],
+  ["Bytes", postgresNativeTypesBytes],
+  ["Datetime", postgresNativeTypesDatetime],
+  ["Decimal", postgresNativeTypesDecimal]
+])
+
+export const mysqlPrismaTypesToNativeTypes = new Map([
+  ["String", mysqlNativeTypesString],
+  ["Int", mysqlNativeTypesInt],
+  ["Float", mysqlNativeTypesFloat],
+  ["Json", mysqlNativeTypesJson],
+  ["Datetime", mysqlNativeTypesDatetime],
+  ["Decimal", mysqlNativeTypesDecimal],
+  ["Bytes", mysqlNativeTypesBytes]
+])
+

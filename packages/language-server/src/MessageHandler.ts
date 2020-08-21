@@ -490,6 +490,7 @@ export function handleCompletionRequest(
           foundBlock,
           getCurrentLine(document, position.line),
           lines,
+          wordsBeforePosition,
         )
       case '"':
         return getSuggestionForSupportedFields(
@@ -501,7 +502,6 @@ export function handleCompletionRequest(
       case '.': 
         return getSuggestionForNativeTypes(
           foundBlock,
-          currentLineUntrimmed,
           lines,
           wordsBeforePosition
         )
@@ -535,6 +535,7 @@ export function handleCompletionRequest(
         foundBlock,
         lines[position.line],
         lines,
+        wordsBeforePosition,
       )
     case 'datasource':
     case 'generator':
