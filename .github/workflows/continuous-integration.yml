@@ -1,7 +1,9 @@
 name: CI tests
 
 on: [pull_request]
-    
+
+env:
+  PRISMA_TELEMETRY_INFORMATION: "language-tools continuous-integration.yml"
 
 jobs:
   test:

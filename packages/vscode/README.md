@@ -1,10 +1,6 @@
 <h2 align="center">Prisma VS Code Extension</h2>
 <div align="center">
 
-[![Version](https://vsmarketplacebadge.apphb.com/version/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider)
-[![Installs](https://vsmarketplacebadge.apphb.com/installs/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider)
-[![Ratings](https://vsmarketplacebadge.apphb.com/rating/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider)
-
 ![CI tests](https://img.shields.io/github/workflow/status/prisma/vscode/CI%20tests/master.svg?label=CI%20tests&logo=github)
 ![Check for Update + Automated Publish](https://img.shields.io/github/workflow/status/prisma/vscode/Check%20for%20Update%20%2B%20Automated%20Publish/master.svg?label=Check%20for%20Update%20%2B%20Automated%20Publish&logo=github)
 
@@ -24,7 +20,7 @@ Please note that you should not have the regular and insider version of the exte
 ## Build information
 
 This version is built from commit [undefined](undefined).
-This is for Prisma CLI 2.5.0-dev.67.
+This is for Prisma CLI 2.6.0-dev.15.
 
 ## Contributing
 

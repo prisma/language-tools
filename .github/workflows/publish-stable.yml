@@ -8,6 +8,7 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+  PRISMA_TELEMETRY_INFORMATION: "language-tools publish-stable.yml"
 
 jobs:
   setup:
@@ -94,7 +95,7 @@ jobs:
     steps: 
       - uses: actions/checkout@v2
       - name: Install Dependencies
-        if: ${{ needs.setup.outputs.version }}
+        if: ${{ needs.setup.outputs.is-minor-release }}
         run: npm install
       - name: Bump versions
         # Jobs do not share workspace --> bump versions again
