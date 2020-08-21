@@ -51,6 +51,7 @@ import {
   printLogMessage,
   isRelationField,
 } from './rename/renameUtil'
+import nativeTypeConstructors from './nativeTypes'
 
 export function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
@@ -430,15 +431,19 @@ export function handleHoverRequest(
  *
  * This handler provides the initial list of the completion items.
  */
-export function handleCompletionRequest(
+export async function handleCompletionRequest(
   params: CompletionParams,
   document: TextDocument,
-): CompletionList | undefined {
+): Promise<CompletionList | undefined> {
   const context = params.context
   const position = params.position
   if (!context) {
     return
   }
+
+  const binPath = await util.getBinPath()
+  let nativeTypes = await nativeTypeConstructors(binPath, document.getText())
+  console.log(nativeTypes)
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
   const currentLineUntrimmed = getCurrentLine(document, position.line)
