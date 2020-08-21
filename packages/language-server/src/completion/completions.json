@@ -338,7 +338,9 @@
         },
         {
           "label": "Year",
-          "documentation": "1-byte type used to represent year values with an implicit display width of 4 characters."
+          "fullSignature": "Year",
+          "documentation": "1-byte type used to represent year values with an implicit display width of 4 characters.",
+          "params": []
         }
       ],
       "Float": [
@@ -373,16 +375,24 @@
               "documentation": "Indicates the maximum number of characters you want to store."
             }
           ]
-
         },
         {
-          "label": "TinyText"
+          "label": "TinyText",
+          "fullSignature": "TinyText",
+          "documentation": "",
+          "params": []
         },
         {
-          "label": "MediumText"
+          "label": "MediumText",
+          "fullSignature": "MediumText",
+          "documentation": "",
+          "params": []
         },
         {
-          "label": "LongText"
+          "label": "LongText",
+          "fullSignature": "LongText",
+          "documentation": "",
+          "params": []
         }
       ],
       "Bytes": [
@@ -420,22 +430,35 @@
           ]
         },
         {
-          "label": "TinyBlob"
+          "label": "TinyBlob",
+          "fullSignature": "TinyBlob",
+          "documentation": "",
+          "params": []
         },
         {
-          "label": "MediumBlob"
+          "label": "MediumBlob",
+          "fullSignature": "MediumBlob",
+          "documentation": "",
+          "params": []
         },
         {
-          "label": "LongBlob"
+          "label": "LongBlob",
+          "fullSignature": "LongBlob",
+          "documentation": "",
+          "params": []
         }
       ],
       "DateTime": [
         {
-          "label": "Date"
+          "label": "Date",
+          "fullSignature": "Date",
+          "documentation": "",
+          "params": []
         },
         {
           "label": "Time()",
           "fullSignature": "Time(m: Optional<u32>)",
+          "documentation": "",
           "params": [
             {
               "label": "m",
@@ -444,10 +467,16 @@
           ]
         },
         {
-          "label": "Datetime"
+          "label": "Datetime",
+          "fullSignature": "Datetime",
+          "documentation": "",
+          "params": []
         },
         {
-          "label": "Timestamp"
+          "label": "Timestamp",
+          "fullSignature": "Timestamp",
+          "documentation": "",
+          "params": []
         }
       ],
       "Json": [
@@ -459,95 +488,211 @@
     "postgresql": {
       "Int": [
         {
-          "label": "SmallInt"
+          "label": "SmallInt",
+          "documentation": "Stores whole numbers, that is numbers without fractional components. Attempts to store values outside of the allowed range will result in an error."
         },
         {
-          "label": "Integer"
+          "label": "Integer",
+          "documentation": "Stores whole numbers, that is numbers without fractional components. Attempts to store values outside of the allowed range will result in an error."
         },
         {
-          "label": "BigInt"
+          "label": "BigInt",
+          "documentation": "Stores whole numbers, that is numbers without fractional components. Attempts to store values outside of the allowed range will result in an error."
         },
         {
-          "label": "SmallSerial"
+          "label": "SmallSerial",
+          "documentation": ""
         },
         {
-          "label": "BigSerial"
+          "label": "BigSerial",
+          "documentation": ""
         }
       ],
       "Decimal": [
         {
-          "label": "Decimal"
+          "label": "Decimal()",
+          "fullSignature": "Decimal(precision, scale)",
+          "documentation": "Equivalent to type *Numeric*.",
+          "params": [
+            {
+              "label": "precision",
+              "documentation": "Total count of siginificant digits in the whole number, that is, the number of digits to both sides of the decimal point."
+            },
+            {
+              "label": "scale",
+              "documentation": "Count of decimal gidits in the fractional part, to the right of the decimal point. Integers can be conisdered to have ea scale of zero."
+            }
+          ]
         },
         {
-          "label": "Numeric"
+          "label": "Numeric()",
+          "fullSignature": "Numeric(precision, scale)",
+          "documentation": "Equivalent to type *Decimal*.",
+          "params": [
+            {
+              "label": "precision",
+              "documentation": "Total count of siginificant digits in the whole number, that is, the number of digits to both sides of the decimal point."
+            },
+            {
+              "label": "scale",
+              "documentation": "Count of decimal gidits in the fractional part, to the right of the decimal point. Integers can be conisdered to have ea scale of zero."
+            }
+          ]
         }
       ],
       "Float": [
         {
-          "label": "Real"
+          "label": "Real",
+          "documentation": "Inexact, variable-precision numeric type."
         },
         {
-          "label": "DoublePrecision"
+          "label": "DoublePrecision",
+          "documentation": "Inexact, variable-precision numeric type."
         }
       ],
       "String": [
         {
-          "label": "VarChar"
+          "label": "VarChar()",
+          "fullSignature": "VarChar(n)",
+          "documentation": "Variable-length with limit.",
+          "params": [
+            {
+              "label": "n",
+              "documentation": "Positive integer.  Declares the length of strings to be stored in characters."
+            }
+          ]
         },
         {
-          "label": "Char"
+          "label": "Char()",
+          "fullSignature": "Char(n)",
+          "documentation": "Fixed-length, blank padded.",
+          "params": [
+            {
+              "label": "n",
+              "documentation": "Positive integer.  Declares the length of strings to be stored in characters."
+            }
+          ]
         },
         {
-          "label": "Text"
+          "label": "Text",
+          "fullSignature": "Text",
+          "documentation": "Variable unlimited length.",
+          "params": []
         },
         {
-          "label": "Bit"
+          "label": "Bit()",
+          "fullSignature": "Bit(n)",
+          "documentation": "",
+          "params": [
+            {
+              "label": "n",
+              "documentation": "Positive integer.  Declares the length of bit strings to be stored."
+            }
+          ]
         },
         {
-          "label": "VarBit"
+          "label": "VarBit()",
+          "fullSignature": "VarBit(n)",
+          "documentation": "",
+          "params": [
+            {
+              "label": "n",
+              "documentation": "Positive integer.  Declares the length of bit strings to be stored."
+            }
+          ]
         },
         {
-          "label": "UUID"
+          "label": "UUID",
+          "fullSignature": "UUID",
+          "documentation": "",
+          "params": []
         }
       ],
       "Bytes": [
         {
-          "label": "ByteA"
+          "label": "ByteA",
+          "documentation": "Allows storage of binary strings."
         }
       ],
       "DateTime": [
         {
-          "label": "Timestamp"
+          "label": "Timestamp()",
+          "fullSignature": "Timestamp(p)",
+          "documentation": "",
+          "params": [
+            {
+              "label": "p",
+              "documentation": "Precision value specifying the number of fractional digits retained the seconds field. The allowed range is from 0 to 6."
+            }
+          ]
         },
         {
-          "label": "TimestampWithTimezone"
+          "label": "TimestampWithTimezone()",
+          "fullSignature": "TimestampWithTimezone(p)",
+          "documentation": "",
+          "params": [
+            {
+              "label": "p",
+              "documentation": "Precision value specifying the number of fractional digits retained the seconds field. The allowed range is from 0 to 6."
+            }
+          ]
         },
         {
-          "label": "Date"
+          "label": "Date",
+          "fullSignature": "Date",
+          "documentation": "",
+          "params": []
         },
         {
-          "label": "Time"
+          "label": "Time()",
+          "fullSignature": "Time(p)",
+          "documentation": "",
+          "params": [
+            {
+              "label": "p",
+              "documentation": "Precision value specifying the number of fractional digits retained the seconds field. The allowed range is from 0 to 6."
+            }
+          ]
         },
         {
-          "label": "TimeWithTimezone"
+          "label": "TimeWithTimezone()",
+          "fullSignature": "TimeWithTimezone(p)",
+          "documentation": "",
+          "params": [
+            {
+              "label": "p",
+              "documentation": "Precision value specifying the number of fractional digits retained the seconds field. The allowed range is from 0 to 6."
+            }
+          ]
         }
       ],
       "Interval": [
         {
-          "label": "Interval"
+          "label": "Interval()",
+          "fullSignature": "Interval(p)",
+          "documentation": "",
+          "params": [
+            {
+              "label": "p",
+              "documentation": "Precision value specifying the number of fractional digits retained the seconds field. The allowed range is from 0 to 6."
+            }
+          ]
         }
       ],
       "XML": [
         {
-          "label": "XML"
+          "label": "XML",
+          "documentation": ""
         }
       ],
       "Json": [
         {
-          "label": "Json"
+          "label": "Json",
+          "documentation": ""
         },
         {
-          "label": "JsonB"
+          "label": "JsonB",
+          "documentation": ""
         }
       ]
     }
