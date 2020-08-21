@@ -27,6 +27,8 @@ import {
 } from './completionUtil'
 import klona from 'klona'
 import { extractModelName } from '../rename/renameUtil'
+import * as util from '../util'
+import nativeTypeConstructors, { NativeTypeConstructors } from '../nativeTypes'
 
 function toCompletionItems(
   allowedTypes: string[],
@@ -200,9 +202,10 @@ function getSupportedNativeTypesForProviderAndCurrentLine(provider: string, word
 export function getSuggestionForNativeTypes(
   foundBlock: Block,
   lines: string[],
-  wordsBeforePosition: string[]
+  wordsBeforePosition: string[],
+  document: TextDocument
 ): CompletionList | undefined {
-  if (foundBlock.type !== 'model' || !declaredNativeTypes(lines)) {
+  if (foundBlock.type !== 'model' || !declaredNativeTypes(document)) {
     return undefined
   }
 
@@ -233,6 +236,7 @@ export function getSuggestionForFieldAttribute(
   currentLine: string,
   lines: string[],
   wordsBeforePosition: string[],
+  document: TextDocument,
 ): CompletionList | undefined {
   if (block.type !== 'model') {
     return
@@ -240,7 +244,7 @@ export function getSuggestionForFieldAttribute(
   // create deep copy
   let suggestions: CompletionItem[] = klona(fieldAttributes)
 
-  let enabledNativeTypes = declaredNativeTypes(lines)
+  let enabledNativeTypes = declaredNativeTypes(document)
 
   if (!(currentLine.includes('Int') || currentLine.includes('String'))) {
     // id not allowed
@@ -503,26 +507,16 @@ export function getValuesInsideBrackets(line: string): string[] {
 }
 
 
-function declaredNativeTypes
-  (lines: Array<string>): boolean {
-  let foundDataSourceBlock = false
-  for (const item of lines) {
-    if (item.includes('generator')) {
-      foundDataSourceBlock = true
-      continue
-    }
-    if (foundDataSourceBlock) {
-      if (item.startsWith('}')) {
-        break
-      }
-      if ((item.startsWith('previewFeatures') || item.startsWith('experimentalFeatures'))
-        && item.includes('nativeTypes')) {
-        return true
-      }
-    }
+async function declaredNativeTypes
+  (document: TextDocument): Promise<boolean> {
+  const binPath = await util.getBinPath()
+  let nativeTypes: NativeTypeConstructors[] = await nativeTypeConstructors(binPath, document.getText())
+  if (nativeTypes.length === 0) {
+    return false 
   }
+  // TODO do stuff with possible native types here!!!
 
-  return false
+  return true
 }
 
 export function getSuggestionForSupportedFields(

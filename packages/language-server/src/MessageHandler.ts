@@ -51,7 +51,6 @@ import {
   printLogMessage,
   isRelationField,
 } from './rename/renameUtil'
-import nativeTypeConstructors from './nativeTypes'
 
 export function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
@@ -441,10 +440,6 @@ export async function handleCompletionRequest(
     return
   }
 
-  const binPath = await util.getBinPath()
-  let nativeTypes = await nativeTypeConstructors(binPath, document.getText())
-  console.log(nativeTypes)
-
   const lines = convertDocumentTextToTrimmedLineArray(document)
   const currentLineUntrimmed = getCurrentLine(document, position.line)
 
@@ -496,6 +491,7 @@ export async function handleCompletionRequest(
           getCurrentLine(document, position.line),
           lines,
           wordsBeforePosition,
+          document
         )
       case '"':
         return getSuggestionForSupportedFields(
@@ -508,7 +504,8 @@ export async function handleCompletionRequest(
         return getSuggestionForNativeTypes(
           foundBlock,
           lines,
-          wordsBeforePosition
+          wordsBeforePosition,
+          document
         )
     }
   }
@@ -541,6 +538,7 @@ export async function handleCompletionRequest(
         lines[position.line],
         lines,
         wordsBeforePosition,
+        document
       )
     case 'datasource':
     case 'generator':
