@@ -1,9 +1,13 @@
-# Prisma Language Support
+# Prisma Language Tools
 
 Using the Language Server Protocol to improve Prisma's developer experience.
-Server implementation can be found [here](packages/language-server).
 
-## Structure
+- [Prisma VSCode Extension](packages/vscode)
+  - Install stable version of [Prisma](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma) from the VSCode marketplace
+  - or install Insider version of [Prisma Insider](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider) from the marketplace
+- [Language Server implementation](packages/language-server)
+
+## Repository Structure
 
 ```
 .
@@ -16,8 +20,3 @@ Server implementation can be found [here](packages/language-server).
 │           └── cli.ts    // Language Server CLI entry point
 └── package.json         // The extension manifest
 ```
-
-### VSCode
-- install stable version of [Prisma](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma) from the marketplace ([plugin source](packages/vscode))
-- or install insider version of [Prisma Insider](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider) from the marketplace ([plugin source](packages/vscode))
-
