@@ -6,7 +6,7 @@ import {
   MarkupKind,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { Block, getModelOrEnumBlock, getBlockAtPosition } from '../MessageHandler'
+import { Block, getModelOrEnumBlock } from '../MessageHandler'
 import {
   blockAttributes,
   fieldAttributes,
@@ -22,8 +22,6 @@ import {
   generatorProviderArguments,
   generatorPreviewFeaturesArguments,
   generatorPreviewFeatures,
-  postgresPrismaTypesToNativeTypes,
-  mysqlPrismaTypesToNativeTypes,
 } from './completionUtil'
 import klona from 'klona'
 import { extractModelName } from '../rename/renameUtil'
@@ -151,79 +149,19 @@ function getSuggestionForBlockAttribute(
   return suggestions
 }
 
-function getProvider(datasourceName: string, lines: string[]): string | undefined {
-  let line = lines.findIndex(l => l.startsWith("datasource") && l.includes(datasourceName as string) && l.includes('{'))
-  let datasourceBlock = getBlockAtPosition(line, lines)
-  if (!datasourceBlock) {
-    return undefined
-  }
-  let reachedStartLine = false
-  for (const [key, item] of lines.entries()) {
-    if (key === datasourceBlock.start.line + 1) {
-      reachedStartLine = true
-    }
-    if (!reachedStartLine) {
-      continue
-    }
-    if (key === datasourceBlock.end.line) {
-      break
-    }
 
-    if (item.startsWith("provider") && getValuesInsideBrackets(item).length === 0) {
-      // get single prvider
-      const provider = item.slice(item.indexOf('=') + 1).trimLeft().replace(/ .*/, '').slice(1)
-      return provider.replace('"', '')
-    }
-  }
-  return undefined
-}
-
-function getSupportedNativeTypesForProviderAndCurrentLine(provider: string, wordsBeforePosition: string[]): CompletionItem[] | undefined {
-  let prismaScalarToNativeTypes: Map<string, CompletionItem[]>
-
-  switch (provider) {
-    case 'postgresql':
-      prismaScalarToNativeTypes = postgresPrismaTypesToNativeTypes
-      break
-    case 'mysql':
-      prismaScalarToNativeTypes = mysqlPrismaTypesToNativeTypes
-      break
-    case 'mssql':
-    case 'sqlite':
-    default:
-      // Not supported for these connectors yet!
-      return undefined
-  }
-
-  let prismaFieldType = wordsBeforePosition[1].replace('?', '').replace('[]', '')
-  return prismaScalarToNativeTypes.get(prismaFieldType)
-}
-
-export function getSuggestionForNativeTypes(
+export async function getSuggestionForNativeTypes(
   foundBlock: Block,
-  lines: string[],
   wordsBeforePosition: string[],
   document: TextDocument
-): CompletionList | undefined {
-  if (foundBlock.type !== 'model' || !declaredNativeTypes(document)) {
+): Promise<CompletionList | undefined> {
+  let activeFeatureFlag = await declaredNativeTypes(document)
+  if (foundBlock.type !== 'model' || !activeFeatureFlag || wordsBeforePosition.length < 2) {
     return undefined
   }
 
-  let datasourceName = getFirstDatasourceName(lines)
-  if (!datasourceName || wordsBeforePosition[wordsBeforePosition.length - 1] !== '@' + datasourceName) {
-    return undefined
-  }
-
-  let provider = getProvider(datasourceName, lines)
-  if (provider === undefined) {
-    return undefined
-  }
-
-  let suggestions = getSupportedNativeTypesForProviderAndCurrentLine(provider, wordsBeforePosition)
-
-  if (!suggestions) {
-    return undefined
-  }
+  let prismaType = wordsBeforePosition[1].replace('?', '').replace('[]', '')
+  let suggestions = await getNativeTypes(document, prismaType)
 
   return {
     items: suggestions,
@@ -231,20 +169,20 @@ export function getSuggestionForNativeTypes(
   }
 }
 
-export function getSuggestionForFieldAttribute(
+export async function getSuggestionForFieldAttribute(
   block: Block,
   currentLine: string,
   lines: string[],
   wordsBeforePosition: string[],
   document: TextDocument,
-): CompletionList | undefined {
+): Promise<CompletionList | undefined> {
   if (block.type !== 'model') {
     return
   }
   // create deep copy
   let suggestions: CompletionItem[] = klona(fieldAttributes)
 
-  let enabledNativeTypes = declaredNativeTypes(document)
+  let enabledNativeTypes = await declaredNativeTypes(document)
 
   if (!(currentLine.includes('Int') || currentLine.includes('String'))) {
     // id not allowed
@@ -257,23 +195,21 @@ export function getSuggestionForFieldAttribute(
 
   suggestions = removeInvalidAttributeSuggestions(suggestions, block, lines)
 
-  if (enabledNativeTypes) {
-    let name = getFirstDatasourceName(lines)
-    if (name) {
-      let provider = getProvider(name, lines)
-      if (provider) {
-        let nativeTypeSuggestions = getSupportedNativeTypesForProviderAndCurrentLine(provider, wordsBeforePosition)
+  if (enabledNativeTypes && wordsBeforePosition.length >= 2) {
+    let datasourceName = getFirstDatasourceName(lines)
+    let prismaType = wordsBeforePosition[1]
+    let nativeTypeSuggestions = await getNativeTypes(document, prismaType)
 
-        if (name && nativeTypeSuggestions !== undefined && nativeTypeSuggestions.length !== 0 && !currentLine.includes('@' + name)) {
-          suggestions.push(
-            {
-              kind: CompletionItemKind.Property,
-              label: '@' + name,
-              documentation: "Defines a custom type that should be used for this field."
-            }
-          )
+    if (datasourceName && nativeTypeSuggestions.length !== 0 && !currentLine.includes('@' + datasourceName)) {
+      suggestions.push(
+        {
+          kind: CompletionItemKind.Property,
+          label: '@' + datasourceName,
+          documentation: "Defines a custom type that should be used for this field."
         }
-      }
+      )
+
+
     }
   }
 
@@ -512,11 +448,48 @@ async function declaredNativeTypes
   const binPath = await util.getBinPath()
   let nativeTypes: NativeTypeConstructors[] = await nativeTypeConstructors(binPath, document.getText())
   if (nativeTypes.length === 0) {
-    return false 
+    return false
   }
-  // TODO do stuff with possible native types here!!!
-
   return true
+}
+
+async function getNativeTypes(document: TextDocument, prismaType: string): Promise<CompletionItem[]> {
+  const binPath = await util.getBinPath()
+  let nativeTypes: NativeTypeConstructors[] = await nativeTypeConstructors(binPath, document.getText())
+
+  if (nativeTypes.length === 0) {
+    return []
+  }
+
+  let suggestions: CompletionItem[] = []
+  nativeTypes = nativeTypes.filter(
+    n => n.prisma_type === prismaType
+  )
+  nativeTypes.forEach(element => {
+    if (element._number_of_args + element._number_of_optional_args !== 0) {
+      let documentation = ''
+      if (element._number_of_optional_args !== 0) {
+        documentation = `${documentation}Number of optional arguments: ${element._number_of_optional_args}.\n'`
+      }
+      if (element._number_of_args !== 0) {
+        documentation = `${documentation}Number of required arguments: ${element._number_of_args}.\n`
+      }
+      suggestions.push({
+        label: `${element.name}()`,
+        kind: CompletionItemKind.TypeParameter,
+        insertText: `${element.name}($0)`,
+        documentation: { kind: MarkupKind.Markdown, value: documentation },
+        insertTextFormat: 2
+      })
+    } else {
+      suggestions.push({
+        label: element.name,
+        kind: CompletionItemKind.TypeParameter
+      })
+    }
+  });
+
+  return suggestions
 }
 
 export function getSuggestionForSupportedFields(
@@ -696,7 +669,7 @@ function getDefaultValues(currentLine: string, lines: string[]): CompletionItem[
   if (modelOrEnum && modelOrEnum.type === 'enum') {
     // get fields from enum block for suggestions
     let values: string[] = getFieldsFromCurrentBlock(lines, modelOrEnum)
-    values.forEach(v => suggestions.push({ label: v, kind: CompletionItemKind.Value}))
+    values.forEach(v => suggestions.push({ label: v, kind: CompletionItemKind.Value }))
   }
 
   return suggestions
@@ -787,8 +760,9 @@ export function getTypesFromCurrentBlock(
     if (!item.startsWith('@@') && (!position || key !== position.line)) {
       let type = getFieldType(item)
       if (type !== undefined) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        /* eslint-disable @typescript-eslint/no-unsafe-assignment */
         suggestions.set(type, key)
+        /* eslint-enable @typescript-eslint/no-unsafe-assignment */
       }
     }
   }
@@ -801,7 +775,7 @@ function getFieldType(line: string): string | undefined {
     return undefined
   }
   let type = wordsInLine[1]
-  if (type !== '' && type !== undefined) {
+  if (type.length === 0 && type !== undefined) {
     return type
   }
   return undefined

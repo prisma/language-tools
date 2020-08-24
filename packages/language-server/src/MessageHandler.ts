@@ -503,7 +503,6 @@ export async function handleCompletionRequest(
       case '.': 
         return getSuggestionForNativeTypes(
           foundBlock,
-          lines,
           wordsBeforePosition,
           document
         )
