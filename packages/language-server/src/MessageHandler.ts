@@ -615,6 +615,7 @@ export function handleRenameRequest(
     let blockOfDefinition = currentBlock
     let lineOfDefinition = currentLine
     if (isModelRename || isEnumRename) {
+      // get definition of model or enum
       lineNumberOfDefinition = lines.findIndex(
         (l) =>
           (l.startsWith('model') || l.startsWith('enum')) &&
