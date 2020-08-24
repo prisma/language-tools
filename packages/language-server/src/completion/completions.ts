@@ -775,7 +775,7 @@ function getFieldType(line: string): string | undefined {
     return undefined
   }
   let type = wordsInLine[1]
-  if (type.length === 0 && type !== undefined) {
+  if (type.length !== 0 && type !== undefined) {
     return type
   }
   return undefined
