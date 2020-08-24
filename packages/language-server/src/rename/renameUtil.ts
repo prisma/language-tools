@@ -75,11 +75,83 @@ export function isValidFieldName(
   return type !== '' && type !== undefined
 }
 
-export function isModelName(position: Position, block: Block): boolean {
-  if (position.line !== block.start.line) {
+export function isModelName(
+  position: Position,
+  block: Block,
+  lines: string[],
+  document: TextDocument,
+): boolean {
+  if (block.type !== 'model') {
     return false
   }
-  return position.character > 5
+
+  if (position.line === block.start.line) {
+    return position.character > 5
+  }
+
+  return renameModelOrEnumWhereUsedAsType(
+    block,
+    lines,
+    document,
+    position,
+    'model',
+  )
+}
+
+export function isEnumName(
+  position: Position,
+  block: Block,
+  lines: string[],
+  document: TextDocument,
+): boolean {
+  if (block.type === 'enum' && position.line === block.start.line) {
+    return position.character > 4
+  }
+
+  return renameModelOrEnumWhereUsedAsType(
+    block,
+    lines,
+    document,
+    position,
+    'enum',
+  )
+}
+
+function renameModelOrEnumWhereUsedAsType(
+  block: Block,
+  lines: string[],
+  document: TextDocument,
+  position: Position,
+  blockType: string,
+): boolean {
+  if (block.type !== 'model') {
+    return false
+  }
+
+  const allRelationNames: string[] = getAllRelationNames(lines)
+  const currentName = getWordAtPosition(document, position)
+  const isRelation = allRelationNames.includes(currentName)
+  if (!isRelation) {
+    return false
+  }
+  const indexOfRelation = lines.findIndex(
+    (l) => l.startsWith(blockType) && l.includes(currentName),
+  )
+  return indexOfRelation !== -1
+}
+
+export function isEnumValue(
+  currentLine: string,
+  position: Position,
+  currentBlock: Block,
+  document: TextDocument,
+): boolean {
+  return (
+    currentBlock.type === 'enum' &&
+    position.line !== currentBlock.start.line &&
+    !currentLine.startsWith('@@') &&
+    !getWordAtPosition(document, position).startsWith('@')
+  )
 }
 
 export function printLogMessage(
@@ -102,27 +174,6 @@ export function printLogMessage(
     typeOfRename = 'Enum value '
   }
   console.log(typeOfRename + message)
-}
-
-export function isEnumName(position: Position, block: Block): boolean {
-  if (position.line !== block.start.line) {
-    return false
-  }
-  return position.character > 4
-}
-
-export function isEnumValue(
-  currentLine: string,
-  position: Position,
-  currentBlock: Block,
-  document: TextDocument,
-): boolean {
-  return (
-    currentBlock.type === 'enum' &&
-    position.line !== currentBlock.start.line &&
-    !currentLine.startsWith('@@') &&
-    !getWordAtPosition(document, position).startsWith('@')
-  )
 }
 
 function insertInlineRename(currentName: string, line: number): TextEdit {
@@ -477,9 +528,20 @@ export function extractCurrentName(
   isModelOrEnumRename: boolean,
   isEnumValueRename: boolean,
   isFieldRename: boolean,
+  document: TextDocument,
+  position: Position,
+  lines: string[],
 ): string {
   if (isModelOrEnumRename) {
-    return extractModelName(line)
+    const currentLineUntrimmed = getCurrentLine(document, position.line)
+    const currentLineTillPosition = currentLineUntrimmed
+      .slice(0, position.character)
+      .trim()
+    const wordsBeforePosition: string[] = currentLineTillPosition.split(/\s+/)
+    if (wordsBeforePosition.length < 2) {
+      return ''
+    }
+    return wordsBeforePosition[1]
   }
   if (isEnumValueRename || isFieldRename) {
     return extractFirstWord(line)

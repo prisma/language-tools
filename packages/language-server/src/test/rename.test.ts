@@ -120,6 +120,40 @@ suite('Rename', () => {
       { line: 9, character: 10 },
     )
   })
+  test('Model where it is used as type', () => {
+    assertRename(
+      {
+        changes: {
+          [renameModel.uri]: [
+            {
+              newText: newModelName2,
+              range: {
+                start: { line: 9, character: 6 },
+                end: { line: 9, character: 10 },
+              },
+            },
+            {
+              newText: '\t@@map("Post")\n}',
+              range: {
+                start: { line: 15, character: 0 },
+                end: { line: 15, character: 1 },
+              },
+            },
+            {
+              newText: newModelName2,
+              range: {
+                start: { line: 21, character: 8 },
+                end: { line: 21, character: 12 },
+              },
+            },
+          ],
+        },
+      },
+      renameModel,
+      newModelName2,
+      { line: 21, character: 12 },
+    )
+  })
   test('Model with Json default attribute', () => {
     assertRename(
       {
