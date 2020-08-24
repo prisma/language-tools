@@ -8,6 +8,8 @@ import {
 } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
+import { getBinPath, binaryIsNeeded } from '../util'
+import install from '../install'
 
 async function assertCompletion(
   fixturePath: string,
@@ -24,10 +26,9 @@ async function assertCompletion(
     },
   }
 
-  const completionResult: CompletionList | undefined = await handleCompletionRequest(
-    params,
-    document,
-  )
+  const completionResult:
+    | CompletionList
+    | undefined = await handleCompletionRequest(params, document)
 
   assert.ok(completionResult !== undefined)
   assert.deepStrictEqual(completionResult.isIncomplete, expected.isIncomplete)
@@ -43,6 +44,12 @@ async function assertCompletion(
 }
 
 suite('Quick Fix', () => {
+  suiteSetup(async () => {
+    // install prisma-fmt binary
+    const binPathPrismaFmt = await getBinPath()
+    if (await binaryIsNeeded(binPathPrismaFmt)) await install(binPathPrismaFmt)
+  })
+
   const emptyDocUri = 'completions/empty.prisma'
   const sqliteDocUri = 'completions/datasourceWithSqlite.prisma'
   const dataSourceWithUri = 'completions/datasourceWithUrl.prisma'
@@ -67,7 +74,7 @@ suite('Quick Fix', () => {
   })
 
   test('Diagnoses block type suggestions for empty file', async () => {
-   await assertCompletion(
+    await assertCompletion(
       emptyDocUri,
       { line: 0, character: 0 },
       {
@@ -107,7 +114,7 @@ suite('Quick Fix', () => {
   const env = { label: 'env()', kind: CompletionItemKind.Property }
 
   test('Diagnoses datasource field suggestions in empty block', async () => {
-   await assertCompletion(
+    await assertCompletion(
       emptyBlocksUri,
       { line: 1, character: 0 },
       {
@@ -118,7 +125,7 @@ suite('Quick Fix', () => {
   })
 
   test('Diagnoses datasource field suggestions with existing field', async () => {
-   await assertCompletion(
+    await assertCompletion(
       sqliteDocUri,
       { line: 2, character: 0 },
       {
@@ -126,7 +133,7 @@ suite('Quick Fix', () => {
         items: [fieldUrl],
       },
     )
-   await assertCompletion(
+    await assertCompletion(
       dataSourceWithUri,
       { line: 2, character: 0 },
       {
@@ -137,7 +144,7 @@ suite('Quick Fix', () => {
   })
 
   test('Diagnoses url argument suggestions for datasource block', async () => {
-   await assertCompletion(
+    await assertCompletion(
       dataSourceWithUri,
       { line: 7, character: 10 },
       {
@@ -145,7 +152,7 @@ suite('Quick Fix', () => {
         items: [quotationMarks, env],
       },
     ),
-     await assertCompletion(
+      await assertCompletion(
         dataSourceWithUri,
         { line: 11, character: 15 },
         {
@@ -156,7 +163,7 @@ suite('Quick Fix', () => {
   })
 
   test('Diagnoses single provider suggestions for datasource block', async () => {
-   await assertCompletion(
+    await assertCompletion(
       sqliteDocUri,
       { line: 14, character: 14 },
       {
@@ -164,7 +171,7 @@ suite('Quick Fix', () => {
         items: [mysql, postgresql, sqlite],
       },
     ),
-     await assertCompletion(
+      await assertCompletion(
         sqliteDocUri,
         { line: 18, character: 13 },
         {
@@ -175,7 +182,7 @@ suite('Quick Fix', () => {
   })
 
   test('Diagnoses multiple provider suggestions for datasource block', async () => {
-   await assertCompletion(
+    await assertCompletion(
       sqliteDocUri,
       { line: 6, character: 15 },
       {
@@ -183,7 +190,7 @@ suite('Quick Fix', () => {
         items: [mysql, postgresql, sqlite],
       },
     ),
-     await assertCompletion(
+      await assertCompletion(
         sqliteDocUri,
         { line: 22, character: 14 },
         {
@@ -191,7 +198,7 @@ suite('Quick Fix', () => {
           items: [quotationMarks],
         },
       )
-   await assertCompletion(
+    await assertCompletion(
       sqliteDocUri,
       { line: 10, character: 25 },
       {
@@ -217,7 +224,7 @@ suite('Quick Fix', () => {
     'completions/generatorWithExistingFields.prisma'
 
   test('Diagnoses generator field suggestions in empty block', async () => {
-   await assertCompletion(
+    await assertCompletion(
       emptyBlocksUri,
       { line: 5, character: 0 },
       {
@@ -233,7 +240,7 @@ suite('Quick Fix', () => {
   })
 
   test('Diagnoses generator field suggestions with existing fields', async () => {
-   await assertCompletion(
+    await assertCompletion(
       generatorWithExistingFieldsUri,
       { line: 2, character: 0 },
       {
@@ -241,7 +248,7 @@ suite('Quick Fix', () => {
         items: [fieldOutput, fieldBinaryTargets, fieldPreviewFeatures],
       },
     )
-   await assertCompletion(
+    await assertCompletion(
       generatorWithExistingFieldsUri,
       { line: 7, character: 0 },
       {
@@ -271,7 +278,7 @@ suite('Quick Fix', () => {
   }
 
   test('Diagnoses block attribute suggestions first in a line', async () => {
-   await assertCompletion(
+    await assertCompletion(
       emptyBlocksUri,
       { line: 9, character: 0 },
       {
@@ -287,7 +294,7 @@ suite('Quick Fix', () => {
   })
 
   test('Diagnoses block attribute suggestions with existing attributes first in a line', async () => {
-   await assertCompletion(
+    await assertCompletion(
       modelBlocksUri,
       { line: 5, character: 0 },
       {
@@ -300,7 +307,7 @@ suite('Quick Fix', () => {
         ],
       },
     )
-   await assertCompletion(
+    await assertCompletion(
       modelBlocksUri,
       { line: 14, character: 0 },
       {
@@ -313,7 +320,7 @@ suite('Quick Fix', () => {
   // TYPES
 
   test('Diagnoses type suggestions in model block', async () => {
-   await assertCompletion(
+    await assertCompletion(
       modelBlocksUri,
       { line: 51, character: 7 },
       {
@@ -335,7 +342,7 @@ suite('Quick Fix', () => {
           { label: 'TypeCheck', kind: CompletionItemKind.Reference },
           { label: 'Hello', kind: CompletionItemKind.Reference },
           { label: 'DateTest', kind: CompletionItemKind.Reference },
-          { label: 'UserType', kind: CompletionItemKind.Reference }
+          { label: 'UserType', kind: CompletionItemKind.Reference },
         ],
       },
     )
@@ -394,11 +401,11 @@ suite('Quick Fix', () => {
   }
   const enumValueOne = {
     label: 'ADMIN',
-    kind: CompletionItemKind.Value
+    kind: CompletionItemKind.Value,
   }
   const enumValueTwo = {
     label: 'NORMAL',
-    kind: CompletionItemKind.Value
+    kind: CompletionItemKind.Value,
   }
 
   const fieldsProperty = {
@@ -416,7 +423,7 @@ suite('Quick Fix', () => {
   }
 
   test('Diagnoses field and block attribute suggestions', async () => {
-   await assertCompletion(
+    await assertCompletion(
       modelBlocksUri,
       { line: 18, character: 14 },
       {
@@ -430,7 +437,7 @@ suite('Quick Fix', () => {
         ],
       },
     )
-   await assertCompletion(
+    await assertCompletion(
       modelBlocksUri,
       { line: 19, character: 14 },
       {
@@ -443,7 +450,7 @@ suite('Quick Fix', () => {
         ],
       },
     )
-   await assertCompletion(
+    await assertCompletion(
       modelBlocksUri,
       { line: 61, character: 20 },
       {
@@ -457,7 +464,7 @@ suite('Quick Fix', () => {
         ],
       },
     )
-   await assertCompletion(
+    await assertCompletion(
       modelBlocksUri,
       { line: 13, character: 16 },
       {
@@ -473,7 +480,7 @@ suite('Quick Fix', () => {
   })
 
   test('Diagnoses functions as default values', async () => {
-   await assertCompletion(
+    await assertCompletion(
       modelBlocksUri,
       { line: 11, character: 24 },
       {
@@ -481,7 +488,7 @@ suite('Quick Fix', () => {
         items: [functionAutoInc],
       },
     )
-   await assertCompletion(
+    await assertCompletion(
       modelBlocksUri,
       { line: 28, character: 27 },
       {
@@ -489,7 +496,7 @@ suite('Quick Fix', () => {
         items: [functionUuid, functionCuid],
       },
     )
-   await assertCompletion(
+    await assertCompletion(
       modelBlocksUri,
       { line: 30, character: 36 },
       {
@@ -500,7 +507,7 @@ suite('Quick Fix', () => {
   })
 
   test('Diagnoses static default values', async () => {
-   await assertCompletion(
+    await assertCompletion(
       modelBlocksUri,
       { line: 24, character: 28 },
       {
@@ -537,7 +544,7 @@ suite('Quick Fix', () => {
   })
 
   test('Diagnoses arguments of @@id', async () => {
-   await assertCompletion(
+    await assertCompletion(
       modelBlocksUri,
       { line: 46, character: 10 },
       {
@@ -552,7 +559,7 @@ suite('Quick Fix', () => {
   })
 
   test('Diagnoses arguments of @@index', async () => {
-   await assertCompletion(
+    await assertCompletion(
       modelBlocksUri,
       { line: 47, character: 13 },
       {
@@ -568,7 +575,7 @@ suite('Quick Fix', () => {
 
   const relationDirectiveUri = 'completions/relationDirective.prisma'
   test('Diagnoses arguments of @relation directive', async () => {
-   await assertCompletion(
+    await assertCompletion(
       relationDirectiveUri,
       { line: 12, character: 26 },
       {
@@ -576,7 +583,7 @@ suite('Quick Fix', () => {
         items: [referencesProperty, fieldsProperty, nameProperty],
       },
     )
-   await assertCompletion(
+    await assertCompletion(
       relationDirectiveUri,
       { line: 21, character: 39 },
       {
@@ -588,7 +595,7 @@ suite('Quick Fix', () => {
         ],
       },
     )
-   await assertCompletion(
+    await assertCompletion(
       relationDirectiveUri,
       { line: 30, character: 44 },
       {
@@ -596,7 +603,7 @@ suite('Quick Fix', () => {
         items: [fieldsProperty, nameProperty],
       },
     )
-   await assertCompletion(
+    await assertCompletion(
       relationDirectiveUri,
       { line: 39, character: 45 },
       {
@@ -604,7 +611,7 @@ suite('Quick Fix', () => {
         items: [referencesProperty, nameProperty],
       },
     )
-   await assertCompletion(
+    await assertCompletion(
       relationDirectiveUri,
       { line: 48, character: 35 },
       {

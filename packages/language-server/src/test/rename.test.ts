@@ -3,8 +3,6 @@ import { handleRenameRequest } from '../MessageHandler'
 import { WorkspaceEdit, RenameParams, Position } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
-import { getBinPath, binaryIsNeeded } from '../util'
-import install from '../install'
 
 function assertRename(
   expected: WorkspaceEdit,
@@ -28,12 +26,6 @@ function assertRename(
 }
 
 suite('Rename', () => {
-  suiteSetup(async () => {
-    // install prisma-fmt binary
-    const binPathPrismaFmt = await getBinPath()
-    if (await binaryIsNeeded(binPathPrismaFmt)) await install(binPathPrismaFmt)
-  })
-
   const renameModelPath = './rename/renameModel.prisma'
   const renameFieldPath = './rename/renameFields.prisma'
   const renameEnumPath = './rename/renameEnum.prisma'
