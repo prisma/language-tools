@@ -486,12 +486,12 @@ export async function handleCompletionRequest(
         ) {
           return
         }
-        return getSuggestionForFieldAttribute(
+        return await getSuggestionForFieldAttribute(
           foundBlock,
           getCurrentLine(document, position.line),
           lines,
           wordsBeforePosition,
-          document
+          document,
         )
       case '"':
         return getSuggestionForSupportedFields(
@@ -500,11 +500,11 @@ export async function handleCompletionRequest(
           currentLineUntrimmed,
           position,
         )
-      case '.': 
-        return getSuggestionForNativeTypes(
+      case '.':
+        return await getSuggestionForNativeTypes(
           foundBlock,
           wordsBeforePosition,
-          document
+          document,
         )
     }
   }
@@ -532,12 +532,12 @@ export async function handleCompletionRequest(
           currentLineUntrimmed,
         )
       }
-      return getSuggestionForFieldAttribute(
+      return await getSuggestionForFieldAttribute(
         foundBlock,
         lines[position.line],
         lines,
         wordsBeforePosition,
-        document
+        document,
       )
     case 'datasource':
     case 'generator':
