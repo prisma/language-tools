@@ -568,8 +568,18 @@ export function handleRenameRequest(
     return
   }
 
-  const isModelRename: boolean = isModelName(params.position, currentBlock)
-  const isEnumRename: boolean = isEnumName(params.position, currentBlock)
+  const isModelRename: boolean = isModelName(
+    params.position,
+    currentBlock,
+    lines,
+    document,
+  )
+  const isEnumRename: boolean = isEnumName(
+    params.position,
+    currentBlock,
+    lines,
+    document,
+  )
   const isEnumValueRename: boolean = isEnumValue(
     currentLine,
     params.position,
@@ -596,20 +606,52 @@ export function handleRenameRequest(
       isModelRename || isEnumRename,
       isEnumValueRename,
       isValidFieldRename,
+      document,
+      params.position,
+      lines,
     )
+
+    let lineNumberOfDefinition = position.line
+    let blockOfDefinition = currentBlock
+    let lineOfDefinition = currentLine
+    if (isModelRename || isEnumRename) {
+      // get definition of model or enum
+      lineNumberOfDefinition = lines.findIndex(
+        (l) =>
+          (l.startsWith('model') || l.startsWith('enum')) &&
+          l.includes(currentName),
+      )
+      if (lineNumberOfDefinition === -1) {
+        return
+      }
+      lineOfDefinition = lines[lineNumberOfDefinition]
+      const definitionBlockAtPosition = getBlockAtPosition(
+        lineNumberOfDefinition,
+        lines,
+      )
+      if (!definitionBlockAtPosition) {
+        return
+      }
+      blockOfDefinition = definitionBlockAtPosition
+    }
 
     // rename marked string
     edits.push(
-      insertBasicRename(params.newName, currentName, document, position.line),
+      insertBasicRename(
+        params.newName,
+        currentName,
+        document,
+        lineNumberOfDefinition,
+      ),
     )
 
     // check if map exists already
     if (
       !isRelationFieldRename &&
       !mapExistsAlready(
-        currentLine,
+        lineOfDefinition,
         lines,
-        currentBlock,
+        blockOfDefinition,
         isModelRename || isEnumRename,
       )
     ) {
@@ -618,7 +660,7 @@ export function handleRenameRequest(
         insertMapAttribute(
           currentName,
           position,
-          currentBlock,
+          blockOfDefinition,
           isModelRename || isEnumRename,
         ),
       )
@@ -641,7 +683,7 @@ export function handleRenameRequest(
           params.newName,
           document,
           lines,
-          currentBlock.name,
+          blockOfDefinition.name,
         ),
       )
     } else if (isValidFieldRename) {
@@ -651,7 +693,7 @@ export function handleRenameRequest(
           params.newName,
           document,
           lines,
-          currentBlock,
+          blockOfDefinition,
           isRelationFieldRename,
         ),
       )
