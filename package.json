@@ -43,7 +43,8 @@
     "testScripts": "jest __tests__",
     "check:lsp": "sh scripts/lsp-version.sh",
     "setup:patch": "sh scripts/patch/setup.sh",
-    "openvsx:publish": "cd packages/vscode && ovsx publish -p"
+    "openvsx:publish": "cd packages/vscode && ovsx publish -p",
+    "check-for-update": "sh scripts/versions/check-for-update.sh"
   },
   "husky": {
     "hooks": {
