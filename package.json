@@ -44,7 +44,9 @@
     "check:lsp": "sh scripts/lsp-version.sh",
     "setup:patch": "sh scripts/patch/setup.sh",
     "openvsx:publish": "cd packages/vscode && ovsx publish -p",
-    "check-for-update": "sh scripts/versions/check-for-update.sh"
+    "check-for-update": "sh scripts/versions/check-for-update.sh",
+    "bump-prisma-version-in-scripts": "sh scripts/versions/bump_prisma_version.sh",
+    "bump-extension-version-in-scripts": "node scripts/versions/bump_extension_version.js"
   },
   "husky": {
     "hooks": {

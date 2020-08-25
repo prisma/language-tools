@@ -1,0 +1,36 @@
+name: Bump versions for extension only
+
+on:
+    push:
+      branches: 
+        - 'master'
+        - '**.x'
+
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v2
+      - name: Setup Git
+        run: |
+          git config --global user.email "prismabots@gmail.com"
+          git config --global user.name "Prismo"
+          git remote add github "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" || true
+      - name: Update version in scripts folder and push to master
+        id: update
+        run: npm run bump-extension-version ${{ github.ref }}
+      - name: Push to master
+        run: |
+          git add -A .
+          git commit -m "bump extension version to ${{ steps.update.next-vscode-version }}."
+          git push
+      - name: Switch branch 
+        if: endsWith(github.ref, '.x')
+        run: 
+      - name: Update VSCode extension version
+        run:    ${{ steps.update.outputs.next-vscode-version }}
+      - name: Push to branch
+        run: 
+      - name: Trigger next worklow 
+        run: 

@@ -1,4 +1,4 @@
-name: Bump versions
+name: Bump versions on new Prisma CLI
 
 on:
   workflow_dispatch:
@@ -9,26 +9,32 @@ on:
       version:
         description: 'New Prisma CLI version'
         required: true
-  push:
-    branches: 
-      - 'master'
-      - '**.x'
-
 
 jobs:
   bump:
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v2
-      - name: Update versions in scripts folder and push to master
-        run: 
+      - name: Setup Git
+        run: |
+          git config --global user.email "prismabots@gmail.com"
+          git config --global user.name "Prismo"
+          git remote add github "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" || true
+      - name: Update versions in scripts folder 
+        run: npm run bump-prisma-version-in-scripts ${{ github.event.inputs.npm-channel }}
+      - name: Update next extension version in scripts folder
+        id: update
+        run: npm run bump-extension-version ${{ github.event.inputs.npm-channel }}
+      - name: Push to master
+        run: |
+          git add -A .
+          git commit -m "bump Prisma CLI ${{ github.event.inputs.npm-channel }} version to ${{ github.event.inputs.version }} and extension version to ${{ steps.update.next-vscode-version }}."
+          git push
       - name: Switch branch 
-        if: ${{ github.event.inputs.npm-channel }} != "dev"
-        run: 
-      - name: Update to new Prisma CLI version
-        run: 
-      - name: Update VSCode extension version
-        run: 
+        if: ${{ github.event.inputs.npm-channel }} == "latest"
+        run: git checkout -b latest # TODO check if branch exists if not create new one, for stable and patch stuff
+      - name: Update Prisma CLI version and VSCode extension version
+        run:    ${{ steps.update.outputs.next-vscode-version }}
       - name: Push to branch
         run: 
       - name: Trigger next worklow 
