@@ -1,0 +1,25 @@
+name: Publish 
+
+on:
+  workflow_dispatch:
+    inputs:
+      npm-channel:
+        description: 'Prisma CLI NPM Channel'
+        required: true
+
+jobs:
+  marketplace:
+    name: Publish to marketplace
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v2
+      - name: publish vsix to marketplace
+        run: 
+
+  open-vsx:
+    name: Publish to open-vsx
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v2
+      - name: Publish vsix to open-vsx.org
+        run: 

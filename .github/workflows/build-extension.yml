@@ -1,0 +1,32 @@
+name: Build extension
+
+on:
+  workflow_dispatch:
+    inputs:
+      npm-channel:
+        description: 'Prisma CLI NPM Channel'
+        required: true
+
+jobs:
+  tests:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        if: ${{ needs.setup.outputs.patch-version }}
+        run: npm install
+      - name: Compile
+        if: ${{ needs.setup.outputs.patch-version }}
+        run: npm run compile
+      - name: Replace Readme
+        run: 
+      - name: Replace version string in readme
+        run:
+      - name: Build vsix and put into release (and folder)
+        run: 
+      - name: undo readme back to plain github readme
+        if: on master branch
+        run: 
+      - name: push changes
+      - name: trigger next workflow

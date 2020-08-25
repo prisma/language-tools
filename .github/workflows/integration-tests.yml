@@ -1,0 +1,29 @@
+name: Integration tests 
+
+on:
+  workflow_dispatch:
+    inputs:
+      npm-channel:
+        description: 'Prisma CLI NPM Channel'
+        required: true
+
+jobs:
+  tests:
+    name: Integration tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps: 
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        if: ${{ needs.setup.outputs.patch-version }}
+        run: npm install
+      - name: Compile
+        if: ${{ needs.setup.outputs.patch-version }}
+        run: npm run compile
+      - name: Headless e2e tests
+        if: ${{ needs.setup.outputs.patch-version }}
+        uses: GabrielBB/xvfb-action@v1.0
+        with:
+          run: npm run test

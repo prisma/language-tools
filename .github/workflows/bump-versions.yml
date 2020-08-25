@@ -1,0 +1,35 @@
+name: Bump versions
+
+on:
+  workflow_dispatch:
+    inputs:
+      npm-channel:
+        description: 'Prisma CLI NPM Channel'
+        required: true
+      version:
+        description: 'New Prisma CLI version'
+        required: true
+  push:
+    branches: 
+      - 'master'
+      - '**.x'
+
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v2
+      - name: Update versions in scripts folder and push to master
+        run: 
+      - name: Switch branch 
+        if: ${{ github.event.inputs.npm-channel }} != "dev"
+        run: 
+      - name: Update to new Prisma CLI version
+        run: 
+      - name: Update VSCode extension version
+        run: 
+      - name: Push to branch
+        run: 
+      - name: Trigger next worklow 
+        run: 

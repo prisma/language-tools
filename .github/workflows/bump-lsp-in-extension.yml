@@ -1,0 +1,17 @@
+name: Bump LSP in VSCode extension
+
+on:
+  workflow_dispatch:
+    inputs:
+      npm-channel:
+        description: 'Prisma CLI NPM Channel'
+        required: true
+
+jobs:
+  bump:
+    name: Bump LSP in VSCode extension
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Commit and push to branch 
+        run: 
