@@ -229,6 +229,10 @@
     {
       "label": "insensitiveFilters",
       "documentation": "Case insensitive scalar filters for supported DBs. Only postgres has any implementation at the moment, as SQLite doesn't reliably support insensitive filtering and MySQL is insensitive by default."
+    },
+    {
+      "label": "nativeTypes",
+      "documentation": "Allows to define custom types that should be used for a given field."
     }
   ],
   "generatorProviders": [

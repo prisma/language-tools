@@ -95,7 +95,7 @@ export function startServer(options?: LSOptions): void {
         documentFormattingProvider: true,
         completionProvider: {
           resolveProvider: true,
-          triggerCharacters: ['@', '"'],
+          triggerCharacters: ['@', '"', '.'],
         },
         hoverProvider: true,
         renameProvider: true,
@@ -152,10 +152,10 @@ export function startServer(options?: LSOptions): void {
     }
   })
 
-  connection.onCompletion((params: CompletionParams) => {
+  connection.onCompletion(async (params: CompletionParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      return MessageHandler.handleCompletionRequest(params, doc)
+      return await MessageHandler.handleCompletionRequest(params, doc)
     }
   })
 
