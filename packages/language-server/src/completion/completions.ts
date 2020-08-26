@@ -25,7 +25,6 @@ import {
 } from './completionUtil'
 import klona from 'klona'
 import { extractModelName } from '../rename/renameUtil'
-import * as util from '../util'
 import nativeTypeConstructors, { NativeTypeConstructors } from '../nativeTypes'
 
 function toCompletionItems(
@@ -150,18 +149,19 @@ function getSuggestionForBlockAttribute(
 }
 
 
-export async function getSuggestionForNativeTypes(
+export function getSuggestionForNativeTypes(
   foundBlock: Block,
   wordsBeforePosition: string[],
-  document: TextDocument
-): Promise<CompletionList | undefined> {
-  let activeFeatureFlag = await declaredNativeTypes(document)
+  document: TextDocument,
+  binPath: string
+): CompletionList | undefined {
+  let activeFeatureFlag = declaredNativeTypes(document, binPath)
   if (foundBlock.type !== 'model' || !activeFeatureFlag || wordsBeforePosition.length < 2) {
     return undefined
   }
 
   let prismaType = wordsBeforePosition[1].replace('?', '').replace('[]', '')
-  let suggestions = await getNativeTypes(document, prismaType)
+  let suggestions = getNativeTypes(document, prismaType, binPath)
 
   return {
     items: suggestions,
@@ -169,20 +169,21 @@ export async function getSuggestionForNativeTypes(
   }
 }
 
-export async function getSuggestionForFieldAttribute(
+export function getSuggestionForFieldAttribute(
   block: Block,
   currentLine: string,
   lines: string[],
   wordsBeforePosition: string[],
   document: TextDocument,
-): Promise<CompletionList | undefined> {
+  binPath: string
+): CompletionList | undefined {
   if (block.type !== 'model') {
     return
   }
   // create deep copy
   let suggestions: CompletionItem[] = klona(fieldAttributes)
 
-  let enabledNativeTypes = await declaredNativeTypes(document)
+  let enabledNativeTypes = declaredNativeTypes(document, binPath)
 
   if (!(currentLine.includes('Int') || currentLine.includes('String'))) {
     // id not allowed
@@ -198,7 +199,7 @@ export async function getSuggestionForFieldAttribute(
   if (enabledNativeTypes && wordsBeforePosition.length >= 2) {
     let datasourceName = getFirstDatasourceName(lines)
     let prismaType = wordsBeforePosition[1]
-    let nativeTypeSuggestions = await getNativeTypes(document, prismaType)
+    let nativeTypeSuggestions = getNativeTypes(document, prismaType, binPath)
 
     if (datasourceName && nativeTypeSuggestions.length !== 0 && !currentLine.includes('@' + datasourceName)) {
       suggestions.push(
@@ -443,19 +444,17 @@ export function getValuesInsideBrackets(line: string): string[] {
 }
 
 
-async function declaredNativeTypes
-  (document: TextDocument): Promise<boolean> {
-  const binPath = await util.getBinPath()
-  let nativeTypes: NativeTypeConstructors[] = await nativeTypeConstructors(binPath, document.getText())
+function declaredNativeTypes
+  (document: TextDocument, binPath: string): boolean {
+  let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(binPath, document.getText())
   if (nativeTypes.length === 0) {
     return false
   }
   return true
 }
 
-async function getNativeTypes(document: TextDocument, prismaType: string): Promise<CompletionItem[]> {
-  const binPath = await util.getBinPath()
-  let nativeTypes: NativeTypeConstructors[] = await nativeTypeConstructors(binPath, document.getText())
+function getNativeTypes(document: TextDocument, prismaType: string, binPath: string): CompletionItem[] {
+  let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(binPath, document.getText())
 
   if (nativeTypes.length === 0) {
     return []
@@ -775,7 +774,7 @@ function getFieldType(line: string): string | undefined {
     return undefined
   }
   let type = wordsInLine[1]
-  if (type.length !== 0 && type !== undefined) {
+  if (type.length !== 0) {
     return type
   }
   return undefined

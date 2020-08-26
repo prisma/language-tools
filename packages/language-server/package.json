@@ -43,7 +43,8 @@
     "vsce": "1.77.0",
     "@types/mocha": "8.0.1",
     "mocha": "8.1.0",
-    "typescript": "3.9.7"
+    "typescript": "3.9.7",
+    "execa": "4.0.3"
   },
   "keywords": [
     "autocomplete",

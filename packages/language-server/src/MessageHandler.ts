@@ -442,6 +442,7 @@ export async function handleCompletionRequest(
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
   const currentLineUntrimmed = getCurrentLine(document, position.line)
+  const binPath = await util.getBinPath()
 
   const currentLineTillPosition = currentLineUntrimmed
     .slice(0, position.character - 1)
@@ -486,12 +487,13 @@ export async function handleCompletionRequest(
         ) {
           return
         }
-        return await getSuggestionForFieldAttribute(
+        return getSuggestionForFieldAttribute(
           foundBlock,
           getCurrentLine(document, position.line),
           lines,
           wordsBeforePosition,
           document,
+          binPath
         )
       case '"':
         return getSuggestionForSupportedFields(
@@ -501,10 +503,11 @@ export async function handleCompletionRequest(
           position,
         )
       case '.':
-        return await getSuggestionForNativeTypes(
+        return getSuggestionForNativeTypes(
           foundBlock,
           wordsBeforePosition,
           document,
+          binPath
         )
     }
   }
@@ -532,12 +535,13 @@ export async function handleCompletionRequest(
           currentLineUntrimmed,
         )
       }
-      return await getSuggestionForFieldAttribute(
+      return getSuggestionForFieldAttribute(
         foundBlock,
         lines[position.line],
         lines,
         wordsBeforePosition,
         document,
+        binPath
       )
     case 'datasource':
     case 'generator':
