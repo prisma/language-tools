@@ -155,13 +155,13 @@ export function getSuggestionForNativeTypes(
   document: TextDocument,
   binPath: string
 ): CompletionList | undefined {
-  let activeFeatureFlag = declaredNativeTypes(document, binPath)
+  const activeFeatureFlag = declaredNativeTypes(document, binPath)
   if (foundBlock.type !== 'model' || !activeFeatureFlag || wordsBeforePosition.length < 2) {
     return undefined
   }
 
-  let prismaType = wordsBeforePosition[1].replace('?', '').replace('[]', '')
-  let suggestions = getNativeTypes(document, prismaType, binPath)
+  const prismaType = wordsBeforePosition[1].replace('?', '').replace('[]', '')
+  const suggestions = getNativeTypes(document, prismaType, binPath)
 
   return {
     items: suggestions,
