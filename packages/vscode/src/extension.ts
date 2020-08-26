@@ -25,7 +25,6 @@ import path from 'path'
 import {
   applySnippetWorkspaceEdit,
   isSnippetEdit,
-  tryRequire,
   isDebugOrTestSession,
   enablePrismaNodeModulesFolderWatch,
 } from './util'
@@ -34,7 +33,9 @@ let client: LanguageClient
 let telemetry: Telemetry
 let serverModule: string
 
-const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
+function isDebugMode() {
+  return process.env.VSCODE_DEBUG_MODE
+}
 
 class GenericLanguageServerException extends Error {
   constructor(message: string, stack: string) {
@@ -42,6 +43,16 @@ class GenericLanguageServerException extends Error {
     this.name = 'GenericLanguageServerException'
     this.stack = stack
     this.message = message
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function tryRequire(path: string): any {
+  try {
+    return require(path)
+  } catch (err) {
+    console.error(err)
+    return
   }
 }
 
