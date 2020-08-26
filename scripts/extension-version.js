@@ -22,7 +22,7 @@ function nextExtensionVersion({
       // extension only patch
       
       if (extensionTokens[0] !== prismaTokens[1]) {
-        return prismaTokens[1] + '.1.1'
+        return `${prismaTokens[1]}.1.1`
       }
 
       return semVer.inc(extensionVersion, 'patch')
@@ -56,7 +56,7 @@ function nextExtensionVersion({
       // first new release after stable minor bump --> extensionVersion from x.y.z to (x+1).0.1
       let bumpMajor = semVer.inc(extensionVersion, 'major').split('.')
 
-      return bumpMajor[0] + '.0.1'
+      return `${bumpMajor[0]}.0.1`
     }
 
   }

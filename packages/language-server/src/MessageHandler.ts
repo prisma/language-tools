@@ -608,7 +608,6 @@ export function handleRenameRequest(
       isValidFieldRename,
       document,
       params.position,
-      lines,
     )
 
     let lineNumberOfDefinition = position.line
