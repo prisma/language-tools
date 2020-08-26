@@ -37,14 +37,14 @@
     "vscode-uri": "2.1.2",
     "npm": "6.14.7",
     "js-levenshtein": "1.1.6",
-    "@types/js-levenshtein": "1.1.0"
+    "@types/js-levenshtein": "1.1.0",
+    "execa": "4.0.3"
   },
   "devDependencies": {
     "vsce": "1.77.0",
     "@types/mocha": "8.0.1",
     "mocha": "8.1.0",
-    "typescript": "3.9.7",
-    "execa": "4.0.3"
+    "typescript": "3.9.7"
   },
   "keywords": [
     "autocomplete",
