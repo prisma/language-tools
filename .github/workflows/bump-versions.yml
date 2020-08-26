@@ -31,8 +31,8 @@ jobs:
           git commit -m "bump Prisma CLI ${{ github.event.inputs.npm-channel }} version to ${{ github.event.inputs.version }} and extension version to ${{ steps.update.next-vscode-version }}."
           git push
       - name: Switch branch 
-        if: ${{ github.event.inputs.npm-channel }} == "latest"
-        run: git checkout -b latest # TODO check if branch exists if not create new one, for stable and patch stuff
+        if: ${{ github.event.inputs.npm-channel }} != "dev"
+        run: npm run setup:branch ${{ github.event.inputs.npm-channel }}
       - name: Update Prisma CLI version and VSCode extension version
         run:    ${{ steps.update.outputs.next-vscode-version }}
       - name: Push to branch
