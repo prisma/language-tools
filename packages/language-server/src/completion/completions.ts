@@ -220,12 +220,12 @@ export function getSuggestionsForTypes(
     for (const sugg of completeSuggestions) {
       suggestions.push(
         {
-          label: sugg.label + '?',
+          label: `${sugg.label}?`,
           kind: sugg.kind,
           documentation: sugg.documentation,
         },
         {
-          label: sugg.label + '[]',
+          label: `${sugg.label}[]`,
           kind: sugg.kind,
           documentation: sugg.documentation,
         },

@@ -188,7 +188,7 @@ function insertInlineRename(currentName: string, line: number): TextEdit {
         character: Number.MAX_VALUE,
       },
     },
-    newText: ' @map("' + currentName + '")',
+    newText: ` @map("${currentName }")`,
   }
 }
 
@@ -201,7 +201,7 @@ function insertMapBlockAttribute(oldName: string, block: Block): TextEdit {
       },
       end: block.end,
     },
-    newText: '\t@@map("' + oldName + '")\n}',
+    newText: `\t@@map("${oldName}")\n}`,
   }
 }
 
@@ -358,7 +358,7 @@ export function renameReferencesForEnumValue(
   enumName: string,
 ): TextEdit[] {
   const edits: TextEdit[] = []
-  const searchString = '@default(' + currentValue + ')'
+  const searchString = `@default(${currentValue})`
 
   for (const [index, value] of lines.entries()) {
     if (value.includes(searchString) && value.includes(enumName)) {
@@ -376,7 +376,7 @@ export function renameReferencesForEnumValue(
             character: indexOfCurrentName + searchString.length,
           },
         },
-        newText: '@default(' + newName + ')',
+        newText: `@default(${newName})`,
       })
     }
   }
@@ -530,7 +530,6 @@ export function extractCurrentName(
   isFieldRename: boolean,
   document: TextDocument,
   position: Position,
-  lines: string[],
 ): string {
   if (isModelOrEnumRename) {
     const currentLineUntrimmed = getCurrentLine(document, position.line)

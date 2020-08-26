@@ -92,8 +92,8 @@ function addTypeModifiers(
   hasTypeModifierOptional: boolean,
   suggestion: string,
 ): string {
-  if (hasTypeModifierArray) return suggestion + '[]'
-  if (hasTypeModifierOptional) return suggestion + '?'
+  if (hasTypeModifierArray) return `${suggestion}[]`
+  if (hasTypeModifierOptional) return `${suggestion}?`
   return suggestion
 }
 
@@ -132,7 +132,7 @@ export function quickFix(
       )
       if (spellingSuggestion) {
         codeActions.push({
-          title: "Change spelling to '" + spellingSuggestion + "'",
+          title: `Change spelling to '${spellingSuggestion}'`,
           kind: CodeActionKind.QuickFix,
           diagnostics: [diag],
           edit: {
@@ -152,7 +152,7 @@ export function quickFix(
         })
       }
       codeActions.push({
-        title: "Create new model '" + diagText + "'",
+        title: `Create new model '${diagText}'`,
         kind: CodeActionKind.QuickFix,
         diagnostics: [diag],
         edit: {
@@ -160,14 +160,14 @@ export function quickFix(
             [params.textDocument.uri]: [
               {
                 range: getInsertRange(textDocument),
-                newText: '\nmodel ' + diagText + ' {\n\n}\n',
+                newText: `\nmodel ${diagText} {\n\n}\n`,
               },
             ],
           },
         },
       })
       codeActions.push({
-        title: "Create new enum '" + diagText + "'",
+        title: `Create new enum '${diagText}'`,
         kind: CodeActionKind.QuickFix,
         diagnostics: [diag],
         edit: {
@@ -175,7 +175,7 @@ export function quickFix(
             [params.textDocument.uri]: [
               {
                 range: getInsertRange(textDocument),
-                newText: '\nenum ' + diagText + ' {\n\n}\n',
+                newText: `\nenum ${diagText} {\n\n}\n`,
               },
             ],
           },

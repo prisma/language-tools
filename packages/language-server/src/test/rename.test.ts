@@ -405,7 +405,7 @@ suite('Rename', () => {
               },
             },
             {
-              newText: '@default(' + newEnumValue + ')',
+              newText: `@default(${newEnumValue })`,
               range: {
                 start: { line: 2, character: 12 },
                 end: { line: 2, character: 48 },
