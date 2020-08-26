@@ -153,10 +153,16 @@ export function getSuggestionForNativeTypes(
   foundBlock: Block,
   wordsBeforePosition: string[],
   document: TextDocument,
-  binPath: string
+  binPath: string,
+  lines: string[]
 ): CompletionList | undefined {
   const activeFeatureFlag = declaredNativeTypes(document, binPath)
   if (foundBlock.type !== 'model' || !activeFeatureFlag || wordsBeforePosition.length < 2) {
+    return undefined
+  }
+
+  const datasourceName = getFirstDatasourceName(lines)
+  if (!datasourceName || wordsBeforePosition[wordsBeforePosition.length - 1] !== `@${datasourceName}`) {
     return undefined
   }
 

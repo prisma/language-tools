@@ -507,7 +507,8 @@ export async function handleCompletionRequest(
           foundBlock,
           wordsBeforePosition,
           document,
-          binPath
+          binPath,
+          lines
         )
     }
   }
