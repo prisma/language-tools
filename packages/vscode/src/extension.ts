@@ -27,6 +27,7 @@ import {
   isSnippetEdit,
   isDebugOrTestSession,
   enablePrismaNodeModulesFolderWatch,
+  checkForMinimalColorTheme,
 } from './util'
 const packageJson = require('../../package.json')  // eslint-disable-line @typescript-eslint/no-var-requires
 
@@ -57,6 +58,7 @@ function createLanguageServer(
     clientOptions,
   )
 }
+
 
 export async function activate(context: ExtensionContext): Promise<void> {
   const isDebugOrTest = isDebugOrTestSession()
@@ -215,6 +217,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
       signature: await telemetry.getSignature(),
     })
   }
+
+  checkForMinimalColorTheme()
 }
 
 export async function deactivate(): Promise<void> {
