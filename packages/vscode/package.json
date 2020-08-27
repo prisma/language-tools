@@ -25,12 +25,12 @@
   "scripts": {
     "watch": "npm run build -- -w",
     "package": "vsce package",
-    "vscode:prepublish": "webpack --mode production",
+    "vscode:prepublish": "npm run webpack",
     "webpack": "webpack --config webpack.prod.js",
     "webpack:dev": "webpack --watch --config webpack.dev.js",
     "build": "tsc -p ./"
   },
-  "main": "./dist/main.bundle",
+  "main": "./dist/extension.js",
   "activationEvents": [
     "onLanguage:prisma"
   ],
