@@ -25,10 +25,11 @@ import path from 'path'
 import {
   applySnippetWorkspaceEdit,
   isSnippetEdit,
-  tryRequire,
   isDebugOrTestSession,
   enablePrismaNodeModulesFolderWatch,
 } from './util'
+const packageJson = require('../../package.json')  // eslint-disable-line @typescript-eslint/no-var-requires
+
 
 let client: LanguageClient
 let telemetry: Telemetry
@@ -71,12 +72,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
     serverModule = require.resolve('@prisma/language-server/dist/src/cli')
   }
 
-  const pj = tryRequire(path.join(__dirname, '../../package.json'))
-  if (!pj) {
-    return
-  }
-  const extensionId = 'prisma.' + pj.name
-  const extensionVersion = pj.version
+  const extensionId = 'prisma.' + packageJson.name
+  const extensionVersion = packageJson.version
   if (!isDebugOrTest) {
     telemetry = new Telemetry(extensionId, extensionVersion)
   }

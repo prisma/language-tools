@@ -62,16 +62,6 @@ export async function enablePrismaNodeModulesFolderWatch(): Promise<void> {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function tryRequire(path: string): any {
-  try {
-    return require(path)
-  } catch (err) {
-    console.error(err)
-    return
-  }
-}
-
 export function isSnippetEdit(
   action: CodeAction,
   document: TextDocumentIdentifier,
