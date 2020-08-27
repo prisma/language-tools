@@ -23,6 +23,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
 import * as util from './util'
 import install from './install'
+const packageJson = require('../../package.json')  // eslint-disable-line @typescript-eslint/no-var-requires
 
 export interface LSOptions {
   /**
@@ -82,9 +83,8 @@ export function startServer(options?: LSOptions): void {
       `Installed version of Prisma binary 'prisma-fmt': ${await util.getVersion()}`
     )
 
-    const pj = util.tryRequire('../../package.json')
     connection.console.info(
-      `Extension name ${pj.name} with version ${pj.version}`
+      `Extension name ${packageJson.name} with version ${packageJson.version}`
     )
     const prismaCLIVersion = await util.getCLIVersion()
     connection.console.info(`Prisma CLI version: ${prismaCLIVersion}`)

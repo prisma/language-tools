@@ -2,10 +2,10 @@
  * Imports
  */
 import { getPlatform, Platform } from '@prisma/get-platform'
-import pkgdir from 'pkg-dir'
 import path from 'path'
 import fs from 'fs'
 import exec from './exec'
+const packageJson = require('../../package.json')  // eslint-disable-line @typescript-eslint/no-var-requires
 
 /**
  * Lookup Cache
@@ -13,32 +13,15 @@ import exec from './exec'
 let platform: Platform | undefined
 let version: string | undefined
 
-/**
- * Try requiring
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function tryRequire(path: string): any {
-  try {
-    return require(path)
-  } catch (err) {
-    console.error(err)
-    throw new Error(err)
-  }
-}
 
 /**
  * Lookup version
  */
 export async function getVersion(): Promise<string> {
-  const pkgPath = await pkgdir(__dirname)
-  if (!pkgPath) {
+  if (!packageJson || !packageJson.prisma || !packageJson.prisma.version) {
     return 'latest'
   }
-  const pkg = tryRequire(path.join(pkgPath, 'package.json'))
-  if (!pkg['prisma'] || !pkg['prisma']['version']) {
-    return 'latest'
-  }
-  return pkg['prisma']['version']
+  return packageJson.prisma.version
 }
 
 /**
@@ -62,12 +45,7 @@ export async function getDownloadURL(): Promise<string> {
 }
 
 export async function getCLIVersion(): Promise<string> {
-  const pkgPath = await pkgdir(__dirname)
-  if (!pkgPath) {
-    return ''
-  }
-  const pkg = tryRequire(path.join(pkgPath, 'package.json'))
-  return pkg['dependencies']['@prisma/get-platform']
+  return packageJson.dependencies['@prisma/get-platform']
 }
 
 export async function binaryIsNeeded(path: string): Promise<boolean> {
