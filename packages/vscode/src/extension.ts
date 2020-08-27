@@ -28,6 +28,7 @@ import {
   isDebugOrTestSession,
   enablePrismaNodeModulesFolderWatch,
 } from './util'
+const packageJson = require('../package.json') // eslint-disable-line @typescript-eslint/no-var-requires
 
 let client: LanguageClient
 let telemetry: Telemetry
@@ -55,18 +56,6 @@ function createLanguageServer(
   )
 }
 
-declare function __non_webpack_require__(module: string): any
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function tryRequire(path: string): any {
-  try {
-    return  __non_webpack_require__(path)
-  } catch (err) {
-    console.error(err)
-    return
-  }
-}
-
-
 export async function activate(context: ExtensionContext): Promise<void> {
   const isDebugOrTest = isDebugOrTestSession()
   const isTest = isDebugOrTest && process.env.NODE_ENV === 'production'
@@ -80,6 +69,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     // We're using eval so no build processes mess with the require.resolve
     // use published npm package for production
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       serverModule = eval(
         `require.resolve('@prisma/language-server/dist/src/cli')`
       )
@@ -88,13 +78,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
     }
   }
 
-  console.log(serverModule)
-  console.log(process.env.NODE_ENV)
-
-  const packageJson = tryRequire('../package.json')
   const extensionId = 'prisma.' + packageJson.name
   const extensionVersion = packageJson.version
-  console.log(extensionVersion)
   if (!isDebugOrTest) {
     telemetry = new Telemetry(extensionId, extensionVersion)
   }
