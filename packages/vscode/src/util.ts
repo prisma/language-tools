@@ -62,7 +62,6 @@ export async function enablePrismaNodeModulesFolderWatch(): Promise<void> {
   }
 }
 
-
 export function isSnippetEdit(
   action: CodeAction,
   document: TextDocumentIdentifier,

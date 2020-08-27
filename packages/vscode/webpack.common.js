@@ -26,9 +26,6 @@ const config = {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
     extensions: ['.ts', '.js'],
     modules: [path.resolve(__dirname, '../node_modules')],
-    alias: {
-      lsp$: '@prisma/language-server/dist/src'
-    }
   },
   module: {
     rules: [

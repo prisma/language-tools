@@ -28,7 +28,7 @@ import {
   isDebugOrTestSession,
   enablePrismaNodeModulesFolderWatch,
 } from './util'
-import * as d from 'lsp/cli.js'
+const packageJson = require('../../package.json')  // eslint-disable-line @typescript-eslint/no-var-requires
 
 let client: LanguageClient
 let telemetry: Telemetry
@@ -43,15 +43,6 @@ class GenericLanguageServerException extends Error {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function tryRequire(path: string): any {
-  try {
-    return require(path)
-  } catch (err) {
-    console.error(err)
-    return
-  }
-}
 
 function createLanguageServer(
   serverOptions: ServerOptions,
@@ -76,15 +67,11 @@ export async function activate(context: ExtensionContext): Promise<void> {
     )
   } else {
     // use published npm package for production
-    serverModule = d
+    serverModule = require.resolve('@prisma/language-server/dist/src/cli')
   }
 
-  const pj = tryRequire(path.join(__dirname, '../../package.json'))
-  if (!pj) {
-    return
-  }
-  const extensionId = 'prisma.' + pj.name
-  const extensionVersion = pj.version
+  const extensionId = 'prisma.' + packageJson.name
+  const extensionVersion = packageJson.version
   if (!isDebugOrTest) {
     telemetry = new Telemetry(extensionId, extensionVersion)
   }
