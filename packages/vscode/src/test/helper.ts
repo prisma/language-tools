@@ -1,5 +1,6 @@
 import vscode from 'vscode'
 import path from 'path'
+const packageJson = require('../../../package.json')
 
 export let doc: vscode.TextDocument
 export let editor: vscode.TextEditor
