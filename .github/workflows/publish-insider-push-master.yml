@@ -123,7 +123,7 @@ jobs:
         run: npm install
       - name: Compile
         if: ${{ needs.setup.outputs.version }}
-        run: npm run compile
+        run: npm run compile:withoutWebpack
       - name: Headless e2e tests
         if: ${{ needs.setup.outputs.version }}
         uses: GabrielBB/xvfb-action@v1.0

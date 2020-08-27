@@ -35,6 +35,7 @@
     "lint": "eslint  \"packages/**/*.{js,ts}\" --fix",
     "compile:dev": "cd packages/language-server && npm run build && cd ../vscode && npm run webpack:dev && cd ../..",
     "compile": "cd packages/language-server && npm run build && cd ../vscode && npm run webpack && cd ../..",
+    "compile:withoutWebpack": "cd packages/language-server && npm run build && cd ../vscode && npm run build && cd ../..",
     "watch": "npm run build -- -w",
     "vsce:publish": "sh scripts/publish.sh",
     "vsce:check": "npm run shell:lint && sh scripts/check-update.sh",
