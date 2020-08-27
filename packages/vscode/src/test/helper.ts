@@ -5,22 +5,10 @@ export let doc: vscode.TextDocument
 export let editor: vscode.TextEditor
 export let documentEol: string
 export let platformEol: string
+const packageJson = require('../../../package.json')
 
 export async function sleep(ms: number): Promise<NodeJS.Timeout> {
   return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-/**
- * Try requiring
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function tryRequire(path: string): any {
-  try {
-    return require(path)
-  } catch (err) {
-    console.error(err)
-    return
-  }
 }
 
 /**
@@ -29,11 +17,7 @@ function tryRequire(path: string): any {
  */
 export async function activate(docUri: vscode.Uri): Promise<void> {
   // The extensionId is `publisher.name` from package.json
-  const pj = tryRequire('../../../package.json')
-  if (!pj) {
-    return
-  }
-  const ext = vscode.extensions.getExtension(pj.publisher + '.' + pj.name)
+  const ext = vscode.extensions.getExtension(packageJson.publisher + '.' + packageJson.name)
   if (!ext) {
     console.error('Failed to get extension.')
     return

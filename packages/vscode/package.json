@@ -28,7 +28,7 @@
     "vscode:prepublish": "webpack --mode production",
     "webpack": "webpack --config webpack.prod.js",
     "webpack:dev": "webpack --watch --config webpack.dev.js",
-    "test-compile": "tsc -p ./"
+    "build": "tsc -p ./"
   },
   "main": "./dist/main.bundle",
   "activationEvents": [
