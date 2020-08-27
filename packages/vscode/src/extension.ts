@@ -28,7 +28,6 @@ import {
   isDebugOrTestSession,
   enablePrismaNodeModulesFolderWatch,
 } from './util'
-import * as d from 'lsp/cli.js'
 
 let client: LanguageClient
 let telemetry: Telemetry
@@ -43,10 +42,11 @@ class GenericLanguageServerException extends Error {
   }
 }
 
+declare function __non_webpack_require__(module: string): any
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function tryRequire(path: string): any {
   try {
-    return require(path)
+    return __non_webpack_require__(path)
   } catch (err) {
     console.error(err)
     return
@@ -76,7 +76,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
     )
   } else {
     // use published npm package for production
-    serverModule = d
+    serverModule = path.join(
+      require.resolve('@prisma/language-server'),
+      'dist/src/cli.js',
+    )
   }
 
   const pj = tryRequire(path.join(__dirname, '../../package.json'))
