@@ -28,7 +28,7 @@ import {
   isDebugOrTestSession,
   enablePrismaNodeModulesFolderWatch,
 } from './util'
-const packageJson = require('../package.json') // eslint-disable-line @typescript-eslint/no-var-requires
+const packageJson = require('../../package.json') // eslint-disable-line @typescript-eslint/no-var-requires
 
 let client: LanguageClient
 let telemetry: Telemetry
