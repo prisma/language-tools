@@ -32,6 +32,7 @@ import {
   isInsideAttribute,
   getSymbolBeforePosition,
   suggestEqualSymbol,
+  getSuggestionForNativeTypes,
 } from './completion/completions'
 import { quickFix } from './codeActionProvider'
 import lint from './lint'
@@ -429,10 +430,10 @@ export function handleHoverRequest(
  *
  * This handler provides the initial list of the completion items.
  */
-export function handleCompletionRequest(
+export async function handleCompletionRequest(
   params: CompletionParams,
   document: TextDocument,
-): CompletionList | undefined {
+): Promise<CompletionList | undefined> {
   const context = params.context
   const position = params.position
   if (!context) {
@@ -441,6 +442,7 @@ export function handleCompletionRequest(
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
   const currentLineUntrimmed = getCurrentLine(document, position.line)
+  const binPath = await util.getBinPath()
 
   const currentLineTillPosition = currentLineUntrimmed
     .slice(0, position.character - 1)
@@ -489,6 +491,9 @@ export function handleCompletionRequest(
           foundBlock,
           getCurrentLine(document, position.line),
           lines,
+          wordsBeforePosition,
+          document,
+          binPath
         )
       case '"':
         return getSuggestionForSupportedFields(
@@ -496,6 +501,14 @@ export function handleCompletionRequest(
           lines[position.line],
           currentLineUntrimmed,
           position,
+        )
+      case '.':
+        return getSuggestionForNativeTypes(
+          foundBlock,
+          wordsBeforePosition,
+          document,
+          binPath,
+          lines
         )
     }
   }
@@ -527,6 +540,9 @@ export function handleCompletionRequest(
         foundBlock,
         lines[position.line],
         lines,
+        wordsBeforePosition,
+        document,
+        binPath
       )
     case 'datasource':
     case 'generator':
