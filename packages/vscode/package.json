@@ -26,11 +26,11 @@
     "watch": "npm run build -- -w",
     "package": "vsce package",
     "vscode:prepublish": "webpack --mode production",
-    "webpack": "webpack --mode development",
-    "webpack-dev": "webpack --mode development --watch",
+    "webpack": "webpack --config webpack.prod.js",
+    "webpack:dev": "webpack --watch --config webpack.dev.js",
     "test-compile": "tsc -p ./"
   },
-  "main": "./dist/extension",
+  "main": "./dist/main.bundle",
   "activationEvents": [
     "onLanguage:prisma"
   ],
@@ -110,7 +110,9 @@
     "vsce": "1.77.0",
     "vscode-test": "1.4.0",
     "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12"
+    "webpack-cli": "^3.3.12",
+    "webpack-merge": "^5.1.2",
+    "clean-webpack-plugin": "3.0.0"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
   "publishConfig": {

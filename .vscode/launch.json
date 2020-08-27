@@ -18,9 +18,6 @@
       "outFiles": [
         "${workspaceFolder}/packages/vscode/dist/**/*.js"
       ],
-      "env": {
-        "VSCODE_DEBUG_MODE": "true"
-      }
     },
     {
       "type": "node",

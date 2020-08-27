@@ -1,9 +1,7 @@
 //@ts-check
 
-'use strict';
-
 const path = require('path');
-const webpack = require('webpack');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -13,19 +11,24 @@ const config = {
   output: {
     // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
     path: path.resolve(__dirname, 'dist'),
-    filename: 'extension.js',
+    filename: '[name].bundle.js',
     libraryTarget: 'commonjs2',
     devtoolModuleFilenameTemplate: '../[resource-path]'
   },
-  devtool: 'source-map',
   externals: {
     vscode: 'commonjs vscode', // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
     'vscode-extension-telemetry': 'vscode-extension-telemetry',
-    '@prisma/language-server': '@prisma/language-server'
+    '@prisma/language-server': '@prisma/language-server',
+    'checkpoint-client': 'checkpoint-client',
+    'vscode-languageclient': 'vscode-languageclient'
   },
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
-    extensions: ['.ts', '.js']
+    extensions: ['.ts', '.js'],
+    modules: [path.resolve(__dirname, '../node_modules')],
+    alias: {
+      lsp$: '@prisma/language-server/dist/src'
+    }
   },
   module: {
     rules: [
@@ -41,9 +44,7 @@ const config = {
     ]
   },
   plugins: [
-      new webpack.EnvironmentPlugin({
-        VSCODE_DEBUG_MODE: false // use 'false' unless process.env.VSCODE_DEBUG_MODE is defined
-      })
+    new CleanWebpackPlugin()
   ]
 };
 module.exports = config;

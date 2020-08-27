@@ -28,14 +28,11 @@ import {
   isDebugOrTestSession,
   enablePrismaNodeModulesFolderWatch,
 } from './util'
+import * as d from 'lsp/cli.js'
 
 let client: LanguageClient
 let telemetry: Telemetry
 let serverModule: string
-
-function isDebugMode() {
-  return process.env.VSCODE_DEBUG_MODE
-}
 
 class GenericLanguageServerException extends Error {
   constructor(message: string, stack: string) {
@@ -70,16 +67,16 @@ function createLanguageServer(
 
 export async function activate(context: ExtensionContext): Promise<void> {
   const isDebugOrTest = isDebugOrTestSession()
-  const isTest = isDebugOrTest && !isDebugMode()
+  const isTest = isDebugOrTest && process.env.NODE_ENV === 'production'
 
-  if (isDebugMode()) {
+  if (process.env.NODE_ENV !== 'production') {
     // use LSP from folder for debugging
     serverModule = context.asAbsolutePath(
       path.join('../../packages/language-server/dist/src/cli'),
     )
   } else {
     // use published npm package for production
-    serverModule = require.resolve('@prisma/language-server/dist/src/cli')
+    serverModule = d
   }
 
   const pj = tryRequire(path.join(__dirname, '../../package.json'))
