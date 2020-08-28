@@ -9,7 +9,7 @@ import {
   WorkspaceConfiguration,
 } from 'vscode'
 import { CodeAction, TextDocumentIdentifier } from 'vscode-languageclient'
-import { blackListColorThemesDark, blackListColorThemesLight } from './blackListColorThemes';
+import { denyListDarkColorThemes, denyListLightColorThemes } from './denyListColorThemes';
 
 export function isDebugOrTestSession(): boolean {
   return env.sessionId === 'someValue.sessionId'
@@ -36,10 +36,10 @@ export function checkForMinimalColorTheme() {
 
   console.log(colorTheme)
 
-  if (blackListColorThemesDark.includes(colorTheme as string)) {
+  if (denyListDarkColorThemes.includes(colorTheme as string)) {
     showToastToSwitchColorTheme(colorTheme as string, 'Dark+ (Visual Studio)')
   }
-  if (blackListColorThemesLight.includes(colorTheme as string)) {
+  if (denyListLightColorThemes.includes(colorTheme as string)) {
     showToastToSwitchColorTheme(colorTheme as string, 'Light+ (Visual Studio)')
   }
 }

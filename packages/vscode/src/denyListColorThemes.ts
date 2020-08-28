@@ -1,4 +1,4 @@
-export const blackListColorThemesDark = [
+export const denyListDarkColorThemes = [
     'Visual Studio Dark',
     'Minimal',
     'RDCD',
@@ -10,7 +10,7 @@ export const blackListColorThemesDark = [
     'Solarized Minimal (dark)',
 ]
 
-export const blackListColorThemesLight = [
+export const denyListLightColorThemes = [
     'Visual Studio Light',
     'Light',
     'Minimal Light',
