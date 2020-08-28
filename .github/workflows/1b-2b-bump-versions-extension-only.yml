@@ -33,5 +33,9 @@ jobs:
         run:    ${{ steps.update.outputs.next-vscode-version }}
       - name: Push to branch
         run: 
-      - name: Trigger next worklow 
-        run: 
+      - name: Trigger next workflow for LSP Unit tests
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Unit tests for LSP and bump LSP version
+          token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "npm-channel": "dev" }'

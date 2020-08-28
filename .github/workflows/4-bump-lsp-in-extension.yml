@@ -18,7 +18,6 @@ jobs:
       - name: Commit and push to branch 
         run: 
       - name: Trigger next workflow for VSCode e2e tests
-        if: ${{ steps.check_for_update.outputs.dev-version }}
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Integration tests

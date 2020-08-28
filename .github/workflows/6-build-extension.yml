@@ -1,4 +1,4 @@
-name: Build extension
+name: ç
 
 on:
   workflow_dispatch:
@@ -29,4 +29,9 @@ jobs:
         if: on master branch
         run: 
       - name: push changes
-      - name: trigger next workflow
+      - name: Trigger next workflow to publish extension
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Publish
+          token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "npm-channel": "dev" }'

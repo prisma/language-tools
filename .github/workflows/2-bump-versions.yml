@@ -38,7 +38,6 @@ jobs:
       - name: Push to branch
         run: # TODO
       - name: Trigger next workflow for LSP Unit tests
-        if: ${{ steps.check_for_update.outputs.dev-version }}
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Unit tests for LSP and bumo LSP version

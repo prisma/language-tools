@@ -27,3 +27,9 @@ jobs:
         uses: GabrielBB/xvfb-action@v1.0
         with:
           run: npm run test
+      - name: Trigger next workflow to build extension
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Build extension
+          token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "npm-channel": "dev" }'
