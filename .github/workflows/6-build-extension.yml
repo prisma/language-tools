@@ -20,9 +20,7 @@ jobs:
         if: ${{ needs.setup.outputs.patch-version }}
         run: npm run compile
       - name: Replace Readme
-        run: 
-      - name: Replace version string in readme
-        run:
+        run: npm run change-readme  ${{ github.event.inputs.npm-channel }}
       - name: Build vsix and put into release (and folder)
         run: 
       - name: undo readme back to plain github readme
