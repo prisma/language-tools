@@ -6,3 +6,4 @@ dist/
 !node_modules/@prisma/language-server
 node_modules
 webpack.config.json
+**/*.ts
