@@ -1,0 +1,26 @@
+name: Bump LSP in VSCode extension
+
+on:
+  workflow_dispatch:
+    inputs:
+      npm-channel:
+        description: 'Prisma CLI NPM Channel'
+        required: true
+
+jobs:
+  bump:
+    name: Bump LSP in VSCode extension
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Bump LSP version in extension
+        run: 
+      - name: Commit and push to branch 
+        run: 
+      - name: Trigger next workflow for VSCode e2e tests
+        if: ${{ steps.check_for_update.outputs.dev-version }}
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Integration tests
+          token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "npm-channel": "dev" }'

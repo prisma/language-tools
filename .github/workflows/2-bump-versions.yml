@@ -36,6 +36,11 @@ jobs:
       - name: Update Prisma CLI version and VSCode extension version
         run:    ${{ steps.update.outputs.next-vscode-version }}
       - name: Push to branch
-        run: 
-      - name: Trigger next worklow 
-        run: 
+        run: # TODO
+      - name: Trigger next workflow for LSP Unit tests
+        if: ${{ steps.check_for_update.outputs.dev-version }}
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Unit tests for LSP and bumo LSP version
+          token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "npm-channel": "dev" }'

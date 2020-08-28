@@ -37,6 +37,10 @@ jobs:
         run: 
       - name: Publish to npm
         run: 
-      - name: Trigger next workflow
-        run: 
-    
+      - name: Trigger next workflow for bumping LSP in extension
+        if: ${{ steps.check_for_update.outputs.dev-version }}
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Bump LSP in VSCode extension
+          token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "npm-channel": "dev" }'
