@@ -93,13 +93,13 @@ export const supportedGeneratorFields: CompletionItem[] = convertToCompletionIte
 export const blockAttributes: CompletionItem[] = convertAttributesToCompletionItems(
   completions.blockAttributes,
   CompletionItemKind.Property,
-  (label: string) => label.replace('[]', '[$0]'),
+  (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
 )
 
 export const fieldAttributes: CompletionItem[] = convertAttributesToCompletionItems(
   completions.fieldAttributes,
   CompletionItemKind.Property,
-  (label: string) => label.replace('()', '($0)'),
+  (label: string) => label.replace('()', '($0)').replace('""', '"$0"'),
 )
 
 export const relationArguments: CompletionItem[] = convertAttributesToCompletionItems(
