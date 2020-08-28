@@ -28,7 +28,6 @@ import {
   isDebugOrTestSession,
   enablePrismaNodeModulesFolderWatch,
 } from './util'
-const packageJson = require('../../package.json') // eslint-disable-line @typescript-eslint/no-var-requires
 
 let client: LanguageClient
 let telemetry: Telemetry
@@ -78,10 +77,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
     }
   }
 
-  const extensionId = 'prisma.' + packageJson.name
-  const extensionVersion = packageJson.version
+  
   if (!isDebugOrTest) {
-    telemetry = new Telemetry(extensionId, extensionVersion)
+    const packageJson = require('../package.json') // eslint-disable-line @typescript-eslint/no-var-requires
+    telemetry = new Telemetry(packageJson.extensionId, packageJson.extensionVersion)
   }
 
   // The debug options for the server
