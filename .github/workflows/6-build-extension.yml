@@ -14,15 +14,32 @@ jobs:
     steps: 
       - uses: actions/checkout@v2
       - name: Install Dependencies
-        if: ${{ needs.setup.outputs.patch-version }}
         run: npm install
       - name: Compile
-        if: ${{ needs.setup.outputs.patch-version }}
         run: npm run compile
       - name: Replace Readme
         run: npm run change-readme  ${{ github.event.inputs.npm-channel }}
-      - name: Build vsix and put into release (and folder)
-        run: 
+      - name: Build vsix 
+        run: npm run deploy ${{ secrets.PAT }}
+      - name: create a release
+        if: github.ref == 'refs/heads/master'
+        id: create_release
+        uses: actions/create-release@v1
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: # TODO
+          release_name: #TODO 
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: # TODO ${{github.workspace}}/ prisma.3.4.0.vsix
+          asset_name: # TODO prisma.3.4.0.vsix
+          asset_content_type: application/zip
       - name: undo readme back to plain github readme
         if: on master branch
         run: 
