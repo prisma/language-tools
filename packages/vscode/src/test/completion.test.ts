@@ -84,6 +84,10 @@ suite('Should auto-complete', () => {
 
   // DATASOURCE BLOCK
 
+  const fieldPreviewFeatures = {
+    label: 'previewFeatures',
+    kind: vscode.CompletionItemKind.Field,
+  }
   const fieldProvider = {
     label: 'provider',
     kind: vscode.CompletionItemKind.Field,
@@ -110,7 +114,11 @@ suite('Should auto-complete', () => {
     await testCompletion(
       emptyBlocksUri,
       new vscode.Position(1, 0),
-      new vscode.CompletionList([fieldProvider, fieldUrl]),
+      new vscode.CompletionList([
+        fieldProvider,
+        fieldUrl,
+        fieldPreviewFeatures,
+      ]),
       false,
     )
   })
@@ -119,13 +127,13 @@ suite('Should auto-complete', () => {
     await testCompletion(
       sqliteDocUri,
       new vscode.Position(2, 0),
-      new vscode.CompletionList([fieldUrl]),
+      new vscode.CompletionList([fieldUrl, fieldPreviewFeatures]),
       false,
     )
     await testCompletion(
       dataSourceWithUri,
       new vscode.Position(2, 0),
-      new vscode.CompletionList([fieldProvider]),
+      new vscode.CompletionList([fieldProvider, fieldPreviewFeatures]),
       false,
     )
   })
@@ -186,10 +194,6 @@ suite('Should auto-complete', () => {
   const fieldOutput = { label: 'output', kind: vscode.CompletionItemKind.Field }
   const fieldBinaryTargets = {
     label: 'binaryTargets',
-    kind: vscode.CompletionItemKind.Field,
-  }
-  const fieldPreviewFeatures = {
-    label: 'previewFeatures',
     kind: vscode.CompletionItemKind.Field,
   }
 

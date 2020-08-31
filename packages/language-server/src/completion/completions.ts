@@ -20,8 +20,9 @@ import {
   dataSourceProviderArguments,
   generatorProviders,
   generatorProviderArguments,
-  generatorPreviewFeaturesArguments,
+  previewFeaturesArguments,
   generatorPreviewFeatures,
+  datasourcePreviewFeatures,
 } from './completionUtil'
 import klona from 'klona'
 import { extractModelName } from '../rename/renameUtil'
@@ -459,6 +460,35 @@ function declaredNativeTypes
   return true
 }
 
+function handlePreviewFeatures(previewFeatures: CompletionItem[], position: Position, currentLineUntrimmed: string, isInsideQuotation: boolean): CompletionList {
+  if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
+    if (isInsideQuotation) {
+      const usedValues = getValuesInsideBrackets(currentLineUntrimmed)
+      previewFeatures = previewFeatures.filter(
+        (t) => !usedValues.includes(t.label),
+      )
+      return {
+        items: previewFeatures,
+        isIncomplete: true,
+      }
+    } else {
+      return {
+        items: previewFeaturesArguments.filter(
+          (arg) => !arg.label.includes('['),
+        ),
+        isIncomplete: true,
+      }
+    }
+  } else {
+    return {
+      items: previewFeaturesArguments.filter(
+        (arg) => !arg.label.includes('"'),
+      ),
+      isIncomplete: true,
+    }
+  }
+}
+
 function getNativeTypes(document: TextDocument, prismaType: string, binPath: string): CompletionItem[] {
   let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(binPath, document.getText())
 
@@ -527,32 +557,7 @@ export function getSuggestionForSupportedFields(
       }
       if (currentLine.startsWith('previewFeatures')) {
         let previewFeatures: CompletionItem[] = klona(generatorPreviewFeatures)
-        if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
-          if (isInsideQuotation) {
-            const usedValues = getValuesInsideBrackets(currentLineUntrimmed)
-            previewFeatures = previewFeatures.filter(
-              (t) => !usedValues.includes(t.label),
-            )
-            return {
-              items: previewFeatures,
-              isIncomplete: true,
-            }
-          } else {
-            return {
-              items: generatorPreviewFeaturesArguments.filter(
-                (arg) => !arg.label.includes('['),
-              ),
-              isIncomplete: true,
-            }
-          }
-        } else {
-          return {
-            items: generatorPreviewFeaturesArguments.filter(
-              (arg) => !arg.label.includes('"'),
-            ),
-            isIncomplete: true,
-          }
-        }
+        return handlePreviewFeatures(previewFeatures, position, currentLineUntrimmed, isInsideQuotation)
       }
       break
     case 'datasource':
@@ -605,6 +610,9 @@ export function getSuggestionForSupportedFields(
             isIncomplete: true,
           }
         }
+      } else if (currentLine.startsWith('previewFeatures')) {
+        let previewFeatures: CompletionItem[] = klona(datasourcePreviewFeatures)
+        return handlePreviewFeatures(previewFeatures, position, currentLineUntrimmed, isInsideQuotation)
       }
       break
   }
