@@ -241,7 +241,7 @@ suite('Should auto-complete', () => {
     kind: vscode.CompletionItemKind.Property,
   }
   const blockAttributeMap = {
-    label: '@@map([])',
+    label: '@@map([""])',
     kind: vscode.CompletionItemKind.Property,
   }
   const blockAttributeUnique = {
@@ -333,7 +333,7 @@ suite('Should auto-complete', () => {
     kind: vscode.CompletionItemKind.Property,
   }
   const fieldAttributeMap = {
-    label: '@map()',
+    label: '@map("")',
     kind: vscode.CompletionItemKind.Property,
   }
   const fieldAttributeDefault = {
