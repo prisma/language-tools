@@ -18,7 +18,7 @@ jobs:
           git config --global user.email "prismabots@gmail.com"
           git config --global user.name "Prismo"
           git remote add github "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" || true
-      - name: Update version in scripts folder and push to master
+      - name: Update extension version in scripts folder and push to master
         id: update
         run: npm run bump-extension-version-in-scripts dev
       - name: Push to master
@@ -26,8 +26,11 @@ jobs:
           git add -A .
           git commit -m "bump extension version to ${{ steps.update.next-vscode-version }}."
           git push
+      - name: Checkout patch branch if necessary
+        if: 
+        run: 
       - name: Update VSCode extension version
-        run:  npm run   ${{ steps.update.outputs.next-vscode-version }}
+        run:  npm run bump-versions-in-repo dev ${{ steps.update.outputs.next-vscode-version }} ""
       - name: Push to branch
         run: 
       - name: Trigger next workflow for LSP Unit tests

@@ -26,11 +26,13 @@ if [ "${EXISTS_ALREADY}" = "" ]; then
 
     if [ "$ENVIRONMENT" = "PRODUCTION" ]; then
         NPM_LATEST=$(cat scripts/versions/prisma_latest)
-        git checkout -b "$BRANCH" "$NPM_LATEST"       
+        git checkout -b "$BRANCH" "$NPM_LATEST"
+        echo "Checked branch out to $BRANCH."       
     else
         echo "Not setting up repo because ENVIRONMENT is not set"
     fi
 else 
     git checkout "$BRANCH"
     echo "Branch $BRANCH exists already."
+    echo "Checked branch out to $BRANCH."
 fi

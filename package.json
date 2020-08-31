@@ -43,7 +43,8 @@
     "bump-prisma-version-in-scripts": "sh scripts/versions/bump_prisma_version.sh",
     "bump-extension-version-in-scripts": "node scripts/versions/bump_extension_version.js",
     "setup:branch": "node scripts/versions/setup_branch.js",
-    "change-readme": "sh scripts/change-readme.js"
+    "change-readme": "sh scripts/change-readme.js",
+    "bump-versions-in-repo": "sh scripts/update-versions.sh"
   },
   "husky": {
     "hooks": {
@@ -60,8 +61,5 @@
     "packages/**/*.{js,ts}": [
       "eslint --fix"
     ]
-  },
-  "prisma": {
-    "version": "4207c64a590fe98ef0e456b5f49e99ea4f7f0ce0"
   }
 }
