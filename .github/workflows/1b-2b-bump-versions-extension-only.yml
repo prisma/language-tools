@@ -2,7 +2,7 @@ name: Bump versions for extension only
 
 on:
     push:
-      branches: 
+      branches: # TODO patch-branch!
         - 'master'
 
 
@@ -11,7 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v2
-      # TODO if on patch branch, checkout to master to push script files there
+      - name: Install Dependencies
+        run: npm install
       - name: Setup Git
         run: |
           git config --global user.email "prismabots@gmail.com"
@@ -19,7 +20,7 @@ jobs:
           git remote add github "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" || true
       - name: Update version in scripts folder and push to master
         id: update
-        run: npm run bump-prisma-version-in-scripts dev
+        run: npm run bump-extension-version-in-scripts dev
       - name: Push to master
         run: |
           git add -A .

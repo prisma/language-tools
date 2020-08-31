@@ -24,18 +24,18 @@ jobs:
         with:
           workflow: Bump versions
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm-channel": "dev", "version": ${{ steps.check_for_update.outputs.dev-version }} }'
+          inputs: '{ "npm-channel": "dev", "version": "${{ steps.check_for_update.outputs.dev-version }}" }'
       - name: Invoke bump workflow with inputs for latest
         if: ${{ steps.check_for_update.outputs.latest-version }}
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Bump versions
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm-channel": "latest", "version": ${{ steps.check_for_update.outputs.latest-version }} }'
+          inputs: '{ "npm-channel": "latest", "version": "${{ steps.check_for_update.outputs.latest-version }}" }'
       - name: Invoke bump workflow with inputs for patch-dev
         if: ${{ steps.check_for_update.outputs.patch-dev-version }}
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Bump versions
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm-channel": "patch-dev", "version": ${{ steps.check_for_update.outputs.patch-dev-version }} }'
+          inputs: '{ "npm-channel": "patch-dev", "version": "${{ steps.check_for_update.outputs.patch-dev-version }}" }'
