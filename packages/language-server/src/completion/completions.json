@@ -51,6 +51,10 @@
     {
       "label": "url",
       "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database, [learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema)."
+    },
+    {
+      "label": "previewFeatures",
+      "documentation": "Enables preview feature flags."
     }
   ],
   "generatorFields": [
@@ -231,6 +235,12 @@
       "documentation": "Case insensitive scalar filters for supported DBs. Only postgres has any implementation at the moment, as SQLite doesn't reliably support insensitive filtering and MySQL is insensitive by default."
     },
     {
+      "label": "atomicNumberOperations",
+      "documentation": "Atomic updates for numeric operations. Check the [related issue](https://github.com/prisma/prisma-client-js/issues/775)."
+    }
+  ],
+  "datasourcePreviewFeatures": [
+    {
       "label": "nativeTypes",
       "documentation": "Allows to define custom types that should be used for a given field."
     }
@@ -271,7 +281,7 @@
       "documentation": "Specifies a single provider."
     }
   ],
-  "generatorPreviewFeaturesArguments": [
+  "previewFeaturesArguments": [
     {
       "label": "[]",
       "documentation": "Enables preview feature flags."
