@@ -4,15 +4,22 @@ on:
     push:
       branches: # TODO patch-branch!
         - 'master'
-
+        - '**.x'
 
 jobs:
   bump:
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v2
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
       - name: Install Dependencies
         run: npm install
+      - name: checkout master if necessary
+        if: endsWith(github.ref, '/master') == false
+        run: git checkout master
       - name: Setup Git
         run: |
           git config --global user.email "prismabots@gmail.com"
@@ -26,6 +33,8 @@ jobs:
           git add -A .
           git commit -m "bump extension version in scripts to ${{ steps.update.next-vscode-version }}."
           git push
+      - name: Checkout previous branch
+        run: git checkout {{ steps.extract_branch.outputs.branch }}
       - name: Update VSCode extension version
         run:  npm run bump-versions-in-repo dev ${{ steps.update.outputs.next-vscode-version }} ""
       - name: Push to branch
