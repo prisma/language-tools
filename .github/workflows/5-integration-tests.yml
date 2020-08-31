@@ -6,6 +6,9 @@ on:
       npm-channel:
         description: 'Prisma CLI NPM Channel'
         required: true
+      vscode-version:
+        description: 'VSCode version'
+        required: true
 
 jobs:
   tests:
@@ -32,4 +35,4 @@ jobs:
         with:
           workflow: Build extension
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm-channel": "dev" }'
+          inputs: '{ "npm-channel": "dev", "vscode-version": "${{ github.event.inputs.vscode-version }}" }'

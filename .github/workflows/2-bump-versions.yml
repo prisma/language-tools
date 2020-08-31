@@ -50,4 +50,4 @@ jobs:
         with:
           workflow: Unit tests for LSP and bump LSP version
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm-channel": "dev" }'
+          inputs: '{ "npm-channel": "dev" , "extension-version": "${{ steps.update.next-vscode-version }}"}'

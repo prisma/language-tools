@@ -1,10 +1,13 @@
-name: ç
+name: Build extension
 
 on:
   workflow_dispatch:
     inputs:
       npm-channel:
         description: 'Prisma CLI NPM Channel'
+        required: true
+      vscode-version:
+        description: 'VSCode version'
         required: true
 
 jobs:
@@ -21,15 +24,17 @@ jobs:
         run: npm run change-readme  ${{ github.event.inputs.npm-channel }}
       - name: Build vsix 
         run: npm run deploy ${{ secrets.PAT }}
+      - name: Get tag and asset name
+        id: names
+        run: npm run get-tag-name ${{ github.event.inputs.npm-channel }} ${{ github.event.inputs.vscode-version }} # TODO create this!
       - name: create a release
-        if: github.ref == 'refs/heads/master'
         id: create_release
         uses: actions/create-release@v1
         env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: # TODO
-          release_name: #TODO 
+          tag_name: ${{ steps.names.outputs.tag-name }}
+          release_name: ${{ steps.names.outputs.tag-name }}
       - name: Upload Release Asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
@@ -37,13 +42,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: # TODO ${{github.workspace}}/ prisma.3.4.0.vsix
-          asset_name: # TODO prisma.3.4.0.vsix
-          asset_content_type: application/zip
-      - name: undo readme back to plain github readme
-        if: on master branch
-        run: 
-      - name: push changes
+          asset_path: ${{github.workspace}}/Prisma.${{ steps.names.outputs.asset-name }}-${{ github.event.inputs.vscode-version }}.vsix
+          asset_name: Prisma.${{ steps.names.outputs.asset-name }}-${{ github.event.inputs.vscode-version }}.vsix
+          asset_content_type: application/zip     
       - name: Trigger next workflow to publish extension
         uses: benc-uk/workflow-dispatch@v1
         with:

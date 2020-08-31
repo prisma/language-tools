@@ -9,6 +9,9 @@ on:
       lsp-version:
         description: 'LSP version'
         required: true
+      vscode-version:
+        description: 'VSCode version'
+        required: true
 
 jobs:
   bump:
@@ -17,12 +20,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Bump LSP version in extension
-        run: 
+        run: |
+            jq ".dependencies[\"@prisma/language-server\"] = \"${{ github.event.inputs.lsp-version }}" \
+            ./packages/vscode/package.json >./packages/vscode/package.json.bk
+            mv ./packages/vscode/package.json.bk ./packages/vscode/package.json
       - name: Commit and push to branch 
-        run: 
+        run: |
+          git add -A .
+          git commit -m "bump LSP version to ${{ github.event.inputs.lsp-version }} in VSCode extension."
+          git push
       - name: Trigger next workflow for VSCode e2e tests
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Integration tests
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm-channel": "dev" }'
+          inputs: '{ "npm-channel": "dev", "vscode-version": "${{ github.event.inputs.vscode-version }}" }'

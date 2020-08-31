@@ -6,6 +6,9 @@ on:
       npm-channel:
         description: 'Prisma CLI NPM Channel'
         required: true
+      vscode-version:
+        description: 'VSCode version'
+        required: true
 
 jobs:
   tests:
@@ -72,4 +75,4 @@ jobs:
         with:
           workflow: Bump LSP in VSCode extension
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm-channel": "dev", "lsp-version": "steps.lsp-version.outputs.version" }'
+          inputs: '{ "npm-channel": "dev", "lsp-version": "steps.lsp-version.outputs.version", "vscode-version": "${{ github.event.inputs.vscode-version }}" }'
