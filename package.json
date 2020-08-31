@@ -45,7 +45,8 @@
     "setup:branch": "node scripts/versions/setup_branch.js",
     "change-readme": "sh scripts/change-readme.js",
     "bump-versions-in-repo": "sh scripts/update-versions.sh",
-    "get-next-lsp-version": "node scripts/next-lsp-version.js"
+    "get-next-lsp-version": "node scripts/next-lsp-version.js",
+    "get-tag-name": "sh scripts/get-tag-name.sh"
   },
   "husky": {
     "hooks": {

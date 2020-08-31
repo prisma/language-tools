@@ -26,7 +26,7 @@ jobs:
         run: npm run deploy ${{ secrets.PAT }}
       - name: Get tag and asset name
         id: names
-        run: npm run get-tag-name ${{ github.event.inputs.npm-channel }} ${{ github.event.inputs.vscode-version }} # TODO create this!
+        run: npm run get-tag-name ${{ github.event.inputs.npm-channel }} ${{ github.event.inputs.vscode-version }}
       - name: create a release
         id: create_release
         uses: actions/create-release@v1
