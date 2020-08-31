@@ -6,6 +6,9 @@ on:
       npm-channel:
         description: 'Prisma CLI NPM Channel'
         required: true
+      lsp-version:
+        description: 'LSP version'
+        required: true
 
 jobs:
   bump:

@@ -33,7 +33,7 @@ jobs:
       - name: Push to master
         run: |
           git add -A .
-          git commit -m "bump Prisma CLI ${{ github.event.inputs.npm-channel }} version to ${{ github.event.inputs.version }} and extension version to ${{ steps.update.next-vscode-version }}."
+          git commit -m "bump Prisma CLI ${{ github.event.inputs.npm-channel }} version to ${{ github.event.inputs.version }} and extension version to ${{ steps.update.next-vscode-version }} in scripts."
           git push
       - name: Switch branch 
         if: ${{ github.event.inputs.npm-channel }} != "dev"
@@ -41,7 +41,10 @@ jobs:
       - name: Update Prisma CLI version and VSCode extension version
         run:  npm run bump-versions-in-repo ${{ github.event.inputs.npm-channel }} ${{ steps.update.outputs.next-vscode-version }} ${{ github.event.inputs.version }} 
       - name: Push to branch
-        run: # TODO
+        run: |
+          git add -A .
+          git commit -m "bump extension version to ${{ steps.update.next-vscode-version }} in package.json"
+          git push
       - name: Trigger next workflow for LSP Unit tests
         uses: benc-uk/workflow-dispatch@v1
         with:

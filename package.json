@@ -44,7 +44,8 @@
     "bump-extension-version-in-scripts": "node scripts/versions/bump_extension_version.js",
     "setup:branch": "node scripts/versions/setup_branch.js",
     "change-readme": "sh scripts/change-readme.js",
-    "bump-versions-in-repo": "sh scripts/update-versions.sh"
+    "bump-versions-in-repo": "sh scripts/update-versions.sh",
+    "get-next-lsp-version": "node scripts/next-lsp-version.js"
   },
   "husky": {
     "hooks": {

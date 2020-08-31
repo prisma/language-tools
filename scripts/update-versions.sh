@@ -40,4 +40,3 @@ if [ "$NEW_PRISMA_VERSION" != "" ]; then
 fi
 
 npm install
-npx -q -p @prisma/cli@"dev" prisma --version | grep "Query Engine" | awk '{print $5}'

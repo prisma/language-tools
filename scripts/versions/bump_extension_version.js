@@ -36,7 +36,7 @@ function stripPreReleaseText(version) {
   return version.replace('-dev', '')
 }
 
-function nextExtensionVersion({
+function nextVersion({
   currentVersion,
   branch_channel,
 }) {
@@ -101,28 +101,37 @@ function readFile({
 
 function bumpExtensionVersionInScriptFiles({
   nextVersion = '',
-  branch_channel = ''
+  branch_channel = '',
+  extensionBump = true
 }) {
+  let insiderName = "extension_insider"
+  let stableName = "extension_stable"
+  let patchName = "extension_patch"
+  if (!extensionBump) {
+    insiderName = "lsp-dev"
+    stableName = "lsp-latest"
+    patchName = "lsp-patch-dev"
+  }
   switch (branch_channel) {
     case 'master':
     case 'dev':
-      writeToFile({fileName: "extension_insider", content: nextVersion})
+      writeToFile({fileName: insiderName, content: nextVersion})
       break
     case 'latest':
-      writeToFile({fileName: "extension_stable", content: nextVersion})
+      writeToFile({fileName: stableName, content: nextVersion})
       break
     case 'patch-dev':
-      writeToFile({fileName: "extension_patch", content: nextVersion})
+      writeToFile({fileName: patchName, content: nextVersion})
       break
     default:
       if (branch_channel.endsWith('.x')) {
-        writeToFile({fileName: "extension_patch",  content: nextVersion})
+        writeToFile({fileName: patchName,  content: nextVersion})
       }
   }
 }
 
 
-module.exports = { currentExtensionVersion, nextExtensionVersion, bumpExtensionVersionInScriptFiles }
+module.exports = { isMinorRelease, currentExtensionVersion, nextVersion, bumpExtensionVersionInScriptFiles }
 
 if (require.main === module) {
   const args = process.argv.slice(2)
@@ -130,7 +139,7 @@ if (require.main === module) {
     branch_channel: args[0]
   })
   console.log(`Current version: ${currentVersion}`)
-  const version = nextExtensionVersion({
+  const version = nextVersion({
     currentVersion,
     branch_channel: args[0],
   })
