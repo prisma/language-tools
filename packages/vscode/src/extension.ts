@@ -26,9 +26,9 @@ import {
   applySnippetWorkspaceEdit,
   isSnippetEdit,
   isDebugOrTestSession,
-  enablePrismaNodeModulesFolderWatch,
   checkForMinimalColorTheme,
 } from './util'
+import * as fs from 'fs'
 const packageJson = require('../../package.json')  // eslint-disable-line @typescript-eslint/no-var-requires
 
 
@@ -62,7 +62,6 @@ function createLanguageServer(
 
 export async function activate(context: ExtensionContext): Promise<void> {
   const isDebugOrTest = isDebugOrTestSession()
-  const isTest = isDebugOrTest && !isDebugMode()
 
   if (isDebugMode()) {
     // use LSP from folder for debugging
@@ -98,18 +97,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
     },
   }
 
-  // enable fileWatcher to watch .prisma folder inside node_modules
-  if (!isTest) {
-    await enablePrismaNodeModulesFolderWatch()
-  }
-
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
     // Register the server for prisma documents
     documentSelector: [{ scheme: 'file', language: 'prisma' }],
-    synchronize: {
-      fileEvents: workspace.createFileSystemWatcher('**/.prisma/client/*.d.ts'),
-    },
     middleware: {
       async provideCodeActions(
         document: TextDocument,
@@ -168,10 +159,6 @@ export async function activate(context: ExtensionContext): Promise<void> {
   const disposable = client.start()
 
   client.onReady().then(() => {
-    client.onNotification('prisma/didChangeWatchedFiles', () => {
-      console.log('Restarting TS Language Server..')
-      commands.executeCommand('typescript.restartTsServer')
-    })
     if (!isDebugOrTest) {
       client.onNotification('prisma/telemetry', (payload: TelemetryPayload) => {
         // eslint-disable-next-line no-console
@@ -219,7 +206,20 @@ export async function activate(context: ExtensionContext): Promise<void> {
   }
 
   checkForMinimalColorTheme()
+  workspace.createFileSystemWatcher('**/.prisma/client/*.d.ts')
 }
+
+
+
+let folders = workspace.workspaceFolders
+if (folders && folders[0]) {
+  window.showInformationMessage(folders[0].toString())
+  fs.watchFile(path.join(folders[0].toString(), "node_modules/.prisma/client/index.d.ts"), (_curr, _prev) => {
+    window.showInformationMessage(`File has changed. Restarting TS Server.`)
+    commands.executeCommand('typescript.restartTsServer')
+  })
+}
+
 
 export async function deactivate(): Promise<void> {
   if (!client) {
