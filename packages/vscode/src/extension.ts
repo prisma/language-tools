@@ -28,9 +28,10 @@ import {
   isDebugOrTestSession,
   checkForMinimalColorTheme,
 } from './util'
+import { check } from 'checkpoint-client'
+import { getProjectHash } from './hashes'
 import * as chokidar from 'chokidar'
 const packageJson = require('../../package.json')  // eslint-disable-line @typescript-eslint/no-var-requires
-
 
 let client: LanguageClient
 let telemetry: Telemetry
@@ -205,9 +206,15 @@ export async function activate(context: ExtensionContext): Promise<void> {
       applySnippetWorkspaceEdit(),
     ),
   )
+  
   if (!isDebugOrTest) {
     telemetry.sendEvent('activated', {
       signature: await telemetry.getSignature(),
+    })
+    await check({
+      product: extensionId,
+      version: extensionVersion,
+      project_hash: await getProjectHash()
     })
   }
 
