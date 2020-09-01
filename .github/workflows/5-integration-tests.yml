@@ -35,4 +35,4 @@ jobs:
         with:
           workflow: Build extension
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm-channel": "dev", "vscode-version": "${{ github.event.inputs.vscode-version }}" }'
+          inputs: '{ "npm-channel": "${{ github.event.inputs.npm-channel }}", "vscode-version": "${{ github.event.inputs.vscode-version }}" }'

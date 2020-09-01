@@ -50,4 +50,4 @@ jobs:
         with:
           workflow: Publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm-channel": "dev", "asset-name": "Prisma.${{ steps.names.outputs.asset-name }}-${{ github.event.inputs.vscode-version }}.vsix", "tag-name": "${{ steps.names.outputs.tag-name }}" }'
+          inputs: '{ "npm-channel": "${{ github.event.inputs.npm-channel }}", "asset-name": "Prisma.${{ steps.names.outputs.asset-name }}-${{ github.event.inputs.vscode-version }}.vsix", "tag-name": "${{ steps.names.outputs.tag-name }}" }'
