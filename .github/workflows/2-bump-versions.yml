@@ -26,7 +26,7 @@ jobs:
           git config --global user.name "Prismo"
           git remote add github "https://$GITHUB_ACTOR:$GH_TOKEN@github.com/$GITHUB_REPOSITORY.git" || true
       - name: Update versions in scripts folder 
-        run: npm run bump-prisma-version-in-scripts ${{ github.event.inputs.npm-channel }}
+        run: npm run bump-prisma-version-in-scripts ${{ github.event.inputs.npm-channel }} ${{ github.event.inputs.version }}
       - name: Update next extension version in scripts folder
         id: update
         run: npm run bump-extension-version-in-scripts ${{ github.event.inputs.npm-channel }}
