@@ -91,6 +91,10 @@ suite('Quick Fix', () => {
 
   // DATASOURCE BLOCK
 
+  const fieldPreviewFeatures = {
+    label: 'previewFeatures',
+    kind: CompletionItemKind.Field,
+  }
   const fieldProvider = {
     label: 'provider',
     kind: CompletionItemKind.Field,
@@ -119,7 +123,7 @@ suite('Quick Fix', () => {
       { line: 1, character: 0 },
       {
         isIncomplete: false,
-        items: [fieldProvider, fieldUrl],
+        items: [fieldProvider, fieldUrl, fieldPreviewFeatures],
       },
     )
   })
@@ -130,7 +134,7 @@ suite('Quick Fix', () => {
       { line: 2, character: 0 },
       {
         isIncomplete: false,
-        items: [fieldUrl],
+        items: [fieldUrl, fieldPreviewFeatures],
       },
     )
     await assertCompletion(
@@ -138,7 +142,7 @@ suite('Quick Fix', () => {
       { line: 2, character: 0 },
       {
         isIncomplete: false,
-        items: [fieldProvider],
+        items: [fieldProvider, fieldPreviewFeatures],
       },
     )
   })
@@ -215,10 +219,6 @@ suite('Quick Fix', () => {
     label: 'binaryTargets',
     kind: CompletionItemKind.Field,
   }
-  const fieldPreviewFeatures = {
-    label: 'previewFeatures',
-    kind: CompletionItemKind.Field,
-  }
 
   const generatorWithExistingFieldsUri =
     'completions/generatorWithExistingFields.prisma'
@@ -265,7 +265,7 @@ suite('Quick Fix', () => {
     kind: CompletionItemKind.Property,
   }
   const blockAttributeMap = {
-    label: '@@map([])',
+    label: '@@map([""])',
     kind: CompletionItemKind.Property,
   }
   const blockAttributeUnique = {
@@ -359,7 +359,7 @@ suite('Quick Fix', () => {
     kind: CompletionItemKind.Property,
   }
   const fieldAttributeMap = {
-    label: '@map()',
+    label: '@map("")',
     kind: CompletionItemKind.Property,
   }
   const fieldAttributeDefault = {

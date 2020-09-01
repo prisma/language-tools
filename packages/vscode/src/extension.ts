@@ -25,11 +25,12 @@ import path from 'path'
 import {
   applySnippetWorkspaceEdit,
   isSnippetEdit,
-  tryRequire,
   isDebugOrTestSession,
   enablePrismaNodeModulesFolderWatch,
+  checkForMinimalColorTheme,
 } from './util'
 import { check } from 'checkpoint-client'
+const packageJson = require('../../package.json')  // eslint-disable-line @typescript-eslint/no-var-requires
 
 let client: LanguageClient
 let telemetry: Telemetry
@@ -58,6 +59,7 @@ function createLanguageServer(
   )
 }
 
+
 export async function activate(context: ExtensionContext): Promise<void> {
   const isDebugOrTest = isDebugOrTestSession()
   const isTest = isDebugOrTest && !isDebugMode()
@@ -72,12 +74,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
     serverModule = require.resolve('@prisma/language-server/dist/src/cli')
   }
 
-  const pj = tryRequire(path.join(__dirname, '../../package.json'))
-  if (!pj) {
-    return
-  }
-  const extensionId = 'prisma.' + pj.name
-  const extensionVersion = pj.version
+  const extensionId = 'prisma.' + packageJson.name
+  const extensionVersion = packageJson.version
   if (!isDebugOrTest) {
     telemetry = new Telemetry(extensionId, extensionVersion)
   }
@@ -224,6 +222,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
       version: extensionVersion
     })
   }
+
+  checkForMinimalColorTheme()
 }
 
 export async function deactivate(): Promise<void> {
