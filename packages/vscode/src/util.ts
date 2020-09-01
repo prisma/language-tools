@@ -6,69 +6,31 @@ import {
   TextEditorEdit,
   env,
   workspace,
-  WorkspaceConfiguration,
 } from 'vscode'
 import { CodeAction, TextDocumentIdentifier } from 'vscode-languageclient'
+import { denyListDarkColorThemes, denyListLightColorThemes } from './denyListColorThemes';
 
 export function isDebugOrTestSession(): boolean {
   return env.sessionId === 'someValue.sessionId'
 }
 
-function removeElementFromVSCodeConfig(config: { [key: string]: string }, itemKey: string) {
-  return Object.keys(config)
-    .filter(sKey => sKey != itemKey)
-    .reduce((obj: any, key: string) => {
-      obj[key] = config[key];
-      return obj;
-    }, {});
+function showToastToSwitchColorTheme(currentTheme: string, suggestedTheme: string) {
+  window.showWarningMessage(`The VSCode Color Theme '${currentTheme}' you are using unfortunately does not fully support syntax highlighting. We suggest you switch to '${suggestedTheme}' which does fully support it and will give you a better experience.`)
 }
 
-export async function enablePrismaNodeModulesFolderWatch(): Promise<void> {
-  const config: WorkspaceConfiguration = workspace.getConfiguration(undefined, null)
-  let value = config.get<{ [key: string]: string }>('files.watcherExclude', {})
-  const newKey = '**/node_modules/{[^.],?[^p],??[^r],???[^i],????[^s],?????[^m]}*'
-
-  if (typeof value === 'string') {
-    value = JSON.parse(value)
-  }
-
-  const nodeModulesKeys = Object.keys(value).filter(key => key.includes('node_modules') && key !== newKey)
-
-  if (nodeModulesKeys.length !== 0) {
-    // Copy boolean value
-    value[newKey] =
-      value[nodeModulesKeys[0]]
-
-    if (nodeModulesKeys.length === 1) {
-      // Delete original exclude
-      // workaround from https://github.com/fabiospampinato/vscode-terminals/issues/32#issuecomment-621599992
-      value = removeElementFromVSCodeConfig(value, nodeModulesKeys[0])
-    } else {
-      // found multiple keys with node_modules
-      console.log("Found multiple keys including 'node_modules' inside 'files.watcherExclude' VSCode setting.")
-      nodeModulesKeys.forEach(key => {
-        value = removeElementFromVSCodeConfig(value, key)
-      })
-    }
-    try {
-      await config.update('files.watcherExclude', value)
-      console.log('Successfully updated setting files.watcherExclude')
-    } catch (err) {
-      console.error('Updating user setting files.watcherExclude failed')
-      console.error(err)
-    }
-  } else {
-    console.log('Not updating user setting.')
-  }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function tryRequire(path: string): any {
-  try {
-    return require(path)
-  } catch (err) {
-    console.error(err)
+export function checkForMinimalColorTheme() {
+  const colorTheme = workspace.getConfiguration('workbench').get("colorTheme")
+  if (!colorTheme) {
     return
+  }
+
+  console.log(colorTheme)
+
+  if (denyListDarkColorThemes.includes(colorTheme as string)) {
+    showToastToSwitchColorTheme(colorTheme as string, 'Dark+ (Visual Studio)')
+  }
+  if (denyListLightColorThemes.includes(colorTheme as string)) {
+    showToastToSwitchColorTheme(colorTheme as string, 'Light+ (Visual Studio)')
   }
 }
 

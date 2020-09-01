@@ -32,6 +32,7 @@ import {
   isInsideAttribute,
   getSymbolBeforePosition,
   suggestEqualSymbol,
+  getSuggestionForNativeTypes,
 } from './completion/completions'
 import { quickFix } from './codeActionProvider'
 import lint from './lint'
@@ -429,10 +430,10 @@ export function handleHoverRequest(
  *
  * This handler provides the initial list of the completion items.
  */
-export function handleCompletionRequest(
+export async function handleCompletionRequest(
   params: CompletionParams,
   document: TextDocument,
-): CompletionList | undefined {
+): Promise<CompletionList | undefined> {
   const context = params.context
   const position = params.position
   if (!context) {
@@ -441,6 +442,7 @@ export function handleCompletionRequest(
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
   const currentLineUntrimmed = getCurrentLine(document, position.line)
+  const binPath = await util.getBinPath()
 
   const currentLineTillPosition = currentLineUntrimmed
     .slice(0, position.character - 1)
@@ -489,6 +491,9 @@ export function handleCompletionRequest(
           foundBlock,
           getCurrentLine(document, position.line),
           lines,
+          wordsBeforePosition,
+          document,
+          binPath
         )
       case '"':
         return getSuggestionForSupportedFields(
@@ -496,6 +501,14 @@ export function handleCompletionRequest(
           lines[position.line],
           currentLineUntrimmed,
           position,
+        )
+      case '.':
+        return getSuggestionForNativeTypes(
+          foundBlock,
+          wordsBeforePosition,
+          document,
+          binPath,
+          lines
         )
     }
   }
@@ -527,6 +540,9 @@ export function handleCompletionRequest(
         foundBlock,
         lines[position.line],
         lines,
+        wordsBeforePosition,
+        document,
+        binPath
       )
     case 'datasource':
     case 'generator':
@@ -568,8 +584,18 @@ export function handleRenameRequest(
     return
   }
 
-  const isModelRename: boolean = isModelName(params.position, currentBlock)
-  const isEnumRename: boolean = isEnumName(params.position, currentBlock)
+  const isModelRename: boolean = isModelName(
+    params.position,
+    currentBlock,
+    lines,
+    document,
+  )
+  const isEnumRename: boolean = isEnumName(
+    params.position,
+    currentBlock,
+    lines,
+    document,
+  )
   const isEnumValueRename: boolean = isEnumValue(
     currentLine,
     params.position,
@@ -596,20 +622,51 @@ export function handleRenameRequest(
       isModelRename || isEnumRename,
       isEnumValueRename,
       isValidFieldRename,
+      document,
+      params.position,
     )
+
+    let lineNumberOfDefinition = position.line
+    let blockOfDefinition = currentBlock
+    let lineOfDefinition = currentLine
+    if (isModelRename || isEnumRename) {
+      // get definition of model or enum
+      lineNumberOfDefinition = lines.findIndex(
+        (l) =>
+          (l.startsWith('model') || l.startsWith('enum')) &&
+          l.includes(currentName),
+      )
+      if (lineNumberOfDefinition === -1) {
+        return
+      }
+      lineOfDefinition = lines[lineNumberOfDefinition]
+      const definitionBlockAtPosition = getBlockAtPosition(
+        lineNumberOfDefinition,
+        lines,
+      )
+      if (!definitionBlockAtPosition) {
+        return
+      }
+      blockOfDefinition = definitionBlockAtPosition
+    }
 
     // rename marked string
     edits.push(
-      insertBasicRename(params.newName, currentName, document, position.line),
+      insertBasicRename(
+        params.newName,
+        currentName,
+        document,
+        lineNumberOfDefinition,
+      ),
     )
 
     // check if map exists already
     if (
       !isRelationFieldRename &&
       !mapExistsAlready(
-        currentLine,
+        lineOfDefinition,
         lines,
-        currentBlock,
+        blockOfDefinition,
         isModelRename || isEnumRename,
       )
     ) {
@@ -618,7 +675,7 @@ export function handleRenameRequest(
         insertMapAttribute(
           currentName,
           position,
-          currentBlock,
+          blockOfDefinition,
           isModelRename || isEnumRename,
         ),
       )
@@ -641,7 +698,7 @@ export function handleRenameRequest(
           params.newName,
           document,
           lines,
-          currentBlock.name,
+          blockOfDefinition.name,
         ),
       )
     } else if (isValidFieldRename) {
@@ -651,7 +708,7 @@ export function handleRenameRequest(
           params.newName,
           document,
           lines,
-          currentBlock,
+          blockOfDefinition,
           isRelationFieldRename,
         ),
       )

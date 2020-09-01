@@ -29,12 +29,12 @@ async function testCompletion(
     expectedCompletionList.items.length,
   )
   assert.deepStrictEqual(
-    actualCompletions.items.map((items) => items.label),
-    expectedCompletionList.items.map((items) => items.label),
+    actualCompletions.items.map((items) => items.label).sort(),
+    expectedCompletionList.items.map((items) => items.label).sort(),
   )
   assert.deepStrictEqual(
-    actualCompletions.items.map((item) => item.kind),
-    expectedCompletionList.items.map((item) => item.kind),
+    actualCompletions.items.map((item) => item.kind).sort(),
+    expectedCompletionList.items.map((item) => item.kind).sort(),
   )
 }
 
@@ -84,6 +84,10 @@ suite('Should auto-complete', () => {
 
   // DATASOURCE BLOCK
 
+  const fieldPreviewFeatures = {
+    label: 'previewFeatures',
+    kind: vscode.CompletionItemKind.Field,
+  }
   const fieldProvider = {
     label: 'provider',
     kind: vscode.CompletionItemKind.Field,
@@ -110,7 +114,11 @@ suite('Should auto-complete', () => {
     await testCompletion(
       emptyBlocksUri,
       new vscode.Position(1, 0),
-      new vscode.CompletionList([fieldProvider, fieldUrl]),
+      new vscode.CompletionList([
+        fieldProvider,
+        fieldUrl,
+        fieldPreviewFeatures,
+      ]),
       false,
     )
   })
@@ -119,13 +127,13 @@ suite('Should auto-complete', () => {
     await testCompletion(
       sqliteDocUri,
       new vscode.Position(2, 0),
-      new vscode.CompletionList([fieldUrl]),
+      new vscode.CompletionList([fieldUrl, fieldPreviewFeatures]),
       false,
     )
     await testCompletion(
       dataSourceWithUri,
       new vscode.Position(2, 0),
-      new vscode.CompletionList([fieldProvider]),
+      new vscode.CompletionList([fieldProvider, fieldPreviewFeatures]),
       false,
     )
   })
@@ -188,10 +196,6 @@ suite('Should auto-complete', () => {
     label: 'binaryTargets',
     kind: vscode.CompletionItemKind.Field,
   }
-  const fieldPreviewFeatures = {
-    label: 'previewFeatures',
-    kind: vscode.CompletionItemKind.Field,
-  }
 
   const generatorWithExistingFieldsUri = getDocUri(
     'completions/generatorWithExistingFields.prisma',
@@ -241,7 +245,7 @@ suite('Should auto-complete', () => {
     kind: vscode.CompletionItemKind.Property,
   }
   const blockAttributeMap = {
-    label: '@@map([])',
+    label: '@@map([""])',
     kind: vscode.CompletionItemKind.Property,
   }
   const blockAttributeUnique = {
@@ -333,7 +337,7 @@ suite('Should auto-complete', () => {
     kind: vscode.CompletionItemKind.Property,
   }
   const fieldAttributeMap = {
-    label: '@map()',
+    label: '@map("")',
     kind: vscode.CompletionItemKind.Property,
   }
   const fieldAttributeDefault = {

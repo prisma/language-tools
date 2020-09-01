@@ -25,14 +25,18 @@ import path from 'path'
 import {
   applySnippetWorkspaceEdit,
   isSnippetEdit,
-  tryRequire,
   isDebugOrTestSession,
-  enablePrismaNodeModulesFolderWatch,
+  checkForMinimalColorTheme,
 } from './util'
+import { check } from 'checkpoint-client'
+import { getProjectHash } from './hashes'
+import * as chokidar from 'chokidar'
+const packageJson = require('../../package.json')  // eslint-disable-line @typescript-eslint/no-var-requires
 
 let client: LanguageClient
 let telemetry: Telemetry
 let serverModule: string
+let watcher: chokidar.FSWatcher
 
 const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
 
@@ -57,9 +61,14 @@ function createLanguageServer(
   )
 }
 
+
 export async function activate(context: ExtensionContext): Promise<void> {
   const isDebugOrTest = isDebugOrTestSession()
-  const isTest = isDebugOrTest && !isDebugMode()
+
+  let rootPath = workspace.rootPath
+  if (rootPath) {
+    watcher = chokidar.watch(path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts'))
+  }
 
   if (isDebugMode()) {
     // use LSP from folder for debugging
@@ -71,12 +80,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
     serverModule = require.resolve('@prisma/language-server/dist/src/cli')
   }
 
-  const pj = tryRequire(path.join(__dirname, '../../package.json'))
-  if (!pj) {
-    return
-  }
-  const extensionId = 'prisma.' + pj.name
-  const extensionVersion = pj.version
+  const extensionId = 'prisma.' + packageJson.name
+  const extensionVersion = packageJson.version
   if (!isDebugOrTest) {
     telemetry = new Telemetry(extensionId, extensionVersion)
   }
@@ -99,18 +104,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
     },
   }
 
-  // enable fileWatcher to watch .prisma folder inside node_modules
-  if (!isTest) {
-    await enablePrismaNodeModulesFolderWatch()
-  }
-
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
     // Register the server for prisma documents
     documentSelector: [{ scheme: 'file', language: 'prisma' }],
-    synchronize: {
-      fileEvents: workspace.createFileSystemWatcher('**/.prisma/client/*.d.ts'),
-    },
     middleware: {
       async provideCodeActions(
         document: TextDocument,
@@ -169,10 +166,6 @@ export async function activate(context: ExtensionContext): Promise<void> {
   const disposable = client.start()
 
   client.onReady().then(() => {
-    client.onNotification('prisma/didChangeWatchedFiles', () => {
-      console.log('Restarting TS Language Server..')
-      commands.executeCommand('typescript.restartTsServer')
-    })
     if (!isDebugOrTest) {
       client.onNotification('prisma/telemetry', (payload: TelemetryPayload) => {
         // eslint-disable-next-line no-console
@@ -213,9 +206,23 @@ export async function activate(context: ExtensionContext): Promise<void> {
       applySnippetWorkspaceEdit(),
     ),
   )
+  
   if (!isDebugOrTest) {
     telemetry.sendEvent('activated', {
       signature: await telemetry.getSignature(),
+    })
+    await check({
+      product: extensionId,
+      version: extensionVersion,
+      project_hash: await getProjectHash()
+    })
+  }
+
+  checkForMinimalColorTheme()
+  if (watcher) {
+    watcher.on('change', path => {
+      window.showInformationMessage(`File ${path} has been changed. Restarting TS Server.`)
+      commands.executeCommand('typescript.restartTsServer')
     })
   }
 }

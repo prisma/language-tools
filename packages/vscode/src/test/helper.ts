@@ -1,5 +1,6 @@
 import vscode from 'vscode'
 import path from 'path'
+const packageJson = require('../../../package.json')
 
 export let doc: vscode.TextDocument
 export let editor: vscode.TextEditor
@@ -11,29 +12,12 @@ export async function sleep(ms: number): Promise<NodeJS.Timeout> {
 }
 
 /**
- * Try requiring
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function tryRequire(path: string): any {
-  try {
-    return require(path)
-  } catch (err) {
-    console.error(err)
-    return
-  }
-}
-
-/**
  * Activates the vscode.prisma extension
  * @todo check readiness of the server instead of timeout
  */
 export async function activate(docUri: vscode.Uri): Promise<void> {
   // The extensionId is `publisher.name` from package.json
-  const pj = tryRequire('../../../package.json')
-  if (!pj) {
-    return
-  }
-  const ext = vscode.extensions.getExtension(pj.publisher + '.' + pj.name)
+  const ext = vscode.extensions.getExtension(packageJson.publisher + '.' + packageJson.name)
   if (!ext) {
     console.error('Failed to get extension.')
     return

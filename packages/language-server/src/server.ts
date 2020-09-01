@@ -23,6 +23,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
 import * as util from './util'
 import install from './install'
+const packageJson = require('../../package.json')  // eslint-disable-line @typescript-eslint/no-var-requires
 
 export interface LSOptions {
   /**
@@ -38,9 +39,9 @@ function getConnection(options?: LSOptions): IConnection {
     connection = process.argv.includes('--stdio')
       ? createConnection(process.stdin, process.stdout)
       : createConnection(
-          new IPCMessageReader(process),
-          new IPCMessageWriter(process),
-        )
+        new IPCMessageReader(process),
+        new IPCMessageWriter(process),
+      )
   }
   return connection
 }
@@ -70,25 +71,23 @@ export function startServer(options?: LSOptions): void {
       try {
         await install(binPathPrismaFmt)
         connection.console.info(
-          'Prisma plugin prisma-fmt installation succeeded.',
+          `Prisma plugin prisma-fmt installation succeeded.`,
         )
       } catch (err) {
-        sendException(await getSignature(), err, 'Cannot install prisma-fmt.')
+        sendException(await getSignature(), err, `Cannot install prisma-fmt.`)
         connection.console.error('Cannot install prisma-fmt: ' + err)
       }
     }
 
     connection.console.info(
-      'Installed version of Prisma binary `prisma-fmt`: ' +
-        (await util.getVersion()),
+      `Installed version of Prisma binary 'prisma-fmt': ${await util.getVersion()}`
     )
 
-    const pj = util.tryRequire('../../package.json')
     connection.console.info(
-      'Extension name ' + pj.name + ' with version ' + pj.version,
+      `Extension name ${packageJson.name} with version ${packageJson.version}`
     )
     const prismaCLIVersion = await util.getCLIVersion()
-    connection.console.info('Prisma CLI version: ' + prismaCLIVersion)
+    connection.console.info(`Prisma CLI version: ${prismaCLIVersion}`)
 
     const result: InitializeResult = {
       capabilities: {
@@ -96,7 +95,7 @@ export function startServer(options?: LSOptions): void {
         documentFormattingProvider: true,
         completionProvider: {
           resolveProvider: true,
-          triggerCharacters: ['@', '"'],
+          triggerCharacters: ['@', '"', '.'],
         },
         hoverProvider: true,
         renameProvider: true,
@@ -124,12 +123,12 @@ export function startServer(options?: LSOptions): void {
     connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
   }
 
-  documents.onDidChangeContent((change: { document: TextDocument }) => {
-    validateTextDocument(change.document)
+  documents.onDidChangeContent(async (change: { document: TextDocument }) => {
+    await validateTextDocument(change.document)
   })
 
-  documents.onDidOpen((open: { document: TextDocument }) => {
-    validateTextDocument(open.document)
+  documents.onDidOpen(async (open: { document: TextDocument }) => {
+    await validateTextDocument(open.document)
   })
 
   function getDocument(uri: string): TextDocument | undefined {
@@ -153,10 +152,10 @@ export function startServer(options?: LSOptions): void {
     }
   })
 
-  connection.onCompletion((params: CompletionParams) => {
+  connection.onCompletion(async (params: CompletionParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      return MessageHandler.handleCompletionRequest(params, doc)
+      return await MessageHandler.handleCompletionRequest(params, doc)
     }
   })
 
@@ -171,10 +170,10 @@ export function startServer(options?: LSOptions): void {
     return MessageHandler.handleCompletionResolveRequest(completionItem)
   })
 
-  connection.onDidChangeWatchedFiles((_change) => {
+  connection.onDidChangeWatchedFiles(() => {
     // Monitored files have changed in VS Code
     connection.console.log(
-      'Types have changed. Sending request to restart TS Language Server.',
+      `Types have changed. Sending request to restart TS Language Server.`,
     )
     // Restart TS Language Server
     connection.sendNotification('prisma/didChangeWatchedFiles', {})
