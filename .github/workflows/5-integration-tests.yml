@@ -30,7 +30,13 @@ jobs:
         uses: GabrielBB/xvfb-action@v1.0
         with:
           run: npm run test
-      - name: Trigger next workflow to build extension
+  trigger:
+    name: Trigger next workflow
+    needs: [tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Trigger next workflow to build extension 
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Build extension
