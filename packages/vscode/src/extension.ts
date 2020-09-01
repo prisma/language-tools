@@ -30,7 +30,6 @@ import {
   enablePrismaNodeModulesFolderWatch,
 } from './util'
 import { check } from 'checkpoint-client'
-import { getCLIPathHash, getProjectHash } from './hashes'
 
 let client: LanguageClient
 let telemetry: Telemetry
@@ -222,9 +221,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     })
     await check({
       product: extensionId,
-      cli_path_hash: getCLIPathHash(),
-      project_hash: await getProjectHash(),
-      version: ''
+      version: extensionVersion
     })
   }
 }
