@@ -30,6 +30,7 @@ import {
   checkForMinimalColorTheme,
 } from './util'
 import { check } from 'checkpoint-client'
+import { getProjectHash } from './hashes'
 const packageJson = require('../../package.json')  // eslint-disable-line @typescript-eslint/no-var-requires
 
 let client: LanguageClient
@@ -219,7 +220,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
     })
     await check({
       product: extensionId,
-      version: extensionVersion
+      version: extensionVersion,
+      project_hash: await getProjectHash()
     })
   }
 
