@@ -28,13 +28,14 @@ import {
   isDebugOrTestSession,
   checkForMinimalColorTheme,
 } from './util'
-import * as fs from 'fs'
+import * as chokidar from 'chokidar'
 const packageJson = require('../../package.json')  // eslint-disable-line @typescript-eslint/no-var-requires
 
 
 let client: LanguageClient
 let telemetry: Telemetry
 let serverModule: string
+let watcher: chokidar.FSWatcher
 
 const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
 
@@ -62,6 +63,11 @@ function createLanguageServer(
 
 export async function activate(context: ExtensionContext): Promise<void> {
   const isDebugOrTest = isDebugOrTestSession()
+
+  let rootPath = workspace.rootPath
+  if (rootPath) {
+    watcher = chokidar.watch(path.join(rootPath, 'node_modules/.prisma/client/index.d.ts'))
+  }
 
   if (isDebugMode()) {
     // use LSP from folder for debugging
@@ -206,20 +212,11 @@ export async function activate(context: ExtensionContext): Promise<void> {
   }
 
   checkForMinimalColorTheme()
-  workspace.createFileSystemWatcher('**/.prisma/client/*.d.ts')
-}
-
-
-
-let folders = workspace.workspaceFolders
-if (folders && folders[0]) {
-  window.showInformationMessage(folders[0].toString())
-  fs.watchFile(path.join(folders[0].toString(), "node_modules/.prisma/client/index.d.ts"), (_curr, _prev) => {
-    window.showInformationMessage(`File has changed. Restarting TS Server.`)
+  watcher.on('change', path => {
+    window.showInformationMessage(`File ${path} has been changed. Restarting TS Server.`)
     commands.executeCommand('typescript.restartTsServer')
   })
 }
-
 
 export async function deactivate(): Promise<void> {
   if (!client) {
