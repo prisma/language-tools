@@ -88,13 +88,13 @@ function writeToFile({
   fileName = '',
   content
 }) {
-  fs.writeFileSync(path.join(__dirname, `./${fileName}`), content)
+  fs.writeFileSync(path.join(__dirname, 'versions', `./${fileName}`), content)
 }
 
 function readFile({
   fileName = ''
 }) {
-  return fs.readFileSync(path.join(__dirname, `./${fileName}`), {
+  return fs.readFileSync(path.join(__dirname, 'versions', `./${fileName}`), {
     encoding: 'utf-8'
   })
 }
