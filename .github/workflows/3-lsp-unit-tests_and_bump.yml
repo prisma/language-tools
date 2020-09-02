@@ -42,12 +42,11 @@ jobs:
         if: endsWith(github.ref, '/master') == false
         run: git checkout master
       - name: Update scripts version file
-        id: lsp-version
-        run: npm run get-next-lsp-version ${{ github.event.inputs.npm-channel }}
+        run: npm run bump-lsp-version-in-scripts ${{ github.event.inputs.npm-channel }} ${{ github.event.inputs.extension-version }}
       - name: Commit and push to master branch 
         run: |
           git add -A .
-          git commit -m "bump LSP version to ${{ steps.lsp-version.outputs.version }}  in scripts."
+          git commit -m "bump LSP version to ${{ github.event.inputs.extension-version }}  in scripts."
           git push
       - name: Checkout previous branch
         if: endsWith(github.ref, '/master') == false
@@ -59,7 +58,7 @@ jobs:
       - name: Push to branch
         run: |
           git add -A .
-          git commit -m "bump LSP version to ${{ steps.lsp-version.outputs.version }} in package.json."
+          git commit -m "bump LSP version to ${{ github.event.inputs.extension-version }} in package.json."
           git push
        - name: Publish LSP to npm
         # Setup .npmrc file to publish to npm
@@ -75,4 +74,4 @@ jobs:
         with:
           workflow: Bump LSP in VSCode extension
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm-channel": "${{ github.event.inputs.npm-channel }}", "lsp-version": "steps.lsp-version.outputs.version", "extension-version": "${{ github.event.inputs.extension-version }}" }'
+          inputs: '{ "npm-channel": "${{ github.event.inputs.npm-channel }}", "extension-version": "${{ github.event.inputs.extension-version }}" }'
