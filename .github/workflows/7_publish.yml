@@ -3,13 +3,10 @@ name: Publish
 on:
   workflow_dispatch:
     inputs:
-      npm-channel:
-        description: 'Prisma CLI NPM Channel'
-        required: true
       asset-name:
         description: 'Name of the .vsix file in the release'
         required: true
-      tag-name: 
+      tag_name: 
         description: 'The release version to fetch from.'
         required: true
       
@@ -27,7 +24,7 @@ jobs:
       - uses: dsaltares/fetch-gh-release-asset@master
         with:
           repo: "prisma/language-tools"
-          version: "tags/${{ github.event.inputs.tag-name }}"
+          version: "tags/${{ github.event.inputs.tag_name }}"
           file: ${{ github.event.inputs.asset-name }}
           token: ${{ secrets.GH_TOKEN }}
       - name: publish vsix to marketplace
@@ -42,7 +39,7 @@ jobs:
       - uses: dsaltares/fetch-gh-release-asset@master
         with:
           repo: "prisma/language-tools"
-          version: "tags/${{ github.event.inputs.tag-name }}"
+          version: "tags/${{ github.event.inputs.tag_name }}"
           file: ${{ github.event.inputs.asset-name }}
           token: ${{ secrets.GH_TOKEN }}
       - name: Publish vsix to open-vsx.org

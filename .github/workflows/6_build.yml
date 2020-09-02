@@ -3,7 +3,7 @@ name: Build extension
 on:
   workflow_dispatch:
     inputs:
-      npm-channel:
+      npm_channel:
         description: 'Prisma CLI NPM Channel'
         required: true
       extension-version:
@@ -21,12 +21,12 @@ jobs:
       - name: Compile
         run: npm run compile
       - name: Replace Readme
-        run: npm run change_readme  ${{ github.event.inputs.npm-channel }}
+        run: npm run change_readme  ${{ github.event.inputs.npm_channel }}
       - name: Build vsix 
         run: npm run deploy ${{ secrets.PAT }}
       - name: Get tag and asset name
         id: names
-        run: npm run get_tag_name ${{ github.event.inputs.npm-channel }} ${{ github.event.inputs.extension-version }}
+        run: npm run get_tag_name ${{ github.event.inputs.npm_channel }} ${{ github.event.inputs.extension-version }}
       - name: create a release
         id: create_release
         uses: actions/create-release@v1
@@ -50,4 +50,4 @@ jobs:
         with:
           workflow: Publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm-channel": "${{ github.event.inputs.npm-channel }}", "asset-name": "Prisma.${{ steps.names.outputs.asset-name }}-${{ github.event.inputs.extension-version }}.vsix", "tag-name": "${{ steps.names.outputs.tag-name }}" }'
+          inputs: '{ "asset-name": "Prisma.${{ steps.names.outputs.asset-name }}-${{ github.event.inputs.extension-version }}.vsix", "tag-name": "${{ steps.names.outputs.tag-name }}" }'
