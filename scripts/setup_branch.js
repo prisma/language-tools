@@ -28,7 +28,7 @@ function getBranchName({
 }
 
 
-module.exports = { getBranchName, checkoutBranch}
+module.exports = { getBranchName }
 
 if (require.main === module) {
   const args = process.argv.slice(2)
