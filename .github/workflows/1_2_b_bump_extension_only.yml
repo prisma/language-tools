@@ -38,7 +38,7 @@ jobs:
       - name: Push to master
         run: |
           git add -A .
-          git commit -m "bump extension version in scripts to ${{ steps.update.next_extension_version }}."
+          git commit -m "bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}."
           git push
       - name: Checkout previous branch
         if: ${{ github.event_name }} != workflow_dispatch
@@ -55,7 +55,7 @@ jobs:
       - name: Push to branch
         run: |
           git add -A .
-          git commit -m "bump extension version in package.json to ${{ steps.update.next_extension_version }}."
+          git commit -m "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}."
           git push
       - name: Trigger next workflow for LSP Unit tests
         if: ${{ github.event_name }} != workflow_dispatch
@@ -63,11 +63,11 @@ jobs:
         with:
           workflow: Unit tests for LSP and bump LSP version
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.next_extension_version }}" }'
+          inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}" }'
       - name: Trigger next workflow for LSP Unit tests
         if: ${{ github.event_name }} == workflow_dispatch
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Unit tests for LSP and bump LSP version
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "latest", "extension_version": "${{ steps.update.next_extension_version }}" }'
+          inputs: '{ "npm_channel": "latest", "extension_version": "${{ steps.update.outputs.next_extension_version }}" }'
