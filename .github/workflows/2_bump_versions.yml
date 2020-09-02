@@ -32,21 +32,21 @@ jobs:
       - name: Push to master
         run: |
           git add -A .
-          git commit -m "bump Prisma CLI ${{ github.event.inputs.npm_channel }} version to ${{ github.event.inputs.version }} and extension version to ${{ steps.update.next-extension-version }} in scripts."
+          git commit -m "bump Prisma CLI ${{ github.event.inputs.npm_channel }} version to ${{ github.event.inputs.version }} and extension version to ${{ steps.update.next_extension_version }} in scripts."
           git push
       - name: Switch branch 
         if: ${{ github.event.inputs.npm_channel }} != "dev"
         run: npm run setup:branch ${{ github.event.inputs.npm_channel }}
       - name: Update Prisma CLI version and VSCode extension version
-        run:  npm run bump_versions_in_repo ${{ github.event.inputs.npm_channel }} ${{ steps.update.outputs.next-extension-version }} ${{ github.event.inputs.version }} 
+        run:  npm run bump_versions_in_repo ${{ github.event.inputs.npm_channel }} ${{ steps.update.outputs.next_extension_version }} ${{ github.event.inputs.version }} 
       - name: Push to branch
         run: |
           git add -A .
-          git commit -m "bump extension version to ${{ steps.update.next-extension-version }} in package.json"
+          git commit -m "bump extension version to ${{ steps.update.next_extension_version }} in package.json"
           git push
       - name: Trigger next workflow for LSP Unit tests
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Unit tests for LSP and bump LSP version
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}" , "extension-version": "${{ steps.update.next-extension-version }}"}'
+          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}" , "extension-version": "${{ steps.update.next_extension_version }}"}'
