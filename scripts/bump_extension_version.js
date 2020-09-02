@@ -102,16 +102,10 @@ function readFile({
 function bumpExtensionVersionInScriptFiles({
   nextVersion = '',
   branch_channel = '',
-  extensionBump = true
 }) {
   let insiderName = "extension_insider"
   let stableName = "extension_stable"
   let patchName = "extension_patch"
-  if (!extensionBump) {
-    insiderName = "lsp-dev"
-    stableName = "lsp-latest"
-    patchName = "lsp-patch-dev"
-  }
   switch (branch_channel) {
     case 'master':
     case 'dev':

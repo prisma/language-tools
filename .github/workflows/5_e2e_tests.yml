@@ -3,10 +3,10 @@ name: Integration tests
 on:
   workflow_dispatch:
     inputs:
-      npm-channel:
+      npm_channel:
         description: 'Prisma CLI NPM Channel'
         required: true
-      extension-version:
+      extension_version:
         description: 'VSCode version'
         required: true
 
@@ -20,13 +20,10 @@ jobs:
     steps: 
       - uses: actions/checkout@v2
       - name: Install Dependencies
-        if: ${{ needs.setup.outputs.patch-version }}
         run: npm install
       - name: Compile
-        if: ${{ needs.setup.outputs.patch-version }}
         run: npm run compile
       - name: Headless e2e tests
-        if: ${{ needs.setup.outputs.patch-version }}
         uses: GabrielBB/xvfb-action@v1.0
         with:
           run: npm run test
@@ -41,4 +38,4 @@ jobs:
         with:
           workflow: Build extension
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm-channel": "${{ github.event.inputs.npm-channel }}", "extension-version": "${{ github.event.inputs.extension-version }}" }'
+          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}" }'
