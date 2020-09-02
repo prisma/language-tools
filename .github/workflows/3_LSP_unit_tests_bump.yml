@@ -1,0 +1,77 @@
+name: Unit tests for LSP and bump LSP version
+
+on:
+  workflow_dispatch:
+    inputs:
+      npm-channel:
+        description: 'Prisma CLI NPM Channel'
+        required: true
+      extension-version:
+        description: 'VSCode version'
+        required: true
+
+jobs:
+  tests:
+    name: Run unit tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps: 
+      - uses: actions/checkout@v2
+      - name: Install Dependencies in LSP
+        run: cd packages/language-server && npm install
+      - name: Compile LSP
+        run: cd packages/language-server && npm run build
+      - name: LSP unit tests
+        run: cd packages/language-server && npm test
+
+  bump:
+    name: Bump LSP version
+    needs: [tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract-branch
+      - name: Install Dependencies
+        run: npm install
+      - name: checkout master if necessary
+        if: endsWith(github.ref, '/master') == false
+        run: git checkout master
+      - name: Update scripts version file
+        run: npm run bump_lsp_version_in_scripts ${{ github.event.inputs.npm-channel }} ${{ github.event.inputs.extension-version }}
+      - name: Commit and push to master branch 
+        run: |
+          git add -A .
+          git commit -m "bump LSP version to ${{ github.event.inputs.extension-version }}  in scripts."
+          git push
+      - name: Checkout previous branch
+        if: endsWith(github.ref, '/master') == false
+        run: git checkout {{ steps.extract-branch.outputs.branch }}
+      - name: Install Dependencies in LSP
+        run: cd packages/language-server && npm install
+      - name: Compile LSP
+        run: cd packages/language-server && npm run build
+      - name: Push to branch
+        run: |
+          git add -A .
+          git commit -m "bump LSP version to ${{ github.event.inputs.extension-version }} in package.json."
+          git push
+       - name: Publish LSP to npm
+        # Setup .npmrc file to publish to npm
+        uses: actions/setup-node@v1
+        with: 
+          node-version: '12.x'
+          registry-url: 'https://registry.npmjs.org'
+      - run: cd packages/language-server && npm publish --tag ${{ github.event.inputs.npm-channel }} --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN}}
+      - name: Trigger next workflow for bumping LSP in extension
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Bump LSP in VSCode extension
+          token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "npm-channel": "${{ github.event.inputs.npm-channel }}", "extension-version": "${{ github.event.inputs.extension-version }}" }'

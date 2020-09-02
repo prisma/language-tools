@@ -1,0 +1,53 @@
+name: Build extension
+
+on:
+  workflow_dispatch:
+    inputs:
+      npm-channel:
+        description: 'Prisma CLI NPM Channel'
+        required: true
+      extension-version:
+        description: 'VSCode version'
+        required: true
+
+jobs:
+  tests:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: npm install
+      - name: Compile
+        run: npm run compile
+      - name: Replace Readme
+        run: npm run change_readme  ${{ github.event.inputs.npm-channel }}
+      - name: Build vsix 
+        run: npm run deploy ${{ secrets.PAT }}
+      - name: Get tag and asset name
+        id: names
+        run: npm run get_tag_name ${{ github.event.inputs.npm-channel }} ${{ github.event.inputs.extension-version }}
+      - name: create a release
+        id: create_release
+        uses: actions/create-release@v1
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.names.outputs.tag-name }}
+          release_name: ${{ steps.names.outputs.tag-name }}
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{github.workspace}}/Prisma.${{ steps.names.outputs.asset-name }}-${{ github.event.inputs.extension-version }}.vsix
+          asset_name: Prisma.${{ steps.names.outputs.asset-name }}-${{ github.event.inputs.extension-version }}.vsix
+          asset_content_type: application/zip     
+      - name: Trigger next workflow to publish extension
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Publish
+          token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "npm-channel": "${{ github.event.inputs.npm-channel }}", "asset-name": "Prisma.${{ steps.names.outputs.asset-name }}-${{ github.event.inputs.extension-version }}.vsix", "tag-name": "${{ steps.names.outputs.tag-name }}" }'

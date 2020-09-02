@@ -1,0 +1,41 @@
+name: Check for Prisma CLI Update
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+
+env:  
+  PRISMA_TELEMETRY_INFORMATION: "language-tools check-for-update.yml"
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+jobs:
+  check:
+    name: Check for Prisma CLI update
+    runs-on: ubuntu-latest
+    if: endsWith(github.ref, '/master')
+    steps:
+      - uses: actions/checkout@v2
+      - name: Check for Prisma CLI update
+        id: check_update
+        run: npm run check_for_update
+      - name: Invoke bump workflow with inputs for dev
+        if: ${{ steps.check_update.outputs.dev_version }}
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Bump versions
+          token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "npm_channel": "dev", "version": "${{ steps.check_update.outputs.dev_version }}" }'
+      - name: Invoke bump workflow with inputs for latest
+        if: ${{ steps.check_update.outputs.latest_version }}
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Bump versions
+          token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "npm_channel": "latest", "version": "${{ steps.check_update.outputs.latest_version }}" }'
+      - name: Invoke bump workflow with inputs for patch-dev
+        if: ${{ steps.check_update.outputs.patch_dev_version }}
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Bump versions
+          token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "npm_channel": "patch-dev", "version": "${{ steps.check_update.outputs.patch_dev_version }}" }'
