@@ -16,7 +16,6 @@ env:
 
 jobs:
   marketplace:
-    needs: [pre]
     name: Publish to marketplace
     runs-on: ubuntu-latest
     steps: 
@@ -31,7 +30,6 @@ jobs:
         run: vsce publish --pat ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN}} --packagePath ${{github.workspace}}/${{ github.event.inputs.asset_name }}
 
   open-vsx:
-    needs: [pre]
     name: Publish to open-vsx
     runs-on: ubuntu-latest
     steps: 
