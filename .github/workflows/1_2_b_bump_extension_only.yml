@@ -2,8 +2,11 @@ name: Bump versions for extension only
 
 on:
     push:
-      branches: # TODO patch-branch!
+      branches: 
         - 'master'
+        - '**.x'
+    workflow_dispatch: # promote patch to stable
+      branches:
         - '**.x'
 
 jobs:
@@ -25,26 +28,47 @@ jobs:
           git config --global user.email "prismabots@gmail.com"
           git config --global user.name "Prismo"
           git remote add github "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" || true
-      - name: Update extension version in scripts folder and push to master
+      - name: Update extension version in scripts folder and push to master for dev
+        if: ${{ github.event_name }} != workflow_dispatch
         id: update
         run: npm run bump_extension_version_in_scripts dev
+      - name: Update extension version in scripts folder and push to master for stable patch
+        if: ${{ github.event_name }} == workflow_dispatch
+        id: update
+        run: npm run bump_extension_version_in_scripts latest
       - name: Push to master
         run: |
           git add -A .
           git commit -m "bump extension version in scripts to ${{ steps.update.next-extension-version }}."
           git push
       - name: Checkout previous branch
+        if: ${{ github.event_name }} != workflow_dispatch
         run: git checkout {{ steps.extract-branch.outputs.branch }}
+      - name: Get latest patch tag to promote it to stable
+        if: ${{ github.event_name }} == workflow_dispatch
+        id: patch_tag
+        run: npm run get_current_patch_tag
+      - name: Checkout previous branch
+        if: ${{ github.event_name }} == workflow_dispatch
+        run: git checkout latest ${{ steps.patch_tag.outputs.tag }}
       - name: Update VSCode extension version
         run:  npm run bump_versions_in_repo dev ${{ steps.update.outputs.next-extension-version }} ""
       - name: Push to branch
         run: |
-         git add -A .
+          git add -A .
           git commit -m "bump extension version in package.json to ${{ steps.update.next-extension-version }}."
           git push
       - name: Trigger next workflow for LSP Unit tests
+        if: ${{ github.event_name }} != workflow_dispatch
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Unit tests for LSP and bump LSP version
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm-channel": "dev", "extension-version": "${{ steps.update.next-extension-version }}" }'
+      - name: Trigger next workflow for LSP Unit tests
+        if: ${{ github.event_name }} == workflow_dispatch
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Unit tests for LSP and bump LSP version
+          token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "npm-channel": "latest", "extension-version": "${{ steps.update.next-extension-version }}" }'

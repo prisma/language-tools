@@ -42,11 +42,12 @@
     "check_for_update": "sh scripts/check_for_update.sh",
     "bump_prisma_version_in_scripts": "sh scripts/bump_prisma_version.sh",
     "bump_extension_version_in_scripts": "node scripts/bump_extension_version.js",
-    "setup:branch": "node scripts/setup_branch.js",
+    "setup:branch": "sh scripts/setup_branch.sh",
     "change_readme": "sh scripts/change_readme.js",
     "bump_versions_in_repo": "sh scripts/update_versions.sh",
     "bump_lsp_version_in_scripts": "node scripts/bump_lsp_version.js",
-    "get_tag_name": "sh scripts/get_tag_name.sh"
+    "get_tag_name": "sh scripts/get_tag_name.sh",
+    "get_current_patch_tag": "sh scripts/get_current_patch_tag.sh"
   },
   "husky": {
     "hooks": {
