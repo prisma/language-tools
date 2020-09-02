@@ -27,7 +27,6 @@ jobs:
         run: |
           git config --global user.email "prismabots@gmail.com"
           git config --global user.name "Prismo"
-          git remote add github "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" || true
       - name: Update extension version in scripts folder and push to master for dev
         if: ${{ github.event_name }} != workflow_dispatch
         id: update
