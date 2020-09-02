@@ -6,7 +6,7 @@ on:
       npm-channel:
         description: 'Prisma CLI NPM Channel'
         required: true
-      vscode-version:
+      extension-version:
         description: 'VSCode version'
         required: true
 
@@ -26,7 +26,7 @@ jobs:
         run: npm run deploy ${{ secrets.PAT }}
       - name: Get tag and asset name
         id: names
-        run: npm run get-tag-name ${{ github.event.inputs.npm-channel }} ${{ github.event.inputs.vscode-version }}
+        run: npm run get-tag-name ${{ github.event.inputs.npm-channel }} ${{ github.event.inputs.extension-version }}
       - name: create a release
         id: create_release
         uses: actions/create-release@v1
@@ -42,12 +42,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{github.workspace}}/Prisma.${{ steps.names.outputs.asset-name }}-${{ github.event.inputs.vscode-version }}.vsix
-          asset_name: Prisma.${{ steps.names.outputs.asset-name }}-${{ github.event.inputs.vscode-version }}.vsix
+          asset_path: ${{github.workspace}}/Prisma.${{ steps.names.outputs.asset-name }}-${{ github.event.inputs.extension-version }}.vsix
+          asset_name: Prisma.${{ steps.names.outputs.asset-name }}-${{ github.event.inputs.extension-version }}.vsix
           asset_content_type: application/zip     
       - name: Trigger next workflow to publish extension
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm-channel": "${{ github.event.inputs.npm-channel }}", "asset-name": "Prisma.${{ steps.names.outputs.asset-name }}-${{ github.event.inputs.vscode-version }}.vsix", "tag-name": "${{ steps.names.outputs.tag-name }}" }'
+          inputs: '{ "npm-channel": "${{ github.event.inputs.npm-channel }}", "asset-name": "Prisma.${{ steps.names.outputs.asset-name }}-${{ github.event.inputs.extension-version }}.vsix", "tag-name": "${{ steps.names.outputs.tag-name }}" }'

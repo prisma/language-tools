@@ -9,7 +9,7 @@ on:
       lsp-version:
         description: 'LSP version'
         required: true
-      vscode-version:
+      extension-version:
         description: 'VSCode version'
         required: true
 
@@ -34,4 +34,4 @@ jobs:
         with:
           workflow: Integration tests
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm-channel": "${{ github.event.inputs.npm-channel }}", "vscode-version": "${{ github.event.inputs.vscode-version }}" }'
+          inputs: '{ "npm-channel": "${{ github.event.inputs.npm-channel }}", "extension-version": "${{ github.event.inputs.extension-version }}" }'

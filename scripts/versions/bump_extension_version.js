@@ -144,7 +144,7 @@ if (require.main === module) {
     branch_channel: args[0],
   })
   console.log(`Next extension version ${version}.`)
-  console.log(`::set-output name=next-vscode-version::${version}`)
+  console.log(`::set-output name=next-extension-version::${version}`)
   bumpExtensionVersionInScriptFiles({
     nextVersion: version,
     branch_channel: args[0],
