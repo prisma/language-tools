@@ -27,6 +27,7 @@ import {
   isSnippetEdit,
   isDebugOrTestSession,
   checkForMinimalColorTheme,
+  wait,
 } from './util'
 import { check } from 'checkpoint-client'
 import { getProjectHash } from './hashes'
@@ -206,6 +207,20 @@ export async function activate(context: ExtensionContext): Promise<void> {
       applySnippetWorkspaceEdit(),
     ),
   )
+
+  const result = await check({
+    product: extensionId,
+      version: extensionVersion,
+      project_hash: await getProjectHash(),
+      unref: false
+  })
+
+  if (result.status === 'waiting') {
+    const { stdout, stderr } = await wait(result.data)
+    console.log(stdout)
+    console.log(stderr)
+    console.log(JSON.parse(stdout))
+  }
   
   if (!isDebugOrTest) {
     telemetry.sendEvent('activated', {

@@ -9,6 +9,8 @@ import {
 } from 'vscode'
 import { CodeAction, TextDocumentIdentifier } from 'vscode-languageclient'
 import { denyListDarkColorThemes, denyListLightColorThemes } from './denyListColorThemes';
+import { ChildProcess } from 'child_process';
+import concatStream from 'concat-stream'
 
 export function isDebugOrTestSession(): boolean {
   return env.sessionId === 'someValue.sessionId'
@@ -85,5 +87,32 @@ export function applySnippetWorkspaceEdit(): (
       )
       await editor.insertSnippet(new SnippetString(snip.newText), range)
     }
+  }
+}
+
+type ChildOutput = {
+  stdout: string
+  stderr: string
+  code: number | null
+}
+
+// wait for the child to finish
+export async function wait(child: ChildProcess): Promise<ChildOutput> {
+  let stdout = ''
+  let stderr = ''
+  if (child.stdout) {
+    child.stdout.pipe(concatStream((data) => (stdout += data.toString('utf8'))))
+  }
+  if (child.stderr) {
+    child.stderr.pipe(concatStream((data) => (stderr += data.toString('utf8'))))
+  }
+  const code = await new Promise<number | null>((resolve, reject) => {
+    child.once('error', (err) => reject(err))
+    child.once('exit', (code) => resolve(code))
+  })
+  return {
+    stdout: stdout,
+    stderr: stderr,
+    code: code,
   }
 }
