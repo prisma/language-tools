@@ -23,7 +23,7 @@ jobs:
       - name: Replace Readme
         run: npm run change_readme  ${{ github.event.inputs.npm_channel }}
       - name: Build vsix 
-        run: npm run deploy ${{ secrets.PAT }}
+        run: cd packages/vscode && npm run package
       - name: Get tag and asset name
         id: names
         run: npm run get_tag_name ${{ github.event.inputs.npm_channel }} ${{ github.event.inputs.extension_version }}
