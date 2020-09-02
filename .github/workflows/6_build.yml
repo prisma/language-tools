@@ -42,12 +42,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{github.workspace}}/Prisma.${{ steps.names.outputs.asset_name }}-${{ github.event.inputs.extension_version }}.vsix
-          asset_name: Prisma.${{ steps.names.outputs.asset_name }}-${{ github.event.inputs.extension_version }}.vsix
+          asset_path: ${{github.workspace}}/${{ steps.names.outputs.asset_name }}-${{ github.event.inputs.extension_version }}.vsix
+          asset_name: ${{ steps.names.outputs.asset_name }}-${{ github.event.inputs.extension_version }}.vsix
           asset_content_type: application/zip     
       - name: Trigger next workflow to publish extension
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "asset_name": "Prisma.${{ steps.names.outputs.asset_name }}-${{ github.event.inputs.extension_version }}.vsix", "tag_name": "${{ steps.names.outputs.tag_name }}" }'
+          inputs: '{ "asset_name": "${{ steps.names.outputs.asset_name }}-${{ github.event.inputs.extension_version }}.vsix", "tag_name": "${{ steps.names.outputs.tag_name }}" }'
