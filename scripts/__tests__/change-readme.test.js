@@ -1,5 +1,5 @@
 
-const { getNewReadMeContent } = require('./../change-readme.js')
+const { getNewReadMeContent } = require('./../change_readme.js')
 
 describe('changeReadme', () => {
 

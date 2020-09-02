@@ -14,7 +14,7 @@ jobs:
       - name: Extract branch name
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
+        id: extract-branch
       - name: Install Dependencies
         run: npm install
       - name: checkout master if necessary
@@ -27,16 +27,16 @@ jobs:
           git remote add github "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" || true
       - name: Update extension version in scripts folder and push to master
         id: update
-        run: npm run bump-extension-version-in-scripts dev
+        run: npm run bump_extension_version_in_scripts dev
       - name: Push to master
         run: |
           git add -A .
           git commit -m "bump extension version in scripts to ${{ steps.update.next-extension-version }}."
           git push
       - name: Checkout previous branch
-        run: git checkout {{ steps.extract_branch.outputs.branch }}
+        run: git checkout {{ steps.extract-branch.outputs.branch }}
       - name: Update VSCode extension version
-        run:  npm run bump-versions-in-repo dev ${{ steps.update.outputs.next-extension-version }} ""
+        run:  npm run bump_versions_in_repo dev ${{ steps.update.outputs.next-extension-version }} ""
       - name: Push to branch
         run: |
          git add -A .

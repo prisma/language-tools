@@ -39,14 +39,14 @@
     "test": "sh scripts/e2e.sh",
     "testScripts": "jest __tests__",
     "openvsx:publish": "cd packages/vscode && ovsx publish -p",
-    "check-for-update": "sh scripts/versions/check-for-update.sh",
-    "bump-prisma-version-in-scripts": "sh scripts/versions/bump_prisma_version.sh",
-    "bump-extension-version-in-scripts": "node scripts/versions/bump_extension_version.js",
-    "setup:branch": "node scripts/versions/setup_branch.js",
-    "change-readme": "sh scripts/change-readme.js",
-    "bump-versions-in-repo": "sh scripts/update-versions.sh",
-    "bump-lsp-version-in-scripts": "node scripts/bump_lsp_version.js",
-    "get-tag-name": "sh scripts/get-tag-name.sh"
+    "check_for_update": "sh scripts/check_for_update.sh",
+    "bump_prisma_version_in_scripts": "sh scripts/bump_prisma_version.sh",
+    "bump_extension_version_in_scripts": "node scripts/bump_extension_version.js",
+    "setup:branch": "node scripts/setup_branch.js",
+    "change_readme": "sh scripts/change_readme.js",
+    "bump_versions_in_repo": "sh scripts/update_versions.sh",
+    "bump_lsp_version_in_scripts": "node scripts/bump_lsp_version.js",
+    "get_tag_name": "sh scripts/get_tag_name.sh"
   },
   "husky": {
     "hooks": {

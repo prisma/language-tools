@@ -21,12 +21,12 @@ jobs:
       - name: Compile
         run: npm run compile
       - name: Replace Readme
-        run: npm run change-readme  ${{ github.event.inputs.npm-channel }}
+        run: npm run change_readme  ${{ github.event.inputs.npm-channel }}
       - name: Build vsix 
         run: npm run deploy ${{ secrets.PAT }}
       - name: Get tag and asset name
         id: names
-        run: npm run get-tag-name ${{ github.event.inputs.npm-channel }} ${{ github.event.inputs.extension-version }}
+        run: npm run get_tag_name ${{ github.event.inputs.npm-channel }} ${{ github.event.inputs.extension-version }}
       - name: create a release
         id: create_release
         uses: actions/create-release@v1

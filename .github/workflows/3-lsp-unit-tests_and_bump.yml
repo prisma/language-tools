@@ -35,14 +35,14 @@ jobs:
       - name: Extract branch name
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
+        id: extract-branch
       - name: Install Dependencies
         run: npm install
       - name: checkout master if necessary
         if: endsWith(github.ref, '/master') == false
         run: git checkout master
       - name: Update scripts version file
-        run: npm run bump-lsp-version-in-scripts ${{ github.event.inputs.npm-channel }} ${{ github.event.inputs.extension-version }}
+        run: npm run bump_lsp_version_in_scripts ${{ github.event.inputs.npm-channel }} ${{ github.event.inputs.extension-version }}
       - name: Commit and push to master branch 
         run: |
           git add -A .
@@ -50,7 +50,7 @@ jobs:
           git push
       - name: Checkout previous branch
         if: endsWith(github.ref, '/master') == false
-        run: git checkout {{ steps.extract_branch.outputs.branch }}
+        run: git checkout {{ steps.extract-branch.outputs.branch }}
       - name: Install Dependencies in LSP
         run: cd packages/language-server && npm install
       - name: Compile LSP

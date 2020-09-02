@@ -1,4 +1,4 @@
-import { bumpExtensionVersionInScriptFiles } from './versions/bump_extension_version'
+import { bumpExtensionVersionInScriptFiles } from './bump_extension_version'
 
 
 if (require.main === module) {
