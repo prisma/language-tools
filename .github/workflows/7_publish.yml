@@ -29,7 +29,7 @@ jobs:
           file: ${{ github.event.inputs.asset_name }}
           token: ${{ secrets.GH_TOKEN }}
       - name: publish vsix to marketplace
-        run: npm run deploy:marketplace --pat ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN}} --packagePath ${{github.workspace}}/${{ github.event.inputs.asset_name }}
+        run: cd packages/vscode && ./node_modules/.bin/vsce publish --pat ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN}} --packagePath ${{github.workspace}}/${{ github.event.inputs.asset_name }}
 
   open-vsx:
     name: Publish to open-vsx
@@ -45,4 +45,4 @@ jobs:
           file: ${{ github.event.inputs.asset_name }}
           token: ${{ secrets.GH_TOKEN }}
       - name: Publish vsix to open-vsx.org
-        run: npm run deploy:vsx --pat ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN}} --packagePath ${{github.workspace}}/${{ github.event.inputs.asset_name }}
+        run: cd packages/vscode && ./node_modules/.bin/ovsx publish --pat ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN}} --packagePath ${{github.workspace}}/${{ github.event.inputs.asset_name }}

@@ -47,9 +47,7 @@
     "bump_versions_in_repo": "sh scripts/update_versions.sh",
     "bump_lsp_version_in_scripts": "node scripts/bump_lsp_version.js",
     "get_tag_name": "sh scripts/get_tag_name.sh",
-    "get_current_patch_tag": "sh scripts/get_current_patch_tag.sh",
-    "deploy:marketplace": "cd packages/vscode && vsce publish",
-    "deploy:vsx": "cd packages/vscode && ovsx publish"
+    "get_current_patch_tag": "sh scripts/get_current_patch_tag.sh"
   },
   "husky": {
     "hooks": {
