@@ -13,36 +13,42 @@ fi
 
 NPM_CHANNEL=$1
 
-BRANCH=$(node scripts/setup_branch.js "$NPM_CHANNEL")
-echo "BRANCH: $BRANCH"
+if [ "$NPM_CHANNEL" = "dev" ]; then
+    echo "Not switching branch because we are on NPM_CHANNEL dev."
+    echo "::set-output name=branch::dev"
+else
+    BRANCH=$(node scripts/setup_branch.js "$NPM_CHANNEL")
+    echo "BRANCH: $BRANCH"
+    echo "::set-output name=branch::$BRANCH"
 
-git fetch
+    git fetch
 
-EXISTS_ALREADY=$(git ls-remote --heads origin "$BRANCH")
-echo "$EXISTS_ALREADY"
+    EXISTS_ALREADY=$(git ls-remote --heads origin "$BRANCH")
+    echo "$EXISTS_ALREADY"
 
-if [ "${EXISTS_ALREADY}" = "" ]; then
-    echo "Branch $BRANCH does not exist yet."
-    GITHUB_ARGUMENT="--set-upstream origin $BRANCH"
-    echo "::set-output name=new_branch::$GITHUB_ARGUMENT"
+    if [ "${EXISTS_ALREADY}" = "" ]; then
+        echo "Branch $BRANCH does not exist yet."
+        GITHUB_ARGUMENT="--set-upstream origin $BRANCH"
+        echo "::set-output name=new_branch::$GITHUB_ARGUMENT"
 
-    if [ "$ENVIRONMENT" = "PRODUCTION" ]; then
-        git config --global user.email "prismabots@gmail.com"
-        git config --global user.name "Prismo"
+        if [ "$ENVIRONMENT" = "PRODUCTION" ]; then
+            git config --global user.email "prismabots@gmail.com"
+            git config --global user.name "Prismo"
 
-        if [ "$NPM_CHANNEL" = "latest" ]; then
-            git checkout -b "$BRANCH"
+            if [ "$NPM_CHANNEL" = "latest" ]; then
+                git checkout -b "$BRANCH"
+            else
+                # Patch branch
+                NPM_VERSION=$(cat scripts/versions/prisma_latest)
+                echo "NPM_VERSION to base new branch on: $NPM_VERSION"
+                git checkout -b "$BRANCH" "$NPM_VERSION"
+            fi
+
         else
-            # Patch branch
-            NPM_VERSION=$(cat scripts/versions/prisma_latest)
-            echo "NPM_VERSION to base new branch on: $NPM_VERSION"
-            git checkout -b "$BRANCH" "$NPM_VERSION"
+            echo "Not setting up repo because ENVIRONMENT is not set"
         fi
-
-    else
-        echo "Not setting up repo because ENVIRONMENT is not set"
+    else 
+        git checkout "$BRANCH"
+        echo "$BRANCH exists already."
     fi
-else 
-    git checkout "$BRANCH"
-    echo "$BRANCH exists already."
 fi

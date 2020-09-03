@@ -28,9 +28,6 @@ jobs:
       - name: Checkout branch
         run: |
           git checkout ${{ github.event.inputs.branch }}
-      - name: Print current branch
-        run: |
-          echo ${{ github.ref }}
       - name: Install Dependencies in LSP
         run: cd packages/language-server && npm install
       - name: Compile LSP
@@ -47,13 +44,6 @@ jobs:
       - name: Checkout branch
         run: |
           git checkout ${{ github.event.inputs.branch }}
-      - name: Print current branch
-        run: |
-          echo ${{ github.ref }}
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
       - name: Install Dependencies
         run: npm install
       - name: checkout master if necessary
@@ -68,7 +58,7 @@ jobs:
           git push
       - name: Checkout previous branch
         if: endsWith(github.ref, '/master') == false
-        run: git checkout {{ steps.extract_branch.outputs.branch }}
+        run: git checkout ${{ github.event.inputs.branch }}
       - name: Install Dependencies in LSP
         run: cd packages/language-server && npm install
       - name: Compile LSP
@@ -92,4 +82,4 @@ jobs:
         with:
           workflow: Bump LSP in VSCode extension
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{github.ref}}" }'
+          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}" }'

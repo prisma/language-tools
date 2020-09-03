@@ -67,11 +67,11 @@ jobs:
         with:
           workflow: Unit tests for LSP and bump LSP version
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}" }'
+          inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "master" }'
       - name: Trigger next workflow for LSP Unit tests
         if: ${{ github.event_name }} == workflow_dispatch
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Unit tests for LSP and bump LSP version
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "latest", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{github.ref}}" }'
+          inputs: '{ "npm_channel": "latest", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}" }'

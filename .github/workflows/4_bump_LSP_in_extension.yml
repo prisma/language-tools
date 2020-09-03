@@ -22,9 +22,6 @@ jobs:
       - name: Checkout branch
         run: |
           git checkout ${{ github.event.inputs.branch }}
-      - name: Print current branch
-        run: |
-          echo ${{ github.ref }}
       - name: Bump LSP version in extension
         run: |
             jq ".dependencies[\"@prisma/language-server\"] = \"${{ github.event.inputs.extension_version }}" \
@@ -40,4 +37,4 @@ jobs:
         with:
           workflow: Integration tests
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{github.ref}}" }'
+          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}" }'

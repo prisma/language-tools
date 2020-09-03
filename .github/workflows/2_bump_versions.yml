@@ -37,7 +37,6 @@ jobs:
           git push
       - name: Switch branch 
         id: setup_branch
-        if: ${{ github.event.inputs.npm_channel }} != "dev"
         run: npm run setup:branch ${{ github.event.inputs.npm_channel }}
       - name: Update Prisma CLI version and VSCode extension version
         run:  npm run bump_versions_in_repo ${{ github.event.inputs.npm_channel }} ${{ steps.update.outputs.next_extension_version }} ${{ github.event.inputs.version }} 
@@ -51,4 +50,4 @@ jobs:
         with:
           workflow: Unit tests for LSP and bump LSP version
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}" , "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{github.ref}}" }'
+          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}" , "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}" }'
