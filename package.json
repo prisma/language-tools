@@ -35,7 +35,7 @@
     "lint": "eslint  \"packages/**/*.{js,ts}\" --fix",
     "compile": "cd packages/language-server && npm run build && cd ../vscode && npm run build && cd .. && cd ..",
     "watch": "npm run build -- -w",
-    "shell:lint": "shellcheck -x scripts/**/*.sh",
+    "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "sh scripts/e2e.sh",
     "testScripts": "jest __tests__",
     "openvsx:publish": "cd packages/vscode && ovsx publish -p",
