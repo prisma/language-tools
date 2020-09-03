@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 
 function patchBranchName() {
-  const prismaStableVersion = fs.readFileSync(path.join(__dirname, './prisma_latest')).toString()
+  const prismaStableVersion = fs.readFileSync(path.join(__dirname, 'versions', './prisma_latest')).toString()
   const tokens = prismaStableVersion.split('.')
   if (tokens.length !== 3) {
       throw new Error(
