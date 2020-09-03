@@ -32,7 +32,8 @@ module.exports = { getBranchName }
 
 if (require.main === module) {
   const args = process.argv.slice(2)
-  getBranchName({
+  const branchName = getBranchName({
     branch_channel: args[0],
   })
+  console.log(branchName)
 }
