@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v2
-       - name: Turnstyle
+      - name: Turnstyle
         uses: softprops/turnstyle@v1
         # https://github.com/softprops/turnstyle/issues/13
         env:
