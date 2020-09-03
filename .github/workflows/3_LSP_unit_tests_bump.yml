@@ -41,6 +41,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+       - name: Turnstyle
+        uses: softprops/turnstyle@v1
+        # https://github.com/softprops/turnstyle/issues/13
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Checkout branch
         run: |
           git checkout ${{ github.event.inputs.branch }}

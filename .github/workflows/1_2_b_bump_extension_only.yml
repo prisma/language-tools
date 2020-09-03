@@ -17,6 +17,11 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v2
+       - name: Turnstyle
+        uses: softprops/turnstyle@v1
+        # https://github.com/softprops/turnstyle/issues/13
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       - name: Extract branch name
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"

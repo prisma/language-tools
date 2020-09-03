@@ -16,6 +16,11 @@ on:
 jobs:
   bump:
     name: Bump LSP in VSCode extension
+     - name: Turnstyle
+        uses: softprops/turnstyle@v1
+        # https://github.com/softprops/turnstyle/issues/13
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
