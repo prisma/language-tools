@@ -50,7 +50,6 @@ function nextVersion({
 
   switch (branch_channel) {
     case 'master':
-    // extension only update
     case 'dev':
       // Prisma CLI new dev version
       if (prisma_dev_tokens[2] != currentVersionTokens[1]) {
@@ -73,12 +72,19 @@ function nextVersion({
       }
       return semVer.inc(prisma_latest, 'patch')
     case 'patch-dev':
-      // Prisma CLI new patch-dev version
-      // TODO
-      break
+      const derivedVersion = getDerivedExtensionVersion(stripPreReleaseText(prisma_patch))
+      if (prisma_patch_tokens[0] !== currentVersion[0]) {
+        return derivedVersion
+      }
+
+      return semVer.inc(currentVersion, 'patch')
     default:
       if (branch_channel.endsWith('.x')) {
         // extension only new patch update
+        if (prisma_latest_tokens[0] !== currentVersionTokens[0]) {
+          return `${prisma_latest_tokens[0]}.1.1`
+        }
+        return semVer.inc(currentVersion, 'patch')
       }
   }
   throw new Error()
