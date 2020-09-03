@@ -9,6 +9,9 @@ on:
       extension_version:
         description: 'VSCode version'
         required: true
+      branch:
+        description: 'Branch to run run this workflow on'
+        required: true
 
 env:
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
@@ -22,6 +25,12 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps: 
       - uses: actions/checkout@v2
+      - name: Checkout branch
+        run: |
+          git checkout ${{ github.event.inputs.branch }}
+      - name: Print current branch
+        run: |
+          echo ${{ github.ref }}
       - name: Install Dependencies in LSP
         run: cd packages/language-server && npm install
       - name: Compile LSP
@@ -35,6 +44,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Checkout branch
+        run: |
+          git checkout ${{ github.event.inputs.branch }}
+      - name: Print current branch
+        run: |
+          echo ${{ github.ref }}
       - name: Extract branch name
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
@@ -77,4 +92,4 @@ jobs:
         with:
           workflow: Bump LSP in VSCode extension
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}" }'
+          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{github.ref}}" }'

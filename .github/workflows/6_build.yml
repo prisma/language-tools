@@ -9,6 +9,9 @@ on:
       extension_version:
         description: 'VSCode version'
         required: true
+      branch:
+        description: 'Branch to run run this workflow on'
+        required: true
 
 jobs:
   tests:
@@ -16,6 +19,12 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v2
+      - name: Checkout branch
+        run: |
+          git checkout ${{ github.event.inputs.branch }}
+      - name: Print current branch
+        run: |
+          echo ${{ github.ref }}
       - name: Install Dependencies
         run: npm install
       - name: Compile
