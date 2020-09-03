@@ -26,6 +26,7 @@ if [ "${EXISTS_ALREADY}" = "" ]; then
 
     if [ "$ENVIRONMENT" = "PRODUCTION" ]; then
         $NPM_VERSION=$(cat scripts/versions/prisma_latest)
+        echo "NPM_VERSION to base new branch on: $NPM_VERSION"
         git config --global user.email "prismabots@gmail.com"
         git config --global user.name "Prismo"
         git checkout -b "$BRANCH" "$NPM_VERSION"
