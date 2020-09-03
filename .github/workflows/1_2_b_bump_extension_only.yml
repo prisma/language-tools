@@ -50,16 +50,17 @@ jobs:
         if: ${{ github.event_name }} == workflow_dispatch
         id: patch_tag
         run: npm run get_current_patch_tag
-      - name: Checkout previous branch
+      - name: Switch branch 
+        id: setup_branch
         if: ${{ github.event_name }} == workflow_dispatch
-        run: git checkout latest ${{ steps.patch_tag.outputs.tag }}
+        run: npm run setup:branch && git checkout ${{ steps.patch_tag.outputs.tag }}
       - name: Update VSCode extension version
         run:  npm run bump_versions_in_repo dev ${{ steps.update.outputs.next_extension_version }} ""
       - name: Push to branch
         run: |
           git add -A .
           git commit -m "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}."
-          git push
+          git push ${{ steps.setup_branch.outputs.new_branch}}
       - name: Trigger next workflow for LSP Unit tests
         if: ${{ github.event_name }} != workflow_dispatch
         uses: benc-uk/workflow-dispatch@v1
