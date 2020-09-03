@@ -4,14 +4,13 @@
 ![CI tests](https://img.shields.io/github/workflow/status/prisma/vscode/CI%20tests/master.svg?label=CI%20tests&logo=github)
 ![Check for Update + Automated Publish](https://img.shields.io/github/workflow/status/prisma/vscode/Check%20for%20Update%20%2B%20Automated%20Publish/master.svg?label=Check%20for%20Update%20%2B%20Automated%20Publish&logo=github)
 
-
 </div>
 <hr>
 
 ## Insider Build
 
 This is the Insider Build of the [Prisma VSCode extension](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma). Most users should not use this version, but instead install
-the regular version of the extension.This version of the extension may contain unstable prerelease code and is directly built from the master branch. 
+the regular version of the extension.This version of the extension may contain unstable prerelease code and is directly built from the master branch.
 
 **Only use this extension if you are also using the dev version of the CLI.**
 
@@ -20,7 +19,7 @@ Please note that you should not have the regular and insider version of the exte
 ## Build information
 
 This version is built from commit [undefined](undefined).
-This is for Prisma CLI 2.6.0-dev.61.
+This is for Prisma CLI 2.7.0-dev.4.
 
 ## Contributing
 
