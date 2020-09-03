@@ -2,9 +2,9 @@ const fs = require('fs')
 const path = require('path')
 const semVer = require('semver')
 
-function isMinorRelease({
+function isMinorRelease(
   prismaVersion,
-}) {
+) {
   const tokens = prismaVersion.split('.')
   if (tokens.length !== 3) {
     throw new Error(
@@ -67,7 +67,7 @@ function nextVersion({
       return semVer.inc(currentVersion, 'patch')
     case 'latest':
       // Prisma CLI new latest version
-      if (isMinorRelease({ prisma_latest })) {
+      if (isMinorRelease(prisma_latest)) {
         return prisma_latest
       }
       return semVer.inc(prisma_latest, 'patch')
