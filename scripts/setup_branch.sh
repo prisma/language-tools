@@ -15,7 +15,7 @@ NPM_CHANNEL=$1
 
 if [ "$NPM_CHANNEL" = "dev" ]; then
     echo "Not switching branch because we are on NPM_CHANNEL dev."
-    echo "::set-output name=branch::dev"
+    echo "::set-output name=branch::master"
 else
     BRANCH=$(node scripts/setup_branch.js "$NPM_CHANNEL")
     echo "BRANCH: $BRANCH"
