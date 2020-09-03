@@ -102,7 +102,7 @@ function readFile({
 }) {
   return fs.readFileSync(path.join(__dirname, 'versions', `./${fileName}`), {
     encoding: 'utf-8'
-  })
+  }).replace('\n', '')
 }
 
 function bumpExtensionVersionInScriptFiles({
