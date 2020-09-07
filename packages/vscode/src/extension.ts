@@ -67,7 +67,9 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   let rootPath = workspace.rootPath
   if (rootPath) {
-    watcher = chokidar.watch(path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts'))
+    watcher = chokidar.watch(path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts'), {
+      usePolling: false
+    })
   }
 
   if (isDebugMode()) {

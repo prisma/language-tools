@@ -20,6 +20,9 @@
     "@prisma/language-server": "7.0.13",
     "vscode-languageclient": "6.1.3"
   },
+  "optionalDependencies": {
+    "fsevents": "2.1.3"
+  },
   "repository": {
     "type": "github",
     "url": "https://github.com/prisma/vscode"
