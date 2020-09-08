@@ -24,6 +24,8 @@ function getBranchName({
       return 'stable'
     case 'patch-dev':
       return patchBranchName()
+    default:
+      throw new Error("Switching to another branch is only possible if on latest or patch-dev channel.")
   }
 }
 
