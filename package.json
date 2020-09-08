@@ -43,8 +43,7 @@
     "setup:branch": "sh scripts/setup_branch.sh",
     "change_readme": "sh scripts/change_readme.js",
     "bump_versions_in_repo": "sh scripts/update_versions.sh",
-    "get_tag_name": "sh scripts/get_tag_name.sh",
-    "get_current_patch_tag": "sh scripts/get_current_patch_tag.sh"
+    "get_tag_name": "sh scripts/get_tag_name.sh"
   },
   "husky": {
     "hooks": {

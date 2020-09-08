@@ -31,11 +31,11 @@ jobs:
       - name: Update extension version in scripts folder 
         if: ${{ github.event_name }} != workflow_dispatch
         id: update
-        run: node bump_extension_version_in_scripts dev
+        run: node bump_extension_version_in_scripts.js dev
       - name: Update extension version in scripts folder
         if: ${{ github.event_name }} == workflow_dispatch
         id: update
-        run: node bump_extension_version_in_scripts latest
+        run: node bump_extension_version_in_scripts.js latest
       - name: Push to master
         run: |
           git add -A .
@@ -48,7 +48,7 @@ jobs:
       - name: Get latest patch tag to promote it to stable
         if: ${{ github.event_name }} == workflow_dispatch
         id: patch_tag
-        run: npm run get_current_patch_tag
+        run: node get_extension_patch_version.js
       - name: Switch branch 
         id: setup_branch
         if: ${{ github.event_name }} == workflow_dispatch
