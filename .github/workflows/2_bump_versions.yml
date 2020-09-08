@@ -7,7 +7,7 @@ on:
         description: 'Prisma CLI NPM Channel'
         required: true
       version:
-        description: 'New Prisma CLI version'
+        description: 'New Prisma CLI version in that channel'
         required: true
 
 env:
