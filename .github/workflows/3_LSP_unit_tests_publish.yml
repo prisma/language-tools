@@ -47,8 +47,6 @@ jobs:
       - name: checkout master if necessary
         if: endsWith(github.ref, '/master') == false
         run: git checkout master
-      - name: Update scripts version file
-        run: npm run bump_lsp_version_in_scripts ${{ github.event.inputs.npm_channel }} ${{ github.event.inputs.extension_version }}
       - name: Commit and push to master branch 
         run: |
           git add -A .

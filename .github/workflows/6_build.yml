@@ -21,12 +21,16 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.branch }}
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
       - name: Install Dependencies
         run: npm install
       - name: Compile
         run: npm run compile
       - name: Replace Readme
-        run: npm run change_readme  ${{ github.event.inputs.npm_channel }}
+        run: node scripts/change_readme.js ${{ github.event.inputs.npm_channel }}
       - name: Build vsix 
         run: cd packages/vscode && npm run package
       - name: Get tag and asset name

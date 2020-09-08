@@ -39,9 +39,7 @@
     "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "sh scripts/e2e.sh",
     "testScripts": "jest __tests__",
-    "openvsx:publish": "cd packages/vscode && ovsx publish -p",
     "setup:branch": "sh scripts/setup_branch.sh",
-    "change_readme": "sh scripts/change_readme.js",
     "bump_versions_in_repo": "sh scripts/update_versions.sh",
     "get_tag_name": "sh scripts/get_tag_name.sh"
   },
