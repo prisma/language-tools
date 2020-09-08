@@ -85,9 +85,10 @@ function nextVersion({
           return `${prisma_latest_tokens[0]}.1.1`
         }
         return semVer.inc(currentVersion, 'patch')
+      } else {
+        throw new Error("This function needs to be called with a known channel (dev, latest or patch-dev) or the current patch branch name ending with '.x'.")
       }
   }
-  throw new Error()
 }
 
 function writeToFile({
