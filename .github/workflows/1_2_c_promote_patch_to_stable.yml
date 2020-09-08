@@ -1,12 +1,10 @@
 name: Bump versions for extension only
 
 # This workflow covers both '1_check_for_updates' and '2_bump_versions' workflows, therefore it is another variant of the same, but specifically for extension only, without any Prisma CLI updates that would need to be handled.
+# This is used to manually promote the patch branch to stable and release a new stable version.
 
 on:
-    push:
-      branches: 
-        - 'master'
-        - '**.x'
+    workflow_dispatch: 
 
 env:
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
@@ -23,23 +21,26 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: checkout master if necessary
-        if: endsWith(github.ref, '/master') == false
         run: git checkout master
       - name: Setup Git
         run: |
           git config --global user.email "prismabots@gmail.com"
           git config --global user.name "Prismo"
-      - name: Update extension version in scripts folder 
+      - name: Update extension version in scripts folder
         id: update
-        run: node scripts/bump_extension_version_in_scripts.js dev
+        run: node scripts/bump_extension_version_in_scripts.js latest
       - name: Push to master
         run: |
           git add -A .
           git commit -m "bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}."
           git pull --rebase
           git push
-      - name: Checkout previous branch
-        run: git checkout {{ github.ref }}
+      - name: Get latest patch tag to promote it to stable
+        id: patch_tag
+        run: node scripts/get_extension_patch_version.js
+      - name: Switch branch 
+        id: setup_branch
+        run: npm run setup:branch "patch-dev"
       - name: Update VSCode extension version
         run:  node scripts/update_package_json_files.js dev ${{ steps.update.outputs.next_extension_version }} ""
       - name: Install Dependencies
@@ -55,4 +56,4 @@ jobs:
         with:
           workflow: Unit tests for LSP and publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "master" }'
+          inputs: '{ "npm_channel": "latest", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}" }'
