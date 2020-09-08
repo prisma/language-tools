@@ -12,7 +12,6 @@ jobs:
   check:
     name: Check for Prisma CLI update
     runs-on: ubuntu-latest
-    if: endsWith(github.ref, '/master')
     steps:
       - uses: actions/checkout@v2
       - name: Check for Prisma CLI update

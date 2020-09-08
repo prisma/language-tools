@@ -6,8 +6,6 @@ on:
         - 'master'
         - '**.x'
     workflow_dispatch: # promote patch to stable
-      branches:
-        - '**.x'
 
 env:
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
@@ -30,11 +28,11 @@ jobs:
         run: |
           git config --global user.email "prismabots@gmail.com"
           git config --global user.name "Prismo"
-      - name: Update extension version in scripts folder and push to master for dev
+      - name: Update extension version in scripts folder 
         if: ${{ github.event_name }} != workflow_dispatch
         id: update
         run: npm run bump_extension_version_in_scripts dev
-      - name: Update extension version in scripts folder and push to master for stable patch
+      - name: Update extension version in scripts folder
         if: ${{ github.event_name }} == workflow_dispatch
         id: update
         run: npm run bump_extension_version_in_scripts latest
