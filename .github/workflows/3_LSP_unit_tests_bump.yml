@@ -25,9 +25,8 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps: 
       - uses: actions/checkout@v2
-      - name: Checkout branch
-        run: |
-          git checkout ${{ github.event.inputs.branch }}
+        with: 
+          ref: ${{ github.event.inputs.branch }}
       - name: Install Dependencies in LSP
         run: cd packages/language-server && npm install
       - name: Compile LSP
@@ -41,9 +40,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Checkout branch
-        run: |
-          git checkout ${{ github.event.inputs.branch }}
+        with:
+          ref: ${{ github.event.inputs.branch }}
       - name: Install Dependencies
         run: npm install
       - name: checkout master if necessary
