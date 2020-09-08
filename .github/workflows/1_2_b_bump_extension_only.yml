@@ -15,10 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v2
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
       - name: Install Dependencies
         run: npm install
       - name: checkout master if necessary
@@ -44,7 +40,7 @@ jobs:
           git push
       - name: Checkout previous branch
         if: ${{ github.event_name }} != workflow_dispatch
-        run: git checkout {{ steps.extract_branch.outputs.branch }}
+        run: git checkout {{ github.ref }}
       - name: Get latest patch tag to promote it to stable
         if: ${{ github.event_name }} == workflow_dispatch
         id: patch_tag
