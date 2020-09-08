@@ -40,8 +40,6 @@
     "test": "sh scripts/e2e.sh",
     "testScripts": "jest __tests__",
     "openvsx:publish": "cd packages/vscode && ovsx publish -p",
-    "bump_prisma_version_in_scripts": "sh scripts/bump_prisma_version.sh",
-    "bump_extension_version_in_scripts": "node scripts/bump_extension_version.js",
     "setup:branch": "sh scripts/setup_branch.sh",
     "change_readme": "sh scripts/change_readme.js",
     "bump_versions_in_repo": "sh scripts/update_versions.sh",

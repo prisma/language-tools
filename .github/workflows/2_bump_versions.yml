@@ -19,6 +19,10 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
       - name: Install Semver # Needed to use semver in scripts
         run: npm install
       - name: Setup Git
@@ -26,10 +30,10 @@ jobs:
           git config --global user.email "prismabots@gmail.com"
           git config --global user.name "Prismo"
       - name: Update versions in scripts folder 
-        run: npm run bump_prisma_version_in_scripts ${{ github.event.inputs.npm_channel }} ${{ github.event.inputs.version }}
+        run: node bump_prisma_version_in_scripts ${{ github.event.inputs.npm_channel }} ${{ github.event.inputs.version }}
       - name: Update next extension version in scripts folder
         id: update
-        run: npm run bump_extension_version_in_scripts ${{ github.event.inputs.npm_channel }}
+        run: node bump_extension_version_in_scripts ${{ github.event.inputs.npm_channel }}
       - name: Push to master
         run: |
           git add -A .

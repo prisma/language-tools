@@ -15,6 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
       - name: Install Dependencies
         run: npm install
       - name: checkout master if necessary
@@ -27,11 +31,11 @@ jobs:
       - name: Update extension version in scripts folder 
         if: ${{ github.event_name }} != workflow_dispatch
         id: update
-        run: npm run bump_extension_version_in_scripts dev
+        run: node bump_extension_version_in_scripts dev
       - name: Update extension version in scripts folder
         if: ${{ github.event_name }} == workflow_dispatch
         id: update
-        run: npm run bump_extension_version_in_scripts latest
+        run: node bump_extension_version_in_scripts latest
       - name: Push to master
         run: |
           git add -A .
