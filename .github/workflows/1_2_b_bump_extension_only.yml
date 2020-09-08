@@ -48,7 +48,7 @@ jobs:
       - name: Switch branch 
         id: setup_branch
         if: ${{ github.event_name }} == workflow_dispatch
-        run: npm run setup:branch && git checkout ${{ steps.patch_tag.outputs.tag }}
+        run: npm run setup:branch "patch-dev"
       - name: Update VSCode extension version
         run:  npm run bump_versions_in_repo dev ${{ steps.update.outputs.next_extension_version }} ""
       - name: Push to branch
