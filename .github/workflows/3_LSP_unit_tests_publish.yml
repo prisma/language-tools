@@ -1,4 +1,4 @@
-name: Unit tests for LSP and bump LSP version
+name: Unit tests for LSP and publish
 
 on:
   workflow_dispatch:

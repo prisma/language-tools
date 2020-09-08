@@ -50,6 +50,6 @@ jobs:
       - name: Trigger next workflow for LSP Unit tests
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: Unit tests for LSP and bump LSP version
+          workflow: Unit tests for LSP and publish
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}" , "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}" }'
