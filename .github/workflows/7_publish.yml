@@ -7,7 +7,7 @@ on:
         description: 'Name of the .vsix file in the release'
         required: true
       tag_name: 
-        description: 'The release version to fetch from.'
+        description: 'The release version/tag to fetch from.'
         required: true
       
 
