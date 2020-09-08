@@ -39,9 +39,7 @@
     "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "sh scripts/e2e.sh",
     "testScripts": "jest __tests__",
-    "setup:branch": "sh scripts/setup_branch.sh",
-    "bump_versions_in_repo": "sh scripts/update_versions.sh",
-    "get_tag_name": "sh scripts/get_tag_name.sh"
+    "setup:branch": "sh scripts/setup_branch.sh"
   },
   "husky": {
     "hooks": {
