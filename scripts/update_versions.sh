@@ -39,4 +39,9 @@ if [ "$NEW_PRISMA_VERSION" != "" ]; then
     ./packages/language-server/package.json >./packages/language-server/package.json.bk
 fi
 
+jq ".version = \"$NEW_EXTENSION_VERSION\" | \
+    .prisma.version = \"$SHA\"" \
+./package.json > ./package.json.bk
+mv ./package.json.bk ./package.json
+
 npm install
