@@ -1,6 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const semVer = require('semver')
+import { readVersionFile, writeToVersionFile } from './util'
 
 function isMinorRelease(
   prismaVersion,
@@ -20,14 +21,14 @@ function currentExtensionVersion({
   switch (branch_channel) {
     case 'master':
     case 'dev':
-      return readFile({ fileName: "extension_insider" })
+      return readVersionFile({ fileName: "extension_insider" })
     case 'latest':
-      return readFile({ fileName: "extension_stable" })
+      return readVersionFile({ fileName: "extension_stable" })
     case 'patch-dev':
-      return readFile({ fileName: "extension_patch" })
+      return readVersionFile({ fileName: "extension_patch" })
     default:
       if (branch_channel.endsWith('.x')) {
-        return readFile({ fileName: "extension_patch" })
+        return readVersionFile({ fileName: "extension_patch" })
       }
   }
 }
@@ -40,9 +41,9 @@ function nextVersion({
   currentVersion,
   branch_channel,
 }) {
-  const prisma_latest = readFile({ fileName: 'prisma_latest' })
-  const prisma_dev = stripPreReleaseText(readFile({ fileName: 'prisma_dev' }))
-  const prisma_patch = stripPreReleaseText(readFile({ fileName: 'prisma_patch' }))
+  const prisma_latest = readVersionFile({ fileName: 'prisma_latest' })
+  const prisma_dev = stripPreReleaseText(readVersionFile({ fileName: 'prisma_dev' }))
+  const prisma_patch = stripPreReleaseText(readVersionFile({ fileName: 'prisma_patch' }))
 
   const currentVersionTokens = currentVersion.split('.')
   const prisma_dev_tokens = prisma_dev.split('.')
@@ -91,21 +92,6 @@ function nextVersion({
   }
 }
 
-function writeToFile({
-  fileName = '',
-  content
-}) {
-  fs.writeFileSync(path.join(__dirname, 'versions', `./${fileName}`), content)
-}
-
-function readFile({
-  fileName = ''
-}) {
-  return fs.readFileSync(path.join(__dirname, 'versions', `./${fileName}`), {
-    encoding: 'utf-8'
-  }).replace('\n', '')
-}
-
 function bumpExtensionVersionInScriptFiles({
   nextVersion = '',
   branch_channel = '',
@@ -116,17 +102,17 @@ function bumpExtensionVersionInScriptFiles({
   switch (branch_channel) {
     case 'master':
     case 'dev':
-      writeToFile({fileName: insiderName, content: nextVersion})
+      writeToVersionFile({fileName: insiderName, content: nextVersion})
       break
     case 'latest':
-      writeToFile({fileName: stableName, content: nextVersion})
+      writeToVersionFile({fileName: stableName, content: nextVersion})
       break
     case 'patch-dev':
-      writeToFile({fileName: patchName, content: nextVersion})
+      writeToVersionFile({fileName: patchName, content: nextVersion})
       break
     default:
       if (branch_channel.endsWith('.x')) {
-        writeToFile({fileName: patchName,  content: nextVersion})
+        writeToVersionFile({fileName: patchName,  content: nextVersion})
       }
   }
 }

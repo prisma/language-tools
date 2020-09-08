@@ -26,7 +26,8 @@
     "typescript": "3.9.7",
     "vsce": "1.77.0",
     "yarn": "1.22.4",
-    "ovsx": "0.1.0-next.dacd2fd"
+    "ovsx": "0.1.0-next.dacd2fd",
+    "execa": "4.0.3"
   },
   "scripts": {
     "build": "tsc -b",
@@ -39,7 +40,6 @@
     "test": "sh scripts/e2e.sh",
     "testScripts": "jest __tests__",
     "openvsx:publish": "cd packages/vscode && ovsx publish -p",
-    "check_for_update": "sh scripts/check_for_update.sh",
     "bump_prisma_version_in_scripts": "sh scripts/bump_prisma_version.sh",
     "bump_extension_version_in_scripts": "node scripts/bump_extension_version.js",
     "setup:branch": "sh scripts/setup_branch.sh",
