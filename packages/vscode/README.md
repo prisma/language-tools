@@ -10,7 +10,7 @@
 ## Insider Build
 
 This is the Insider Build of the [Prisma VSCode extension](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma). Most users should not use this version, but instead install
-the regular version of the extension.This version of the extension may contain unstable prerelease code and is directly built from the master branch.
+the regular version of the extension. This version of the extension may contain unstable prerelease code and is directly built from the master branch.
 
 **Only use this extension if you are also using the dev version of the CLI.**
 
