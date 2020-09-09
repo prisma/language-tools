@@ -48,9 +48,7 @@ jobs:
         run: cd packages/language-server && npm run build
       - name: Push to branch
         run: |
-          git add -A .
-          git commit -m "bump LSP version to ${{ github.event.inputs.extension_version }} in package.json."
-          git push
+          sh scripts/commit_and_push.sh "bump LSP version to ${{ github.event.inputs.extension_version }} in package.json." "origin/master"
       
        - name: Publish LSP to npm
         # Setup .npmrc file to publish to npm

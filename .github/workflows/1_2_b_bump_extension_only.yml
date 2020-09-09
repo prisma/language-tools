@@ -31,24 +31,20 @@ jobs:
       - name: Update extension version in scripts folder 
         id: update
         run: node scripts/bump_extension_version_in_scripts.js dev
-      - name: Push to master
+      - name: Commit and Push
         run: |
-          git add -A .
-          git commit -m "bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}."
-          git pull --rebase
-          git push
+          sh scripts/commit_and_push.sh "bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}." "origin/master"
+      
       - name: Checkout previous branch
         run: git checkout {{ github.ref }}
       - name: Update VSCode extension version
         run:  node scripts/update_package_json_files.js dev ${{ steps.update.outputs.next_extension_version }} ""
       - name: Install Dependencies
         run: npm run install
-      - name: Push to branch
+      - name: Commit and Push
         run: |
-          git add -A .
-          git commit -m "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}."
-          git pull --rebase
-          git push ${{ steps.setup_branch.outputs.new_branch}}
+          sh scripts/commit_and_push.sh "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}." ${{ steps.setup_branch.outputs.new_branch}}
+      
       - name: Trigger next workflow for LSP Unit tests
         uses: benc-uk/workflow-dispatch@v1
         with:

@@ -28,10 +28,7 @@ jobs:
             mv ./packages/vscode/package.json.bk ./packages/vscode/package.json
       - name: Commit and push to branch 
         run: |
-          git add -A .
-          git commit -m "bump LSP version to ${{ github.event.inputs.extension_version }} in VSCode extension."
-          git pull --rebase
-          git push
+          sh scripts/commit_and_push.sh "bump LSP version to ${{ github.event.inputs.extension_version }} in VSCode extension." "origin/master"
     
       - name: Trigger next workflow for VSCode e2e tests
         uses: benc-uk/workflow-dispatch@v1

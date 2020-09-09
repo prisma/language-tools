@@ -34,12 +34,9 @@ jobs:
       - name: Update next extension version in scripts folder
         id: update # Used to access the calculated next extension version in later steps
         run: node scripts/bump_extension_version_in_scripts.js ${{ github.event.inputs.npm_channel }}
-      - name: Push to master
+      - name: Commit and Push
         run: |
-          git add -A .
-          git commit -m "bump Prisma CLI ${{ github.event.inputs.npm_channel }} version to ${{ github.event.inputs.version }} and extension version to ${{ steps.update.next_extension_version }} in scripts."
-          git pull --rebase
-          git push
+          sh scripts/commit_and_push.sh "bump Prisma CLI ${{ github.event.inputs.npm_channel }} version to ${{ github.event.inputs.version }} and extension version to ${{ steps.update.next_extension_version }} in scripts." "origin/master"
 
       - name: Switch branch 
         id: setup_branch
@@ -51,10 +48,7 @@ jobs:
         run: npm install
       - name: Push to branch
         run: |
-          git add -A .
-          git commit -m "bump extension version to ${{ steps.update.next_extension_version }} in package.json"
-          git pull --rebase
-          git push ${{ steps.setup_branch.outputs.new_branch}}
+          sh scripts/commit_and_push.sh "bump extension version to ${{ steps.update.next_extension_version }} in package.json" ${{ steps.setup_branch.outputs.new_branch}}
 
       - name: Trigger next workflow for LSP Unit tests
         uses: benc-uk/workflow-dispatch@v1

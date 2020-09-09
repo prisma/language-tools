@@ -21,6 +21,7 @@ jobs:
       - name: Check for Prisma CLI update
         id: check_update
         run: node scripts/check_for_update.js
+      
       - name: Invoke bump workflow with inputs for dev
         if: ${{ steps.check_update.outputs.dev_version }}
         uses: benc-uk/workflow-dispatch@v1
@@ -28,6 +29,7 @@ jobs:
           workflow: Bump versions
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "dev", "version": "${{ steps.check_update.outputs.dev_version }}" }'
+      
       - name: Invoke bump workflow with inputs for latest
         if: ${{ steps.check_update.outputs.latest_version }}
         uses: benc-uk/workflow-dispatch@v1
@@ -35,6 +37,7 @@ jobs:
           workflow: Bump versions
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "latest", "version": "${{ steps.check_update.outputs.latest_version }}" }'
+      
       - name: Invoke bump workflow with inputs for patch-dev
         if: ${{ steps.check_update.outputs.patch-dev_version }}
         uses: benc-uk/workflow-dispatch@v1
