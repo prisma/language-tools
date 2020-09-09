@@ -32,7 +32,7 @@ jobs:
           sh scripts/set_git_credentials.sh
       - name: Update extension version in scripts folder 
         id: update
-        run: node scripts/bump_extension_version_in_scripts.js dev
+        run: node scripts/bump_extension_version.js dev
       - name: Commit and Push
         run: |
           sh scripts/commit_and_push.sh "bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}." "origin/master"

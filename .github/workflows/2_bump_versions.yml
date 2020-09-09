@@ -34,7 +34,7 @@ jobs:
           echo "${{ github.event.inputs.version }}" >scripts/versions/prisma_${{ github.event.inputs.npm_channel }}
       - name: Update next extension version in scripts folder
         id: update # Used to access the calculated next extension version in later steps
-        run: node scripts/bump_extension_version_in_scripts.js ${{ github.event.inputs.npm_channel }}
+        run: node scripts/bump_extension_version.js ${{ github.event.inputs.npm_channel }}
       - name: Commit and Push
         run: |
           sh scripts/commit_and_push.sh "bump Prisma CLI ${{ github.event.inputs.npm_channel }} version to ${{ github.event.inputs.version }} and extension version to ${{ steps.update.next_extension_version }} in scripts." "origin/master"
