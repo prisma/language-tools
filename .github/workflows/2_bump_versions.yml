@@ -41,6 +41,7 @@ jobs:
           git commit -m "bump Prisma CLI ${{ github.event.inputs.npm_channel }} version to ${{ github.event.inputs.version }} and extension version to ${{ steps.update.next_extension_version }} in scripts."
           git pull --rebase
           git push
+
       - name: Switch branch 
         id: setup_branch
         run: npm run setup:branch ${{ github.event.inputs.npm_channel }}
