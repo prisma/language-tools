@@ -38,7 +38,7 @@ jobs:
           sh scripts/commit_and_push.sh "bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}." "origin/master"
       
       - name: Checkout previous branch
-        run: git checkout {{ github.ref }}
+        run: git checkout ${{ github.ref }}
       - name: Update VSCode extension version
         run:  | 
           node scripts/update_package_json_files.js dev ${{ steps.update.outputs.next_extension_version }} ""
