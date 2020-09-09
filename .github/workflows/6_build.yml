@@ -36,6 +36,7 @@ jobs:
       - name: Get tag and asset name
         id: names
         run: node scripts/get_tag_name.js ${{ github.event.inputs.npm_channel }} ${{ github.event.inputs.extension_version }}
+      
       - name: create a release
         id: create_release
         uses: actions/create-release@v1
@@ -58,6 +59,7 @@ jobs:
           asset_path: ${{github.workspace}}/${{ steps.names.outputs.asset_name }}-${{ github.event.inputs.extension_version }}.vsix
           asset_name: ${{ steps.get_asset_name.outputs.asset_name }}
           asset_content_type: application/zip
+      
       - name: Trigger next workflow to publish extension
         uses: benc-uk/workflow-dispatch@v1
         with:

@@ -32,6 +32,7 @@ jobs:
         uses: GabrielBB/xvfb-action@v1.0
         with:
           run: npm run test
+  
   trigger:
     name: Trigger next workflow
     needs: [tests]

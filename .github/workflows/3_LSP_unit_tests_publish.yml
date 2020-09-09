@@ -42,11 +42,6 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.branch }}
-      - name: Install Dependencies
-        run: npm install
-      - name: Checkout previous branch
-        if: endsWith(github.ref, '/master') == false
-        run: git checkout ${{ github.event.inputs.branch }}
       - name: Install Dependencies in LSP
         run: cd packages/language-server && npm install
       - name: Compile LSP
@@ -56,6 +51,7 @@ jobs:
           git add -A .
           git commit -m "bump LSP version to ${{ github.event.inputs.extension_version }} in package.json."
           git push
+      
        - name: Publish LSP to npm
         # Setup .npmrc file to publish to npm
         uses: actions/setup-node@v1
@@ -65,6 +61,7 @@ jobs:
       - run: cd packages/language-server && npm publish --tag ${{ github.event.inputs.npm_channel }} --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN}}
+      
       - name: Trigger next workflow for bumping LSP in extension
         uses: benc-uk/workflow-dispatch@v1
         with:

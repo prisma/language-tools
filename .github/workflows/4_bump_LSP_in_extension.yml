@@ -32,6 +32,7 @@ jobs:
           git commit -m "bump LSP version to ${{ github.event.inputs.extension_version }} in VSCode extension."
           git pull --rebase
           git push
+    
       - name: Trigger next workflow for VSCode e2e tests
         uses: benc-uk/workflow-dispatch@v1
         with:
