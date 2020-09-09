@@ -20,7 +20,7 @@ jobs:
           node-version: '12.x'
       - name: Install Dependencies
         run: npm install
-      - name: checkout master if necessary
+      - name: checkout master
         run: git checkout master
       - name: Setup Git
         run: |
