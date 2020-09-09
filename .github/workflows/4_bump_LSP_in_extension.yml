@@ -29,6 +29,9 @@ jobs:
       - name: Bump LSP version in extension
         run: |
           node scripts/update_package_json_files.js ${{ github.event.inputs.extension_version }}
+      - name: Setup Git
+        run: |
+          sh scripts/set_git_credentials.sh
       - name: Commit and push to branch 
         run: |
           sh scripts/commit_and_push.sh "bump LSP version to ${{ github.event.inputs.extension_version }} in VSCode extension." "origin/master"
