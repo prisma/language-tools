@@ -23,9 +23,7 @@ jobs:
           ref: ${{ github.event.inputs.branch }}
       - name: Bump LSP version in extension
         run: |
-            jq ".dependencies[\"@prisma/language-server\"] = \"${{ github.event.inputs.extension_version }}" \
-            ./packages/vscode/package.json >./packages/vscode/package.json.bk
-            mv ./packages/vscode/package.json.bk ./packages/vscode/package.json
+          node scripts/update_package_json_files.js ${{ github.event.inputs.extension_version }}
       - name: Commit and push to branch 
         run: |
           sh scripts/commit_and_push.sh "bump LSP version to ${{ github.event.inputs.extension_version }} in VSCode extension." "origin/master"

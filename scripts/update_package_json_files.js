@@ -12,6 +12,13 @@ function bumpVersionInVSCodeRepo({ version, name, displayName, description, prev
   fs.writeFileSync(vscodePackageJsonPath, content)
 }
 
+function bumpLSPVersionInExtension({version}) {
+  const vscodePackageJsonPath = './packages/vscode/package.json'
+  let content = fs.readFileSync(vscodePackageJsonPath, { encoding: "utf-8" })
+  content['dependencies']['@prisma/language-server'] = version
+  fs.writeFileSync(vscodePackageJsonPath, content)
+}
+
 function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersion = '' }) {
   const languageServerPackageJsonPath = './packages/vscode/package.json'
   const rootPackageJsonPath = './package.json'
@@ -72,7 +79,12 @@ if (require.main === module) {
       channel: args[0],
       newExtensionVersion: args[1]
     })
+  } else if (args.length === 1) {
+    // only bump LSP version in extension
+    bumpLSPVersionInExtension({
+      nextLSPVersion: args[0]
+    })
   } else {
-    throw new Error(`Expected 2 or 3 arguments, but received ${args.length}.`)
+    throw new Error(`Expected 1, 2 or 3 arguments, but received ${args.length}.`)
   }
 }
