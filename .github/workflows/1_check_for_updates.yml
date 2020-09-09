@@ -19,6 +19,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
+      - name: Install Dependencies
+        run: npm install
       - name: Check for Prisma CLI update
         id: check_update
         run: node scripts/check_for_update.js
