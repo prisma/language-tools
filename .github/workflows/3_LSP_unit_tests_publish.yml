@@ -51,7 +51,7 @@ jobs:
       - name: Push to branch
         run: |
           sh scripts/commit_and_push.sh "bump LSP version to ${{ github.event.inputs.extension_version }} in package.json." "origin/master"
-       - name: Publish LSP to npm
+      - name: Publish LSP to npm
         # Setup .npmrc file to publish to npm
         uses: actions/setup-node@v1
         with: 
