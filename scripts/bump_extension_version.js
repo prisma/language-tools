@@ -1,7 +1,5 @@
-const fs = require('fs')
-const path = require('path')
 const semVer = require('semver')
-import { readVersionFile, writeToVersionFile } from './util'
+const { readVersionFile, writeToVersionFile } = require('./util')
 
 function isMinorRelease(
   prismaVersion,
@@ -37,17 +35,31 @@ function stripPreReleaseText(version) {
   return version.replace('-dev', '')
 }
 
+function getDerivedExtensionVersion(version) {
+  const tokens = version.split('.')
+
+  if (tokens.length === 4) {
+    return tokens.slice(1).join('.')
+  }
+  if (tokens.length === 3) {
+    return tokens.join('.')
+  }
+  throw new Error(
+    `Version ${version} must have 3 or 4 tokens separated by "." character`,
+  )
+}
+
 function nextVersion({
   currentVersion,
   branch_channel,
+  prisma_latest,
+  prisma_dev,
+  prisma_patch
 }) {
-  const prisma_latest = readVersionFile({ fileName: 'prisma_latest' })
-  const prisma_dev = stripPreReleaseText(readVersionFile({ fileName: 'prisma_dev' }))
-  const prisma_patch = stripPreReleaseText(readVersionFile({ fileName: 'prisma_patch' }))
-
   const currentVersionTokens = currentVersion.split('.')
-  const prisma_dev_tokens = prisma_dev.split('.')
+  const prisma_dev_tokens = stripPreReleaseText(prisma_dev).split('.')
   const prisma_latest_tokens = prisma_latest.split('.')
+  const prisma_patch_tokens = stripPreReleaseText(prisma_patch).split('.')
 
   switch (branch_channel) {
     case 'master':
@@ -73,7 +85,7 @@ function nextVersion({
       }
       return semVer.inc(currentVersion, 'patch')
     case 'patch-dev':
-      const derivedVersion = getDerivedExtensionVersion(stripPreReleaseText(prisma_patch))
+      const derivedVersion = getDerivedExtensionVersion(prisma_patch)
       if (prisma_patch_tokens[0] !== currentVersion[0]) {
         return derivedVersion
       }
@@ -82,8 +94,8 @@ function nextVersion({
     default:
       if (branch_channel.endsWith('.x')) {
         // extension only new patch update
-        if (prisma_latest_tokens[0] !== currentVersionTokens[0]) {
-          return `${prisma_latest_tokens[0]}.1.1`
+        if (prisma_latest_tokens[1] !== currentVersionTokens[0]) {
+          return `${prisma_latest_tokens[1]}.1.1`
         }
         return semVer.inc(currentVersion, 'patch')
       } else {
@@ -129,6 +141,9 @@ if (require.main === module) {
   const version = nextVersion({
     currentVersion,
     branch_channel: args[0],
+    prisma_dev: readVersionFile({ fileName: 'prisma_dev' }),
+    prisma_latest: readVersionFile({ fileName: 'prisma_latest' }),
+    prisma_patch: readVersionFile({ fileName: 'prisma_patch-dev' })
   })
   console.log(`Next extension version ${version}.`)
   console.log(`::set-output name=next_extension_version::${version}`)

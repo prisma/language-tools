@@ -8,7 +8,6 @@ describe('changeReadme', () => {
       getNewReadMeContent({
         releaseChannel: 'dev',
         npmVersion: '2.5.0-dev.4',
-        githubActionContextSha: 'sha'
       })
     ).toMatchSnapshot()
   })
@@ -18,7 +17,6 @@ describe('changeReadme', () => {
         getNewReadMeContent({
             releaseChannel: 'patch-dev',
             npmVersion: '2.5.1-dev.1',
-            githubActionContextSha: 'sha'
           })
     ).toMatchSnapshot()
   })
@@ -28,7 +26,6 @@ describe('changeReadme', () => {
         getNewReadMeContent({
             releaseChannel: 'latest',
             npmVersion: '2.4.0',
-            githubActionContextSha: 'sha'
           })
     ).toMatchSnapshot()
   })
