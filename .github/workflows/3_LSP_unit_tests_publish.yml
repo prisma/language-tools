@@ -44,14 +44,6 @@ jobs:
           ref: ${{ github.event.inputs.branch }}
       - name: Install Dependencies
         run: npm install
-      - name: checkout master if necessary
-        if: endsWith(github.ref, '/master') == false
-        run: git checkout master
-      - name: Commit and push to master branch 
-        run: |
-          git add -A .
-          git commit -m "bump LSP version to ${{ github.event.inputs.extension_version }}  in scripts."
-          git push
       - name: Checkout previous branch
         if: endsWith(github.ref, '/master') == false
         run: git checkout ${{ github.event.inputs.branch }}
