@@ -16,6 +16,10 @@ env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
   PRISMA_TELEMETRY_INFORMATION: "language-tools 7_publish.yml"
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  SLACK_CHANNEL: feed-language-tools
+  SLACK_USERNAME: Prismo
+  SLACK_ICON_EMOJI: ":ship:"
 
 jobs:
   marketplace:
@@ -33,7 +37,22 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
       - name: publish vsix to marketplace
         run: cd packages/vscode && ./node_modules/.bin/vsce publish --pat ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN}} --packagePath ${{github.workspace}}/${{ github.event.inputs.asset_name }}
-
+      
+      - name: Slack Notification on Failure
+        if: ${{ failure() }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_TITLE: "Publishing to marketplace failed :x:"
+          SLACK_COLOR: '#FF0000'
+          SLACK_MESSAGE: ${{ github.event.inputs.tag_name }}
+      - name: Slack Notification on Success
+        if: ${{ success() }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_TITLE: "Published to marketplace :white_check_mark:"
+          SLACK_COLOR: '#008000'
+          SLACK_MESSAGE: ${{ github.event.inputs.tag_name }}
+  
   open-vsx:
     name: Publish to open-vsx
     runs-on: ubuntu-latest
@@ -49,3 +68,18 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
       - name: Publish vsix to open-vsx.org
         run: cd packages/vscode && ./node_modules/.bin/ovsx publish --pat ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN}} --packagePath ${{github.workspace}}/${{ github.event.inputs.asset_name }}
+      
+      - name: Slack Notification on Failure
+        if: ${{ failure() }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_TITLE: "Publishing to open-vsx failed :x:"
+          SLACK_COLOR: '#FF0000'
+          SLACK_MESSAGE: ${{ github.event.inputs.tag_name }}
+      - name: Slack Notification on Success
+        if: ${{ success() }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_TITLE: "Published to open-vsx :white_check_mark:"
+          SLACK_COLOR: '#008000'
+          SLACK_MESSAGE: ${{ github.event.inputs.tag_name }}
