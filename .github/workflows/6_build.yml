@@ -61,7 +61,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{github.workspace}}/${{ steps.names.outputs.asset_name }}-${{ github.event.inputs.extension_version }}.vsix
+          asset_path: ${{github.workspace}}/packages/vscode/${{ steps.get_asset_name.outputs.asset_name }}
           asset_name: ${{ steps.get_asset_name.outputs.asset_name }}
           asset_content_type: application/zip
       
