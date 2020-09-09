@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-      - name: Install Semver # Needed to use semver in scripts
+      - name: Install Dependencies
         run: npm install
       - name: Setup Git
         run: |
