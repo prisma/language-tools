@@ -30,7 +30,7 @@ function getPackageJsonContent({path}) {
   }
   
   function writeJsonToPackageJson({content, path}) {
-    fs.writeFileSync(path, JSON.stringify(content))
+    fs.writeFileSync(path, JSON.stringify(content, undefined, 2))
   }
 
 module.exports = { getPackageJsonContent, writeJsonToPackageJson, writeToVersionFile, readVersionFile, getNpmPrismaVersion }

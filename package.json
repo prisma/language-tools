@@ -50,11 +50,11 @@
     "access": "public"
   },
   "lint-staged": {
-    "./**/*.{js,ts,css,json,md}": [
+    "packages/**/*.{js,ts,css,json,md}": [
       "prettier --write",
       "git add"
     ],
-    "./**/*.{js,ts}": [
+    "packages/**/*.{js,ts}": [
       "eslint --fix"
     ]
   }
