@@ -223,7 +223,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
   checkForMinimalColorTheme()
   if (watcher) {
     watcher.on('change', path => {
-      window.showInformationMessage(`File ${path} has been changed. Restarting TS Server.`)
+      console.log(`File ${path} has been changed. Restarting TS Server.`)
       commands.executeCommand('typescript.restartTsServer')
     })
   }
