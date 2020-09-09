@@ -46,12 +46,25 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Commit and Push
+        if: endsWith(github.ref, '/master') == false
         run: |
           sh scripts/commit_and_push.sh "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}." ${{ github.ref }}
+      - name: Commit and Push
+        if: endsWith(github.ref, '/master')
+        run: |
+          sh scripts/commit_and_push.sh "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}." ""
       
       - name: Trigger next workflow for LSP Unit tests
+        if: endsWith(github.ref, '/master')
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Unit tests for LSP and publish
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "master" }'
+      - name: Trigger next workflow for LSP Unit tests
+        if: endsWith(github.ref, '/master') == false
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Unit tests for LSP and publish
+          token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{github.ref}}" }'
