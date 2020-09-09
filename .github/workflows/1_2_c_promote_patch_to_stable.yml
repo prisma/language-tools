@@ -20,7 +20,7 @@ jobs:
           node-version: '12.x'
       - name: Install Dependencies
         run: npm install
-      - name: checkout master
+      - name: Checkout master
         run: git checkout master
       - name: Setup Git
         run: |
@@ -40,7 +40,8 @@ jobs:
         run: node scripts/get_extension_patch_version.js
       - name: Switch branch 
         id: setup_branch
-        run: npm run setup:branch "patch-dev"
+        run: |
+          sh scripts/setup_branch.sh "patch-dev"
       - name: Update VSCode extension version
         run:  node scripts/update_package_json_files.js dev ${{ steps.update.outputs.next_extension_version }} ""
       - name: Install Dependencies

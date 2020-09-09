@@ -43,7 +43,8 @@ jobs:
           git push
       - name: Switch branch 
         id: setup_branch
-        run: npm run setup:branch ${{ github.event.inputs.npm_channel }}
+        run: |
+          sh scripts/setup_branch.sh ${{ github.event.inputs.npm_channel }}
       - name: Update Prisma CLI version and VSCode extension version
         run:  node scripts/update_package_json_files.js ${{ github.event.inputs.npm_channel }} ${{ steps.update.outputs.next_extension_version }} ${{ github.event.inputs.version }} 
       - name: Install Dependencies
