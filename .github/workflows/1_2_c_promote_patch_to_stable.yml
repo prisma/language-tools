@@ -44,7 +44,7 @@ jobs:
         run:  |
           node scripts/update_package_json_files.js dev ${{ steps.update.outputs.next_extension_version }} ""
       - name: Install Dependencies
-        run: npm run install
+        run: npm install
       - name: Commit and Push
         run: |
           sh scripts/commit_and_push.sh "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}." 
