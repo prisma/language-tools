@@ -90,7 +90,7 @@ if (require.main === module) {
     // only bump LSP version in extension
     console.log("Bumping LSP version in extension.")
     bumpLSPVersionInExtension({
-      nextLSPVersion: args[0]
+      version: args[0]
     })
   } else {
     throw new Error(`Expected 1, 2 or 3 arguments, but received ${args.length}.`)
