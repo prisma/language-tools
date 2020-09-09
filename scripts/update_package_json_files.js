@@ -61,6 +61,12 @@ function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersion = '
   let rootPackageJson = getPackageJsonContent({path: rootPackageJsonPath})
   rootPackageJson['version'] = newExtensionVersion
   writeJsonToPackageJson({content: rootPackageJson, path: rootPackageJsonPath})
+
+  // update version in LSP
+  const lspPackageJsonPath = path.join(__dirname, '../packages/language-server/package.json')
+  let lspPackageJson = getPackageJsonContent({path: lspPackageJsonPath})
+  lspPackageJson['version'] = newExtensionVersion
+  writeJsonToPackageJson({content: lspPackageJson, path: lspPackageJsonPath})
 }
 
 module.exports = { bumpVersionsInRepo }
@@ -68,18 +74,21 @@ module.exports = { bumpVersionsInRepo }
 if (require.main === module) {
   const args = process.argv.slice(2)
   if (args.length === 3) {
+    console.log("Bumping Prisma CLI version, extension and LSP version in repo.")
     bumpVersionsInRepo({
       channel: args[0],
       newExtensionVersion: args[1],
       newPrismaVersion: args[2]
     })
   } else if (args.length === 2) {
+    console.log("Bumping extension and LSP version in repo.")
     bumpVersionsInRepo({
       channel: args[0],
       newExtensionVersion: args[1]
     })
   } else if (args.length === 1) {
     // only bump LSP version in extension
+    console.log("Bumping LSP version in extension.")
     bumpLSPVersionInExtension({
       nextLSPVersion: args[0]
     })
