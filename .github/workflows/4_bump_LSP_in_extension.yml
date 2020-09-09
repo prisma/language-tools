@@ -26,6 +26,8 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.branch }}
+      - name: Install Dependencies
+        run: npm install
       - name: Bump LSP version in extension
         run: |
           node scripts/update_package_json_files.js ${{ github.event.inputs.extension_version }}
