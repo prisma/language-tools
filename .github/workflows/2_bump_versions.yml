@@ -13,6 +13,7 @@ on:
 env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+  PRISMA_TELEMETRY_INFORMATION: "language-tools 2_bump_versions.yml"
 
 jobs:
   bump:

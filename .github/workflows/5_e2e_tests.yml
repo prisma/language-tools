@@ -12,6 +12,10 @@ on:
       branch:
         description: 'Branch to run run this workflow on'
         required: true
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+  PRISMA_TELEMETRY_INFORMATION: "language-tools 5_e2e_tests.yml"
 
 jobs:
   tests:

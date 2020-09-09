@@ -13,6 +13,9 @@ on:
 
 env:
   AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+  PRISMA_TELEMETRY_INFORMATION: "language-tools 7_publish.yml"
 
 jobs:
   marketplace:

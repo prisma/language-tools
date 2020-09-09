@@ -4,9 +4,10 @@ on:
   schedule:
     - cron: '*/5 * * * *'
 
-env:  
-  PRISMA_TELEMETRY_INFORMATION: "language-tools check-for-update.yml"
+env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+  PRISMA_TELEMETRY_INFORMATION: "language-tools 1_check_for_update.yml"
 
 jobs:
   check:
