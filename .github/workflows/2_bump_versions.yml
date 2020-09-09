@@ -27,8 +27,7 @@ jobs:
         run: npm install
       - name: Setup Git
         run: |
-          git config --global user.email "prismabots@gmail.com"
-          git config --global user.name "Prismo"
+          sh scripts/set_git_credentials.sh
       - name: Update versions in scripts folder 
         run: |
           echo "${{ github.event.inputs.version }}" >scripts/versions/prisma_${{ github.event.inputs.npm_channel }}
