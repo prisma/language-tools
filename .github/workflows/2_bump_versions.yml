@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-      - name: Install Semver # Needed to use semver in scripts
+      - name: Install Dependencies
         run: npm install
       - name: Setup Git
         run: |
@@ -41,6 +41,7 @@ jobs:
           git commit -m "bump Prisma CLI ${{ github.event.inputs.npm_channel }} version to ${{ github.event.inputs.version }} and extension version to ${{ steps.update.next_extension_version }} in scripts."
           git pull --rebase
           git push
+
       - name: Switch branch 
         id: setup_branch
         run: |
