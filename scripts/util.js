@@ -24,7 +24,16 @@ function getNpmPrismaVersion({ channel }) {
     })();
 }
 
-module.exports = { writeToVersionFile, readVersionFile, getNpmPrismaVersion }
+function getPackageJsonContent({path}) {
+    let content = fs.readFileSync(path, {encoding: "utf-8"})
+    return JSON.parse(content)
+  }
+  
+  function writeJsonToPackageJson({content, path}) {
+    fs.writeFileSync(path, JSON.stringify(content))
+  }
+
+module.exports = { getPackageJsonContent, writeJsonToPackageJson, writeToVersionFile, readVersionFile, getNpmPrismaVersion }
 
 if (require.main === module) {
     getNpmPrismaVersion({channel: "dev"})
