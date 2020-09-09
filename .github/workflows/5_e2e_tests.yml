@@ -1,4 +1,4 @@
-name: Integration tests 
+name: Integration tests in VSCode folder with published LSP
 
 on:
   workflow_dispatch:
@@ -15,7 +15,7 @@ on:
 
 jobs:
   tests:
-    name: Integration tests
+    name: Integration tests in VSCode folder with published LSP
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
