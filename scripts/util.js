@@ -1,6 +1,6 @@
 const execa = require('execa')
 const fs = require('fs')
-
+const path = require('path')
 
 function writeToVersionFile({
     fileName = '',
