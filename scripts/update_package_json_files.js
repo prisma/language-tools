@@ -59,7 +59,7 @@ function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersion = '
   }
 
   // update version in root package.json 
-  let rootPackageJson = fs.readFileSync(rootPackageJson, { encoding: "utf-8" })
+  let rootPackageJson = fs.readFileSync(rootPackageJsonPath, { encoding: "utf-8" })
   rootPackageJson['version'] = newExtensionVersion
   fs.writeFileSync(rootPackageJsonPath, rootPackageJson)
 }
