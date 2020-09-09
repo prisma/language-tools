@@ -1,4 +1,4 @@
-import { readVersionFile, getNpmPrismaVersion } from './util'
+const {readVersionFile, getNpmPrismaVersion } = require('./util')
 
 function checkForUpdate({channel}) {
     const currentPrismaVersion = readVersionFile(`prisma_${channel}`)
