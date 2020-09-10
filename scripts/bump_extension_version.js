@@ -65,12 +65,6 @@ function nextVersion({
     case 'master':
     case 'dev':
       // Prisma CLI new dev version
-      if (prisma_dev_tokens[2] != currentVersionTokens[1]) {
-        // first new release after patch bump --> extensionVersion from x.y.z to x.(y+1).1
-        console.log("First new release after patch bump.")
-        let bumpMinor = semVer.inc(currentVersion, 'minor').split('.')
-        return `${bumpMinor[0]}.${bumpMinor[1]}.1`
-      }
       if (prisma_latest_tokens[1] == currentVersionTokens[0]) {
         // first new release after stable minor bump --> extensionVersion from x.y.z to (x+1).0.1
         console.log("First new release after stable minor bump.")
