@@ -1,4 +1,3 @@
-const execa = require('execa')
 const fs = require('fs')
 const path = require('path')
 
@@ -17,13 +16,6 @@ function readVersionFile({
     }).replace('\n', '')
 }
 
-function getNpmPrismaVersion({ channel }) {
-    (async () => {
-        const {stdout} = await execa('npm', ['show', `@prisma/cli@${channel}`, 'version']);
-        return stdout
-    })();
-}
-
 function getPackageJsonContent({path}) {
     let content = fs.readFileSync(path, {encoding: "utf-8"})
     return JSON.parse(content)
@@ -33,8 +25,4 @@ function getPackageJsonContent({path}) {
     fs.writeFileSync(path, JSON.stringify(content, undefined, 2))
   }
 
-module.exports = { getPackageJsonContent, writeJsonToPackageJson, writeToVersionFile, readVersionFile, getNpmPrismaVersion }
-
-if (require.main === module) {
-    getNpmPrismaVersion({channel: "dev"})
-}
+module.exports = { getPackageJsonContent, writeJsonToPackageJson, writeToVersionFile, readVersionFile }
