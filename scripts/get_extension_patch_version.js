@@ -1,5 +1,4 @@
-import { readVersionFile } from './util'
-
+const {readVersionFile} = require('./util')
 
 if (require.main === module) {
     const tag = readVersionFile('extension_patch')
