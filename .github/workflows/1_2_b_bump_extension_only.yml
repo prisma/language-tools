@@ -24,9 +24,13 @@ jobs:
           node-version: '12.x'
       - name: Install Dependencies
         run: npm install
+      - name: Extract branch name # needed because github.ref will contain sth like refs/heads/2.6.x, so pushing to that will fail
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
       - name: checkout master if necessary
         if: endsWith(github.ref, '/master') == false
-        run: git checkout master
+        run: git fetch && git checkout master
       - name: Setup Git
         run: |
           sh scripts/set_git_credentials.sh
@@ -39,7 +43,7 @@ jobs:
       
       - name: Checkout previous branch
         if: endsWith(github.ref, '/master') == false
-        run: git checkout ${{ github.ref }}
+        run: git checkout ${{ steps.extract_branch.outputs.branch }}
       - name: Update VSCode extension version
         run:  | 
           node scripts/update_package_json_files.js dev ${{ steps.update.outputs.next_extension_version }} ""
@@ -48,7 +52,7 @@ jobs:
       - name: Commit and Push
         if: endsWith(github.ref, '/master') == false
         run: |
-          sh scripts/commit_and_push.sh "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}." ${{ github.ref }}
+          sh scripts/commit_and_push.sh "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}." ${{ steps.extract_branch.outputs.branch }}
       - name: Commit and Push
         if: endsWith(github.ref, '/master')
         run: |
@@ -67,4 +71,4 @@ jobs:
         with:
           workflow: Unit tests for LSP and publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{github.ref}}" }'
+          inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.extract_branch.outputs.branch}}" }'
