@@ -50,11 +50,6 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Commit and Push
-        if: endsWith(github.ref, '/master') == false
-        run: |
-          sh scripts/commit_and_push.sh "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}." ${{ steps.extract_branch.outputs.branch }}
-      - name: Commit and Push
-        if: endsWith(github.ref, '/master')
         run: |
           sh scripts/commit_and_push.sh "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}." ""
       
