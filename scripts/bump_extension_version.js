@@ -79,7 +79,7 @@ function nextVersion({
       }
       return semVer.inc(currentVersion, 'patch')
     case 'patch-dev':
-      const derivedVersion = getDerivedExtensionVersion(prisma_patch)
+      const derivedVersion = getDerivedExtensionVersion(stripPreReleaseText(prisma_patch))
       if (prisma_patch_tokens[0] !== currentVersion[0]) {
         return derivedVersion
       }
