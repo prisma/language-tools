@@ -55,4 +55,4 @@ jobs:
         with:
           workflow: Unit tests for LSP and publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "latest", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}" }'
+          inputs: '{ "npm_channel": "latest", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "stable" }'
