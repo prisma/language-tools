@@ -15,11 +15,10 @@ NPM_CHANNEL=$1
 
 if [ "$NPM_CHANNEL" = "dev" ]; then
     echo "Not switching branch because we are on NPM_CHANNEL dev."
-    echo "::set-output name=branch::master"
+    echo "::set-output name=branch::"
 else
     BRANCH=$(node scripts/setup_branch.js "$NPM_CHANNEL")
     echo "BRANCH: $BRANCH"
-    echo "::set-output name=branch::$BRANCH"
 
     git fetch
 
@@ -29,7 +28,7 @@ else
     if [ "${EXISTS_ALREADY}" = "" ]; then
         echo "Branch $BRANCH does not exist yet."
         GITHUB_ARGUMENT="--set-upstream origin $BRANCH"
-        echo "::set-output name=new_branch::$GITHUB_ARGUMENT"
+        echo "::set-output name=branch::$GITHUB_ARGUMENT"
 
         if [ "$ENVIRONMENT" = "PRODUCTION" ]; then
             git config --global user.email "prismabots@gmail.com"
@@ -50,5 +49,6 @@ else
     else 
         git checkout "$BRANCH"
         echo "$BRANCH exists already."
+        echo "::set-output name=branch::$BRANCH"
     fi
 fi
