@@ -36,9 +36,6 @@ jobs:
         run: node scripts/bump_extension_version.js ${{steps.extract_branch.outputs.branch}}
       - name: Commit and Push
         run: sh scripts/commit_and_push.sh "bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}." "origin/master"
-      - name: Get latest patch tag to promote it to stable
-        id: patch_tag
-        run: node scripts/get_extension_patch_version.js
       
       - name: Switch branch 
         id: setup_branch
