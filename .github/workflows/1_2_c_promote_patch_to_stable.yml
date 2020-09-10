@@ -22,10 +22,6 @@ jobs:
           node-version: '12.x'
       - name: Install Dependencies
         run: npm install
-      - name: Extract branch name # needed because github.ref will contain sth like refs/heads/2.6.x, so pushing to that will fail
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
       - name: Checkout master
         run: git fetch && git checkout master
       - name: Setup Git
@@ -33,7 +29,7 @@ jobs:
           sh scripts/set_git_credentials.sh
       - name: Update extension version in scripts folder
         id: update
-        run: node scripts/bump_extension_version.js ${{steps.extract_branch.outputs.branch}}
+        run: node scripts/bump_extension_version.js "latest"
       - name: Commit and Push
         run: sh scripts/commit_and_push.sh "bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}." "origin/master"
       
