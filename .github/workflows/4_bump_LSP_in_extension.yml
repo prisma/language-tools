@@ -31,6 +31,8 @@ jobs:
       - name: Bump LSP version in extension
         run: |
           node scripts/update_package_json_files.js ${{ github.event.inputs.extension_version }}
+      - name: Install Dependencies
+        run: npm install
       - name: Setup Git
         run: |
           sh scripts/set_git_credentials.sh
