@@ -26,6 +26,10 @@ jobs:
           node-version: '12.x'
       - name: Install Dependencies
         run: npm install
+      - name: Print inputs
+        run: |
+          echo ${{github.event.inputs.version}}
+          echo ${{github.event.inputs.npm-channel}}
       - name: Setup Git
         run: |
           sh scripts/set_git_credentials.sh
