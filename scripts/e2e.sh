@@ -9,7 +9,9 @@ CODE_TESTS_WORKSPACE="$(pwd)/packages/vscode/testFixture"
 export CODE_TESTS_WORKSPACE
 
 if [ "$USE_LOCAL" = "useLocalLSP" ]; then 
+    echo "Using local LSP."
     node "$(pwd)/packages/vscode/dist/src/test/runTest" "useLocalLSP"
 else 
+    echo "Using published LSP."
     node "$(pwd)/packages/vscode/dist/src/test/runTest"
 fi
