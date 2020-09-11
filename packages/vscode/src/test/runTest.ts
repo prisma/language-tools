@@ -4,6 +4,7 @@ import { runTests } from 'vscode-test'
 
 async function main(): Promise<void> {
   try {
+    const args = process.argv.slice(2)
     // The folder containing the Extension Manifest package.json
     // Passed to `--extensionDevelopmentPath`
     const extensionDevelopmentPath = path.resolve(__dirname, '../../../')
@@ -21,7 +22,7 @@ async function main(): Promise<void> {
         '--disable-extensions',
       ],
       extensionTestsEnv: {
-        'localLSP': "true"
+        'localLSP': args[0].toString()
       }
     })
   } catch (err) {
