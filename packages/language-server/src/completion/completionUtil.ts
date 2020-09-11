@@ -142,12 +142,12 @@ export const generatorPreviewFeatures: CompletionItem[] = convertToCompletionIte
 )
 
 export const previewFeaturesArguments: CompletionItem[] = convertToCompletionItems(
- completions.previewFeaturesArguments,
+  completions.previewFeaturesArguments,
   CompletionItemKind.Property,
   (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
 )
 
 export const datasourcePreviewFeatures: CompletionItem[] = convertToCompletionItems(
   completions.datasourcePreviewFeatures,
-  CompletionItemKind.Constant
+  CompletionItemKind.Constant,
 )
