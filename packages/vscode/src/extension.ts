@@ -174,7 +174,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   const disposable = client.start()
 
-  await client.onReady().then(() => {
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  client.onReady().then(() => {
     if (!isDebugOrTest) {
       client.onNotification('prisma/telemetry', (payload: TelemetryPayload) => {
         // eslint-disable-next-line no-console
@@ -207,7 +208,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
       client = createLanguageServer(serverOptions, clientOptions)
       context.subscriptions.push(client.start())
       await client.onReady()
-      await window.showInformationMessage('Prisma language server restarted.')
+      window.showInformationMessage('Prisma language server restarted.') // eslint-disable-line @typescript-eslint/no-floating-promises
     }),
     commands.registerCommand(
       'prisma.applySnippetWorkspaceEdit',
@@ -226,7 +227,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     })
   }
 
-  await checkForMinimalColorTheme()
+  checkForMinimalColorTheme()
   if (watcher) {
     watcher.on('change', (path) => {
       console.log(`File ${path} has been changed. Restarting TS Server.`)
@@ -243,7 +244,7 @@ export async function deactivate(): Promise<void> {
     telemetry.sendEvent('deactivated', {
       signature: await telemetry.getSignature(),
     })
-    await telemetry.reporter.dispose()
+    telemetry.reporter.dispose() // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
   return client.stop()

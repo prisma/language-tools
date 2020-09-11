@@ -17,16 +17,17 @@ export function isDebugOrTestSession(): boolean {
   return env.sessionId === 'someValue.sessionId'
 }
 
-async function showToastToSwitchColorTheme(
+function showToastToSwitchColorTheme(
   currentTheme: string,
   suggestedTheme: string,
-): Promise<void> {
-  await window.showWarningMessage(
+): void {
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  window.showWarningMessage(
     `The VSCode Color Theme '${currentTheme}' you are using unfortunately does not fully support syntax highlighting. We suggest you switch to '${suggestedTheme}' which does fully support it and will give you a better experience.`,
   )
 }
 
-export async function checkForMinimalColorTheme(): Promise<void> {
+export function checkForMinimalColorTheme(): void {
   const colorTheme = workspace.getConfiguration('workbench').get('colorTheme')
   if (!colorTheme) {
     return
@@ -35,16 +36,10 @@ export async function checkForMinimalColorTheme(): Promise<void> {
   console.log(colorTheme)
 
   if (denyListDarkColorThemes.includes(colorTheme as string)) {
-    await showToastToSwitchColorTheme(
-      colorTheme as string,
-      'Dark+ (Visual Studio)',
-    )
+    showToastToSwitchColorTheme(colorTheme as string, 'Dark+ (Visual Studio)')
   }
   if (denyListLightColorThemes.includes(colorTheme as string)) {
-    await showToastToSwitchColorTheme(
-      colorTheme as string,
-      'Light+ (Visual Studio)',
-    )
+    showToastToSwitchColorTheme(colorTheme as string, 'Light+ (Visual Studio)')
   }
 }
 
