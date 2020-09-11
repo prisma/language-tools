@@ -73,7 +73,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     })
   }
   console.log('e2etestsonpullrequest: ' + process.env.localLSP)
-  if (isDebugMode() || isE2ETestOnPullRequest) {
+  if (isDebugMode() || isE2ETestOnPullRequest()) {
     // use LSP from folder for debugging
     console.log("Using local LSP")
     serverModule = context.asAbsolutePath(
