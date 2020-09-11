@@ -196,7 +196,7 @@ export function getSuggestionForFieldAttribute(
   // create deep copy
   let suggestions: CompletionItem[] = klona(fieldAttributes)
 
-  let enabledNativeTypes = declaredNativeTypes(document, binPath)
+  const enabledNativeTypes = declaredNativeTypes(document, binPath)
 
   if (!(currentLine.includes('Int') || currentLine.includes('String'))) {
     // id not allowed
@@ -210,9 +210,9 @@ export function getSuggestionForFieldAttribute(
   suggestions = removeInvalidAttributeSuggestions(suggestions, block, lines)
 
   if (enabledNativeTypes && wordsBeforePosition.length >= 2) {
-    let datasourceName = getFirstDatasourceName(lines)
-    let prismaType = wordsBeforePosition[1]
-    let nativeTypeSuggestions = getNativeTypes(document, prismaType, binPath)
+    const datasourceName = getFirstDatasourceName(lines)
+    const prismaType = wordsBeforePosition[1]
+    const nativeTypeSuggestions = getNativeTypes(document, prismaType, binPath)
 
     if (
       datasourceName &&
@@ -235,13 +235,13 @@ export function getSuggestionForFieldAttribute(
 }
 
 function getFirstDatasourceName(lines: string[]): string | undefined {
-  let datasourceBlockFirstLine = lines.find(
+  const datasourceBlockFirstLine = lines.find(
     (l) => l.startsWith('datasource') && l.includes('{'),
   )
   if (!datasourceBlockFirstLine) {
     return undefined
   }
-  let indexOfBracket = datasourceBlockFirstLine.indexOf('{')
+  const indexOfBracket = datasourceBlockFirstLine.indexOf('{')
   return datasourceBlockFirstLine
     .slice('datasource'.length, indexOfBracket)
     .trim()
@@ -462,7 +462,7 @@ export function getValuesInsideBrackets(line: string): string[] {
 }
 
 function declaredNativeTypes(document: TextDocument, binPath: string): boolean {
-  let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(
+  const nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(
     binPath,
     document.getText(),
   )
@@ -518,7 +518,7 @@ function getNativeTypes(
     return []
   }
 
-  let suggestions: CompletionItem[] = []
+  const suggestions: CompletionItem[] = []
   nativeTypes = nativeTypes.filter((n) => n.prisma_type === prismaType)
   nativeTypes.forEach((element) => {
     if (element._number_of_args + element._number_of_optional_args !== 0) {
@@ -576,7 +576,9 @@ export function getSuggestionForSupportedFields(
         }
       }
       if (currentLine.startsWith('previewFeatures')) {
-        let previewFeatures: CompletionItem[] = klona(generatorPreviewFeatures)
+        const previewFeatures: CompletionItem[] = klona(
+          generatorPreviewFeatures,
+        )
         return handlePreviewFeatures(
           previewFeatures,
           position,
@@ -636,7 +638,9 @@ export function getSuggestionForSupportedFields(
           }
         }
       } else if (currentLine.startsWith('previewFeatures')) {
-        let previewFeatures: CompletionItem[] = klona(datasourcePreviewFeatures)
+        const previewFeatures: CompletionItem[] = klona(
+          datasourcePreviewFeatures,
+        )
         return handlePreviewFeatures(
           previewFeatures,
           position,
@@ -658,7 +662,7 @@ function getDefaultValues(
   lines: string[],
 ): CompletionItem[] {
   const suggestions: CompletionItem[] = []
-  let fieldType = getFieldType(currentLine)
+  const fieldType = getFieldType(currentLine)
   if (!fieldType) {
     return []
   }
@@ -711,10 +715,10 @@ function getDefaultValues(
       )
       break
   }
-  let modelOrEnum = getModelOrEnumBlock(fieldType, lines)
+  const modelOrEnum = getModelOrEnumBlock(fieldType, lines)
   if (modelOrEnum && modelOrEnum.type === 'enum') {
     // get fields from enum block for suggestions
-    let values: string[] = getFieldsFromCurrentBlock(lines, modelOrEnum)
+    const values: string[] = getFieldsFromCurrentBlock(lines, modelOrEnum)
     values.forEach((v) =>
       suggestions.push({ label: v, kind: CompletionItemKind.Value }),
     )
@@ -806,7 +810,7 @@ export function getTypesFromCurrentBlock(
       break
     }
     if (!item.startsWith('@@') && (!position || key !== position.line)) {
-      let type = getFieldType(item)
+      const type = getFieldType(item)
       if (type !== undefined) {
         /* eslint-disable @typescript-eslint/no-unsafe-assignment */
         suggestions.set(type, key)
@@ -822,7 +826,7 @@ function getFieldType(line: string): string | undefined {
   if (wordsInLine.length < 2) {
     return undefined
   }
-  let type = wordsInLine[1]
+  const type = wordsInLine[1]
   if (type.length !== 0) {
     return type
   }

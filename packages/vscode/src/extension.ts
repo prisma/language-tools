@@ -31,7 +31,7 @@ import {
 import { check } from 'checkpoint-client'
 import { getProjectHash } from './hashes'
 import * as chokidar from 'chokidar'
-const packageJson = require('../../package.json') // eslint-disable-line @typescript-eslint/no-var-requires
+const packageJson = require('../../package.json') // eslint-disable-line
 
 let client: LanguageClient
 let telemetry: Telemetry
@@ -65,7 +65,7 @@ function createLanguageServer(
 export async function activate(context: ExtensionContext): Promise<void> {
   const isDebugOrTest = isDebugOrTestSession()
 
-  let rootPath = workspace.rootPath
+  const rootPath = workspace.rootPath
   if (rootPath) {
     watcher = chokidar.watch(
       path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts'),

@@ -1,6 +1,6 @@
 import vscode from 'vscode'
 import path from 'path'
-const packageJson = require('../../../package.json')
+const packageJson = require('../../../package.json') // eslint-disable-line
 
 export let doc: vscode.TextDocument
 export let editor: vscode.TextEditor

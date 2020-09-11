@@ -23,7 +23,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
 import * as util from './util'
 import install from './install'
-const packageJson = require('../../package.json') // eslint-disable-line @typescript-eslint/no-var-requires
+const packageJson = require('../../package.json') // eslint-disable-line
 
 export interface LSOptions {
   /**
