@@ -10,13 +10,13 @@ export default function exec(
   const chunks: string[] = []
 
   fmt.stdout.on('data', (data) => {
-    chunks.push(data.toString())
+    chunks.push(data.toString()) // eslint-disable-line @typescript-eslint/no-unsafe-member-access
   })
 
   const errChunks: string[] = []
 
   fmt.stderr.on('data', (data) => {
-    errChunks.push(data.toString())
+    errChunks.push(data.toString()) // eslint-disable-line @typescript-eslint/no-unsafe-member-access
   })
 
   fmt.stdin.setDefaultEncoding('utf-8')

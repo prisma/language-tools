@@ -86,7 +86,9 @@ export async function activate(context: ExtensionContext): Promise<void> {
     serverModule = require.resolve('@prisma/language-server/dist/src/cli')
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const extensionId = 'prisma.' + packageJson.name
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const extensionVersion = packageJson.version
   if (!isDebugOrTest) {
     telemetry = new Telemetry(extensionId, extensionVersion)

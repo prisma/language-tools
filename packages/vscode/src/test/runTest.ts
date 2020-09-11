@@ -35,4 +35,4 @@ async function main(): Promise<void> {
   }
 }
 
-main()
+main() // eslint-disable-line @typescript-eslint/no-floating-promises

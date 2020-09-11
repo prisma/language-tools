@@ -18,7 +18,7 @@ export async function sleep(ms: number): Promise<NodeJS.Timeout> {
 export async function activate(docUri: vscode.Uri): Promise<void> {
   // The extensionId is `publisher.name` from package.json
   const ext = vscode.extensions.getExtension(
-    packageJson.publisher + '.' + packageJson.name,
+    packageJson.publisher + '.' + packageJson.name, // eslint-disable-line @typescript-eslint/no-unsafe-member-access
   )
   if (!ext) {
     console.error('Failed to get extension.')

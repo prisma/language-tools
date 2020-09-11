@@ -26,7 +26,7 @@ async function showToastToSwitchColorTheme(
   )
 }
 
-export async function checkForMinimalColorTheme() {
+export async function checkForMinimalColorTheme(): Promise<void> {
   const colorTheme = workspace.getConfiguration('workbench').get('colorTheme')
   if (!colorTheme) {
     return

@@ -17,9 +17,11 @@ let version: string | undefined
  * Lookup version
  */
 export function getVersion(): string {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   if (!packageJson || !packageJson.prisma || !packageJson.prisma.version) {
     return 'latest'
   }
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   return packageJson.prisma.version
 }
 
@@ -44,6 +46,7 @@ export async function getDownloadURL(): Promise<string> {
 }
 
 export async function getCLIVersion(): Promise<string> {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   return packageJson.dependencies['@prisma/get-platform']
 }
 
