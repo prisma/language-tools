@@ -31,7 +31,7 @@ import {
 import { check } from 'checkpoint-client'
 import { getProjectHash } from './hashes'
 import * as chokidar from 'chokidar'
-const packageJson = require('../../package.json')  // eslint-disable-line @typescript-eslint/no-var-requires
+const packageJson = require('../../package.json') // eslint-disable-line @typescript-eslint/no-var-requires
 
 let client: LanguageClient
 let telemetry: Telemetry
@@ -62,24 +62,26 @@ function createLanguageServer(
   )
 }
 
-
 export async function activate(context: ExtensionContext): Promise<void> {
   const isDebugOrTest = isDebugOrTestSession()
 
   let rootPath = workspace.rootPath
   if (rootPath) {
-    watcher = chokidar.watch(path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts'), {
-      usePolling: false
-    })
+    watcher = chokidar.watch(
+      path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts'),
+      {
+        usePolling: false,
+      },
+    )
   }
   if (isDebugMode() || isE2ETestOnPullRequest()) {
     // use LSP from folder for debugging
-    console.log("Using local LSP")
+    console.log('Using local LSP')
     serverModule = context.asAbsolutePath(
       path.join('../../packages/language-server/dist/src/cli'),
     )
   } else {
-    console.log("Using published LSP.")
+    console.log('Using published LSP.')
     // use published npm package for production
     serverModule = require.resolve('@prisma/language-server/dist/src/cli')
   }
@@ -169,27 +171,32 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   const disposable = client.start()
 
-  client.onReady().then(() => {
-    if (!isDebugOrTest) {
-      client.onNotification('prisma/telemetry', (payload: TelemetryPayload) => {
-        // eslint-disable-next-line no-console
-        telemetry.sendEvent(payload.action, payload.attributes)
-      })
-      client.onNotification(
-        'prisma/telemetryException',
-        (payload: ExceptionPayload) => {
-          const error = new GenericLanguageServerException(
-            payload.message,
-            payload.stack,
-          )
-          telemetry.sendException(error, {
-            signature: payload.signature,
-          })
-        },
-      )
-    }
-  },
-    () => { })
+  client.onReady().then(
+    () => {
+      if (!isDebugOrTest) {
+        client.onNotification(
+          'prisma/telemetry',
+          (payload: TelemetryPayload) => {
+            // eslint-disable-next-line no-console
+            telemetry.sendEvent(payload.action, payload.attributes)
+          },
+        )
+        client.onNotification(
+          'prisma/telemetryException',
+          (payload: ExceptionPayload) => {
+            const error = new GenericLanguageServerException(
+              payload.message,
+              payload.stack,
+            )
+            telemetry.sendException(error, {
+              signature: payload.signature,
+            })
+          },
+        )
+      }
+    },
+    () => {},
+  )
 
   // Start the client. This will also launch the server
   context.subscriptions.push(disposable)
@@ -210,7 +217,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
       applySnippetWorkspaceEdit(),
     ),
   )
-  
+
   if (!isDebugOrTest) {
     telemetry.sendEvent('activated', {
       signature: await telemetry.getSignature(),
@@ -218,13 +225,13 @@ export async function activate(context: ExtensionContext): Promise<void> {
     await check({
       product: extensionId,
       version: extensionVersion,
-      project_hash: await getProjectHash()
+      project_hash: await getProjectHash(),
     })
   }
 
   checkForMinimalColorTheme()
   if (watcher) {
-    watcher.on('change', path => {
+    watcher.on('change', (path) => {
       console.log(`File ${path} has been changed. Restarting TS Server.`)
       commands.executeCommand('typescript.restartTsServer')
     })

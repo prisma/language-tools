@@ -8,18 +8,26 @@ import {
   workspace,
 } from 'vscode'
 import { CodeAction, TextDocumentIdentifier } from 'vscode-languageclient'
-import { denyListDarkColorThemes, denyListLightColorThemes } from './denyListColorThemes';
+import {
+  denyListDarkColorThemes,
+  denyListLightColorThemes,
+} from './denyListColorThemes'
 
 export function isDebugOrTestSession(): boolean {
   return env.sessionId === 'someValue.sessionId'
 }
 
-function showToastToSwitchColorTheme(currentTheme: string, suggestedTheme: string) {
-  window.showWarningMessage(`The VSCode Color Theme '${currentTheme}' you are using unfortunately does not fully support syntax highlighting. We suggest you switch to '${suggestedTheme}' which does fully support it and will give you a better experience.`)
+function showToastToSwitchColorTheme(
+  currentTheme: string,
+  suggestedTheme: string,
+) {
+  window.showWarningMessage(
+    `The VSCode Color Theme '${currentTheme}' you are using unfortunately does not fully support syntax highlighting. We suggest you switch to '${suggestedTheme}' which does fully support it and will give you a better experience.`,
+  )
 }
 
 export function checkForMinimalColorTheme() {
-  const colorTheme = workspace.getConfiguration('workbench').get("colorTheme")
+  const colorTheme = workspace.getConfiguration('workbench').get('colorTheme')
   if (!colorTheme) {
     return
   }
