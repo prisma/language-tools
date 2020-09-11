@@ -13,7 +13,7 @@
       "documentation": "Integer value"
     },
     {
-      "label": "Floa",
+      "label": "Float",
       "documentation": "Floating point number"
     },
     {

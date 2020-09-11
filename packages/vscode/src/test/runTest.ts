@@ -29,7 +29,6 @@ async function main(): Promise<void> {
         'localLSP': args[0]
       }
     })
-
   } catch (err) {
     console.error('Failed to run tests')
     process.exit(1)
