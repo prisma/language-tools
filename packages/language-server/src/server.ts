@@ -23,7 +23,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
 import * as util from './util'
 import install from './install'
-const packageJson = require('../../package.json')  // eslint-disable-line @typescript-eslint/no-var-requires
+const packageJson = require('../../package.json') // eslint-disable-line
 
 export interface LSOptions {
   /**
@@ -39,9 +39,9 @@ function getConnection(options?: LSOptions): IConnection {
     connection = process.argv.includes('--stdio')
       ? createConnection(process.stdin, process.stdout)
       : createConnection(
-        new IPCMessageReader(process),
-        new IPCMessageWriter(process),
-      )
+          new IPCMessageReader(process),
+          new IPCMessageWriter(process),
+        )
   }
   return connection
 }
@@ -75,18 +75,19 @@ export function startServer(options?: LSOptions): void {
         )
       } catch (err) {
         sendException(await getSignature(), err, `Cannot install prisma-fmt.`)
-        connection.console.error('Cannot install prisma-fmt: ' + err)
+        connection.console.error('Cannot install prisma-fmt: ' + err) // eslint-disable-line @typescript-eslint/restrict-plus-operands
       }
     }
 
     connection.console.info(
-      `Installed version of Prisma binary 'prisma-fmt': ${await util.getVersion()}`
+      `Installed version of Prisma binary 'prisma-fmt': ${util.getVersion()}`,
     )
 
     connection.console.info(
-      `Extension name ${packageJson.name} with version ${packageJson.version}`
+      // eslint-disable-next-line
+      `Extension name ${packageJson.name} with version ${packageJson.version}`,
     )
-    const prismaCLIVersion = await util.getCLIVersion()
+    const prismaCLIVersion = util.getCLIVersion()
     connection.console.info(`Prisma CLI version: ${prismaCLIVersion}`)
 
     const result: InitializeResult = {
@@ -180,7 +181,6 @@ export function startServer(options?: LSOptions): void {
   })
 
   connection.onHover(async (params: HoverParams) => {
-
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
       const hover = MessageHandler.handleHoverRequest(doc, params)
@@ -218,7 +218,10 @@ export function startServer(options?: LSOptions): void {
   connection.onCodeAction(async (params: CodeActionParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      const codeActions: CodeAction[] = MessageHandler.handleCodeActions(params, doc)
+      const codeActions: CodeAction[] = MessageHandler.handleCodeActions(
+        params,
+        doc,
+      )
       if (codeActions.length !== 0) {
         sendTelemetry({
           action: 'codeAction',

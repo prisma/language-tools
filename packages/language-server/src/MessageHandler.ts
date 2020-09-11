@@ -493,7 +493,7 @@ export async function handleCompletionRequest(
           lines,
           wordsBeforePosition,
           document,
-          binPath
+          binPath,
         )
       case '"':
         return getSuggestionForSupportedFields(
@@ -508,7 +508,7 @@ export async function handleCompletionRequest(
           wordsBeforePosition,
           document,
           binPath,
-          lines
+          lines,
         )
     }
   }
@@ -542,7 +542,7 @@ export async function handleCompletionRequest(
         lines,
         wordsBeforePosition,
         document,
-        binPath
+        binPath,
       )
     case 'datasource':
     case 'generator':

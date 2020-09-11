@@ -1,6 +1,6 @@
 {
   "name": "@prisma/language-support",
-  "version": "7.0.24",
+  "version": "7.0.42",
   "author": "Prisma",
   "license": "Apache-2.0",
   "workspaces": [
@@ -14,7 +14,7 @@
     "@types/node": "14.0.27",
     "@typescript-eslint/eslint-plugin": "3.7.1",
     "@typescript-eslint/parser": "3.7.1",
-    "eslint": "7.6.0",
+    "eslint": "7.8.1",
     "eslint-config-prettier": "6.11.0",
     "eslint-plugin-prettier": "3.1.4",
     "husky": "4.2.5",
@@ -22,7 +22,7 @@
     "lerna": "3.22.1",
     "lint-staged": "10.2.11",
     "mocha": "8.1.0",
-    "prettier": "2.0.5",
+    "prettier": "2.1.1",
     "typescript": "3.9.7",
     "vsce": "1.77.0",
     "yarn": "1.22.4",
@@ -57,5 +57,8 @@
     "packages/**/*.{js,ts}": [
       "eslint --fix"
     ]
+  },
+  "prisma": {
+    "version": "a6a6ecba74cbaeee0756c312b1b0f2502b27e49c"
   }
 }
