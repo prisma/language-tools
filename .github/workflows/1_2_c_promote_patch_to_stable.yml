@@ -31,7 +31,7 @@ jobs:
         id: update
         run: node scripts/bump_extension_version.js "latest"
       - name: Commit and Push
-        run: sh scripts/commit_and_push.sh "bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}." "origin/master"
+        run: sh scripts/commit_and_push.sh "bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}." ""
       
       - name: Switch branch 
         id: setup_branch
