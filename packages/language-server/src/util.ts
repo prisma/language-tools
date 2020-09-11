@@ -16,7 +16,7 @@ let version: string | undefined
 /**
  * Lookup version
  */
-export async function getVersion(): Promise<string> {
+export function getVersion(): string {
   if (!packageJson || !packageJson.prisma || !packageJson.prisma.version) {
     return 'latest'
   }
@@ -28,7 +28,7 @@ export async function getVersion(): Promise<string> {
  */
 export async function getBinPath(): Promise<string> {
   platform = platform || (await getPlatform())
-  version = version || (await getVersion())
+  version = version || getVersion()
   const extension = platform === 'windows' ? '.exe' : ''
   return path.join(__dirname, `prisma-fmt.${version}${extension}`)
 }
@@ -38,7 +38,7 @@ export async function getBinPath(): Promise<string> {
  */
 export async function getDownloadURL(): Promise<string> {
   platform = platform || (await getPlatform())
-  version = version || (await getVersion())
+  version = version || getVersion()
   const extension = platform === 'windows' ? '.exe.gz' : '.gz'
   return `https://binaries.prisma.sh/all_commits/${version}/${platform}/prisma-fmt${extension}`
 }

@@ -80,7 +80,7 @@ export function startServer(options?: LSOptions): void {
     }
 
     connection.console.info(
-      `Installed version of Prisma binary 'prisma-fmt': ${await util.getVersion()}`,
+      `Installed version of Prisma binary 'prisma-fmt': ${util.getVersion()}`,
     )
 
     connection.console.info(
