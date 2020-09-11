@@ -1,0 +1,48 @@
+name: Bump LSP in VSCode extension
+
+on:
+  workflow_dispatch:
+    inputs:
+      npm_channel:
+        description: 'Prisma CLI NPM Channel'
+        required: true
+      extension_version:
+        description: 'VSCode extension version'
+        required: true
+      branch:
+        description: 'Branch to run run this workflow on'
+        required: true
+
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+  PRISMA_TELEMETRY_INFORMATION: "language-tools 4_bump_LSP_in_extension.yml"
+
+jobs:
+  bump:
+    name: Bump LSP in VSCode extension
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.branch }}
+      - name: Install Dependencies
+        run: npm install
+      - name: Bump LSP version in extension
+        run: |
+          node scripts/update_package_json_files.js ${{ github.event.inputs.extension_version }}
+      - name: Install Dependencies
+        run: npm install
+      - name: Setup Git
+        run: |
+          sh scripts/set_git_credentials.sh
+      - name: Commit and push to branch 
+        run: |
+          sh scripts/commit_and_push.sh "bump LSP version to ${{ github.event.inputs.extension_version }} in VSCode extension." "origin/master"
+    
+      - name: Trigger next workflow for VSCode e2e tests
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Integration tests in VSCode folder with published LSP
+          token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}" }'

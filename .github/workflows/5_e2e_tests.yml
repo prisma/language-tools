@@ -1,0 +1,51 @@
+name: Integration tests in VSCode folder with published LSP
+
+on:
+  workflow_dispatch:
+    inputs:
+      npm_channel:
+        description: 'Prisma CLI NPM Channel'
+        required: true
+      extension_version:
+        description: 'VSCode extension version'
+        required: true
+      branch:
+        description: 'Branch to run run this workflow on'
+        required: true
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+  PRISMA_TELEMETRY_INFORMATION: "language-tools 5_e2e_tests.yml"
+
+jobs:
+  tests:
+    name: Integration tests in VSCode folder with published LSP
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps: 
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.branch }}
+      - name: Install Dependencies
+        run: npm install
+      - name: Compile
+        run: npm run compile
+      - name: Headless e2e tests
+        uses: GabrielBB/xvfb-action@v1.0
+        with:
+          run: npm run test
+  
+  trigger:
+    name: Trigger next workflow
+    needs: [tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Trigger next workflow to build extension 
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Build extension
+          token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{github.event.inputs.branch}}" }'

@@ -26,7 +26,9 @@
     "typescript": "3.9.7",
     "vsce": "1.77.0",
     "yarn": "1.22.4",
-    "ovsx": "0.1.0-next.dacd2fd"
+    "ovsx": "0.1.0-next.dacd2fd",
+    "execa": "4.0.3",
+    "semver": "7.3.2"
   },
   "scripts": {
     "build": "tsc -b",
@@ -35,15 +37,9 @@
     "lint": "eslint  \"packages/**/*.{js,ts}\" --fix",
     "compile": "cd packages/language-server && npm run build && cd ../vscode && npm run build && cd .. && cd ..",
     "watch": "npm run build -- -w",
-    "vsce:publish": "sh scripts/publish.sh",
-    "vsce:check": "npm run shell:lint && sh scripts/check-update.sh",
-    "vsce:bump": "sh scripts/bump.sh",
-    "shell:lint": "shellcheck -x scripts/**/*.sh",
+    "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "sh scripts/e2e.sh",
-    "testScripts": "jest __tests__",
-    "check:lsp": "sh scripts/lsp-version.sh",
-    "setup:patch": "sh scripts/patch/setup.sh",
-    "openvsx:publish": "cd packages/vscode && ovsx publish -p"
+    "testScripts": "jest __tests__"
   },
   "husky": {
     "hooks": {
@@ -55,7 +51,8 @@
   },
   "lint-staged": {
     "packages/**/*.{js,ts,css,json,md}": [
-      "prettier --write"
+      "prettier --write",
+      "git add"
     ],
     "packages/**/*.{js,ts}": [
       "eslint --fix"

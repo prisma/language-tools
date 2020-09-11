@@ -1,0 +1,54 @@
+name: Bump versions for extension only (promotes patch branch to stable release)
+
+# This workflow covers both '1_check_for_updates' and '2_bump_versions' workflows, therefore it is another variant of the same, but specifically for extension only, without any Prisma CLI updates that would need to be handled.
+# This is used to manually promote the patch branch to stable and release a new stable version.
+
+on:
+    workflow_dispatch: 
+
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+  PRISMA_TELEMETRY_INFORMATION: "language-tools 1_2_c_promote_patch_to_stable.yml"
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Install Dependencies
+        run: npm install
+      - name: Checkout master
+        run: git fetch && git checkout master
+      - name: Setup Git
+        run: |
+          sh scripts/set_git_credentials.sh
+      - name: Update extension version in scripts folder
+        id: update
+        run: node scripts/bump_extension_version.js "latest"
+      - name: Commit and Push
+        run: sh scripts/commit_and_push.sh "bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}." "origin/master"
+      
+      - name: Switch branch 
+        id: setup_branch
+        run: |
+          sh scripts/setup_branch.sh "promote_patch-dev"
+      - name: Update VSCode extension version
+        run:  |
+          node scripts/update_package_json_files.js dev ${{ steps.update.outputs.next_extension_version }} ""
+      - name: Install Dependencies
+        run: npm install
+      - name: Commit and Push
+        run: |
+          sh scripts/commit_and_push.sh "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}." ""
+      
+      - name: Trigger next workflow for LSP Unit tests
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Unit tests for LSP and publish
+          token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "npm_channel": "latest", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "stable" }'
