@@ -329,7 +329,7 @@ suite('Quick Fix', () => {
           { label: 'String', kind: CompletionItemKind.TypeParameter },
           { label: 'Boolean', kind: CompletionItemKind.TypeParameter },
           { label: 'Int', kind: CompletionItemKind.TypeParameter },
-          { label: 'Float', kind: CompletionItemKind.TypeParameter },
+          { label: 'Floa', kind: CompletionItemKind.TypeParameter },
           { label: 'DateTime', kind: CompletionItemKind.TypeParameter },
           { label: 'Json', kind: CompletionItemKind.TypeParameter },
           { label: 'User', kind: CompletionItemKind.Reference },

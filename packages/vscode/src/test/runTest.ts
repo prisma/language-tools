@@ -20,6 +20,9 @@ async function main(): Promise<void> {
         // This disables all extensions except the one being testing
         '--disable-extensions',
       ],
+      extensionTestsEnv: {
+        'localLSP': "true"
+      }
     })
   } catch (err) {
     console.error('Failed to run tests')

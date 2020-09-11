@@ -39,6 +39,7 @@ let serverModule: string
 let watcher: chokidar.FSWatcher
 
 const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
+const isE2ETestOnPullRequest = () => process.env.localLSP === 'true'
 
 class GenericLanguageServerException extends Error {
   constructor(message: string, stack: string) {
@@ -72,7 +73,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     })
   }
 
-  if (isDebugMode()) {
+  if (isDebugMode() || isE2ETestOnPullRequest) {
     // use LSP from folder for debugging
     serverModule = context.asAbsolutePath(
       path.join('../../packages/language-server/dist/src/cli'),
