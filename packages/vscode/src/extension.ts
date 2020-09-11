@@ -229,7 +229,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     })
   }
 
-  checkForMinimalColorTheme()
+  await checkForMinimalColorTheme()
   if (watcher) {
     watcher.on('change', (path) => {
       console.log(`File ${path} has been changed. Restarting TS Server.`)
