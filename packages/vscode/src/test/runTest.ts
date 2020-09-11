@@ -4,6 +4,11 @@ import { runTests } from 'vscode-test'
 
 async function main(): Promise<void> {
   try {
+    const args = process.argv.slice(2)
+    if (args.length < 1) {
+      console.error('Expected one argument, but received none.')
+      process.exit(1)
+    }
     // The folder containing the Extension Manifest package.json
     // Passed to `--extensionDevelopmentPath`
     const extensionDevelopmentPath = path.resolve(__dirname, '../../../')
@@ -20,6 +25,9 @@ async function main(): Promise<void> {
         // This disables all extensions except the one being testing
         '--disable-extensions',
       ],
+      extensionTestsEnv: {
+        'localLSP': args[0]
+      }
     })
   } catch (err) {
     console.error('Failed to run tests')

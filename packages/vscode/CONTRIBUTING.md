@@ -32,7 +32,7 @@ On push to the master branch, a new Insider extension is released, with an incre
 - Open VS Code on this folder.
 - Switch to the debug viewlet.
 - Select `Launch VSCode extension` from the drop down.
-- Run the launch config.
+- Run the launch config. (This will always use the local LSP, not the published one.)
 - If you want to debug the server as well use the launch configuration `Attach to Server` afterwards.
 - A new file should open in the [Extension Development Host] instance of VSCode.
 - Change the language to Prisma.
@@ -49,8 +49,10 @@ End-to-End tests:
 - Open VS Code on this folder.
 - Switch to the debug viewlet.
 - Select `Integration Tests` from the drop down.
-- Run the launch config.
+- Run the launch config. (This will use the local LSP.)
 - Open the debug console to view the test results.
+
+When running the End-to-End tests in Github Actions, the script `scripts/e2e.sh` is run. by default, the published LSP is used. Adding the parameter `useLocalLSP` will run the tests using the local LSP.
 
 ## Publishing
 

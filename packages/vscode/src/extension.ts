@@ -39,6 +39,7 @@ let serverModule: string
 let watcher: chokidar.FSWatcher
 
 const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
+const isE2ETestOnPullRequest = () => process.env.localLSP === 'true'
 
 class GenericLanguageServerException extends Error {
   constructor(message: string, stack: string) {
@@ -71,13 +72,14 @@ export async function activate(context: ExtensionContext): Promise<void> {
       usePolling: false
     })
   }
-
-  if (isDebugMode()) {
+  if (isDebugMode() || isE2ETestOnPullRequest()) {
     // use LSP from folder for debugging
+    console.log("Using local LSP")
     serverModule = context.asAbsolutePath(
       path.join('../../packages/language-server/dist/src/cli'),
     )
   } else {
+    console.log("Using published LSP.")
     // use published npm package for production
     serverModule = require.resolve('@prisma/language-server/dist/src/cli')
   }
