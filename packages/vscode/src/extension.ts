@@ -86,9 +86,9 @@ export async function activate(context: ExtensionContext): Promise<void> {
     serverModule = require.resolve('@prisma/language-server/dist/src/cli')
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  // eslint-disable-next-line
   const extensionId = 'prisma.' + packageJson.name
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  // eslint-disable-next-line
   const extensionVersion = packageJson.version
   if (!isDebugOrTest) {
     telemetry = new Telemetry(extensionId, extensionVersion)
@@ -116,6 +116,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
   const clientOptions: LanguageClientOptions = {
     // Register the server for prisma documents
     documentSelector: [{ scheme: 'file', language: 'prisma' }],
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     middleware: {
       async provideCodeActions(
         document: TextDocument,
@@ -173,32 +174,26 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   const disposable = client.start()
 
-  client.onReady().then(
-    () => {
-      if (!isDebugOrTest) {
-        client.onNotification(
-          'prisma/telemetry',
-          (payload: TelemetryPayload) => {
-            // eslint-disable-next-line no-console
-            telemetry.sendEvent(payload.action, payload.attributes)
-          },
-        )
-        client.onNotification(
-          'prisma/telemetryException',
-          (payload: ExceptionPayload) => {
-            const error = new GenericLanguageServerException(
-              payload.message,
-              payload.stack,
-            )
-            telemetry.sendException(error, {
-              signature: payload.signature,
-            })
-          },
-        )
-      }
-    },
-    () => {},
-  )
+  await client.onReady().then(() => {
+    if (!isDebugOrTest) {
+      client.onNotification('prisma/telemetry', (payload: TelemetryPayload) => {
+        // eslint-disable-next-line no-console
+        telemetry.sendEvent(payload.action, payload.attributes)
+      })
+      client.onNotification(
+        'prisma/telemetryException',
+        (payload: ExceptionPayload) => {
+          const error = new GenericLanguageServerException(
+            payload.message,
+            payload.stack,
+          )
+          telemetry.sendException(error, {
+            signature: payload.signature,
+          })
+        },
+      )
+    }
+  })
 
   // Start the client. This will also launch the server
   context.subscriptions.push(disposable)
@@ -212,7 +207,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
       client = createLanguageServer(serverOptions, clientOptions)
       context.subscriptions.push(client.start())
       await client.onReady()
-      window.showInformationMessage('Prisma language server restarted.')
+      await window.showInformationMessage('Prisma language server restarted.')
     }),
     commands.registerCommand(
       'prisma.applySnippetWorkspaceEdit',
@@ -225,8 +220,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
       signature: await telemetry.getSignature(),
     })
     await check({
-      product: extensionId,
-      version: extensionVersion,
+      product: extensionId, // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+      version: extensionVersion, // eslint-disable-line @typescript-eslint/no-unsafe-assignment
       project_hash: await getProjectHash(),
     })
   }
@@ -235,7 +230,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
   if (watcher) {
     watcher.on('change', (path) => {
       console.log(`File ${path} has been changed. Restarting TS Server.`)
-      commands.executeCommand('typescript.restartTsServer')
+      commands.executeCommand('typescript.restartTsServer') // eslint-disable-line
     })
   }
 }
@@ -248,7 +243,7 @@ export async function deactivate(): Promise<void> {
     telemetry.sendEvent('deactivated', {
       signature: await telemetry.getSignature(),
     })
-    telemetry.reporter.dispose()
+    await telemetry.reporter.dispose()
   }
 
   return client.stop()

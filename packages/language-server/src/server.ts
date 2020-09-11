@@ -75,7 +75,7 @@ export function startServer(options?: LSOptions): void {
         )
       } catch (err) {
         sendException(await getSignature(), err, `Cannot install prisma-fmt.`)
-        connection.console.error('Cannot install prisma-fmt: ' + err)
+        connection.console.error('Cannot install prisma-fmt: ' + err) // eslint-disable-line @typescript-eslint/restrict-plus-operands
       }
     }
 
@@ -84,6 +84,7 @@ export function startServer(options?: LSOptions): void {
     )
 
     connection.console.info(
+      // eslint-disable-next-line
       `Extension name ${packageJson.name} with version ${packageJson.version}`,
     )
     const prismaCLIVersion = util.getCLIVersion()
