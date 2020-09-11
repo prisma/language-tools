@@ -21,7 +21,7 @@ export function getVersion(): string {
   if (!packageJson || !packageJson.prisma || !packageJson.prisma.version) {
     return 'latest'
   }
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  // eslint-disable-next-line
   return packageJson.prisma.version
 }
 
@@ -45,8 +45,8 @@ export async function getDownloadURL(): Promise<string> {
   return `https://binaries.prisma.sh/all_commits/${version}/${platform}/prisma-fmt${extension}`
 }
 
-export async function getCLIVersion(): Promise<string> {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+export function getCLIVersion(): Promise<string> {
+  // eslint-disable-next-line
   return packageJson.dependencies['@prisma/get-platform']
 }
 

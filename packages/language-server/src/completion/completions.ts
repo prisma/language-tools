@@ -796,7 +796,7 @@ export function getTypesFromCurrentBlock(
   block: Block,
   position?: Position,
 ): Map<string, number> {
-  const suggestions: Map<string, number> = new Map()
+  const suggestions: Map<string, number> = new Map<string, number>()
 
   let reachedStartLine = false
   for (const [key, item] of lines.entries()) {

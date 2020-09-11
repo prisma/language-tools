@@ -86,7 +86,7 @@ export function startServer(options?: LSOptions): void {
     connection.console.info(
       `Extension name ${packageJson.name} with version ${packageJson.version}`,
     )
-    const prismaCLIVersion = await util.getCLIVersion()
+    const prismaCLIVersion = util.getCLIVersion()
     connection.console.info(`Prisma CLI version: ${prismaCLIVersion}`)
 
     const result: InitializeResult = {
