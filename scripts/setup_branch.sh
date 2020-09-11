@@ -15,7 +15,8 @@ NPM_CHANNEL=$1
 
 if [ "$NPM_CHANNEL" = "dev" ]; then
     echo "Not switching branch because we are on NPM_CHANNEL dev."
-    echo "::set-output name=branch::"
+    BRANCH=""
+    echo "::set-output name=branch::$BRANCH"
 elif [ "$NPM_CHANNEL" = "promote_patch-dev" ]; then
     PATCH_BRANCH=$(node scripts/setup_branch.js "patch-dev")
     git checkout stable
