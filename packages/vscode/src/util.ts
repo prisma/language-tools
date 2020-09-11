@@ -21,6 +21,7 @@ function showToastToSwitchColorTheme(
   currentTheme: string,
   suggestedTheme: string,
 ): void {
+  // We do not want to block on this UI message, therefore disabling the linter here.
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
   window.showWarningMessage(
     `The VSCode Color Theme '${currentTheme}' you are using unfortunately does not fully support syntax highlighting. We suggest you switch to '${suggestedTheme}' which does fully support it and will give you a better experience.`,
