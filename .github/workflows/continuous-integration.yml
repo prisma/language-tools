@@ -23,7 +23,7 @@ jobs:
       - name: Run headless test
         uses: GabrielBB/xvfb-action@v1.0
         with:
-          run: npm test
+          run: npm test "useLocalLSP"
       - name: Catch shell script issues
         if: matrix.os == 'ubuntu-latest'
         run: npm run shell:lint
