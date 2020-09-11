@@ -72,13 +72,15 @@ export async function activate(context: ExtensionContext): Promise<void> {
       usePolling: false
     })
   }
-
+  console.log('e2etestsonpullrequest: ' + process.env.localLSP)
   if (isDebugMode() || isE2ETestOnPullRequest) {
     // use LSP from folder for debugging
+    console.log("Using local LSP")
     serverModule = context.asAbsolutePath(
       path.join('../../packages/language-server/dist/src/cli'),
     )
   } else {
+    console.log("Using published LSP.")
     // use published npm package for production
     serverModule = require.resolve('@prisma/language-server/dist/src/cli')
   }
