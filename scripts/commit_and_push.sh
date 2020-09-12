@@ -15,10 +15,15 @@ fi
 COMMIT_MESSAGE=$1
 echo "COMMIT_MESSAGE: $COMMIT_MESSAGE"
 
-BRANCH=$2
+BRANCH=${2-master}
 echo "BRANCH: $BRANCH"
 
 git add -A .
 git commit -am "$COMMIT_MESSAGE"
 git pull --rebase
-git push $BRANCH
+
+if [ $BRANCH = "master" ]; then
+    git push
+else
+    git push $BRANCH
+fi
