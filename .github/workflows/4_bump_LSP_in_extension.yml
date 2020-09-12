@@ -38,7 +38,7 @@ jobs:
           sh scripts/set_git_credentials.sh
       - name: Commit and push to branch 
         run: |
-          sh scripts/commit_and_push.sh "bump LSP version to ${{ github.event.inputs.extension_version }} in VSCode extension." ""
+          sh scripts/commit_and_push.sh "bump LSP version to ${{ github.event.inputs.extension_version }} in VSCode extension."
     
       - name: Trigger next workflow for VSCode e2e tests
         uses: benc-uk/workflow-dispatch@v1
