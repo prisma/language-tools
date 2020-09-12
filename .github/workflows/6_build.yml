@@ -17,12 +17,15 @@ env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
   PRISMA_TELEMETRY_INFORMATION: "language-tools 6_build.yml"
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  SLACK_CHANNEL: feed-language-tools
+  SLACK_USERNAME: Prismo
+  SLACK_ICON_EMOJI: ":ship:"
 
 jobs:
   build:
     name: Build extension
     runs-on: macos-latest
-    env:
     steps: 
       - uses: actions/checkout@v2
         with:
@@ -73,14 +76,10 @@ jobs:
           inputs: '{ "asset_name": "${{ steps.get_asset_name.outputs.asset_name }}", "tag_name": "${{ steps.names.outputs.tag_name }}" }'
 
   slack:
-    name: Sned slack notification
+    name: Senc slack notification
     runs-on: ubuntu-latest
     needs: [build]
-    env:
-      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-      SLACK_CHANNEL: feed-language-tools
-      SLACK_USERNAME: Prismo
-      SLACK_ICON_EMOJI: ":ship:"
+    steps:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.branch }}
