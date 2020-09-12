@@ -76,7 +76,7 @@ jobs:
           inputs: '{ "asset_name": "${{ steps.get_asset_name.outputs.asset_name }}", "tag_name": "${{ steps.names.outputs.tag_name }}" }'
 
   slack:
-    name: Sned slack notification
+    name: Senc slack notification
     runs-on: ubuntu-latest
     needs: [build]
     steps:
