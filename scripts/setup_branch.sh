@@ -20,6 +20,7 @@ elif [ "$NPM_CHANNEL" = "promote_patch-dev" ]; then
     git checkout stable
     git reset --hard "$PATCH_BRANCH" # Reset stable to patch-dev branch
     git push -f # do not merge, only use state of PATCH_BRANCH
+    echo "::set-output name=branch::master"
 else 
     BRANCH=$(node scripts/setup_branch.js "$NPM_CHANNEL")
     echo "BRANCH: $BRANCH"

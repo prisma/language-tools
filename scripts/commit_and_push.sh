@@ -5,11 +5,11 @@ set -eu
 
 # For local development, in production, the environment will be set though GH actions and GH secrets
 if [ -f ".envrc" ]; then
-    echo "Loading .envrc"
-    # shellcheck disable=SC1091
-    . .envrc
+  echo "Loading .envrc"
+  # shellcheck disable=SC1091
+  . .envrc
 else
-    echo "No .envrc"
+  echo "No .envrc"
 fi
 
 COMMIT_MESSAGE=$1
@@ -23,7 +23,7 @@ git commit -am "$COMMIT_MESSAGE"
 git pull --rebase
 
 if [ $BRANCH = "master" ]; then
-    git push
+  git push
 else
-    git push $BRANCH
+  git push $BRANCH
 fi
