@@ -26,7 +26,6 @@
     "typescript": "3.9.7",
     "vsce": "1.77.0",
     "yarn": "1.22.4",
-    "ovsx": "0.1.0-next.dacd2fd",
     "execa": "4.0.3",
     "semver": "7.3.2"
   },
