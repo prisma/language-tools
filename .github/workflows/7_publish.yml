@@ -68,7 +68,7 @@ jobs:
           file: ${{ github.event.inputs.asset_name }}
           token: ${{ secrets.GH_TOKEN }}
       - name: Publish vsix to open-vsx.org
-        run: cd packages/vscode && ./node_modules/.bin/ovsx publish --pat  ${{ secrets.OPEN_VSX_ACCESS_TOKEN }} --packagePath ${{github.workspace}}/${{ github.event.inputs.asset_name }}
+        run: cd packages/vscode && ./node_modules/.bin/ovsx publish ${{github.workspace}}/${{ github.event.inputs.asset_name }} --pat  ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
       
       - name: Slack Notification on Failure
         if: ${{ failure() }}
