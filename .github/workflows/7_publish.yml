@@ -13,6 +13,7 @@ on:
 
 env:
   AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
+  OPEN_VSX_ACCESS_TOKEN: ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
   PRISMA_TELEMETRY_INFORMATION: "language-tools 7_publish.yml"
@@ -67,7 +68,7 @@ jobs:
           file: ${{ github.event.inputs.asset_name }}
           token: ${{ secrets.GH_TOKEN }}
       - name: Publish vsix to open-vsx.org
-        run: cd packages/vscode && ./node_modules/.bin/ovsx publish --pat ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN}} --packagePath ${{github.workspace}}/${{ github.event.inputs.asset_name }}
+        run: cd packages/vscode && ./node_modules/.bin/ovsx publish --pat  ${{ secrets.OPEN_VSX_ACCESS_TOKEN }} --packagePath ${{github.workspace}}/${{ github.event.inputs.asset_name }}
       
       - name: Slack Notification on Failure
         if: ${{ failure() }}
