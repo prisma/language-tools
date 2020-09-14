@@ -1,10 +1,5 @@
 <h2 align="center">Prisma VS Code Extension</h2>
 <div align="center">
-
-[![Version](https://vsmarketplacebadge.apphb.com/version/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
-[![Installs](https://vsmarketplacebadge.apphb.com/installs/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
-[![Ratings](https://vsmarketplacebadge.apphb.com/rating/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
-
 </div>
 <hr>
 Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma Schema files.
