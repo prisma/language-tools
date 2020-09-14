@@ -110,7 +110,8 @@
     "@types/mocha": "8.0.1",
     "mocha": "8.1.0",
     "semver": "7.3.2",
-    "typescript": "3.9.7"
+    "typescript": "3.9.7",
+    "ovsx": "0.1.0-next.bcce4bc"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
   "publishConfig": {
