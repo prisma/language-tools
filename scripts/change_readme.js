@@ -34,7 +34,7 @@ function getNewReadMeContent({
 function changeReadme({
   releaseChannel,
 }) {
-  const cliVersion = readVersionFile(`prisma_${releaseChannel}`)
+  const cliVersion = readVersionFile({ fileName: `prisma_${releaseChannel}` })
   const sha = githubAction.context.sha
   const content = getNewReadMeContent({releaseChannel: releaseChannel, npmVersion: cliVersion, githubActionContextSha: sha})
   fs.writeFileSync("./packages/vscode/README.md", content);
