@@ -9,7 +9,7 @@
 <hr>
 Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma Schema files.
 
-## Marketplace
+## VSCode Marketplace
 
 You can find both the [stable](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma) and [Insider](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider) extension on the Marketplace.
 
