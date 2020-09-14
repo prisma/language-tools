@@ -1,6 +1,7 @@
 const fs = require('fs')
 const githubAction = require('@actions/github')
 const path = require('path')
+const { readVersionFile } = require('./util')
 
 
 function getNewReadMeContent({
@@ -32,10 +33,10 @@ function getNewReadMeContent({
 
 function changeReadme({
   releaseChannel,
-  npmVersion
 }) {
+  const cliVersion = readVersionFile(`prisma_${releaseChannel}`)
   const sha = githubAction.context.sha
-  const content = getNewReadMeContent({releaseChannel, npmVersion, sha})
+  const content = getNewReadMeContent({releaseChannel: releaseChannel, npmVersion: cliVersion, githubActionContextSha: sha})
   fs.writeFileSync("./packages/vscode/README.md", content);
 }
 
@@ -46,6 +47,5 @@ if (require.main === module) {
   const args = process.argv.slice(2)
   changeReadme({
     releaseChannel: args[0],
-    npmVersion: args[1]
   })
 }
