@@ -1,10 +1,5 @@
 <h2 align="center">Prisma VS Code Extension</h2>
 <div align="center">
-
-[![Version](https://vsmarketplacebadge.apphb.com/version/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
-[![Installs](https://vsmarketplacebadge.apphb.com/installs/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
-[![Ratings](https://vsmarketplacebadge.apphb.com/rating/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma)
-
 </div>
 <hr>
 Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma Schema files.
@@ -14,7 +9,7 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
 * Syntax highlighting
 * Code Completion
     * Completion results appear for symbols as you type. 
-    * You can trigger this manually with the Ctrl+Space shortcut.
+    * You can trigger this manually with the `Ctrl+Space` shortcut.
 * Documentation help
     * Information about the documentation of a completion result pops up as completion results are provided.
 * Quick info on hover
@@ -29,6 +24,8 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
         ```
 * Rename
     * Rename models, enums, fields and enum values
+    * Click into the model or enum, press `F2` and then type the new desired name and press `Enter`
+    * All usages will be renamed
     * Automatically applies `@map` or `@@map` on the schema 
 * Linting
     * Diagnostic tools are used to surface errors and warnings in your schema file as you type.

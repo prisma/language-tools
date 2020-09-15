@@ -26,12 +26,20 @@ import {
   applySnippetWorkspaceEdit,
   isSnippetEdit,
   isDebugOrTestSession,
-  enablePrismaNodeModulesFolderWatch,
+  checkForMinimalColorTheme,
 } from './util'
+import { check } from 'checkpoint-client'
+import { getProjectHash } from './hashes'
+import * as chokidar from 'chokidar'
+const packageJson = require('../../package.json') // eslint-disable-line
 
 let client: LanguageClient
 let telemetry: Telemetry
 let serverModule: string
+let watcher: chokidar.FSWatcher
+
+const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
+const isE2ETestOnPullRequest = () => process.env.localLSP === 'true'
 
 class GenericLanguageServerException extends Error {
   constructor(message: string, stack: string) {
@@ -41,7 +49,6 @@ class GenericLanguageServerException extends Error {
     this.message = message
   }
 }
-
 
 function createLanguageServer(
   serverOptions: ServerOptions,
@@ -57,30 +64,46 @@ function createLanguageServer(
 
 export async function activate(context: ExtensionContext): Promise<void> {
   const isDebugOrTest = isDebugOrTestSession()
-  const isTest = isDebugOrTest && process.env.NODE_ENV === 'production'
+  const rootPath = workspace.rootPath
+  if (rootPath) {
+    watcher = chokidar.watch(
+      path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts'),
+      {
+        usePolling: false,
+      },
+    )
+  }
 
-  if (process.env.NODE_ENV !== 'production') {
+  if (
+    process.env.NODE_ENV !== 'production' ||
+    isDebugMode() ||
+    isE2ETestOnPullRequest()
+  ) {
     // use LSP from folder for debugging
+    console.log('Using local LSP')
     serverModule = context.asAbsolutePath(
       path.join('../../packages/language-server/dist/src/cli'),
     )
   } else {
     // We're using eval so no build processes mess with the require.resolve
+    console.log('Using published LSP.')
     // use published npm package for production
     try {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       serverModule = eval(
-        `require.resolve('@prisma/language-server/dist/src/cli')`
+        `require.resolve('@prisma/language-server/dist/src/cli')`,
       )
     } catch (e) {
       throw new Error('Could not resolve `serverModule` for VSCode extension')
     }
   }
 
-  
+  // eslint-disable-next-line
+  const extensionId = 'prisma.' + packageJson.name
+  // eslint-disable-next-line
+  const extensionVersion = packageJson.version
   if (!isDebugOrTest) {
-    const packageJson = require('../package.json') // eslint-disable-line @typescript-eslint/no-var-requires
-    telemetry = new Telemetry(packageJson.extensionId, packageJson.extensionVersion)
+    telemetry = new Telemetry(extensionId, extensionVersion)
   }
 
   // The debug options for the server
@@ -101,18 +124,11 @@ export async function activate(context: ExtensionContext): Promise<void> {
     },
   }
 
-  // enable fileWatcher to watch .prisma folder inside node_modules
-  if (!isTest) {
-    await enablePrismaNodeModulesFolderWatch()
-  }
-
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
     // Register the server for prisma documents
     documentSelector: [{ scheme: 'file', language: 'prisma' }],
-    synchronize: {
-      fileEvents: workspace.createFileSystemWatcher('**/.prisma/client/*.d.ts'),
-    },
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     middleware: {
       async provideCodeActions(
         document: TextDocument,
@@ -170,11 +186,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   const disposable = client.start()
 
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   client.onReady().then(() => {
-    client.onNotification('prisma/didChangeWatchedFiles', () => {
-      console.log('Restarting TS Language Server..')
-      commands.executeCommand('typescript.restartTsServer')
-    })
     if (!isDebugOrTest) {
       client.onNotification('prisma/telemetry', (payload: TelemetryPayload) => {
         // eslint-disable-next-line no-console
@@ -193,8 +206,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
         },
       )
     }
-  },
-    () => { })
+  })
 
   // Start the client. This will also launch the server
   context.subscriptions.push(disposable)
@@ -208,16 +220,30 @@ export async function activate(context: ExtensionContext): Promise<void> {
       client = createLanguageServer(serverOptions, clientOptions)
       context.subscriptions.push(client.start())
       await client.onReady()
-      window.showInformationMessage('Prisma language server restarted.')
+      window.showInformationMessage('Prisma language server restarted.') // eslint-disable-line @typescript-eslint/no-floating-promises
     }),
     commands.registerCommand(
       'prisma.applySnippetWorkspaceEdit',
       applySnippetWorkspaceEdit(),
     ),
   )
+
   if (!isDebugOrTest) {
     telemetry.sendEvent('activated', {
       signature: await telemetry.getSignature(),
+    })
+    await check({
+      product: extensionId, // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+      version: extensionVersion, // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+      project_hash: await getProjectHash(),
+    })
+  }
+
+  checkForMinimalColorTheme()
+  if (watcher) {
+    watcher.on('change', (path) => {
+      console.log(`File ${path} has been changed. Restarting TS Server.`)
+      commands.executeCommand('typescript.restartTsServer') // eslint-disable-line
     })
   }
 }
@@ -230,7 +256,7 @@ export async function deactivate(): Promise<void> {
     telemetry.sendEvent('deactivated', {
       signature: await telemetry.getSignature(),
     })
-    telemetry.reporter.dispose()
+    telemetry.reporter.dispose() // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
   return client.stop()

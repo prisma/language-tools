@@ -1,6 +1,6 @@
 {
   "name": "@prisma/language-support",
-  "version": "6.0.38",
+  "version": "8.0.1",
   "author": "Prisma",
   "license": "Apache-2.0",
   "workspaces": [
@@ -14,7 +14,7 @@
     "@types/node": "14.0.27",
     "@typescript-eslint/eslint-plugin": "3.7.1",
     "@typescript-eslint/parser": "3.7.1",
-    "eslint": "7.6.0",
+    "eslint": "7.8.1",
     "eslint-config-prettier": "6.11.0",
     "eslint-plugin-prettier": "3.1.4",
     "husky": "4.2.5",
@@ -22,11 +22,12 @@
     "lerna": "3.22.1",
     "lint-staged": "10.2.11",
     "mocha": "8.1.0",
-    "prettier": "2.0.5",
+    "prettier": "2.1.1",
     "typescript": "3.9.7",
     "vsce": "1.77.0",
     "yarn": "1.22.4",
-    "ovsx": "0.1.0-next.dacd2fd"
+    "execa": "4.0.3",
+    "semver": "7.3.2"
   },
   "scripts": {
     "build": "tsc -b",
@@ -37,15 +38,9 @@
     "compile": "cd packages/language-server && npm run build && cd ../vscode && npm run webpack && cd ../..",
     "compile:withoutWebpack": "cd packages/language-server && npm run build && cd ../vscode && npm run build && cd ../..",
     "watch": "npm run build -- -w",
-    "vsce:publish": "sh scripts/publish.sh",
-    "vsce:check": "npm run shell:lint && sh scripts/check-update.sh",
-    "vsce:bump": "sh scripts/bump.sh",
-    "shell:lint": "shellcheck -x scripts/**/*.sh",
+    "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "sh scripts/e2e.sh",
-    "testScripts": "jest __tests__",
-    "check:lsp": "sh scripts/lsp-version.sh",
-    "setup:patch": "sh scripts/patch/setup.sh",
-    "openvsx:publish": "cd packages/vscode && ovsx publish -p"
+    "testScripts": "jest __tests__"
   },
   "husky": {
     "hooks": {
@@ -57,13 +52,14 @@
   },
   "lint-staged": {
     "packages/**/*.{js,ts,css,json,md}": [
-      "prettier --write"
+      "prettier --write",
+      "git add"
     ],
     "packages/**/*.{js,ts}": [
       "eslint --fix"
     ]
   },
   "prisma": {
-    "version": "ef1b5f6a28c2cf3933b0be3b48677edd6e0852a0"
+    "version": "a6a6ecba74cbaeee0756c312b1b0f2502b27e49c"
   }
 }

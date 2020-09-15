@@ -20,8 +20,9 @@ import {
   dataSourceProviderArguments,
   generatorProviders,
   generatorProviderArguments,
-  generatorPreviewFeaturesArguments,
+  previewFeaturesArguments,
   generatorPreviewFeatures,
+  datasourcePreviewFeatures,
 } from './completionUtil'
 import klona from 'klona'
 import { extractModelName } from '../rename/renameUtil'
@@ -148,21 +149,27 @@ function getSuggestionForBlockAttribute(
   return suggestions
 }
 
-
 export function getSuggestionForNativeTypes(
   foundBlock: Block,
   wordsBeforePosition: string[],
   document: TextDocument,
   binPath: string,
-  lines: string[]
+  lines: string[],
 ): CompletionList | undefined {
   const activeFeatureFlag = declaredNativeTypes(document, binPath)
-  if (foundBlock.type !== 'model' || !activeFeatureFlag || wordsBeforePosition.length < 2) {
+  if (
+    foundBlock.type !== 'model' ||
+    !activeFeatureFlag ||
+    wordsBeforePosition.length < 2
+  ) {
     return undefined
   }
 
   const datasourceName = getFirstDatasourceName(lines)
-  if (!datasourceName || wordsBeforePosition[wordsBeforePosition.length - 1] !== `@${datasourceName}`) {
+  if (
+    !datasourceName ||
+    wordsBeforePosition[wordsBeforePosition.length - 1] !== `@${datasourceName}`
+  ) {
     return undefined
   }
 
@@ -171,7 +178,7 @@ export function getSuggestionForNativeTypes(
 
   return {
     items: suggestions,
-    isIncomplete: true
+    isIncomplete: true,
   }
 }
 
@@ -181,7 +188,7 @@ export function getSuggestionForFieldAttribute(
   lines: string[],
   wordsBeforePosition: string[],
   document: TextDocument,
-  binPath: string
+  binPath: string,
 ): CompletionList | undefined {
   if (block.type !== 'model') {
     return
@@ -189,7 +196,7 @@ export function getSuggestionForFieldAttribute(
   // create deep copy
   let suggestions: CompletionItem[] = klona(fieldAttributes)
 
-  let enabledNativeTypes = declaredNativeTypes(document, binPath)
+  const enabledNativeTypes = declaredNativeTypes(document, binPath)
 
   if (!(currentLine.includes('Int') || currentLine.includes('String'))) {
     // id not allowed
@@ -203,20 +210,21 @@ export function getSuggestionForFieldAttribute(
   suggestions = removeInvalidAttributeSuggestions(suggestions, block, lines)
 
   if (enabledNativeTypes && wordsBeforePosition.length >= 2) {
-    let datasourceName = getFirstDatasourceName(lines)
-    let prismaType = wordsBeforePosition[1]
-    let nativeTypeSuggestions = getNativeTypes(document, prismaType, binPath)
+    const datasourceName = getFirstDatasourceName(lines)
+    const prismaType = wordsBeforePosition[1]
+    const nativeTypeSuggestions = getNativeTypes(document, prismaType, binPath)
 
-    if (datasourceName && nativeTypeSuggestions.length !== 0 && !currentLine.includes('@' + datasourceName)) {
-      suggestions.push(
-        {
-          kind: CompletionItemKind.Property,
-          label: '@' + datasourceName,
-          documentation: "Defines a custom type that should be used for this field."
-        }
-      )
-
-
+    if (
+      datasourceName &&
+      nativeTypeSuggestions.length !== 0 &&
+      !currentLine.includes('@' + datasourceName)
+    ) {
+      suggestions.push({
+        kind: CompletionItemKind.Property,
+        label: '@' + datasourceName,
+        documentation:
+          'Defines a custom type that should be used for this field.',
+      })
     }
   }
 
@@ -227,12 +235,16 @@ export function getSuggestionForFieldAttribute(
 }
 
 function getFirstDatasourceName(lines: string[]): string | undefined {
-  let datasourceBlockFirstLine = lines.find(l => l.startsWith("datasource") && l.includes('{'))
+  const datasourceBlockFirstLine = lines.find(
+    (l) => l.startsWith('datasource') && l.includes('{'),
+  )
   if (!datasourceBlockFirstLine) {
     return undefined
   }
-  let indexOfBracket = datasourceBlockFirstLine.indexOf("{")
-  return datasourceBlockFirstLine.slice("datasource".length, indexOfBracket).trim()
+  const indexOfBracket = datasourceBlockFirstLine.indexOf('{')
+  return datasourceBlockFirstLine
+    .slice('datasource'.length, indexOfBracket)
+    .trim()
 }
 
 export function getAllRelationNames(lines: Array<string>): Array<string> {
@@ -449,28 +461,66 @@ export function getValuesInsideBrackets(line: string): string[] {
   return result.map((v) => v.trim().replace('"', '').replace('"', ''))
 }
 
-
-function declaredNativeTypes
-  (document: TextDocument, binPath: string): boolean {
-  let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(binPath, document.getText())
+function declaredNativeTypes(document: TextDocument, binPath: string): boolean {
+  const nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(
+    binPath,
+    document.getText(),
+  )
   if (nativeTypes.length === 0) {
     return false
   }
   return true
 }
 
-function getNativeTypes(document: TextDocument, prismaType: string, binPath: string): CompletionItem[] {
-  let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(binPath, document.getText())
+function handlePreviewFeatures(
+  previewFeatures: CompletionItem[],
+  position: Position,
+  currentLineUntrimmed: string,
+  isInsideQuotation: boolean,
+): CompletionList {
+  if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
+    if (isInsideQuotation) {
+      const usedValues = getValuesInsideBrackets(currentLineUntrimmed)
+      previewFeatures = previewFeatures.filter(
+        (t) => !usedValues.includes(t.label),
+      )
+      return {
+        items: previewFeatures,
+        isIncomplete: true,
+      }
+    } else {
+      return {
+        items: previewFeaturesArguments.filter(
+          (arg) => !arg.label.includes('['),
+        ),
+        isIncomplete: true,
+      }
+    }
+  } else {
+    return {
+      items: previewFeaturesArguments.filter((arg) => !arg.label.includes('"')),
+      isIncomplete: true,
+    }
+  }
+}
+
+function getNativeTypes(
+  document: TextDocument,
+  prismaType: string,
+  binPath: string,
+): CompletionItem[] {
+  let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(
+    binPath,
+    document.getText(),
+  )
 
   if (nativeTypes.length === 0) {
     return []
   }
 
-  let suggestions: CompletionItem[] = []
-  nativeTypes = nativeTypes.filter(
-    n => n.prisma_type === prismaType
-  )
-  nativeTypes.forEach(element => {
+  const suggestions: CompletionItem[] = []
+  nativeTypes = nativeTypes.filter((n) => n.prisma_type === prismaType)
+  nativeTypes.forEach((element) => {
     if (element._number_of_args + element._number_of_optional_args !== 0) {
       let documentation = ''
       if (element._number_of_optional_args !== 0) {
@@ -484,15 +534,15 @@ function getNativeTypes(document: TextDocument, prismaType: string, binPath: str
         kind: CompletionItemKind.TypeParameter,
         insertText: `${element.name}($0)`,
         documentation: { kind: MarkupKind.Markdown, value: documentation },
-        insertTextFormat: 2
+        insertTextFormat: 2,
       })
     } else {
       suggestions.push({
         label: element.name,
-        kind: CompletionItemKind.TypeParameter
+        kind: CompletionItemKind.TypeParameter,
       })
     }
-  });
+  })
 
   return suggestions
 }
@@ -526,33 +576,15 @@ export function getSuggestionForSupportedFields(
         }
       }
       if (currentLine.startsWith('previewFeatures')) {
-        let previewFeatures: CompletionItem[] = klona(generatorPreviewFeatures)
-        if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
-          if (isInsideQuotation) {
-            const usedValues = getValuesInsideBrackets(currentLineUntrimmed)
-            previewFeatures = previewFeatures.filter(
-              (t) => !usedValues.includes(t.label),
-            )
-            return {
-              items: previewFeatures,
-              isIncomplete: true,
-            }
-          } else {
-            return {
-              items: generatorPreviewFeaturesArguments.filter(
-                (arg) => !arg.label.includes('['),
-              ),
-              isIncomplete: true,
-            }
-          }
-        } else {
-          return {
-            items: generatorPreviewFeaturesArguments.filter(
-              (arg) => !arg.label.includes('"'),
-            ),
-            isIncomplete: true,
-          }
-        }
+        const previewFeatures: CompletionItem[] = klona(
+          generatorPreviewFeatures,
+        )
+        return handlePreviewFeatures(
+          previewFeatures,
+          position,
+          currentLineUntrimmed,
+          isInsideQuotation,
+        )
       }
       break
     case 'datasource':
@@ -605,6 +637,16 @@ export function getSuggestionForSupportedFields(
             isIncomplete: true,
           }
         }
+      } else if (currentLine.startsWith('previewFeatures')) {
+        const previewFeatures: CompletionItem[] = klona(
+          datasourcePreviewFeatures,
+        )
+        return handlePreviewFeatures(
+          previewFeatures,
+          position,
+          currentLineUntrimmed,
+          isInsideQuotation,
+        )
       }
       break
   }
@@ -615,9 +657,12 @@ export function getSuggestionForSupportedFields(
   }
 }
 
-function getDefaultValues(currentLine: string, lines: string[]): CompletionItem[] {
+function getDefaultValues(
+  currentLine: string,
+  lines: string[],
+): CompletionItem[] {
   const suggestions: CompletionItem[] = []
-  let fieldType = getFieldType(currentLine)
+  const fieldType = getFieldType(currentLine)
   if (!fieldType) {
     return []
   }
@@ -670,11 +715,13 @@ function getDefaultValues(currentLine: string, lines: string[]): CompletionItem[
       )
       break
   }
-  let modelOrEnum = getModelOrEnumBlock(fieldType, lines)
+  const modelOrEnum = getModelOrEnumBlock(fieldType, lines)
   if (modelOrEnum && modelOrEnum.type === 'enum') {
     // get fields from enum block for suggestions
-    let values: string[] = getFieldsFromCurrentBlock(lines, modelOrEnum)
-    values.forEach(v => suggestions.push({ label: v, kind: CompletionItemKind.Value }))
+    const values: string[] = getFieldsFromCurrentBlock(lines, modelOrEnum)
+    values.forEach((v) =>
+      suggestions.push({ label: v, kind: CompletionItemKind.Value }),
+    )
   }
 
   return suggestions
@@ -749,7 +796,7 @@ export function getTypesFromCurrentBlock(
   block: Block,
   position?: Position,
 ): Map<string, number> {
-  const suggestions: Map<string, number> = new Map()
+  const suggestions: Map<string, number> = new Map<string, number>()
 
   let reachedStartLine = false
   for (const [key, item] of lines.entries()) {
@@ -763,7 +810,7 @@ export function getTypesFromCurrentBlock(
       break
     }
     if (!item.startsWith('@@') && (!position || key !== position.line)) {
-      let type = getFieldType(item)
+      const type = getFieldType(item)
       if (type !== undefined) {
         /* eslint-disable @typescript-eslint/no-unsafe-assignment */
         suggestions.set(type, key)
@@ -779,7 +826,7 @@ function getFieldType(line: string): string | undefined {
   if (wordsInLine.length < 2) {
     return undefined
   }
-  let type = wordsInLine[1]
+  const type = wordsInLine[1]
   if (type.length !== 0) {
     return type
   }

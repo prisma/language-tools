@@ -1,6 +1,6 @@
 import vscode from 'vscode'
 import path from 'path'
-const packageJson = require('../../../package.json')
+const packageJson = require('../../../package.json') // eslint-disable-line
 
 export let doc: vscode.TextDocument
 export let editor: vscode.TextEditor
@@ -17,7 +17,9 @@ export async function sleep(ms: number): Promise<NodeJS.Timeout> {
  */
 export async function activate(docUri: vscode.Uri): Promise<void> {
   // The extensionId is `publisher.name` from package.json
-  const ext = vscode.extensions.getExtension(packageJson.publisher + '.' + packageJson.name)
+  const ext = vscode.extensions.getExtension(
+    `${packageJson.publisher}.${packageJson.name}`, // eslint-disable-line
+  )
   if (!ext) {
     console.error('Failed to get extension.')
     return

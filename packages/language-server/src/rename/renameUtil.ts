@@ -188,7 +188,7 @@ function insertInlineRename(currentName: string, line: number): TextEdit {
         character: Number.MAX_VALUE,
       },
     },
-    newText: ` @map("${currentName }")`,
+    newText: ` @map("${currentName}")`,
   }
 }
 

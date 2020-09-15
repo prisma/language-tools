@@ -5,7 +5,7 @@ import { getPlatform, Platform } from '@prisma/get-platform'
 import path from 'path'
 import fs from 'fs'
 import exec from './exec'
-const packageJson = require('../../package.json')  // eslint-disable-line @typescript-eslint/no-var-requires
+const packageJson = require('../../package.json') // eslint-disable-line
 
 /**
  * Lookup Cache
@@ -13,14 +13,15 @@ const packageJson = require('../../package.json')  // eslint-disable-line @types
 let platform: Platform | undefined
 let version: string | undefined
 
-
 /**
  * Lookup version
  */
-export async function getVersion(): Promise<string> {
+export function getVersion(): string {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   if (!packageJson || !packageJson.prisma || !packageJson.prisma.version) {
     return 'latest'
   }
+  // eslint-disable-next-line
   return packageJson.prisma.version
 }
 
@@ -29,7 +30,7 @@ export async function getVersion(): Promise<string> {
  */
 export async function getBinPath(): Promise<string> {
   platform = platform || (await getPlatform())
-  version = version || (await getVersion())
+  version = version || getVersion()
   const extension = platform === 'windows' ? '.exe' : ''
   return path.join(__dirname, `prisma-fmt.${version}${extension}`)
 }
@@ -39,12 +40,13 @@ export async function getBinPath(): Promise<string> {
  */
 export async function getDownloadURL(): Promise<string> {
   platform = platform || (await getPlatform())
-  version = version || (await getVersion())
+  version = version || getVersion()
   const extension = platform === 'windows' ? '.exe.gz' : '.gz'
   return `https://binaries.prisma.sh/all_commits/${version}/${platform}/prisma-fmt${extension}`
 }
 
-export async function getCLIVersion(): Promise<string> {
+export function getCLIVersion(): string {
+  // eslint-disable-next-line
   return packageJson.dependencies['@prisma/get-platform']
 }
 

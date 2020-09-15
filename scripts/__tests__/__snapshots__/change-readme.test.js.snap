@@ -4,10 +4,6 @@ exports[`changeReadme it should with an insider release 1`] = `
 "<h2 align=\\"center\\">Prisma VS Code Extension</h2>
 <div align=\\"center\\">
 
-[![Version](https://vsmarketplacebadge.apphb.com/version/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider)
-[![Installs](https://vsmarketplacebadge.apphb.com/installs/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider)
-[![Ratings](https://vsmarketplacebadge.apphb.com/rating/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider)
-
 ![CI tests](https://img.shields.io/github/workflow/status/prisma/vscode/CI%20tests/master.svg?label=CI%20tests&logo=github)
 ![Check for Update + Automated Publish](https://img.shields.io/github/workflow/status/prisma/vscode/Check%20for%20Update%20%2B%20Automated%20Publish/master.svg?label=Check%20for%20Update%20%2B%20Automated%20Publish&logo=github)
 
@@ -26,7 +22,7 @@ Please note that you should not have the regular and insider version of the exte
 
 ## Build information
 
-This version is built from commit [sha](sha).
+This version is built from commit [undefined](undefined).
 This is for Prisma CLI 2.5.0-dev.4.
 
 ## Contributing
@@ -48,10 +44,6 @@ exports[`changeReadme it should work with a patch release 1`] = `
 "<h2 align=\\"center\\">Prisma VS Code Extension</h2>
 <div align=\\"center\\">
 
-[![Version](https://vsmarketplacebadge.apphb.com/version/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider)
-[![Installs](https://vsmarketplacebadge.apphb.com/installs/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider)
-[![Ratings](https://vsmarketplacebadge.apphb.com/rating/prisma.Prisma.svg)](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider)
-
 ![CI tests](https://img.shields.io/github/workflow/status/prisma/vscode/CI%20tests/master.svg?label=CI%20tests&logo=github)
 ![Check for Update + Automated Publish](https://img.shields.io/github/workflow/status/prisma/vscode/Check%20for%20Update%20%2B%20Automated%20Publish/master.svg?label=Check%20for%20Update%20%2B%20Automated%20Publish&logo=github)
 
@@ -70,7 +62,7 @@ Please note that you should not have the regular and insider version of the exte
 
 ## Build information
 
-This version is built from commit [sha](sha).
+This version is built from commit [undefined](undefined).
 This is for Prisma CLI 2.5.1-dev.1.
 
 ## Contributing
@@ -105,7 +97,7 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
 * Syntax highlighting
 * Code Completion
     * Completion results appear for symbols as you type. 
-    * You can trigger this manually with the Ctrl+Space shortcut.
+    * You can trigger this manually with the \`Ctrl+Space\` shortcut.
 * Documentation help
     * Information about the documentation of a completion result pops up as completion results are provided.
 * Quick info on hover
@@ -120,6 +112,8 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
         \`\`\`
 * Rename
     * Rename models, enums, fields and enum values
+    * Click into the model or enum, press \`F2\` and then type the new desired name and press \`Enter\`
+    * All usages will be renamed
     * Automatically applies \`@map\` or \`@@map\` on the schema 
 * Linting
     * Diagnostic tools are used to surface errors and warnings in your schema file as you type.
