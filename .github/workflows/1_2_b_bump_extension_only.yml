@@ -53,7 +53,7 @@ jobs:
         run: npm install
       - name: Commit and Push
         run: |
-          sh scripts/commit_and_push.sh "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}."
+          sh scripts/commit_and_push.sh "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}." ${{ steps.setup_branch.outputs.new_branch }}
       
       - name: Trigger next workflow for LSP Unit tests
         if: endsWith(github.ref, '/master')

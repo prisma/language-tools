@@ -54,7 +54,7 @@ jobs:
         run: npm install
       - name: Push to branch
         run: |
-          sh scripts/commit_and_push.sh "bump extension version to ${{ steps.update.next_extension_version }} in package.json" ${{ steps.setup_branch.outputs.branch}}
+          sh scripts/commit_and_push.sh "bump extension version to ${{ steps.update.next_extension_version }} in package.json" ${{ steps.setup_branch.outputs.branch}} ${{ steps.setup_branch.outputs.new_branch }}
 
       - name: Trigger next workflow for LSP Unit tests
         uses: benc-uk/workflow-dispatch@v1
