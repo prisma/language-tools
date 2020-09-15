@@ -1,0 +1,64 @@
+name: Bump versions
+
+on:
+  workflow_dispatch:
+    inputs:
+      npm_channel:
+        description: 'Prisma CLI NPM Channel'
+        required: true
+      version:
+        description: 'New Prisma CLI version in that channel'
+        required: true
+
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+  PRISMA_TELEMETRY_INFORMATION: "language-tools 2_bump_versions.yml"
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Install Dependencies
+        run: npm install
+      - name: Print inputs
+        run: |
+          echo ${{github.event.inputs.version}}
+          echo ${{github.event.inputs.npm-channel}}
+      - name: Setup Git
+        run: |
+          sh scripts/set_git_credentials.sh
+      - name: Update versions in scripts folder 
+        run: |
+          echo "${{ github.event.inputs.version }}" >scripts/versions/prisma_${{ github.event.inputs.npm_channel }}
+      - name: Update next extension version in scripts folder
+        id: update # Used to access the calculated next extension version in later steps
+        run: node scripts/bump_extension_version.js ${{ github.event.inputs.npm_channel }}
+      - name: Commit and Push
+        run: |
+          sh scripts/commit_and_push.sh "bump Prisma CLI ${{ github.event.inputs.npm_channel }} version to ${{ github.event.inputs.version }} and extension version to ${{ steps.update.next_extension_version }} in scripts."
+
+      - name: Switch branch 
+        id: setup_branch
+        run: |
+          sh scripts/setup_branch.sh ${{ github.event.inputs.npm_channel }}
+      - name: Update Prisma CLI version and VSCode extension version
+        run:  |
+          node scripts/update_package_json_files.js ${{ github.event.inputs.npm_channel }} ${{ steps.update.outputs.next_extension_version }} ${{ github.event.inputs.version }} 
+      - name: Install Dependencies
+        run: npm install
+      - name: Push to branch
+        run: |
+          sh scripts/commit_and_push.sh "bump extension version to ${{ steps.update.next_extension_version }} in package.json" ${{ steps.setup_branch.outputs.branch}} ${{ steps.setup_branch.outputs.new_branch }}
+
+      - name: Trigger next workflow for LSP Unit tests
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Unit tests for LSP and publish
+          token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}" , "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}" }'
