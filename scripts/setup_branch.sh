@@ -33,8 +33,8 @@ else
 
     if [ "${EXISTS_ALREADY}" = "" ]; then
         echo "Branch $BRANCH does not exist yet."
-        GITHUB_ARGUMENT="--set-upstream origin $BRANCH"
-        echo "::set-output name=branch::$GITHUB_ARGUMENT"
+        echo "::set-output name=new_branch::true"
+        echo "::set-output name=branch::$BRANCH"
 
         if [ "$ENVIRONMENT" = "PRODUCTION" ]; then
             git config --global user.email "prismabots@gmail.com"
