@@ -1,7 +1,5 @@
 .vscode
-src/
 tsconfig.json
-dist/
 !node_modules/vscode-extension-telemetry
 !node_modules/@prisma/language-server
 node_modules

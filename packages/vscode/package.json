@@ -35,7 +35,7 @@
     "webpack:dev": "webpack --watch --config webpack.dev.js",
     "build": "tsc -p ./"
   },
-  "main": "./dist/src/extension.js",
+  "main": "./dist/extension.js",
   "activationEvents": [
     "onLanguage:prisma"
   ],
