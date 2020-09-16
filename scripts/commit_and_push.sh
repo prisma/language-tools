@@ -18,12 +18,20 @@ echo "COMMIT_MESSAGE: $COMMIT_MESSAGE"
 BRANCH=${2-master}
 echo "BRANCH: $BRANCH"
 
+NEW_BRANCH=${3-false}
+echo "NEW BRANCH: $NEW_BRANCH"
+
 git add -A .
 git commit -am "$COMMIT_MESSAGE"
-git pull --rebase
 
-if [ $BRANCH = "master" ]; then
-  git push
-else
-  git push $BRANCH
+if [ "$NEW_BRANCH" = "false" ]; then 
+  git pull --rebase
+  if [ $BRANCH = "master" ]; then
+    git push
+  else
+    git push $BRANCH
+  fi
+else 
+  ## Do not rebase on newly created branch
+  git push --set-upstream origin $BRANCH
 fi
