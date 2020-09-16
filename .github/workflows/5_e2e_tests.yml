@@ -31,7 +31,7 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Compile
-        run: npm run compile
+        run: npm run compile:withoutWebpack
       - name: Headless e2e tests
         uses: GabrielBB/xvfb-action@v1.0
         with:
