@@ -46,7 +46,7 @@ export function toRange(
 }
 
 export const getDocPath = (p: string): string => {
-  return path.join(__dirname, '../../../testFixture', p)
+  return path.join(__dirname, '../../testFixture', p)
 }
 export const getDocUri = (p: string): vscode.Uri => {
   return vscode.Uri.file(getDocPath(p))
