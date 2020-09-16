@@ -1,6 +1,6 @@
 import vscode from 'vscode'
 import path from 'path'
-const packageJson = require('../../../package.json') // eslint-disable-line
+const packageJson = require('../../package.json') // eslint-disable-line
 
 export let doc: vscode.TextDocument
 export let editor: vscode.TextEditor
@@ -46,7 +46,7 @@ export function toRange(
 }
 
 export const getDocPath = (p: string): string => {
-  return path.join(__dirname, '../../../testFixture', p)
+  return path.join(__dirname, '../../testFixture', p)
 }
 export const getDocUri = (p: string): vscode.Uri => {
   return vscode.Uri.file(getDocPath(p))
