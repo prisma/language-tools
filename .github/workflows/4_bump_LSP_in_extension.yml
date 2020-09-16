@@ -46,3 +46,16 @@ jobs:
           workflow: Integration tests in VSCode folder with published LSP
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}" }'
+      
+
+      - name: Slack Notification on Failure
+        if: ${{ failure() }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_TITLE: "4 - Bumping LSP in VSCode extension failed :x:"
+          SLACK_COLOR: '#FF0000'
+          SLACK_MESSAGE: ${{github.event.inputs.extension_version}}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: feed-language-tools
+          SLACK_USERNAME: Prismo
+          SLACK_ICON_EMOJI: ":boom:"

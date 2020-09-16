@@ -48,3 +48,14 @@ jobs:
           workflow: Bump versions
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "patch-dev", "version": "${{ steps.check_update.outputs.patch-dev_version }}" }'
+      
+      - name: Slack Notification on Failure
+        if: ${{ failure() }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_TITLE: "1 - Checking for Prisma CLI Update failed :x:"
+          SLACK_COLOR: '#FF0000'
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: feed-language-tools
+          SLACK_USERNAME: Prismo
+          SLACK_ICON_EMOJI: ":boom:"

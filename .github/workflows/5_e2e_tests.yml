@@ -41,11 +41,25 @@ jobs:
     name: Trigger next workflow
     needs: [tests]
     runs-on: ubuntu-latest
+    if: always()
     steps:
       - uses: actions/checkout@v2
       - name: Trigger next workflow to build extension 
+        if: ${{ needs.tests.result == 'success' }}
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Build extension
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{github.event.inputs.branch}}" }'
+      
+      - name: Slack Notification on Failure
+        if: ${{ failure() || needs.tests.result == 'failure' }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_TITLE: "5 - Integration tests in VSCode folder with published LSP failed :x:"
+          SLACK_COLOR: '#FF0000'
+          SLACK_MESSAGE: ${{github.event.inputs.extension_version}}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: feed-language-tools
+          SLACK_USERNAME: Prismo
+          SLACK_ICON_EMOJI: ":boom:"
