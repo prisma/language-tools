@@ -54,6 +54,8 @@ End-to-End tests:
 
 When running the End-to-End tests in Github Actions, the script `scripts/e2e.sh` is run. by default, the published LSP is used. Adding the parameter `useLocalLSP` will run the tests using the local LSP.
 
+End-to-End tests are also run after publish in the [vscode-e2e-tests](https://github.com/prisma/vscode-e2e-tests) repo.
+
 ## Publishing
 
 The extension is automatically published using a [Azure Devops Personal Access Token](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) via Github actions (see `.github/workflows/publish.yml`).
