@@ -1,7 +1,7 @@
 //@ts-check
 
-const path = require('path');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const path = require('path') // eslint-disable-line
+const { CleanWebpackPlugin } = require('clean-webpack-plugin') // eslint-disable-line
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -13,14 +13,15 @@ const config = {
     path: path.resolve(__dirname, 'dist/src'),
     filename: 'extension.js',
     libraryTarget: 'commonjs2',
-    devtoolModuleFilenameTemplate: '../[resource-path]'
+    devtoolModuleFilenameTemplate: '../[resource-path]',
   },
   externals: {
     vscode: 'commonjs vscode', // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
     'vscode-extension-telemetry': 'vscode-extension-telemetry',
     '@prisma/language-server': '@prisma/language-server',
     'checkpoint-client': 'checkpoint-client',
-    'vscode-languageclient': 'vscode-languageclient'
+    'vscode-languageclient': 'vscode-languageclient',
+    chokidar: 'chokidar',
   },
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
@@ -34,14 +35,12 @@ const config = {
         exclude: /node_modules/,
         use: [
           {
-            loader: 'ts-loader'
-          }
-        ]
-      }
-    ]
+            loader: 'ts-loader',
+          },
+        ],
+      },
+    ],
   },
-  plugins: [
-    new CleanWebpackPlugin()
-  ]
-};
-module.exports = config;
+  plugins: [new CleanWebpackPlugin()],
+}
+module.exports = config

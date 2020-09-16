@@ -31,7 +31,6 @@ import {
 import { check } from 'checkpoint-client'
 import { getProjectHash } from './hashes'
 import * as chokidar from 'chokidar'
-const packageJson = require('../../package.json') // eslint-disable-line
 
 let client: LanguageClient
 let telemetry: Telemetry
@@ -98,12 +97,12 @@ export async function activate(context: ExtensionContext): Promise<void> {
     }
   }
 
-  // eslint-disable-next-line
-  const extensionId = 'prisma.' + packageJson.name
-  // eslint-disable-next-line
-  const extensionVersion = packageJson.version
   if (!isDebugOrTest) {
-    telemetry = new Telemetry(extensionId, extensionVersion)
+    const packageJson = require('../package.json') // eslint-disable-line
+    telemetry = new Telemetry(
+      'prisma.' + packageJson.name, // eslint-disable-line
+      packageJson.extensionVersion, // eslint-disable-line
+    )
   }
 
   // The debug options for the server
@@ -232,9 +231,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
     telemetry.sendEvent('activated', {
       signature: await telemetry.getSignature(),
     })
+    const packageJson = require('../package.json') // eslint-disable-line
     await check({
-      product: extensionId, // eslint-disable-line @typescript-eslint/no-unsafe-assignment
-      version: extensionVersion, // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+      product: 'prisma.' + packageJson.name, // eslint-disable-line
+      version: packageJson.extensionVersion, // eslint-disable-line
       project_hash: await getProjectHash(),
     })
   }

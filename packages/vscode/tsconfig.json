@@ -12,6 +12,6 @@
     "composite": true,
     "declaration": true
   },
-  "include": ["src"],
+  "include": ["src", "webpack.*.js"],
   "exclude": ["node_modules", ".vscode-test"]
 }
