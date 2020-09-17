@@ -222,8 +222,20 @@ export function quickFix(
                 },
               },
             })
+          } else {
+            console.log(
+              'Not showing a quick-fix for native Types, because datasource block could not be found.',
+            )
           }
+        } else {
+          console.log(
+            'Not showing a quick-fix for native Types, because a datasource could not be found in cashed schema.',
+          )
         }
+      } else {
+        console.log(
+          'Not showing a quick-fix for native Types, because a datasource could not be found.',
+        )
       }
     }
     if (
