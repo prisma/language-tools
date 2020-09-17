@@ -21,6 +21,8 @@ const config = {
     '@prisma/language-server': '@prisma/language-server',
     'checkpoint-client': 'checkpoint-client',
     'vscode-languageclient': 'vscode-languageclient',
+    'vscode-jsonrpc': 'vscode-jsonrpc',
+    'vscode-language-server': 'vscode-language-server',
     chokidar: 'chokidar',
   },
   resolve: {
