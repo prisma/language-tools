@@ -117,7 +117,7 @@ suite('Should auto-complete', () => {
       new vscode.CompletionList([
         fieldProvider,
         fieldUrl,
-        fieldPreviewFeatures,
+        /*fieldPreviewFeatures, */ // TODO: uncomment once nativeTypes will be launched!
       ]),
       false,
     )
@@ -127,13 +127,13 @@ suite('Should auto-complete', () => {
     await testCompletion(
       sqliteDocUri,
       new vscode.Position(2, 0),
-      new vscode.CompletionList([fieldUrl, fieldPreviewFeatures]),
+      new vscode.CompletionList([fieldUrl /*, fieldPreviewFeatures */]), // TODO: uncomment once nativeTypes will be launched!
       false,
     )
     await testCompletion(
       dataSourceWithUri,
       new vscode.Position(2, 0),
-      new vscode.CompletionList([fieldProvider, fieldPreviewFeatures]),
+      new vscode.CompletionList([fieldProvider /*, fieldPreviewFeatures */]), // TODO: uncomment once nativeTypes will be launched!
       false,
     )
   })
