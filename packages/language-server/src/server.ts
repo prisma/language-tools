@@ -166,11 +166,11 @@ export async function startServer(options?: LSPOptions): Promise<void> {
     return result
   }
 
-  function getPrismaFmtBinPath(settings: LSPSettings): string {
-    if (settings.prismaFmtBinPath === '') {
+  function getPrismaFmtBinPath(binPathSetting: string): string {
+    if (binPathSetting.length === 0) {
       return globalSettings.prismaFmtBinPath
     } else {
-      return settings.prismaFmtBinPath
+      return binPathSetting
     }
   }
 
@@ -180,7 +180,7 @@ export async function startServer(options?: LSPOptions): Promise<void> {
     const settings = await getDocumentSettings(textDocument.uri)
     const diagnostics: Diagnostic[] = await MessageHandler.handleDiagnosticsRequest(
       textDocument,
-      getPrismaFmtBinPath(settings),
+      getPrismaFmtBinPath(settings.prismaFmtBinPath),
       (errorMessage: string) => {
         connection.window.showErrorMessage(errorMessage)
       },
@@ -199,7 +199,7 @@ export async function startServer(options?: LSPOptions): Promise<void> {
 
   async function installPrismaFmt(documentUri: string) {
     const settings = await getDocumentSettings(documentUri)
-    const prismaFmtBinPath = getPrismaFmtBinPath(settings)
+    const prismaFmtBinPath = getPrismaFmtBinPath(settings.prismaFmtBinPath)
     if (await util.binaryIsNeeded(prismaFmtBinPath)) {
       try {
         await install(prismaFmtBinPath)
@@ -239,7 +239,7 @@ export async function startServer(options?: LSPOptions): Promise<void> {
   connection.onCompletion(async (params: CompletionParams) => {
     const doc = getDocument(params.textDocument.uri)
     const settings = await getDocumentSettings(params.textDocument.uri)
-    const prismaFmtBinPath = getPrismaFmtBinPath(settings)
+    const prismaFmtBinPath = getPrismaFmtBinPath(settings.prismaFmtBinPath)
     if (doc) {
       return MessageHandler.handleCompletionRequest(
         params,
@@ -288,7 +288,7 @@ export async function startServer(options?: LSPOptions): Promise<void> {
   connection.onDocumentFormatting(async (params: DocumentFormattingParams) => {
     const doc = getDocument(params.textDocument.uri)
     const settings = await getDocumentSettings(params.textDocument.uri)
-    const prismaFmtBinPath = getPrismaFmtBinPath(settings)
+    const prismaFmtBinPath = getPrismaFmtBinPath(settings.prismaFmtBinPath)
     if (doc) {
       sendTelemetry({
         action: 'format',
