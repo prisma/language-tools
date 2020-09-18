@@ -17,7 +17,6 @@ import {
   RenameParams,
   WorkspaceEdit,
 } from 'vscode-languageserver'
-import * as util from './util'
 import { fullDocumentRange } from './provider'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import format from './format'
@@ -243,11 +242,10 @@ function getExperimentalFeaturesRange(
 
 export async function handleDiagnosticsRequest(
   document: TextDocument,
+  binPath: string,
   onError?: (errorMessage: string) => void,
 ): Promise<Diagnostic[]> {
   const text = document.getText(fullDocumentRange(document))
-  const binPath = await util.getBinPath()
-
   const res = await lint(binPath, text, (errorMessage: string) => {
     if (onError) {
       onError(errorMessage)
@@ -373,11 +371,11 @@ export function handleDefinitionRequest(
 export async function handleDocumentFormatting(
   params: DocumentFormattingParams,
   document: TextDocument,
+  binPath: string,
   onError?: (errorMessage: string) => void,
 ): Promise<TextEdit[]> {
   const options = params.options
 
-  const binPath = await util.getBinPath()
   return format(
     binPath,
     options.tabSize,
@@ -430,10 +428,11 @@ export function handleHoverRequest(
  *
  * This handler provides the initial list of the completion items.
  */
-export async function handleCompletionRequest(
+export function handleCompletionRequest(
   params: CompletionParams,
   document: TextDocument,
-): Promise<CompletionList | undefined> {
+  binPath: string,
+): CompletionList | undefined {
   const context = params.context
   const position = params.position
   if (!context) {
@@ -442,8 +441,6 @@ export async function handleCompletionRequest(
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
   const currentLineUntrimmed = getCurrentLine(document, position.line)
-  const binPath = await util.getBinPath()
-
   const currentLineTillPosition = currentLineUntrimmed
     .slice(0, position.character - 1)
     .trim()

@@ -14,6 +14,7 @@ async function assertLinting(
 
   const diagnosticsResults: Diagnostic[] = await handleDiagnosticsRequest(
     document,
+    binPathPrismaFmt,
   )
 
   assert.ok(diagnosticsResults.length != 0)
@@ -25,10 +26,15 @@ async function assertLinting(
   })
 }
 
+// Cache prisma-fmt binary path
+let binPathPrismaFmt = ''
+
 suite('Linting', () => {
   suiteSetup(async () => {
     // install prisma-fmt binary
-    const binPathPrismaFmt = await getBinPath()
+    if (binPathPrismaFmt === '') {
+      binPathPrismaFmt = await getBinPath()
+    }
     if (await binaryIsNeeded(binPathPrismaFmt)) await install(binPathPrismaFmt)
   })
 

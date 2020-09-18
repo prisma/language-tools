@@ -16,6 +16,7 @@ import {
   RenameParams,
   DocumentFormattingParams,
   CodeAction,
+  DidChangeConfigurationNotification,
 } from 'vscode-languageserver'
 import { getSignature } from 'checkpoint-client'
 import { sendTelemetry, sendException, initializeTelemetry } from './telemetry'
@@ -25,7 +26,7 @@ import * as util from './util'
 import install from './install'
 const packageJson = require('../../package.json') // eslint-disable-line
 
-export interface LSOptions {
+export interface LSPOptions {
   /**
    * If you have a connection already that the ls should use, pass it in.
    * Else the connection will be created from `process`.
@@ -33,7 +34,11 @@ export interface LSOptions {
   connection?: IConnection
 }
 
-function getConnection(options?: LSOptions): IConnection {
+interface LSPSettings {
+  prismaFmtBinPath: string
+}
+
+function getConnection(options?: LSPOptions): IConnection {
   let connection = options?.connection
   if (!connection) {
     connection = process.argv.includes('--stdio')
@@ -46,41 +51,29 @@ function getConnection(options?: LSOptions): IConnection {
   return connection
 }
 
+let hasCodeActionLiteralsCapability = false
+let hasConfigurationCapability = false
+
 /**
  * Starts the language server.
  *
  * @param options Options to customize behavior
  */
-export function startServer(options?: LSOptions): void {
+export async function startServer(options?: LSPOptions): Promise<void> {
   const connection: IConnection = getConnection(options)
   const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
-  // Does the clients accepts diagnostics with related information?
-  let hasCodeActionLiteralsCapability = false
-
-  connection.onInitialize(async (params: InitializeParams) => {
+  connection.onInitialize((params: InitializeParams) => {
     initializeTelemetry(connection)
     const capabilities = params.capabilities
 
     hasCodeActionLiteralsCapability = Boolean(
       capabilities?.textDocument?.codeAction?.codeActionLiteralSupport,
     )
-
-    const binPathPrismaFmt = await util.getBinPath()
-    if (await util.binaryIsNeeded(binPathPrismaFmt)) {
-      try {
-        await install(binPathPrismaFmt)
-        connection.console.info(
-          `Prisma plugin prisma-fmt installation succeeded.`,
-        )
-      } catch (err) {
-        sendException(await getSignature(), err, `Cannot install prisma-fmt.`)
-        connection.console.error('Cannot install prisma-fmt: ' + err) // eslint-disable-line @typescript-eslint/restrict-plus-operands
-      }
-    }
+    hasConfigurationCapability = Boolean(capabilities?.workspace?.configuration)
 
     connection.console.info(
-      `Installed version of Prisma binary 'prisma-fmt': ${util.getVersion()}`,
+      `Default version of Prisma binary 'prisma-fmt': ${util.getVersion()}`,
     )
 
     connection.console.info(
@@ -112,11 +105,82 @@ export function startServer(options?: LSOptions): void {
     return result
   })
 
+  connection.onInitialized(() => {
+    if (hasConfigurationCapability) {
+      // Register for all configuration changes.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      connection.client.register(
+        DidChangeConfigurationNotification.type,
+        undefined,
+      )
+    }
+  })
+
+  // The global settings, used when the `workspace/configuration` request is not supported by the client or is not set by the user.
+  // This does not apply to VSCode, as this client supports this setting.
+  const defaultSettings: LSPSettings = {
+    prismaFmtBinPath: await util.getBinPath(),
+  }
+  let globalSettings: LSPSettings = defaultSettings
+
+  // Cache the settings of all open documents
+  const documentSettings: Map<string, Thenable<LSPSettings>> = new Map<
+    string,
+    Thenable<LSPSettings>
+  >()
+
+  connection.onDidChangeConfiguration((change) => {
+    connection.console.info('Configuration changed.')
+    if (hasConfigurationCapability) {
+      // Reset all cached document settings
+      documentSettings.clear()
+    } else {
+      globalSettings = <LSPSettings>(
+        (change.settings.prismaLanguageServer || defaultSettings) // eslint-disable-line @typescript-eslint/no-unsafe-member-access
+      )
+    }
+    documents.all().forEach(async (d) => await installPrismaFmt(d.uri)) // eslint-disable-line @typescript-eslint/no-misused-promises
+
+    // Revalidate all open prisma schemas
+    documents.all().forEach(validateTextDocument) // eslint-disable-line @typescript-eslint/no-misused-promises
+  })
+
+  // Only keep settings for open documents
+  documents.onDidClose((e) => {
+    documentSettings.delete(e.document.uri)
+  })
+
+  function getDocumentSettings(resource: string): Thenable<LSPSettings> {
+    if (!hasConfigurationCapability) {
+      connection.console.info(`Using default prisma-fmt binary path.`)
+      return Promise.resolve(globalSettings)
+    }
+    let result = documentSettings.get(resource)
+    if (!result) {
+      result = connection.workspace.getConfiguration({
+        scopeUri: resource,
+        section: 'prismaLanguageServer',
+      })
+      documentSettings.set(resource, result)
+    }
+    return result
+  }
+
+  function getPrismaFmtBinPath(settings: LSPSettings): string {
+    if (settings.prismaFmtBinPath === '') {
+      return globalSettings.prismaFmtBinPath
+    } else {
+      return settings.prismaFmtBinPath
+    }
+  }
+
   async function validateTextDocument(
     textDocument: TextDocument,
   ): Promise<void> {
+    const settings = await getDocumentSettings(textDocument.uri)
     const diagnostics: Diagnostic[] = await MessageHandler.handleDiagnosticsRequest(
       textDocument,
+      getPrismaFmtBinPath(settings),
       (errorMessage: string) => {
         connection.window.showErrorMessage(errorMessage)
       },
@@ -129,8 +193,28 @@ export function startServer(options?: LSOptions): void {
   })
 
   documents.onDidOpen(async (open: { document: TextDocument }) => {
+    await installPrismaFmt(open.document.uri)
     await validateTextDocument(open.document)
   })
+
+  async function installPrismaFmt(documentUri: string) {
+    const settings = await getDocumentSettings(documentUri)
+    const prismaFmtBinPath = getPrismaFmtBinPath(settings)
+    if (await util.binaryIsNeeded(prismaFmtBinPath)) {
+      try {
+        await install(prismaFmtBinPath)
+        connection.console.info(
+          `Prisma plugin prisma-fmt installation succeeded.`,
+        )
+        connection.console.info(`Installed 'prisma-fmt': ${prismaFmtBinPath}`)
+      } catch (err) {
+        sendException(await getSignature(), err, `Cannot install prisma-fmt.`)
+        connection.console.error('Cannot install prisma-fmt: ' + err) // eslint-disable-line @typescript-eslint/restrict-plus-operands
+      }
+    } else {
+      connection.console.info(`Installed 'prisma-fmt': ${prismaFmtBinPath}`)
+    }
+  }
 
   function getDocument(uri: string): TextDocument | undefined {
     return documents.get(uri)
@@ -138,7 +222,6 @@ export function startServer(options?: LSOptions): void {
 
   connection.onDefinition(async (params: DeclarationParams) => {
     const doc = getDocument(params.textDocument.uri)
-
     if (doc) {
       const definition = MessageHandler.handleDefinitionRequest(doc, params)
       if (definition !== undefined) {
@@ -155,8 +238,14 @@ export function startServer(options?: LSOptions): void {
 
   connection.onCompletion(async (params: CompletionParams) => {
     const doc = getDocument(params.textDocument.uri)
+    const settings = await getDocumentSettings(params.textDocument.uri)
+    const prismaFmtBinPath = getPrismaFmtBinPath(settings)
     if (doc) {
-      return await MessageHandler.handleCompletionRequest(params, doc)
+      return MessageHandler.handleCompletionRequest(
+        params,
+        doc,
+        prismaFmtBinPath,
+      )
     }
   })
 
@@ -198,6 +287,8 @@ export function startServer(options?: LSOptions): void {
 
   connection.onDocumentFormatting(async (params: DocumentFormattingParams) => {
     const doc = getDocument(params.textDocument.uri)
+    const settings = await getDocumentSettings(params.textDocument.uri)
+    const prismaFmtBinPath = getPrismaFmtBinPath(settings)
     if (doc) {
       sendTelemetry({
         action: 'format',
@@ -208,6 +299,7 @@ export function startServer(options?: LSOptions): void {
       return MessageHandler.handleDocumentFormatting(
         params,
         doc,
+        prismaFmtBinPath,
         (errorMessage: string) => {
           connection.window.showErrorMessage(errorMessage)
         },
