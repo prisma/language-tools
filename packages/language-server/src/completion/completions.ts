@@ -22,7 +22,8 @@ import {
   generatorProviderArguments,
   previewFeaturesArguments,
   generatorPreviewFeatures,
-  datasourcePreviewFeatures,
+  // TODO: uncomment once nativeTypes will be launched!
+  // datasourcePreviewFeatures,
 } from './completionUtil'
 import klona from 'klona'
 import { extractModelName } from '../rename/renameUtil'
@@ -636,8 +637,8 @@ export function getSuggestionForSupportedFields(
             items: dataSourceUrlArguments,
             isIncomplete: true,
           }
-        }
-      } else if (currentLine.startsWith('previewFeatures')) {
+        } // TODO: uncomment once nativeTypes will be launched!
+      } /*else if (currentLine.startsWith('previewFeatures')) {
         const previewFeatures: CompletionItem[] = klona(
           datasourcePreviewFeatures,
         )
@@ -647,7 +648,7 @@ export function getSuggestionForSupportedFields(
           currentLineUntrimmed,
           isInsideQuotation,
         )
-      }
+      } */
       break
   }
 

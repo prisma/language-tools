@@ -81,7 +81,7 @@ export const allowedBlockTypes: CompletionItem[] = convertToCompletionItems(
 )
 
 export const supportedDataSourceFields: CompletionItem[] = convertToCompletionItems(
-  completions.dataSourceFields,
+  completions.dataSourceFields.filter((f) => f.label !== 'previewFeatures'), // TODO: uncomment once nativeTypes will be launched!
   CompletionItemKind.Field,
 )
 
@@ -147,7 +147,8 @@ export const previewFeaturesArguments: CompletionItem[] = convertToCompletionIte
   (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
 )
 
-export const datasourcePreviewFeatures: CompletionItem[] = convertToCompletionItems(
-  completions.datasourcePreviewFeatures,
-  CompletionItemKind.Constant,
-)
+// TODO: uncomment once nativeTypes will be launched!
+// export const datasourcePreviewFeatures: CompletionItem[] = convertToCompletionItems(
+//  completions.datasourcePreviewFeatures,
+//  CompletionItemKind.Constant,
+//)
