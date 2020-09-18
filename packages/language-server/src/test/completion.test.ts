@@ -87,15 +87,14 @@ suite('Quick Fix', () => {
         ],
       },
     )
-  })
+  }) // TODO: uncomment once nativeTypes will be launched!
 
   // DATASOURCE BLOCK
 
-  const fieldPreviewFeatures = {
+  /* const fieldPreviewFeatures = {
     label: 'previewFeatures',
     kind: CompletionItemKind.Field,
-  }
-  const fieldProvider = {
+  } */ const fieldProvider = {
     label: 'provider',
     kind: CompletionItemKind.Field,
   }
@@ -123,7 +122,7 @@ suite('Quick Fix', () => {
       { line: 1, character: 0 },
       {
         isIncomplete: false,
-        items: [fieldProvider, fieldUrl, fieldPreviewFeatures],
+        items: [fieldProvider, fieldUrl /*fieldPreviewFeatures*/], // TODO: uncomment once nativeTypes will be launched!
       },
     )
   })
@@ -134,7 +133,7 @@ suite('Quick Fix', () => {
       { line: 2, character: 0 },
       {
         isIncomplete: false,
-        items: [fieldUrl, fieldPreviewFeatures],
+        items: [fieldUrl /*fieldPreviewFeatures*/],
       },
     )
     await assertCompletion(
@@ -142,7 +141,7 @@ suite('Quick Fix', () => {
       { line: 2, character: 0 },
       {
         isIncomplete: false,
-        items: [fieldProvider, fieldPreviewFeatures],
+        items: [fieldProvider /*fieldPreviewFeatures*/],
       },
     )
   })
@@ -233,7 +232,7 @@ suite('Quick Fix', () => {
           fieldProvider,
           fieldOutput,
           fieldBinaryTargets,
-          fieldPreviewFeatures,
+          /*fieldPreviewFeatures,*/
         ],
       },
     )
@@ -245,7 +244,7 @@ suite('Quick Fix', () => {
       { line: 2, character: 0 },
       {
         isIncomplete: false,
-        items: [fieldOutput, fieldBinaryTargets, fieldPreviewFeatures],
+        items: [fieldOutput, fieldBinaryTargets /*fieldPreviewFeatures*/],
       },
     )
     await assertCompletion(
@@ -253,7 +252,7 @@ suite('Quick Fix', () => {
       { line: 7, character: 0 },
       {
         isIncomplete: false,
-        items: [fieldProvider, fieldBinaryTargets, fieldPreviewFeatures],
+        items: [fieldProvider, fieldBinaryTargets /*fieldPreviewFeatures*/],
       },
     )
   })
