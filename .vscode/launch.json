@@ -72,5 +72,11 @@
         "${workspaceFolder}/packages/vscode/dist/src/test/**/*.js"
       ]
     }
+  ],
+  "compounds": [
+    {
+      "name": "VSCode + LSP",
+      "configurations": ["Launch VSCode extension", "Attach to Server"]
+    }
   ]
 }

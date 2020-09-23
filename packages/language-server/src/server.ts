@@ -24,19 +24,8 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
 import * as util from './util'
 import install from './install'
+import { LSPOptions, LSPSettings } from './settings'
 const packageJson = require('../../package.json') // eslint-disable-line
-
-export interface LSPOptions {
-  /**
-   * If you have a connection already that the ls should use, pass it in.
-   * Else the connection will be created from `process`.
-   */
-  connection?: IConnection
-}
-
-interface LSPSettings {
-  prismaFmtBinPath: string
-}
 
 function getConnection(options?: LSPOptions): IConnection {
   let connection = options?.connection
@@ -53,17 +42,18 @@ function getConnection(options?: LSPOptions): IConnection {
 
 let hasCodeActionLiteralsCapability = false
 let hasConfigurationCapability = false
+let defaultBinPath = ''
 
 /**
  * Starts the language server.
  *
  * @param options Options to customize behavior
  */
-export async function startServer(options?: LSPOptions): Promise<void> {
+export function startServer(options?: LSPOptions): void {
   const connection: IConnection = getConnection(options)
   const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
-  connection.onInitialize((params: InitializeParams) => {
+  connection.onInitialize(async (params: InitializeParams) => {
     initializeTelemetry(connection)
     const capabilities = params.capabilities
 
@@ -71,6 +61,8 @@ export async function startServer(options?: LSPOptions): Promise<void> {
       capabilities?.textDocument?.codeAction?.codeActionLiteralSupport,
     )
     hasConfigurationCapability = Boolean(capabilities?.workspace?.configuration)
+
+    defaultBinPath = await util.getBinPath()
 
     connection.console.info(
       `Default version of Prisma binary 'prisma-fmt': ${util.getVersion()}`,
@@ -119,7 +111,7 @@ export async function startServer(options?: LSPOptions): Promise<void> {
   // The global settings, used when the `workspace/configuration` request is not supported by the client or is not set by the user.
   // This does not apply to VSCode, as this client supports this setting.
   const defaultSettings: LSPSettings = {
-    prismaFmtBinPath: await util.getBinPath(),
+    prismaFmtBinPath: defaultBinPath,
   }
   let globalSettings: LSPSettings = defaultSettings
 
@@ -167,20 +159,17 @@ export async function startServer(options?: LSPOptions): Promise<void> {
   }
 
   function getPrismaFmtBinPath(binPathSetting: string): string {
-    if (binPathSetting.length === 0) {
-      return globalSettings.prismaFmtBinPath
-    } else {
-      return binPathSetting
-    }
+    return binPathSetting.length === 0 ? defaultBinPath : binPathSetting
   }
 
   async function validateTextDocument(
     textDocument: TextDocument,
   ): Promise<void> {
     const settings = await getDocumentSettings(textDocument.uri)
+    const fmtBinPath = getPrismaFmtBinPath(settings.prismaFmtBinPath)
     const diagnostics: Diagnostic[] = await MessageHandler.handleDiagnosticsRequest(
       textDocument,
-      getPrismaFmtBinPath(settings.prismaFmtBinPath),
+      fmtBinPath,
       (errorMessage: string) => {
         connection.window.showErrorMessage(errorMessage)
       },
