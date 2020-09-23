@@ -27,6 +27,6 @@ model   Post {
     }
 
     model PostTitle {
-  id   Int   @default(autoincrement()) @id
+  id   Int   @id @default(autoincrement()) 
   title       String
 }
