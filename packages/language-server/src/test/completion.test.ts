@@ -94,7 +94,7 @@ suite('Quick Fix', () => {
         ],
       },
     )
-  })
+  }) // TODO: uncomment once nativeTypes will be launched!
 
   // DATASOURCE BLOCK
 
@@ -130,7 +130,7 @@ suite('Quick Fix', () => {
       { line: 1, character: 0 },
       {
         isIncomplete: false,
-        items: [fieldProvider, fieldUrl, fieldPreviewFeatures],
+        items: [fieldProvider, fieldUrl /*fieldPreviewFeatures*/], // TODO: uncomment once nativeTypes will be launched!
       },
     )
   })
@@ -141,7 +141,7 @@ suite('Quick Fix', () => {
       { line: 2, character: 0 },
       {
         isIncomplete: false,
-        items: [fieldUrl, fieldPreviewFeatures],
+        items: [fieldUrl /*fieldPreviewFeatures*/],
       },
     )
     assertCompletion(
@@ -149,7 +149,7 @@ suite('Quick Fix', () => {
       { line: 2, character: 0 },
       {
         isIncomplete: false,
-        items: [fieldProvider, fieldPreviewFeatures],
+        items: [fieldProvider /*fieldPreviewFeatures*/],
       },
     )
   })
