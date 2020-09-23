@@ -21,7 +21,7 @@ function bumpLSPVersionInExtension({version}) {
 }
 
 function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersion = '' }) {
-  const languageServerPackageJsonPath = path.join(__dirname, '../packages/vscode/package.json')
+  const languageServerPackageJsonPath = path.join(__dirname, '../packages/language-server/package.json')
   const rootPackageJsonPath = path.join(__dirname, '../package.json')
 
   // update version in packages/vscode folder
