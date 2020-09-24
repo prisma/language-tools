@@ -25,6 +25,7 @@ import * as MessageHandler from './MessageHandler'
 import * as util from './util'
 import install from './install'
 import { LSPOptions, LSPSettings } from './settings'
+import { existsSync } from 'fs'
 const packageJson = require('../../package.json') // eslint-disable-line
 
 function getConnection(options?: LSPOptions): IConnection {
@@ -159,7 +160,19 @@ export function startServer(options?: LSPOptions): void {
   }
 
   function getPrismaFmtBinPath(binPathSetting: string): string {
-    return binPathSetting.length === 0 ? defaultBinPath : binPathSetting
+    if (binPathSetting.length === 0) {
+      return defaultBinPath
+    } else if (!existsSync(binPathSetting)) {
+      connection.window.showErrorMessage(
+        `Path to prisma-fmt binary (${binPathSetting}) does not exist. Using default prisma-fmt binary path instead.`,
+      )
+      return defaultBinPath
+    } else {
+      connection.console.log(
+        'Using binary path from Prisma Language Server configuration.',
+      )
+      return binPathSetting
+    }
   }
 
   async function validateTextDocument(
@@ -178,18 +191,18 @@ export function startServer(options?: LSPOptions): void {
   }
 
   documents.onDidChangeContent(async (change: { document: TextDocument }) => {
+    await installPrismaFmt(change.document.uri)
     await validateTextDocument(change.document)
-  })
-
-  documents.onDidOpen(async (open: { document: TextDocument }) => {
-    await installPrismaFmt(open.document.uri)
-    await validateTextDocument(open.document)
   })
 
   async function installPrismaFmt(documentUri: string) {
     const settings = await getDocumentSettings(documentUri)
     const prismaFmtBinPath = getPrismaFmtBinPath(settings.prismaFmtBinPath)
-    if (await util.binaryIsNeeded(prismaFmtBinPath)) {
+    const installNecessary = util.binaryIsNeeded(prismaFmtBinPath)
+    if (
+      installNecessary ||
+      (!installNecessary && !(await util.testBinarySuccess(prismaFmtBinPath)))
+    ) {
       try {
         await install(prismaFmtBinPath)
         connection.console.info(
@@ -200,8 +213,6 @@ export function startServer(options?: LSPOptions): void {
         sendException(await getSignature(), err, `Cannot install prisma-fmt.`)
         connection.console.error('Cannot install prisma-fmt: ' + err) // eslint-disable-line @typescript-eslint/restrict-plus-operands
       }
-    } else {
-      connection.console.info(`Installed 'prisma-fmt': ${prismaFmtBinPath}`)
     }
   }
 

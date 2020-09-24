@@ -50,19 +50,19 @@ export function getCLIVersion(): string {
   return packageJson.dependencies['@prisma/get-platform']
 }
 
-export async function binaryIsNeeded(path: string): Promise<boolean> {
-  if (!fs.existsSync(path)) {
-    return true
-  }
+export function binaryIsNeeded(path: string): boolean {
+  return !fs.existsSync(path)
+}
 
+export async function testBinarySuccess(path: string): Promise<boolean> {
   // try to execute version command
   try {
     await exec(path, ['--version'], '')
     console.log('Binary test successful.')
-    return false
+    return true
   } catch (errors) {
     console.log('Binary test failed. Re-attempting a download.')
     console.log(errors)
-    return true
+    return false
   }
 }
