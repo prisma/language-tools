@@ -1,0 +1,37 @@
+name: Check for new release on Marketplace
+
+on: 
+  schedule:
+    - cron: '*/10 * * * *'
+
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+  
+jobs:
+
+  check-version: 
+    name: Check for new version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: npm install
+      - name: Check new release of stable and Insider
+        id: check_published_version
+        run: |
+          node scripts/e2eTestsOnVsix/check_for_new_release.js
+      - name: Trigger e2e tests for Insider
+        if: ${{ steps.check_published_version.outputs.new_insider_version }}
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: E2E tests after release on VSIX
+          token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "extension_type": "insider", "extension_version": "${{ steps.check_published_version.outputs.new_insider_version }}" }'
+      - name: Trigger e2e tests for stable
+        if: ${{ steps.check_published_version.outputs.new_stable_version }}
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: E2E tests after release on VSIX
+          token: ${{ secrets.GH_TOKEN }}
+          inputs: '{ "extension_type": "stable", "extension_version": "${{ steps.check_published_version.outputs.new_stable_version }}" }'
