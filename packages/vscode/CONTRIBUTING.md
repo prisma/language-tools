@@ -52,7 +52,9 @@ End-to-End tests:
 - Run the launch config. (This will use the local LSP.)
 - Open the debug console to view the test results.
 
-When running the End-to-End tests in Github Actions, the script `scripts/e2e.sh` is run. by default, the published LSP is used. Adding the parameter `useLocalLSP` will run the tests using the local LSP.
+When running the End-to-End tests in Github Actions before publishing, the script `scripts/e2e.sh` is run. By default, the published LSP is used. Adding the parameter `useLocalLSP` will run the tests using the local LSP.
+The End-to-End tests that are run after the publish of the extension are located in `scripts/e2eTestsOnVsix/test.sh`.
+In both cases the tests in `packages/vscode/src/test` with the schmeas located in `packages/vscode/testFixture` are used.
 
 ## Publishing
 
