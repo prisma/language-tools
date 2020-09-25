@@ -205,10 +205,13 @@ export function startServer(options?: LSPOptions): void {
     ) {
       try {
         await install(prismaFmtBinPath)
+        const version = await util.getBinaryVersion(prismaFmtBinPath)
         connection.console.info(
           `Prisma plugin prisma-fmt installation succeeded.`,
         )
-        connection.console.info(`Installed 'prisma-fmt': ${prismaFmtBinPath}`)
+        connection.console.info(
+          `Installed version ${version} of 'prisma-fmt' using path: ${prismaFmtBinPath}`,
+        )
       } catch (err) {
         sendException(await getSignature(), err, `Cannot install prisma-fmt.`)
         connection.console.error('Cannot install prisma-fmt: ' + err) // eslint-disable-line @typescript-eslint/restrict-plus-operands

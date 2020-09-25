@@ -54,15 +54,22 @@ export function binaryIsNeeded(path: string): boolean {
   return !fs.existsSync(path)
 }
 
+export async function getBinaryVersion(path: string): Promise<string> {
+  try {
+    const output = await exec(path, ['--version'], '')
+    return output
+  } catch (errors) {
+    console.log(errors)
+    return ''
+  }
+}
+
 export async function testBinarySuccess(path: string): Promise<boolean> {
   // try to execute version command
-  try {
-    await exec(path, ['--version'], '')
-    console.log('Binary test successful.')
-    return true
-  } catch (errors) {
+  const version = await getBinaryVersion(path)
+  if (version === '') {
     console.log('Binary test failed. Re-attempting a download.')
-    console.log(errors)
     return false
   }
+  return true
 }
