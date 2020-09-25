@@ -198,10 +198,10 @@ export function startServer(options?: LSPOptions): void {
   async function installPrismaFmt(documentUri: string) {
     const settings = await getDocumentSettings(documentUri)
     const prismaFmtBinPath = getPrismaFmtBinPath(settings.prismaFmtBinPath)
-    const installNecessary = util.binaryIsNeeded(prismaFmtBinPath)
+    const isInstallNecessary = util.binaryIsNeeded(prismaFmtBinPath)
     if (
-      installNecessary ||
-      (!installNecessary && !(await util.testBinarySuccess(prismaFmtBinPath)))
+      isInstallNecessary ||
+      (!isInstallNecessary && !(await util.testBinarySuccess(prismaFmtBinPath)))
     ) {
       try {
         await install(prismaFmtBinPath)
