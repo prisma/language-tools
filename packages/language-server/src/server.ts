@@ -43,7 +43,6 @@ function getConnection(options?: LSPOptions): IConnection {
 
 let hasCodeActionLiteralsCapability = false
 let hasConfigurationCapability = false
-let defaultBinPath = ''
 
 /**
  * Starts the language server.
@@ -53,6 +52,7 @@ let defaultBinPath = ''
 export function startServer(options?: LSPOptions): void {
   const connection: IConnection = getConnection(options)
   const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
+  let defaultBinPath = ''
 
   connection.onInitialize(async (params: InitializeParams) => {
     initializeTelemetry(connection)
