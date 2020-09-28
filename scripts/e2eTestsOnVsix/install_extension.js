@@ -8,7 +8,7 @@ async function installExtension({
 }) {
   try {
     let vsceArgument = ''
-    if (type === 'insider') {
+    if (extensionType === 'insider') {
       vsceArgument = '-insider'
     }
     const extensionName = `Prisma.prisma${vsceArgument}`
