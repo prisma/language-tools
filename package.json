@@ -42,7 +42,7 @@
     "test": "sh scripts/e2e.sh",
     "test:e2e": "sh scripts/e2eTestsOnVsix/test.sh",
     "testScripts": "jest __tests__",
-    "test:bump": "sh scripts/bump-version.sh"
+    "test:bump": "sh scripts/e2eTestsOnVsix/bump_version.sh"
   },
   "husky": {
     "hooks": {
