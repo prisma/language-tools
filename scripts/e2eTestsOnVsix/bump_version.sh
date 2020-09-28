@@ -27,9 +27,9 @@ else
 fi
 
 if [ "$RELEASE_CHANNEL" = "insider" ]; then
-    echo "$NEW_TESTED_VERSION" >scripts/tested_extension_insider
+    echo "$NEW_TESTED_VERSION" >scripts/versions/tested_extension_insider
 else
-    echo "$NEW_TESTED_VERSION" >scripts/tested_extension_stable
+    echo "$NEW_TESTED_VERSION" >scripts/versions/tested_extension_stable
 fi
 
 echo "Bumped tested_prisma_version from $OLD_TESTED_VERSION to $NEW_TESTED_VERSION"
