@@ -27,7 +27,9 @@
     "vsce": "1.77.0",
     "yarn": "1.22.4",
     "execa": "4.0.3",
-    "semver": "7.3.2"
+    "semver": "7.3.2",
+    "vscode-test": "1.4.0",
+    "child-process": "1.0.2"
   },
   "scripts": {
     "build": "tsc -b",
