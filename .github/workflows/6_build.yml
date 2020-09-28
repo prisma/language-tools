@@ -1,4 +1,4 @@
-name: 6 Build extension
+name: 6. Build extension
 
 on:
   workflow_dispatch:
@@ -73,7 +73,7 @@ jobs:
       - name: Trigger next workflow to publish extension
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: 7 Publish
+          workflow: 7. Publish
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "asset_name": "${{ steps.get_asset_name.outputs.asset_name }}", "tag_name": "${{ steps.names.outputs.tag_name }}" }'
 
@@ -90,14 +90,14 @@ jobs:
         if: ${{ failure() || needs.build.result == 'failure' }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "6 - Release failed :x:"
+          SLACK_TITLE: "6. Release failed :x:"
           SLACK_COLOR: '#FF0000'
           SLACK_MESSAGE: ${{ needs.build.outputs.tag_name }}
       - name: Slack Notification on Success
         if: ${{ success() && needs.build.result == 'success' }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "6 - Release was successful :white_check_mark:"
+          SLACK_TITLE: "6. Release was successful :white_check_mark:"
           SLACK_COLOR: '#008000'
           SLACK_MESSAGE: ${{ needs.build.outputs.tag_name }}
       

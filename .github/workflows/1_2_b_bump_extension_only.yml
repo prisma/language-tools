@@ -1,4 +1,4 @@
-name: 1/2 b Bump versions for extension only (on push to master and patch branch)
+name: 1/2b. Bump versions for extension only (on push to master and patch branch)
 
 # This workflow covers both '1_check_for_updates' and '2_bump_versions' workflows, therefore it is another variant of the same, but specifically for extension only, without any Prisma CLI updates that would need to be handled.
 
@@ -59,14 +59,14 @@ jobs:
         if: endsWith(github.ref, '/master')
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: 3 Unit tests for LSP and publish
+          workflow: 3. Unit tests for LSP and publish
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "master" }'
       - name: Trigger next workflow for LSP Unit tests
         if: endsWith(github.ref, '/master') == false
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: 3 Unit tests for LSP and publish
+          workflow: 3. Unit tests for LSP and publish
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "patch-dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.extract_branch.outputs.branch}}" }'
       
@@ -74,7 +74,7 @@ jobs:
         if: ${{ failure() }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "1/2 b - Bumping versions for extension only failed :x:"
+          SLACK_TITLE: "1/2b. - Bumping versions for extension only failed :x:"
           SLACK_COLOR: '#FF0000'
           SLACK_MESSAGE: ${{ steps.update.outputs.next_extension_version  }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
