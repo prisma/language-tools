@@ -53,7 +53,7 @@ jobs:
         run: echo ${{ needs.test.outputs.installed-extension }}
       - name: Bump version
         if: ${{needs.test.result == 'success' && needs.test.outputs.installed-extension }}
-        run: npm run test:bump ${{ github.event.inputs.extension_type }} ${{ needs.test.outputs.installed-extension }}
+        run: npm run test:bump ${{ github.event.inputs.extension_type }} ${{ github.event.inputs.extension_version }}
       - name: Slack Notification on Failure
         if: ${{ needs.test.result == 'failure' && needs.test.outputs.installed-extension }}
         uses: rtCamp/action-slack-notify@v2.0.2
