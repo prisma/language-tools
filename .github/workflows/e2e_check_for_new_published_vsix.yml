@@ -21,10 +21,14 @@ jobs:
           node-version: '12.x'
       - name: Install Dependencies
         run: npm install
+      - name: Get version of published extensions
+        id: versions
+        run: |
+          sh scripts/e2eTestsOnVsix/extension_version.sh
       - name: Check new release of stable and Insider
         id: check_published_version
         run: |
-          node scripts/e2eTestsOnVsix/check_for_new_release.js
+          node scripts/e2eTestsOnVsix/check_for_new_release.js ${{ needs.versions.outputs.insider_version }} ${{ needs.versions.outputs.stable_version }}
       - name: Trigger e2e tests for Insider
         if: ${{ steps.check_published_version.outputs.new_insider_version }}
         uses: benc-uk/workflow-dispatch@v1

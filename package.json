@@ -38,7 +38,8 @@
     "watch": "npm run build -- -w",
     "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "sh scripts/e2e.sh",
-    "testScripts": "jest __tests__"
+    "testScripts": "jest __tests__",
+    "test:bump": "sh scripts/bump-version.sh"
   },
   "husky": {
     "hooks": {
