@@ -11,7 +11,7 @@ on:
         required: true
 
 env:
-  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   SLACK-USERNAME: Prismo
   SLACK_CHANNEL: feed-vscode-e2e-tests
