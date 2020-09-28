@@ -59,7 +59,7 @@ jobs:
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
           SLACK_TITLE: "Testing released ${{ github.event.inputs.extension_type }} extension failed :x:"
-          SLACK_MESSAGE: ${{ needs.test.outputs.installed-extension }}
+          SLACK_MESSAGE: ${{ github.event.inputs.extension_version }}
           SLACK_COLOR: '#FF0000'
 
       - name: Slack Notification on Success
@@ -67,5 +67,5 @@ jobs:
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
           SLACK_TITLE: "Tested released ${{ github.event.inputs.extension_type }} extension :white_check_mark:"
-          SLACK_MESSAGE: ${{ needs.test.outputs.installed-extension }}
+          SLACK_MESSAGE: ${{ github.event.inputs.extension_version }}
           SLACK_COLOR: '#008000'
