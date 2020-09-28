@@ -1,4 +1,4 @@
-name: Bump LSP in VSCode extension
+name: 4 Bump LSP in VSCode extension
 
 on:
   workflow_dispatch:
@@ -43,7 +43,7 @@ jobs:
       - name: Trigger next workflow for VSCode e2e tests
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: Integration tests in VSCode folder with published LSP
+          workflow: 5 Integration tests in VSCode folder with published LSP
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}" }'
       

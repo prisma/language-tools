@@ -1,4 +1,4 @@
-name: Bump versions for extension only (promotes patch branch to stable release)
+name: 1/2 c Bump versions for extension only (promotes patch branch to stable release)
 
 # This workflow covers both '1_check_for_updates' and '2_bump_versions' workflows, therefore it is another variant of the same, but specifically for extension only, without any Prisma CLI updates that would need to be handled.
 # This is used to manually promote the patch branch to stable and release a new stable version.
@@ -50,7 +50,7 @@ jobs:
       - name: Trigger next workflow for LSP Unit tests
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: Unit tests for LSP and publish
+          workflow: 3 Unit tests for LSP and publish
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "latest", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "stable" }'
 
@@ -58,7 +58,7 @@ jobs:
         if: ${{ failure() }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "1 - Promoting patch branch to stable failed :x:"
+          SLACK_TITLE: "1/2 c - Promoting patch branch to stable failed :x:"
           SLACK_COLOR: '#FF0000'
           SLACK_MESSAGE: ${{ steps.update.outputs.next_extension_version  }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

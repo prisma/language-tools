@@ -1,4 +1,4 @@
-name: Publish 
+name: 7 Publish 
 
 on:
   workflow_dispatch:
@@ -43,14 +43,14 @@ jobs:
         if: ${{ failure() }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "Publishing to marketplace failed :x:"
+          SLACK_TITLE: "7 - Publishing to marketplace failed :x:"
           SLACK_COLOR: '#FF0000'
           SLACK_MESSAGE: ${{ github.event.inputs.tag_name }}
       - name: Slack Notification on Success
         if: ${{ success() }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "Published to marketplace :white_check_mark:"
+          SLACK_TITLE: "7 - Published to marketplace :white_check_mark:"
           SLACK_COLOR: '#008000'
           SLACK_MESSAGE: ${{ github.event.inputs.tag_name }}
   
@@ -74,13 +74,13 @@ jobs:
         if: ${{ failure() }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "Publishing to open-vsx failed :x:"
+          SLACK_TITLE: "7 - Publishing to open-vsx failed :x:"
           SLACK_COLOR: '#FF0000'
           SLACK_MESSAGE: ${{ github.event.inputs.tag_name }}
       - name: Slack Notification on Success
         if: ${{ success() }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "Published to open-vsx :white_check_mark:"
+          SLACK_TITLE: "7 - Published to open-vsx :white_check_mark:"
           SLACK_COLOR: '#008000'
           SLACK_MESSAGE: ${{ github.event.inputs.tag_name }}

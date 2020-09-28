@@ -1,4 +1,4 @@
-name: Integration tests in VSCode folder with published LSP
+name: 5 Integration tests in VSCode folder with published LSP
 
 on:
   workflow_dispatch:
@@ -48,7 +48,7 @@ jobs:
         if: ${{ needs.tests.result == 'success' }}
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: Build extension
+          workflow: 6 Build extension
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{github.event.inputs.branch}}" }'
       

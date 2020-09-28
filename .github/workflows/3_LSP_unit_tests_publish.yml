@@ -1,4 +1,4 @@
-name: Unit tests for LSP and publish
+name: 3 Unit tests for LSP and publish
 
 on:
   workflow_dispatch:
@@ -61,7 +61,7 @@ jobs:
       - name: Trigger next workflow for bumping LSP in extension
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: Bump LSP in VSCode extension
+          workflow: 4 Bump LSP in VSCode extension
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}" }'
       
