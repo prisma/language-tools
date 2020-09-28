@@ -216,7 +216,7 @@ export function quickFix(
                           character: Number.MAX_VALUE,
                         },
                       },
-                      newText: '  previewFeatures = ["previewFeatures"]\n}',
+                      newText: '  previewFeatures = ["nativeTypes"]\n}',
                     },
                   ],
                 },
