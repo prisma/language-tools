@@ -51,21 +51,21 @@ jobs:
       - uses: actions/checkout@v2
       - name: echo new version
         run: echo ${{ needs.test.outputs.installed-extension }}
-      - name: Bump version "dev"
+      - name: Bump version
         if: ${{needs.test.result == 'success' && needs.test.outputs.installed-extension }}
-        run: npm run test:bump "dev" ${{ needs.pre-test.outputs.version }}
+        run: npm run test:bump ${{ github.event.inputs.extension_type }} ${{ needs.test.outputs.installed-extension }}
       - name: Slack Notification on Failure
         if: ${{ needs.test.result == 'failure' && needs.test.outputs.installed-extension }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "Testing released insider extension failed :x:"
-          SLACK_MESSAGE: ${{ needs.pre-test.outputs.version }}
+          SLACK_TITLE: "Testing released ${{ github.event.inputs.extension_type }} extension failed :x:"
+          SLACK_MESSAGE: ${{ needs.test.outputs.installed-extension }}
           SLACK_COLOR: '#FF0000'
 
       - name: Slack Notification on Success
         if: ${{ needs.test.result == 'success' && needs.test.outputs.installed-extension }} 
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "Tested released insider extension :white_check_mark:"
-          SLACK_MESSAGE: ${{ needs.pre-test.outputs.version  }}
+          SLACK_TITLE: "Tested released ${{ github.event.inputs.extension_type }} extension :white_check_mark:"
+          SLACK_MESSAGE: ${{ needs.test.outputs.installed-extension }}
           SLACK_COLOR: '#008000'
