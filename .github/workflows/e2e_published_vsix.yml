@@ -40,7 +40,7 @@ jobs:
         if: ${{ steps.install.outputs.installed-extension }}
         uses: GabrielBB/xvfb-action@v1.0
         with:
-          run: npm run test ${{ github.event.inputs.extension_type }} ${{ matrix.os }} ${{ github.event.inputs.extension_version }}
+          run: npm run test:e2e ${{ github.event.inputs.extension_type }} ${{ matrix.os }} ${{ github.event.inputs.extension_version }}
   
   after-test:
     name: Send slack notification
