@@ -1,4 +1,4 @@
-name: Check for Prisma CLI Update
+name: 1. Check for Prisma CLI Update
 
 on:
   schedule:
@@ -29,7 +29,7 @@ jobs:
         if: ${{ steps.check_update.outputs.dev_version }}
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: Bump versions
+          workflow: 2. Bump versions
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "dev", "version": "${{ steps.check_update.outputs.dev_version }}" }'
       
@@ -37,7 +37,7 @@ jobs:
         if: ${{ steps.check_update.outputs.latest_version }}
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: Bump versions
+          workflow: 2. Bump versions
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "latest", "version": "${{ steps.check_update.outputs.latest_version }}" }'
       
@@ -45,7 +45,7 @@ jobs:
         if: ${{ steps.check_update.outputs.patch-dev_version }}
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: Bump versions
+          workflow: 2. Bump versions
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "patch-dev", "version": "${{ steps.check_update.outputs.patch-dev_version }}" }'
       
@@ -53,7 +53,7 @@ jobs:
         if: ${{ failure() }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "1 - Checking for Prisma CLI Update failed :x:"
+          SLACK_TITLE: "1. Checking for Prisma CLI Update failed :x:"
           SLACK_COLOR: '#FF0000'
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: feed-language-tools
