@@ -26,11 +26,7 @@ git commit -am "$COMMIT_MESSAGE"
 
 if [ "$NEW_BRANCH" = "false" ]; then 
   git pull --rebase
-  if [ $BRANCH = "master" ]; then
-    git push
-  else
-    git push $BRANCH
-  fi
+  git push
 else 
   ## Do not rebase on newly created branch
   git push --set-upstream origin $BRANCH
