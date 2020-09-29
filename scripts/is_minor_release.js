@@ -3,6 +3,7 @@ const { readVersionFile } = require('./util')
 
 if (require.main === module) {
     const args = process.argv.slice(2)
+    const releaseChannel = args[0]
     if (releaseChannel === 'latest') {
         const prisma_latest =  readVersionFile({ fileName: 'prisma_latest' })
         const isMinor = isMinorRelease({prismaVersion: prisma_latest})
