@@ -10,5 +10,3 @@ if (require.main === module) {
         console.log(`::set-output name=is_minor_release::${isMinor}`) 
     }
   }
-  
-  
