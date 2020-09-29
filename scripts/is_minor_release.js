@@ -6,7 +6,7 @@ if (require.main === module) {
     const releaseChannel = args[0]
     if (releaseChannel === 'latest') {
         const prisma_latest =  readVersionFile({ fileName: 'prisma_latest' })
-        const isMinor = isMinorRelease({prismaVersion: prisma_latest})
+        const isMinor = isMinorRelease(prisma_latest)
         console.log(`::set-output name=is_minor_release::${isMinor}`) 
     }
   }
