@@ -233,10 +233,6 @@
     {
       "label": "atomicNumberOperations",
       "documentation": "Atomic updates for numeric operations. Check the [related issue](https://github.com/prisma/prisma-client-js/issues/775)."
-    },
-    {
-      "label": "findFirst",
-      "documentation": "Find the first ${singular} that matches the filter."
     }
   ],
   "datasourcePreviewFeatures": [
