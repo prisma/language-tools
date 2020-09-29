@@ -236,7 +236,7 @@
     },
     {
       "label": "findFirst",
-      "documentation": ""
+      "documentation": "Find the first ${singular} that matches the filter."
     }
   ],
   "datasourcePreviewFeatures": [
