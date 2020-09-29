@@ -28,8 +28,6 @@ if [ "$NEW_BRANCH" = "false" ]; then
   git pull --rebase
   if [ $BRANCH = "master" ]; then
     git push
-  else
-    git push $BRANCH
   fi
 else 
   ## Do not rebase on newly created branch
