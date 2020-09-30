@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "vsce": "1.77.0",
-    "@types/mocha": "8.0.1",
+    "@types/mocha": "8.0.3",
     "mocha": "8.1.0",
     "typescript": "3.9.7"
   },
