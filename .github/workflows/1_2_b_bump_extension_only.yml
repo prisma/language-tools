@@ -62,7 +62,7 @@ jobs:
         with:
           workflow: 3. Unit tests for LSP and publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "master" }'
+          inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "master", "trigger_reason": "On push to ${{ steps.extract_branch.outputs.branch }}." }'
       - name: Trigger next workflow for LSP Unit tests
         if: endsWith(github.ref, '/master') == false
         uses: benc-uk/workflow-dispatch@v1
@@ -75,7 +75,7 @@ jobs:
         if: ${{ failure() }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "1/2b. - Bumping versions for extension only failed :x:"
+          SLACK_TITLE: "1/2b. - Bumping versions for 'extension only' failed :x:"
           SLACK_COLOR: '#FF0000'
           SLACK_MESSAGE: "${{ steps.update.outputs.next_extension_version  }} - On push to ${{ steps.extract_branch.outputs.branch }}."
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
