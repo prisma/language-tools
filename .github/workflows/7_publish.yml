@@ -9,6 +9,9 @@ on:
       tag_name: 
         description: 'The release version/tag to fetch from.'
         required: true
+      trigger_reason:
+        description: 'Information about what caused the publishing process in the first place.'
+        required: true
       
 
 env:
@@ -26,6 +29,8 @@ jobs:
   marketplace:
     name: Publish to marketplace
     runs-on: ubuntu-latest
+    env:
+      SLACK_MESSAGE: "${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}"
     steps: 
       - uses: actions/checkout@v2
       - name: Install Dependencies
@@ -45,18 +50,18 @@ jobs:
         env:  
           SLACK_TITLE: "7. Publishing to marketplace failed :x:"
           SLACK_COLOR: '#FF0000'
-          SLACK_MESSAGE: ${{ github.event.inputs.tag_name }}
       - name: Slack Notification on Success
         if: ${{ success() }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
           SLACK_TITLE: "7. Published to marketplace :white_check_mark:"
           SLACK_COLOR: '#008000'
-          SLACK_MESSAGE: ${{ github.event.inputs.tag_name }}
   
   open-vsx:
     name: Publish to open-vsx
     runs-on: ubuntu-latest
+    env:
+      SLACK_MESSAGE: "${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}"
     steps: 
       - uses: actions/checkout@v2
       - name: Install Dependencies
@@ -76,11 +81,9 @@ jobs:
         env:  
           SLACK_TITLE: "7. Publishing to open-vsx failed :x:"
           SLACK_COLOR: '#FF0000'
-          SLACK_MESSAGE: ${{ github.event.inputs.tag_name }}
       - name: Slack Notification on Success
         if: ${{ success() }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
           SLACK_TITLE: "7. Published to open-vsx :white_check_mark:"
           SLACK_COLOR: '#008000'
-          SLACK_MESSAGE: ${{ github.event.inputs.tag_name }}

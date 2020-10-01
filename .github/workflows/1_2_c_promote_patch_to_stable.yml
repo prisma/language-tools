@@ -52,7 +52,7 @@ jobs:
         with:
           workflow: 3. Unit tests for LSP and publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "latest", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "stable" }'
+          inputs: '{ "npm_channel": "latest", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "stable", "trigger_reason": "On manual trigger promoting patch branch to stable." }'
 
       - name: Slack Notification on Failure
         if: ${{ failure() }}
@@ -60,7 +60,7 @@ jobs:
         env:  
           SLACK_TITLE: "1/2c. - Promoting patch branch to stable failed :x:"
           SLACK_COLOR: '#FF0000'
-          SLACK_MESSAGE: ${{ steps.update.outputs.next_extension_version  }}
+          SLACK_MESSAGE: "${{ steps.update.outputs.next_extension_version  }} - On manual trigger promoting patch branch to stable."
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: feed-language-tools
           SLACK_USERNAME: Prismo

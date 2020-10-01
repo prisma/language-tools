@@ -12,6 +12,9 @@ on:
       branch:
         description: 'Branch to run run this workflow on'
         required: true
+      trigger_reason:
+        description: 'Information about what caused the publishing process in the first place.'
+        required: true
 env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
@@ -50,7 +53,7 @@ jobs:
         with:
           workflow: 6. Build extension
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{github.event.inputs.branch}}" }'
+          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{github.event.inputs.branch}}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'
       
       - name: Slack Notification on Failure
         if: ${{ failure() || needs.tests.result == 'failure' }}
@@ -58,7 +61,7 @@ jobs:
         env:  
           SLACK_TITLE: "5. Integration tests in VSCode folder with published LSP failed :x:"
           SLACK_COLOR: '#FF0000'
-          SLACK_MESSAGE: ${{github.event.inputs.extension_version}}
+          SLACK_MESSAGE: "${{github.event.inputs.extension_version}} - ${{github.event.inputs.trigger_reason}} "
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: feed-language-tools
           SLACK_USERNAME: Prismo
