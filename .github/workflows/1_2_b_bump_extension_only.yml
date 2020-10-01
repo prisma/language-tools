@@ -69,7 +69,7 @@ jobs:
         with:
           workflow: 3. Unit tests for LSP and publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "patch-dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.extract_branch.outputs.branch}}" }'
+          inputs: '{ "npm_channel": "patch-dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.extract_branch.outputs.branch}}", "trigger_reason": "On push to ${{ steps.extract_branch.outputs.branch }}." }'
       
       - name: Slack Notification on Failure
         if: ${{ failure() }}
@@ -77,7 +77,7 @@ jobs:
         env:  
           SLACK_TITLE: "1/2b. - Bumping versions for extension only failed :x:"
           SLACK_COLOR: '#FF0000'
-          SLACK_MESSAGE: ${{ steps.update.outputs.next_extension_version  }}
+          SLACK_MESSAGE: "${{ steps.update.outputs.next_extension_version  }} - On push to ${{ steps.extract_branch.outputs.branch }}."
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: feed-language-tools
           SLACK_USERNAME: Prismo
