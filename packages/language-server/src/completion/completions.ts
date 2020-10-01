@@ -226,6 +226,10 @@ export function getSuggestionForFieldAttribute(
       } else {
         suggestions.push(...nativeTypeSuggestions)
       }
+    } else {
+      console.log(
+        'Did not receive any native type suggestions from prisma-fmt call.',
+      )
     }
   }
 
