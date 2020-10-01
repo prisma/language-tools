@@ -39,6 +39,11 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
+      - name: Print inputs
+        run: |
+          echo ${{github.event.inputs.extension_version}}
+          echo ${{github.event.inputs.npm_channel}}
+          echo ${{github.event.inputs.trigger_reason}}
       - name: Install Dependencies
         run: npm install
       - name: Compile

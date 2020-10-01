@@ -48,6 +48,11 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.branch }}
+      - name: Print inputs
+        run: |
+          echo ${{github.event.inputs.extension_version}}
+          echo ${{github.event.inputs.npm_channel}}
+          echo ${{github.event.inputs.trigger_reason}}
       - name: Install Dependencies in LSP
         run: cd packages/language-server && npm install
       - name: Compile LSP

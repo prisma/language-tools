@@ -33,6 +33,9 @@ jobs:
       SLACK_MESSAGE: "${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}"
     steps: 
       - uses: actions/checkout@v2
+      - name: Print inputs
+        run: |
+          echo ${{github.event.inputs.trigger_reason}}
       - name: Install Dependencies
         run: npm install
       - uses: dsaltares/fetch-gh-release-asset@master
@@ -64,6 +67,9 @@ jobs:
       SLACK_MESSAGE: "${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}"
     steps: 
       - uses: actions/checkout@v2
+      - name: Print inputs
+        run: |
+          echo ${{github.event.inputs.trigger_reason}}
       - name: Install Dependencies
         run: npm install
       - uses: dsaltares/fetch-gh-release-asset@master
