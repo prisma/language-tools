@@ -35,7 +35,7 @@ function getInsertRange(document: TextDocument): Range {
  *        (0.4 allows 1 substitution/transposition for every 5 characters,
  *         and 1 insertion/deletion at 3 characters)
  */
-function getSpellingSuggestionForModelAndEnumName(
+function getSpellingSuggestions(
   name: string,
   relations: string[],
 ): string | undefined {
@@ -129,7 +129,7 @@ export function quickFix(
         hasTypeModifierOptional,
         diagText,
       )
-      const spellingSuggestion = getSpellingSuggestionForModelAndEnumName(
+      const spellingSuggestion = getSpellingSuggestions(
         diagText,
         getAllRelationNames(lines),
       )
@@ -257,6 +257,32 @@ export function quickFix(
           },
         },
       })
+    }
+    if (diag.severity === DiagnosticSeverity.Error &&
+    diag.message.includes('It does not start with any known Prisma schema keyword.')) {
+      let diagText = textDocument.getText(diag.range).split(/\s/)
+      const spellingSuggestion = getSpellingSuggestions(
+        diagText[0],
+        ["model", "enum", "datasource", "generator"],
+      )
+      if (spellingSuggestion && diagText.length !== 0) {
+        codeActions.push({
+          title: `Change spelling to '${spellingSuggestion}'`,
+          kind: CodeActionKind.QuickFix,
+          diagnostics: [diag],
+          edit: {
+            changes: {
+              [params.textDocument.uri]: [
+                {
+                  range: { start: diag.range.start, end: {line: diag.range.start.line, character: diagText[0].length}},  // the red squiggly lines start at the beginning of the blog and end at the end of the line, include e.g. 'mode nameOfBlock {' but 
+                  // we only want to replace e.g. 'mode' with 'model', not delete the whole line
+                  newText: spellingSuggestion,
+                },
+              ],
+            },
+          },
+        })
+      }
     }
   }
 
