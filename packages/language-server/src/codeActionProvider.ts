@@ -37,14 +37,14 @@ function getInsertRange(document: TextDocument): Range {
  */
 function getSpellingSuggestions(
   name: string,
-  relations: string[],
+  possibleSuggestions: string[],
 ): string | undefined {
   const maximumLengthDifference = Math.min(2, Math.floor(name.length * 0.34))
   let bestDistance = Math.floor(name.length * 0.4) + 1 // If the best result isn't better than this, don't bother.
   let bestCandidate: string | undefined
   let justCheckExactMatches = false
   const nameLowerCase = name.toLowerCase()
-  for (const candidate of relations) {
+  for (const candidate of possibleSuggestions) {
     if (
       !(
         Math.abs(candidate.length - nameLowerCase.length) <=
@@ -259,29 +259,31 @@ export function quickFix(
       })
     }
     if (diag.severity === DiagnosticSeverity.Error &&
-    diag.message.includes('It does not start with any known Prisma schema keyword.')) {
+      diag.message.includes('It does not start with any known Prisma schema keyword.')) {
       let diagText = textDocument.getText(diag.range).split(/\s/)
-      const spellingSuggestion = getSpellingSuggestions(
-        diagText[0],
-        ["model", "enum", "datasource", "generator"],
-      )
-      if (spellingSuggestion && diagText.length !== 0) {
-        codeActions.push({
-          title: `Change spelling to '${spellingSuggestion}'`,
-          kind: CodeActionKind.QuickFix,
-          diagnostics: [diag],
-          edit: {
-            changes: {
-              [params.textDocument.uri]: [
-                {
-                  range: { start: diag.range.start, end: {line: diag.range.start.line, character: diagText[0].length}},  // the red squiggly lines start at the beginning of the blog and end at the end of the line, include e.g. 'mode nameOfBlock {' but 
-                  // we only want to replace e.g. 'mode' with 'model', not delete the whole line
-                  newText: spellingSuggestion,
-                },
-              ],
+      if (diagText.length !== 0) {
+        const spellingSuggestion = getSpellingSuggestions(
+          diagText[0],
+          ["model", "enum", "datasource", "generator"],
+        )
+        if (spellingSuggestion) {
+          codeActions.push({
+            title: `Change spelling to '${spellingSuggestion}'`,
+            kind: CodeActionKind.QuickFix,
+            diagnostics: [diag],
+            edit: {
+              changes: {
+                [params.textDocument.uri]: [
+                  {
+                    range: { start: diag.range.start, end: { line: diag.range.start.line, character: diagText[0].length } },  // the red squiggly lines start at the beginning of the blog and end at the end of the line, include e.g. 'mode nameOfBlock {' but 
+                    // we only want to replace e.g. 'mode' with 'model', not delete the whole line
+                    newText: spellingSuggestion,
+                  },
+                ],
+              },
             },
-          },
-        })
+          })
+        }
       }
     }
   }
