@@ -215,17 +215,17 @@ export function getSuggestionForFieldAttribute(
     const prismaType = wordsBeforePosition[1]
     const nativeTypeSuggestions = getNativeTypes(document, prismaType, binPath)
 
-    if (
-      datasourceName &&
-      nativeTypeSuggestions.length !== 0 &&
-      !currentLine.includes('@' + datasourceName)
-    ) {
-      suggestions.push({
-        kind: CompletionItemKind.Property,
-        label: '@' + datasourceName,
-        documentation:
-          'Defines a custom type that should be used for this field.',
-      })
+    if (datasourceName && nativeTypeSuggestions.length !== 0) {
+      if (!currentLine.includes('@' + datasourceName)) {
+        suggestions.push({
+          kind: CompletionItemKind.Property,
+          label: '@' + datasourceName,
+          documentation:
+            'Defines a custom type that should be used for this field.',
+        })
+      } else {
+        suggestions.push(...nativeTypeSuggestions)
+      }
     }
   }
 
