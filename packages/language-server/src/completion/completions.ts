@@ -25,7 +25,7 @@ import {
   // TODO: uncomment once nativeTypes will be launched!
   // datasourcePreviewFeatures,
 } from './completionUtil'
-import klona from 'klona'
+import { klona } from 'klona'
 import { extractModelName } from '../rename/renameUtil'
 import nativeTypeConstructors, { NativeTypeConstructors } from '../nativeTypes'
 
