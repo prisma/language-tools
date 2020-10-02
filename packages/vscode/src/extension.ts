@@ -29,13 +29,13 @@ import {
   checkForMinimalColorTheme,
   checkForOtherPrismaExtension,
 } from './util'
-import { check } from 'checkpoint-client'
-import { getProjectHash } from './hashes'
 import * as chokidar from 'chokidar'
+import TelemetryReporter from './telemetryReporter'
 const packageJson = require('../../package.json') // eslint-disable-line
 
 let client: LanguageClient
 let serverModule: string
+let telemetry: TelemetryReporter
 let watcher: chokidar.FSWatcher
 
 const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
@@ -180,11 +180,9 @@ export async function activate(context: ExtensionContext): Promise<void> {
     const extensionId = 'prisma.' + packageJson.name
     // eslint-disable-next-line
     const extensionVersion = packageJson.version
-    await check({
-      product: extensionId, // eslint-disable-line @typescript-eslint/no-unsafe-assignment
-      version: extensionVersion, // eslint-disable-line @typescript-eslint/no-unsafe-assignment
-      project_hash: await getProjectHash(),
-    })
+    telemetry = new TelemetryReporter(extensionId, extensionVersion)
+    context.subscriptions.push(telemetry)
+    await telemetry.sendTelemetryEvent()
     if (extensionId === 'prisma.prisma-insider') {
       checkForOtherPrismaExtension(extensionId)
     }
@@ -203,6 +201,8 @@ export async function deactivate(): Promise<void> {
   if (!client) {
     return undefined
   }
-
+  if (!isDebugOrTestSession()) {
+    telemetry.dispose() // eslint-disable-line @typescript-eslint/no-floating-promises
+  }
   return client.stop()
 }
