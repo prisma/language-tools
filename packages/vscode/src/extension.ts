@@ -29,8 +29,6 @@ import {
   checkForMinimalColorTheme,
   checkForOtherPrismaExtension,
 } from './util'
-import { check } from 'checkpoint-client'
-import { getProjectHash } from './hashes'
 import * as chokidar from 'chokidar'
 import TelemetryReporter from './telemetryReporter'
 const packageJson = require('../../package.json') // eslint-disable-line
