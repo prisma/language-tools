@@ -18,8 +18,8 @@ export default class TelemetryReporter {
   public async sendTelemetryEvent(): Promise<void> {
     if (this.userOptIn) {
       await check({
-        product: this.extensionId, // eslint-disable-line @typescript-eslint/no-unsafe-assignment
-        version: this.extensionVersion, // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+        product: this.extensionId,
+        version: this.extensionVersion,
         project_hash: await getProjectHash(),
       })
     }
