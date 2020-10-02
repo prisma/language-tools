@@ -55,6 +55,7 @@ Read more about [how to contribute to the Prisma VSCode extension](./packages/vs
 ## Telemetry
 
 This extension collects telemetry data to help us better the usage of the extension. You can read more about that [here](https://www.prisma.io/docs/reference/more/telemetry).
+The extension respects the `telemetry.enableTelemetry` setting in VSCode.
 
 ## Build information
 
