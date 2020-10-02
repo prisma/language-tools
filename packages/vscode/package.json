@@ -13,7 +13,6 @@
     "Programming Languages"
   ],
   "dependencies": {
-    "vscode-extension-telemetry": "0.1.6",
     "checkpoint-client": "1.1.12",
     "crypto": "1.0.1",
     "chokidar": "3.4.2",

@@ -15,11 +15,8 @@ import {
   DeclarationParams,
   RenameParams,
   DocumentFormattingParams,
-  CodeAction,
   DidChangeConfigurationNotification,
 } from 'vscode-languageserver'
-import { getSignature } from 'checkpoint-client'
-import { sendTelemetry, sendException, initializeTelemetry } from './telemetry'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
 import * as util from './util'
@@ -55,7 +52,6 @@ export function startServer(options?: LSPOptions): void {
   let defaultBinPath = ''
 
   connection.onInitialize(async (params: InitializeParams) => {
-    initializeTelemetry(connection)
     const capabilities = params.capabilities
 
     hasCodeActionLiteralsCapability = Boolean(
@@ -213,7 +209,6 @@ export function startServer(options?: LSPOptions): void {
           `Installed version ${version} of 'prisma-fmt' using path: ${prismaFmtBinPath}`,
         )
       } catch (err) {
-        sendException(await getSignature(), err, `Cannot install prisma-fmt.`)
         connection.console.error('Cannot install prisma-fmt: ' + err) // eslint-disable-line @typescript-eslint/restrict-plus-operands
       }
     }
@@ -223,19 +218,10 @@ export function startServer(options?: LSPOptions): void {
     return documents.get(uri)
   }
 
-  connection.onDefinition(async (params: DeclarationParams) => {
+  connection.onDefinition((params: DeclarationParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      const definition = MessageHandler.handleDefinitionRequest(doc, params)
-      if (definition !== undefined) {
-        sendTelemetry({
-          action: 'definition',
-          attributes: {
-            signature: await getSignature(),
-          },
-        })
-      }
-      return definition
+      return MessageHandler.handleDefinitionRequest(doc, params)
     }
   })
 
@@ -252,14 +238,7 @@ export function startServer(options?: LSPOptions): void {
     }
   })
 
-  connection.onCompletionResolve(async (completionItem: CompletionItem) => {
-    sendTelemetry({
-      action: 'resolveCompletion',
-      attributes: {
-        label: completionItem.label,
-        signature: await getSignature(),
-      },
-    })
+  connection.onCompletionResolve((completionItem: CompletionItem) => {
     return MessageHandler.handleCompletionResolveRequest(completionItem)
   })
 
@@ -272,19 +251,10 @@ export function startServer(options?: LSPOptions): void {
     connection.sendNotification('prisma/didChangeWatchedFiles', {})
   })
 
-  connection.onHover(async (params: HoverParams) => {
+  connection.onHover((params: HoverParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      const hover = MessageHandler.handleHoverRequest(doc, params)
-      if (hover !== undefined) {
-        sendTelemetry({
-          action: 'hover',
-          attributes: {
-            signature: await getSignature(),
-          },
-        })
-      }
-      return hover
+      return MessageHandler.handleHoverRequest(doc, params)
     }
   })
 
@@ -293,12 +263,6 @@ export function startServer(options?: LSPOptions): void {
     const settings = await getDocumentSettings(params.textDocument.uri)
     const prismaFmtBinPath = getPrismaFmtBinPath(settings.prismaFmtBinPath)
     if (doc) {
-      sendTelemetry({
-        action: 'format',
-        attributes: {
-          signature: await getSignature(),
-        },
-      })
       return MessageHandler.handleDocumentFormatting(
         params,
         doc,
@@ -310,38 +274,17 @@ export function startServer(options?: LSPOptions): void {
     }
   })
 
-  connection.onCodeAction(async (params: CodeActionParams) => {
+  connection.onCodeAction((params: CodeActionParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      const codeActions: CodeAction[] = MessageHandler.handleCodeActions(
-        params,
-        doc,
-      )
-      if (codeActions.length !== 0) {
-        sendTelemetry({
-          action: 'codeAction',
-          attributes: {
-            signature: await getSignature(),
-          },
-        })
-      }
-      return codeActions
+      return MessageHandler.handleCodeActions(params, doc)
     }
   })
 
-  connection.onRenameRequest(async (params: RenameParams) => {
+  connection.onRenameRequest((params: RenameParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      const rename = MessageHandler.handleRenameRequest(params, doc)
-      if (rename !== undefined) {
-        sendTelemetry({
-          action: 'rename',
-          attributes: {
-            signature: await getSignature(),
-          },
-        })
-      }
-      return rename
+      return MessageHandler.handleRenameRequest(params, doc)
     }
   })
 
