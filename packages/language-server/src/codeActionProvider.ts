@@ -258,20 +258,14 @@ export function quickFix(
         },
       })
     }
-    if (
-      diag.severity === DiagnosticSeverity.Error &&
-      diag.message.includes(
-        'It does not start with any known Prisma schema keyword.',
-      )
-    ) {
-      const diagText = textDocument.getText(diag.range).split(/\s/)
+    if (diag.severity === DiagnosticSeverity.Error &&
+      diag.message.includes('It does not start with any known Prisma schema keyword.')) {
+      let diagText = textDocument.getText(diag.range).split(/\s/)
       if (diagText.length !== 0) {
-        const spellingSuggestion = getSpellingSuggestions(diagText[0], [
-          'model',
-          'enum',
-          'datasource',
-          'generator',
-        ])
+        const spellingSuggestion = getSpellingSuggestions(
+          diagText[0],
+          ["model", "enum", "datasource", "generator"],
+        )
         if (spellingSuggestion) {
           codeActions.push({
             title: `Change spelling to '${spellingSuggestion}'`,
@@ -281,13 +275,7 @@ export function quickFix(
               changes: {
                 [params.textDocument.uri]: [
                   {
-                    range: {
-                      start: diag.range.start,
-                      end: {
-                        line: diag.range.start.line,
-                        character: diagText[0].length,
-                      },
-                    }, // the red squiggly lines start at the beginning of the blog and end at the end of the line, include e.g. 'mode nameOfBlock {' but
+                    range: { start: diag.range.start, end: { line: diag.range.start.line, character: diagText[0].length } },  // the red squiggly lines start at the beginning of the blog and end at the end of the line, include e.g. 'mode nameOfBlock {' but 
                     // we only want to replace e.g. 'mode' with 'model', not delete the whole line
                     newText: spellingSuggestion,
                   },
