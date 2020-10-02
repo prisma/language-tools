@@ -12,9 +12,34 @@ import {
   denyListDarkColorThemes,
   denyListLightColorThemes,
 } from './denyListColorThemes'
+import { homedir } from 'os'
+import { readdirSync } from 'fs'
+import path from 'path'
 
 export function isDebugOrTestSession(): boolean {
   return env.sessionId === 'someValue.sessionId'
+}
+
+export function checkForOtherPrismaExtension(extensionId: string) {
+  let watchedFolderPrefix = ''
+  if (extensionId === 'prisma.prisma-insider') {
+    watchedFolderPrefix = 'prisma.prisma-'
+  } else {
+    watchedFolderPrefix = 'prisma.prisma-insider-'
+  }
+
+  const files = readdirSync(
+    path.join(homedir(), '.vscode/extensions'),
+  ).filter((fn) => fn.startsWith(watchedFolderPrefix))
+  if (files.length !== 0) {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    window.showInformationMessage(
+      `You have both the Insider and stable Prisma VSCode extension installed. Please uninstall or disable one of them for a better experience.`,
+    )
+    console.log(
+      'Both the insider and stable Prisma VSCode extension are being used.',
+    )
+  }
 }
 
 function showToastToSwitchColorTheme(

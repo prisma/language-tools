@@ -27,6 +27,7 @@ import {
   isSnippetEdit,
   isDebugOrTestSession,
   checkForMinimalColorTheme,
+  checkForOtherPrismaExtension,
 } from './util'
 import { check } from 'checkpoint-client'
 import { getProjectHash } from './hashes'
@@ -66,9 +67,13 @@ export async function activate(context: ExtensionContext): Promise<void> {
   const isDebugOrTest = isDebugOrTestSession()
 
   const rootPath = workspace.rootPath
+
   if (rootPath) {
     watcher = chokidar.watch(
-      path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts'),
+      [
+        path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts'),
+        '$HOME/.vscode/extensions',
+      ],
       {
         usePolling: false,
       },
@@ -93,6 +98,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
   if (!isDebugOrTest) {
     telemetry = new Telemetry(extensionId, extensionVersion)
   }
+
+  checkForOtherPrismaExtension(extensionId)
 
   // The debug options for the server
   // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
