@@ -21,9 +21,11 @@ export function isDebugOrTestSession(): boolean {
 }
 
 export function checkForOtherPrismaExtension(extensionId: string) {
-  const files = readdirSync(
-    path.join(homedir(), '.vscode/extensions'),
-  ).filter((fn) => fn.startsWith('prisma.prisma-'))
+  const files = readdirSync(path.join(homedir(), '.vscode/extensions')).filter(
+    (fn) =>
+      fn.startsWith('prisma.prisma-') &&
+      !fn.startsWith('prisma.prisma-insider-'),
+  )
   if (files.length !== 0) {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     window.showInformationMessage(
