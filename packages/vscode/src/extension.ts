@@ -27,6 +27,7 @@ import {
   isSnippetEdit,
   isDebugOrTestSession,
   checkForMinimalColorTheme,
+  checkForOtherPrismaExtension,
 } from './util'
 import { check } from 'checkpoint-client'
 import { getProjectHash } from './hashes'
@@ -56,6 +57,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
   const isDebugOrTest = isDebugOrTestSession()
 
   const rootPath = workspace.rootPath
+
   if (rootPath) {
     watcher = chokidar.watch(
       path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts'),
@@ -183,6 +185,9 @@ export async function activate(context: ExtensionContext): Promise<void> {
       version: extensionVersion, // eslint-disable-line @typescript-eslint/no-unsafe-assignment
       project_hash: await getProjectHash(),
     })
+    if (extensionId === 'prisma.prisma-insider') {
+      checkForOtherPrismaExtension(extensionId)
+    }
   }
 
   checkForMinimalColorTheme()
