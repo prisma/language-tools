@@ -21,16 +21,9 @@ export function isDebugOrTestSession(): boolean {
 }
 
 export function checkForOtherPrismaExtension(extensionId: string) {
-  let watchedFolderPrefix = ''
-  if (extensionId === 'prisma.prisma-insider') {
-    watchedFolderPrefix = 'prisma.prisma-'
-  } else {
-    watchedFolderPrefix = 'prisma.prisma-insider-'
-  }
-
   const files = readdirSync(
     path.join(homedir(), '.vscode/extensions'),
-  ).filter((fn) => fn.startsWith(watchedFolderPrefix))
+  ).filter((fn) => fn.startsWith('prisma.prisma-'))
   if (files.length !== 0) {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     window.showInformationMessage(
