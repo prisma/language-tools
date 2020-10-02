@@ -60,8 +60,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   if (rootPath) {
     watcher = chokidar.watch(
-      path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts')
-      ,
+      path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts'),
       {
         usePolling: false,
       },
@@ -186,7 +185,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
       version: extensionVersion, // eslint-disable-line @typescript-eslint/no-unsafe-assignment
       project_hash: await getProjectHash(),
     })
-    if (extensionId.includes('insider')) {
+    if (extensionId === 'prisma.prisma-insider') {
       checkForOtherPrismaExtension(extensionId)
     }
   }
