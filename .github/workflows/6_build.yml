@@ -1,4 +1,4 @@
-name: Build extension
+name: 6. Build extension
 
 on:
   workflow_dispatch:
@@ -11,6 +11,9 @@ on:
         required: true
       branch:
         description: 'Branch to run run this workflow on'
+        required: true
+      trigger_reason:
+        description: 'Information about what caused the publishing process in the first place.'
         required: true
 
 env:
@@ -36,6 +39,11 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
+      - name: Print inputs
+        run: |
+          echo ${{github.event.inputs.extension_version}}
+          echo ${{github.event.inputs.npm_channel}}
+          echo ${{github.event.inputs.trigger_reason}}
       - name: Install Dependencies
         run: npm install
       - name: Compile
@@ -73,15 +81,17 @@ jobs:
       - name: Trigger next workflow to publish extension
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: Publish
+          workflow: 7. Publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "asset_name": "${{ steps.get_asset_name.outputs.asset_name }}", "tag_name": "${{ steps.names.outputs.tag_name }}" }'
+          inputs: '{ "asset_name": "${{ steps.get_asset_name.outputs.asset_name }}", "tag_name": "${{ steps.names.outputs.tag_name }}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'
 
   slack:
     name: Send slack notification
     runs-on: ubuntu-latest
     needs: [build]
     if: always()
+    env:
+      SLACK_MESSAGE: "${{ needs.build.outputs.tag_name }} - ${{github.event.inputs.trigger_reason}} "
     steps:
       - uses: actions/checkout@v2
         with:
@@ -90,16 +100,12 @@ jobs:
         if: ${{ failure() || needs.build.result == 'failure' }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "Release failed :x:"
+          SLACK_TITLE: "6. Release failed :x:"
           SLACK_COLOR: '#FF0000'
-          SLACK_MESSAGE: ${{ needs.build.outputs.tag_name }}
       - name: Slack Notification on Success
         if: ${{ success() && needs.build.result == 'success' }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "Release was successful :white_check_mark:"
+          SLACK_TITLE: "6. Release was successful :white_check_mark:"
           SLACK_COLOR: '#008000'
-          SLACK_MESSAGE: ${{ needs.build.outputs.tag_name }}
-      
-      
       

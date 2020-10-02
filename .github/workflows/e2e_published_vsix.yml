@@ -1,0 +1,71 @@
+name: E2E tests after release on VSIX
+
+on:
+  workflow_dispatch:
+    inputs:
+      extension_type:
+        description: 'Insider or stable extension'
+        required: true
+      extension_version:
+        description: 'VSCode extension version'
+        required: true
+
+env:
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  SLACK-USERNAME: Prismo
+  SLACK_CHANNEL: feed-vscode-e2e-tests
+  SLACK_ICON_EMOJI: ":robot_face:"
+  ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+  
+jobs:
+
+  test:
+    name: Test published extension
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    outputs: 
+      installed-extension: ${{ steps.install.outputs.installed-extension }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: npm install
+      - name: Install extension via CLI
+        id: install
+        run: |
+          node scripts/e2eTestsOnVsix/install_extension.js ${{ github.event.inputs.extension_type }} ${{ github.event.inputs.extension_version }}
+      - name: Run test
+        if: ${{ steps.install.outputs.installed-extension }}
+        uses: GabrielBB/xvfb-action@v1.0
+        with:
+          run: npm run test:e2e ${{ github.event.inputs.extension_type }} ${{ matrix.os }} ${{ github.event.inputs.extension_version }}
+  
+  after-test:
+    name: Send slack notification
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: always()
+    steps:
+      - uses: actions/checkout@v2
+      - name: echo new version
+        run: echo ${{ needs.test.outputs.installed-extension }}
+      - name: Bump version
+        if: ${{needs.test.result == 'success' && needs.test.outputs.installed-extension }}
+        run: npm run test:bump ${{ github.event.inputs.extension_type }} ${{ github.event.inputs.extension_version }}
+      - name: Slack Notification on Failure
+        if: ${{ needs.test.result == 'failure' && needs.test.outputs.installed-extension }}
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_TITLE: "Testing released ${{ github.event.inputs.extension_type }} extension failed :x:"
+          SLACK_MESSAGE: ${{ github.event.inputs.extension_version }}
+          SLACK_COLOR: '#FF0000'
+
+      - name: Slack Notification on Success
+        if: ${{ needs.test.result == 'success' && needs.test.outputs.installed-extension }} 
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:  
+          SLACK_TITLE: "Tested released ${{ github.event.inputs.extension_type }} extension :white_check_mark:"
+          SLACK_MESSAGE: ${{ github.event.inputs.extension_version }}
+          SLACK_COLOR: '#008000'

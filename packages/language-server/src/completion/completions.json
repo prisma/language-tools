@@ -231,10 +231,6 @@
       "documentation": "While Prisma already ships transactions within [nested writes](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/relation-queries#nested-writes), there are many use cases, where you might want to perform multiple *unrelated* write operations in a transaction and rollback, if one of them fails.\nBy wrapping your write operations in the new `transaction()` function, you can achieve exactly this!\n\n(Note, that these transactions are not long-running and are executed directly after each other. This is an explicit design decision of Prisma. In case this does not cover your use case yet, please chime in on [GitHub](https://github.com/prisma/prisma-client-js/issues/742)).\nAlternatively, you can store the unresolved promises in variables and pass these to the new transaction function.\n\n\n\nPlease [share your feedback](https://github.com/prisma/prisma/issues/3104) on how this feature works for you. We are interested in both positive and negative feedback to help us gauge when this feature is ready for production! (If encounter any problems, please open a new issue [here](https://github.com/prisma/prisma/issues/new/choose))."
     },
     {
-      "label": "insensitiveFilters",
-      "documentation": "Case insensitive scalar filters for supported DBs. Only postgres has any implementation at the moment, as SQLite doesn't reliably support insensitive filtering and MySQL is insensitive by default."
-    },
-    {
       "label": "atomicNumberOperations",
       "documentation": "Atomic updates for numeric operations. Check the [related issue](https://github.com/prisma/prisma-client-js/issues/775)."
     }

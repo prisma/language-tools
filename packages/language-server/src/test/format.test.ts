@@ -19,6 +19,7 @@ async function assertFormat(fixturePath: string): Promise<void> {
   const formatResult: TextEdit[] = await handleDocumentFormatting(
     params,
     document,
+    binPathPrismaFmt,
   )
 
   // TODO apply edits and compare with fixtures/correct.prisma
@@ -26,10 +27,15 @@ async function assertFormat(fixturePath: string): Promise<void> {
   assert.ok(formatResult.length !== 0)
 }
 
+// Cache prisma-fmt binary path
+let binPathPrismaFmt = ''
+
 suite('Format', () => {
   suiteSetup(async () => {
     // install prisma-fmt binary
-    const binPathPrismaFmt = await getBinPath()
+    if (binPathPrismaFmt === '') {
+      binPathPrismaFmt = await getBinPath()
+    }
     if (await binaryIsNeeded(binPathPrismaFmt)) await install(binPathPrismaFmt)
   })
 

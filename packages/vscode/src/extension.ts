@@ -20,7 +20,7 @@ import {
   Command,
   workspace,
 } from 'vscode'
-import { Telemetry, TelemetryPayload, ExceptionPayload } from './telemetry'
+
 import path from 'path'
 import {
   applySnippetWorkspaceEdit,
@@ -35,21 +35,11 @@ import * as chokidar from 'chokidar'
 const packageJson = require('../../package.json') // eslint-disable-line
 
 let client: LanguageClient
-let telemetry: Telemetry
 let serverModule: string
 let watcher: chokidar.FSWatcher
 
 const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
 const isE2ETestOnPullRequest = () => process.env.localLSP === 'true'
-
-class GenericLanguageServerException extends Error {
-  constructor(message: string, stack: string) {
-    super()
-    this.name = 'GenericLanguageServerException'
-    this.stack = stack
-    this.message = message
-  }
-}
 
 function createLanguageServer(
   serverOptions: ServerOptions,
@@ -87,18 +77,6 @@ export async function activate(context: ExtensionContext): Promise<void> {
     console.log('Using published LSP.')
     // use published npm package for production
     serverModule = require.resolve('@prisma/language-server/dist/src/cli')
-  }
-
-  // eslint-disable-next-line
-  const extensionId = 'prisma.' + packageJson.name
-  // eslint-disable-next-line
-  const extensionVersion = packageJson.version
-  if (!isDebugOrTest) {
-    telemetry = new Telemetry(extensionId, extensionVersion)
-  }
-
-  if (extensionId.includes('insider')) {
-    checkForOtherPrismaExtension(extensionId)
   }
 
   // The debug options for the server
@@ -181,33 +159,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   const disposable = client.start()
 
-  // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  client.onReady().then(() => {
-    if (!isDebugOrTest) {
-      client.onNotification('prisma/telemetry', (payload: TelemetryPayload) => {
-        // eslint-disable-next-line no-console
-        telemetry.sendEvent(payload.action, payload.attributes)
-      })
-      client.onNotification(
-        'prisma/telemetryException',
-        (payload: ExceptionPayload) => {
-          const error = new GenericLanguageServerException(
-            payload.message,
-            payload.stack,
-          )
-          telemetry.sendException(error, {
-            signature: payload.signature,
-          })
-        },
-      )
-    }
-  })
-
   // Start the client. This will also launch the server
   context.subscriptions.push(disposable)
-  if (!isDebugOrTestSession()) {
-    context.subscriptions.push(telemetry.reporter)
-  }
 
   context.subscriptions.push(
     commands.registerCommand('prisma.restartLanguageServer', async () => {
@@ -224,14 +177,18 @@ export async function activate(context: ExtensionContext): Promise<void> {
   )
 
   if (!isDebugOrTest) {
-    telemetry.sendEvent('activated', {
-      signature: await telemetry.getSignature(),
-    })
+    // eslint-disable-next-line
+    const extensionId = 'prisma.' + packageJson.name
+    // eslint-disable-next-line
+    const extensionVersion = packageJson.version
     await check({
       product: extensionId, // eslint-disable-line @typescript-eslint/no-unsafe-assignment
       version: extensionVersion, // eslint-disable-line @typescript-eslint/no-unsafe-assignment
       project_hash: await getProjectHash(),
     })
+    if (extensionId.includes('insider')) {
+      checkForOtherPrismaExtension(extensionId)
+    }
   }
 
   checkForMinimalColorTheme()
@@ -246,12 +203,6 @@ export async function activate(context: ExtensionContext): Promise<void> {
 export async function deactivate(): Promise<void> {
   if (!client) {
     return undefined
-  }
-  if (!isDebugOrTestSession()) {
-    telemetry.sendEvent('deactivated', {
-      signature: await telemetry.getSignature(),
-    })
-    telemetry.reporter.dispose() // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
   return client.stop()

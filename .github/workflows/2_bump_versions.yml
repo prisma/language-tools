@@ -1,4 +1,4 @@
-name: Bump versions
+name: 2. Bump versions
 
 on:
   workflow_dispatch:
@@ -47,6 +47,15 @@ jobs:
         id: setup_branch
         run: |
           sh scripts/setup_branch.sh ${{ github.event.inputs.npm_channel }}
+      - name: Check for minor release
+        id: is_minor
+        run: |
+          node scripts/is_minor_release.js ${{ github.event.inputs.npm_channel }}
+      - name: Reset on master if minor release
+        if: ${{steps.is_minor.outputs.is_minor_release}}
+        run: |
+          git reset --hard master
+          git push --force origin stable
       - name: Update Prisma CLI version and VSCode extension version
         run:  |
           node scripts/update_package_json_files.js ${{ github.event.inputs.npm_channel }} ${{ steps.update.outputs.next_extension_version }} ${{ github.event.inputs.version }} 
@@ -59,17 +68,17 @@ jobs:
       - name: Trigger next workflow for LSP Unit tests
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: Unit tests for LSP and publish
+          workflow: 3. Unit tests for LSP and publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}" , "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}" }'
+          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}" , "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}", "trigger_reason": "On new Prisma CLI version." }'
       
       - name: Slack Notification on Failure
         if: ${{ failure() }}
         uses: rtCamp/action-slack-notify@v2.0.2
         env:  
-          SLACK_TITLE: "2 - Bumping versions failed :x:"
+          SLACK_TITLE: "2. Bumping versions failed :x:"
           SLACK_COLOR: '#FF0000'
-          SLACK_MESSAGE: ${{github.event.inputs.version}}
+          SLACK_MESSAGE: "${{github.event.inputs.version}} - On new Prisma CLI version."
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: feed-language-tools
           SLACK_USERNAME: Prismo

@@ -1,0 +1,40 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "semanticCommits": true,
+  "ignoreDeps": ["@prisma/language-server", "@prisma/get-platform"],
+  "masterIssue": true,
+  "reviewers": ["@divyenduz", "@carmenberndt"],
+  "rebaseWhen": "conflicted",
+  "packageRules": [
+    {
+      "groupName": "checkpoint-client",
+      "packageNames": ["checkpoint-client"],
+      "updateTypes": ["patch", "minor"],
+      "schedule": ["at any time"]
+    },
+    {
+      "groupName": "devDependencies (non-major)",
+      "automerge": "true",
+      "depTypeList": ["devDependencies"],
+      "updateTypes": ["patch", "minor"]
+    },
+    {
+      "groupName": "definitelyTyped",
+      "automerge": "true",
+      "packagePatterns": ["^@types/"],
+      "updateTypes": ["patch", "minor"]
+    },
+    {
+      "groupName": "renovate-meta",
+      "updateTypes": ["lockFileMaintenance", "pin"]
+    },
+    {
+      "groupName": "dependencies (non-major)",
+      "depTypeList": ["dependencies"],
+      "excludePackageNames": ["@prisma/language-server", "@prisma/get-platform"],
+      "updateTypes": ["patch", "minor"]
+    }
+  ]
+}
