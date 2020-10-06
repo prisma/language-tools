@@ -12,6 +12,9 @@ on:
       branch:
         description: 'Branch to run run this workflow on'
         required: true
+      trigger_reason:
+        description: 'Information about what caused the publishing process in the first place.'
+        required: true
 
 env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -26,6 +29,11 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.branch }}
+      - name: Print inputs
+        run: |
+          echo ${{github.event.inputs.extension_version}}
+          echo ${{github.event.inputs.npm_channel}}
+          echo ${{github.event.inputs.trigger_reason}}
       - name: Install Dependencies
         run: npm install
       - name: Bump LSP version in extension
@@ -45,7 +53,7 @@ jobs:
         with:
           workflow: 5. Integration tests in VSCode folder with published LSP
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}" }'
+          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'
       
 
       - name: Slack Notification on Failure
@@ -54,7 +62,7 @@ jobs:
         env:  
           SLACK_TITLE: "4. Bumping LSP in VSCode extension failed :x:"
           SLACK_COLOR: '#FF0000'
-          SLACK_MESSAGE: ${{github.event.inputs.extension_version}}
+          SLACK_MESSAGE: "${{github.event.inputs.extension_version}} - ${{github.event.inputs.trigger_reason}} "
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: feed-language-tools
           SLACK_USERNAME: Prismo
