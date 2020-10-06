@@ -34,9 +34,35 @@
   },
   "main": "./dist/src/extension.js",
   "activationEvents": [
-    "onLanguage:prisma"
+    "onLanguage:prisma",
+    "onCommand:prisma.plugin.studio.open",
+    "onCommand:prisma.plugin.nextjs.addTypes"
   ],
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "prisma-studio",
+          "title": "Prisma Studio",
+          "icon": "resources/prisma-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "prisma-studio": [
+        {
+          "id": "prismaStudio",
+          "name": "Prisma Studio"
+        }
+      ]
+    },
+    "customEditors": [
+      {
+        "viewType": "prisma.studio",
+        "displayName": "Prisma Studio",
+        "priority": "default"
+      }
+    ],
     "languages": [
       {
         "id": "prisma",
@@ -79,6 +105,11 @@
           "scope": "resource",
           "type": "string",
           "description": "Option to set the path to the prisma-fmt binary."
+        },
+        "prisma.plugin.nextjs.addTypesOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Add Types on Save"
         }
       }
     },
@@ -86,6 +117,16 @@
       {
         "command": "prisma.restartLanguageServer",
         "title": "Prisma: Restart Language Server"
+      },
+      {
+        "command": "prisma.plugin.nextjs.addTypes",
+        "title": "Add Types to a NextJS Page",
+        "category": "Prisma"
+      },
+      {
+        "command": "prisma.plugin.studio.open",
+        "title": "Open Studio",
+        "category": "Prisma"
       }
     ]
   },

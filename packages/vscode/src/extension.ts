@@ -1,36 +1,37 @@
-import {
-  LanguageClient,
-  LanguageClientOptions,
-  ServerOptions,
-  TransportKind,
-  CodeActionParams,
-  ProvideCodeActionsSignature,
-  CodeActionRequest,
-  CodeAction as lsCodeAction,
-} from 'vscode-languageclient'
-import {
-  ExtensionContext,
-  commands,
-  window,
-  TextDocument,
-  Range,
-  CodeActionContext,
-  CancellationToken,
-  CodeAction,
-  Command,
-  workspace,
-} from 'vscode'
-
+import * as chokidar from 'chokidar'
 import path from 'path'
 import {
+  CancellationToken,
+  CodeAction,
+  CodeActionContext,
+  Command,
+  commands,
+  ExtensionContext,
+  Range,
+  TextDocument,
+  window,
+  workspace,
+} from 'vscode'
+import {
+  CodeAction as lsCodeAction,
+  CodeActionParams,
+  CodeActionRequest,
+  LanguageClient,
+  LanguageClientOptions,
+  ProvideCodeActionsSignature,
+  ServerOptions,
+  TransportKind,
+} from 'vscode-languageclient'
+import plugins from './plugins'
+import TelemetryReporter from './telemetryReporter'
+import {
   applySnippetWorkspaceEdit,
-  isSnippetEdit,
-  isDebugOrTestSession,
   checkForMinimalColorTheme,
   checkForOtherPrismaExtension,
+  isDebugOrTestSession,
+  isSnippetEdit,
 } from './util'
-import * as chokidar from 'chokidar'
-import TelemetryReporter from './telemetryReporter'
+
 const packageJson = require('../../package.json') // eslint-disable-line
 
 let client: LanguageClient
@@ -52,10 +53,14 @@ function createLanguageServer(
     clientOptions,
   )
 }
-
+plugins.forEach((plugin) => {
+  plugin.commands.forEach((command) => {
+    commands.registerCommand(command.commandId, command.action)
+  })
+})
+// workspace.onDidSaveTextDocument((document) => {})
 export async function activate(context: ExtensionContext): Promise<void> {
   const isDebugOrTest = isDebugOrTestSession()
-
   const rootPath = workspace.rootPath
 
   if (rootPath) {
