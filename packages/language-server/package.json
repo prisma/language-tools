@@ -10,7 +10,7 @@
     "node": ">=10"
   },
   "prisma": {
-    "version": "f4f4c265b355e72ab29dbb1d4495d4bcaf0e829f"
+    "version": "29ef6782028310083196853b728a878b78bf1a31"
   },
   "bin": {
     "prisma-language-server": "dist/src/cli.js"
@@ -29,7 +29,7 @@
   "typings": "dist/src/index",
   "dependencies": {
     "klona": "2.0.4",
-    "@prisma/get-platform": "2.9.0-dev.50",
+    "@prisma/get-platform": "2.9.0-dev.51",
     "pkg-dir": "4.2.0",
     "vscode-languageserver": "6.1.1",
     "vscode-languageserver-textdocument": "1.0.1",
