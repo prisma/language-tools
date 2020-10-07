@@ -1,8 +1,14 @@
+import { ExtensionContext } from 'vscode'
+
 type PluginCommand = {
-  commandId: string
+  id: string
   action: () => Promise<void> | void
 }
 export interface PrismaVSCodePlugin {
   name: string
-  commands: PluginCommand[]
+  commands?: PluginCommand[]
+  enabled: () => Promise<boolean> | boolean
+
+  activate?: (context: ExtensionContext) => Promise<void> | void
+  deactivate?: () => Promise<void> | void
 }

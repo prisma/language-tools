@@ -1,4 +1,8 @@
 import nextjs from './nextjs'
+import languageServer from './prisma-language-server'
 import studio from './studio'
+import { PrismaVSCodePlugin } from './types'
 
-export default [nextjs, studio]
+const plugins: PrismaVSCodePlugin[] = [nextjs, studio, languageServer]
+
+export default plugins

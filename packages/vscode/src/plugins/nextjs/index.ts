@@ -1,5 +1,6 @@
 import { Project, ProjectOptions } from 'ts-morph'
 import { window } from 'vscode'
+import { packageJsonIncludes } from '../../helpers/workspace'
 import { PrismaVSCodePlugin } from '../types'
 import { addMissingImports } from './addImports'
 import { addJSDoc } from './addJSDoc'
@@ -40,7 +41,6 @@ export class NextTypes {
     // Read more: https://ts-morph.com/setup/
     const sourceFile = this.project.addSourceFileAtPath(filePath)
 
-    console.log(sourceFile.getFilePath())
     const foundFunctions = getUsedNextFunctions(sourceFile)
     if (isJS(sourceFile)) {
       addJSDoc(sourceFile, foundFunctions)
@@ -59,9 +59,10 @@ const nextTypes = new NextTypes({ save: true })
 
 const plugin: PrismaVSCodePlugin = {
   name: 'nextjs',
+  enabled: () => packageJsonIncludes('next'),
   commands: [
     {
-      commandId: 'prisma.plugin.nextjs.addTypes',
+      id: 'prisma.plugin.nextjs.addTypes',
       action: async () => {
         const filename = window.activeTextEditor?.document.fileName
         if (filename && filename.includes('pages')) {
