@@ -43,7 +43,7 @@ function addType(
 export function addJSDoc(
   sourceFile: SourceFile,
   foundNextFunctions: NextFunctionType,
-) {
+): void {
   const defaultExportSymbol = sourceFile.getDefaultExportSymbol()
 
   if (defaultExportSymbol) {

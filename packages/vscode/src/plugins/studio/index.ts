@@ -12,6 +12,7 @@ const plugin: PrismaVSCodePlugin = {
     {
       id: 'prisma.plugin.studio.kill',
       action: () => {
+        console.log('Killing Prisma Studio')
         if (studioProcess) {
           studioProcess.kill()
         }
@@ -39,9 +40,8 @@ const plugin: PrismaVSCodePlugin = {
           studioProcess.stdout.on('data', (data: Buffer) => {
             decoded += data
             if (decoded.includes('Prisma Studio is up on')) {
-              console.log(decoded)
               decoded = ''
-              void vscode.window.showInformationMessage('Opening Prisma Studio')
+              console.log('Opening Prisma Studio')
               const panel = vscode.window.createWebviewPanel(
                 'prisma.studio',
                 'Prisma Studio',

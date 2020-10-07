@@ -2,12 +2,12 @@ import { SourceFile } from 'ts-morph'
 import { NextFunctionName, NextFunctionType } from './constants'
 
 /**
- * Adds Missing Next Imports depending function which have been found
+ * Adds the Required NextJS type imports if they are missing
  */
 export function addMissingImports(
   sourceFile: SourceFile,
   foundNextFunctions: NextFunctionType,
-) {
+): void {
   Object.keys(foundNextFunctions).forEach((functionName) => {
     addImportIfMissing(
       sourceFile,
@@ -16,7 +16,7 @@ export function addMissingImports(
   })
 }
 
-export function addImportIfMissing(sourceFile: SourceFile, type: string) {
+export function addImportIfMissing(sourceFile: SourceFile, type: string): void {
   // import { GetServerSidePropsContext, InferGetServerSidePropsType } from 'next';
   let nextImport = sourceFile.getImportDeclaration('next')
   let hasTypeImport = false

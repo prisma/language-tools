@@ -210,5 +210,4 @@ const plugin: PrismaVSCodePlugin = {
     return client.stop()
   },
 }
-// workspace.onDidSaveTextDocument((document) => {})
 export default plugin
