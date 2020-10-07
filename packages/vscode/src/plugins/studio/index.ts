@@ -1,5 +1,6 @@
 import * as cp from 'child_process'
 import * as vscode from 'vscode'
+import { getExecutor } from '../../helpers/workspace'
 import { getResourceURI } from '../../util'
 import { PrismaVSCodePlugin } from '../types'
 
@@ -29,9 +30,15 @@ const plugin: PrismaVSCodePlugin = {
             BROWSER: 'none',
           },
         }
-
+        const executor = getExecutor()
+        if (!executor) {
+          void vscode.window.showErrorMessage(
+            'It looks like your dependencies are not installed',
+          )
+          return
+        }
         studioProcess = cp.spawn(
-          'yarn',
+          executor,
           ['dotenv', '--', 'prisma', 'studio'],
           options,
         )
