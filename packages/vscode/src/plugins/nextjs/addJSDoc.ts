@@ -18,29 +18,24 @@ function addType(
     const params = node.getParameters()
     const param = params[0]
     const typeString = foundNextFunctions[functionNames[0]].type
-    if (TypeGuards.isFunctionDeclaration(node)) {
-      if (param) {
-        node.addJsDoc({
-          tags: [
-            {
-              tagName: 'param',
-              text: buildJSDocType(typeString, 'props'),
-            },
-          ],
-        })
-      } else {
+    const jsDocType = buildJSDocType(typeString, 'props')
+    if (
+      TypeGuards.isFunctionDeclaration(node) &&
+      node.getJsDocs().length === 0
+    ) {
+      if (!param) {
         node.addParameter({
           name: 'props',
         })
-        node.addJsDoc({
-          tags: [
-            {
-              tagName: 'param',
-              text: buildJSDocType(typeString, 'props'),
-            },
-          ],
-        })
       }
+      node.addJsDoc({
+        tags: [
+          {
+            tagName: 'param',
+            text: jsDocType,
+          },
+        ],
+      })
     }
   }
 }
