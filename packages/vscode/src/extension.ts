@@ -8,7 +8,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
       void window.showInformationMessage(`Activating ${plugin.name}`)
       plugin.activate && (await plugin.activate(context))
       plugin.commands?.forEach((command) => {
-        commands.registerCommand(command.id, command.action)
+        commands.registerCommand(command.id, () => command.action(context))
       })
     }
   })

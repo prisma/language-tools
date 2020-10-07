@@ -2,7 +2,7 @@ import { ExtensionContext } from 'vscode'
 
 type PluginCommand = {
   id: string
-  action: () => Promise<void> | void
+  action: (context: ExtensionContext) => Promise<void> | void
 }
 export interface PrismaVSCodePlugin {
   name: string

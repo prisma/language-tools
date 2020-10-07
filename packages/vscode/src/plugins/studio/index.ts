@@ -1,5 +1,6 @@
 import * as cp from 'child_process'
 import * as vscode from 'vscode'
+import { getResourceURI } from '../../util'
 import { PrismaVSCodePlugin } from '../types'
 
 let studioProcess: cp.ChildProcessWithoutNullStreams
@@ -18,7 +19,7 @@ const plugin: PrismaVSCodePlugin = {
     },
     {
       id: 'prisma.plugin.studio.open',
-      action: () => {
+      action: (context) => {
         if (!vscode.workspace.rootPath) return
         const options: cp.SpawnOptionsWithoutStdio | undefined = {
           cwd: vscode.workspace.rootPath,
@@ -49,6 +50,10 @@ const plugin: PrismaVSCodePlugin = {
                   enableScripts: true,
                 },
               )
+              panel.iconPath = {
+                dark: getResourceURI('prisma-icon-light.svg', context),
+                light: getResourceURI('prisma-icon-dark.svg', context),
+              }
               panel.onDidDispose(() => {
                 if (studioProcess) {
                   studioProcess.kill()
