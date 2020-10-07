@@ -1,0 +1,1525 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`function tests - named next import and const both export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetStaticPropsType, InferGetServerSidePropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - named next import and const both export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetStaticPropsType, InferGetServerSidePropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - named next import and const both export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetStaticPropsType, InferGetServerSidePropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - named next import and const both export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetStaticPropsType, InferGetServerSidePropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - named next import and const both export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetStaticPropsType, InferGetServerSidePropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - named next import and const both export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetStaticPropsType, InferGetServerSidePropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - named next import and const getServerSideProps export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetServerSidePropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - named next import and const getServerSideProps export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetServerSidePropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - named next import and const getServerSideProps export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetServerSidePropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - named next import and const getServerSideProps export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetServerSidePropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - named next import and const getServerSideProps export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetServerSidePropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - named next import and const getServerSideProps export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetServerSidePropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - named next import and const getStaticProps export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetStaticPropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+
+export default function({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - named next import and const getStaticProps export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetStaticPropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - named next import and const getStaticProps export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetStaticPropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - named next import and const getStaticProps export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetStaticPropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+
+function MyApp({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - named next import and const getStaticProps export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetStaticPropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - named next import and const getStaticProps export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetStaticPropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - named next import and function both export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetServerSidePropsType, InferGetStaticPropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+export default function({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - named next import and function both export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetServerSidePropsType, InferGetStaticPropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - named next import and function both export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetServerSidePropsType, InferGetStaticPropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - named next import and function both export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetServerSidePropsType, InferGetStaticPropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+function MyApp({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - named next import and function both export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetServerSidePropsType, InferGetStaticPropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - named next import and function both export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetServerSidePropsType, InferGetStaticPropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - named next import and function getServerSideProps export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetServerSidePropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+
+export default function({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - named next import and function getServerSideProps export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetServerSidePropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - named next import and function getServerSideProps export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetServerSidePropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - named next import and function getServerSideProps export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetServerSidePropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+
+function MyApp({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - named next import and function getServerSideProps export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetServerSidePropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - named next import and function getServerSideProps export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetServerSidePropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - named next import and function getStaticProps export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetStaticPropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export async function getStaticProps(ctx){}; 
+
+export default function({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - named next import and function getStaticProps export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetStaticPropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export async function getStaticProps(ctx){}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - named next import and function getStaticProps export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetStaticPropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export async function getStaticProps(ctx){}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - named next import and function getStaticProps export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetStaticPropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export async function getStaticProps(ctx){}; 
+
+function MyApp({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - named next import and function getStaticProps export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetStaticPropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export async function getStaticProps(ctx){}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - named next import and function getStaticProps export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { NextLink, InferGetStaticPropsType } from 'next';
+  import { PrismaClient } from '@prisma/client';
+
+export async function getStaticProps(ctx){}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - no import and const both export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - no import and const both export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - no import and const both export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - no import and const both export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - no import and const both export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - no import and const both export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - no import and const getServerSideProps export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetServerSidePropsType } from "next";
+
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - no import and const getServerSideProps export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetServerSidePropsType } from "next";
+
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - no import and const getServerSideProps export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetServerSidePropsType } from "next";
+
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - no import and const getServerSideProps export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetServerSidePropsType } from "next";
+
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - no import and const getServerSideProps export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetServerSidePropsType } from "next";
+
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - no import and const getServerSideProps export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetServerSidePropsType } from "next";
+
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - no import and const getStaticProps export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+
+export const getStaticProps = async (ctx) => {}; 
+
+export default function({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - no import and const getStaticProps export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+
+export const getStaticProps = async (ctx) => {}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - no import and const getStaticProps export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+
+export const getStaticProps = async (ctx) => {}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - no import and const getStaticProps export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+
+export const getStaticProps = async (ctx) => {}; 
+
+function MyApp({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - no import and const getStaticProps export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+
+export const getStaticProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - no import and const getStaticProps export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+
+export const getStaticProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - no import and function both export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+export default function({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - no import and function both export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - no import and function both export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - no import and function both export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+function MyApp({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - no import and function both export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - no import and function both export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - no import and function getServerSideProps export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetServerSidePropsType } from "next";
+
+export async function getServerSideProps(ctx){}; 
+
+export default function({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - no import and function getServerSideProps export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetServerSidePropsType } from "next";
+
+export async function getServerSideProps(ctx){}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - no import and function getServerSideProps export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetServerSidePropsType } from "next";
+
+export async function getServerSideProps(ctx){}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - no import and function getServerSideProps export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetServerSidePropsType } from "next";
+
+export async function getServerSideProps(ctx){}; 
+
+function MyApp({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - no import and function getServerSideProps export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetServerSidePropsType } from "next";
+
+export async function getServerSideProps(ctx){}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - no import and function getServerSideProps export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetServerSidePropsType } from "next";
+
+export async function getServerSideProps(ctx){}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - no import and function getStaticProps export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+
+export async function getStaticProps(ctx){}; 
+
+export default function({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - no import and function getStaticProps export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+
+export async function getStaticProps(ctx){}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - no import and function getStaticProps export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+
+export async function getStaticProps(ctx){}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - no import and function getStaticProps export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+
+export async function getStaticProps(ctx){}; 
+
+function MyApp({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - no import and function getStaticProps export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+
+export async function getStaticProps(ctx){}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - no import and function getStaticProps export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+
+export async function getStaticProps(ctx){}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - server type import and const both export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - server type import and const both export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - server type import and const both export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - server type import and const both export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - server type import and const both export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - server type import and const both export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - server type import and const getServerSideProps export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - server type import and const getServerSideProps export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - server type import and const getServerSideProps export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - server type import and const getServerSideProps export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - server type import and const getServerSideProps export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - server type import and const getServerSideProps export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - server type import and const getStaticProps export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+
+export default function({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - server type import and const getStaticProps export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - server type import and const getStaticProps export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - server type import and const getStaticProps export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+
+function MyApp({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - server type import and const getStaticProps export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - server type import and const getStaticProps export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - server type import and function both export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+export default function({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - server type import and function both export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - server type import and function both export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - server type import and function both export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+function MyApp({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - server type import and function both export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - server type import and function both export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - server type import and function getServerSideProps export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+
+export default function({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - server type import and function getServerSideProps export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - server type import and function getServerSideProps export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - server type import and function getServerSideProps export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+
+function MyApp({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - server type import and function getServerSideProps export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - server type import and function getServerSideProps export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - server type import and function getStaticProps export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export async function getStaticProps(ctx){}; 
+
+export default function({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - server type import and function getStaticProps export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export async function getStaticProps(ctx){}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - server type import and function getStaticProps export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export async function getStaticProps(ctx){}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - server type import and function getStaticProps export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export async function getStaticProps(ctx){}; 
+
+function MyApp({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - server type import and function getStaticProps export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export async function getStaticProps(ctx){}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - server type import and function getStaticProps export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+  import { InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
+  import { PrismaClient } from '@prisma/client';
+
+export async function getStaticProps(ctx){}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - static type import and const both export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - static type import and const both export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - static type import and const both export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - static type import and const both export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - static type import and const both export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - static type import and const both export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps> & InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - static type import and const getServerSideProps export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - static type import and const getServerSideProps export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - static type import and const getServerSideProps export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export const getServerSideProps = async (ctx) => {}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - static type import and const getServerSideProps export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - static type import and const getServerSideProps export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - static type import and const getServerSideProps export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export const getServerSideProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - static type import and const getStaticProps export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+
+export default function({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - static type import and const getStaticProps export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - static type import and const getStaticProps export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - static type import and const getStaticProps export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+
+function MyApp({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - static type import and const getStaticProps export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - static type import and const getStaticProps export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export const getStaticProps = async (ctx) => {}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - static type import and function both export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+export default function({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - static type import and function both export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - static type import and function both export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - static type import and function both export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+function MyApp({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - static type import and function both export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - static type import and function both export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+export async function getStaticProps(ctx){}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps> & InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - static type import and function getServerSideProps export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+
+export default function({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - static type import and function getServerSideProps export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - static type import and function getServerSideProps export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+
+export default function(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+`;
+
+exports[`function tests - static type import and function getServerSideProps export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+
+function MyApp({ Component, pageProps }: InferGetServerSidePropsType<typeof getServerSideProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - static type import and function getServerSideProps export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - static type import and function getServerSideProps export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType, InferGetServerSidePropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export async function getServerSideProps(ctx){}; 
+
+function MyApp(props: InferGetServerSidePropsType<typeof getServerSideProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - static type import and function getStaticProps export and function anon with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export async function getStaticProps(ctx){}; 
+
+export default function({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - static type import and function getStaticProps export and function anon with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export async function getStaticProps(ctx){}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - static type import and function getStaticProps export and function anon without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export async function getStaticProps(ctx){}; 
+
+export default function(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+`;
+
+exports[`function tests - static type import and function getStaticProps export and function named with destructed props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export async function getStaticProps(ctx){}; 
+
+function MyApp({ Component, pageProps }: InferGetStaticPropsType<typeof getStaticProps>) {return ()}
+export default MyApp;
+`;
+
+exports[`function tests - static type import and function getStaticProps export and function named with props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export async function getStaticProps(ctx){}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
+
+exports[`function tests - static type import and function getStaticProps export and function named without props.tsx 1`] = `
+import { Box, Button, Heading, Text } from '@chakra-ui/core';
+import { InferGetStaticPropsType } from "next";
+import { PrismaClient } from '@prisma/client';
+
+export async function getStaticProps(ctx){}; 
+
+function MyApp(props: InferGetStaticPropsType<typeof getStaticProps>){return ()}
+export default MyApp;
+`;
