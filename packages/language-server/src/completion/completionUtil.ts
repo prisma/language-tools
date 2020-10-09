@@ -136,19 +136,8 @@ export const generatorProviderArguments: CompletionItem[] = convertToCompletionI
   (label: string) => label.replace('""', '"$0"'),
 )
 
-export const generatorPreviewFeatures: CompletionItem[] = convertToCompletionItems(
-  completions.generatorPreviewFeatures,
-  CompletionItemKind.Constant,
-)
-
 export const previewFeaturesArguments: CompletionItem[] = convertToCompletionItems(
   completions.previewFeaturesArguments,
   CompletionItemKind.Property,
   (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
 )
-
-// TODO: uncomment once nativeTypes will be launched!
-// export const datasourcePreviewFeatures: CompletionItem[] = convertToCompletionItems(
-//  completions.datasourcePreviewFeatures,
-//  CompletionItemKind.Constant,
-//)

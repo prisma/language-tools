@@ -2,7 +2,7 @@
  * Imports
  */
 
-import * as util from './util'
+import * as util from './../util'
 import https from 'https'
 import zlib from 'zlib'
 import fs from 'fs'

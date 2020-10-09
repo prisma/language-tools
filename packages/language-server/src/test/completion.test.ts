@@ -9,7 +9,7 @@ import {
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
 import { getBinPath, binaryIsNeeded } from '../util'
-import install from '../install'
+import install from '../prisma-fmt/install'
 
 function assertCompletion(
   fixturePath: string,
@@ -54,7 +54,7 @@ suite('Quick Fix', () => {
     if (binPathPrismaFmt === '') {
       binPathPrismaFmt = await getBinPath()
     }
-    if (await binaryIsNeeded(binPathPrismaFmt)) await install(binPathPrismaFmt)
+    if (binaryIsNeeded(binPathPrismaFmt)) await install(binPathPrismaFmt)
   })
 
   const emptyDocUri = 'completions/empty.prisma'
