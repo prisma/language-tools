@@ -3,7 +3,7 @@
     "config:base"
   ],
   "semanticCommits": true,
-  "ignoreDeps": ["@prisma/language-server", "@prisma/get-platform", "vsce"],
+  "ignoreDeps": ["@prisma/language-server", "@prisma/get-platform"],
   "masterIssue": true,
   "reviewers": ["@divyenduz", "@carmenberndt"],
   "rebaseWhen": "conflicted",
