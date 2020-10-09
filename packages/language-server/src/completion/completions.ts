@@ -21,13 +21,13 @@ import {
   generatorProviders,
   generatorProviderArguments,
   previewFeaturesArguments,
-  generatorPreviewFeatures,
-  // TODO: uncomment once nativeTypes will be launched!
-  // datasourcePreviewFeatures,
 } from './completionUtil'
 import { klona } from 'klona'
 import { extractModelName } from '../rename/renameUtil'
-import nativeTypeConstructors, { NativeTypeConstructors } from '../nativeTypes'
+import previewFeatures from '../prisma-fmt/previewFeatures'
+import nativeTypeConstructors, {
+  NativeTypeConstructors,
+} from '../prisma-fmt/nativeTypes'
 
 function toCompletionItems(
   allowedTypes: string[],
@@ -478,11 +478,14 @@ function declaredNativeTypes(document: TextDocument, binPath: string): boolean {
 }
 
 function handlePreviewFeatures(
-  previewFeatures: CompletionItem[],
+  previewFeaturesArray: string[],
   position: Position,
   currentLineUntrimmed: string,
   isInsideQuotation: boolean,
 ): CompletionList {
+  let previewFeatures: CompletionItem[] = previewFeaturesArray.map((pf) =>
+    CompletionItem.create(pf),
+  )
   if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
     if (isInsideQuotation) {
       const usedValues = getValuesInsideBrackets(currentLineUntrimmed)
@@ -557,6 +560,7 @@ export function getSuggestionForSupportedFields(
   currentLine: string,
   currentLineUntrimmed: string,
   position: Position,
+  binPath: string,
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
   const isInsideQuotation: boolean = isInsideQuotationMark(
@@ -581,15 +585,18 @@ export function getSuggestionForSupportedFields(
         }
       }
       if (currentLine.startsWith('previewFeatures')) {
-        const previewFeatures: CompletionItem[] = klona(
-          generatorPreviewFeatures,
+        const generatorPreviewFeatures: string[] = previewFeatures(
+          binPath,
+          false,
         )
-        return handlePreviewFeatures(
-          previewFeatures,
-          position,
-          currentLineUntrimmed,
-          isInsideQuotation,
-        )
+        if (generatorPreviewFeatures.length > 0) {
+          return handlePreviewFeatures(
+            generatorPreviewFeatures,
+            position,
+            currentLineUntrimmed,
+            isInsideQuotation,
+          )
+        }
       }
       break
     case 'datasource':
@@ -643,11 +650,9 @@ export function getSuggestionForSupportedFields(
           }
         } // TODO: uncomment once nativeTypes will be launched!
       } /*else if (currentLine.startsWith('previewFeatures')) {
-        const previewFeatures: CompletionItem[] = klona(
-          datasourcePreviewFeatures,
-        )
+        const datasourcePreviewFeatures: string[] = previewFeatures(binPath, true)
         return handlePreviewFeatures(
-          previewFeatures,
+          datasourcePreviewFeatures,
           position,
           currentLineUntrimmed,
           isInsideQuotation,

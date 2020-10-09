@@ -19,7 +19,7 @@ import {
 } from 'vscode-languageserver'
 import { fullDocumentRange } from './provider'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import format from './format'
+import format from './prisma-fmt/format'
 import {
   getSuggestionForFieldAttribute,
   getSuggestionsForTypes,
@@ -34,7 +34,7 @@ import {
   getSuggestionForNativeTypes,
 } from './completion/completions'
 import { quickFix } from './codeActionProvider'
-import lint from './lint'
+import lint from './prisma-fmt/lint'
 import {
   isModelName,
   insertBasicRename,
@@ -498,6 +498,7 @@ export function handleCompletionRequest(
           lines[position.line],
           currentLineUntrimmed,
           position,
+          binPath,
         )
       case '.':
         return getSuggestionForNativeTypes(
@@ -560,6 +561,7 @@ export function handleCompletionRequest(
           lines[position.line],
           currentLineUntrimmed,
           position,
+          binPath,
         )
       }
       break
