@@ -9,6 +9,11 @@
   "rebaseWhen": "conflicted",
   "packageRules": [
     {
+      "groupName": "VSCode",
+      "packageNames": ["vscode", "@types/vscode"],
+      "updateTypes": ["patch", "minor"]
+    },
+    {
       "groupName": "checkpoint-client",
       "packageNames": ["checkpoint-client"],
       "updateTypes": ["patch", "minor"],
@@ -24,6 +29,7 @@
       "groupName": "definitelyTyped",
       "automerge": "true",
       "packagePatterns": ["^@types/"],
+      "excludePackageNames": ["@types/vscode"],
       "updateTypes": ["patch", "minor"]
     },
     {
