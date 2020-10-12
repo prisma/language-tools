@@ -3,11 +3,16 @@
     "config:base"
   ],
   "semanticCommits": true,
-  "ignoreDeps": ["@prisma/language-server", "@prisma/get-platform, @types/vscode", "vscode"],
+  "ignoreDeps": ["@prisma/language-server", "@prisma/get-platform"],
   "masterIssue": true,
   "reviewers": ["@divyenduz", "@carmenberndt"],
   "rebaseWhen": "conflicted",
   "packageRules": [
+    {
+      "groupName": "VSCode",
+      "packageNames": ["vscode", "@types/vscode"],
+      "updateTypes": ["patch", "minor"]
+    },
     {
       "groupName": "checkpoint-client",
       "packageNames": ["checkpoint-client"],
@@ -24,6 +29,7 @@
       "groupName": "definitelyTyped",
       "automerge": "true",
       "packagePatterns": ["^@types/"],
+      "excludePackageNames": ["@types/vscode"],
       "updateTypes": ["patch", "minor"]
     },
     {
