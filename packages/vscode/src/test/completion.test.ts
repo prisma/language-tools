@@ -46,6 +46,7 @@ suite('Should auto-complete', () => {
   const dataSourceWithUri = getDocUri('completions/datasourceWithUrl.prisma')
   const emptyBlocksUri = getDocUri('completions/emptyBlocks.prisma')
   const modelBlocksUri = getDocUri('completions/modelBlocks.prisma')
+  const enumCommentUri = getDocUri('completions/enumWithComments.prisma')
 
   // ALL BLOCKS
 
@@ -480,6 +481,19 @@ suite('Should auto-complete', () => {
         { label: 'lastName', kind: vscode.CompletionItemKind.Field },
       ]),
       true,
+    )
+  })
+
+  test('Diagnoses default suggestions for enum values excluding comments', async () => {
+    await testCompletion(
+      enumCommentUri,
+      new vscode.Position(11, 30),
+      new vscode.CompletionList([
+        { label: 'ADMIN', kind: vscode.CompletionItemKind.Constant },
+        { label: 'NORMAL', kind: vscode.CompletionItemKind.Constant },
+      ]),
+
+      false,
     )
   })
 
