@@ -489,8 +489,8 @@ suite('Should auto-complete', () => {
       enumCommentUri,
       new vscode.Position(11, 30),
       new vscode.CompletionList([
-        { label: 'ADMIN', kind: vscode.CompletionItemKind.Constant },
-        { label: 'NORMAL', kind: vscode.CompletionItemKind.Constant },
+        { label: 'ADMIN', kind: vscode.CompletionItemKind.Value },
+        { label: 'NORMAL', kind: vscode.CompletionItemKind.Value },
       ]),
 
       false,
