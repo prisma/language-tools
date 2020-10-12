@@ -62,6 +62,7 @@ suite('Quick Fix', () => {
   const dataSourceWithUri = 'completions/datasourceWithUrl.prisma'
   const emptyBlocksUri = 'completions/emptyBlocks.prisma'
   const modelBlocksUri = 'completions/modelBlocks.prisma'
+  const enumCommentUri = 'completions/enumWithComments.prisma'
 
   // ALL BLOCKS
 
@@ -528,6 +529,17 @@ suite('Quick Fix', () => {
     assertCompletion(
       modelBlocksUri,
       { line: 62, character: 27 },
+      {
+        isIncomplete: false,
+        items: [enumValueOne, enumValueTwo],
+      },
+    )
+  })
+
+  test('Diagnoses default suggestions for enum values excluding comments', () => {
+    assertCompletion(
+      enumCommentUri,
+      { line: 11, character: 30 },
       {
         isIncomplete: false,
         items: [enumValueOne, enumValueTwo],

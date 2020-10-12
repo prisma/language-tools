@@ -793,7 +793,7 @@ function getFieldsFromCurrentBlock(
     }
     if (!item.startsWith('@@') && (!position || key !== position.line)) {
       field = item.replace(/ .*/, '')
-      if (field !== '') {
+      if (field !== '' && !field.startsWith('//')) {
         suggestions.push(field)
       }
     }

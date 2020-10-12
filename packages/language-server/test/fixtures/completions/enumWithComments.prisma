@@ -1,0 +1,20 @@
+datasource db {
+    provider = "mysql"
+    url = "mysql://"
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+model Test {
+    id Int @id
+    enum CommentEnum @default()
+}
+
+enum CommentEnum {
+    // Comment
+    ADMIN
+    NORMAL
+    /// Doc comment
+}
