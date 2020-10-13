@@ -36,7 +36,7 @@ function buildTypeString(foundNextFunctions: NextFunctionType) {
 export function addTypesToPage(
   sourceFile: SourceFile,
   foundNextFunctions: NextFunctionType,
-) {
+): void {
   const defaultExportSymbol = sourceFile.getDefaultExportSymbol()
   const typeString = buildTypeString(foundNextFunctions)
   if (defaultExportSymbol) {
@@ -54,7 +54,7 @@ export function addTypesToPage(
       } else if (TypeGuards.isIdentifier(expr)) {
         const node = expr
           .findReferences()[0]
-          .getDefinition()
+          ?.getDefinition()
           .getDeclarationNode()
         const child = node?.getLastChild()
 

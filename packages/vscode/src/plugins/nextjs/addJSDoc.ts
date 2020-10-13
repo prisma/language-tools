@@ -39,7 +39,7 @@ function addType(
     }
   }
 }
-
+// TODO Refactor as suggested by Carmen
 export function addJSDoc(
   sourceFile: SourceFile,
   foundNextFunctions: NextFunctionType,
@@ -61,7 +61,7 @@ export function addJSDoc(
       } else if (TypeGuards.isIdentifier(expr)) {
         const node = expr
           .findReferences()[0]
-          .getDefinition()
+          ?.getDefinition()
           .getDeclarationNode()
         const child = node?.getLastChild()
 

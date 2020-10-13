@@ -76,12 +76,23 @@
     ],
     "configuration": {
       "type": "object",
-      "title": "Language server configuration",
+      "title": "Prisma Configuration",
       "properties": {
         "prismaLanguageServer.prismaFmtBinPath": {
           "scope": "resource",
           "type": "string",
           "description": "Option to set the path to the prisma-fmt binary."
+        },
+        "prisma.plugin.nextjs.root": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Option to set the path to a nextjs project"
+        },
+        "prisma.plugin.nextjs.addTypesOnSave": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically add NextJS page types on save"
         }
       }
     },
