@@ -15,7 +15,7 @@
   "dependencies": {
     "checkpoint-client": "1.1.13",
     "crypto": "1.0.1",
-    "chokidar": "3.4.2",
+    "chokidar": "3.4.3",
     "@prisma/language-server": "10.0.8",
     "vscode-languageclient": "6.1.3"
   },
