@@ -19,22 +19,3 @@ export async function packageJsonIncludes(
   }
   return false
 }
-
-export async function packageSearch(
-  packageName: string,
-  scopes: PackageScopes[],
-): Promise<boolean> {
-  const rootPath = workspace.rootPath
-  if (rootPath) {
-    const packageJson = await require(path.join(rootPath, 'package.json')) // eslint-disable-line
-    scopes.forEach((scope) => {
-      // eslint-disable-next-line
-      const dependencies = packageJson && packageJson[scope]
-      if (dependencies) {
-        const packages = Object.keys(dependencies)
-        return packages.includes(packageName)
-      }
-    })
-  }
-  return false
-}
