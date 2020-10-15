@@ -37,6 +37,7 @@
   "main": "./dist/src/extension.js",
   "activationEvents": [
     "workspaceContains:**/*.prisma",
+    "onLanguage:prisma",
     "onCommand:prisma.plugin.nextjs.addTypes"
   ],
   "contributes": {
