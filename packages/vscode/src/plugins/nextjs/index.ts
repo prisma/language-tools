@@ -1,5 +1,5 @@
-import { Project, ProjectOptions } from 'ts-morph'
 import {
+  commands,
   TextDocument,
   TextDocumentSaveReason,
   TextDocumentWillSaveEvent,
@@ -8,90 +8,59 @@ import {
 } from 'vscode'
 import { packageJsonIncludes } from '../../helpers/workspace'
 import { PrismaVSCodePlugin } from '../types'
-import { addMissingImports } from './addImports'
-import { addJSDoc } from './addJSDoc'
-import { addTypesToPage } from './addTypesToPage'
-import { getUsedNextFunctions, isJS } from './utils'
-
-interface Options {
-  tsProjectOptions?: ProjectOptions
-  /**
-   * default:  "./pages/**\/*.{ts,tsx,js,jsx}"
-   */
-  customPagesGlob?: string
-  /**
-   * default:  true
-   */
-  save: boolean
-}
-
-export class NextTypes {
-  project: Project
-  options: Options | undefined
-  constructor(options?: Options) {
-    this.project = new Project({
-      skipFileDependencyResolution: true,
-      skipLoadingLibFiles: false,
-      ...options?.tsProjectOptions,
-      compilerOptions: {
-        allowJs: true,
-        ...options?.tsProjectOptions?.compilerOptions,
-      },
-    })
-    this.options = options
-  }
-  async run(filePath: string): Promise<void> {
-    // Read more: https://ts-morph.com/setup/
-    const sourceFile = this.project.addSourceFileAtPath(filePath)
-
-    const foundFunctions = getUsedNextFunctions(sourceFile)
-    if (isJS(sourceFile)) {
-      addJSDoc(sourceFile, foundFunctions)
-    } else {
-      addMissingImports(sourceFile, foundFunctions)
-      addTypesToPage(sourceFile, foundFunctions)
-    }
-    if (this.options?.save) {
-      await this.project.save()
-    }
-    this.project.removeSourceFile(sourceFile)
-  }
-}
+import { NextTypes } from './nextTypes'
 
 const nextTypes = new NextTypes({ save: true })
+const supportedLanguageIds = [
+  'typescriptreact',
+  'javascriptreact',
+  'typescript',
+  'javascript',
+]
 // This is used to get around other plugins that modify the document in onWillSave
 let shouldUpdate = false
+
 const plugin: PrismaVSCodePlugin = {
   name: 'nextjs',
-  enabled: () => packageJsonIncludes('next'),
-  activate: () => {
+  enabled: async () => {
+    // TODO Add Workspace Support currently only checks the workspace root for deps
+    const hasNext = await packageJsonIncludes('next', ['dependencies'])
+    const hasPrismaCLI = await packageJsonIncludes('@prisma/cli', [
+      'devDependencies',
+    ])
+
+    return hasNext && hasPrismaCLI
+  },
+  activate: (context) => {
     const shouldAutoFormat = workspace
       .getConfiguration('prisma.plugin.nextjs')
       .get('addTypesOnSave')
-    console.log({ shouldAutoFormat })
+
     if (shouldAutoFormat) {
       workspace.onWillSaveTextDocument((e: TextDocumentWillSaveEvent) => {
-        // This insures that it is only run when a user saves the doument
-        if (e.reason === TextDocumentSaveReason.Manual) {
+        if (
+          e.reason === TextDocumentSaveReason.Manual &&
+          supportedLanguageIds.includes(e.document.languageId)
+        ) {
           shouldUpdate = true
         }
       })
-      workspace.onDidSaveTextDocument(async (document: TextDocument) => {
-        if (shouldUpdate) {
-          await formatDocument(document)
-        }
-        shouldUpdate = false
-      })
+      const onSaveDisposable = workspace.onDidSaveTextDocument(
+        async (document: TextDocument) => {
+          if (shouldUpdate) {
+            await formatDocument(document)
+          }
+          shouldUpdate = false
+        },
+      )
+      context.subscriptions.push(onSaveDisposable)
+      context.subscriptions.push(
+        commands.registerCommand('prisma.plugin.nextjs.addTypes', async () => {
+          await formatDocument()
+        }),
+      )
     }
   },
-  commands: [
-    {
-      id: 'prisma.plugin.nextjs.addTypes',
-      action: async () => {
-        await formatDocument()
-      },
-    },
-  ],
 }
 async function formatDocument(document?: TextDocument) {
   const filename = document
@@ -99,7 +68,7 @@ async function formatDocument(document?: TextDocument) {
     : window.activeTextEditor?.document.fileName
   if (filename && filename.includes('pages')) {
     try {
-      console.log(`Running - ${filename}`)
+      console.log(`Adding Types to ${filename}`)
       await nextTypes.run(filename)
     } catch (e) {
       console.error(e)

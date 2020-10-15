@@ -1,4 +1,4 @@
-import { commands, ExtensionContext } from 'vscode'
+import { ExtensionContext } from 'vscode'
 import plugins from './plugins'
 
 export function activate(context: ExtensionContext): void {
@@ -9,9 +9,6 @@ export function activate(context: ExtensionContext): void {
       if (plugin.activate) {
         await plugin.activate(context)
       }
-      plugin.commands?.forEach((command) => {
-        commands.registerCommand(command.id, () => command.action(context))
-      })
     } else {
       console.log(`${plugin.name} is Disabled`)
     }

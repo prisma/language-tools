@@ -2,7 +2,8 @@ import { join } from 'path'
 import { Project } from 'ts-morph'
 import { addMissingImports } from '../../addImports'
 import { addJSDoc } from '../../addJSDoc'
-import { addTypesToPage } from '../../addTypesToPage'
+import { addTSType } from '../../addTSType'
+import { findNodes } from '../../findNodes'
 import { getUsedNextFunctions, isJS } from '../../utils'
 
 let testProject: Project | null
@@ -25,10 +26,10 @@ export async function runTestProject(
   // Add source files
   const foundFunctions = getUsedNextFunctions(sourceFile)
   if (isJS(sourceFile)) {
-    addJSDoc(sourceFile, foundFunctions)
+    findNodes(sourceFile, foundFunctions, addJSDoc)
   } else {
     addMissingImports(sourceFile, foundFunctions)
-    addTypesToPage(sourceFile, foundFunctions)
+    findNodes(sourceFile, foundFunctions, addTSType)
   }
   await testProject.save()
 }
