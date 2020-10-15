@@ -19,7 +19,7 @@ jobs:
       - name: Compile
         run: npm run compile
       - name: Run plugin tests
-        run: cd packages/vscode && npm test && cd ../..
+        run: cd packages/vscode && npm test
       - name: Unit tests
         run: cd packages/language-server && npm test
       - name: Run headless test
