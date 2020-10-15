@@ -131,7 +131,7 @@
     "tempy": "^0.7.1",
     "ts-jest": "^26.4.1",
     "typescript": "4.0.3",
-    "vsce": "1.80.0",
+    "vsce": "1.81.1",
     "vscode-test": "1.4.0"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
