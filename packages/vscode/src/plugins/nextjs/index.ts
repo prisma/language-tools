@@ -31,11 +31,26 @@ const plugin: PrismaVSCodePlugin = {
 
     return hasNext && hasPrismaCLI
   },
-  activate: (context) => {
+  activate: async (context) => {
     const shouldAutoFormat = workspace
       .getConfiguration('prisma.plugin.nextjs')
       .get('addTypesOnSave')
-
+    const hasPrompted = workspace
+      .getConfiguration('prisma.plugin.nextjs')
+      .get('hasPrompted')
+    // TODO Someone please help with a better message
+    if (!hasPrompted) {
+      const res = await window.showInformationMessage(
+        'Would you like to enable nextjs-prisma autotypes',
+        'Yes',
+        'No',
+      )
+      const config = workspace.getConfiguration('prisma.plugin.nextjs')
+      if (res === 'Yes') {
+        await config.update('addTypesOnSave', true)
+      }
+      await config.update('hasPrompted', true)
+    }
     if (shouldAutoFormat) {
       workspace.onWillSaveTextDocument((e: TextDocumentWillSaveEvent) => {
         if (
