@@ -17,7 +17,6 @@ export function addMissingImports(
 }
 
 export function addImportIfMissing(sourceFile: SourceFile, type: string): void {
-  // import { GetServerSidePropsContext, InferGetServerSidePropsType } from 'next';
   let nextImport = sourceFile.getImportDeclaration('next')
   let hasTypeImport = false
   if (!nextImport) {
