@@ -50,7 +50,6 @@ import {
   printLogMessage,
   isRelationField,
 } from './rename/renameUtil'
-import { ENGINE_METHOD_DIGESTS } from 'constants'
 
 export function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
