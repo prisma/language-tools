@@ -7,13 +7,13 @@ type KeyOfImportVars = keyof typeof import_variations
 type KeyOfExportVars = keyof typeof export_variations
 type KeyOfPageExportVar = keyof typeof page_export_variations
 
-type Filter = (value: string, index: number, array: string[]) => boolean
-type Extension = 'js' | 'jsx' | 'ts' | 'tsx'
+export type Filter = (value: string, index: number, array: string[]) => boolean
+export type FileExtension = 'js' | 'jsx' | 'ts' | 'tsx'
 /**
  * This builds different variations of import/export and nextjs page statements. Only used for testing
  */
 export function buildVariations(
-  extension: Extension,
+  extension: FileExtension,
   filter?: {
     import?: Filter
     export?: Filter
