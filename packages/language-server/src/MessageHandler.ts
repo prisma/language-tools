@@ -255,9 +255,9 @@ export async function handleDiagnosticsRequest(
   const diagnostics: Diagnostic[] = []
   if (
     res.some(
-      (err) =>
-        err.text === "Field declarations don't require a `:`." ||
-        err.text ===
+      (diagnostic) =>
+        diagnostic.text === "Field declarations don't require a `:`." ||
+        diagnostic.text ===
           'Model declarations have to be indicated with the `model` keyword.',
     )
   ) {
@@ -268,15 +268,19 @@ export async function handleDiagnosticsRequest(
     }
   }
 
-  for (const error of res) {
+  for (const diag of res) {
     const diagnostic: Diagnostic = {
-      severity: DiagnosticSeverity.Error,
       range: {
-        start: document.positionAt(error.start),
-        end: document.positionAt(error.end),
+        start: document.positionAt(diag.start),
+        end: document.positionAt(diag.end),
       },
-      message: error.text,
+      message: diag.text,
       source: '',
+    }
+    if (diag.is_warning) {
+      diagnostic.severity = DiagnosticSeverity.Warning
+    } else {
+      diagnostic.severity = DiagnosticSeverity.Error
     }
     diagnostics.push(diagnostic)
   }

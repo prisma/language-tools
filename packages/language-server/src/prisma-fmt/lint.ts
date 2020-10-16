@@ -4,6 +4,7 @@ export interface LinterError {
   start: number
   end: number
   text: string
+  is_warning: boolean
 }
 
 export default async function lint(
