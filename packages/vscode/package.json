@@ -14,7 +14,7 @@
   ],
   "dependencies": {
     "checkpoint-client": "1.1.14",
-    "ts-morph": "8.1.1",
+    "ts-morph": "8.1.2",
     "crypto": "1.0.1",
     "chokidar": "3.4.3",
     "@prisma/language-server": "10.0.22",
