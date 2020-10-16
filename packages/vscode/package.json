@@ -14,6 +14,7 @@
   ],
   "dependencies": {
     "checkpoint-client": "1.1.14",
+    "ts-morph": "8.1.1",
     "crypto": "1.0.1",
     "chokidar": "3.4.3",
     "@prisma/language-server": "10.0.22",
@@ -29,12 +30,15 @@
   "scripts": {
     "build": "tsc -p ./",
     "watch": "npm run build -- -w",
+    "test": "jest",
     "vscode:prepublish": "cd .. && cd .. && tsc --build --clean && npm run compile",
     "package": "vsce package"
   },
   "main": "./dist/src/extension.js",
   "activationEvents": [
-    "onLanguage:prisma"
+    "workspaceContains:**/*.prisma",
+    "onLanguage:prisma",
+    "onCommand:prisma.plugin.nextjs.addTypes"
   ],
   "contributes": {
     "languages": [
@@ -73,32 +77,62 @@
     ],
     "configuration": {
       "type": "object",
-      "title": "Language server configuration",
+      "title": "Prisma",
       "properties": {
         "prismaLanguageServer.prismaFmtBinPath": {
           "scope": "resource",
           "type": "string",
           "description": "Option to set the path to the prisma-fmt binary."
+        },
+        "prisma.plugin.nextjs.root": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Option to set the path to a nextjs project"
+        },
+        "prisma.plugin.nextjs.hasPrompted": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Hides Autotypes Prompt if it has been shown"
+        },
+        "prisma.plugin.nextjs.addTypesOnSave": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically add NextJS page types on save"
         }
       }
     },
     "commands": [
       {
         "command": "prisma.restartLanguageServer",
-        "title": "Prisma: Restart Language Server"
+        "title": "Restart Language Server",
+        "category": "Prisma"
+      },
+      {
+        "command": "prisma.plugin.nextjs.addTypes",
+        "title": "Add Types to a NextJS Page",
+        "category": "Prisma"
       }
     ]
   },
   "devDependencies": {
+    "@types/dedent": "^0.7.0",
     "@types/glob": "7.1.3",
-    "@types/vscode": "1.49.0",
-    "vsce": "1.81.1",
-    "vscode-test": "1.4.0",
+    "@types/jest": "^26.0.14",
     "@types/mocha": "8.0.3",
+    "@types/vscode": "1.49.0",
+    "dedent": "^0.7.0",
+    "fs-jetpack": "^3.1.0",
+    "jest": "^26.4.2",
+    "jest-snapshot-serializer-raw": "^1.1.0",
     "mocha": "8.1.3",
+    "ovsx": "0.1.0-next.e000fdb",
     "semver": "7.3.2",
+    "tempy": "^0.7.1",
+    "ts-jest": "^26.4.1",
     "typescript": "4.0.3",
-    "ovsx": "0.1.0-next.e000fdb"
+    "vsce": "1.81.1",
+    "vscode-test": "1.4.0"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
   "publishConfig": {

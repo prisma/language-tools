@@ -10,8 +10,9 @@
     "esModuleInterop": true,
     "strict": true,
     "composite": true,
-    "declaration": true
+    "declaration": true,
+    "skipLibCheck": true
   },
-  "include": ["src"],
+  "include": ["src", "jest.config.js"],
   "exclude": ["node_modules", ".vscode-test"]
 }
