@@ -128,7 +128,7 @@
     "mocha": "8.1.3",
     "ovsx": "0.1.0-next.e000fdb",
     "semver": "7.3.2",
-    "tempy": "0.7.1",
+    "tempy": "1.0.0",
     "ts-jest": "26.4.1",
     "typescript": "4.0.3",
     "vsce": "1.81.1",
