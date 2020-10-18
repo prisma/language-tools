@@ -47,7 +47,6 @@ import {
   insertMapAttribute,
   renameReferencesForFieldValue,
   isEnumName,
-  printLogMessage,
   isRelationField,
 } from './rename/renameUtil'
 
@@ -717,14 +716,6 @@ export function handleRenameRequest(
       )
     }
 
-    printLogMessage(
-      currentName,
-      params.newName,
-      isEnumRename,
-      isModelRename,
-      isValidFieldRename,
-      isEnumValueRename,
-    )
     return {
       changes: {
         [document.uri]: edits,
