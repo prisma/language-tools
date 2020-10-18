@@ -439,9 +439,6 @@ export function handleCompletionRequest(
 ): CompletionList | undefined {
   const context = params.context
   const position = params.position
-  if (!context) {
-    return
-  }
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
   const currentLineUntrimmed = getCurrentLine(document, position.line)
@@ -480,7 +477,7 @@ export function handleCompletionRequest(
   }
 
   // Completion was triggered by a triggerCharacter
-  if (context.triggerKind === 2) {
+  if (context?.triggerKind === 2) {
     switch (context.triggerCharacter) {
       case '@':
         if (
