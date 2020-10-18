@@ -146,10 +146,12 @@ export function startServer(options?: LSPOptions): void {
     }
     let result = documentSettings.get(resource)
     if (!result) {
-      result = connection.workspace.getConfiguration({
-        scopeUri: resource,
-        section: 'prismaLanguageServer',
-      })
+      result = connection.workspace
+        .getConfiguration({
+          scopeUri: resource,
+          section: 'prismaLanguageServer',
+        })
+        .then((settings) => settings || globalSettings)
       documentSettings.set(resource, result)
     }
     return result
