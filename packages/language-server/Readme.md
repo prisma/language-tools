@@ -12,7 +12,7 @@ npm install -g @prisma/language-server
 
 ## Contributing
 
-Read more about [how to contribute to the Prisma Language Server](./packages/language-server/CONTRIBUTING.md)
+Read more about [how to contribute to the Prisma Language Server](./CONTRIBUTING.md)
 
 ## Security
 
