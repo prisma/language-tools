@@ -534,7 +534,11 @@ export function extractCurrentName(
   if (isModelOrEnumRename) {
     const currentLineUntrimmed = getCurrentLine(document, position.line)
     const currentLineTillPosition = currentLineUntrimmed
-      .slice(0, position.character)
+      .slice(
+        0,
+        position.character +
+          currentLineUntrimmed.slice(position.character).search(/\W/),
+      )
       .trim()
     const wordsBeforePosition: string[] = currentLineTillPosition.split(/\s+/)
     if (wordsBeforePosition.length < 2) {

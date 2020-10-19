@@ -92,6 +92,102 @@ suite('Rename', () => {
         changes: {
           [renameModel.uri]: [
             {
+              newText: newModelName,
+              range: {
+                start: { line: 17, character: 6 },
+                end: { line: 17, character: 10 },
+              },
+            },
+            {
+              newText: '\t@@map("User")\n}',
+              range: {
+                start: { line: 23, character: 0 },
+                end: { line: 23, character: 1 },
+              },
+            },
+            {
+              newText: newModelName,
+              range: {
+                start: { line: 13, character: 12 },
+                end: { line: 13, character: 16 },
+              },
+            },
+          ],
+        },
+      },
+      renameModel,
+      newModelName,
+      { line: 17, character: 9 },
+    )
+    assertRename(
+      {
+        changes: {
+          [renameModel.uri]: [
+            {
+              newText: newModelName,
+              range: {
+                start: { line: 17, character: 6 },
+                end: { line: 17, character: 10 },
+              },
+            },
+            {
+              newText: '\t@@map("User")\n}',
+              range: {
+                start: { line: 23, character: 0 },
+                end: { line: 23, character: 1 },
+              },
+            },
+            {
+              newText: newModelName,
+              range: {
+                start: { line: 13, character: 12 },
+                end: { line: 13, character: 16 },
+              },
+            },
+          ],
+        },
+      },
+      renameModel,
+      newModelName,
+      { line: 17, character: 8 },
+    )
+    assertRename(
+      {
+        changes: {
+          [renameModel.uri]: [
+            {
+              newText: newModelName,
+              range: {
+                start: { line: 17, character: 6 },
+                end: { line: 17, character: 10 },
+              },
+            },
+            {
+              newText: '\t@@map("User")\n}',
+              range: {
+                start: { line: 23, character: 0 },
+                end: { line: 23, character: 1 },
+              },
+            },
+            {
+              newText: newModelName,
+              range: {
+                start: { line: 13, character: 12 },
+                end: { line: 13, character: 16 },
+              },
+            },
+          ],
+        },
+      },
+      renameModel,
+      newModelName,
+      { line: 17, character: 6 },
+    )
+    assertRename(
+      {
+        changes: {
+          [renameModel.uri]: [
+            {
               newText: newModelName2,
               range: {
                 start: { line: 9, character: 6 },
