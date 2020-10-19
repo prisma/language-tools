@@ -2,7 +2,6 @@
  * Imports
  */
 
-import * as util from './../util'
 import https from 'https'
 import zlib from 'zlib'
 import fs from 'fs'
@@ -11,8 +10,10 @@ import fs from 'fs'
  * Install prisma format
  */
 
-export default async function install(fmtPath: string): Promise<string> {
-  const url = await util.getDownloadURL()
+export default async function install(
+  url: string,
+  fmtPath: string,
+): Promise<string> {
   const file = fs.createWriteStream(fmtPath)
 
   // Fetch fetch fetch.

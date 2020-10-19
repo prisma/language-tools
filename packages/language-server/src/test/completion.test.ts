@@ -8,7 +8,7 @@ import {
 } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
-import { getBinPath, binaryIsNeeded } from '../util'
+import { getBinPath, binaryIsNeeded, getDownloadURL } from '../util'
 import install from '../prisma-fmt/install'
 
 function assertCompletion(
@@ -54,7 +54,9 @@ suite('Quick Fix', () => {
     if (binPathPrismaFmt === '') {
       binPathPrismaFmt = await getBinPath()
     }
-    if (binaryIsNeeded(binPathPrismaFmt)) await install(binPathPrismaFmt)
+    if (binaryIsNeeded(binPathPrismaFmt)) {
+      await install(await getDownloadURL(), binPathPrismaFmt)
+    }
   })
 
   const emptyDocUri = 'completions/empty.prisma'
