@@ -72,12 +72,14 @@ const plugin: PrismaVSCodePlugin = {
       // use LSP from folder for debugging
       console.log('Using local LSP')
       serverModule = context.asAbsolutePath(
-        path.join('../../packages/language-server/dist/src/cli'),
+        path.join('../../packages/language-server/bin/prisma-language-server'),
       )
     } else {
       console.log('Using published LSP.')
       // use published npm package for production
-      serverModule = require.resolve('@prisma/language-server/dist/src/cli')
+      serverModule = require.resolve(
+        '@prisma/language-server/bin/prisma-language-server',
+      )
     }
 
     // The debug options for the server
