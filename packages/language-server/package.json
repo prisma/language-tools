@@ -13,7 +13,7 @@
     "version": "013fea8c06f68ee01634987104fdd5c1dbeb412e"
   },
   "bin": {
-    "prisma-language-server": "bin/prisma-language-server"
+    "prisma-language-server": "dist/src/bin.js"
   },
   "repository": {
     "type": "github",
