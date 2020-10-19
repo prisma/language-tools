@@ -16,21 +16,29 @@ export default async function install(fmtPath: string): Promise<string> {
   const file = fs.createWriteStream(fmtPath)
 
   // Fetch fetch fetch.
-  return new Promise<string>(function (resolve, reject) {
-    https.get(url, function (response) {
-      // Did everything go well?
-      if (response.statusCode !== 200) {
-        reject(response.statusMessage)
-      }
+  try {
+    return new Promise<string>(function (resolve, reject) {
+      https.get(url, function (response) {
+        // Did everything go well?
+        if (response.statusCode !== 200) {
+          reject(response.statusMessage)
+        }
 
-      // If so, unzip and pipe into our file.
-      const unzip = zlib.createGunzip()
-      response.pipe(unzip).pipe(file)
-      file.on('finish', function () {
-        fs.chmodSync(fmtPath, '755')
-        file.close()
-        resolve(fmtPath)
+        // If so, unzip and pipe into our file.
+        const unzip = zlib.createGunzip()
+        response.pipe(unzip).pipe(file)
+        file.on('finish', function () {
+          fs.chmodSync(fmtPath, '755')
+          file.close()
+          resolve(fmtPath)
+        })
       })
     })
-  })
+  } catch (e) {
+    // Cleanup on failure
+    try {
+      fs.unlinkSync(fmtPath)
+    } catch (err) {}
+    throw e
+  }
 }
