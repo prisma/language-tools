@@ -17,11 +17,11 @@ export default async function install(fmtPath: string): Promise<string> {
 
   // Fetch fetch fetch.
   try {
-    return new Promise<string>(function (resolve, reject) {
+    return await new Promise<string>(function (resolve, reject) {
       https.get(url, function (response) {
         // Did everything go well?
         if (response.statusCode !== 200) {
-          reject(response.statusMessage)
+          reject(new Error(response.statusMessage))
         }
 
         // If so, unzip and pipe into our file.
