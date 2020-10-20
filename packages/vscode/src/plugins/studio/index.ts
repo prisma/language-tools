@@ -1,5 +1,6 @@
 import * as cp from 'child_process'
 import * as vscode from 'vscode'
+import { commands } from 'vscode'
 import { getExecutor } from '../../helpers/workspace'
 import { getResourceURI } from '../../util'
 import { PrismaVSCodePlugin } from '../types'
@@ -9,19 +10,15 @@ let studioProcess: cp.ChildProcessWithoutNullStreams
 const plugin: PrismaVSCodePlugin = {
   name: 'studio',
   enabled: () => true,
-  commands: [
-    {
-      id: 'prisma.plugin.studio.kill',
-      action: () => {
+  activate: (context) => {
+    context.subscriptions.push(
+      commands.registerCommand('prisma.plugin.studio.kill', () => {
         console.log('Killing Prisma Studio')
         if (studioProcess) {
           studioProcess.kill()
         }
-      },
-    },
-    {
-      id: 'prisma.plugin.studio.open',
-      action: (context) => {
+      }),
+      commands.registerCommand('prisma.plugin.studio.open', () => {
         if (!vscode.workspace.rootPath) return
         const options: cp.SpawnOptionsWithoutStdio | undefined = {
           cwd: vscode.workspace.rootPath,
@@ -100,8 +97,8 @@ const plugin: PrismaVSCodePlugin = {
             console.log('Closed')
           })
         }
-      },
-    },
-  ],
+      }),
+    )
+  },
 }
 export default plugin
