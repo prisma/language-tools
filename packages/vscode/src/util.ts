@@ -1,20 +1,22 @@
+import { readdirSync } from 'fs'
+import { homedir } from 'os'
+import path from 'path'
 import {
-  WorkspaceEdit,
-  window,
-  TextEdit,
-  SnippetString,
-  TextEditorEdit,
   env,
+  ExtensionContext,
+  SnippetString,
+  TextEdit,
+  TextEditorEdit,
+  Uri,
+  window,
   workspace,
+  WorkspaceEdit,
 } from 'vscode'
 import { CodeAction, TextDocumentIdentifier } from 'vscode-languageclient'
 import {
   denyListDarkColorThemes,
   denyListLightColorThemes,
 } from './denyListColorThemes'
-import { homedir } from 'os'
-import { readdirSync } from 'fs'
-import path from 'path'
 
 export function isDebugOrTestSession(): boolean {
   return env.sessionId === 'someValue.sessionId'
@@ -116,4 +118,13 @@ export function applySnippetWorkspaceEdit(): (
       await editor.insertSnippet(new SnippetString(snip.newText), range)
     }
   }
+}
+/**
+ * Returns the URI for a file located in our resources folder.
+ *
+ * @param file The base file name.
+ * @param context The context of this extension to get its path regardless where it is installed.
+ */
+export function getResourceURI(file: string, context: ExtensionContext): Uri {
+  return Uri.file(context.asAbsolutePath(path.join('resources', file)))
 }

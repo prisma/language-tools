@@ -112,6 +112,16 @@
         "command": "prisma.plugin.nextjs.addTypes",
         "title": "Add Types to a NextJS Page",
         "category": "Prisma"
+      },
+      {
+        "command": "prisma.plugin.studio.open",
+        "title": "Open Studio",
+        "category": "Prisma"
+      },
+      {
+        "command": "prisma.plugin.studio.kill",
+        "title": "Stop Studio",
+        "category": "Prisma"
       }
     ]
   },
