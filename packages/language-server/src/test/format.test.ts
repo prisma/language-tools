@@ -1,6 +1,6 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { handleDocumentFormatting } from '../MessageHandler'
-import { getBinPath, binaryIsNeeded } from '../util'
+import { getBinPath, binaryIsNeeded, getDownloadURL } from '../util'
 import install from '../prisma-fmt/install'
 import { TextEdit, DocumentFormattingParams } from 'vscode-languageserver'
 import * as assert from 'assert'
@@ -36,7 +36,8 @@ suite('Format', () => {
     if (binPathPrismaFmt === '') {
       binPathPrismaFmt = await getBinPath()
     }
-    if (binaryIsNeeded(binPathPrismaFmt)) await install(binPathPrismaFmt)
+    if (binaryIsNeeded(binPathPrismaFmt))
+      await install(await getDownloadURL(), binPathPrismaFmt)
   })
 
   const fixturePath = './formatting/autoFormat.prisma'

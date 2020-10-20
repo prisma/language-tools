@@ -194,13 +194,18 @@ export function startServer(options?: LSPOptions): void {
   async function installPrismaFmt(documentUri: string) {
     const settings = await getDocumentSettings(documentUri)
     const prismaFmtBinPath = getPrismaFmtBinPath(settings.prismaFmtBinPath)
+    connection.console.info(`Local prisma-fmt path: ${prismaFmtBinPath}`)
+
     const isInstallNecessary = util.binaryIsNeeded(prismaFmtBinPath)
     if (
       isInstallNecessary ||
       (!isInstallNecessary && !(await util.testBinarySuccess(prismaFmtBinPath)))
     ) {
+      const downloadUrl = await util.getDownloadURL()
+      connection.console.info(`Downloading prisma-fmt from ${downloadUrl}`)
+
       try {
-        await install(prismaFmtBinPath)
+        await install(downloadUrl, prismaFmtBinPath)
         const version = await util.getBinaryVersion(prismaFmtBinPath)
         connection.console.info(
           `Prisma plugin prisma-fmt installation succeeded.`,
@@ -209,7 +214,13 @@ export function startServer(options?: LSPOptions): void {
           `Installed version ${version} of 'prisma-fmt' using path: ${prismaFmtBinPath}`,
         )
       } catch (err) {
-        connection.console.error('Cannot install prisma-fmt: ' + err) // eslint-disable-line @typescript-eslint/restrict-plus-operands
+        const message = err instanceof Error ? err.message : `${err}` // eslint-disable-line @typescript-eslint/restrict-template-expressions
+        connection.console.error(
+          `Cannot install prisma-fmt: ${message}. Please:\n` +
+            '1. Check your network connection and run `Prisma: Restart Language Server`, or\n' +
+            '2. Manually download and uncompress the archive file, then set the path in `prismaLanguageServer.prismaFmtBinPath`\n\n' +
+            `The achieve file can be acquired at:\n  ${downloadUrl}\n\n`,
+        )
       }
     }
   }
