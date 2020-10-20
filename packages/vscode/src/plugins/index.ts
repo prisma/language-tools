@@ -1,6 +1,6 @@
 import nextjs from './nextjs'
 import languageServer from './prisma-language-server'
-import studio from './prisma-language-server'
+import studio from './studio'
 
 import { PrismaVSCodePlugin } from './types'
 
