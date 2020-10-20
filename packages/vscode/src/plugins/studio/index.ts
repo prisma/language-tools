@@ -14,9 +14,7 @@ const plugin: PrismaVSCodePlugin = {
     context.subscriptions.push(
       commands.registerCommand('prisma.plugin.studio.kill', () => {
         console.log('Killing Prisma Studio')
-        if (studioProcess) {
-          studioProcess.kill()
-        }
+        if (studioProcess) studioProcess.kill()
       }),
       commands.registerCommand('prisma.plugin.studio.open', () => {
         if (!vscode.workspace.rootPath) return
@@ -99,6 +97,11 @@ const plugin: PrismaVSCodePlugin = {
         }
       }),
     )
+  },
+  deactivate: () => {
+    if (studioProcess) {
+      studioProcess.kill()
+    }
   },
 }
 export default plugin
