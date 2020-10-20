@@ -40,7 +40,7 @@ export default class TelemetryReporter {
     }
   }
 
-  public dispose() {
+  public dispose(): void {
     this.configListener.dispose()
   }
 }

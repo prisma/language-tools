@@ -77,9 +77,7 @@ const plugin: PrismaVSCodePlugin = {
     } else {
       console.log('Using published LSP.')
       // use published npm package for production
-      serverModule = require.resolve(
-        '@prisma/language-server/dist/src/bin',
-      )
+      serverModule = require.resolve('@prisma/language-server/dist/src/bin')
     }
 
     // The debug options for the server
@@ -190,7 +188,7 @@ const plugin: PrismaVSCodePlugin = {
       context.subscriptions.push(telemetry)
       await telemetry.sendTelemetryEvent()
       if (extensionId === 'prisma.prisma-insider') {
-        checkForOtherPrismaExtension(extensionId)
+        checkForOtherPrismaExtension()
       }
     }
 
