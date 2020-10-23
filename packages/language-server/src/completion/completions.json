@@ -51,10 +51,6 @@
     {
       "label": "url",
       "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database, [learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema)."
-    },
-    {
-      "label": "previewFeatures",
-      "documentation": "Enables preview feature flags."
     }
   ],
   "generatorFields": [

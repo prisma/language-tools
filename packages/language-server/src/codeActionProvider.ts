@@ -193,16 +193,16 @@ export function quickFix(
       diag.message.includes('previewFeatures = ["nativeTypes"]')
     ) {
       // get datasource block
-      const datasourceStart = lines.filter(
-        (l) => l.startsWith('datasource') && l.includes('{'),
+      const generatorStart = lines.filter(
+        (l) => l.startsWith('generator') && l.includes('{'),
       )
-      if (datasourceStart.length !== 0) {
-        const index = lines.indexOf(datasourceStart[0])
+      if (generatorStart.length !== 0) {
+        const index = lines.indexOf(generatorStart[0])
         if (index !== -1) {
           const block = getBlockAtPosition(index, lines)
           if (block) {
             codeActions.push({
-              title: "Add preview feature 'nativeTypes' to datasource block.",
+              title: "Add preview feature 'nativeTypes' to generator block.",
               kind: CodeActionKind.QuickFix,
               diagnostics: [diag],
               edit: {
@@ -224,17 +224,17 @@ export function quickFix(
             })
           } else {
             console.log(
-              'Not showing a quick-fix for native Types, because datasource block could not be found.',
+              'Not showing a quick-fix for native Types, because generator block could not be found.',
             )
           }
         } else {
           console.log(
-            'Not showing a quick-fix for native Types, because a datasource could not be found in cashed schema.',
+            'Not showing a quick-fix for native Types, because a generator could not be found in cashed schema.',
           )
         }
       } else {
         console.log(
-          'Not showing a quick-fix for native Types, because a datasource could not be found.',
+          'Not showing a quick-fix for native Types, because a generator could not be found.',
         )
       }
     }

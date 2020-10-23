@@ -648,16 +648,8 @@ export function getSuggestionForSupportedFields(
             items: dataSourceUrlArguments,
             isIncomplete: true,
           }
-        } // TODO: uncomment once nativeTypes will be launched!
-      } /*else if (currentLine.startsWith('previewFeatures')) {
-        const datasourcePreviewFeatures: string[] = previewFeatures(binPath, true)
-        return handlePreviewFeatures(
-          datasourcePreviewFeatures,
-          position,
-          currentLineUntrimmed,
-          isInsideQuotation,
-        )
-      } */
+        }
+      }
       break
   }
 
