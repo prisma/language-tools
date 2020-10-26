@@ -241,6 +241,10 @@
     {
       "label": "sqlite",
       "documentation": "Specifies a SQLite data source. Learn more about the SQLite data source connector [here](https://www.prisma.io/docs/reference/database-connectors/sqlite)."
+    },
+    {
+      "label": "sqlserver",
+      "documentation": "Specifies a Microsoft SQL Server data source."
     }
   ],
   "datasourceProviderArguments": [
