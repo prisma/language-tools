@@ -116,6 +116,10 @@ suite('Quick Fix', () => {
     label: 'postgresql',
     kind: CompletionItemKind.Constant,
   }
+  const mssql = {
+    label: 'sqlserver',
+    kind: CompletionItemKind.Constant,
+  }
   const array = { label: '[]', kind: CompletionItemKind.Property }
   const quotationMarks = {
     label: '""',
@@ -182,7 +186,7 @@ suite('Quick Fix', () => {
       { line: 14, character: 14 },
       {
         isIncomplete: true,
-        items: [mysql, postgresql, sqlite],
+        items: [mysql, postgresql, sqlite, mssql],
       },
     ),
       assertCompletion(
@@ -201,7 +205,7 @@ suite('Quick Fix', () => {
       { line: 6, character: 15 },
       {
         isIncomplete: true,
-        items: [mysql, postgresql, sqlite],
+        items: [mysql, postgresql, sqlite, mssql],
       },
     ),
       assertCompletion(
@@ -217,7 +221,7 @@ suite('Quick Fix', () => {
       { line: 10, character: 25 },
       {
         isIncomplete: true,
-        items: [mysql, postgresql],
+        items: [mysql, postgresql, mssql],
       },
     )
   })

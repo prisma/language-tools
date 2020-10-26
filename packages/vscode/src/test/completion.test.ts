@@ -100,6 +100,7 @@ suite('Should auto-complete', () => {
     label: 'postgresql',
     kind: vscode.CompletionItemKind.Constant,
   }
+  const mssql = { label: 'sqlserver', kind: vscode.CompletionItemKind.Constant }
   const array = { label: '[]', kind: vscode.CompletionItemKind.Property }
   const quotationMarks = {
     label: '""',
@@ -158,7 +159,7 @@ suite('Should auto-complete', () => {
     await testCompletion(
       sqliteDocUri,
       new vscode.Position(14, 14),
-      new vscode.CompletionList([mysql, postgresql, sqlite], true),
+      new vscode.CompletionList([mysql, postgresql, sqlite, mssql], true),
       false,
     ),
       await testCompletion(
@@ -173,7 +174,7 @@ suite('Should auto-complete', () => {
     await testCompletion(
       sqliteDocUri,
       new vscode.Position(6, 15),
-      new vscode.CompletionList([mysql, postgresql, sqlite], true),
+      new vscode.CompletionList([mysql, postgresql, sqlite, mssql], true),
       true,
     ),
       await testCompletion(
@@ -185,7 +186,7 @@ suite('Should auto-complete', () => {
     await testCompletion(
       sqliteDocUri,
       new vscode.Position(10, 25),
-      new vscode.CompletionList([mysql, postgresql], true),
+      new vscode.CompletionList([mysql, postgresql, mssql], true),
       true,
     )
   })
