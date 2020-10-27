@@ -129,8 +129,8 @@
     "ovsx": "0.1.0-next.e000fdb",
     "semver": "7.3.2",
     "tempy": "1.0.0",
-    "ts-jest": "26.4.2",
-    "typescript": "4.0.3",
+    "ts-jest": "26.4.3",
+    "typescript": "4.0.5",
     "vsce": "1.81.1",
     "vscode-test": "1.4.0"
   },
