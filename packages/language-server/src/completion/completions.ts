@@ -197,7 +197,7 @@ export function getSuggestionForFieldAttribute(
   // create deep copy
   let suggestions: CompletionItem[] = klona(fieldAttributes)
 
-  const enabledNativeTypes = declaredNativeTypes(document, binPath)
+  // const enabledNativeTypes = declaredNativeTypes(document, binPath)
 
   if (!(currentLine.includes('Int') || currentLine.includes('String'))) {
     // id not allowed
@@ -210,7 +210,7 @@ export function getSuggestionForFieldAttribute(
 
   suggestions = removeInvalidAttributeSuggestions(suggestions, block, lines)
 
-  if (enabledNativeTypes && wordsBeforePosition.length >= 2) {
+  /* if (enabledNativeTypes && wordsBeforePosition.length >= 2) {
     const datasourceName = getFirstDatasourceName(lines)
     const prismaType = wordsBeforePosition[1]
     const nativeTypeSuggestions = getNativeTypes(document, prismaType, binPath)
@@ -231,7 +231,7 @@ export function getSuggestionForFieldAttribute(
         'Did not receive any native type suggestions from prisma-fmt call.',
       )
     }
-  }
+  } */
 
   return {
     items: suggestions,
@@ -588,7 +588,7 @@ export function getSuggestionForSupportedFields(
         const generatorPreviewFeatures: string[] = previewFeatures(
           binPath,
           false,
-        )
+        ).filter((f) => f != 'nativeTypes')
         if (generatorPreviewFeatures.length > 0) {
           return handlePreviewFeatures(
             generatorPreviewFeatures,
