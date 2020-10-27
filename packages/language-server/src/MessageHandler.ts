@@ -30,8 +30,8 @@ import {
   positionIsAfterFieldAndType,
   isInsideAttribute,
   getSymbolBeforePosition,
-  suggestEqualSymbol,
-  getSuggestionForNativeTypes,
+  suggestEqualSymbol /*,
+  getSuggestionForNativeTypes, */,
 } from './completion/completions'
 import { quickFix } from './codeActionProvider'
 import lint from './prisma-fmt/lint'
@@ -501,14 +501,14 @@ export function handleCompletionRequest(
           position,
           binPath,
         )
-      case '.':
+      /* case '.':
         return getSuggestionForNativeTypes(
           foundBlock,
           wordsBeforePosition,
           document,
           binPath,
           lines,
-        )
+        ) */
     }
   }
 
