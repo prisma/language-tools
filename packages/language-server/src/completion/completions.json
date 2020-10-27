@@ -23,6 +23,14 @@
     {
       "label": "Json",
       "documentation": "A JSON object"
+    },
+    {
+      "label": "Bytes",
+      "documentation": ""
+    },
+    {
+      "label": "Decimal",
+      "documentation": "Decimal value"
     }
   ],
   "blockTypes": [
