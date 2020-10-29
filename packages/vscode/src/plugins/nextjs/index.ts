@@ -42,7 +42,7 @@ const plugin: PrismaVSCodePlugin = {
     // TODO Someone please help with a better message
     if (!hasPrompted) {
       const res = await window.showInformationMessage(
-        'Would you like to enable nextjs-prisma autotypes',
+        'Would you like to enable nextjs-prisma autotypes [EXPERIMENTAL]',
         'Yes',
         'No',
       )
