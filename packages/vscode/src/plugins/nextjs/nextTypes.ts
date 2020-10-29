@@ -36,14 +36,16 @@ export class NextTypes {
     const sourceFile = this.project.addSourceFileAtPath(filePath)
 
     const foundFunctions = getUsedNextFunctions(sourceFile)
-    if (isJS(sourceFile)) {
-      findNodes(sourceFile, foundFunctions, addJSDoc)
-    } else {
-      addMissingImports(sourceFile, foundFunctions)
-      findNodes(sourceFile, foundFunctions, addTSType)
-    }
-    if (this.options?.save) {
-      await this.project.save()
+    if (foundFunctions) {
+      if (isJS(sourceFile)) {
+        findNodes(sourceFile, foundFunctions, addJSDoc)
+      } else {
+        addMissingImports(sourceFile, foundFunctions)
+        findNodes(sourceFile, foundFunctions, addTSType)
+      }
+      if (this.options?.save) {
+        await this.project.save()
+      }
     }
     this.project.removeSourceFile(sourceFile)
   }

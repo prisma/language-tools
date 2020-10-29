@@ -1,3 +1,4 @@
+import path from 'path'
 import {
   commands,
   TextDocument,
@@ -81,7 +82,11 @@ async function formatDocument(document?: TextDocument) {
   const filename = document
     ? document.fileName
     : window.activeTextEditor?.document.fileName
-  if (filename && filename.includes('pages')) {
+  if (
+    filename &&
+    filename.includes('pages') &&
+    !filename.includes(path.join('pages', 'api'))
+  ) {
     try {
       console.log(`Adding Types to ${filename}`)
       await nextTypes.run(filename)

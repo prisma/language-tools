@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`regressions -  regression 1`] = `
+import { NextApiRequest, NextApiResponse } from 'next'
+
+import { primsa } from "~/lib/db";
+import { requestWrapper } from "~/lib/auth/jwt";
+
+export default async (req: NextApiRequest, res) => {
+await requestWrapper(req, res, async (token: any) => {
+  const posts = await prisma.post.findMany();
+  res.status(200).json()({posts})
+})
+}
+`;
