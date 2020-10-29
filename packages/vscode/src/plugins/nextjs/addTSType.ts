@@ -9,18 +9,20 @@ export function addTSType(
 
   const params = node.getParameters()
   const param = params[0]
-  if (param) {
+  if (!params || params.length === 0) {
+    node.addParameter({
+      name: 'props',
+      type: typeString,
+    })
+  } else if (params.length === 1) {
     node.addParameter({
       name: param.getName(),
       type: typeString,
     })
     param.remove()
-  } else {
-    node.addParameter({
-      name: 'props',
-      type: typeString,
-    })
   }
+  // The case for adding types when multiple params are present
+  // is not currently possible with ts-morph
 }
 function buildTypeString(foundNextFunctions: NextFunctionType) {
   return Object.keys(foundNextFunctions).reduce((acc, functionName) => {
