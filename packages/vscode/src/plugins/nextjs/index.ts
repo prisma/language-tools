@@ -1,3 +1,4 @@
+import path from 'path'
 import {
   commands,
   TextDocument,
@@ -41,7 +42,7 @@ const plugin: PrismaVSCodePlugin = {
     // TODO Someone please help with a better message
     if (!hasPrompted) {
       const res = await window.showInformationMessage(
-        'Would you like to enable nextjs-prisma autotypes',
+        'Would you like to enable nextjs-prisma autotypes [EXPERIMENTAL]',
         'Yes',
         'No',
       )
@@ -53,9 +54,13 @@ const plugin: PrismaVSCodePlugin = {
     }
     if (shouldAutoFormat) {
       workspace.onWillSaveTextDocument((e: TextDocumentWillSaveEvent) => {
+        const shouldAutoFormat = workspace
+          .getConfiguration('prisma.plugin.nextjs')
+          .get('addTypesOnSave')
         if (
           e.reason === TextDocumentSaveReason.Manual &&
-          supportedLanguageIds.includes(e.document.languageId)
+          supportedLanguageIds.includes(e.document.languageId) &&
+          shouldAutoFormat
         ) {
           shouldUpdate = true
         }
@@ -81,7 +86,11 @@ async function formatDocument(document?: TextDocument) {
   const filename = document
     ? document.fileName
     : window.activeTextEditor?.document.fileName
-  if (filename && filename.includes('pages')) {
+  if (
+    filename &&
+    filename.includes('pages') &&
+    !filename.includes(path.join('pages', 'api'))
+  ) {
     try {
       console.log(`Adding Types to ${filename}`)
       await nextTypes.run(filename)
