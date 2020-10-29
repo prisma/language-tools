@@ -54,9 +54,13 @@ const plugin: PrismaVSCodePlugin = {
     }
     if (shouldAutoFormat) {
       workspace.onWillSaveTextDocument((e: TextDocumentWillSaveEvent) => {
+        const shouldAutoFormat = workspace
+          .getConfiguration('prisma.plugin.nextjs')
+          .get('addTypesOnSave')
         if (
           e.reason === TextDocumentSaveReason.Manual &&
-          supportedLanguageIds.includes(e.document.languageId)
+          supportedLanguageIds.includes(e.document.languageId) &&
+          shouldAutoFormat
         ) {
           shouldUpdate = true
         }
