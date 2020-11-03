@@ -20,7 +20,6 @@ On push to the master branch, a new Insider extension is released, with an incre
 │       └── src
 |           └── extension.ts // VS Code Entry Point
 │           └── plugins
-│               └── nextjs                  // Next JS entry point
 │               └── prisma-language-server  // Language Client entry point
 |   └── language-server      // Language Server
 │       └── src
