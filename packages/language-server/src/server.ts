@@ -48,6 +48,10 @@ let hasConfigurationCapability = false
  */
 export function startServer(options?: LSPOptions): void {
   const connection: IConnection = getConnection(options)
+
+  console.log = connection.console.log.bind(connection.console)
+  console.error = connection.console.error.bind(connection.console)
+
   const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
   let defaultBinPath = ''
 
