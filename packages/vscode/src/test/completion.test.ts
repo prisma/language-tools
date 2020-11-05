@@ -317,6 +317,8 @@ suite('Should auto-complete', () => {
           { label: 'Post', kind: vscode.CompletionItemKind.Reference },
           { label: 'SecondUser', kind: vscode.CompletionItemKind.Reference },
           { label: 'String', kind: vscode.CompletionItemKind.TypeParameter },
+          { label: 'Bytes', kind: vscode.CompletionItemKind.TypeParameter },
+          { label: 'Decimal', kind: vscode.CompletionItemKind.TypeParameter },
           { label: 'Test', kind: vscode.CompletionItemKind.Reference },
           { label: 'ThirdUser', kind: vscode.CompletionItemKind.Reference },
           { label: 'TypeCheck', kind: vscode.CompletionItemKind.Reference },
