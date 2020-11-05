@@ -2,7 +2,7 @@
   "name": "@prisma/language-server",
   "description": "Implementation of a language server in node.",
   "displayName": "Prisma Language Server",
-  "version": "11.0.41",
+  "version": "11.0.42",
   "author": "Prisma",
   "license": "Apache-2.0",
   "publisher": "Prisma",
@@ -42,7 +42,7 @@
   "devDependencies": {
     "vsce": "1.81.1",
     "@types/mocha": "8.0.3",
-    "mocha": "8.2.0",
+    "mocha": "8.2.1",
     "typescript": "4.0.5"
   },
   "keywords": [
