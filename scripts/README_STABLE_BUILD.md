@@ -45,7 +45,7 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
 <details>
   <summary>Quick-Fixes</summary>
   
-![Quick-Fixes](https://media.giphy.com/media/iGGCF9JWOHx7SAKQlu/giphy.gif)
+![Quick-Fixes](./resources/spellingFix.gif)
 </details>
 
 ## Contributing
