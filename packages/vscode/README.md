@@ -15,7 +15,7 @@ You can find both the [stable](https://marketplace.visualstudio.com/items?itemNa
 
 ## Open VSX Registry
 
-You can find both the [stable](http://open-vsx.org/extension/Prisma/prisma) and [Insider](https://open-vsx.org/extension/Prisma/prisma-insider) extension on the Open VSX Registry.
+You can find both the [stable](https://open-vsx.org/extension/Prisma/prisma) and [Insider](https://open-vsx.org/extension/Prisma/prisma-insider) extension on the Open VSX Registry.
 
 ## Features
 
