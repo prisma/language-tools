@@ -57,12 +57,12 @@ You can find both the [stable](http://open-vsx.org/extension/Prisma/prisma) and 
 <details>
   <summary>Quick-Fixes</summary>
   
-![Quick-Fixes](./resources/spellingFix.gif)
+![Quick-Fixes](../../resources/spellingFix.gif)
 </details>
 
 ## Contributing
 
-Read more about [how to contribute to the Prisma VSCode extension](./packages/vscode/CONTRIBUTING.md)
+Read more about [how to contribute to the Prisma VSCode extension](./CONTRIBUTING.md)
 
 ## Security
 
