@@ -58,7 +58,7 @@ jobs:
 
       - name: Slack Notification on Failure
         if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@v2.1.0
+        uses: rtCamp/action-slack-notify@v2.1.1
         env:  
           SLACK_TITLE: "4. Bumping LSP in VSCode extension failed :x:"
           SLACK_COLOR: '#FF0000'
