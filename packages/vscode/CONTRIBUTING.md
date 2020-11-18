@@ -43,7 +43,7 @@ On push to the master branch, a new Insider extension is released, with an incre
 
 ## Debugging
 
-- Set `prismaLanguageServer.trace.server` to `messages` or `verbose` to trace the communication between VSCode and the language server.
+- Set `prisma.trace.server` to `messages` or `verbose` to trace the communication between VSCode and the language server.
 - There is a tool to visualize and filter the communication between Language Client / Server. All logs from the channel can be saved into a file, and loaded with the Language Server Protocol Inspector at https://microsoft.github.io/language-server-protocol/inspector
 
 ## Testing
