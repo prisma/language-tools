@@ -74,7 +74,7 @@ function nextVersion({
       return semVer.inc(currentVersion, 'patch')
     case 'latest':
       // Prisma CLI new latest version
-      if (isMinorRelease(prisma_latest)) {
+      if (isMinorRelease(prisma_latest) && currentVersion != prisma_latest) {
         return prisma_latest
       }
       return semVer.inc(currentVersion, 'patch')
