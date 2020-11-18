@@ -1,8 +1,8 @@
 {
-  "name": "prisma",
-  "displayName": "Prisma",
-  "description": "Adds syntax highlighting, formatting, auto-completion, jump-to-definition and linting for .prisma files.",
-  "version": "2.11.1",
+  "name": "prisma-insider",
+  "displayName": "Prisma - Insider",
+  "description": "This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the dev version of the CLI.",
+  "version": "12.0.44",
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
@@ -106,5 +106,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "preview": false
+  "preview": true
 }
