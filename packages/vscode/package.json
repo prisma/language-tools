@@ -76,10 +76,21 @@
       "type": "object",
       "title": "Language server configuration",
       "properties": {
-        "prismaLanguageServer.prismaFmtBinPath": {
+        "prisma.prismaFmtBinPath": {
           "scope": "resource",
           "type": "string",
           "description": "Option to set the path to the prisma-fmt binary."
+        },
+        "prisma.trace.server": {
+          "scope": "window",
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces the communication between VS Code and the language server."
         }
       }
     },

@@ -128,9 +128,7 @@ export function startServer(options?: LSPOptions): void {
       // Reset all cached document settings
       documentSettings.clear()
     } else {
-      globalSettings = <LSPSettings>(
-        (change.settings.prismaLanguageServer || defaultSettings) // eslint-disable-line @typescript-eslint/no-unsafe-member-access
-      )
+      globalSettings = <LSPSettings>(change.settings.prisma || defaultSettings) // eslint-disable-line @typescript-eslint/no-unsafe-member-access
     }
     documents.all().forEach(async (d) => await installPrismaFmt(d.uri)) // eslint-disable-line @typescript-eslint/no-misused-promises
 
@@ -152,7 +150,7 @@ export function startServer(options?: LSPOptions): void {
     if (!result) {
       result = connection.workspace.getConfiguration({
         scopeUri: resource,
-        section: 'prismaLanguageServer',
+        section: 'prisma',
       })
       documentSettings.set(resource, result)
     }
@@ -222,7 +220,7 @@ export function startServer(options?: LSPOptions): void {
         connection.console.error(
           `Cannot install prisma-fmt: ${message}. Please:\n` +
             '1. Check your network connection and run `Prisma: Restart Language Server`, or\n' +
-            '2. Manually download and uncompress the archive file, then set the path in `prismaLanguageServer.prismaFmtBinPath`\n\n' +
+            '2. Manually download and uncompress the archive file, then set the path in `prisma.prismaFmtBinPath`\n\n' +
             `The achieve file can be acquired at:\n  ${downloadUrl}\n\n`,
         )
       }
