@@ -15,7 +15,7 @@ You can find both the [stable](https://marketplace.visualstudio.com/items?itemNa
 
 ## Open VSX Registry
 
-You can find both the [stable](http://open-vsx.org/extension/Prisma/prisma) and [Insider](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider) extension on the Open VSX Registry.
+You can find both the [stable](https://open-vsx.org/extension/Prisma/prisma) and [Insider](https://open-vsx.org/extension/Prisma/prisma-insider) extension on the Open VSX Registry.
 
 ## Features
 
@@ -57,12 +57,12 @@ You can find both the [stable](http://open-vsx.org/extension/Prisma/prisma) and 
 <details>
   <summary>Quick-Fixes</summary>
   
-![Quick-Fixes](https://media.giphy.com/media/iGGCF9JWOHx7SAKQlu/giphy.gif)
+![Quick-Fixes](../../resources/spellingFix.gif)
 </details>
 
 ## Contributing
 
-Read more about [how to contribute to the Prisma VSCode extension](./packages/vscode/CONTRIBUTING.md)
+Read more about [how to contribute to the Prisma VSCode extension](./CONTRIBUTING.md)
 
 ## Security
 
