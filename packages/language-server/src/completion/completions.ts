@@ -527,7 +527,7 @@ function getNativeTypes(
   }
 
   const suggestions: CompletionItem[] = []
-  nativeTypes = nativeTypes.filter((n) => n.prisma_type === prismaType)
+  nativeTypes = nativeTypes.filter((n) => n.prisma_types.includes(prismaType))
   nativeTypes.forEach((element) => {
     if (element._number_of_args + element._number_of_optional_args !== 0) {
       let documentation = ''

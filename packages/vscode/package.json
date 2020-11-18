@@ -2,7 +2,7 @@
   "name": "prisma-insider",
   "displayName": "Prisma - Insider",
   "description": "This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the dev version of the CLI.",
-  "version": "12.0.43",
+  "version": "12.0.47",
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
@@ -16,7 +16,7 @@
     "checkpoint-client": "1.1.14",
     "crypto": "1.0.1",
     "chokidar": "3.4.3",
-    "@prisma/language-server": "12.0.43",
+    "@prisma/language-server": "12.0.47",
     "vscode-languageclient": "6.1.3"
   },
   "optionalDependencies": {
@@ -76,10 +76,21 @@
       "type": "object",
       "title": "Language server configuration",
       "properties": {
-        "prismaLanguageServer.prismaFmtBinPath": {
+        "prisma.prismaFmtBinPath": {
           "scope": "resource",
           "type": "string",
           "description": "Option to set the path to the prisma-fmt binary."
+        },
+        "prisma.trace.server": {
+          "scope": "window",
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces the communication between VS Code and the language server."
         }
       }
     },

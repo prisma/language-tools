@@ -40,7 +40,7 @@ jobs:
           sh scripts/setup_branch.sh "promote_patch-dev"
       - name: Update VSCode extension version
         run:  |
-          node scripts/update_package_json_files.js dev ${{ steps.update.outputs.next_extension_version }} ""
+          node scripts/update_package_json_files.js latest ${{ steps.update.outputs.next_extension_version }} ""
       - name: Install Dependencies
         run: npm install
       - name: Commit and Push
