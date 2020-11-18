@@ -4,7 +4,7 @@ export interface NativeTypeConstructors {
   name: string
   _number_of_args: number
   _number_of_optional_args: number
-  prisma_type: string
+  prisma_types: string[]
 }
 
 export default function nativeTypeConstructors(
