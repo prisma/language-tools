@@ -38,6 +38,10 @@ export default async function install(
   } catch (e) {
     // Cleanup on failure
     try {
+      console.error(
+        `Language Server failed while downloading url ${url} with fmtPath ${fmtPath}.`,
+      )
+      console.error(e)
       fs.unlinkSync(fmtPath)
     } catch (err) {}
     throw e
