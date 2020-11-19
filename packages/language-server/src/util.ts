@@ -71,5 +71,6 @@ export async function testBinarySuccess(path: string): Promise<boolean> {
     console.log('Binary test failed. Re-attempting a download.')
     return false
   }
+  console.log('Binary test successful.')
   return true
 }
