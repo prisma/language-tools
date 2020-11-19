@@ -56,7 +56,7 @@ jobs:
 
       - name: Slack Notification on Failure
         if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@v2.1.0
+        uses: rtCamp/action-slack-notify@v2.1.1
         env:  
           SLACK_TITLE: "1/2c. - Promoting patch branch to stable failed :x:"
           SLACK_COLOR: '#FF0000'
