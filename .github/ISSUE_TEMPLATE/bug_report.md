@@ -40,7 +40,8 @@ Do not include your database credentials when sharing your Prisma schema! -->
 <!-- In which environment does the problem occur -->
 
 - OS: <!--[e.g. Mac OS, Windows, Debian, CentOS, ...]-->
-- VSCode version: <!--[..., 1.51.0, 1.51.1, ...]-->
+- Editor: <!--[VSCode, Vim, ...]-->
+- Editor version: <!--[..., 1.51.0, 1.51.1, ...]-->
 - Extension version: <!--[Go to the extension marketplace to see your installed extensions.]-->
 
 ```
