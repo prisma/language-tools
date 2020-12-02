@@ -2,9 +2,10 @@
  * Imports
  */
 
-import https from 'https'
 import zlib from 'zlib'
 import fs from 'fs'
+import { getProxyAgent } from '@prisma/fetch-engine'
+import fetch from 'node-fetch'
 
 /**
  * Install prisma format
@@ -18,21 +19,16 @@ export default async function install(
 
   // Fetch fetch fetch.
   try {
-    return await new Promise<string>(function (resolve, reject) {
-      https.get(url, function (response) {
-        // Did everything go well?
-        if (response.statusCode !== 200) {
-          reject(new Error(response.statusMessage))
-        }
-
-        // If so, unzip and pipe into our file.
-        const unzip = zlib.createGunzip()
-        response.pipe(unzip).pipe(file)
-        file.on('finish', function () {
-          fs.chmodSync(fmtPath, '755')
-          file.close()
-          resolve(fmtPath)
-        })
+    const response = await fetch(url, {
+      agent: getProxyAgent(url),
+    })
+    return await new Promise((resolve, reject) => {
+      const unzip = zlib.createGunzip()
+      response.body.pipe(unzip).pipe(file).on('error', reject)
+      file.on('finish', function () {
+        fs.chmodSync(fmtPath, '755')
+        file.close()
+        resolve(fmtPath)
       })
     })
   } catch (e) {
