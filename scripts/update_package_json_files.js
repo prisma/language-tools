@@ -53,6 +53,7 @@ function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersion = '
       let languageServerPackageJson = getPackageJsonContent({path: languageServerPackageJsonPath})
       languageServerPackageJson['prisma']['version'] = sha
       languageServerPackageJson['dependencies']['@prisma/get-platform'] = newPrismaVersion
+      languageServerPackageJson['dependencies']['@prisma/fetch-engine'] = newPrismaVersion
       writeJsonToPackageJson({content: languageServerPackageJson, path: languageServerPackageJsonPath})
     })();
   }
