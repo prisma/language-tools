@@ -405,40 +405,42 @@ export function renameReferencesForModelName(
       if (block && block.type == 'model') {
         searchedBlocks.push(block)
         // search block for references
-        const types: Map<string, number> = getTypesFromCurrentBlock(
+        const types: Map<string, number[]> = getTypesFromCurrentBlock(
           lines,
           block,
         )
         for (const f of types.keys()) {
           if (f.replace('?', '').replace('[]', '') === currentName) {
             // replace here
-            const line = types.get(f)
-            if (!line) {
+            const foundLines = types.get(f)
+            if (!foundLines) {
               return edits
             }
-            const currentLineUntrimmed = getCurrentLine(document, line)
-            const wordsInLine: string[] = lines[line].split(/\s+/)
-            // get the index of the second word
-            const indexOfFirstWord = currentLineUntrimmed.indexOf(
-              wordsInLine[0],
-            )
-            const indexOfCurrentName = currentLineUntrimmed.indexOf(
-              currentName,
-              indexOfFirstWord + wordsInLine[0].length,
-            )
-            edits.push({
-              range: {
-                start: {
-                  line: line,
-                  character: indexOfCurrentName,
+            for (const line of foundLines) {
+              const currentLineUntrimmed = getCurrentLine(document, line)
+              const wordsInLine: string[] = lines[line].split(/\s+/)
+              // get the index of the second word
+              const indexOfFirstWord = currentLineUntrimmed.indexOf(
+                wordsInLine[0],
+              )
+              const indexOfCurrentName = currentLineUntrimmed.indexOf(
+                currentName,
+                indexOfFirstWord + wordsInLine[0].length,
+              )
+              edits.push({
+                range: {
+                  start: {
+                    line: line,
+                    character: indexOfCurrentName,
+                  },
+                  end: {
+                    line: line,
+                    character: indexOfCurrentName + currentName.length,
+                  },
                 },
-                end: {
-                  line: line,
-                  character: indexOfCurrentName + currentName.length,
-                },
-              },
-              newText: newName,
-            })
+                newText: newName,
+              })
+            }
           }
         }
       }
