@@ -13,12 +13,6 @@ model Article {
   description     String
   markdownContent String
   user            User         @relation(fields: [userId], references: [id])
-  tags            ArticleTag[]
   favoritedBy     User[]       @relation("FavoritedArticles")
   userId          Int
-}
-
-model ArticleTag {
-  name     String    @id
-  articles Article[]
 }

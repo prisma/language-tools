@@ -234,15 +234,8 @@ suite('Rename', () => {
             {
               newText: '\t@@map("Article")\n}',
               range: {
-                start: { line: 19, character: 0 },
-                end: { line: 19, character: 1 },
-              },
-            },
-            {
-              newText: newModelName3,
-              range: {
-                start: { line: 22, character: 11 },
-                end: { line: 22, character: 18 },
+                start: { line: 17, character: 0 },
+                end: { line: 17, character: 1 },
               },
             },
             {
