@@ -13,7 +13,7 @@
     "Programming Languages"
   ],
   "dependencies": {
-    "checkpoint-client": "1.1.14",
+    "checkpoint-client": "1.1.17",
     "crypto": "1.0.1",
     "chokidar": "3.4.3",
     "@prisma/language-server": "13.0.50",
