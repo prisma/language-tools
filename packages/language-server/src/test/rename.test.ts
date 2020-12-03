@@ -32,6 +32,7 @@ suite('Rename', () => {
   const renameFieldLargeSchemaPath = './rename/renameFieldLargeSchema.prisma'
   const renameModelWithJsonDefaultPath =
     './rename/renameModelWithJsonDefault.prisma'
+  const renameMultipleModelsPath = './rename/renameMultipleModels.prisma'
 
   const renameModel: TextDocument = getTextDocument(renameModelPath)
   const renameField: TextDocument = getTextDocument(renameFieldPath)
@@ -42,9 +43,13 @@ suite('Rename', () => {
   const renameFieldLargeSchema: TextDocument = getTextDocument(
     renameFieldLargeSchemaPath,
   )
+  const renameMultipleModels: TextDocument = getTextDocument(
+    renameMultipleModelsPath,
+  )
 
   const newModelName = 'Customer'
   const newModelName2 = 'Posts'
+  const newModelName3 = 'ArticleNew'
 
   const newFieldName = 'publisherId'
   const newFieldName2 = 'headline'
@@ -214,6 +219,45 @@ suite('Rename', () => {
       renameModel,
       newModelName2,
       { line: 9, character: 10 },
+    )
+    assertRename(
+      {
+        changes: {
+          [renameMultipleModels.uri]: [
+            {
+              newText: newModelName3,
+              range: {
+                start: { line: 6, character: 6 },
+                end: { line: 6, character: 13 },
+              },
+            },
+            {
+              newText: '\t@@map("Article")\n}',
+              range: {
+                start: { line: 17, character: 0 },
+                end: { line: 17, character: 1 },
+              },
+            },
+            {
+              newText: newModelName3,
+              range: {
+                start: { line: 2, character: 19 },
+                end: { line: 2, character: 26 },
+              },
+            },
+            {
+              newText: newModelName3,
+              range: {
+                start: { line: 3, character: 19 },
+                end: { line: 3, character: 26 },
+              },
+            },
+          ],
+        },
+      },
+      renameMultipleModels,
+      newModelName3,
+      { line: 6, character: 11 },
     )
   })
   test('Model where it is used as type', () => {

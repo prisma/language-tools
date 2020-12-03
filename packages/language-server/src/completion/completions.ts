@@ -797,8 +797,8 @@ export function getTypesFromCurrentBlock(
   lines: Array<string>,
   block: Block,
   position?: Position,
-): Map<string, number> {
-  const suggestions: Map<string, number> = new Map<string, number>()
+): Map<string, number[]> {
+  const suggestions: Map<string, number[]> = new Map<string, number[]>()
 
   let reachedStartLine = false
   for (const [key, item] of lines.entries()) {
@@ -815,7 +815,13 @@ export function getTypesFromCurrentBlock(
       const type = getFieldType(item)
       if (type !== undefined) {
         /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-        suggestions.set(type, key)
+        const existingSuggestion = suggestions.get(type)
+        if (!existingSuggestion) {
+          suggestions.set(type, [key])
+        } else {
+          existingSuggestion.push(key)
+          suggestions.set(type, existingSuggestion)
+        }
         /* eslint-enable @typescript-eslint/no-unsafe-assignment */
       }
     }
