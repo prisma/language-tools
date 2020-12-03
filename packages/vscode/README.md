@@ -57,7 +57,7 @@ You can find both the [stable](https://open-vsx.org/extension/Prisma/prisma) and
 <details>
   <summary>Quick-Fixes</summary>
   
-![Quick-Fixes](../../resources/spellingFix.gif)
+![Quick-Fixes](resources/spellingFix.gif)
 </details>
 
 ## Contributing
