@@ -65,6 +65,7 @@ const plugin: PrismaVSCodePlugin = {
         path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts'),
         {
           usePolling: false,
+          followSymlinks: false,
         },
       )
     }
