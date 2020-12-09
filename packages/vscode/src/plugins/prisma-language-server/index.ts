@@ -30,7 +30,6 @@ import {
   isSnippetEdit,
 } from '../../util'
 import { PrismaVSCodePlugin } from '../types'
-import * as picomatch from 'picomatch'
 
 const packageJson = require('../../../../package.json') // eslint-disable-line
 
