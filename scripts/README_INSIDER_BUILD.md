@@ -23,7 +23,7 @@ Please note that you should not have the regular and insider version of the exte
 <details>
   <summary>Quick-Fixes</summary>
   
-![Quick-Fixes](https://github.com/prisma/language-tools/blob/master/packages/vscode/resources/spellingFix.gif?raw=true)
+![Quick Fixes](https://github.com/prisma/language-tools/blob/master/packages/vscode/resources/spellingFix.gif?raw=true)
 </details>
 
 ## Build information
