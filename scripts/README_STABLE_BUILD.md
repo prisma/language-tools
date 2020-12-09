@@ -45,7 +45,7 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
 <details>
   <summary>Quick-Fixes</summary>
   
-![Quick-Fixes](./packages/vscode/resources/spellingFix.gif)
+![Quick-Fixes](https://github.com/prisma/language-tools/blob/master/packages/vscode/resources/spellingFix.gif?raw=true)
 </details>
 
 ## Contributing
