@@ -12,6 +12,20 @@ the regular version of the extension.This version of the extension may contain u
 
 Please note that you should not have the regular and insider version of the extension installed at the same time.
 
+## Preview
+
+<details>
+  <summary>Syntax-Highlighting</summary>
+
+![Preview Schema](https://i.imgur.com/W80iRwE.png)
+
+</details>
+<details>
+  <summary>Quick-Fixes</summary>
+  
+![Quick Fixes](https://github.com/prisma/language-tools/blob/master/packages/vscode/resources/spellingFix.gif?raw=true)
+</details>
+
 ## Build information
 
 This version is built from commit [$commit-sha$]($commit-sha$).
