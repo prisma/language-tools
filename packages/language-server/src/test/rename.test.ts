@@ -33,6 +33,7 @@ suite('Rename', () => {
   const renameModelWithJsonDefaultPath =
     './rename/renameModelWithJsonDefault.prisma'
   const renameMultipleModelsPath = './rename/renameMultipleModels.prisma'
+  const renameModelBugPath = './rename/renameModelBug.prisma'
 
   const renameModel: TextDocument = getTextDocument(renameModelPath)
   const renameField: TextDocument = getTextDocument(renameFieldPath)
@@ -46,6 +47,7 @@ suite('Rename', () => {
   const renameMultipleModels: TextDocument = getTextDocument(
     renameMultipleModelsPath,
   )
+  const renameModelBug: TextDocument = getTextDocument(renameModelBugPath)
 
   const newModelName = 'Customer'
   const newModelName2 = 'Posts'
@@ -258,6 +260,31 @@ suite('Rename', () => {
       renameMultipleModels,
       newModelName3,
       { line: 6, character: 11 },
+    )
+    assertRename(
+      {
+        changes: {
+          [renameModelBug.uri]: [
+            {
+              newText: newModelName,
+              range: {
+                start: { line: 6, character: 6 },
+                end: { line: 6, character: 12 },
+              },
+            },
+            {
+              newText: '\t@@map("zaknos")\n}',
+              range: {
+                start: { line: 9, character: 0 },
+                end: { line: 9, character: 1 },
+              },
+            },
+          ],
+        },
+      },
+      renameModelBug,
+      newModelName,
+      { line: 6, character: 12 },
     )
   })
   test('Model where it is used as type', () => {
