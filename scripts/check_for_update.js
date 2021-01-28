@@ -5,7 +5,9 @@ function checkForUpdate({channel}) {
   (async () => {
     const currentPrismaVersion = readVersionFile({fileName: `prisma_${channel}`})
     console.log('current: ' + currentPrismaVersion)
-    const { stdout } = await execa('npm', ['show', `@prisma/cli@${channel}`, 'version']);
+    // TODO switch to prisma after next release
+    const cliPackageName = channel === 'dev' ? 'prisma' : '@prisma/cli'
+    const { stdout } = await execa('npm', ['show', `${cliPackageName}@${channel}`, 'version']);
     const npmPrismaVersion = stdout
     console.log('npm: ' + npmPrismaVersion)
     if (npmPrismaVersion === undefined) {
