@@ -123,6 +123,12 @@
           "documentation": "A list of references."
         }
       ]
+    },
+    {
+      "label": "@@ignore",
+      "documentation": "Ignores the model during client generation and migrations",
+      "fullSignature": "@@ignore",
+      "params": []
     }
   ],
   "fieldAttributes": [

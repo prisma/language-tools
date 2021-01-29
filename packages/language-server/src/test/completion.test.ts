@@ -290,6 +290,10 @@ suite('Quick Fix', () => {
     label: '@@index([])',
     kind: CompletionItemKind.Property,
   }
+  const blockAttributeIgnore = {
+    label: '@@ignore',
+    kind: CompletionItemKind.Property,
+  }
 
   test('Diagnoses block attribute suggestions first in a line', () => {
     assertCompletion(
@@ -302,6 +306,7 @@ suite('Quick Fix', () => {
           blockAttributeId,
           blockAttributeUnique,
           blockAttributeIndex,
+          blockAttributeIgnore,
         ],
       },
     )
@@ -318,6 +323,7 @@ suite('Quick Fix', () => {
           blockAttributeId,
           blockAttributeUnique,
           blockAttributeIndex,
+          blockAttributeIgnore,
         ],
       },
     )
@@ -326,7 +332,12 @@ suite('Quick Fix', () => {
       { line: 14, character: 0 },
       {
         isIncomplete: false,
-        items: [blockAttributeMap, blockAttributeUnique, blockAttributeIndex],
+        items: [
+          blockAttributeMap,
+          blockAttributeUnique,
+          blockAttributeIndex,
+          blockAttributeIgnore,
+        ],
       },
     )
   })
