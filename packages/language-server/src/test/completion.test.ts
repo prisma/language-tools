@@ -401,6 +401,10 @@ suite('Quick Fix', () => {
     label: '@updatedAt',
     kind: CompletionItemKind.Property,
   }
+  const fieldAttributeIgnore = {
+    label: '@ignore',
+    kind: CompletionItemKind.Property,
+  }
 
   const functionCuid = {
     label: 'cuid()',
@@ -461,7 +465,7 @@ suite('Quick Fix', () => {
           fieldAttributeMap,
           fieldAttributeDefault,
           fieldAttributeRelation,
-          // fieldAttributeIgnore,
+          fieldAttributeIgnore,
         ],
       },
     )
@@ -475,7 +479,7 @@ suite('Quick Fix', () => {
           fieldAttributeMap,
           fieldAttributeDefault,
           fieldAttributeRelation,
-          // fieldAttributeIgnore,
+          fieldAttributeIgnore,
         ],
       },
     )
@@ -490,7 +494,7 @@ suite('Quick Fix', () => {
           fieldAttributeDefault,
           fieldAttributeRelation,
           fieldAttributeUpdatedAt,
-          // fieldAttributeIgnore,
+          fieldAttributeIgnore,
         ],
       },
     )
@@ -504,7 +508,7 @@ suite('Quick Fix', () => {
           fieldAttributeMap,
           fieldAttributeDefault,
           fieldAttributeRelation,
-          // fieldAttributeIgnore,
+          fieldAttributeIgnore,
         ],
       },
     )
