@@ -359,6 +359,10 @@ suite('Should auto-complete', () => {
     label: '@relation()',
     kind: vscode.CompletionItemKind.Property,
   }
+  const fieldAttributeIgnore = {
+    label: '@ignore',
+    kind: vscode.CompletionItemKind.Property,
+  }
 
   const functionCuid = {
     label: 'cuid()',
@@ -409,6 +413,7 @@ suite('Should auto-complete', () => {
         fieldAttributeMap,
         fieldAttributeRelation,
         fieldAttributeUnique,
+        fieldAttributeIgnore,
       ]),
       true,
     )
@@ -420,6 +425,7 @@ suite('Should auto-complete', () => {
         fieldAttributeMap,
         fieldAttributeRelation,
         fieldAttributeUnique,
+        fieldAttributeIgnore,
       ]),
       true,
     )
