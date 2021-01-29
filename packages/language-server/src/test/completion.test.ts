@@ -401,10 +401,6 @@ suite('Quick Fix', () => {
     label: '@updatedAt',
     kind: CompletionItemKind.Property,
   }
-  const fieldAttributeIgnore = {
-    label: '@ignore',
-    kind: CompletionItemKind.Property,
-  }
 
   const functionCuid = {
     label: 'cuid()',
