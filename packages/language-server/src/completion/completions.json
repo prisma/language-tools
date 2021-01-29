@@ -194,7 +194,7 @@
     {
       "label": "@ignore",
       "fullSignature": "@ignore",
-      "documentation": "Ignores the field during client generation and migrations",
+      "documentation": "Ignores the field during client generation.",
       "params": []
     }
   ],
