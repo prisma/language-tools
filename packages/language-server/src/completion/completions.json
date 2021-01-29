@@ -31,6 +31,17 @@
     {
       "label": "Decimal",
       "documentation": "Decimal value"
+    },
+    {
+      "label": "Unsupported(\"\")",
+      "documentation": "An arbitrary, unsupported database type",
+      "fullSignature": "Unsupported(_ name: String)",
+      "params": [
+        {
+          "label": "name",
+          "documentation": "Name of the database type"
+        }
+      ]
     }
   ],
   "blockTypes": [
@@ -94,7 +105,7 @@
     {
       "label": "@@id([])",
       "documentation": "Defines a multi-field ID on the model.",
-      "fullSignature": "@id(_ fields: FieldReference[])",
+      "fullSignature": "@@id(_ fields: FieldReference[])",
       "params": [
         {
           "label": "fields",
