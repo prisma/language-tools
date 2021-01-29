@@ -419,6 +419,10 @@ suite('Quick Fix', () => {
     label: 'now()',
     kind: CompletionItemKind.Function,
   }
+  const functionDbGenerated = {
+    label: 'dbgenerated("")',
+    kind: CompletionItemKind.Function,
+  }
   const staticValueTrue = {
     label: 'true',
     kind: CompletionItemKind.Value,
@@ -517,7 +521,7 @@ suite('Quick Fix', () => {
       { line: 11, character: 24 },
       {
         isIncomplete: false,
-        items: [functionAutoInc],
+        items: [functionDbGenerated, functionAutoInc],
       },
     )
     assertCompletion(
@@ -525,7 +529,7 @@ suite('Quick Fix', () => {
       { line: 28, character: 27 },
       {
         isIncomplete: false,
-        items: [functionUuid, functionCuid],
+        items: [functionDbGenerated, functionUuid, functionCuid],
       },
     )
     assertCompletion(
@@ -533,7 +537,7 @@ suite('Quick Fix', () => {
       { line: 30, character: 36 },
       {
         isIncomplete: false,
-        items: [functionNow],
+        items: [functionDbGenerated, functionNow],
       },
     )
   })
@@ -544,7 +548,7 @@ suite('Quick Fix', () => {
       { line: 24, character: 28 },
       {
         isIncomplete: false,
-        items: [staticValueTrue, staticValueFalse],
+        items: [functionDbGenerated, staticValueTrue, staticValueFalse],
       },
     )
   })
@@ -555,7 +559,7 @@ suite('Quick Fix', () => {
       { line: 62, character: 27 },
       {
         isIncomplete: false,
-        items: [enumValueOne, enumValueTwo],
+        items: [functionDbGenerated, enumValueOne, enumValueTwo],
       },
     )
   })
@@ -566,7 +570,7 @@ suite('Quick Fix', () => {
       { line: 11, character: 30 },
       {
         isIncomplete: false,
-        items: [enumValueOne, enumValueTwo],
+        items: [functionDbGenerated, enumValueOne, enumValueTwo],
       },
     )
   })
