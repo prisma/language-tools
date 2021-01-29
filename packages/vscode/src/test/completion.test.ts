@@ -326,6 +326,10 @@ suite('Should auto-complete', () => {
           { label: 'String', kind: vscode.CompletionItemKind.TypeParameter },
           { label: 'Bytes', kind: vscode.CompletionItemKind.TypeParameter },
           { label: 'Decimal', kind: vscode.CompletionItemKind.TypeParameter },
+          {
+            label: 'Unsupported("")',
+            kind: vscode.CompletionItemKind.TypeParameter,
+          },
           { label: 'Test', kind: vscode.CompletionItemKind.Reference },
           { label: 'ThirdUser', kind: vscode.CompletionItemKind.Reference },
           { label: 'TypeCheck', kind: vscode.CompletionItemKind.Reference },

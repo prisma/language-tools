@@ -31,6 +31,17 @@
     {
       "label": "Decimal",
       "documentation": "Decimal value"
+    },
+    {
+      "label": "Unsupported(\"\")",
+      "documentation": "An arbitrary database column type, for which Prisma has no syntax. Fields of type `Unsupported` work with Prisma Migrate and introspection, but are not exposed in Prisma Client.",
+      "fullSignature": "Unsupported(_ name: String)",
+      "params": [
+        {
+          "label": "name",
+          "documentation": "Name of the column type as expected by the underlying database, e.g. Unsupported(\"GEOGRAPHY(POINT,4326)\"). This string is not validated by Prisma Migrate and will be used by Prisma Migrate to generate the DDL statements to evolve the database schema. Prisma Introspect will overwrite this when re-introspecting if the type does not match."
+        }
+      ]
     }
   ],
   "blockTypes": [
@@ -94,7 +105,7 @@
     {
       "label": "@@id([])",
       "documentation": "Defines a multi-field ID on the model.",
-      "fullSignature": "@id(_ fields: FieldReference[])",
+      "fullSignature": "@@id(_ fields: FieldReference[])",
       "params": [
         {
           "label": "fields",

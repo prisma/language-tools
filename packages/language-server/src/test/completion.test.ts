@@ -359,6 +359,7 @@ suite('Quick Fix', () => {
           { label: 'Json', kind: CompletionItemKind.TypeParameter },
           { label: 'Bytes', kind: CompletionItemKind.TypeParameter },
           { label: 'Decimal', kind: CompletionItemKind.TypeParameter },
+          { label: 'Unsupported("")', kind: CompletionItemKind.TypeParameter },
           { label: 'User', kind: CompletionItemKind.Reference },
           { label: 'Post', kind: CompletionItemKind.Reference },
           { label: 'Person', kind: CompletionItemKind.Reference },

@@ -73,6 +73,7 @@ function convertAttributesToCompletionItems(
 export const corePrimitiveTypes: CompletionItem[] = convertToCompletionItems(
   completions.primitiveTypes,
   CompletionItemKind.TypeParameter,
+  (label: string) => label.replace('()', '($0)').replace('""', '"$0"'),
 )
 
 export const allowedBlockTypes: CompletionItem[] = convertToCompletionItems(
