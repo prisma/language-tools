@@ -258,6 +258,10 @@ suite('Should auto-complete', () => {
     label: '@@index([])',
     kind: vscode.CompletionItemKind.Property,
   }
+  const blockAttributeIgnore = {
+    label: '@@ignore',
+    kind: vscode.CompletionItemKind.Property,
+  }
 
   test('Diagnoses block attribute suggestions first in a line', async () => {
     await testCompletion(
@@ -268,6 +272,7 @@ suite('Should auto-complete', () => {
         blockAttributeIndex,
         blockAttributeMap,
         blockAttributeUnique,
+        blockAttributeIgnore,
       ]),
       false,
     )
@@ -283,6 +288,7 @@ suite('Should auto-complete', () => {
         blockAttributeIndex,
         blockAttributeMap,
         blockAttributeUnique,
+        blockAttributeIgnore,
       ]),
       true,
     )
@@ -293,6 +299,7 @@ suite('Should auto-complete', () => {
         blockAttributeIndex,
         blockAttributeMap,
         blockAttributeUnique,
+        blockAttributeIgnore,
       ]),
       true,
     )
