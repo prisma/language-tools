@@ -465,7 +465,7 @@ suite('Quick Fix', () => {
           fieldAttributeMap,
           fieldAttributeDefault,
           fieldAttributeRelation,
-          fieldAttributeIgnore,
+          // fieldAttributeIgnore,
         ],
       },
     )
@@ -479,7 +479,7 @@ suite('Quick Fix', () => {
           fieldAttributeMap,
           fieldAttributeDefault,
           fieldAttributeRelation,
-          fieldAttributeIgnore,
+          // fieldAttributeIgnore,
         ],
       },
     )
@@ -494,7 +494,7 @@ suite('Quick Fix', () => {
           fieldAttributeDefault,
           fieldAttributeRelation,
           fieldAttributeUpdatedAt,
-          fieldAttributeIgnore,
+          // fieldAttributeIgnore,
         ],
       },
     )
@@ -508,7 +508,7 @@ suite('Quick Fix', () => {
           fieldAttributeMap,
           fieldAttributeDefault,
           fieldAttributeRelation,
-          fieldAttributeIgnore,
+          // fieldAttributeIgnore,
         ],
       },
     )
