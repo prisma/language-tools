@@ -47,7 +47,7 @@ function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersion = '
   // update Prisma CLI version in packages/language-server folder
   if (newPrismaVersion !== '') {
     (async () => {
-      const { stdout } = await execa('npx', ['-q', `@prisma/cli@${newPrismaVersion}`, 'version', '--json']);
+      const { stdout } = await execa('npx', ['-q', `prisma@${newPrismaVersion}`, 'version', '--json']);
       let json = JSON.parse(stdout)
       let sha = json["format-binary"].split(/\s+/).slice(1)[0]
       let languageServerPackageJson = getPackageJsonContent({path: languageServerPackageJsonPath})
