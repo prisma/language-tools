@@ -126,7 +126,7 @@
     },
     {
       "label": "@@ignore",
-      "documentation": "Ignores the model during client generation and migrations",
+      "documentation": "Ignores the model during client generation.",
       "fullSignature": "@@ignore",
       "params": []
     }
