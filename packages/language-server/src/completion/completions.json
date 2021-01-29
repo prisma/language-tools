@@ -34,7 +34,7 @@
     },
     {
       "label": "Unsupported(\"\")",
-      "documentation": "An arbitrary, unsupported database type",
+      "documentation": "An arbitrary database column type, for which Prisma has no syntax. Fields of type `Unsupported` work with Prisma Migrate and introspection, but are not exposed in Prisma Client.",
       "fullSignature": "Unsupported(_ name: String)",
       "params": [
         {
