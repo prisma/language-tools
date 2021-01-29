@@ -194,7 +194,7 @@
     {
       "label": "@ignore",
       "fullSignature": "@ignore",
-      "documentation": "Ignores the field during client generation.",
+      "documentation": "A field with an `@ignore` attribute can be kept in sync with the database schema using Prisma Migrate and Introspection, but won't be exposed in Prisma Client.",
       "params": []
     }
   ],
