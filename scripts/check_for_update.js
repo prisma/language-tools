@@ -1,11 +1,17 @@
-const {readVersionFile } = require('./util')
+const { readVersionFile } = require('./util')
 const execa = require('execa')
 
-function checkForUpdate({channel}) {
-  (async () => {
-    const currentPrismaVersion = readVersionFile({fileName: `prisma_${channel}`})
+function checkForUpdate({ channel }) {
+  ;(async () => {
+    const currentPrismaVersion = readVersionFile({
+      fileName: `prisma_${channel}`,
+    })
     console.log('current: ' + currentPrismaVersion)
-    const { stdout } = await execa('npm', ['show', `prisma${cliPackageName}@${channel}`, 'version']);
+    const { stdout } = await execa('npm', [
+      'show',
+      `prisma@${channel}`,
+      'version',
+    ])
     const npmPrismaVersion = stdout
     console.log('npm: ' + npmPrismaVersion)
     if (npmPrismaVersion === undefined) {
@@ -14,14 +20,14 @@ function checkForUpdate({channel}) {
     if (currentPrismaVersion != npmPrismaVersion) {
       console.log(`New Prisma CLI version for ${channel} available.`)
       console.log(`::set-output name=${channel}_version::${npmPrismaVersion}`)
-  }
-  })();
+    }
+  })()
 }
 
 module.exports = { checkForUpdate }
 
 if (require.main === module) {
-  checkForUpdate({channel: 'dev'})
-  checkForUpdate({channel: 'latest'})
-  checkForUpdate({channel: 'patch-dev'})
+  checkForUpdate({ channel: 'dev' })
+  checkForUpdate({ channel: 'latest' })
+  checkForUpdate({ channel: 'patch-dev' })
 }
