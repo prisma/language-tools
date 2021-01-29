@@ -190,6 +190,12 @@
       "fullSignature": "@updatedAt",
       "documentation": "Automatically stores the time when a record was last updated.",
       "params": []
+    },
+    {
+      "label": "@ignore",
+      "fullSignature": "@ignore",
+      "documentation": "Ignores the field during client generation and migrations",
+      "params": []
     }
   ],
   "relationArguments": [
