@@ -290,6 +290,10 @@ suite('Quick Fix', () => {
     label: '@@index([])',
     kind: CompletionItemKind.Property,
   }
+  const blockAttributeIgnore = {
+    label: '@@ignore',
+    kind: CompletionItemKind.Property,
+  }
 
   test('Diagnoses block attribute suggestions first in a line', () => {
     assertCompletion(
@@ -302,6 +306,7 @@ suite('Quick Fix', () => {
           blockAttributeId,
           blockAttributeUnique,
           blockAttributeIndex,
+          blockAttributeIgnore,
         ],
       },
     )
@@ -318,6 +323,7 @@ suite('Quick Fix', () => {
           blockAttributeId,
           blockAttributeUnique,
           blockAttributeIndex,
+          blockAttributeIgnore,
         ],
       },
     )
@@ -326,7 +332,12 @@ suite('Quick Fix', () => {
       { line: 14, character: 0 },
       {
         isIncomplete: false,
-        items: [blockAttributeMap, blockAttributeUnique, blockAttributeIndex],
+        items: [
+          blockAttributeMap,
+          blockAttributeUnique,
+          blockAttributeIndex,
+          blockAttributeIgnore,
+        ],
       },
     )
   })
@@ -348,6 +359,7 @@ suite('Quick Fix', () => {
           { label: 'Json', kind: CompletionItemKind.TypeParameter },
           { label: 'Bytes', kind: CompletionItemKind.TypeParameter },
           { label: 'Decimal', kind: CompletionItemKind.TypeParameter },
+          { label: 'Unsupported("")', kind: CompletionItemKind.TypeParameter },
           { label: 'User', kind: CompletionItemKind.Reference },
           { label: 'Post', kind: CompletionItemKind.Reference },
           { label: 'Person', kind: CompletionItemKind.Reference },
@@ -450,6 +462,7 @@ suite('Quick Fix', () => {
           fieldAttributeMap,
           fieldAttributeDefault,
           fieldAttributeRelation,
+          // fieldAttributeIgnore,
         ],
       },
     )
@@ -463,6 +476,7 @@ suite('Quick Fix', () => {
           fieldAttributeMap,
           fieldAttributeDefault,
           fieldAttributeRelation,
+          // fieldAttributeIgnore,
         ],
       },
     )
@@ -477,6 +491,7 @@ suite('Quick Fix', () => {
           fieldAttributeDefault,
           fieldAttributeRelation,
           fieldAttributeUpdatedAt,
+          // fieldAttributeIgnore,
         ],
       },
     )
@@ -490,6 +505,7 @@ suite('Quick Fix', () => {
           fieldAttributeMap,
           fieldAttributeDefault,
           fieldAttributeRelation,
+          // fieldAttributeIgnore,
         ],
       },
     )

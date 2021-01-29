@@ -11,6 +11,7 @@ export default function previewFeatures(
   } else {
     result = execa.sync(execPath, ['preview-features'])
   }
+
   if (result.exitCode !== 0) {
     const errorMessage =
       "prisma-fmt error'd during getting available preview features.\n"
