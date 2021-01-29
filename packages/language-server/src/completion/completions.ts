@@ -663,7 +663,15 @@ function getDefaultValues(
   currentLine: string,
   lines: string[],
 ): CompletionItem[] {
-  const suggestions: CompletionItem[] = []
+  const suggestions: CompletionItem[] = [
+    {
+      label: 'dbgenerated("")',
+      kind: CompletionItemKind.Function,
+      documentation: 'Use a default value from your database',
+      insertText: 'dbgenerated("$0")',
+      insertTextFormat: 2,
+    },
+  ]
   const fieldType = getFieldType(currentLine)
   if (!fieldType) {
     return []
