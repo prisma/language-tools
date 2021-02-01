@@ -42,6 +42,7 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Setup Git
+        run: |
           sh scripts/set_git_credentials.sh
 
       - name: Read package.json
