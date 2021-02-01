@@ -326,6 +326,7 @@ suite('Should auto-complete', () => {
           { label: 'String', kind: vscode.CompletionItemKind.TypeParameter },
           { label: 'Bytes', kind: vscode.CompletionItemKind.TypeParameter },
           { label: 'Decimal', kind: vscode.CompletionItemKind.TypeParameter },
+          { label: 'BigInt', kind: vscode.CompletionItemKind.TypeParameter },
           {
             label: 'Unsupported("")',
             kind: vscode.CompletionItemKind.TypeParameter,
