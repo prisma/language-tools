@@ -51,8 +51,8 @@ jobs:
           PACKAGE_JSON_PATH="./packages/language-server/package.json"
           ENGINES=$(jq '.prisma.version' ${PACKAGE_JSON_PATH}) 
           CLI=$(jq '.dependencies."@prisma/get-platform"' ${PACKAGE_JSON_PATH}) 
-          echo "::set-output name=ENGINES::${ENGINES}'}"
-          echo "::set-output name=CLI::${CLI}'}"
+          echo "::set-output name=ENGINES::${ENGINES}"
+          echo "::set-output name=CLI::${CLI}"
 
       - name: Commit and push to branch 
         run: |
