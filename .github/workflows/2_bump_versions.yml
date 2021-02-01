@@ -70,7 +70,7 @@ jobs:
         with:
           workflow: 3. Unit tests for LSP and publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}" , "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}", "trigger_reason": "On new Prisma CLI version." }'
+          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}" , "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}", "trigger_reason": "On new Prisma CLI version ${{github.event.inputs.version}}" }'
       
       - name: Slack Notification on Failure
         if: ${{ failure() }}
@@ -78,7 +78,7 @@ jobs:
         env:  
           SLACK_TITLE: "2. Bumping versions failed :x:"
           SLACK_COLOR: '#FF0000'
-          SLACK_MESSAGE: "${{github.event.inputs.version}} - On new Prisma CLI version."
+          SLACK_MESSAGE: "${{github.event.inputs.version}} - On new Prisma CLI version ${{github.event.inputs.version}}"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: feed-language-tools
           SLACK_USERNAME: Prismo
