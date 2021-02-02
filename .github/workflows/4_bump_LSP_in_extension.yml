@@ -46,17 +46,17 @@ jobs:
           sh scripts/set_git_credentials.sh
 
       - name: Read package.json
-        id: packageJson
+        id: packagejson
         run: |
           PACKAGE_JSON_PATH="./packages/language-server/package.json"
-          ENGINES=$(jq '.prisma.version' ${PACKAGE_JSON_PATH}) 
-          CLI=$(jq '.dependencies."@prisma/get-platform"' ${PACKAGE_JSON_PATH}) 
-          echo "::set-output name=ENGINES::${ENGINES}"
-          echo "::set-output name=CLI::${CLI}"
+          ENGINES=$(jq -r '.prisma.version' ${PACKAGE_JSON_PATH}) 
+          CLI=$(jq -r '.dependencies."@prisma/get-platform"' ${PACKAGE_JSON_PATH}) 
+          echo "::set-output name=ENGINES::$ENGINES"
+          echo "::set-output name=CLI::$CLI"
 
       - name: Commit and push to branch 
         run: |
-          sh scripts/commit_and_push.sh "Bump LSP to ${{ github.event.inputs.extension_version }} in VSCode. Engines: ${{ steps.packageJson.ENGINES }} CLI: ${{ steps.packageJson.CLI }}"
+          sh scripts/commit_and_push.sh "Bump LSP to ${{ github.event.inputs.extension_version }} in VSCode. Engines: ${{ steps.packagejson.ENGINES }} CLI: ${{ steps.packagejson.CLI }}"
    
       - name: Trigger next workflow for VSCode e2e tests
         uses: benc-uk/workflow-dispatch@v1
