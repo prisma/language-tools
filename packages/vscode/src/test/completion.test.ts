@@ -326,6 +326,7 @@ suite('Should auto-complete', () => {
           { label: 'String', kind: vscode.CompletionItemKind.TypeParameter },
           { label: 'Bytes', kind: vscode.CompletionItemKind.TypeParameter },
           { label: 'Decimal', kind: vscode.CompletionItemKind.TypeParameter },
+          { label: 'BigInt', kind: vscode.CompletionItemKind.TypeParameter },
           {
             label: 'Unsupported("")',
             kind: vscode.CompletionItemKind.TypeParameter,
@@ -384,6 +385,10 @@ suite('Should auto-complete', () => {
     label: 'now()',
     kind: vscode.CompletionItemKind.Function,
   }
+  const functionDbGenerated = {
+    label: 'dbgenerated("")',
+    kind: vscode.CompletionItemKind.Function,
+  }
   const staticValueTrue = {
     label: 'true',
     kind: vscode.CompletionItemKind.Value,
@@ -439,19 +444,23 @@ suite('Should auto-complete', () => {
     await testCompletion(
       modelBlocksUri,
       new vscode.Position(11, 24),
-      new vscode.CompletionList([functionAutoInc]),
+      new vscode.CompletionList([functionDbGenerated, functionAutoInc]),
       true,
     )
     await testCompletion(
       modelBlocksUri,
       new vscode.Position(28, 27),
-      new vscode.CompletionList([functionCuid, functionUuid]),
+      new vscode.CompletionList([
+        functionDbGenerated,
+        functionCuid,
+        functionUuid,
+      ]),
       true,
     )
     await testCompletion(
       modelBlocksUri,
       new vscode.Position(30, 36),
-      new vscode.CompletionList([functionNow]),
+      new vscode.CompletionList([functionDbGenerated, functionNow]),
       true,
     )
   })
@@ -460,7 +469,11 @@ suite('Should auto-complete', () => {
     await testCompletion(
       modelBlocksUri,
       new vscode.Position(24, 28),
-      new vscode.CompletionList([staticValueFalse, staticValueTrue]),
+      new vscode.CompletionList([
+        functionDbGenerated,
+        staticValueFalse,
+        staticValueTrue,
+      ]),
       true,
     )
   })
@@ -509,6 +522,7 @@ suite('Should auto-complete', () => {
       enumCommentUri,
       new vscode.Position(11, 30),
       new vscode.CompletionList([
+        functionDbGenerated,
         { label: 'ADMIN', kind: vscode.CompletionItemKind.Value },
         { label: 'NORMAL', kind: vscode.CompletionItemKind.Value },
       ]),
