@@ -49,7 +49,7 @@ jobs:
         id: packagejson
         run: |
           PACKAGE_JSON_PATH="./packages/language-server/package.json"
-          echo PACKAGE_JSON_PATH
+          echo $PACKAGE_JSON_PATH
           ENGINES_VERSION=$(jq -r '.prisma.version' ${PACKAGE_JSON_PATH}) 
           echo "::set-output name=engines::$ENGINES_VERSION"
           CLI_VERSION=$(jq -r '.dependencies."@prisma/get-platform"' ${PACKAGE_JSON_PATH}) 
