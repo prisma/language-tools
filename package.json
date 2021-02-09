@@ -61,9 +61,6 @@
       "eslint --fix"
     ]
   },
-  "prisma": {
-    "version": "a6a6ecba74cbaeee0756c312b1b0f2502b27e49c"
-  },
   "dependencies": {
     "npm-merge-driver": "2.3.6"
   }
