@@ -82,7 +82,7 @@ export const allowedBlockTypes: CompletionItem[] = convertToCompletionItems(
 )
 
 export const supportedDataSourceFields: CompletionItem[] = convertToCompletionItems(
-  completions.dataSourceFields.filter((f) => f.label !== 'previewFeatures'), // TODO: uncomment once nativeTypes will be launched!
+  completions.dataSourceFields,
   CompletionItemKind.Field,
 )
 

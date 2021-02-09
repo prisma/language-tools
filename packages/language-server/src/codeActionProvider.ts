@@ -8,10 +8,7 @@ import {
   Range,
 } from 'vscode-languageserver'
 import { getAllRelationNames } from './completion/completions'
-import {
-  convertDocumentTextToTrimmedLineArray,
-  getBlockAtPosition,
-} from './MessageHandler'
+import { convertDocumentTextToTrimmedLineArray } from './MessageHandler'
 import levenshtein from 'js-levenshtein'
 
 function getInsertRange(document: TextDocument): Range {
@@ -184,59 +181,6 @@ export function quickFix(
           },
         },
       })
-    }
-    if (
-      diag.severity === DiagnosticSeverity.Error &&
-      diag.message.includes(
-        'corresponding feature flag is enabled. Please add this field in your datasource block',
-      ) &&
-      diag.message.includes('previewFeatures = ["nativeTypes"]')
-    ) {
-      // get datasource block
-      const generatorStart = lines.filter(
-        (l) => l.startsWith('generator') && l.includes('{'),
-      )
-      if (generatorStart.length !== 0) {
-        const index = lines.indexOf(generatorStart[0])
-        if (index !== -1) {
-          const block = getBlockAtPosition(index, lines)
-          if (block) {
-            codeActions.push({
-              title: "Add preview feature 'nativeTypes' to generator block.",
-              kind: CodeActionKind.QuickFix,
-              diagnostics: [diag],
-              edit: {
-                changes: {
-                  [params.textDocument.uri]: [
-                    {
-                      range: {
-                        start: { line: block.end.line, character: 0 },
-                        end: {
-                          line: block.end.line,
-                          character: Number.MAX_VALUE,
-                        },
-                      },
-                      newText: '  previewFeatures = ["nativeTypes"]\n}',
-                    },
-                  ],
-                },
-              },
-            })
-          } else {
-            console.log(
-              'Not showing a quick-fix for native Types, because generator block could not be found.',
-            )
-          }
-        } else {
-          console.log(
-            'Not showing a quick-fix for native Types, because a generator could not be found in cashed schema.',
-          )
-        }
-      } else {
-        console.log(
-          'Not showing a quick-fix for native Types, because a generator could not be found.',
-        )
-      }
     }
     if (
       diag.severity === DiagnosticSeverity.Warning &&
