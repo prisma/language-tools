@@ -158,7 +158,7 @@ export function startServer(options?: LSPOptions): void {
   }
 
   function getPrismaFmtBinPath(binPathSetting: string | undefined): string {
-    if (!binPathSetting) {
+    if (!binPathSetting || binPathSetting.length === 0) {
       return defaultBinPath
     } else if (!existsSync(binPathSetting)) {
       connection.window.showErrorMessage(
