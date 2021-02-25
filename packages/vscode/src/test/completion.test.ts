@@ -94,6 +94,10 @@ suite('Should auto-complete', () => {
     kind: vscode.CompletionItemKind.Field,
   }
   const fieldUrl = { label: 'url', kind: vscode.CompletionItemKind.Field }
+  const fieldShadowDatabaseUrl = {
+    label: 'shadowDatabaseUrl',
+    kind: vscode.CompletionItemKind.Field,
+  }
   const sqlite = { label: 'sqlite', kind: vscode.CompletionItemKind.Constant }
   const mysql = { label: 'mysql', kind: vscode.CompletionItemKind.Constant }
   const postgresql = {
@@ -116,7 +120,11 @@ suite('Should auto-complete', () => {
     await testCompletion(
       emptyBlocksUri,
       new vscode.Position(1, 0),
-      new vscode.CompletionList([fieldProvider, fieldUrl]),
+      new vscode.CompletionList([
+        fieldProvider,
+        fieldUrl,
+        fieldShadowDatabaseUrl,
+      ]),
       false,
     )
   })
@@ -125,13 +133,13 @@ suite('Should auto-complete', () => {
     await testCompletion(
       sqliteDocUri,
       new vscode.Position(2, 0),
-      new vscode.CompletionList([fieldUrl]),
+      new vscode.CompletionList([fieldUrl, fieldShadowDatabaseUrl]),
       false,
     )
     await testCompletion(
       dataSourceWithUri,
       new vscode.Position(2, 0),
-      new vscode.CompletionList([fieldProvider]),
+      new vscode.CompletionList([fieldProvider, fieldShadowDatabaseUrl]),
       false,
     )
   })
