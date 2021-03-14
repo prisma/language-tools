@@ -98,13 +98,13 @@ jobs:
           ref: ${{ github.event.inputs.branch }}
       - name: Slack Notification on Failure
         if: ${{ failure() || needs.build.result == 'failure' }}
-        uses: rtCamp/action-slack-notify@v2.1.2
+        uses: rtCamp/action-slack-notify@v2.1.3
         env:  
           SLACK_TITLE: "6. Release failed :x:"
           SLACK_COLOR: '#FF0000'
       - name: Slack Notification on Success
         if: ${{ success() && needs.build.result == 'success' }}
-        uses: rtCamp/action-slack-notify@v2.1.2
+        uses: rtCamp/action-slack-notify@v2.1.3
         env:  
           SLACK_TITLE: "6. Release was successful :white_check_mark:"
           SLACK_COLOR: '#008000'

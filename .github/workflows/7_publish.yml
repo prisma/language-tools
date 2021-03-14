@@ -49,13 +49,13 @@ jobs:
       
       - name: Slack Notification on Failure
         if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@v2.1.2
+        uses: rtCamp/action-slack-notify@v2.1.3
         env:  
           SLACK_TITLE: "7. Publishing to marketplace failed :x:"
           SLACK_COLOR: '#FF0000'
       - name: Slack Notification on Success
         if: ${{ success() }}
-        uses: rtCamp/action-slack-notify@v2.1.2
+        uses: rtCamp/action-slack-notify@v2.1.3
         env:  
           SLACK_TITLE: "7. Published to marketplace :white_check_mark:"
           SLACK_COLOR: '#008000'
@@ -83,13 +83,13 @@ jobs:
       
       - name: Slack Notification on Failure
         if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@v2.1.2
+        uses: rtCamp/action-slack-notify@v2.1.3
         env:  
           SLACK_TITLE: "7. Publishing to open-vsx failed :x:"
           SLACK_COLOR: '#FF0000'
       - name: Slack Notification on Success
         if: ${{ success() }}
-        uses: rtCamp/action-slack-notify@v2.1.2
+        uses: rtCamp/action-slack-notify@v2.1.3
         env:  
           SLACK_TITLE: "7. Published to open-vsx :white_check_mark:"
           SLACK_COLOR: '#008000'
