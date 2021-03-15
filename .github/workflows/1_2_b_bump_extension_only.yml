@@ -82,3 +82,4 @@ jobs:
           SLACK_CHANNEL: feed-language-tools
           SLACK_USERNAME: Prismo
           SLACK_ICON_EMOJI: ":boom:"
+          SLACK_MSG_AUTHOR: prisma-bot
