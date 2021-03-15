@@ -1,10 +1,6 @@
 import {
-  IConnection,
   TextDocuments,
   Diagnostic,
-  createConnection,
-  IPCMessageReader,
-  IPCMessageWriter,
   InitializeParams,
   InitializeResult,
   CodeActionKind,
@@ -16,7 +12,13 @@ import {
   RenameParams,
   DocumentFormattingParams,
   DidChangeConfigurationNotification,
+  Connection,
 } from 'vscode-languageserver'
+import {
+  createConnection,
+  IPCMessageReader,
+  IPCMessageWriter,
+} from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
 import * as util from './util'
@@ -25,7 +27,7 @@ import { LSPOptions, LSPSettings } from './settings'
 import { existsSync } from 'fs'
 const packageJson = require('../../package.json') // eslint-disable-line
 
-function getConnection(options?: LSPOptions): IConnection {
+function getConnection(options?: LSPOptions): Connection {
   let connection = options?.connection
   if (!connection) {
     connection = process.argv.includes('--stdio')
@@ -47,7 +49,7 @@ let hasConfigurationCapability = false
  * @param options Options to customize behavior
  */
 export function startServer(options?: LSPOptions): void {
-  const connection: IConnection = getConnection(options)
+  const connection: Connection = getConnection(options)
 
   console.log = connection.console.log.bind(connection.console)
   console.error = connection.console.error.bind(connection.console)
