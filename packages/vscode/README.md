@@ -41,7 +41,7 @@ You can find both the [stable](https://open-vsx.org/extension/Prisma/prisma) and
   - _To enable formatting in combination with `prettier`, add the following to your `settings.json` file:_
     ```
     "[prisma]": {
-    "editor.defaultFormatter": "Prisma.prisma"
+      "editor.defaultFormatter": "Prisma.prisma"
     },
     ```
     or use the [Prettier plugin for Prisma](https://github.com/umidbekk/prettier-plugin-prisma)
