@@ -110,6 +110,10 @@ suite('Quick Fix', () => {
     kind: CompletionItemKind.Field,
   }
   const fieldUrl = { label: 'url', kind: CompletionItemKind.Field }
+  const fieldShadowDatabaseUrl = {
+    label: 'shadowDatabaseUrl',
+    kind: CompletionItemKind.Field,
+  }
   const sqlite = { label: 'sqlite', kind: CompletionItemKind.Constant }
   const mysql = { label: 'mysql', kind: CompletionItemKind.Constant }
   const postgresql = {
@@ -137,7 +141,7 @@ suite('Quick Fix', () => {
       { line: 1, character: 0 },
       {
         isIncomplete: false,
-        items: [fieldProvider, fieldUrl],
+        items: [fieldProvider, fieldUrl, fieldShadowDatabaseUrl],
       },
     )
   })
@@ -148,7 +152,7 @@ suite('Quick Fix', () => {
       { line: 2, character: 0 },
       {
         isIncomplete: false,
-        items: [fieldUrl],
+        items: [fieldUrl, fieldShadowDatabaseUrl],
       },
     )
     assertCompletion(
@@ -156,7 +160,7 @@ suite('Quick Fix', () => {
       { line: 2, character: 0 },
       {
         isIncomplete: false,
-        items: [fieldProvider],
+        items: [fieldProvider, fieldShadowDatabaseUrl],
       },
     )
   })
