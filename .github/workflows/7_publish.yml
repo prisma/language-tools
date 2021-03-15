@@ -24,6 +24,7 @@ env:
   SLACK_CHANNEL: feed-language-tools
   SLACK_USERNAME: Prismo
   SLACK_ICON_EMOJI: ":ship:"
+  SLACK_MSG_AUTHOR: prisma-bot
 
 jobs:
   marketplace:
