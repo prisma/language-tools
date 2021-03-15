@@ -38,7 +38,7 @@ You can find both the [stable](https://open-vsx.org/extension/Prisma/prisma) and
     "editor.formatOnSave": true
     ```
 
-  - _To enable format in combination with prettier, add the following to your `settings.json` file:_
+  - _To enable formatting in combination with `prettier`, add the following to your `settings.json` file:_
     ```
     "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
