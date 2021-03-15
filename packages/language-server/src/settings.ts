@@ -1,11 +1,11 @@
-import { IConnection } from 'vscode-languageserver'
+import { Connection } from 'vscode-languageserver/node'
 
 export interface LSPOptions {
   /**
    * If you have a connection already that the ls should use, pass it in.
    * Else the connection will be created from `process`.
    */
-  connection?: IConnection
+  connection?: Connection
 }
 
 export interface LSPSettings {

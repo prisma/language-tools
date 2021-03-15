@@ -7,7 +7,7 @@ import {
   env,
   workspace,
 } from 'vscode'
-import { CodeAction, TextDocumentIdentifier } from 'vscode-languageclient'
+import { CodeAction, TextDocumentIdentifier } from 'vscode-languageclient/node'
 import {
   denyListDarkColorThemes,
   denyListLightColorThemes,
