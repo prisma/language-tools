@@ -18,14 +18,14 @@ Adds syntax highlighting, formatting, jump-to-definition and linting for Prisma 
     * Jump to or peek a model or enum's declaration.
 * Formatting
 
-  - Format code either manually or on save (if configured).
-  - _To automatically format on save, add the following to your `settings.json` file:_
+  * Format code either manually or on save (if configured).
+  * _To automatically format on save, add the following to your `settings.json` file:_
 
     ```
     "editor.formatOnSave": true
     ```
 
-  - _To enable formatting in combination with `prettier`, add the following to your `settings.json` file:_
+  * _To enable formatting in combination with `prettier`, add the following to your `settings.json` file:_
     ```
     "[prisma]": {
       "editor.defaultFormatter": "Prisma.prisma"
