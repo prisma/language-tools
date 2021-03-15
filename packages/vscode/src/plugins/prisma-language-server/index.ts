@@ -20,7 +20,7 @@ import {
   ProvideCodeActionsSignature,
   ServerOptions,
   TransportKind,
-} from 'vscode-languageclient'
+} from 'vscode-languageclient/node'
 import TelemetryReporter from '../../telemetryReporter'
 import {
   applySnippetWorkspaceEdit,
