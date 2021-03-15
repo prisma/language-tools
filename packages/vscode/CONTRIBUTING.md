@@ -41,6 +41,10 @@ On push to the master branch, a new Insider extension is released, with an incre
 - Make a change to the syntax
 - To reload, press the reload button in VSCode ( **Developer: Inspect TM Scopes** is helpful for debugging syntax issues )
 
+### Dependencies
+
+- the version of `@types/vscode` must always be smaller or equal than the `engines.vscode` version. Otherwise the extension can not be packaged.
+
 ## Debugging
 
 - Set `prisma.trace.server` to `messages` or `verbose` to trace the communication between VSCode and the language server.
