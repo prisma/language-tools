@@ -30,11 +30,22 @@ You can find both the [stable](https://open-vsx.org/extension/Prisma/prisma) and
 - Go to Definition
   - Jump to or peek a model or enum's declaration.
 - Formatting
+
   - Format code either manually or on save (if configured).
   - _To automatically format on save, add the following to your `settings.json` file:_
+
     ```
     "editor.formatOnSave": true
     ```
+
+  - _To enable format in combination with prettier, add the following to your `settings.json` file:_
+    ```
+    "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+    },
+    ```
+    or use the [Prettier plugin for Prisma](https://github.com/umidbekk/prettier-plugin-prisma)
+
 - Rename
   - Rename models, enums, fields and enum values
   - Click into the model or enum, press `F2` and then type the new desired name and press `Enter`
