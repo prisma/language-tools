@@ -43,7 +43,7 @@ On push to the master branch, a new Insider extension is released, with an incre
 
 ### Dependencies
 
-- the version of `@types/vscode` must always be smaller or equal than the `engines.vscode` version. Otherwise the extension can not be packaged.
+- the version of `@types/vscode` must always be smaller or equal to the `engines.vscode` version. Otherwise the extension can not be packaged.
 
 ## Debugging
 
