@@ -17,6 +17,7 @@ env:
   SLACK_CHANNEL: feed-vscode-e2e-tests
   SLACK_ICON_EMOJI: ":robot_face:"
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+  SLACK_MSG_AUTHOR: prisma-bot
   
 jobs:
 
