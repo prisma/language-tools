@@ -71,8 +71,6 @@ enum UserType {
 model ForthUser {
     firstName String
     lastName String
-    isAdmin Boolean @default(false)
 
-    @@id([])
     @@index([firstName, ])
 }

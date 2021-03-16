@@ -526,10 +526,10 @@ suite('Quick Fix', () => {
 
     assertCompletion(
       modelBlocksUri,
-      { line: 78, character: 24 },
+      { line: 74, character: 24 },
       {
         isIncomplete: false,
-        items: [{ label: 'lastName', kind: CompletionItemKind.Value }],
+        items: [{ label: 'lastName', kind: CompletionItemKind.Field }],
       },
     )
   })
