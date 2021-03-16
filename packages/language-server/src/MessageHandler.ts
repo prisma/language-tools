@@ -50,6 +50,12 @@ import {
   printLogMessage,
   isRelationField,
 } from './rename/renameUtil'
+import {
+  checkForExperimentalFeaturesUSeage,
+  checkForPrisma1Model,
+  transformLinterErrorsToDiagnostics,
+} from './diagnosticsHandler'
+import { doc } from 'prettier'
 
 export function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
@@ -211,35 +217,6 @@ export function getModelOrEnumBlock(
   return foundBlocks[0]
 }
 
-function getExperimentalFeaturesRange(
-  document: TextDocument,
-): Range | undefined {
-  const lines = convertDocumentTextToTrimmedLineArray(document)
-  const experimentalFeatures = 'experimentalFeatures'
-  let reachedStartLine = false
-  for (const [key, item] of lines.entries()) {
-    if (item.startsWith('generator') && item.includes('{')) {
-      reachedStartLine = true
-    }
-    if (!reachedStartLine) {
-      continue
-    }
-    if (reachedStartLine && item.startsWith('}')) {
-      return
-    }
-
-    if (item.startsWith(experimentalFeatures)) {
-      const startIndex = getCurrentLine(document, key).indexOf(
-        experimentalFeatures,
-      )
-      return {
-        start: { line: key, character: startIndex },
-        end: { line: key, character: startIndex + experimentalFeatures.length },
-      }
-    }
-  }
-}
-
 export async function handleDiagnosticsRequest(
   document: TextDocument,
   binPath: string,
@@ -252,15 +229,7 @@ export async function handleDiagnosticsRequest(
     }
   })
 
-  const diagnostics: Diagnostic[] = []
-  if (
-    res.some(
-      (diagnostic) =>
-        diagnostic.text === "Field declarations don't require a `:`." ||
-        diagnostic.text ===
-          'Model declarations have to be indicated with the `model` keyword.',
-    )
-  ) {
+  if (checkForPrisma1Model(res)) {
     if (onError) {
       onError(
         "You are currently viewing a Prisma 1 datamodel which is based on the GraphQL syntax. The current Prisma Language Server doesn't support this syntax. Please change the file extension to `.graphql` so the Prisma Language Server does not get triggered anymore.",
@@ -268,37 +237,21 @@ export async function handleDiagnosticsRequest(
     }
   }
 
-  for (const diag of res) {
-    const diagnostic: Diagnostic = {
-      range: {
-        start: document.positionAt(diag.start),
-        end: document.positionAt(diag.end),
-      },
-      message: diag.text,
-      source: '',
-    }
-    if (diag.is_warning) {
-      diagnostic.severity = DiagnosticSeverity.Warning
-    } else {
-      diagnostic.severity = DiagnosticSeverity.Error
-    }
-    diagnostics.push(diagnostic)
-  }
+  const diagnostics: Diagnostic[] = transformLinterErrorsToDiagnostics(
+    res,
+    document,
+  )
 
   // check for experimentalFeatures inside generator block
-  if (document.getText().includes('experimentalFeatures')) {
-    const experimentalFeaturesRange:
-      | Range
-      | undefined = getExperimentalFeaturesRange(document)
-    if (experimentalFeaturesRange) {
-      diagnostics.push({
-        severity: DiagnosticSeverity.Warning,
-        range: experimentalFeaturesRange,
-        message:
-          "This property has been renamed to 'previewFeatures' to better communicate what they are.",
-        source: '',
-      })
-    }
+  const experimentalFeaturesUsage = checkForExperimentalFeaturesUSeage(document)
+  if (experimentalFeaturesUsage) {
+    diagnostics.push({
+      severity: DiagnosticSeverity.Warning,
+      range: experimentalFeaturesUsage,
+      message:
+        "This property has been renamed to 'previewFeatures' to better communicate what they are.",
+      source: '',
+    })
   }
 
   return diagnostics
