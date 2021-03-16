@@ -283,7 +283,7 @@ suite('Quick Fix', () => {
     kind: CompletionItemKind.Property,
   }
   const blockAttributeMap = {
-    label: '@@map([""])',
+    label: '@@map("")',
     kind: CompletionItemKind.Property,
   }
   const blockAttributeUnique = {
