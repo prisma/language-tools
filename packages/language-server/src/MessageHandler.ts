@@ -53,6 +53,7 @@ import {
 import {
   checkForExperimentalFeaturesUSeage,
   checkForPrisma1Model,
+  greyOutIgnoredFields,
   transformLinterErrorsToDiagnostics,
 } from './diagnosticsHandler'
 import { doc } from 'prettier'
@@ -253,6 +254,8 @@ export async function handleDiagnosticsRequest(
       source: '',
     })
   }
+
+  diagnostics.concat(greyOutIgnoredFields(document))
 
   return diagnostics
 }

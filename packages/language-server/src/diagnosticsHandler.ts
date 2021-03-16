@@ -10,6 +10,12 @@ import {
 } from './MessageHandler'
 import { LinterError } from './prisma-fmt/lint'
 
+export function greyOutIgnoredFields(document: TextDocument): Diagnostic[] {
+  const diagnostics: Diagnostic[] = []
+
+  return diagnostics
+}
+
 export function checkForPrisma1Model(linterErrors: LinterError[]): boolean {
   return linterErrors.some(
     (diagnostic) =>
