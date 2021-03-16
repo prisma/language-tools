@@ -27,3 +27,8 @@ jobs:
       - name: Catch shell script issues
         if: matrix.os == 'ubuntu-latest'
         run: npm run shell:lint
+      - name: Catch version incompatibilities
+        if: matrix.os == 'ubuntu-latest'
+        run: npm run dep:lint
+
+        
