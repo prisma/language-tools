@@ -100,7 +100,7 @@
   ],
   "blockAttributes": [
     {
-      "label": "@@map([\"\"])",
+      "label": "@@map(\"\")",
       "documentation": "Maps a model name from the Prisma schema to a different table name.",
       "fullSignature": "@@map(_ name: String)",
       "params": [
