@@ -952,11 +952,11 @@ export function getSuggestionsForInsideAttributes(
       isIncomplete: false,
     }
   } else if (
-    wordBeforePosition.includes('@@unique') ||
-    wordBeforePosition.includes('@@id') ||
-    wordBeforePosition.includes('@@index')
+    wordsBeforePosition.some((a) => a.includes('@@unique') || a.includes('@@id') || a.includes('@@index'))
   ) {
     suggestions = getFieldsFromCurrentBlock(lines, block, position)
+    // remove duplicates
+    suggestions = [...new Set(suggestions)]
   } else if (wordsBeforePosition.some((a) => a.includes('@relation'))) {
     return getSuggestionsForRelationDirective(
       wordsBeforePosition,

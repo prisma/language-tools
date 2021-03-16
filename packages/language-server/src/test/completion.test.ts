@@ -283,7 +283,7 @@ suite('Quick Fix', () => {
     kind: CompletionItemKind.Property,
   }
   const blockAttributeMap = {
-    label: '@@map([""])',
+    label: '@@map("")',
     kind: CompletionItemKind.Property,
   }
   const blockAttributeUnique = {
@@ -521,6 +521,17 @@ suite('Quick Fix', () => {
           fieldAttributeIgnore,
         ],
       },
+    )
+
+    assertCompletion(
+      modelBlocksUri,
+      {line: 78, character: 24},
+      {
+        isIncomplete: false,
+        items: [
+          { label: 'lastName', kind: CompletionItemKind.Field}
+        ]
+      }
     )
   })
 
