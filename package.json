@@ -39,7 +39,6 @@
     "compile": "cd packages/language-server && npm run build && cd ../vscode && npm run build && cd .. && cd ..",
     "watch": "npm run build -- -w",
     "shell:lint": "shellcheck -x scripts/*.sh",
-    "dep:lint": "",
     "test": "sh scripts/e2e.sh",
     "test:e2e": "sh scripts/e2eTestsOnVsix/test.sh",
     "testScripts": "jest __tests__",
