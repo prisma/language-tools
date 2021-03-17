@@ -53,10 +53,9 @@ import {
 import {
   checkForExperimentalFeaturesUSeage,
   checkForPrisma1Model,
-  greyOutIgnoredFields,
+  greyOutIgnoredParts,
   transformLinterErrorsToDiagnostics,
 } from './diagnosticsHandler'
-import { doc } from 'prettier'
 
 export function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
@@ -255,7 +254,9 @@ export async function handleDiagnosticsRequest(
     })
   }
 
-  diagnostics.concat(greyOutIgnoredFields(document))
+  const lines = convertDocumentTextToTrimmedLineArray(document)
+  const test = greyOutIgnoredParts(document, lines)
+  diagnostics.push(...test)
 
   return diagnostics
 }

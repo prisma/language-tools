@@ -2,16 +2,45 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import {
   Diagnostic,
   DiagnosticSeverity,
+  DiagnosticTag,
   Range,
 } from 'vscode-languageserver/node'
 import {
   convertDocumentTextToTrimmedLineArray,
+  getBlockAtPosition,
   getCurrentLine,
 } from './MessageHandler'
 import { LinterError } from './prisma-fmt/lint'
 
-export function greyOutIgnoredFields(document: TextDocument): Diagnostic[] {
+export function greyOutIgnoredParts(
+  document: TextDocument,
+  lines: string[],
+): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
+
+  lines.map((currElement, index) => {
+    if (currElement.includes('@@ignore')) {
+      const block = getBlockAtPosition(index, lines)
+      if (block) {
+        diagnostics.push({
+          range: { start: block.start, end: block.end },
+          message: 'This model is ignored because it is invalid.',
+          tags: [DiagnosticTag.Unnecessary],
+          severity: DiagnosticSeverity.Information,
+        })
+      }
+    } else if (currElement.includes('@ignore')) {
+      diagnostics.push({
+        range: {
+          start: { line: index, character: 0 },
+          end: { line: index, character: Number.MAX_VALUE },
+        },
+        message: 'This field is ignored because it refers to an invalid model.',
+        tags: [DiagnosticTag.Unnecessary],
+        severity: DiagnosticSeverity.Information,
+      })
+    }
+  })
 
   return diagnostics
 }
