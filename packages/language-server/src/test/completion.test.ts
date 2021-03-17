@@ -376,6 +376,7 @@ suite('Quick Fix', () => {
           { label: 'Hello', kind: CompletionItemKind.Reference },
           { label: 'DateTest', kind: CompletionItemKind.Reference },
           { label: 'UserType', kind: CompletionItemKind.Reference },
+          { label: 'ForthUser', kind: CompletionItemKind.Reference },
         ],
       },
     )
@@ -520,6 +521,15 @@ suite('Quick Fix', () => {
           fieldAttributeRelation,
           fieldAttributeIgnore,
         ],
+      },
+    )
+
+    assertCompletion(
+      modelBlocksUri,
+      { line: 74, character: 24 },
+      {
+        isIncomplete: false,
+        items: [{ label: 'lastName', kind: CompletionItemKind.Field }],
       },
     )
   })

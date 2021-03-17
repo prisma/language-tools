@@ -952,11 +952,22 @@ export function getSuggestionsForInsideAttributes(
       isIncomplete: false,
     }
   } else if (
-    wordBeforePosition.includes('@@unique') ||
-    wordBeforePosition.includes('@@id') ||
-    wordBeforePosition.includes('@@index')
+    wordsBeforePosition.some(
+      (a) =>
+        a.includes('@@unique') || a.includes('@@id') || a.includes('@@index'),
+    )
   ) {
     suggestions = getFieldsFromCurrentBlock(lines, block, position)
+    // get parameters inside block attribute
+    const parameterMatch = new RegExp(/(?<=\[).+?(?=\])/).exec(
+      untrimmedCurrentLine,
+    )
+    if (parameterMatch) {
+      const existingParameters = parameterMatch[0]
+        .split(',')
+        .map((par) => par.trim())
+      suggestions = suggestions.filter((s) => !existingParameters.includes(s))
+    }
   } else if (wordsBeforePosition.some((a) => a.includes('@relation'))) {
     return getSuggestionsForRelationDirective(
       wordsBeforePosition,
