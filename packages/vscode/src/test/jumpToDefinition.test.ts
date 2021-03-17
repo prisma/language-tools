@@ -14,7 +14,7 @@ async function testJumpToDefinition(
   )) as vscode.Location[]
 
   assert.ok(actualLocation.length === 1)
-  assert.deepEqual(actualLocation[0].range, expectedLocation.range)
+  assert.deepStrictEqual(actualLocation[0].range, expectedLocation.range)
 }
 
 suite('Should jump-to-definition', () => {
