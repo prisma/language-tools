@@ -21,7 +21,7 @@ import {
 } from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
-import * as util from './util'
+import * as util from './prisma-fmt/util'
 import install from './prisma-fmt/install'
 import { LSPOptions, LSPSettings } from './settings'
 import { existsSync } from 'fs'

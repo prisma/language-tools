@@ -1,6 +1,6 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { handleDiagnosticsRequest } from '../MessageHandler'
-import { getBinPath, binaryIsNeeded, getDownloadURL } from '../util'
+import { getBinPath, binaryIsNeeded, getDownloadURL } from '../prisma-fmt/util'
 import install from '../prisma-fmt/install'
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver'
 import * as assert from 'assert'
