@@ -1,16 +1,16 @@
 import { Position } from 'vscode-languageserver'
 import { TextEdit, TextDocument } from 'vscode-languageserver-textdocument'
 import {
-  getCurrentLine,
-  Block,
-  getBlockAtPosition,
-  getWordAtPosition,
-} from '../MessageHandler'
-import {
   getTypesFromCurrentBlock,
   getValuesInsideBrackets,
   getAllRelationNames,
 } from '../completion/completions'
+import {
+  Block,
+  getCurrentLine,
+  getWordAtPosition,
+  getBlockAtPosition,
+} from '../util'
 
 function extractFirstWord(line: string): string {
   return line.replace(/ .*/, '')
