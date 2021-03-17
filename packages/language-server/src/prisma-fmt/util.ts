@@ -5,7 +5,7 @@ import { getPlatform, Platform } from '@prisma/get-platform'
 import path from 'path'
 import fs from 'fs'
 import exec from './exec'
-const packageJson = require('../../package.json') // eslint-disable-line
+const packageJson = require('../../../package.json') // eslint-disable-line
 
 /**
  * Lookup Cache
