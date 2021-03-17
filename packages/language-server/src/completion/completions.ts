@@ -6,7 +6,6 @@ import {
   MarkupKind,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { Block, getModelOrEnumBlock } from '../MessageHandler'
 import {
   blockAttributes,
   fieldAttributes,
@@ -28,6 +27,7 @@ import previewFeatures from '../prisma-fmt/previewFeatures'
 import nativeTypeConstructors, {
   NativeTypeConstructors,
 } from '../prisma-fmt/nativeTypes'
+import { Block, getModelOrEnumBlock } from '../util'
 
 function toCompletionItems(
   allowedTypes: string[],

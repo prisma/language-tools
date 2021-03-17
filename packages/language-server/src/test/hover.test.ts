@@ -18,8 +18,8 @@ function assertHover(
   const hoverResult: Hover | undefined = handleHoverRequest(document, params)
 
   assert.ok(hoverResult !== undefined)
-  assert.deepEqual(hoverResult.contents, expected.contents)
-  assert.deepEqual(hoverResult.range, expected.range)
+  assert.deepStrictEqual(hoverResult.contents, expected.contents)
+  assert.deepStrictEqual(hoverResult.range, expected.range)
 }
 
 suite('Hover of /// documentation comments', () => {

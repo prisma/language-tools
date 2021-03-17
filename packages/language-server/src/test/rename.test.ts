@@ -21,8 +21,8 @@ function assertRename(
     document,
   )
 
-  assert.notEqual(renameResult, undefined)
-  assert.deepEqual(renameResult, expected)
+  assert.notStrictEqual(renameResult, undefined)
+  assert.deepStrictEqual(renameResult, expected)
 }
 
 suite('Rename', () => {

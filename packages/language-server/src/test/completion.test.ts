@@ -8,7 +8,7 @@ import {
 } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
-import { getBinPath, binaryIsNeeded, getDownloadURL } from '../util'
+import { getBinPath, binaryIsNeeded, getDownloadURL } from '../prisma-fmt/util'
 import install from '../prisma-fmt/install'
 
 function assertCompletion(

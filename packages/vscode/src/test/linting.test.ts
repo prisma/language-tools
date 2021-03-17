@@ -10,13 +10,13 @@ async function testDiagnostics(
 
   const actualDiagnostics = vscode.languages.getDiagnostics(docUri)
 
-  assert.equal(actualDiagnostics.length, expectedDiagnostics.length)
+  assert.strictEqual(actualDiagnostics.length, expectedDiagnostics.length)
 
   expectedDiagnostics.forEach((expectedDiagnostic, i) => {
     const actualDiagnostic = actualDiagnostics[i]
-    assert.equal(actualDiagnostic.message, expectedDiagnostic.message)
-    assert.deepEqual(actualDiagnostic.range, expectedDiagnostic.range)
-    assert.equal(actualDiagnostic.severity, expectedDiagnostic.severity)
+    assert.strictEqual(actualDiagnostic.message, expectedDiagnostic.message)
+    assert.deepStrictEqual(actualDiagnostic.range, expectedDiagnostic.range)
+    assert.strictEqual(actualDiagnostic.severity, expectedDiagnostic.severity)
   })
 }
 
