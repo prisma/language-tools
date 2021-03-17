@@ -22,8 +22,6 @@ async function assertFormat(fixturePath: string): Promise<void> {
     binPathPrismaFmt,
   )
 
-  // TODO apply edits and compare with fixtures/correct.prisma
-
   assert.ok(formatResult.length !== 0)
 }
 

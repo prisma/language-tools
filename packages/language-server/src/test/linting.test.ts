@@ -20,9 +20,9 @@ async function assertLinting(
   assert.ok(diagnosticsResults.length != 0)
   expected.forEach((expectedDiagnostic, i) => {
     const actualDiagnostic = diagnosticsResults[i]
-    assert.equal(actualDiagnostic.message, expectedDiagnostic.message)
-    assert.deepEqual(actualDiagnostic.range, expectedDiagnostic.range)
-    assert.equal(actualDiagnostic.severity, expectedDiagnostic.severity)
+    assert.strictEqual(actualDiagnostic.message, expectedDiagnostic.message)
+    assert.deepStrictEqual(actualDiagnostic.range, expectedDiagnostic.range)
+    assert.strictEqual(actualDiagnostic.severity, expectedDiagnostic.severity)
   })
 }
 

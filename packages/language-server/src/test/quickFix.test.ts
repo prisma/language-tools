@@ -30,7 +30,7 @@ function assertQuickFix(
   const quickFixResult: CodeAction[] = quickFix(document, params)
 
   assert.ok(quickFixResult.length !== 0)
-  assert.deepEqual(quickFixResult, expected)
+  assert.deepStrictEqual(quickFixResult, expected)
 }
 
 function createDiagnosticErrorUnknownType(
