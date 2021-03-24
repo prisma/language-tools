@@ -25,7 +25,7 @@ export const checkAndAskForBinaryExecution = async (
   const existingBinaryState = bins?.libs[binaryPath]
   if (!existingBinaryState) {
     const item = await window.showInformationMessage(
-      `Your VSCode workspace is defining a custom binary path for the Prisma extension:"${binaryPath}" . Do you want to trust this binary and let the extension execute it?`,
+      `Your VS Code workspace is defining a custom binary path for the Prisma extension: "${binaryPath}" Do you want to trust this binary and let the extension execute it?`,
       {
         modal: true,
       },
