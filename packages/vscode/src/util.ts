@@ -6,8 +6,13 @@ import {
   TextEditorEdit,
   env,
   workspace,
+  ExtensionContext,
 } from 'vscode'
-import { CodeAction, TextDocumentIdentifier } from 'vscode-languageclient/node'
+import {
+  CodeAction,
+  LanguageClient,
+  TextDocumentIdentifier,
+} from 'vscode-languageclient/node'
 import {
   denyListDarkColorThemes,
   denyListLightColorThemes,
@@ -15,6 +20,12 @@ import {
 import { homedir } from 'os'
 import { readdirSync } from 'fs'
 import path from 'path'
+import {
+  BinaryStorage,
+  checkAndAskForBinaryExecution,
+  printBinaryCheckWarning,
+  PRISMA_ALLOWED_BINS_KEY,
+} from './binaryValidator'
 
 export function isDebugOrTestSession(): boolean {
   return env.sessionId === 'someValue.sessionId'
@@ -115,5 +126,22 @@ export function applySnippetWorkspaceEdit(): (
       )
       await editor.insertSnippet(new SnippetString(snip.newText), range)
     }
+  }
+}
+
+export const restartClient = async (
+  context: ExtensionContext,
+  client: LanguageClient,
+): Promise<void> => {
+  await client.stop()
+  const allowed = await checkAndAskForBinaryExecution(
+    context,
+    workspace.getConfiguration('prisma').get('prismaFmtBinPath'),
+    context.globalState.get<BinaryStorage>(PRISMA_ALLOWED_BINS_KEY),
+  )
+  if (allowed) {
+    context.subscriptions.push(client.start())
+  } else {
+    await printBinaryCheckWarning()
   }
 }

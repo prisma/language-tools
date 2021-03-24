@@ -99,6 +99,11 @@
         "command": "prisma.restartLanguageServer",
         "title": "Restart Language Server",
         "category": "Prisma"
+      },
+      {
+        "command": "prisma.resetBinDecisions",
+        "title": "Reset Binary execution decisions",
+        "category": "Prisma"
       }
     ]
   },
