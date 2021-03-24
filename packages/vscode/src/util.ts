@@ -12,6 +12,8 @@ import {
   CodeAction,
   LanguageClient,
   TextDocumentIdentifier,
+  ServerOptions,
+  LanguageClientOptions,
 } from 'vscode-languageclient/node'
 import {
   denyListDarkColorThemes,
@@ -129,19 +131,38 @@ export function applySnippetWorkspaceEdit(): (
   }
 }
 
+export function createLanguageServer(
+  serverOptions: ServerOptions,
+  clientOptions: LanguageClientOptions,
+): LanguageClient {
+  return new LanguageClient(
+    'prisma',
+    'Prisma Language Server',
+    serverOptions,
+    clientOptions,
+  )
+}
 export const restartClient = async (
   context: ExtensionContext,
   client: LanguageClient,
-): Promise<void> => {
-  await client.stop()
+  serverOptions: ServerOptions,
+  clientOptions: LanguageClientOptions,
+): Promise<LanguageClient> => {
+  client?.diagnostics?.dispose()
+  if (client) await client.stop()
+  // try to create a new client if options are passed
   const allowed = await checkAndAskForBinaryExecution(
     context,
     workspace.getConfiguration('prisma').get('prismaFmtBinPath'),
     context.globalState.get<BinaryStorage>(PRISMA_ALLOWED_BINS_KEY),
   )
   if (allowed) {
+    client = createLanguageServer(serverOptions, clientOptions)
     context.subscriptions.push(client.start())
+    await client.onReady()
+    return client
   } else {
     await printBinaryCheckWarning()
+    return client
   }
 }
