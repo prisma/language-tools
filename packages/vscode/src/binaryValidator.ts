@@ -43,10 +43,6 @@ export const checkAndAskForBinaryExecution = async (
       result = true
     }
 
-    if (item.value === BinaryPopupStatus.Deny) {
-      result = false
-    }
-
     // store the state
     bins = bins ? bins : { libs: {} }
     bins.libs[binaryPath] = { allowed: result }
