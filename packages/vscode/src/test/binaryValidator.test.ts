@@ -12,9 +12,8 @@ suite('Binary validation test', () => {
       },
     },
   }
+  const path = '/user/bin/test'
   test('should return false when path is in deny state', async () => {
-    const path = '/user/bin/test'
-
     const bins: BinaryStorage = { libs: { [path]: { allowed: false } } }
 
     const checkResult = await checkAndAskForBinaryExecution(context, path, bins)
@@ -22,8 +21,6 @@ suite('Binary validation test', () => {
   })
 
   test('should return true when path is in allow state', async () => {
-    const path = '/user/bin/test'
-
     const bins: BinaryStorage = { libs: { [path]: { allowed: true } } }
 
     const checkResult = await checkAndAskForBinaryExecution(context, path, bins)
