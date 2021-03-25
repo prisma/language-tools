@@ -55,6 +55,6 @@ export const checkAndAskForBinaryExecution = async (
 
 export const printBinaryCheckWarning = async () => {
   await window.showWarningMessage(
-    "Execution of Prisma extension's binary defined in settings was not allowed. Please either change the binary path or reset the approval by opening the VS Code command palette and search for 'Reset Binary execution decisions', then press Enter.",
+    "Execution of Prisma extension's binary defined in settings was not allowed. Please either change the binary path or reset the approval by opening the VS Code command palette and search for 'Reset current Prisma format binary execution decision', then press Enter.",
   )
 }
