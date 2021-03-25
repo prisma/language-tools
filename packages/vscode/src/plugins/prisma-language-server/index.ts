@@ -6,6 +6,7 @@ import {
   CodeActionContext,
   Command,
   commands,
+  ExtensionContext,
   Range,
   TextDocument,
   window,
@@ -21,6 +22,12 @@ import {
   ServerOptions,
   TransportKind,
 } from 'vscode-languageclient/node'
+import {
+  BinaryStorage,
+  checkAndAskForBinaryExecution,
+  printBinaryCheckWarning,
+  PRISMA_ALLOWED_BINS_KEY,
+} from '../../binaryValidator'
 import TelemetryReporter from '../../telemetryReporter'
 import {
   applySnippetWorkspaceEdit,
@@ -28,6 +35,8 @@ import {
   checkForOtherPrismaExtension,
   isDebugOrTestSession,
   isSnippetEdit,
+  restartClient,
+  createLanguageServer,
 } from '../../util'
 import { PrismaVSCodePlugin } from '../types'
 
@@ -41,16 +50,18 @@ let watcher: chokidar.FSWatcher
 const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
 const isE2ETestOnPullRequest = () => process.env.localLSP === 'true'
 
-function createLanguageServer(
+const activateClient = (
+  context: ExtensionContext,
   serverOptions: ServerOptions,
   clientOptions: LanguageClientOptions,
-): LanguageClient {
-  return new LanguageClient(
-    'prisma',
-    'Prisma Language Server',
-    serverOptions,
-    clientOptions,
-  )
+) => {
+  // Create the language client
+  client = createLanguageServer(serverOptions, clientOptions)
+
+  const disposable = client.start()
+
+  // Start the client. This will also launch the server
+  context.subscriptions.push(disposable)
 }
 
 const plugin: PrismaVSCodePlugin = {
@@ -157,21 +168,70 @@ const plugin: PrismaVSCodePlugin = {
         },
       } as any,
     }
+    const config = workspace.getConfiguration('prisma')
+    const allowedBins = context.globalState.get<BinaryStorage>(
+      PRISMA_ALLOWED_BINS_KEY,
+    )
 
-    // Create the language client
-    client = createLanguageServer(serverOptions, clientOptions)
+    workspace.onDidChangeConfiguration(
+      async (e) => {
+        const binChanged = e.affectsConfiguration('prisma.prismaFmtBinPath')
+        if (binChanged) {
+          client = await restartClient(
+            context,
+            client,
+            serverOptions,
+            clientOptions,
+          )
+        }
+      },
+      null,
+      context.subscriptions,
+    )
 
-    const disposable = client.start()
-
-    // Start the client. This will also launch the server
-    context.subscriptions.push(disposable)
-
+    const launchAllowed = await checkAndAskForBinaryExecution(
+      context,
+      config.get('prismaFmtBinPath'),
+      allowedBins,
+    )
     context.subscriptions.push(
+      commands.registerCommand('prisma.resetAllBinDecisions', async () => {
+        await context.globalState.update(PRISMA_ALLOWED_BINS_KEY, { libs: {} })
+        client = await restartClient(
+          context,
+          client,
+          serverOptions,
+          clientOptions,
+        )
+      }),
+      commands.registerCommand(
+        'prisma.resetCurrentFmtBinDecision',
+        async () => {
+          const decisions = context.globalState.get<BinaryStorage>(
+            PRISMA_ALLOWED_BINS_KEY,
+          )
+          const currentBin: string | undefined = workspace
+            .getConfiguration('prisma')
+            .get('prismaFmtBinPath')
+          if (decisions && currentBin && currentBin !== '') {
+            delete decisions.libs[currentBin]
+          }
+          await context.globalState.update(PRISMA_ALLOWED_BINS_KEY, decisions)
+          client = await restartClient(
+            context,
+            client,
+            serverOptions,
+            clientOptions,
+          )
+        },
+      ),
       commands.registerCommand('prisma.restartLanguageServer', async () => {
-        await client.stop()
-        client = createLanguageServer(serverOptions, clientOptions)
-        context.subscriptions.push(client.start())
-        await client.onReady()
+        client = await restartClient(
+          context,
+          client,
+          serverOptions,
+          clientOptions,
+        )
         window.showInformationMessage('Prisma language server restarted.') // eslint-disable-line @typescript-eslint/no-floating-promises
       }),
       commands.registerCommand(
@@ -179,6 +239,12 @@ const plugin: PrismaVSCodePlugin = {
         applySnippetWorkspaceEdit(),
       ),
     )
+
+    if (launchAllowed) {
+      activateClient(context, serverOptions, clientOptions)
+    } else {
+      await printBinaryCheckWarning()
+    }
 
     if (!isDebugOrTest) {
       // eslint-disable-next-line
