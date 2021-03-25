@@ -102,12 +102,12 @@
       },
       {
         "command": "prisma.resetCurrentFmtBinDecision",
-        "title": "Reset current Prisma fmt binary execution decision",
+        "title": "Reset current Prisma format binary execution decision",
         "category": "Prisma"
       },
       {
         "command": "prisma.resetAllBinDecisions",
-        "title": "Reset all Prisma fmt binary execution decisions",
+        "title": "Reset all Prisma format binary execution decisions",
         "category": "Prisma"
       }
     ]
