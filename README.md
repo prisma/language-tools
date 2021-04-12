@@ -30,3 +30,4 @@ Using the Language Server Protocol to improve Prisma's developer experience.
 - LSP Unit Tests Status
 
   ![Unit tests for LSP on master](https://github.com/prisma/language-tools/workflows/3.%20Unit%20tests%20for%20LSP%20and%20publish/badge.svg?branch=master)
+
