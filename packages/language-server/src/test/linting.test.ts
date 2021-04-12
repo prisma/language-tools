@@ -75,20 +75,4 @@ suite('Linting', () => {
       fixturePathWrongType,
     )
   })
-  test('', async () => {
-    await assertLinting(
-      [
-        {
-          message:
-            'Error validating: The relation field `author` uses the scalar fields authorId. At least one of those fields is required. Hence the relation field must be required as well.',
-          range: {
-            start: { line: 14, character: 2 },
-            end: { line: 15, character: 0 },
-          },
-          severity: DiagnosticSeverity.Error,
-        },
-      ],
-      fixturePathRequiredField,
-    )
-  })
 })
