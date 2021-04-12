@@ -75,7 +75,7 @@ suite('Linting', () => {
       fixturePathWrongType,
     )
   })
-  test('Required field', async () => {
+  test('', async () => {
     await assertLinting(
       [
         {
