@@ -42,7 +42,6 @@ suite('Linting', () => {
 
   const fixturePathMissingArgument = './linting/missingArgument.prisma'
   const fixturePathWrongType = './linting/wrongType.prisma'
-  const fixturePathRequiredField = './linting/requiredField.prisma'
 
   test('Missing argument', async () => {
     await assertLinting(
