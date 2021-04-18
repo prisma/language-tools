@@ -21,7 +21,7 @@ jobs:
       - name: Unit tests
         run: cd packages/language-server && npm test
       - name: Run headless test
-        uses: GabrielBB/xvfb-action@v1.4
+        uses: GabrielBB/xvfb-action@v1.5
         with:
           run: npm test "useLocalLSP"
       - name: Catch shell script issues
