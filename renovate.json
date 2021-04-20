@@ -5,7 +5,7 @@
   "semanticCommits": true,
   "ignoreDeps": ["@prisma/language-server", "@prisma/get-platform", "@prisma/fetch-engine"],
   "masterIssue": true,
-  "reviewers": ["@divyenduz", "@carmenberndt"],
+  "reviewers": ["@carmenberndt"],
   "rebaseWhen": "conflicted",
   "packageRules": [
     {

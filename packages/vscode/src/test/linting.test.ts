@@ -23,7 +23,6 @@ async function testDiagnostics(
 suite('Should get linting', () => {
   const docUri = getDocUri('linting/missingArgument.prisma')
   const docUri2 = getDocUri('linting/wrongType.prisma')
-  const docUri3 = getDocUri('linting/requiredField.prisma')
 
   test('Diagnoses missing argument', async () => {
     await testDiagnostics(docUri, [
@@ -41,17 +40,6 @@ suite('Should get linting', () => {
         message:
           'Type "Use" is neither a built-in type, nor refers to another model, custom type, or enum.',
         range: toRange(14, 12, 14, 16),
-        severity: vscode.DiagnosticSeverity.Error,
-        source: '',
-      },
-    ])
-  })
-  test('Diagnoses required field', async () => {
-    await testDiagnostics(docUri3, [
-      {
-        message:
-          'Error validating: The relation field `author` uses the scalar fields authorId. At least one of those fields is required. Hence the relation field must be required as well.',
-        range: toRange(14, 2, 15, 0),
         severity: vscode.DiagnosticSeverity.Error,
         source: '',
       },
