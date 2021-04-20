@@ -39,7 +39,7 @@ jobs:
           node scripts/e2eTestsOnVsix/install_extension.js ${{ github.event.inputs.extension_type }} ${{ github.event.inputs.extension_version }}
       - name: Run test
         if: ${{ steps.install.outputs.installed-extension }}
-        uses: GabrielBB/xvfb-action@v1.4
+        uses: GabrielBB/xvfb-action@v1.5
         with:
           run: npm run test:e2e ${{ github.event.inputs.extension_type }} ${{ matrix.os }} ${{ github.event.inputs.extension_version }}
   
