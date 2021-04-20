@@ -65,7 +65,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - run: cd packages/language-server && npm publish --tag ${{ github.event.inputs.npm_channel }} --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN}}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
       - name: Trigger next workflow for bumping LSP in extension
         uses: benc-uk/workflow-dispatch@v1
