@@ -1,6 +1,6 @@
 {
   "name": "@prisma/language-server",
-  "description": "Implementation of a language server in node.",
+  "description": "Implementation of a language server in Node.",
   "displayName": "Prisma Language Server",
   "version": "22.0.18",
   "author": "Prisma",
@@ -15,10 +15,7 @@
   "bin": {
     "prisma-language-server": "dist/src/bin.js"
   },
-  "repository": {
-    "type": "github",
-    "url": "git+https://github.com/prisma/vscode.git"
-  },
+  "repository": "git@github.com:prisma/language-tools.git",
   "scripts": {
     "build": "tsc",
     "watch": "npm run build -- -w",
