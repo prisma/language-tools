@@ -7,7 +7,7 @@
     "packages/*"
   ],
   "devDependencies": {
-    "@actions/github": "4.0.0",
+    "@actions/github": "5.0.0",
     "@commitlint/cli": "12.1.3",
     "@commitlint/config-conventional": "12.1.3",
     "@commitlint/config-lerna-scopes": "12.1.3",
