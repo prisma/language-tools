@@ -66,7 +66,7 @@ suite('Linting', () => {
             'Type "Use" is neither a built-in type, nor refers to another model, custom type, or enum.',
           range: {
             start: { line: 14, character: 12 },
-            end: { line: 14, character: 16 },
+            end: { line: 14, character: 15 },
           },
           severity: DiagnosticSeverity.Error,
         },
