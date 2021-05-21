@@ -1,5 +1,5 @@
 import { TextDocument, Range } from 'vscode-languageserver-textdocument'
-import { Position } from 'vscode-languageserver/node'
+import { Position } from 'vscode-languageserver'
 
 export class Block {
   type: string

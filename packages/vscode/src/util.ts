@@ -10,11 +10,10 @@ import {
 } from 'vscode'
 import {
   CodeAction,
-  LanguageClient,
   TextDocumentIdentifier,
-  ServerOptions,
   LanguageClientOptions,
-} from 'vscode-languageclient/node'
+} from 'vscode-languageclient'
+import { LanguageClient, ServerOptions } from 'vscode-languageclient/node'
 import {
   denyListDarkColorThemes,
   denyListLightColorThemes,
