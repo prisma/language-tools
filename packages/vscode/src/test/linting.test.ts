@@ -39,7 +39,7 @@ suite('Should get linting', () => {
       {
         message:
           'Type "Use" is neither a built-in type, nor refers to another model, custom type, or enum.',
-        range: toRange(14, 12, 14, 16),
+        range: toRange(14, 12, 14, 15),
         severity: vscode.DiagnosticSeverity.Error,
         source: '',
       },

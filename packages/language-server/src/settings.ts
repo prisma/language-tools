@@ -1,4 +1,4 @@
-import { Connection } from 'vscode-languageserver/node'
+import { Connection } from 'vscode-languageserver'
 
 export interface LSPOptions {
   /**

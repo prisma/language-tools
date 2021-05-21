@@ -16,9 +16,11 @@ import {
   CodeAction as lsCodeAction,
   CodeActionParams,
   CodeActionRequest,
-  LanguageClient,
   LanguageClientOptions,
   ProvideCodeActionsSignature,
+} from 'vscode-languageclient'
+import {
+  LanguageClient,
   ServerOptions,
   TransportKind,
 } from 'vscode-languageclient/node'
@@ -124,9 +126,8 @@ const plugin: PrismaVSCodePlugin = {
           _: ProvideCodeActionsSignature,
         ) {
           const params: CodeActionParams = {
-            textDocument: client.code2ProtocolConverter.asTextDocumentIdentifier(
-              document,
-            ),
+            textDocument:
+              client.code2ProtocolConverter.asTextDocumentIdentifier(document),
             range: client.code2ProtocolConverter.asRange(range),
             context: client.code2ProtocolConverter.asCodeActionContext(context),
           }
@@ -136,9 +137,8 @@ const plugin: PrismaVSCodePlugin = {
               const result: (CodeAction | Command)[] = []
               for (const item of values) {
                 if (lsCodeAction.is(item)) {
-                  const action = client.protocol2CodeConverter.asCodeAction(
-                    item,
-                  )
+                  const action =
+                    client.protocol2CodeConverter.asCodeAction(item)
                   if (
                     isSnippetEdit(
                       item,

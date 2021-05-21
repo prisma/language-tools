@@ -180,13 +180,14 @@ export function startServer(options?: LSPOptions): void {
   ): Promise<void> {
     const settings = await getDocumentSettings(textDocument.uri)
     const fmtBinPath = getPrismaFmtBinPath(settings.prismaFmtBinPath)
-    const diagnostics: Diagnostic[] = await MessageHandler.handleDiagnosticsRequest(
-      textDocument,
-      fmtBinPath,
-      (errorMessage: string) => {
-        connection.window.showErrorMessage(errorMessage)
-      },
-    )
+    const diagnostics: Diagnostic[] =
+      await MessageHandler.handleDiagnosticsRequest(
+        textDocument,
+        fmtBinPath,
+        (errorMessage: string) => {
+          connection.window.showErrorMessage(errorMessage)
+        },
+      )
     connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
   }
 
