@@ -2,7 +2,7 @@
   "name": "@prisma/language-server",
   "description": "Implementation of a language server in Node.",
   "displayName": "Prisma Language Server",
-  "version": "25.0.1",
+  "version": "25.0.2",
   "author": "Prisma",
   "license": "Apache-2.0",
   "publisher": "Prisma",
