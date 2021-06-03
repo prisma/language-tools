@@ -11,7 +11,7 @@
     "@commitlint/cli": "12.1.4",
     "@commitlint/config-conventional": "12.1.4",
     "@commitlint/config-lerna-scopes": "12.1.4",
-    "@types/node": "14.17.1",
+    "@types/node": "14.17.2",
     "@typescript-eslint/eslint-plugin": "4.26.0",
     "@typescript-eslint/parser": "4.26.0",
     "child-process": "1.0.2",
