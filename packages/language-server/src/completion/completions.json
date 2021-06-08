@@ -201,6 +201,14 @@
         {
           "label": "references",
           "documentation": "A list of field references of the model on *the other side of the relation*."
+        },
+        {
+          "label": "onDelete",
+          "documentation": "Specifies the action to perform when a referenced row in the referenced table is being deleted."
+        },
+        {
+          "label": "onUpdate",
+          "documentation": "Specifies the action to perform when a referenced column in the referenced table is being updated to a new value."
         }
       ]
     },
@@ -228,6 +236,18 @@
       "label": "fields: []",
       "fullSignature": "fields: []",
       "documentation": "A list of field references of the *current* model.",
+      "params": []
+    },
+    {
+      "label": "onDelete: ",
+      "fullSignature": "onDelete: ",
+      "documentation": "Specifies the action to perform when a referenced row in the referenced table is being deleted.",
+      "params": []
+    },
+    {
+      "label": "onUpdate: ",
+      "fullSignature": "onUpdate: ",
+      "documentation": "Specifies the action to perform when a referenced column in the referenced table is being updated to a new value.",
       "params": []
     },
     {

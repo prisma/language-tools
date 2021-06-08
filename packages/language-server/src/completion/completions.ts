@@ -24,6 +24,7 @@ import {
 import { klona } from 'klona'
 import { extractModelName } from '../rename/renameUtil'
 import previewFeatures from '../prisma-fmt/previewFeatures'
+import referentialActions from '../prisma-fmt/referentialActions'
 import nativeTypeConstructors, {
   NativeTypeConstructors,
 } from '../prisma-fmt/nativeTypes'
@@ -773,6 +774,16 @@ function isInsideFieldsOrReferences(
   return false
 }
 
+function definingReferentialAction(
+  wordsBeforePosition: Array<string>,
+): boolean {
+  const lastWord = wordsBeforePosition[wordsBeforePosition.length - 2]
+  return (
+    lastWord != undefined &&
+    (lastWord.includes('onDelete') || lastWord.includes('onUpdate'))
+  )
+}
+
 function getFieldsFromCurrentBlock(
   lines: Array<string>,
   block: Block,
@@ -854,8 +865,10 @@ function getSuggestionsForRelationDirective(
   wordsBeforePosition: string[],
   currentLineUntrimmed: string,
   lines: string[],
+  document: TextDocument,
   block: Block,
   position: Position,
+  binPath: string,
 ): CompletionList | undefined {
   // create deep copy
   const suggestions: CompletionItem[] = klona(relationArguments)
@@ -865,6 +878,17 @@ function getSuggestionsForRelationDirective(
     .trim()
 
   if (wordBeforePosition.includes('@relation')) {
+    return {
+      items: suggestions,
+      isIncomplete: false,
+    }
+  }
+  if (definingReferentialAction(wordsBeforePosition)) {
+    const suggestions: CompletionItem[] = referentialActions(
+      binPath,
+      document.getText(),
+    ).map((action) => CompletionItem.create(action))
+
     return {
       items: suggestions,
       isIncomplete: false,
@@ -935,8 +959,10 @@ function getSuggestionsForRelationDirective(
 export function getSuggestionsForInsideAttributes(
   untrimmedCurrentLine: string,
   lines: Array<string>,
+  document: TextDocument,
   position: Position,
   block: Block,
+  binPath: string,
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
   const wordsBeforePosition = untrimmedCurrentLine
@@ -973,8 +999,10 @@ export function getSuggestionsForInsideAttributes(
       wordsBeforePosition,
       untrimmedCurrentLine,
       lines,
+      document,
       block,
       position,
+      binPath,
     )
   }
   return {

@@ -458,6 +458,14 @@ suite('Quick Fix', () => {
     label: 'references: []',
     kind: CompletionItemKind.Property,
   }
+  const onDeleteProperty = {
+    label: 'onDelete: ',
+    kind: CompletionItemKind.Property
+  }
+  const onUpdateProperty = {
+    label: 'onUpdate: ',
+    kind: CompletionItemKind.Property
+  }
 
   const nameProperty = {
     label: '""',
@@ -646,7 +654,7 @@ suite('Quick Fix', () => {
       { line: 12, character: 26 },
       {
         isIncomplete: false,
-        items: [referencesProperty, fieldsProperty, nameProperty],
+        items: [referencesProperty, fieldsProperty, onDeleteProperty, onUpdateProperty, nameProperty],
       },
     )
     assertCompletion(
@@ -666,7 +674,7 @@ suite('Quick Fix', () => {
       { line: 30, character: 44 },
       {
         isIncomplete: false,
-        items: [fieldsProperty, nameProperty],
+        items: [fieldsProperty, onDeleteProperty, onUpdateProperty, nameProperty],
       },
     )
     assertCompletion(
@@ -674,7 +682,7 @@ suite('Quick Fix', () => {
       { line: 39, character: 45 },
       {
         isIncomplete: false,
-        items: [referencesProperty, nameProperty],
+        items: [referencesProperty, onDeleteProperty, onUpdateProperty, nameProperty],
       },
     )
     assertCompletion(
