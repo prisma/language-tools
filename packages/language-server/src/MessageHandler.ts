@@ -107,9 +107,8 @@ export async function handleDiagnosticsRequest(
 
   // check for experimentalFeatures inside generator block
   if (document.getText().includes('experimentalFeatures')) {
-    const experimentalFeaturesRange:
-      | Range
-      | undefined = getExperimentalFeaturesRange(document)
+    const experimentalFeaturesRange: Range | undefined =
+      getExperimentalFeaturesRange(document)
     if (experimentalFeaturesRange) {
       diagnostics.push({
         severity: DiagnosticSeverity.Warning,
@@ -200,14 +199,9 @@ export async function handleDocumentFormatting(
 ): Promise<TextEdit[]> {
   const options = params.options
 
-  return format(
-    binPath,
-    options.tabSize,
-    document.getText(),
-    onError,
-  ).then((formatted) => [
-    TextEdit.replace(fullDocumentRange(document), formatted),
-  ])
+  return format(binPath, options.tabSize, document.getText(), onError).then(
+    (formatted) => [TextEdit.replace(fullDocumentRange(document), formatted)],
+  )
 }
 
 export function handleHoverRequest(
@@ -339,8 +333,10 @@ export function handleCompletionRequest(
         return getSuggestionsForInsideAttributes(
           currentLineUntrimmed,
           lines,
+          document,
           position,
           foundBlock,
+          binPath,
         )
       }
 
