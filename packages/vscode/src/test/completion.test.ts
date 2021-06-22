@@ -410,6 +410,14 @@ suite('Should auto-complete', () => {
     label: 'references: []',
     kind: vscode.CompletionItemKind.Property,
   }
+  const onDeleteProperty = {
+    label: "onDelete: ",
+    kind: vscode.CompletionItemKind.Property,
+  }
+  const onUpdateProperty = {
+    label: "onUpdate: ",
+    kind: vscode.CompletionItemKind.Property,
+  }
 
   const nameProperty = {
     label: '""',
@@ -545,6 +553,8 @@ suite('Should auto-complete', () => {
         nameProperty,
         fieldsProperty,
         referencesProperty,
+        onDeleteProperty,
+        onUpdateProperty,
       ]),
       true,
     )
@@ -561,13 +571,13 @@ suite('Should auto-complete', () => {
     await testCompletion(
       relationDirectiveUri,
       new vscode.Position(30, 44),
-      new vscode.CompletionList([nameProperty, fieldsProperty]),
+      new vscode.CompletionList([nameProperty, fieldsProperty, onDeleteProperty, onUpdateProperty]),
       true,
     )
     await testCompletion(
       relationDirectiveUri,
       new vscode.Position(39, 45),
-      new vscode.CompletionList([nameProperty, referencesProperty]),
+      new vscode.CompletionList([nameProperty, referencesProperty, onDeleteProperty, onUpdateProperty]),
       true,
     )
     await testCompletion(

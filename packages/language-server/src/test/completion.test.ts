@@ -454,6 +454,7 @@ suite('Quick Fix', () => {
     label: 'fields: []',
     kind: CompletionItemKind.Property,
   }
+
   const referencesProperty = {
     label: 'references: []',
     kind: CompletionItemKind.Property,
