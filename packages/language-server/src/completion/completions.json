@@ -208,7 +208,7 @@
         },
         {
           "label": "onUpdate",
-          "documentation": "Specifies the action to perform when a referenced column in the referenced table is being updated to a new value."
+          "documentation": "Specifies the action to perform when a referenced field in the referenced model is being updated to a new value."
         }
       ]
     },
