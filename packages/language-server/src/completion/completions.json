@@ -204,7 +204,7 @@
         },
         {
           "label": "onDelete",
-          "documentation": "Specifies the action to perform when a referenced row in the referenced table is being deleted."
+          "documentation": "Specifies the action to perform when a referenced entry in the referenced model is being deleted."
         },
         {
           "label": "onUpdate",
