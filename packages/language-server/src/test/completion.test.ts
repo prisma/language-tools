@@ -700,44 +700,5 @@ suite('Should auto-complete', () => {
         ],
       },
     )
-    assertCompletion(
-      relationDirectiveUri,
-      { line: 66, character: 36 },
-      {
-        isIncomplete: false,
-        items: [
-          { label: 'Cascade', kind: CompletionItemKind.Field },
-          { label: 'NoAction', kind: CompletionItemKind.Field },
-          { label: 'Restrict', kind: CompletionItemKind.Field },
-          { label: 'SetNull', kind: CompletionItemKind.Field },
-        ],
-      },
-    )
-    assertCompletion(
-      relationDirectiveUri,
-      { line: 75, character: 36 },
-      {
-        isIncomplete: false,
-        items: [
-          { label: 'Cascade', kind: CompletionItemKind.Field },
-          { label: 'NoAction', kind: CompletionItemKind.Field },
-          { label: 'Restrict', kind: CompletionItemKind.Field },
-          { label: 'SetNull', kind: CompletionItemKind.Field },
-        ],
-      },
-    )
-    assertCompletion(
-      relationDirectiveUri,
-      { line: 84, character: 84 },
-      {
-        isIncomplete: false,
-        items: [
-          { label: 'Cascade', kind: CompletionItemKind.Field },
-          { label: 'NoAction', kind: CompletionItemKind.Field },
-          { label: 'Restrict', kind: CompletionItemKind.Field },
-          { label: 'SetNull', kind: CompletionItemKind.Field },
-        ],
-      },
-    )
   })
 })
