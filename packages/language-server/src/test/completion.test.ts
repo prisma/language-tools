@@ -700,5 +700,14 @@ suite('Quick Fix', () => {
         ],
       },
     )
+    assertCompletion(
+      relationDirectiveUri,
+      { line: 57, character: 63 },
+      {
+        isIncomplete: false,
+        items: [onDeleteProperty, onUpdateProperty, nameProperty],
+      },
+    )
   })
+
 })
