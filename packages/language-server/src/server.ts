@@ -75,8 +75,8 @@ export function startServer(options?: LSPOptions): void {
       // eslint-disable-next-line
       `Extension name ${packageJson.name} with version ${packageJson.version}`,
     )
-    const prismaCLIVersion = util.getCLIVersion()
-    connection.console.info(`Prisma CLI version: ${prismaCLIVersion}`)
+    const prismaEnginesVersion = util.getEnginesVersion()
+    connection.console.info(`Prisma Engines version: ${prismaEnginesVersion}`)
 
     const result: InitializeResult = {
       capabilities: {

@@ -52,12 +52,10 @@ jobs:
           echo $PACKAGE_JSON_PATH
           ENGINES_VERSION=$(jq -r '.prisma.version' ${PACKAGE_JSON_PATH}) 
           echo "::set-output name=engines::$ENGINES_VERSION"
-          CLI_VERSION=$(jq -r '.dependencies."@prisma/get-platform"' ${PACKAGE_JSON_PATH}) 
-          echo "::set-output name=cli::$CLI_VERSION"
 
       - name: Commit and push to branch 
         run: |
-          sh scripts/commit_and_push.sh "Bump LSP to ${{ github.event.inputs.extension_version }} in VSCode. Engines: ${{ steps.packagejson.engines }} CLI: ${{ steps.packagejson.cli }}"
+          sh scripts/commit_and_push.sh "Bump LSP to ${{ github.event.inputs.extension_version }} in VSCode. Engines: ${{ steps.packagejson.engines }}"
    
       - name: Trigger next workflow for VSCode e2e tests
         uses: benc-uk/workflow-dispatch@v1

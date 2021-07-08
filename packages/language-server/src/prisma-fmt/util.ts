@@ -44,8 +44,11 @@ export async function getDownloadURL(): Promise<string> {
   const extension = platform === 'windows' ? '.exe.gz' : '.gz'
   return `https://binaries.prisma.sh/all_commits/${version}/${platform}/prisma-fmt${extension}`
 }
-
-export function getCLIVersion(): string {
+/**
+ * Gets Engines Version from `@prisma/get-platform`
+ * @returns Something like `2.26.0-23.9b816b3aa13cc270074f172f30d6eda8a8ce867d`
+ */
+export function getEnginesVersion(): string {
   // eslint-disable-next-line
   return packageJson.dependencies['@prisma/get-platform']
 }
