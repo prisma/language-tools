@@ -54,7 +54,8 @@ function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersion = '
       const engineVersion = prismaCLIDeps['@prisma/engines'] // 2.26.0-23.9b816b3aa13cc270074f172f30d6eda8a8ce867d
       const sha = engineVersion.split('.')[3]
       let languageServerPackageJson = getPackageJsonContent({path: languageServerPackageJsonPath})
-      languageServerPackageJson['prisma']['version'] = sha
+      languageServerPackageJson['prisma']['enginesVersion'] = sha
+      languageServerPackageJson['prisma']['cliVersion'] = newPrismaVersion
       languageServerPackageJson['dependencies']['@prisma/get-platform'] = engineVersion
       languageServerPackageJson['dependencies']['@prisma/fetch-engine'] = engineVersion
       writeJsonToPackageJson({content: languageServerPackageJson, path: languageServerPackageJsonPath})
