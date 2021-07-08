@@ -45,12 +45,12 @@ jobs:
         run: |
           sh scripts/set_git_credentials.sh
 
-      - name: Read package.json versions
+      - name: Read package.json versions (engineVersion)
         id: packagejson
         run: |
           PACKAGE_JSON_PATH="./packages/language-server/package.json"
           echo $PACKAGE_JSON_PATH
-          ENGINES_VERSION=$(jq -r '.prisma.version' ${PACKAGE_JSON_PATH}) 
+          ENGINES_VERSION=$(jq -r '.prisma.enginesVersion' ${PACKAGE_JSON_PATH}) 
           echo "::set-output name=engines::$ENGINES_VERSION"
 
       - name: Commit and push to branch 
