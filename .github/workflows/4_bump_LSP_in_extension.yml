@@ -45,7 +45,7 @@ jobs:
         run: |
           sh scripts/set_git_credentials.sh
 
-      - name: Read package.json versions (engineVersion)
+      - name: Read package.json versions (enginesVersion)
         id: packagejson
         run: |
           PACKAGE_JSON_PATH="./packages/language-server/package.json"
