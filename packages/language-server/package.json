@@ -10,8 +10,7 @@
     "node": ">=10"
   },
   "prisma": {
-    "enginesVersion": "93bc5022cab05b6a70742ec1b74ee9a951f7b568",
-    "cliVersion": "2.27.0-dev.50"
+    "version": "93bc5022cab05b6a70742ec1b74ee9a951f7b568"
   },
   "bin": {
     "prisma-language-server": "dist/src/bin.js"
