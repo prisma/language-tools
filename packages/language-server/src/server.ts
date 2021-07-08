@@ -77,6 +77,8 @@ export function startServer(options?: LSPOptions): void {
     )
     const prismaEnginesVersion = util.getEnginesVersion()
     connection.console.info(`Prisma Engines version: ${prismaEnginesVersion}`)
+    const prismaCliVersion = util.getCliVersion()
+    connection.console.info(`Prisma CLI version: ${prismaCliVersion}`)
 
     const result: InitializeResult = {
       capabilities: {

@@ -24,7 +24,7 @@ Note the both `dev` workflow and `latest` workflow call the same scripts, the ch
 1. `check-update.sh` compares `CURRENT_VERSION` (extension) against `NPM_VERSION` of Prisma CLI.
 1. If they are same, this script exits
 1. If they are different, `bump.sh <channel> <version>` is called with `channel=dev` and `version=NPM_VERSION` (i.e. the new version of extension to publish)
-1. `bump.sh` updates the `package.json` files in root, client, server and sets `name`, `displayName`, `version`, `dependencies.@prisma/*` packages, and `prisma.version` values.
+1. `bump.sh` updates the `package.json` files in root, client, server and sets `name`, `displayName`, `version`, `dependencies.@prisma/*` packages, and `prisma.enginesVersion` values.
 1. `check-update.sh` then commits these changes, this commit is required because `vsce publish` (to be run later requires a clean git state)
 1. `npm run vsce:publish <channel> <version>` i.e. `publish.sh <channel> <version>` is then called with `channel=dev` and `version=NPM_VERSION` (i.e. the new version of extension to publish). This command publishes the "Prisma Dev" extension.
 1. `publish.sh` pushes to vscode master repo. Only changes from the dev channel are pushed.
@@ -36,6 +36,6 @@ Note the both `dev` workflow and `latest` workflow call the same scripts, the ch
 1. `check-update.sh` compares `CURRENT_VERSION` (extension) against `NPM_VERSION` of Prisma CLI.
 1. If they are same, this script exits
 1. If they are different, `bump.sh <channel> <version>` is called with `channel=latest` and `version=NPM_VERSION` (i.e. the new version of extension to publish)
-1. `bump.sh` updates the `package.json` files in root, client, server and sets `name`, `displayName`, `version`, `dependencies.@prisma/*` packages, and `prisma.version` values.
+1. `bump.sh` updates the `package.json` files in root, client, server and sets `name`, `displayName`, `version`, `dependencies.@prisma/*` packages, and `prisma.enginesVersion` values.
 1. `check-update.sh` then commits these changes, this commit is required because `vsce publish` (to be run later requires a clean git state)
 1. `npm run vsce:publish <channel> <version>` i.e. `publish.sh <channel> <version>` is then called with `channel=latest` and `version=NPM_VERSION` (i.e. the new version of extension to publish). This command published the "Prisma" extension.
