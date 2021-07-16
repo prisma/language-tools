@@ -44,9 +44,9 @@
     "vscode-uri": "3.0.2"
   },
   "devDependencies": {
-    "@types/mocha": "8.2.2",
-    "@types/node-fetch": "2.5.10",
-    "@types/rimraf": "3.0.0",
+    "@types/mocha": "8.2.3",
+    "@types/node-fetch": "2.5.11",
+    "@types/rimraf": "3.0.1",
     "mocha": "8.4.0",
     "typescript": "4.3.2"
   },
