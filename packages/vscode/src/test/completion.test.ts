@@ -592,5 +592,12 @@ suite('Should auto-complete', () => {
       ]),
       true,
     )
+    await testCompletion(
+      relationDirectiveUri,
+      new vscode.Position(57, 63),
+      new vscode.CompletionList([nameProperty, onDeleteProperty, onUpdateProperty]),
+      true,
+    )
   })
+  
 })
