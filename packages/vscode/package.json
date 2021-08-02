@@ -117,11 +117,11 @@
     "@types/mocha": "8.2.2",
     "@types/vscode": "1.52.0",
     "mocha": "8.4.0",
-    "ovsx": "0.1.0",
+    "ovsx": "0.2.0",
     "semver": "7.3.5",
-    "typescript": "4.3.2",
-    "vsce": "1.91.0",
-    "vscode-test": "1.5.2"
+    "typescript": "4.3.5",
+    "vsce": "1.96.1",
+    "vscode-test": "1.6.1"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
   "publishConfig": {
