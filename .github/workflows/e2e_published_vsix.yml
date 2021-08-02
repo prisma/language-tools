@@ -44,7 +44,7 @@ jobs:
           run: npm run test:e2e ${{ github.event.inputs.extension_type }} ${{ matrix.os }} ${{ github.event.inputs.extension_version }}
   
   after-test:
-    name: Send slack notification
+    name: Bump tested version and commit # scripts/versions/tested_extension_stable & tested_extension_insider
     runs-on: ubuntu-latest
     needs: [test]
     if: always()
