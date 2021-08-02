@@ -14,22 +14,17 @@
     "@types/node": "14.17.2",
     "@typescript-eslint/eslint-plugin": "4.28.5",
     "@typescript-eslint/parser": "4.28.5",
-    "child-process": "1.0.2",
     "eslint": "7.32.0",
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-prettier": "3.4.0",
     "execa": "5.1.1",
     "husky": "4.3.8",
     "jest": "27.0.6",
-    "lerna": "4.0.0",
     "lint-staged": "11.1.1",
-    "mocha": "8.4.0",
     "prettier": "2.3.2",
     "semver": "7.3.5",
     "typescript": "4.3.5",
-    "vsce": "1.96.1",
-    "vscode-test": "1.6.1",
-    "yarn": "1.22.11"
+    "vsce": "1.96.1"
   },
   "scripts": {
     "build": "tsc -b",
@@ -60,8 +55,5 @@
     "packages/**/*.{js,ts}": [
       "eslint --fix"
     ]
-  },
-  "dependencies": {
-    "npm-merge-driver": "2.3.6"
   }
 }
