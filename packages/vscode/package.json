@@ -14,7 +14,6 @@
   ],
   "dependencies": {
     "checkpoint-client": "1.1.20",
-    "crypto": "1.0.1",
     "chokidar": "3.5.2",
     "@prisma/language-server": "29.0.11",
     "vscode-languageclient": "7.0.0"
@@ -118,7 +117,6 @@
     "@types/vscode": "1.52.0",
     "mocha": "8.4.0",
     "ovsx": "0.2.0",
-    "semver": "7.3.5",
     "typescript": "4.3.5",
     "vsce": "1.96.1",
     "vscode-test": "1.6.1"
