@@ -22,8 +22,8 @@ jobs:
           node-version: '12.x'
       - name: Install Dependencies
         run: npm install
-      - name: Checkout master
-        run: git fetch && git checkout master
+      - name: Checkout main
+        run: git fetch && git checkout main
       - name: Setup Git
         run: |
           sh scripts/set_git_credentials.sh
