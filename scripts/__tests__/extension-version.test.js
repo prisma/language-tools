@@ -82,7 +82,7 @@ describe('next extension version', () => {
     expect(
       nextVersion({
         currentVersion: '5.1.3',
-        branch_channel: 'master',
+        branch_channel: 'main',
         prisma_latest: '2.5.0',
         prisma_dev: '2.5.1-dev.2',
         prisma_patch: '2.4.1-dev.3',

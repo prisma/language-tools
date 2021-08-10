@@ -1,11 +1,11 @@
-name: 1/2b. Bump versions for extension only (on push to master and patch branch)
+name: 1/2b. Bump versions for extension only (on push to main and patch branch)
 
 # This workflow covers both '1_check_for_updates' and '2_bump_versions' workflows, therefore it is another variant of the same, but specifically for extension only, without any Prisma CLI updates that would need to be handled.
 
 on:
     push:
       branches: 
-        - 'master'
+        - 'main'
         - '**.x'
         - '!renovate/**'
       paths-ignore:
@@ -31,9 +31,9 @@ jobs:
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
-      - name: checkout master if necessary
-        if: endsWith(github.ref, '/master') == false
-        run: git fetch && git checkout master
+      - name: checkout main if necessary
+        if: endsWith(github.ref, '/main') == false
+        run: git fetch && git checkout main
       - name: Setup Git
         run: |
           sh scripts/set_git_credentials.sh
@@ -45,7 +45,7 @@ jobs:
           sh scripts/commit_and_push.sh "bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}."
       
       - name: Checkout previous branch
-        if: endsWith(github.ref, '/master') == false
+        if: endsWith(github.ref, '/main') == false
         run: git checkout ${{ steps.extract_branch.outputs.branch }}
       - name: Update VSCode extension version
         run:  | 
@@ -57,14 +57,14 @@ jobs:
           sh scripts/commit_and_push.sh "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}." ${{ steps.setup_branch.outputs.new_branch }}
       
       - name: Trigger next workflow for LSP Unit tests
-        if: endsWith(github.ref, '/master')
+        if: endsWith(github.ref, '/main')
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: 3. Unit tests for LSP and publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "master", "trigger_reason": "On push to ${{ steps.extract_branch.outputs.branch }}." }'
+          inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "main", "trigger_reason": "On push to ${{ steps.extract_branch.outputs.branch }}." }'
       - name: Trigger next workflow for LSP Unit tests
-        if: endsWith(github.ref, '/master') == false
+        if: endsWith(github.ref, '/main') == false
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: 3. Unit tests for LSP and publish

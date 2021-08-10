@@ -51,10 +51,10 @@ jobs:
         id: is_minor
         run: |
           node scripts/is_minor_release.js ${{ github.event.inputs.npm_channel }}
-      - name: Reset on master if minor release
+      - name: Reset on main if minor release
         if: ${{steps.is_minor.outputs.is_minor_release}}
         run: |
-          git reset --hard master
+          git reset --hard main
           git push --force origin stable
       - name: Update Prisma CLI version and VSCode extension version
         run:  |
