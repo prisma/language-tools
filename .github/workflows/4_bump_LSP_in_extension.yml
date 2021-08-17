@@ -45,19 +45,17 @@ jobs:
         run: |
           sh scripts/set_git_credentials.sh
 
-      - name: Read package.json versions
+      - name: Read package.json versions (enginesVersion)
         id: packagejson
         run: |
           PACKAGE_JSON_PATH="./packages/language-server/package.json"
           echo $PACKAGE_JSON_PATH
-          ENGINES_VERSION=$(jq -r '.prisma.version' ${PACKAGE_JSON_PATH}) 
+          ENGINES_VERSION=$(jq -r '.prisma.enginesVersion' ${PACKAGE_JSON_PATH}) 
           echo "::set-output name=engines::$ENGINES_VERSION"
-          CLI_VERSION=$(jq -r '.dependencies."@prisma/get-platform"' ${PACKAGE_JSON_PATH}) 
-          echo "::set-output name=cli::$CLI_VERSION"
 
       - name: Commit and push to branch 
         run: |
-          sh scripts/commit_and_push.sh "Bump LSP to ${{ github.event.inputs.extension_version }} in VSCode. Engines: ${{ steps.packagejson.engines }} CLI: ${{ steps.packagejson.cli }}"
+          sh scripts/commit_and_push.sh "Bump LSP to ${{ github.event.inputs.extension_version }} in VSCode. Engines: ${{ steps.packagejson.engines }}"
    
       - name: Trigger next workflow for VSCode e2e tests
         uses: benc-uk/workflow-dispatch@v1
@@ -69,7 +67,7 @@ jobs:
 
       - name: Slack Notification on Failure
         if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@v2.1.3
+        uses: rtCamp/action-slack-notify@v2.2.0
         env:  
           SLACK_TITLE: "4. Bumping LSP in VSCode extension failed :x:"
           SLACK_COLOR: '#FF0000'

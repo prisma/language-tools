@@ -17,7 +17,7 @@ function currentExtensionVersion({
   branch_channel
 }) {
   switch (branch_channel) {
-    case 'master':
+    case 'main':
     case 'dev':
       return readVersionFile({ fileName: "extension_insider" })
     case 'latest':
@@ -62,7 +62,7 @@ function nextVersion({
   const prisma_patch_tokens = stripPreReleaseText(prisma_patch).split('.')
 
   switch (branch_channel) {
-    case 'master':
+    case 'main':
     case 'dev':
       // Prisma CLI new dev version
       if (prisma_latest_tokens[1] == currentVersionTokens[0]) {
@@ -106,7 +106,7 @@ function bumpExtensionVersionInScriptFiles({
   let stableName = "extension_stable"
   let patchName = "extension_patch"
   switch (branch_channel) {
-    case 'master':
+    case 'main':
     case 'dev':
       writeToVersionFile({fileName: insiderName, content: nextVersion})
       break
