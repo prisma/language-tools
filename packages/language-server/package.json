@@ -2,7 +2,7 @@
   "name": "@prisma/language-server",
   "description": "Implementation of a language server in Node.",
   "displayName": "Prisma Language Server",
-  "version": "27.0.11",
+  "version": "30.0.19",
   "author": "Prisma",
   "license": "Apache-2.0",
   "publisher": "Prisma",
@@ -10,7 +10,8 @@
     "node": ">=10"
   },
   "prisma": {
-    "version": "f0567c9a66c21a6f6f8d2e17668bede3930ac69f"
+    "enginesVersion": "0210b3de5042a714f8838a59f9edcb28b11ab97d",
+    "cliVersion": "2.30.0-dev.19"
   },
   "bin": {
     "prisma-language-server": "dist/src/bin.js"
@@ -25,29 +26,26 @@
   "main": "./dist/index.js",
   "typings": "dist/src/index",
   "dependencies": {
-    "@prisma/fetch-engine": "2.27.0-dev.12",
-    "@prisma/get-platform": "2.27.0-dev.12",
+    "@prisma/fetch-engine": "2.30.0-10.0210b3de5042a714f8838a59f9edcb28b11ab97d",
+    "@prisma/get-platform": "2.30.0-10.0210b3de5042a714f8838a59f9edcb28b11ab97d",
     "@types/js-levenshtein": "1.1.0",
-    "execa": "5.0.1",
+    "execa": "5.1.1",
     "hasha": "5.2.2",
     "js-levenshtein": "1.1.6",
     "klona": "2.0.4",
     "node-fetch": "2.6.1",
-    "npm": "6.14.13",
-    "p-retry": "4.5.0",
-    "pkg-dir": "5.0.0",
+    "p-retry": "4.6.1",
     "rimraf": "3.0.2",
     "tempy": "1.0.1",
     "vscode-languageserver": "7.0.0",
-    "vscode-languageserver-textdocument": "1.0.1",
-    "vscode-uri": "3.0.2"
+    "vscode-languageserver-textdocument": "1.0.1"
   },
   "devDependencies": {
-    "@types/mocha": "8.2.2",
+    "@types/mocha": "9.0.0",
     "@types/node-fetch": "2.5.10",
     "@types/rimraf": "3.0.0",
-    "mocha": "8.4.0",
-    "typescript": "4.3.2"
+    "mocha": "9.0.3",
+    "typescript": "4.3.5"
   },
   "keywords": [
     "autocomplete",

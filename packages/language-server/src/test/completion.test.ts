@@ -48,7 +48,7 @@ function assertCompletion(
 // Cache prisma-fmt binary path
 let binPathPrismaFmt = ''
 
-suite('Quick Fix', () => {
+suite('Completions', () => {
   suiteSetup(async () => {
     // install prisma-fmt binary
     if (binPathPrismaFmt === '') {
