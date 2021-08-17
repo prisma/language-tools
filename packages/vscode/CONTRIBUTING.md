@@ -2,9 +2,9 @@
 
 ## About this repository
 
-The `main` branch of this repository contains the VS Code extension for Prisma schema files. Prisma package dependencies are kept up to date with a GitHub Action workflow, that updates them every time a new version of them is released.
+The `main` branch of this repository contains the VS Code extension for Prisma schema files. Prisma package dependencies are kept up to date with [a GitHub Action workflow](/.github/workflows/1_check_for_updates.yml), that updates them every time a new version of them is released.
 
-There is a stable version `prisma` and an unstable version `prisma-dev`. The stable one is published as ["Prisma" in the VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma), the unstable one as ["Prisma Dev"](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-dev). An automated publish runs every 5 minutes calling the `check-update.sh` script.
+There is a stable version `prisma` and an unstable version `prisma-insider`. The stable one is published as ["Prisma" in the VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma), the unstable one as ["Prisma - Insider"](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider). An automated publish runs every 5 minutes calling the `check-update.sh` script.
 In the beginning of this run, the CI job checks for Prisma stable version and `scripts/prisma_version_stable` contents to be the same. If the Prisma stable version is a new minor release, it makes the required version changes and proceeds further in the job. `scripts/prisma_version_stable` is a file that is committed by the stable CI job. That enables the future runs to know if an extension version is already published for a specific Prisma CLI version.
 
 If there is a new Prisma Patch, a new patch branch from the last stable release tag is created if it does not exist yet. It then makes the required version changes and releases a new Insider extension. This script also triggers the release of a new Stable extension, incrementing the version number each time.
