@@ -592,38 +592,5 @@ suite('Should auto-complete', () => {
       ]),
       true,
     )
-    await testCompletion(
-      relationDirectiveUri,
-      new vscode.Position(66, 36),
-      new vscode.CompletionList([
-        { label: 'Cascade', kind: vscode.CompletionItemKind.Field },
-        { label: 'NoAction', kind: vscode.CompletionItemKind.Field },
-        { label: 'Restrict', kind: vscode.CompletionItemKind.Field },
-        { label: 'SetNull', kind: vscode.CompletionItemKind.Field },
-      ]),
-      true,
-    )
-    await testCompletion(
-      relationDirectiveUri,
-      new vscode.Position(75, 36),
-      new vscode.CompletionList([
-        { label: 'Cascade', kind: vscode.CompletionItemKind.Field },
-        { label: 'NoAction', kind: vscode.CompletionItemKind.Field },
-        { label: 'Restrict', kind: vscode.CompletionItemKind.Field },
-        { label: 'SetNull', kind: vscode.CompletionItemKind.Field },
-      ]),
-      true,
-    )
-    await testCompletion(
-      relationDirectiveUri,
-      new vscode.Position(84, 84),
-      new vscode.CompletionList([
-        { label: 'Cascade', kind: vscode.CompletionItemKind.Field },
-        { label: 'NoAction', kind: vscode.CompletionItemKind.Field },
-        { label: 'Restrict', kind: vscode.CompletionItemKind.Field },
-        { label: 'SetNull', kind: vscode.CompletionItemKind.Field },
-      ]),
-      true,
-    )
   })
 })
