@@ -454,22 +454,24 @@ suite('Completions', () => {
     label: 'fields: []',
     kind: CompletionItemKind.Property,
   }
-
   const referencesProperty = {
     label: 'references: []',
     kind: CompletionItemKind.Property,
   }
   const onDeleteProperty = {
     label: 'onDelete: ',
-    kind: CompletionItemKind.Property
+    kind: CompletionItemKind.Property,
   }
   const onUpdateProperty = {
     label: 'onUpdate: ',
-    kind: CompletionItemKind.Property
+    kind: CompletionItemKind.Property,
   }
-
-  const nameProperty = {
+  const nameQuotesProperty = {
     label: '""',
+    kind: CompletionItemKind.Property,
+  }
+  const nameProperty = {
+    label: 'name: ',
     kind: CompletionItemKind.Property,
   }
 
@@ -655,7 +657,14 @@ suite('Completions', () => {
       { line: 12, character: 26 },
       {
         isIncomplete: false,
-        items: [referencesProperty, fieldsProperty, onDeleteProperty, onUpdateProperty, nameProperty],
+        items: [
+          referencesProperty,
+          fieldsProperty,
+          onDeleteProperty,
+          onUpdateProperty,
+          nameQuotesProperty,
+          nameProperty,
+        ],
       },
     )
     assertCompletion(
@@ -675,7 +684,13 @@ suite('Completions', () => {
       { line: 30, character: 44 },
       {
         isIncomplete: false,
-        items: [fieldsProperty, onDeleteProperty, onUpdateProperty, nameProperty],
+        items: [
+          fieldsProperty,
+          onDeleteProperty,
+          onUpdateProperty,
+          nameQuotesProperty,
+          nameProperty,
+        ],
       },
     )
     assertCompletion(
@@ -683,7 +698,13 @@ suite('Completions', () => {
       { line: 39, character: 45 },
       {
         isIncomplete: false,
-        items: [referencesProperty, onDeleteProperty, onUpdateProperty, nameProperty],
+        items: [
+          referencesProperty,
+          onDeleteProperty,
+          onUpdateProperty,
+          nameQuotesProperty,
+          nameProperty,
+        ],
       },
     )
     assertCompletion(
