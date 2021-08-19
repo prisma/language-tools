@@ -556,7 +556,7 @@ suite('Completions', () => {
     })
 
     suite('Diagnoses arguments of @relation directive', function () {
-      test('@relation(x)', async () => {
+      test('@relation(|)', async () => {
         await activate(relationDirectiveUri)
 
         await testCompletion(
