@@ -96,6 +96,10 @@
     {
       "label": "previewFeatures",
       "documentation": "Enables preview feature flags."
+    },
+    {
+      "label": "engineType",
+      "documentation": "TODO"
     }
   ],
   "blockAttributes": [
@@ -334,6 +338,22 @@
     {
       "label": "\"\"",
       "documentation": "Specifies a single provider."
+    }
+  ],
+  "engineTypes": [
+    {
+      "label": "library",
+      "documentation": "Built-in generator."
+    },
+    {
+      "label": "binary",
+      "documentation": "Built-in generator."
+    }
+  ],
+  "engineTypeArguments": [
+    {
+      "label": "\"\"",
+      "documentation": "Specifies the engine type."
     }
   ],
   "datasourceProviders": [

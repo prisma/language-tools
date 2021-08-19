@@ -20,6 +20,8 @@ import {
   generatorProviders,
   generatorProviderArguments,
   previewFeaturesArguments,
+  engineTypes,
+  engineTypeArguments
 } from './completionUtil'
 import { klona } from 'klona'
 import { extractModelName } from '../rename/renameUtil'
@@ -571,6 +573,7 @@ export function getSuggestionForSupportedFields(
 
   switch (blockType) {
     case 'generator':
+      // provider
       if (currentLine.startsWith('provider')) {
         const providers: CompletionItem[] = generatorProviders
         if (isInsideQuotation) {
@@ -585,6 +588,7 @@ export function getSuggestionForSupportedFields(
           }
         }
       }
+      // previewFeatures
       if (currentLine.startsWith('previewFeatures')) {
         const generatorPreviewFeatures: string[] = previewFeatures(
           binPath,
@@ -599,8 +603,24 @@ export function getSuggestionForSupportedFields(
           )
         }
       }
+      // engineType
+      if (currentLine.startsWith('engineType')) {
+        const engineTypesCompletion: CompletionItem[] = engineTypes
+        if (isInsideQuotation) {
+          return {
+            items: engineTypesCompletion,
+            isIncomplete: true,
+          }
+        } else {
+          return {
+            items: engineTypeArguments,
+            isIncomplete: true,
+          }
+        }
+      }
       break
     case 'datasource':
+      // provider
       if (currentLine.startsWith('provider')) {
         let providers: CompletionItem[] = klona(dataSourceProviders)
 
@@ -632,6 +652,7 @@ export function getSuggestionForSupportedFields(
             isIncomplete: true,
           }
         }
+      // url
       } else if (currentLine.startsWith('url')) {
         // check if inside env
         if (isInsideAttribute(currentLineUntrimmed, position, '()')) {

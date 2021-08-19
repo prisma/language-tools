@@ -67,10 +67,7 @@ suite('Completions', () => {
   const enumCommentUri = 'completions/enumWithComments.prisma'
   const relationDirectiveUri = 'completions/relationDirective.prisma'
 
-  const fieldPreviewFeatures = {
-    label: 'previewFeatures',
-    kind: CompletionItemKind.Field,
-  }
+  // usef both in generator and datasource
   const fieldProvider = {
     label: 'provider',
     kind: CompletionItemKind.Field,
@@ -238,6 +235,10 @@ suite('Completions', () => {
       label: 'binaryTargets',
       kind: CompletionItemKind.Field,
     }
+    const fieldPreviewFeatures = {
+      label: 'previewFeatures',
+      kind: CompletionItemKind.Field,
+    }
 
     const generatorWithExistingFieldsUri =
       'completions/generatorWithExistingFields.prisma'
@@ -253,6 +254,7 @@ suite('Completions', () => {
             fieldOutput,
             fieldBinaryTargets,
             fieldPreviewFeatures,
+            fieldEngineType,
           ],
         },
       )
@@ -264,7 +266,7 @@ suite('Completions', () => {
         { line: 2, character: 0 },
         {
           isIncomplete: false,
-          items: [fieldOutput, fieldBinaryTargets, fieldPreviewFeatures],
+          items: [fieldOutput, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
         },
       )
       assertCompletion(
@@ -272,10 +274,14 @@ suite('Completions', () => {
         { line: 7, character: 0 },
         {
           isIncomplete: false,
-          items: [fieldProvider, fieldBinaryTargets, fieldPreviewFeatures],
+          items: [fieldProvider, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
         },
       )
     })
+
+    // TODO previewFeatures autocompletion
+    // TODO provider autocompletion
+    // TODO engineType autocompletion
   })
 
   suite('BLOCK ATTRIBUTES', () => {
