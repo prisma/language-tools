@@ -573,7 +573,7 @@ suite('Completions', () => {
           true,
         )
       })
-      test('@relation(references: [x])', async () => {
+      test('@relation(references: [|])', async () => {
         await testCompletion(
           relationDirectiveUri,
           new vscode.Position(21, 39),
@@ -585,7 +585,7 @@ suite('Completions', () => {
           true,
         )
       })
-      test('@relation(references: [id],x )', async () => {
+      test('@relation(references: [id], |)', async () => {
         await testCompletion(
           relationDirectiveUri,
           new vscode.Position(30, 44),
@@ -599,7 +599,7 @@ suite('Completions', () => {
           true,
         )
       })
-      test('order Order @relation(fields: [orderId],x )', async () => {
+      test('order Order @relation(fields: [orderId], |)', async () => {
         await testCompletion(
           relationDirectiveUri,
           new vscode.Position(39, 45),
@@ -613,7 +613,7 @@ suite('Completions', () => {
           true,
         )
       })
-      test('@relation(fields: [])', async () => {
+      test('@relation(fields: [|])', async () => {
         await testCompletion(
           relationDirectiveUri,
           new vscode.Position(48, 35),
@@ -627,7 +627,7 @@ suite('Completions', () => {
           true,
         )
       })
-      test('@relation(fields: [orderId], references: [id],x )', async () => {
+      test('@relation(fields: [orderId], references: [id], |)', async () => {
         await testCompletion(
           relationDirectiveUri,
           new vscode.Position(57, 62),
