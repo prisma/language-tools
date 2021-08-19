@@ -1,9 +1,11 @@
 {
-  "extends": [
-    "config:base"
-  ],
+  "extends": ["config:base"],
   "semanticCommits": true,
-  "ignoreDeps": ["@prisma/language-server", "@prisma/get-platform", "@prisma/fetch-engine"],
+  "ignoreDeps": [
+    "@prisma/language-server",
+    "@prisma/get-platform",
+    "@prisma/fetch-engine"
+  ],
   "masterIssue": true,
   "reviewers": ["@carmenberndt"],
   "rebaseWhen": "conflicted",
@@ -40,7 +42,12 @@
     {
       "groupName": "dependencies (non-major)",
       "depTypeList": ["dependencies"],
-      "excludePackageNames": ["@prisma/language-server", "@prisma/get-platform", "@types/vscode", "@prisma/fetch-engine"],
+      "excludePackageNames": [
+        "@prisma/language-server",
+        "@prisma/get-platform",
+        "@types/vscode",
+        "@prisma/fetch-engine"
+      ],
       "updateTypes": ["patch", "minor"]
     }
   ]

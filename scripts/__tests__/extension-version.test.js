@@ -1,7 +1,6 @@
 const { nextVersion } = require('./../bump_extension_version')
 
 describe('next extension version', () => {
-
   // normal insider release
   it('it should work with an insider release triggered by Prisma CLI', () => {
     expect(
@@ -52,7 +51,7 @@ describe('next extension version', () => {
     ).toEqual('3.1.2')
   })
 
-  it ('it should work with a first Prisma CLI patch on stable', () => {
+  it('it should work with a first Prisma CLI patch on stable', () => {
     expect(
       nextVersion({
         currentVersion: '2.5.0',
@@ -60,11 +59,11 @@ describe('next extension version', () => {
         prisma_latest: '2.5.1',
         prisma_dev: '2.6.0-dev.2',
         prisma_patch: '2.4.1-dev.3',
-      })
+      }),
     ).toEqual('2.5.1')
   })
 
-  it ('it should work with a Prisma CLI patch on stable', () => {
+  it('it should work with a Prisma CLI patch on stable', () => {
     expect(
       nextVersion({
         currentVersion: '2.5.1',
@@ -72,7 +71,7 @@ describe('next extension version', () => {
         prisma_latest: '2.5.1',
         prisma_dev: '2.6.0-dev.2',
         prisma_patch: '2.4.1-dev.3',
-      })
+      }),
     ).toEqual('2.5.2')
   })
 
@@ -89,5 +88,4 @@ describe('next extension version', () => {
       }),
     ).toEqual('6.0.1')
   })
-
 })

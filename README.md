@@ -20,11 +20,13 @@ Using the Language Server Protocol to improve Prisma's developer experience.
 │           └── cli.ts    // Language Server CLI entry point
 └── package.json         // The extension manifest
 ```
+
 ## Build Status
+
 - E2E Tests Status
 
   [![E2E tests after release on VSIX](https://github.com/prisma/language-tools/workflows/E2E%20tests%20after%20release%20on%20VSIX/badge.svg?branch=main)](https://github.com/prisma/language-tools/actions/workflows/e2e_published_vsix.yml?query=branch%3Amain)
-  
+
   [![E2E tests before Insider release](https://github.com/prisma/language-tools/workflows/5.%20Integration%20tests%20in%20VSCode%20folder%20with%20published%20LSP/badge.svg?branch=main)](https://github.com/prisma/language-tools/actions/workflows/5_e2e_tests.yml?query=branch%3Amain)
 
 - LSP Unit Tests Status
