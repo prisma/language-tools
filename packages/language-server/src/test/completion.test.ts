@@ -655,7 +655,7 @@ suite('Completions', () => {
     })
 
     suite('Diagnoses arguments of @relation directive', function () {
-      test('@relation(x)', () => {
+      test('@relation(|)', () => {
         assertCompletion(
           relationDirectiveUri,
           { line: 12, character: 26 },
@@ -672,7 +672,7 @@ suite('Completions', () => {
           },
         )
       })
-      test('@relation(references: [x])', () => {
+      test('@relation(references: [|])', () => {
         assertCompletion(
           relationDirectiveUri,
           { line: 21, character: 39 },
@@ -686,7 +686,7 @@ suite('Completions', () => {
           },
         )
       })
-      test('@relation(references: [id],x )', () => {
+      test('@relation(references: [id], |)', () => {
         assertCompletion(
           relationDirectiveUri,
           { line: 30, character: 44 },
@@ -702,7 +702,7 @@ suite('Completions', () => {
           },
         )
       })
-      test('order Order @relation(fields: [orderId],x )', () => {
+      test('order Order @relation(fields: [orderId], |)', () => {
         assertCompletion(
           relationDirectiveUri,
           { line: 39, character: 45 },
@@ -718,7 +718,7 @@ suite('Completions', () => {
           },
         )
       })
-      test('@relation(fields: [])', () => {
+      test('@relation(fields: [|])', () => {
         assertCompletion(
           relationDirectiveUri,
           { line: 48, character: 35 },
@@ -734,7 +734,7 @@ suite('Completions', () => {
           },
         )
       })
-      test('@relation(fields: [orderId], references: [id],x )', () => {
+      test('@relation(fields: [orderId], references: [id], |)', () => {
         assertCompletion(
           relationDirectiveUri,
           { line: 57, character: 62 },
