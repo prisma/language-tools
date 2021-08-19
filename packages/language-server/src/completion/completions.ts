@@ -958,6 +958,7 @@ function getSuggestionsForRelationDirective(
       }
     }
 
+    // now filter them out of the suggestions as they are already present
     const filteredSuggestions: CompletionItem[] = suggestions.reduce(
       (accumulator: CompletionItem[] & unknown[], sugg) => {
         let suggestionMatch = false
@@ -976,6 +977,7 @@ function getSuggestionsForRelationDirective(
       [],
     )
 
+    // nothing to present any more, return
     if (filteredSuggestions.length === 0) {
       return
     }
