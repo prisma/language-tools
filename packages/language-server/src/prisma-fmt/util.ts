@@ -18,7 +18,11 @@ let version: string | undefined
  */
 export function getVersion(): string {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  if (!packageJson || !packageJson.prisma || !packageJson.prisma.enginesVersion) {
+  if (
+    !packageJson ||
+    !packageJson.prisma ||
+    !packageJson.prisma.enginesVersion
+  ) {
     return 'latest'
   }
   // eslint-disable-next-line
@@ -58,7 +62,7 @@ export function getEnginesVersion(): string {
  * Gets CLI Version from package.json, prisma, cliVersion
  * @returns Something like `2.27.0-dev.50`
  */
- export function getCliVersion(): string {
+export function getCliVersion(): string {
   return packageJson.prisma.cliVersion
 }
 

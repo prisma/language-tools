@@ -4,7 +4,9 @@ function checkForNewRelease({ type, version }) {
   if (version === undefined) {
     throw new Error(`Version for ${type} is undefined.`)
   }
-  const lastTestedVersion = readVersionFile({ fileName: `tested_extension_${type}` })
+  const lastTestedVersion = readVersionFile({
+    fileName: `tested_extension_${type}`,
+  })
   console.log(`Last tested ${type} version: ${lastTestedVersion}`)
   console.log(`Published ${type} version: ${version}`)
   if (lastTestedVersion != version) {

@@ -13,12 +13,12 @@ on:
 env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
-  PRISMA_TELEMETRY_INFORMATION: "language-tools 2_bump_versions.yml"
+  PRISMA_TELEMETRY_INFORMATION: 'language-tools 2_bump_versions.yml'
 
 jobs:
   bump:
     runs-on: ubuntu-latest
-    steps: 
+    steps:
       - uses: actions/checkout@v2
       - name: Use Node.js
         uses: actions/setup-node@v2
@@ -33,7 +33,7 @@ jobs:
       - name: Setup Git
         run: |
           sh scripts/set_git_credentials.sh
-      - name: Update versions in scripts folder 
+      - name: Update versions in scripts folder
         run: |
           echo "${{ github.event.inputs.version }}" >scripts/versions/prisma_${{ github.event.inputs.npm_channel }}
       - name: Update next extension version in scripts folder
@@ -43,7 +43,7 @@ jobs:
         run: |
           sh scripts/commit_and_push.sh "bump Prisma CLI ${{ github.event.inputs.npm_channel }} version to ${{ github.event.inputs.version }} and extension version to ${{ steps.update.next_extension_version }} in scripts."
 
-      - name: Switch branch 
+      - name: Switch branch
         id: setup_branch
         run: |
           sh scripts/setup_branch.sh ${{ github.event.inputs.npm_channel }}
@@ -57,8 +57,8 @@ jobs:
           git reset --hard main
           git push --force origin stable
       - name: Update Prisma CLI version and VSCode extension version
-        run:  |
-          node scripts/update_package_json_files.js ${{ github.event.inputs.npm_channel }} ${{ steps.update.outputs.next_extension_version }} ${{ github.event.inputs.version }} 
+        run: |
+          node scripts/update_package_json_files.js ${{ github.event.inputs.npm_channel }} ${{ steps.update.outputs.next_extension_version }} ${{ github.event.inputs.version }}
       - name: Install Dependencies
         run: npm install
       - name: Push to branch
@@ -71,16 +71,16 @@ jobs:
           workflow: 3. Unit tests for LSP and publish
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}" , "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}", "trigger_reason": "On new Prisma CLI version ${{github.event.inputs.version}}" }'
-      
+
       - name: Slack Notification on Failure
         if: ${{ failure() }}
         uses: rtCamp/action-slack-notify@v2.2.0
-        env:  
-          SLACK_TITLE: "2. Bumping versions failed :x:"
+        env:
+          SLACK_TITLE: '2. Bumping versions failed :x:'
           SLACK_COLOR: '#FF0000'
-          SLACK_MESSAGE: "${{github.event.inputs.version}} - On new Prisma CLI version ${{github.event.inputs.version}}"
+          SLACK_MESSAGE: '${{github.event.inputs.version}} - On new Prisma CLI version ${{github.event.inputs.version}}'
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: feed-language-tools
           SLACK_USERNAME: Prismo
-          SLACK_ICON_EMOJI: ":boom:"
+          SLACK_ICON_EMOJI: ':boom:'
           SLACK_MSG_AUTHOR: prisma-bot

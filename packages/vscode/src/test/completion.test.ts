@@ -13,12 +13,13 @@ async function testCompletion(
     await activate(docUri)
   }
 
-  const actualCompletions: vscode.CompletionList = (await vscode.commands.executeCommand(
-    'vscode.executeCompletionItemProvider',
-    docUri,
-    position,
-    triggerCharacter,
-  )) as vscode.CompletionList
+  const actualCompletions: vscode.CompletionList =
+    (await vscode.commands.executeCommand(
+      'vscode.executeCompletionItemProvider',
+      docUri,
+      position,
+      triggerCharacter,
+    )) as vscode.CompletionList
 
   assert.deepStrictEqual(
     actualCompletions.isIncomplete,
@@ -411,11 +412,11 @@ suite('Should auto-complete', () => {
     kind: vscode.CompletionItemKind.Property,
   }
   const onDeleteProperty = {
-    label: "onDelete: ",
+    label: 'onDelete: ',
     kind: vscode.CompletionItemKind.Property,
   }
   const onUpdateProperty = {
-    label: "onUpdate: ",
+    label: 'onUpdate: ',
     kind: vscode.CompletionItemKind.Property,
   }
 
@@ -571,13 +572,23 @@ suite('Should auto-complete', () => {
     await testCompletion(
       relationDirectiveUri,
       new vscode.Position(30, 44),
-      new vscode.CompletionList([nameProperty, fieldsProperty, onDeleteProperty, onUpdateProperty]),
+      new vscode.CompletionList([
+        nameProperty,
+        fieldsProperty,
+        onDeleteProperty,
+        onUpdateProperty,
+      ]),
       true,
     )
     await testCompletion(
       relationDirectiveUri,
       new vscode.Position(39, 45),
-      new vscode.CompletionList([nameProperty, referencesProperty, onDeleteProperty, onUpdateProperty]),
+      new vscode.CompletionList([
+        nameProperty,
+        referencesProperty,
+        onDeleteProperty,
+        onUpdateProperty,
+      ]),
       true,
     )
     await testCompletion(

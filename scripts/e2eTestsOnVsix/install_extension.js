@@ -1,11 +1,7 @@
 const vscodeTest = require('vscode-test')
 const chileProcess = require('child_process')
 
-
-async function installExtension({
-  extensionType,
-  extensionVersion,
-}) {
+async function installExtension({ extensionType, extensionVersion }) {
   try {
     let vsceArgument = ''
     if (extensionType === 'insider') {
@@ -14,21 +10,28 @@ async function installExtension({
     const extensionName = `Prisma.prisma${vsceArgument}`
 
     // Install VSCode
-    const vscodeExecutablePath = await vscodeTest.downloadAndUnzipVSCode("stable")
+    const vscodeExecutablePath = await vscodeTest.downloadAndUnzipVSCode(
+      'stable',
+    )
 
     // Install VSCode extension
-    const cliPath = vscodeTest.resolveCliPathFromVSCodeExecutablePath(vscodeExecutablePath)
-    const result = chileProcess.spawnSync(cliPath, ['--install-extension', extensionName + '@' + extensionVersion], {
-      encoding: 'utf-8',
-      stdio: 'pipe'
-    })
+    const cliPath =
+      vscodeTest.resolveCliPathFromVSCodeExecutablePath(vscodeExecutablePath)
+    const result = chileProcess.spawnSync(
+      cliPath,
+      ['--install-extension', extensionName + '@' + extensionVersion],
+      {
+        encoding: 'utf-8',
+        stdio: 'pipe',
+      },
+    )
     console.log(result)
     if (result.stderr.includes('Failed')) {
       console.log("It's not ready to be installed yet.")
-      return "FAIL"
+      return 'FAIL'
     } else {
-      console.log("::set-output name=installed-extension::true")
-      return "SUCCESS"
+      console.log('::set-output name=installed-extension::true')
+      return 'SUCCESS'
     }
   } catch (err) {
     console.error('Failed to install the extension.')
@@ -37,7 +40,6 @@ async function installExtension({
   }
 }
 
-
 module.exports = { installExtension }
 
 if (require.main === module) {
@@ -45,7 +47,7 @@ if (require.main === module) {
   installExtension({
     extensionType: args[0],
     extensionVersion: args[1],
-  }).then(res => {
+  }).then((res) => {
     console.log(res)
   })
 }

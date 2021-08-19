@@ -15,12 +15,11 @@ on:
       trigger_reason:
         description: 'Information about what caused the publishing process in the first place.'
         required: true
-        
 
 env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
-  PRISMA_TELEMETRY_INFORMATION: "language-tools 3_LSP_unit_tests_publish.yml"
+  PRISMA_TELEMETRY_INFORMATION: 'language-tools 3_LSP_unit_tests_publish.yml'
 
 jobs:
   tests:
@@ -29,9 +28,9 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    steps: 
+    steps:
       - uses: actions/checkout@v2
-        with: 
+        with:
           ref: ${{ github.event.inputs.branch }}
       - name: Install Dependencies in LSP
         run: cd packages/language-server && npm install
@@ -60,29 +59,29 @@ jobs:
       - name: Publish LSP to npm
         # Setup .npmrc file to publish to npm
         uses: actions/setup-node@v2
-        with: 
+        with:
           node-version: '12.x'
           registry-url: 'https://registry.npmjs.org'
       - run: cd packages/language-server && npm publish --tag ${{ github.event.inputs.npm_channel }} --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      
+
       - name: Trigger next workflow for bumping LSP in extension
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: 4. Bump LSP in VSCode extension
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'
-      
+
       - name: Slack Notification on Failure
         if: ${{ failure() }}
         uses: rtCamp/action-slack-notify@v2.2.0
-        env:  
-          SLACK_TITLE: "3. Unit tests for LSP and publish failed :x:"
+        env:
+          SLACK_TITLE: '3. Unit tests for LSP and publish failed :x:'
           SLACK_COLOR: '#FF0000'
-          SLACK_MESSAGE: "${{github.event.inputs.extension_version}} - ${{github.event.inputs.trigger_reason}} "
+          SLACK_MESSAGE: '${{github.event.inputs.extension_version}} - ${{github.event.inputs.trigger_reason}} '
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: feed-language-tools
           SLACK_USERNAME: Prismo
-          SLACK_ICON_EMOJI: ":boom:"
+          SLACK_ICON_EMOJI: ':boom:'
           SLACK_MSG_AUTHOR: prisma-bot
