@@ -933,25 +933,58 @@ function getSuggestionsForRelationDirective(
       isIncomplete: false,
     }
   }
+
   if (stringTilPosition.endsWith(',')) {
-    const referencesExist = wordsBeforePosition.some((a) =>
-      a.includes('references'),
+    // Check which attributes are already present
+    // so we can filter them out from the suggestions
+    const attributesFound: Set<string> = new Set()
+
+    for (const word of wordsBeforePosition) {
+      if (word.includes('references')) {
+        attributesFound.add('references')
+      }
+      if (word.includes('fields')) {
+        attributesFound.add('fields')
+      }
+      if (word.includes('onUpdate')) {
+        attributesFound.add('onUpdate')
+      }
+      if (word.includes('onDelete')) {
+        attributesFound.add('onDelete')
+      }
+      if (word.includes('name') || /".*"/.exec(word)) {
+        attributesFound.add('name')
+        attributesFound.add('""')
+      }
+    }
+
+    // now filter them out of the suggestions as they are already present
+    const filteredSuggestions: CompletionItem[] = suggestions.reduce(
+      (accumulator: CompletionItem[] & unknown[], sugg) => {
+        let suggestionMatch = false
+        for (const attribute of attributesFound) {
+          if (sugg.label.includes(attribute)) {
+            suggestionMatch = true
+          }
+        }
+
+        if (!suggestionMatch) {
+          accumulator.push(sugg)
+        }
+
+        return accumulator
+      },
+      [],
     )
-    const fieldsExist = wordsBeforePosition.some((a) => a.includes('fields'))
-    if (referencesExist && fieldsExist) {
+
+    // nothing to present any more, return
+    if (filteredSuggestions.length === 0) {
       return
     }
-    if (referencesExist) {
-      return {
-        items: suggestions.filter((sugg) => !sugg.label.includes('references')),
-        isIncomplete: false,
-      }
-    }
-    if (fieldsExist) {
-      return {
-        items: suggestions.filter((sugg) => !sugg.label.includes('fields')),
-        isIncomplete: false,
-      }
+
+    return {
+      items: filteredSuggestions,
+      isIncomplete: false,
     }
   }
 }

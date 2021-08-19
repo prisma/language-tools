@@ -48,3 +48,12 @@ model OrderItemFive {
     orderId Int
     order Order @relation(fields: [])
 }
+
+model OrderItemSix {
+    id           Int    @id @default(autoincrement())
+    productName  String
+    productPrice Int
+    quantity     Int
+    orderId      Int
+    order Order @relation(fields: [orderId], references: [id], )
+}

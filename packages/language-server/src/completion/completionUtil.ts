@@ -44,7 +44,9 @@ function convertAttributesToCompletionItems(
   itemKind: CompletionItemKind,
   insertTextFunc: (label: string) => string,
 ): CompletionItem[] {
+  // https://code.visualstudio.com/api/references/vscode-api#CompletionItem
   const result: CompletionItem[] = []
+
   for (const item of completionItems) {
     const docComment = [
       '```prisma',

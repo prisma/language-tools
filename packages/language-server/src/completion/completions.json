@@ -240,19 +240,67 @@
     },
     {
       "label": "onDelete: ",
-      "fullSignature": "onDelete: ",
-      "documentation": "Specifies the action to perform when a referenced entry in the referenced model is being deleted.",
-      "params": []
+      "fullSignature": "onDelete: Cascade | Restrict | NoAction | SetNull | SetDefault",
+      "documentation": "Specifies the action to perform when a referenced entry in the referenced model is being deleted, [learn more](https://www.prisma.io/docs/concepts/components/prisma-schema/relations/referential-actions).",
+      "params": [
+        {
+          "label": "Cascade",
+          "documentation": "Deleting a referenced record will trigger the deletion of referencing record."
+        },
+        {
+          "label": "Restrict",
+          "documentation": "Prevents the deletion if any referencing records exist."
+        },
+        {
+          "label": "NoAction",
+          "documentation": "Is similar to Restrict, the difference between the two is dependant on the database being used, [learn more](https://www.prisma.io/docs/concepts/components/prisma-schema/relations/referential-actions)."
+        },
+        {
+          "label": "SetNull",
+          "documentation": "The scalar field of the referenced object will be set to NULL."
+        },
+        {
+          "label": "SetDefault",
+          "documentation": "The scalar field of the referencing object will be set to the fields default value."
+        }
+      ]
     },
     {
       "label": "onUpdate: ",
-      "fullSignature": "onUpdate: ",
-      "documentation": "Specifies the action to perform when a referenced field in the referenced model is being updated to a new value.",
-      "params": []
+      "fullSignature": "onUpdate: Cascade | Restrict | NoAction | SetNull | SetDefault",
+      "documentation": "Specifies the action to perform when a referenced field in the referenced model is being updated to a new value, [learn more](https://www.prisma.io/docs/concepts/components/prisma-schema/relations/referential-actions).",
+      "params": [
+        {
+          "label": "Cascade",
+          "documentation": "Updates the relation scalar fields if the referenced scalar fields of the dependant record are updated."
+        },
+        {
+          "label": "Restrict",
+          "documentation": "Prevents the identifier of a referenced record from being changed."
+        },
+        {
+          "label": "NoAction",
+          "documentation": "Is similar to Restrict, the difference between the two is dependant on the database being used, [learn more](https://www.prisma.io/docs/concepts/components/prisma-schema/relations/referential-actions)."
+        },
+        {
+          "label": "SetNull",
+          "documentation": "When updating the identifier of a referenced object, the scalar fields of the referencing objects will be set to NULL."
+        },
+        {
+          "label": "SetDefault",
+          "documentation": "The scalar field of the referencing object will be set to the fields default value."
+        }
+      ]
     },
     {
       "label": "\"\"",
-      "fullSignature": "\"\"",
+      "fullSignature": "String",
+      "documentation": "Defines the name of the relationship. In an m-n-relation, it also determines the name of the underlying relation table.",
+      "params": []
+    },
+    {
+      "label": "name: ",
+      "fullSignature": "name: String",
       "documentation": "Defines the name of the relationship. In an m-n-relation, it also determines the name of the underlying relation table.",
       "params": []
     }
