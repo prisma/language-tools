@@ -30,7 +30,7 @@
       "outFiles": ["${workspaceFolder}/packages/language-server/dist/**/*.js"]
     },
     {
-      "name": "Unit Tests",
+      "name": "Run LSP Tests",
       "type": "node",
       "request": "launch",
       "program": "${workspaceRoot}/packages/language-server/node_modules/mocha/bin/_mocha",
@@ -55,7 +55,7 @@
       "preLaunchTask": "npm: watch"
     },
     {
-      "name": "Integration Tests",
+      "name": "Run VS Code Tests",
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
@@ -70,7 +70,10 @@
   "compounds": [
     {
       "name": "VSCode + LSP",
-      "configurations": ["Launch VSCode extension", "Attach to Server"]
+      "configurations": [
+        "Launch VSCode extension",
+        "Attach to Server"
+      ]
     }
   ]
 }
