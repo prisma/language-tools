@@ -11,4 +11,3 @@ if (require.main === module) {
     console.log(`::set-output name=asset_name::prisma-insider`)
   }
 }
-

@@ -81,64 +81,73 @@ export const allowedBlockTypes: CompletionItem[] = convertToCompletionItems(
   CompletionItemKind.Class,
 )
 
-export const supportedDataSourceFields: CompletionItem[] = convertToCompletionItems(
-  completions.dataSourceFields,
-  CompletionItemKind.Field,
-)
+export const supportedDataSourceFields: CompletionItem[] =
+  convertToCompletionItems(
+    completions.dataSourceFields,
+    CompletionItemKind.Field,
+  )
 
-export const supportedGeneratorFields: CompletionItem[] = convertToCompletionItems(
-  completions.generatorFields,
-  CompletionItemKind.Field,
-)
+export const supportedGeneratorFields: CompletionItem[] =
+  convertToCompletionItems(
+    completions.generatorFields,
+    CompletionItemKind.Field,
+  )
 
-export const blockAttributes: CompletionItem[] = convertAttributesToCompletionItems(
-  completions.blockAttributes,
-  CompletionItemKind.Property,
-  (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
-)
+export const blockAttributes: CompletionItem[] =
+  convertAttributesToCompletionItems(
+    completions.blockAttributes,
+    CompletionItemKind.Property,
+    (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
+  )
 
-export const fieldAttributes: CompletionItem[] = convertAttributesToCompletionItems(
-  completions.fieldAttributes,
-  CompletionItemKind.Property,
-  (label: string) => label.replace('()', '($0)').replace('""', '"$0"'),
-)
+export const fieldAttributes: CompletionItem[] =
+  convertAttributesToCompletionItems(
+    completions.fieldAttributes,
+    CompletionItemKind.Property,
+    (label: string) => label.replace('()', '($0)').replace('""', '"$0"'),
+  )
 
-export const relationArguments: CompletionItem[] = convertAttributesToCompletionItems(
-  completions.relationArguments,
-  CompletionItemKind.Property,
-  (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
-)
+export const relationArguments: CompletionItem[] =
+  convertAttributesToCompletionItems(
+    completions.relationArguments,
+    CompletionItemKind.Property,
+    (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
+  )
 
-export const dataSourceUrlArguments: CompletionItem[] = convertAttributesToCompletionItems(
-  completions.datasourceUrlArguments,
-  CompletionItemKind.Property,
-  (label: string) => label.replace('()', '($0)').replace('""', '"$0"'),
-)
+export const dataSourceUrlArguments: CompletionItem[] =
+  convertAttributesToCompletionItems(
+    completions.datasourceUrlArguments,
+    CompletionItemKind.Property,
+    (label: string) => label.replace('()', '($0)').replace('""', '"$0"'),
+  )
 
 export const dataSourceProviders: CompletionItem[] = convertToCompletionItems(
   completions.datasourceProviders,
   CompletionItemKind.Constant,
 )
 
-export const dataSourceProviderArguments: CompletionItem[] = convertToCompletionItems(
-  completions.datasourceProviderArguments,
-  CompletionItemKind.Property,
-  (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
-)
+export const dataSourceProviderArguments: CompletionItem[] =
+  convertToCompletionItems(
+    completions.datasourceProviderArguments,
+    CompletionItemKind.Property,
+    (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
+  )
 
 export const generatorProviders: CompletionItem[] = convertToCompletionItems(
   completions.generatorProviders,
   CompletionItemKind.Constant,
 )
 
-export const generatorProviderArguments: CompletionItem[] = convertToCompletionItems(
-  completions.generatorProviderArguments,
-  CompletionItemKind.Property,
-  (label: string) => label.replace('""', '"$0"'),
-)
+export const generatorProviderArguments: CompletionItem[] =
+  convertToCompletionItems(
+    completions.generatorProviderArguments,
+    CompletionItemKind.Property,
+    (label: string) => label.replace('""', '"$0"'),
+  )
 
-export const previewFeaturesArguments: CompletionItem[] = convertToCompletionItems(
-  completions.previewFeaturesArguments,
-  CompletionItemKind.Property,
-  (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
-)
+export const previewFeaturesArguments: CompletionItem[] =
+  convertToCompletionItems(
+    completions.previewFeaturesArguments,
+    CompletionItemKind.Property,
+    (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
+  )

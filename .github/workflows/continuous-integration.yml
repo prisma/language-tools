@@ -3,12 +3,12 @@ name: CI tests
 on: [pull_request]
 
 env:
-  PRISMA_TELEMETRY_INFORMATION: "language-tools continuous-integration.yml"
+  PRISMA_TELEMETRY_INFORMATION: 'language-tools continuous-integration.yml'
 
 jobs:
   test:
     name: Tests + Shellcheck
-    runs-on:  ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -30,5 +30,3 @@ jobs:
       - name: Catch version incompatibilities
         if: matrix.os == 'ubuntu-latest'
         run: npm run testScripts
-
-        

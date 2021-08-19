@@ -1,9 +1,9 @@
 ---
 name: Bug report
 about: Create a bug report to help us improve Prisma Language Tools
-title: ""
-labels: ""
-assignees: ""
+title: ''
+labels: ''
+assignees: ''
 ---
 
 <!--

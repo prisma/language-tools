@@ -15,19 +15,18 @@ env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   SLACK-USERNAME: Prismo
   SLACK_CHANNEL: feed-vscode-e2e-tests
-  SLACK_ICON_EMOJI: ":robot_face:"
+  SLACK_ICON_EMOJI: ':robot_face:'
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
   SLACK_MSG_AUTHOR: prisma-bot
-  
-jobs:
 
+jobs:
   test:
     name: Test published extension
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    outputs: 
+    outputs:
       installed-extension: ${{ steps.install.outputs.installed-extension }}
     steps:
       - uses: actions/checkout@v2
@@ -42,7 +41,7 @@ jobs:
         uses: GabrielBB/xvfb-action@v1.5
         with:
           run: npm run test:e2e ${{ github.event.inputs.extension_type }} ${{ matrix.os }} ${{ github.event.inputs.extension_version }}
-  
+
   after-test:
     name: Bump tested version and commit # scripts/versions/tested_extension_stable & tested_extension_insider
     runs-on: ubuntu-latest
@@ -58,15 +57,15 @@ jobs:
       - name: Slack Notification on Failure
         if: ${{ needs.test.result == 'failure' && needs.test.outputs.installed-extension }}
         uses: rtCamp/action-slack-notify@v2.2.0
-        env:  
-          SLACK_TITLE: "Testing released ${{ github.event.inputs.extension_type }} extension failed :x:"
+        env:
+          SLACK_TITLE: 'Testing released ${{ github.event.inputs.extension_type }} extension failed :x:'
           SLACK_MESSAGE: ${{ github.event.inputs.extension_version }}
           SLACK_COLOR: '#FF0000'
 
       - name: Slack Notification on Success
-        if: ${{ needs.test.result == 'success' && needs.test.outputs.installed-extension }} 
+        if: ${{ needs.test.result == 'success' && needs.test.outputs.installed-extension }}
         uses: rtCamp/action-slack-notify@v2.2.0
-        env:  
-          SLACK_TITLE: "Tested released ${{ github.event.inputs.extension_type }} extension :white_check_mark:"
+        env:
+          SLACK_TITLE: 'Tested released ${{ github.event.inputs.extension_type }} extension :white_check_mark:'
           SLACK_MESSAGE: ${{ github.event.inputs.extension_version }}
           SLACK_COLOR: '#008000'

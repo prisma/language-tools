@@ -3,23 +3,23 @@ name: 1/2b. Bump versions for extension only (on push to main and patch branch)
 # This workflow covers both '1_check_for_updates' and '2_bump_versions' workflows, therefore it is another variant of the same, but specifically for extension only, without any Prisma CLI updates that would need to be handled.
 
 on:
-    push:
-      branches: 
-        - 'main'
-        - '**.x'
-        - '!renovate/**'
-      paths-ignore:
-        - '.github/**'
+  push:
+    branches:
+      - 'main'
+      - '**.x'
+      - '!renovate/**'
+    paths-ignore:
+      - '.github/**'
 
 env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
-  PRISMA_TELEMETRY_INFORMATION: "language-tools 1_2_b_bump_extension_only.yml"
+  PRISMA_TELEMETRY_INFORMATION: 'language-tools 1_2_b_bump_extension_only.yml'
 
 jobs:
   bump:
     runs-on: ubuntu-latest
-    steps: 
+    steps:
       - uses: actions/checkout@v2
       - name: Use Node.js
         uses: actions/setup-node@v2
@@ -37,25 +37,25 @@ jobs:
       - name: Setup Git
         run: |
           sh scripts/set_git_credentials.sh
-      - name: Update extension version in scripts folder 
+      - name: Update extension version in scripts folder
         id: update
         run: node scripts/bump_extension_version.js dev
       - name: Commit and Push
         run: |
           sh scripts/commit_and_push.sh "bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}."
-      
+
       - name: Checkout previous branch
         if: endsWith(github.ref, '/main') == false
         run: git checkout ${{ steps.extract_branch.outputs.branch }}
       - name: Update VSCode extension version
-        run:  | 
+        run: |
           node scripts/update_package_json_files.js dev ${{ steps.update.outputs.next_extension_version }} ""
       - name: Install Dependencies
         run: npm install
       - name: Commit and Push
         run: |
           sh scripts/commit_and_push.sh "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}." ${{ steps.setup_branch.outputs.new_branch }}
-      
+
       - name: Trigger next workflow for LSP Unit tests
         if: endsWith(github.ref, '/main')
         uses: benc-uk/workflow-dispatch@v1
@@ -70,16 +70,16 @@ jobs:
           workflow: 3. Unit tests for LSP and publish
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "patch-dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.extract_branch.outputs.branch}}", "trigger_reason": "On push to ${{ steps.extract_branch.outputs.branch }}." }'
-      
+
       - name: Slack Notification on Failure
         if: ${{ failure() }}
         uses: rtCamp/action-slack-notify@v2.2.0
-        env:  
+        env:
           SLACK_TITLE: "1/2b. - Bumping versions for 'extension only' failed :x:"
           SLACK_COLOR: '#FF0000'
-          SLACK_MESSAGE: "${{ steps.update.outputs.next_extension_version  }} - On push to ${{ steps.extract_branch.outputs.branch }}."
+          SLACK_MESSAGE: '${{ steps.update.outputs.next_extension_version  }} - On push to ${{ steps.extract_branch.outputs.branch }}.'
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: feed-language-tools
           SLACK_USERNAME: Prismo
-          SLACK_ICON_EMOJI: ":boom:"
+          SLACK_ICON_EMOJI: ':boom:'
           SLACK_MSG_AUTHOR: prisma-bot

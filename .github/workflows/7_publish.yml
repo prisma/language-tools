@@ -1,4 +1,4 @@
-name: 7. Publish 
+name: 7. Publish
 
 on:
   workflow_dispatch:
@@ -6,24 +6,23 @@ on:
       asset_name:
         description: 'Name of the .vsix file in the release'
         required: true
-      tag_name: 
+      tag_name:
         description: 'The release version/tag to fetch from.'
         required: true
       trigger_reason:
         description: 'Information about what caused the publishing process in the first place.'
         required: true
-      
 
 env:
   AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
   OPEN_VSX_ACCESS_TOKEN: ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
-  PRISMA_TELEMETRY_INFORMATION: "language-tools 7_publish.yml"
+  PRISMA_TELEMETRY_INFORMATION: 'language-tools 7_publish.yml'
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
   SLACK_CHANNEL: feed-language-tools
   SLACK_USERNAME: Prismo
-  SLACK_ICON_EMOJI: ":ship:"
+  SLACK_ICON_EMOJI: ':ship:'
   SLACK_MSG_AUTHOR: prisma-bot
 
 jobs:
@@ -31,8 +30,8 @@ jobs:
     name: Publish to marketplace
     runs-on: ubuntu-latest
     env:
-      SLACK_MESSAGE: "${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}"
-    steps: 
+      SLACK_MESSAGE: '${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}'
+    steps:
       - uses: actions/checkout@v2
       - name: Print inputs
         run: |
@@ -41,32 +40,32 @@ jobs:
         run: npm install
       - uses: dsaltares/fetch-gh-release-asset@master
         with:
-          repo: "prisma/language-tools"
-          version: "tags/${{ github.event.inputs.tag_name }}"
+          repo: 'prisma/language-tools'
+          version: 'tags/${{ github.event.inputs.tag_name }}'
           file: ${{ github.event.inputs.asset_name }}
           token: ${{ secrets.GH_TOKEN }}
       - name: publish vsix to marketplace
         run: cd packages/vscode && ./node_modules/.bin/vsce publish --pat ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN}} --packagePath ${{github.workspace}}/${{ github.event.inputs.asset_name }}
-      
+
       - name: Slack Notification on Failure
         if: ${{ failure() }}
         uses: rtCamp/action-slack-notify@v2.2.0
-        env:  
-          SLACK_TITLE: "7. Publishing to marketplace failed :x:"
+        env:
+          SLACK_TITLE: '7. Publishing to marketplace failed :x:'
           SLACK_COLOR: '#FF0000'
       - name: Slack Notification on Success
         if: ${{ success() }}
         uses: rtCamp/action-slack-notify@v2.2.0
-        env:  
-          SLACK_TITLE: "7. Published to marketplace :white_check_mark:"
+        env:
+          SLACK_TITLE: '7. Published to marketplace :white_check_mark:'
           SLACK_COLOR: '#008000'
-  
+
   open-vsx:
     name: Publish to open-vsx
     runs-on: ubuntu-latest
     env:
-      SLACK_MESSAGE: "${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}"
-    steps: 
+      SLACK_MESSAGE: '${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}'
+    steps:
       - uses: actions/checkout@v2
       - name: Print inputs
         run: |
@@ -75,22 +74,22 @@ jobs:
         run: npm install
       - uses: dsaltares/fetch-gh-release-asset@master
         with:
-          repo: "prisma/language-tools"
-          version: "tags/${{ github.event.inputs.tag_name }}"
+          repo: 'prisma/language-tools'
+          version: 'tags/${{ github.event.inputs.tag_name }}'
           file: ${{ github.event.inputs.asset_name }}
           token: ${{ secrets.GH_TOKEN }}
       - name: Publish vsix to open-vsx.org
         run: cd packages/vscode && ./node_modules/.bin/ovsx publish ${{github.workspace}}/${{ github.event.inputs.asset_name }} --pat  ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
-      
+
       - name: Slack Notification on Failure
         if: ${{ failure() }}
         uses: rtCamp/action-slack-notify@v2.2.0
-        env:  
-          SLACK_TITLE: "7. Publishing to open-vsx failed :x:"
+        env:
+          SLACK_TITLE: '7. Publishing to open-vsx failed :x:'
           SLACK_COLOR: '#FF0000'
       - name: Slack Notification on Success
         if: ${{ success() }}
         uses: rtCamp/action-slack-notify@v2.2.0
-        env:  
-          SLACK_TITLE: "7. Published to open-vsx :white_check_mark:"
+        env:
+          SLACK_TITLE: '7. Published to open-vsx :white_check_mark:'
           SLACK_COLOR: '#008000'
