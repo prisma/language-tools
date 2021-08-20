@@ -212,6 +212,10 @@ suite('Completions', () => {
       label: 'binaryTargets',
       kind: vscode.CompletionItemKind.Field,
     }
+    const fieldEngineType = {
+      label: 'engineType',
+      kind: vscode.CompletionItemKind.Field,
+    }
 
     const generatorWithExistingFieldsUri = getDocUri(
       'completions/generatorWithExistingFields.prisma',
@@ -225,6 +229,7 @@ suite('Completions', () => {
           fieldOutput,
           fieldPreviewFeatures,
           fieldProvider,
+          fieldEngineType,
         ]),
         false,
       )
@@ -239,6 +244,7 @@ suite('Completions', () => {
           fieldBinaryTargets,
           fieldOutput,
           fieldPreviewFeatures,
+          fieldEngineType,
         ]),
         true,
       )
@@ -249,6 +255,7 @@ suite('Completions', () => {
           fieldBinaryTargets,
           fieldPreviewFeatures,
           fieldProvider,
+          fieldEngineType,
         ]),
         true,
       )
