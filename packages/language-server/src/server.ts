@@ -256,6 +256,7 @@ export function startServer(options?: LSPOptions): void {
     }
   })
 
+  // This handler resolves additional information for the item selected in the completion list.
   connection.onCompletionResolve((completionItem: CompletionItem) => {
     return MessageHandler.handleCompletionResolveRequest(completionItem)
   })

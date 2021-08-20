@@ -28,7 +28,7 @@ import referentialActions from '../prisma-fmt/referentialActions'
 import nativeTypeConstructors, {
   NativeTypeConstructors,
 } from '../prisma-fmt/nativeTypes'
-import { Block, getModelOrEnumBlock } from '../util'
+import { Block, BlockType, getModelOrEnumBlock } from '../util'
 
 function toCompletionItems(
   allowedTypes: string[],
@@ -108,7 +108,8 @@ export function positionIsAfterFieldAndType(
 }
 
 /**
- * Removes all block attribute suggestions that are invalid in this context. E.g. `@@id()` when already used should not be in the suggestions.
+ * Removes all block attribute suggestions that are invalid in this context.
+ * E.g. `@@id()` when already used should not be in the suggestions.
  */
 function removeInvalidAttributeSuggestions(
   supportedAttributes: CompletionItem[],
@@ -127,6 +128,7 @@ function removeInvalidAttributeSuggestions(
       break
     }
 
+    // TODO we should also remove the other suggestions if used (default()...)
     if (item.includes('@id')) {
       supportedAttributes = supportedAttributes.filter(
         (attribute) => !attribute.label.includes('id'),
@@ -136,7 +138,7 @@ function removeInvalidAttributeSuggestions(
   return supportedAttributes
 }
 
-function getSuggestionForBlockAttribute(
+function getSuggestionForModelBlockAttribute(
   block: Block,
   lines: string[],
 ): CompletionItem[] {
@@ -219,6 +221,7 @@ export function getSuggestionForFieldAttribute(
     if (datasourceName && nativeTypeSuggestions.length !== 0) {
       if (!currentLine.includes('@' + datasourceName)) {
         suggestions.push({
+          // https://code.visualstudio.com/docs/editor/intellisense#_types-of-completions
           kind: CompletionItemKind.Property,
           label: '@' + datasourceName,
           documentation:
@@ -385,10 +388,10 @@ function getSuggestionForGeneratorField(
 }
 
 /**
- * gets suggestions for block typ
+ * gets suggestions for block type
  */
 export function getSuggestionForFirstInsideBlock(
-  blockType: string,
+  blockType: BlockType,
   lines: Array<string>,
   position: Position,
   block: Block,
@@ -402,7 +405,7 @@ export function getSuggestionForFirstInsideBlock(
       suggestions = getSuggestionForGeneratorField(block, lines, position)
       break
     case 'model':
-      suggestions = getSuggestionForBlockAttribute(block, lines)
+      suggestions = getSuggestionForModelBlockAttribute(block, lines)
       break
   }
 
@@ -445,7 +448,7 @@ export function getSuggestionForBlockTypes(
 }
 
 export function suggestEqualSymbol(
-  blockType: string,
+  blockType: BlockType,
 ): CompletionList | undefined {
   if (!(blockType == 'datasource' || blockType == 'generator')) {
     return
@@ -556,8 +559,9 @@ function getNativeTypes(
   return suggestions
 }
 
+// Suggest fields for a BlockType
 export function getSuggestionForSupportedFields(
-  blockType: string,
+  blockType: BlockType,
   currentLine: string,
   currentLineUntrimmed: string,
   position: Position,
@@ -877,6 +881,7 @@ function getSuggestionsForRelationDirective(
     .slice(0, position.character)
     .trim()
 
+  // If we are right after @relation(
   if (wordBeforePosition.includes('@relation')) {
     return {
       items: suggestions,
@@ -910,6 +915,7 @@ function getSuggestionsForRelationDirective(
       isIncomplete: false,
     }
   }
+
   if (
     isInsideFieldsOrReferences(
       currentLineUntrimmed,
