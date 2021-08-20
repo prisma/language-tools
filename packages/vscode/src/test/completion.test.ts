@@ -654,10 +654,10 @@ suite('Completions', () => {
           relationDirectiveUri,
           new vscode.Position(66, 36),
           new vscode.CompletionList([
-            { label: 'Cascade', kind: vscode.CompletionItemKind.Field },
-            { label: 'NoAction', kind: vscode.CompletionItemKind.Field },
-            { label: 'Restrict', kind: vscode.CompletionItemKind.Field },
-            { label: 'SetNull', kind: vscode.CompletionItemKind.Field },
+            { label: 'Cascade', kind: vscode.CompletionItemKind.Enum },
+            { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
+            { label: 'Restrict', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
           ]),
           true,
         )
@@ -667,10 +667,10 @@ suite('Completions', () => {
           relationDirectiveUri,
           new vscode.Position(75, 36),
           new vscode.CompletionList([
-            { label: 'Cascade', kind: vscode.CompletionItemKind.Field },
-            { label: 'NoAction', kind: vscode.CompletionItemKind.Field },
-            { label: 'Restrict', kind: vscode.CompletionItemKind.Field },
-            { label: 'SetNull', kind: vscode.CompletionItemKind.Field },
+            { label: 'Cascade', kind: vscode.CompletionItemKind.Enum },
+            { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
+            { label: 'Restrict', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
           ]),
           true,
         )
@@ -680,10 +680,10 @@ suite('Completions', () => {
           relationDirectiveUri,
           new vscode.Position(84, 73),
           new vscode.CompletionList([
-            { label: 'Cascade', kind: vscode.CompletionItemKind.Field },
-            { label: 'NoAction', kind: vscode.CompletionItemKind.Field },
-            { label: 'Restrict', kind: vscode.CompletionItemKind.Field },
-            { label: 'SetNull', kind: vscode.CompletionItemKind.Field },
+            { label: 'Cascade', kind: vscode.CompletionItemKind.Enum },
+            { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
+            { label: 'Restrict', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
           ]),
           true,
         )
