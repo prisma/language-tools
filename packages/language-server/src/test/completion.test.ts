@@ -69,7 +69,7 @@ suite('Completions', () => {
   const enumCommentUri = 'completions/enumWithComments.prisma'
   const relationDirectiveUri = 'completions/relationDirective.prisma'
 
-  // usef both in generator and datasource
+  // used both in generator and datasource
   const fieldProvider = {
     label: 'provider',
     kind: CompletionItemKind.Field,
