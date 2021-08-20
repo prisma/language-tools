@@ -25,7 +25,7 @@ async function testCompletion(
     actualCompletions.isIncomplete,
     expectedCompletionList.isIncomplete,
     // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
-    `Expected isIncomplete to be ${expectedCompletionList.isIncomplete} suggestions and got ${actualCompletions.isIncomplete}`,
+    `Expected isIncomplete to be ${actualCompletions.isIncomplete} suggestions and got ${actualCompletions.isIncomplete}`,
   )
 
   assert.deepStrictEqual(
@@ -34,7 +34,7 @@ async function testCompletion(
     // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
     `Expected ${expectedCompletionList.items.length} suggestions and got ${
       actualCompletions.items.length
-    }: ${JSON.stringify(expectedCompletionList.items, undefined, 2)}`,
+    }: ${JSON.stringify(actualCompletions.items, undefined, 2)}`,
   )
 
   assert.deepStrictEqual(
@@ -655,9 +655,10 @@ suite('Completions', () => {
           new vscode.Position(66, 36),
           new vscode.CompletionList([
             { label: 'Cascade', kind: vscode.CompletionItemKind.Enum },
-            { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
             { label: 'Restrict', kind: vscode.CompletionItemKind.Enum },
+            { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
             { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetDefault', kind: vscode.CompletionItemKind.Enum },
           ]),
           true,
         )
@@ -668,9 +669,10 @@ suite('Completions', () => {
           new vscode.Position(75, 36),
           new vscode.CompletionList([
             { label: 'Cascade', kind: vscode.CompletionItemKind.Enum },
-            { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
             { label: 'Restrict', kind: vscode.CompletionItemKind.Enum },
+            { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
             { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetDefault', kind: vscode.CompletionItemKind.Enum },
           ]),
           true,
         )
@@ -681,9 +683,10 @@ suite('Completions', () => {
           new vscode.Position(84, 73),
           new vscode.CompletionList([
             { label: 'Cascade', kind: vscode.CompletionItemKind.Enum },
-            { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
             { label: 'Restrict', kind: vscode.CompletionItemKind.Enum },
+            { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
             { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetDefault', kind: vscode.CompletionItemKind.Enum },
           ]),
           true,
         )
