@@ -33,12 +33,28 @@ function assertCompletion(
   )
 
   assert.ok(completionResult !== undefined)
-  assert.deepStrictEqual(completionResult.isIncomplete, expected.isIncomplete)
-  assert.deepStrictEqual(completionResult.items.length, expected.items.length)
+
+  assert.deepStrictEqual(
+    completionResult.isIncomplete,
+    expected.isIncomplete,
+    // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
+    `Expected isIncomplete to be ${expected.isIncomplete} suggestions and got ${completionResult.isIncomplete}`,
+  )
+
+  assert.deepStrictEqual(
+    completionResult.items.length,
+    expected.items.length,
+    // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
+    `Expected ${expected.items.length} suggestions and got ${
+      completionResult.items.length
+    }: ${JSON.stringify(completionResult.items, undefined, 2)}`,
+  )
+
   assert.deepStrictEqual(
     completionResult.items.map((items) => items.label),
     expected.items.map((items) => items.label),
   )
+
   assert.deepStrictEqual(
     completionResult.items.map((item) => item.kind),
     expected.items.map((item) => item.kind),
@@ -745,6 +761,54 @@ suite('Completions', () => {
               onUpdateProperty,
               nameQuotesProperty,
               nameProperty,
+            ],
+          },
+        )
+      })
+      test('@relation(onDelete: |)', () => {
+        assertCompletion(
+          relationDirectiveUri,
+          { line: 66, character: 36 },
+          {
+            isIncomplete: false,
+            items: [
+              { label: 'Cascade', kind: CompletionItemKind.Enum },
+              { label: 'Restrict', kind: CompletionItemKind.Enum },
+              { label: 'NoAction', kind: CompletionItemKind.Enum },
+              { label: 'SetNull', kind: CompletionItemKind.Enum },
+              { label: 'SetDefault', kind: CompletionItemKind.Enum },
+            ],
+          },
+        )
+      })
+      test('@relation(onUpdate: |)', () => {
+        assertCompletion(
+          relationDirectiveUri,
+          { line: 75, character: 36 },
+          {
+            isIncomplete: false,
+            items: [
+              { label: 'Cascade', kind: CompletionItemKind.Enum },
+              { label: 'Restrict', kind: CompletionItemKind.Enum },
+              { label: 'NoAction', kind: CompletionItemKind.Enum },
+              { label: 'SetNull', kind: CompletionItemKind.Enum },
+              { label: 'SetDefault', kind: CompletionItemKind.Enum },
+            ],
+          },
+        )
+      })
+      test('@relation(fields: [orderId], references: [id], onDelete: |)', () => {
+        assertCompletion(
+          relationDirectiveUri,
+          { line: 84, character: 73 },
+          {
+            isIncomplete: false,
+            items: [
+              { label: 'Cascade', kind: CompletionItemKind.Enum },
+              { label: 'Restrict', kind: CompletionItemKind.Enum },
+              { label: 'NoAction', kind: CompletionItemKind.Enum },
+              { label: 'SetNull', kind: CompletionItemKind.Enum },
+              { label: 'SetDefault', kind: CompletionItemKind.Enum },
             ],
           },
         )

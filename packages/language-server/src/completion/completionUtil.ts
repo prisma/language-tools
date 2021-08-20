@@ -123,6 +123,22 @@ export const relationArguments: CompletionItem[] =
     (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
   )
 
+export const relationOnDeleteArguments: CompletionItem[] =
+  convertToCompletionItems(
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    completions.relationArguments.find((item) => item.label === 'onDelete: ')!
+      .params,
+    CompletionItemKind.Enum,
+  )
+
+export const relationOnUpdateArguments: CompletionItem[] =
+  convertToCompletionItems(
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    completions.relationArguments.find((item) => item.label === 'onUpdate: ')!
+      .params,
+    CompletionItemKind.Enum,
+  )
+
 export const dataSourceUrlArguments: CompletionItem[] =
   convertAttributesToCompletionItems(
     completions.datasourceUrlArguments,
