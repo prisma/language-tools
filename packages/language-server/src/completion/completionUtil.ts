@@ -2,17 +2,20 @@ import {
   CompletionItem,
   CompletionItemKind,
   MarkupKind,
+  InsertTextFormat,
 } from 'vscode-languageserver'
 import * as completions from './completions.json'
+
+type JSONSimpleCompletionItems = {
+  label: string
+  documentation?: string
+}[]
 
 /**
  * Converts a json object containing labels and documentations to CompletionItems.
  */
 function convertToCompletionItems(
-  completionItems: {
-    label: string
-    documentation?: string
-  }[],
+  completionItems: JSONSimpleCompletionItems,
   itemKind: CompletionItemKind,
   insertTextFunc?: (label: string) => string,
 ): CompletionItem[] {
@@ -22,7 +25,9 @@ function convertToCompletionItems(
       label: item.label,
       kind: itemKind,
       insertText: insertTextFunc ? insertTextFunc(item.label) : undefined,
-      insertTextFormat: insertTextFunc ? 2 : 1,
+      insertTextFormat: insertTextFunc
+        ? InsertTextFormat.Snippet
+        : InsertTextFormat.PlainText,
       documentation: item.documentation
         ? { kind: MarkupKind.Markdown, value: item.documentation }
         : undefined,
@@ -31,16 +36,18 @@ function convertToCompletionItems(
   return result
 }
 
+type JSONFullCompletionItems = {
+  label: string
+  documentation: string
+  fullSignature: string
+  params: { label: string; documentation: string }[]
+}[]
+
 /**
  * Converts a json object containing attributes including function signatures to CompletionItems.
  */
 function convertAttributesToCompletionItems(
-  completionItems: {
-    label: string
-    documentation: string
-    fullSignature: string
-    params: { label: string; documentation: string }[]
-  }[],
+  completionItems: JSONFullCompletionItems,
   itemKind: CompletionItemKind,
   insertTextFunc: (label: string) => string,
 ): CompletionItem[] {
@@ -62,7 +69,7 @@ function convertAttributesToCompletionItems(
       label: item.label,
       kind: itemKind,
       insertText: insertTextFunc(item.label),
-      insertTextFormat: 2,
+      insertTextFormat: InsertTextFormat.Snippet,
       documentation: {
         kind: MarkupKind.Markdown,
         value: docComment.join('\n'),
