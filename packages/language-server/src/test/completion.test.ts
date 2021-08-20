@@ -239,6 +239,10 @@ suite('Completions', () => {
       label: 'previewFeatures',
       kind: CompletionItemKind.Field,
     }
+    const fieldEngineType = {
+      label: 'engineType',
+      kind: CompletionItemKind.Field,
+    }
 
     const generatorWithExistingFieldsUri =
       'completions/generatorWithExistingFields.prisma'
