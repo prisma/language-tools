@@ -24,18 +24,22 @@ async function testCompletion(
   assert.deepStrictEqual(
     actualCompletions.isIncomplete,
     expectedCompletionList.isIncomplete,
+    'isIncomplete'
   )
   assert.deepStrictEqual(
-    actualCompletions.items.length,
-    expectedCompletionList.items.length,
-  )
-  assert.deepStrictEqual(
-    actualCompletions.items.map((items) => items.label).sort(),
-    expectedCompletionList.items.map((items) => items.label).sort(),
+    actualCompletions.items.map((item) => item.label).sort(),
+    expectedCompletionList.items.map((item) => item.label).sort(),
+    'mapped items => item.label'
   )
   assert.deepStrictEqual(
     actualCompletions.items.map((item) => item.kind).sort(),
     expectedCompletionList.items.map((item) => item.kind).sort(),
+    'mapped items => item.label'
+  )
+  assert.deepStrictEqual(
+    actualCompletions.items.length,
+    expectedCompletionList.items.length,
+    'items.length'
   )
 }
 

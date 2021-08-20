@@ -33,16 +33,18 @@ function assertCompletion(
   )
 
   assert.ok(completionResult !== undefined)
-  assert.deepStrictEqual(completionResult.isIncomplete, expected.isIncomplete)
-  assert.deepStrictEqual(completionResult.items.length, expected.items.length)
+  assert.deepStrictEqual(completionResult.isIncomplete, expected.isIncomplete, 'isIncomplete')
   assert.deepStrictEqual(
-    completionResult.items.map((items) => items.label),
-    expected.items.map((items) => items.label),
+    completionResult.items.map((item) => item.label),
+    expected.items.map((item) => item.label),
+    'mapped items => item.label'
   )
   assert.deepStrictEqual(
     completionResult.items.map((item) => item.kind),
     expected.items.map((item) => item.kind),
+    'mapped items => item.label'
   )
+  assert.deepStrictEqual(completionResult.items.length, expected.items.length, 'items.length')
 }
 
 // Cache prisma-fmt binary path
