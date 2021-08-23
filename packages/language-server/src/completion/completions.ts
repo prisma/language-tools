@@ -14,6 +14,8 @@ import {
   supportedDataSourceFields,
   supportedGeneratorFields,
   relationArguments,
+  relationOnDeleteArguments,
+  relationOnUpdateArguments,
   dataSourceUrlArguments,
   dataSourceProviders,
   dataSourceProviderArguments,
@@ -24,7 +26,7 @@ import {
 import { klona } from 'klona'
 import { extractModelName } from '../rename/renameUtil'
 import previewFeatures from '../prisma-fmt/previewFeatures'
-import referentialActions from '../prisma-fmt/referentialActions'
+// import referentialActions from '../prisma-fmt/referentialActions'
 import nativeTypeConstructors, {
   NativeTypeConstructors,
 } from '../prisma-fmt/nativeTypes'
@@ -778,16 +780,6 @@ function isInsideFieldsOrReferences(
   return false
 }
 
-function definingReferentialAction(
-  wordsBeforePosition: Array<string>,
-): boolean {
-  const lastWord = wordsBeforePosition[wordsBeforePosition.length - 2]
-  return (
-    lastWord != undefined &&
-    (lastWord.includes('onDelete') || lastWord.includes('onUpdate'))
-  )
-}
-
 function getFieldsFromCurrentBlock(
   lines: Array<string>,
   block: Block,
@@ -865,21 +857,58 @@ function getFieldType(line: string): string | undefined {
   return undefined
 }
 
+// function definingReferentialAction(
+//   wordsBeforePosition: Array<string>,
+// ): boolean {
+//   const lastWord = wordsBeforePosition[wordsBeforePosition.length - 2]
+//   return (
+//     lastWord != undefined &&
+//     (lastWord.includes('onDelete') || lastWord.includes('onUpdate'))
+//   )
+// }
+
+// @relation
 function getSuggestionsForRelationDirective(
   wordsBeforePosition: string[],
   currentLineUntrimmed: string,
   lines: string[],
-  document: TextDocument,
+  document: TextDocument, // eslint-disable-line @typescript-eslint/no-unused-vars
   block: Block,
   position: Position,
-  binPath: string,
+  binPath: string, // eslint-disable-line @typescript-eslint/no-unused-vars
 ): CompletionList | undefined {
   // create deep copy
   const suggestions: CompletionItem[] = klona(relationArguments)
-  const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
+  const firstWordBeforePosition =
+    wordsBeforePosition[wordsBeforePosition.length - 1]
+  const secondWordBeforePosition =
+    wordsBeforePosition[wordsBeforePosition.length - 2]
+  const wordBeforePosition =
+    firstWordBeforePosition === ''
+      ? secondWordBeforePosition
+      : firstWordBeforePosition
   const stringTilPosition = currentLineUntrimmed
     .slice(0, position.character)
     .trim()
+
+  // This is basically hardcoding the suggestions
+  // because prisma-format referential-actions returns an empty array [] most of the time
+  // Main issue is that "Restrict" should be excluded if on SQL Server
+  //
+  // Note: needs to be before @relation condition because
+  // `@relation(onUpdate: |)` means wordBeforePosition = '@relation(onUpdate:'
+  if (wordBeforePosition.includes('onDelete:')) {
+    return {
+      items: relationOnDeleteArguments,
+      isIncomplete: false,
+    }
+  }
+  if (wordBeforePosition.includes('onUpdate:')) {
+    return {
+      items: relationOnUpdateArguments,
+      isIncomplete: false,
+    }
+  }
 
   // If we are right after @relation(
   if (wordBeforePosition.includes('@relation')) {
@@ -888,17 +917,26 @@ function getSuggestionsForRelationDirective(
       isIncomplete: false,
     }
   }
-  if (definingReferentialAction(wordsBeforePosition)) {
-    const suggestions: CompletionItem[] = referentialActions(
-      binPath,
-      document.getText(),
-    ).map((action) => CompletionItem.create(action))
 
-    return {
-      items: suggestions,
-      isIncomplete: false,
-    }
-  }
+  // Doesn't really work because prisma-fmt returns nothing when the schema is "invalid"
+  // but that also means that the schema is considered invalid when trying to autocomplete...
+  //
+  // if lastWord = onUpdate or onDelete
+  // then get suggestions by passing `referential-actions` arg to `prisma-fmt`
+  // if (definingReferentialAction(wordsBeforePosition)) {
+  //   const suggestionsForReferentialActions: CompletionItem[] = referentialActions(
+  //     binPath,
+  //     document.getText(),
+  //   ).map((action) => {
+  //     return CompletionItem.create(action)
+  //   })
+
+  //   return {
+  //     items: suggestionsForReferentialActions,
+  //     isIncomplete: false,
+  //   }
+  // }
+
   if (
     isInsideFieldsOrReferences(
       currentLineUntrimmed,
