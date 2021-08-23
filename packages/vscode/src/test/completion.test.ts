@@ -25,7 +25,7 @@ async function testCompletion(
     actualCompletions.isIncomplete,
     expectedCompletionList.isIncomplete,
     // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
-    `Expected isIncomplete to be ${actualCompletions.isIncomplete} suggestions and got ${actualCompletions.isIncomplete}`,
+    `Expected isIncomplete to be ${expectedCompletionList.isIncomplete} suggestions and got ${actualCompletions.isIncomplete}`,
   )
 
   assert.deepStrictEqual(
