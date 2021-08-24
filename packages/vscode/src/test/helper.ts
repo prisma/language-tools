@@ -7,7 +7,7 @@ export let editor: vscode.TextEditor
 export let documentEol: string
 export let platformEol: string
 
-export async function sleep(ms: number): Promise<NodeJS.Timeout> {
+export async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
