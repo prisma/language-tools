@@ -25,7 +25,13 @@ async function testCompletion(
     actualCompletions.isIncomplete,
     expectedCompletionList.isIncomplete,
     // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
-    `Expected isIncomplete to be ${expectedCompletionList.isIncomplete} suggestions and got ${actualCompletions.isIncomplete}`,
+    `Expected isIncomplete to be '${expectedCompletionList.isIncomplete}' but got '${actualCompletions.isIncomplete}''`,
+  )
+
+  assert.deepStrictEqual(
+    actualCompletions.items.map((item) => item.kind).sort(),
+    expectedCompletionList.items.map((item) => item.kind).sort(),
+    'mapped items => item.label',
   )
 
   assert.deepStrictEqual(
@@ -34,19 +40,9 @@ async function testCompletion(
     // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
     `Expected ${expectedCompletionList.items.length} suggestions and got ${
       actualCompletions.items.length
-    }: ${JSON.stringify(actualCompletions.items, undefined, 2)}`,
+    }: ${JSON.stringify(actualCompletions.items, undefined, 2)}`, // TODO only 1 value is output here :(
   )
 
-  assert.deepStrictEqual(
-    actualCompletions.items.map((items) => items.label).sort(),
-    expectedCompletionList.items.map((items) => items.label).sort(),
-  )
-
-  assert.deepStrictEqual(
-    actualCompletions.items.map((item) => item.kind).sort(),
-    expectedCompletionList.items.map((item) => item.kind).sort(),
-    'mapped items => item.label',
-  )
   assert.deepStrictEqual(
     actualCompletions.items.length,
     expectedCompletionList.items.length,
@@ -267,6 +263,40 @@ suite('Completions', () => {
           fieldPreviewFeatures,
           fieldProvider,
           fieldEngineType,
+        ]),
+        true,
+      )
+    })
+
+    // TODO provider autocompletion
+    // TODO previewFeatures autocompletion
+
+    test.only('Diagnoses engineType value suggestions', async () => {
+      await activate(generatorWithExistingFieldsUri)
+
+      await testCompletion(
+        generatorWithExistingFieldsUri,
+        new vscode.Position(11, 17),
+        new vscode.CompletionList([
+          {
+            label: '""',
+            kind: vscode.CompletionItemKind.Property,
+          },
+        ]),
+        true,
+      )
+      await testCompletion(
+        generatorWithExistingFieldsUri,
+        new vscode.Position(15, 18),
+        new vscode.CompletionList([
+          {
+            label: 'library',
+            kind: vscode.CompletionItemKind.Value,
+          },
+          {
+            label: 'binary',
+            kind: vscode.CompletionItemKind.Value,
+          },
         ]),
         true,
       )
