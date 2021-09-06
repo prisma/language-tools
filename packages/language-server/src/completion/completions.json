@@ -99,7 +99,7 @@
     },
     {
       "label": "engineType",
-      "documentation": "TODO"
+      "documentation": "Defines the query engine type for Prisma Client"
     }
   ],
   "blockAttributes": [
@@ -343,11 +343,11 @@
   "engineTypes": [
     {
       "label": "library",
-      "documentation": "Built-in generator."
+      "documentation": "Node-API library."
     },
     {
       "label": "binary",
-      "documentation": "Built-in generator."
+      "documentation": "Executable binary."
     }
   ],
   "engineTypeArguments": [
