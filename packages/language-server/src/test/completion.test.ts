@@ -33,18 +33,26 @@ function assertCompletion(
   )
 
   assert.ok(completionResult !== undefined)
-  assert.deepStrictEqual(completionResult.isIncomplete, expected.isIncomplete, 'isIncomplete')
+  assert.deepStrictEqual(
+    completionResult.isIncomplete,
+    expected.isIncomplete,
+    'isIncomplete',
+  )
   assert.deepStrictEqual(
     completionResult.items.map((item) => item.label),
     expected.items.map((item) => item.label),
-    'mapped items => item.label'
+    'mapped items => item.label',
   )
   assert.deepStrictEqual(
     completionResult.items.map((item) => item.kind),
     expected.items.map((item) => item.kind),
-    'mapped items => item.label'
+    'mapped items => item.label',
   )
-  assert.deepStrictEqual(completionResult.items.length, expected.items.length, 'items.length')
+  assert.deepStrictEqual(
+    completionResult.items.length,
+    expected.items.length,
+    'items.length',
+  )
 }
 
 // Cache prisma-fmt binary path
@@ -232,6 +240,7 @@ suite('Completions', () => {
   })
 
   suite('GENERATOR BLOCK', () => {
+    // fieldProvider defined above already
     const fieldOutput = { label: 'output', kind: CompletionItemKind.Field }
     const fieldBinaryTargets = {
       label: 'binaryTargets',
@@ -245,9 +254,6 @@ suite('Completions', () => {
       label: 'engineType',
       kind: CompletionItemKind.Field,
     }
-
-    const generatorWithExistingFieldsUri =
-      'completions/generatorWithExistingFields.prisma'
 
     test('Diagnoses generator field suggestions in empty block', () => {
       assertCompletion(
@@ -266,13 +272,21 @@ suite('Completions', () => {
       )
     })
 
+    const generatorWithExistingFieldsUri =
+      'completions/generatorWithExistingFields.prisma'
+
     test('Diagnoses generator field suggestions with existing fields', () => {
       assertCompletion(
         generatorWithExistingFieldsUri,
         { line: 2, character: 0 },
         {
           isIncomplete: false,
-          items: [fieldOutput, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
+          items: [
+            fieldOutput,
+            fieldBinaryTargets,
+            fieldPreviewFeatures,
+            fieldEngineType,
+          ],
         },
       )
       assertCompletion(
@@ -280,14 +294,38 @@ suite('Completions', () => {
         { line: 7, character: 0 },
         {
           isIncomplete: false,
-          items: [fieldProvider, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
+          items: [
+            fieldProvider,
+            fieldBinaryTargets,
+            fieldPreviewFeatures,
+            fieldEngineType,
+          ],
         },
       )
     })
 
-    // TODO previewFeatures autocompletion
     // TODO provider autocompletion
-    // TODO engineType autocompletion
+    // TODO previewFeatures autocompletion
+
+    test('Diagnoses engineType value suggestions', () => {
+      assertCompletion(
+        generatorWithExistingFieldsUri,
+        { line: 2, character: 0 },
+        {
+          isIncomplete: false,
+          items: [
+            {
+              label: 'library',
+              kind: CompletionItemKind.Value,
+            },
+            {
+              label: 'binary',
+              kind: CompletionItemKind.Value,
+            },
+          ],
+        },
+      )
+    })
   })
 
   suite('BLOCK ATTRIBUTES', () => {
