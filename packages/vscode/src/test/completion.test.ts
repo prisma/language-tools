@@ -271,7 +271,7 @@ suite('Completions', () => {
     // TODO provider autocompletion
     // TODO previewFeatures autocompletion
 
-    test.only('Diagnoses engineType value suggestions', async () => {
+    test('Diagnoses engineType value suggestions', async () => {
       await activate(generatorWithExistingFieldsUri)
 
       await testCompletion(
@@ -288,6 +288,7 @@ suite('Completions', () => {
         ),
         true,
       )
+      /*
       await testCompletion(
         generatorWithExistingFieldsUri,
         new vscode.Position(15, 18),
@@ -302,10 +303,11 @@ suite('Completions', () => {
               kind: vscode.CompletionItemKind.Value,
             },
           ],
-          false,
+          true,
         ),
         true,
       )
+      */
     })
   })
 
