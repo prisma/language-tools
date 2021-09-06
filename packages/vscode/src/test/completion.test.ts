@@ -277,27 +277,33 @@ suite('Completions', () => {
       await testCompletion(
         generatorWithExistingFieldsUri,
         new vscode.Position(11, 17),
-        new vscode.CompletionList([
-          {
-            label: '""',
-            kind: vscode.CompletionItemKind.Property,
-          },
-        ]),
+        new vscode.CompletionList(
+          [
+            {
+              label: '""',
+              kind: vscode.CompletionItemKind.Property,
+            },
+          ],
+          false,
+        ),
         true,
       )
       await testCompletion(
         generatorWithExistingFieldsUri,
         new vscode.Position(15, 18),
-        new vscode.CompletionList([
-          {
-            label: 'library',
-            kind: vscode.CompletionItemKind.Value,
-          },
-          {
-            label: 'binary',
-            kind: vscode.CompletionItemKind.Value,
-          },
-        ]),
+        new vscode.CompletionList(
+          [
+            {
+              label: 'library',
+              kind: vscode.CompletionItemKind.Value,
+            },
+            {
+              label: 'binary',
+              kind: vscode.CompletionItemKind.Value,
+            },
+          ],
+          true,
+        ),
         true,
       )
     })
