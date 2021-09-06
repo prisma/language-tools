@@ -1,13 +1,15 @@
 import { TextDocument, Range } from 'vscode-languageserver-textdocument'
 import { Position } from 'vscode-languageserver'
 
+export type BlockType = 'generator' | 'datasource' | 'model' | 'enum'
+
 export class Block {
-  type: string
+  type: BlockType
   start: Position
   end: Position
   name: string
 
-  constructor(type: string, start: Position, end: Position, name: string) {
+  constructor(type: BlockType, start: Position, end: Position, name: string) {
     this.type = type
     this.start = start
     this.end = end
@@ -103,7 +105,9 @@ export function getBlockAtPosition(
       item.includes('{')
     ) {
       const index = item.search(/\s+/)
-      blockType = ~index ? item.slice(0, index) : item
+      blockType = ~index
+        ? (item.slice(0, index) as BlockType)
+        : (item as BlockType)
       blockName = item.slice(blockType.length, item.length - 2).trim()
       blockStart = Position.create(actualIndex, 0)
       break
@@ -124,9 +128,9 @@ export function getBlockAtPosition(
       continue
     }
     // check if block ends here
-    if (item.startsWith('}')) {
+    if (item.startsWith('}') && blockType) {
       blockEnd = Position.create(key, 1)
-      return new Block(blockType, blockStart, blockEnd, blockName)
+      return new Block(blockType as BlockType, blockStart, blockEnd, blockName)
     }
   }
   return
@@ -172,6 +176,7 @@ export function getModelOrEnumBlock(
   return foundBlocks[0]
 }
 
+// TODO can be removed? Since it was renamed to `previewFeatures`
 export function getExperimentalFeaturesRange(
   document: TextDocument,
 ): Range | undefined {

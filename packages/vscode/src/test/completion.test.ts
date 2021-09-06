@@ -24,22 +24,33 @@ async function testCompletion(
   assert.deepStrictEqual(
     actualCompletions.isIncomplete,
     expectedCompletionList.isIncomplete,
-    'isIncomplete'
+    // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
+    `Expected isIncomplete to be ${expectedCompletionList.isIncomplete} suggestions and got ${actualCompletions.isIncomplete}`,
   )
+
   assert.deepStrictEqual(
-    actualCompletions.items.map((item) => item.label).sort(),
-    expectedCompletionList.items.map((item) => item.label).sort(),
-    'mapped items => item.label'
+    actualCompletions.items.length,
+    expectedCompletionList.items.length,
+    // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
+    `Expected ${expectedCompletionList.items.length} suggestions and got ${
+      actualCompletions.items.length
+    }: ${JSON.stringify(actualCompletions.items, undefined, 2)}`,
   )
+
+  assert.deepStrictEqual(
+    actualCompletions.items.map((items) => items.label).sort(),
+    expectedCompletionList.items.map((items) => items.label).sort(),
+  )
+
   assert.deepStrictEqual(
     actualCompletions.items.map((item) => item.kind).sort(),
     expectedCompletionList.items.map((item) => item.kind).sort(),
-    'mapped items => item.label'
+    'mapped items => item.label',
   )
   assert.deepStrictEqual(
     actualCompletions.items.length,
     expectedCompletionList.items.length,
-    'items.length'
+    'items.length',
   )
 }
 
@@ -647,6 +658,48 @@ suite('Completions', () => {
             nameProperty,
             onDeleteProperty,
             onUpdateProperty,
+          ]),
+          true,
+        )
+      })
+      test('@relation(onDelete: |)', async () => {
+        await testCompletion(
+          relationDirectiveUri,
+          new vscode.Position(66, 36),
+          new vscode.CompletionList([
+            { label: 'Cascade', kind: vscode.CompletionItemKind.Enum },
+            { label: 'Restrict', kind: vscode.CompletionItemKind.Enum },
+            { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetDefault', kind: vscode.CompletionItemKind.Enum },
+          ]),
+          true,
+        )
+      })
+      test('@relation(onUpdate: |)', async () => {
+        await testCompletion(
+          relationDirectiveUri,
+          new vscode.Position(75, 36),
+          new vscode.CompletionList([
+            { label: 'Cascade', kind: vscode.CompletionItemKind.Enum },
+            { label: 'Restrict', kind: vscode.CompletionItemKind.Enum },
+            { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetDefault', kind: vscode.CompletionItemKind.Enum },
+          ]),
+          true,
+        )
+      })
+      test('@relation(fields: [orderId], references: [id], onDelete: |)', async () => {
+        await testCompletion(
+          relationDirectiveUri,
+          new vscode.Position(84, 73),
+          new vscode.CompletionList([
+            { label: 'Cascade', kind: vscode.CompletionItemKind.Enum },
+            { label: 'Restrict', kind: vscode.CompletionItemKind.Enum },
+            { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetDefault', kind: vscode.CompletionItemKind.Enum },
           ]),
           true,
         )
