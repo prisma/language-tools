@@ -301,11 +301,11 @@ suite('Completions', () => {
           [
             {
               label: 'library',
-              kind: vscode.CompletionItemKind.Value,
+              kind: vscode.CompletionItemKind.Constant,
             },
             {
               label: 'binary',
-              kind: vscode.CompletionItemKind.Value,
+              kind: vscode.CompletionItemKind.Constant,
             },
           ],
           true,
