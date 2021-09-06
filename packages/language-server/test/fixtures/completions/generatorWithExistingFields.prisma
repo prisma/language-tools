@@ -9,5 +9,9 @@ generator output {
 }
 
 generator engineType {
-    engineType = [
+    engineType = 
+}
+
+generator engineTypeQuotes {
+    engineType = ""
 }

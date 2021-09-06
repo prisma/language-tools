@@ -38,16 +38,7 @@ function assertCompletion(
     completionResult.isIncomplete,
     expected.isIncomplete,
     // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
-    `Expected isIncomplete to be ${expected.isIncomplete} suggestions and got ${completionResult.isIncomplete}`,
-  )
-
-  assert.deepStrictEqual(
-    completionResult.items.length,
-    expected.items.length,
-    // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
-    `Expected ${expected.items.length} suggestions and got ${
-      completionResult.items.length
-    }: ${JSON.stringify(completionResult.items, undefined, 2)}`,
+    `Expected isIncomplete to be '${expected.isIncomplete}' but got '${completionResult.isIncomplete}'`,
   )
 
   assert.deepStrictEqual(
@@ -57,10 +48,14 @@ function assertCompletion(
   )
 
   assert.deepStrictEqual(
-    completionResult.items.map((item) => item.kind),
-    expected.items.map((item) => item.kind),
-    'mapped items => item.label',
+    completionResult.items.length,
+    expected.items.length,
+    // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
+    `Expected ${expected.items.length} suggestions and got ${
+      completionResult.items.length
+    }: ${JSON.stringify(completionResult.items, undefined, 2)}`, // TODO: This is missing the output of `expected.items` so one can compare
   )
+
   assert.deepStrictEqual(
     completionResult.items.length,
     expected.items.length,
@@ -323,9 +318,22 @@ suite('Completions', () => {
     test('Diagnoses engineType value suggestions', () => {
       assertCompletion(
         generatorWithExistingFieldsUri,
-        { line: 2, character: 0 },
+        { line: 11, character: 17 },
         {
-          isIncomplete: false,
+          isIncomplete: true,
+          items: [
+            {
+              label: '""',
+              kind: CompletionItemKind.Property,
+            },
+          ],
+        },
+      )
+      assertCompletion(
+        generatorWithExistingFieldsUri,
+        { line: 15, character: 18 },
+        {
+          isIncomplete: true,
           items: [
             {
               label: 'library',
