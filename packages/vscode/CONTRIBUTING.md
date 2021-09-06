@@ -27,6 +27,11 @@ On push to the `main` branch, a new Insider extension is released, with an incre
 └── package.json         // The extension manifest
 ```
 
+## Resources
+
+- [VS Code API reference](https://code.visualstudio.com/api/references/vscode-api)
+- [Types of completions (icons)](https://code.visualstudio.com/docs/editor/intellisense#_types-of-completions)
+
 ## Development
 
 - Run `npm install` in the root folder. This installs all necessary npm modules in both the vscode and language-server folder.

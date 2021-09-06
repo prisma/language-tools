@@ -15,6 +15,7 @@ import {
   DiagnosticSeverity,
   RenameParams,
   WorkspaceEdit,
+  CompletionTriggerKind,
 } from 'vscode-languageserver'
 import {
   Block,
@@ -105,6 +106,7 @@ export async function handleDiagnosticsRequest(
     diagnostics.push(diagnostic)
   }
 
+  // TODO can be removed? Since it was renamed to `previewFeatures`
   // check for experimentalFeatures inside generator block
   if (document.getText().includes('experimentalFeatures')) {
     const experimentalFeaturesRange: Range | undefined =
@@ -270,6 +272,7 @@ export function handleCompletionRequest(
     !currentLineTillPosition.includes('[') &&
     symbolBeforePositionIsWhiteSpace
 
+  // datasource, generator, model or enum
   const foundBlock = getBlockAtPosition(position.line, lines)
   if (!foundBlock) {
     if (
@@ -291,8 +294,9 @@ export function handleCompletionRequest(
   }
 
   // Completion was triggered by a triggerCharacter
-  if (context?.triggerKind === 2) {
-    switch (context.triggerCharacter) {
+  // triggerCharacters defined in src/server.ts
+  if (context?.triggerKind === CompletionTriggerKind.TriggerCharacter) {
+    switch (context.triggerCharacter as '@' | '"' | '.') {
       case '@':
         if (
           !positionIsAfterFieldAndType(position, document, wordsBeforePosition)
@@ -339,7 +343,6 @@ export function handleCompletionRequest(
           binPath,
         )
       }
-
       // check if type
       if (
         !positionIsAfterFieldAndType(position, document, wordsBeforePosition)
