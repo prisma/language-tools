@@ -284,7 +284,7 @@ suite('Completions', () => {
               kind: vscode.CompletionItemKind.Property,
             },
           ],
-          false,
+          true,
         ),
         true,
       )
@@ -302,7 +302,7 @@ suite('Completions', () => {
               kind: vscode.CompletionItemKind.Value,
             },
           ],
-          true,
+          false,
         ),
         true,
       )
