@@ -29,9 +29,15 @@ async function testCompletion(
   )
 
   assert.deepStrictEqual(
+    actualCompletions.items.map((items) => items.label).sort(),
+    expectedCompletionList.items.map((items) => items.label).sort(),
+    'mapped items => item.label',
+  )
+
+  assert.deepStrictEqual(
     actualCompletions.items.map((item) => item.kind).sort(),
     expectedCompletionList.items.map((item) => item.kind).sort(),
-    'mapped items => item.label',
+    'mapped items => item.kind',
   )
 
   assert.deepStrictEqual(
