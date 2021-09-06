@@ -25,7 +25,7 @@ async function testCompletion(
     actualCompletions.isIncomplete,
     expectedCompletionList.isIncomplete,
     // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
-    `Expected isIncomplete to be '${expectedCompletionList.isIncomplete}' but got '${actualCompletions.isIncomplete}''`,
+    `Expected isIncomplete to be '${expectedCompletionList.isIncomplete}' but got '${actualCompletions.isIncomplete}'`,
   )
 
   assert.deepStrictEqual(
@@ -288,7 +288,6 @@ suite('Completions', () => {
         ),
         true,
       )
-      /*
       await testCompletion(
         generatorWithExistingFieldsUri,
         new vscode.Position(15, 18),
@@ -307,7 +306,6 @@ suite('Completions', () => {
         ),
         true,
       )
-      */
     })
   })
 
