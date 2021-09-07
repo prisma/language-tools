@@ -7,3 +7,11 @@ generator output {
     output  = "node_modules/@prisma/client"
 
 }
+
+generator engineType {
+    engineType = 
+}
+
+generator engineTypeQuotes {
+    engineType = ""
+}

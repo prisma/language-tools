@@ -38,7 +38,19 @@ function assertCompletion(
     completionResult.isIncomplete,
     expected.isIncomplete,
     // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
-    `Expected isIncomplete to be ${expected.isIncomplete} suggestions and got ${completionResult.isIncomplete}`,
+    `Expected isIncomplete to be '${expected.isIncomplete}' but got '${completionResult.isIncomplete}'`,
+  )
+
+  assert.deepStrictEqual(
+    completionResult.items.map((item) => item.label),
+    expected.items.map((item) => item.label),
+    'mapped items => item.label',
+  )
+
+  assert.deepStrictEqual(
+    completionResult.items.map((item) => item.kind),
+    expected.items.map((item) => item.kind),
+    'mapped items => item.kind',
   )
 
   assert.deepStrictEqual(
@@ -47,17 +59,13 @@ function assertCompletion(
     // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
     `Expected ${expected.items.length} suggestions and got ${
       completionResult.items.length
-    }: ${JSON.stringify(completionResult.items, undefined, 2)}`,
+    }: ${JSON.stringify(completionResult.items, undefined, 2)}`, // TODO: This is missing the output of `expected.items` so one can compare
   )
 
   assert.deepStrictEqual(
-    completionResult.items.map((items) => items.label),
-    expected.items.map((items) => items.label),
-  )
-
-  assert.deepStrictEqual(
-    completionResult.items.map((item) => item.kind),
-    expected.items.map((item) => item.kind),
+    completionResult.items.length,
+    expected.items.length,
+    'items.length',
   )
 }
 
@@ -83,10 +91,7 @@ suite('Completions', () => {
   const enumCommentUri = 'completions/enumWithComments.prisma'
   const relationDirectiveUri = 'completions/relationDirective.prisma'
 
-  const fieldPreviewFeatures = {
-    label: 'previewFeatures',
-    kind: CompletionItemKind.Field,
-  }
+  // used both in generator and datasource
   const fieldProvider = {
     label: 'provider',
     kind: CompletionItemKind.Field,
@@ -249,14 +254,20 @@ suite('Completions', () => {
   })
 
   suite('GENERATOR BLOCK', () => {
+    // fieldProvider defined above already
     const fieldOutput = { label: 'output', kind: CompletionItemKind.Field }
     const fieldBinaryTargets = {
       label: 'binaryTargets',
       kind: CompletionItemKind.Field,
     }
-
-    const generatorWithExistingFieldsUri =
-      'completions/generatorWithExistingFields.prisma'
+    const fieldPreviewFeatures = {
+      label: 'previewFeatures',
+      kind: CompletionItemKind.Field,
+    }
+    const fieldEngineType = {
+      label: 'engineType',
+      kind: CompletionItemKind.Field,
+    }
 
     test('Diagnoses generator field suggestions in empty block', () => {
       assertCompletion(
@@ -269,10 +280,14 @@ suite('Completions', () => {
             fieldOutput,
             fieldBinaryTargets,
             fieldPreviewFeatures,
+            fieldEngineType,
           ],
         },
       )
     })
+
+    const generatorWithExistingFieldsUri =
+      'completions/generatorWithExistingFields.prisma'
 
     test('Diagnoses generator field suggestions with existing fields', () => {
       assertCompletion(
@@ -280,7 +295,12 @@ suite('Completions', () => {
         { line: 2, character: 0 },
         {
           isIncomplete: false,
-          items: [fieldOutput, fieldBinaryTargets, fieldPreviewFeatures],
+          items: [
+            fieldOutput,
+            fieldBinaryTargets,
+            fieldPreviewFeatures,
+            fieldEngineType,
+          ],
         },
       )
       assertCompletion(
@@ -288,7 +308,48 @@ suite('Completions', () => {
         { line: 7, character: 0 },
         {
           isIncomplete: false,
-          items: [fieldProvider, fieldBinaryTargets, fieldPreviewFeatures],
+          items: [
+            fieldProvider,
+            fieldBinaryTargets,
+            fieldPreviewFeatures,
+            fieldEngineType,
+          ],
+        },
+      )
+    })
+
+    // TODO provider autocompletion
+    // TODO previewFeatures autocompletion
+
+    test('Diagnoses engineType value suggestions', () => {
+      assertCompletion(
+        generatorWithExistingFieldsUri,
+        { line: 11, character: 17 },
+        {
+          isIncomplete: true,
+          items: [
+            {
+              label: '""',
+              kind: CompletionItemKind.Property,
+            },
+          ],
+        },
+      )
+      assertCompletion(
+        generatorWithExistingFieldsUri,
+        { line: 15, character: 18 },
+        {
+          isIncomplete: true,
+          items: [
+            {
+              label: 'library',
+              kind: CompletionItemKind.Constant,
+            },
+            {
+              label: 'binary',
+              kind: CompletionItemKind.Constant,
+            },
+          ],
         },
       )
     })

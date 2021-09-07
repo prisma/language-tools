@@ -96,6 +96,10 @@
     {
       "label": "previewFeatures",
       "documentation": "Enables preview feature flags."
+    },
+    {
+      "label": "engineType",
+      "documentation": "Defines the query engine type for Prisma Client"
     }
   ],
   "blockAttributes": [
@@ -334,6 +338,22 @@
     {
       "label": "\"\"",
       "documentation": "Specifies a single provider."
+    }
+  ],
+  "engineTypes": [
+    {
+      "label": "library",
+      "documentation": "Node-API library."
+    },
+    {
+      "label": "binary",
+      "documentation": "Executable binary."
+    }
+  ],
+  "engineTypeArguments": [
+    {
+      "label": "\"\"",
+      "documentation": "Specifies the engine type."
     }
   ],
   "datasourceProviders": [

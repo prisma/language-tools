@@ -158,6 +158,8 @@ export const dataSourceProviderArguments: CompletionItem[] =
     (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
   )
 
+// generator.provider
+
 export const generatorProviders: CompletionItem[] = convertToCompletionItems(
   completions.generatorProviders,
   CompletionItemKind.Constant,
@@ -170,6 +172,20 @@ export const generatorProviderArguments: CompletionItem[] =
     (label: string) => label.replace('""', '"$0"'),
   )
 
+// generator.engineType
+
+export const engineTypes: CompletionItem[] = convertToCompletionItems(
+  completions.engineTypes,
+  CompletionItemKind.Constant,
+)
+
+export const engineTypeArguments: CompletionItem[] = convertToCompletionItems(
+  completions.engineTypeArguments,
+  CompletionItemKind.Property,
+  (label: string) => label.replace('""', '"$0"'),
+)
+
+// generator.previewFeatures
 export const previewFeaturesArguments: CompletionItem[] =
   convertToCompletionItems(
     completions.previewFeaturesArguments,
