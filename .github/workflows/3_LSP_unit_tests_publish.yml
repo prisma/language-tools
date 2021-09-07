@@ -49,8 +49,9 @@ jobs:
           ref: ${{ github.event.inputs.branch }}
       - name: Print inputs
         run: |
-          echo ${{github.event.inputs.extension_version}}
           echo ${{github.event.inputs.npm_channel}}
+          echo ${{github.event.inputs.extension_version}}
+          echo ${{github.event.inputs.branch}}
           echo ${{github.event.inputs.trigger_reason}}
       - name: Install Dependencies in LSP
         run: cd packages/language-server && npm install
