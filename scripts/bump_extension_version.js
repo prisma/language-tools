@@ -8,8 +8,9 @@ function isMinorOrMajorRelease(prismaVersion) {
       `Version ${prismaVersion} must have 3 tokens separated by "." character.`,
     )
   }
-  return tokens[2] === '0' || tokens[1] === '0'
-  //                ^= e.g. 2.29.0       ^= e.g. 3.0.1 
+  return tokens[2] === '0' || prismaVersion === '3.0.1' // <== special case for 3.x that will start with 3.0.1 instead :(
+  //                ^= e.g. 2.29.0       
+  //                         4.0.0
 }
 
 function currentExtensionVersion({ branch_channel }) {
