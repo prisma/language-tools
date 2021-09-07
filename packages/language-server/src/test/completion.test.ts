@@ -343,11 +343,11 @@ suite('Completions', () => {
           items: [
             {
               label: 'library',
-              kind: CompletionItemKind.Value,
+              kind: CompletionItemKind.Constant,
             },
             {
               label: 'binary',
-              kind: CompletionItemKind.Value,
+              kind: CompletionItemKind.Constant,
             },
           ],
         },
