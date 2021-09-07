@@ -1,7 +1,4 @@
 <h2 align="center">Prisma VS Code Extension - Insider</h2>
-<div align="center">
-</div>
-<hr>
 
 ## Insider Build
 
