@@ -28,8 +28,8 @@ Please note that you should not have the regular and insider version of the exte
 
 ## Build information
 
-This version is built from commit [$commit-sha$]($commit-sha$).
-This is for Prisma CLI $prisma-cli-version$.
+- This version is built from commit [$commit-sha$]($commit-sha$).
+- This is for Prisma CLI $prisma-cli-version$.
 
 ## Contributing
 
