@@ -8,7 +8,7 @@ function isMinorRelease(prismaVersion) {
       `Version ${prismaVersion} must have 3 tokens separated by "." character.`,
     )
   }
-  return tokens[2] === '0'
+  return tokens[2] === '0' || prismaVersion === '3.0.1'
 }
 
 function currentExtensionVersion({ branch_channel }) {
