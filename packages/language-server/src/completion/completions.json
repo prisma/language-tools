@@ -343,7 +343,7 @@
   "engineTypes": [
     {
       "label": "library",
-      "documentation": "Node-API library."
+      "documentation": "Node-API library. (Default)"
     },
     {
       "label": "binary",
