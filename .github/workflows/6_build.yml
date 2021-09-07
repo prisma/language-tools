@@ -1,4 +1,4 @@
-name: 6. Build extension
+name: 6. Build extension # and upload as release to GitHub
 
 on:
   workflow_dispatch:
@@ -45,19 +45,22 @@ jobs:
           echo ${{github.event.inputs.extension_version}}
           echo ${{github.event.inputs.npm_channel}}
           echo ${{github.event.inputs.trigger_reason}}
+
+      # Build the extension
       - name: Install Dependencies
         run: npm install
       - name: Compile
         run: npm run compile
-      - name: Replace Readme
+      - name: Replace Readme for marketplace
         run: node scripts/change_readme.js ${{ github.event.inputs.npm_channel }}
       - name: Build vsix
         run: cd packages/vscode && npm run package
-      - name: Get tag and asset name
+
+      # Create Github Release and upload built result as asset
+      - name: Get git tag and asset name
         id: names
         run: node scripts/get_tag_name.js ${{ github.event.inputs.npm_channel }} ${{ github.event.inputs.extension_version }}
-
-      - name: create a release
+      - name: create a GitHub release
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -79,6 +82,7 @@ jobs:
           asset_path: ${{github.workspace}}/packages/vscode/${{ steps.get_asset_name.outputs.asset_name }}
           asset_name: ${{ steps.get_asset_name.outputs.asset_name }}
           asset_content_type: application/zip
+
       - name: Trigger next workflow to publish extension
         uses: benc-uk/workflow-dispatch@v1
         with:

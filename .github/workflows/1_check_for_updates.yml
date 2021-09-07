@@ -21,10 +21,13 @@ jobs:
           node-version: '12.x'
       - name: Install Dependencies
         run: npm install
+
+      # First it runs this
       - name: Check for Prisma CLI update
         id: check_update
         run: node scripts/check_for_update.js
 
+      # ... and depending on the output any (or none) of these 3:
       - name: Invoke bump workflow with inputs for dev
         if: ${{ steps.check_update.outputs.dev_version }}
         uses: benc-uk/workflow-dispatch@v1
@@ -32,7 +35,6 @@ jobs:
           workflow: 2. Bump versions
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "dev", "version": "${{ steps.check_update.outputs.dev_version }}" }'
-
       - name: Invoke bump workflow with inputs for latest
         if: ${{ steps.check_update.outputs.latest_version }}
         uses: benc-uk/workflow-dispatch@v1
@@ -40,7 +42,6 @@ jobs:
           workflow: 2. Bump versions
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "latest", "version": "${{ steps.check_update.outputs.latest_version }}" }'
-
       - name: Invoke bump workflow with inputs for patch-dev
         if: ${{ steps.check_update.outputs.patch-dev_version }}
         uses: benc-uk/workflow-dispatch@v1

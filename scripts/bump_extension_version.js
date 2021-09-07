@@ -1,14 +1,16 @@
 const semVer = require('semver')
 const { readVersionFile, writeToVersionFile } = require('./util')
 
-function isMinorRelease(prismaVersion) {
+function isMinorOrMajorRelease(prismaVersion) {
   const tokens = prismaVersion.split('.')
   if (tokens.length !== 3) {
     throw new Error(
       `Version ${prismaVersion} must have 3 tokens separated by "." character.`,
     )
   }
-  return tokens[2] === '0'
+  return tokens[2] === '0' || prismaVersion === '3.0.1' // <== special case for 3.x that will start with 3.0.1 instead :(
+  //                ^= e.g. 2.29.0       
+  //                         4.0.0
 }
 
 function currentExtensionVersion({ branch_channel }) {
@@ -70,10 +72,13 @@ function nextVersion({
       return semVer.inc(currentVersion, 'patch')
     case 'latest':
       // Prisma CLI new latest version
-      if (isMinorRelease(prisma_latest) && currentVersion != prisma_latest) {
+      if (isMinorOrMajorRelease(prisma_latest) && currentVersion != prisma_latest) {
+        // just adopt the version number from npm for extension as well
         return prisma_latest
+      } else {
+        // bump patch
+        return semVer.inc(currentVersion, 'patch')
       }
-      return semVer.inc(currentVersion, 'patch')
     case 'patch-dev':
       const derivedVersion = getDerivedExtensionVersion(
         stripPreReleaseText(prisma_patch),
@@ -124,7 +129,7 @@ function bumpExtensionVersionInScriptFiles({
 }
 
 module.exports = {
-  isMinorRelease,
+  isMinorOrMajorRelease,
   currentExtensionVersion,
   nextVersion,
   bumpExtensionVersionInScriptFiles,
@@ -132,22 +137,29 @@ module.exports = {
 
 if (require.main === module) {
   const args = process.argv.slice(2)
-  const currentVersion = currentExtensionVersion({
-    branch_channel: args[0],
+  const npm_channel = args[0]
+  
+  // Get extension version matching the npm channel
+  const currentVersionOfExtension = currentExtensionVersion({
+    branch_channel: npm_channel,
   })
-  console.log(`Current version: ${currentVersion}`)
+  console.log(`Current extension version: ${currentVersionOfExtension}`)
+
+  // "Calculate" next version number
   const version = nextVersion({
-    currentVersion,
-    branch_channel: args[0],
+    currentVersion: currentVersionOfExtension,
+    branch_channel: npm_channel,
     prisma_dev: readVersionFile({ fileName: 'prisma_dev' }),
     prisma_latest: readVersionFile({ fileName: 'prisma_latest' }),
     prisma_patch: readVersionFile({ fileName: 'prisma_patch-dev' }),
   })
   console.log(`Next extension version ${version}.`)
   console.log(`::set-output name=next_extension_version::${version}`)
+
+  // Bump in file
   bumpExtensionVersionInScriptFiles({
     nextVersion: version,
-    branch_channel: args[0],
+    branch_channel: npm_channel,
   })
   console.log(`Bumped extension version in scripts/version folder.`)
 }

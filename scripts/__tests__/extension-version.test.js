@@ -88,4 +88,30 @@ describe('next extension version', () => {
       }),
     ).toEqual('6.0.1')
   })
+
+  // first extension release after Prisma CLI major update
+
+  it('it should work with the first extension release after special major Prisma CLI update (3.0.1)', () => {
+    expect(
+      nextVersion({
+        currentVersion: '2.30.3',
+        branch_channel: 'latest',
+        prisma_latest: '3.0.1',
+        prisma_dev: '0.0.0-dev.0',
+        prisma_patch: '0.0.0-dev.0',
+      }),
+    ).toEqual('3.0.1')
+  })
+
+  it('it should work with the first extension release after a major Prisma CLI update (4.0.0)', () => {
+    expect(
+      nextVersion({
+        currentVersion: '3.15.9',
+        branch_channel: 'latest',
+        prisma_latest: '4.0.0',
+        prisma_dev: '0.0.0-dev.0',
+        prisma_patch: '0.0.0-dev.0',
+      }),
+    ).toEqual('4.0.0')
+  })
 })

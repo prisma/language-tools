@@ -45,7 +45,7 @@ jobs:
         run: |
           sh scripts/set_git_credentials.sh
 
-      - name: Read package.json versions (enginesVersion)
+      - name: Read package.json versions (enginesVersion) for the commit message
         id: packagejson
         run: |
           PACKAGE_JSON_PATH="./packages/language-server/package.json"
@@ -55,7 +55,7 @@ jobs:
 
       - name: Commit and push to branch
         run: |
-          sh scripts/commit_and_push.sh "Bump LSP to ${{ github.event.inputs.extension_version }} in VSCode. Engines: ${{ steps.packagejson.engines }}"
+          sh scripts/commit_and_push.sh "Bump LSP to ${{ github.event.inputs.extension_version }} in VSCode. Engines: ${{ steps.packagejson.outputs.engines }}"
 
       - name: Trigger next workflow for VSCode e2e tests
         uses: benc-uk/workflow-dispatch@v1
