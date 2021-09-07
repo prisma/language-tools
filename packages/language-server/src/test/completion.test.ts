@@ -48,6 +48,12 @@ function assertCompletion(
   )
 
   assert.deepStrictEqual(
+    completionResult.items.map((item) => item.kind),
+    expected.items.map((item) => item.kind),
+    'mapped items => item.kind',
+  )
+
+  assert.deepStrictEqual(
     completionResult.items.length,
     expected.items.length,
     // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
