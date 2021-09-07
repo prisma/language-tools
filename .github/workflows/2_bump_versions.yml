@@ -32,7 +32,7 @@ jobs:
       - name: Print inputs
         run: |
           echo ${{github.event.inputs.version}}
-          echo ${{github.event.inputs.npm-channel}}
+          echo ${{github.event.inputs.npm_channel}}
 
       - name: Update versions file in scripts folder
         run: |
