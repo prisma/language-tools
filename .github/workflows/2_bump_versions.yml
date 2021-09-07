@@ -26,51 +26,52 @@ jobs:
           node-version: '12.x'
       - name: Install Dependencies
         run: npm install
+      - name: Setup Git
+        run: |
+          sh scripts/set_git_credentials.sh
       - name: Print inputs
         run: |
           echo ${{github.event.inputs.version}}
           echo ${{github.event.inputs.npm-channel}}
-      - name: Setup Git
-        run: |
-          sh scripts/set_git_credentials.sh
-      - name: Update versions in scripts folder
+
+      - name: Update versions file in scripts folder
         run: |
           echo "${{ github.event.inputs.version }}" >scripts/versions/prisma_${{ github.event.inputs.npm_channel }}
-      - name: Update next extension version in scripts folder
+      - name: Update next extension version in scripts folder and output for later use
         id: update # Used to access the calculated next extension version in later steps
         run: node scripts/bump_extension_version.js ${{ github.event.inputs.npm_channel }}
       - name: Commit and Push
         run: |
-          sh scripts/commit_and_push.sh "bump Prisma CLI ${{ github.event.inputs.npm_channel }} version to ${{ github.event.inputs.version }} and extension version to ${{ steps.update.next_extension_version }} in scripts."
+          sh scripts/commit_and_push.sh "bump Prisma CLI ${{ github.event.inputs.npm_channel }} version to ${{ github.event.inputs.version }} and extension version to ${{ steps.update.outputs.next_extension_version }} in scripts."
 
       - name: Switch branch
         id: setup_branch
         run: |
           sh scripts/setup_branch.sh ${{ github.event.inputs.npm_channel }}
-      - name: Check for minor release
-        id: is_minor
+      - name: Check for minor or major release
+        id: is_minor_or_major
         run: |
-          node scripts/is_minor_release.js ${{ github.event.inputs.npm_channel }}
-      - name: Reset on main if minor release
-        if: ${{steps.is_minor.outputs.is_minor_release}}
+          node scripts/is_minor_or_major_release.js ${{ github.event.inputs.npm_channel }}
+      - name: Reset on 'main' branch if minor or major release
+        if: ${{steps.is_minor_or_major.outputs.is_minor_or_major_release}}
         run: |
           git reset --hard main
           git push --force origin stable
       - name: Update Prisma CLI version and VSCode extension version
         run: |
           node scripts/update_package_json_files.js ${{ github.event.inputs.npm_channel }} ${{ steps.update.outputs.next_extension_version }} ${{ github.event.inputs.version }}
-      - name: Install Dependencies
+      - name: Install Dependencies to update lock file
         run: npm install
       - name: Push to branch
         run: |
-          sh scripts/commit_and_push.sh "bump extension version to ${{ steps.update.next_extension_version }} in package.json" ${{ steps.setup_branch.outputs.branch}} ${{ steps.setup_branch.outputs.new_branch }}
+          sh scripts/commit_and_push.sh "bump extension version to ${{ steps.update.outputs.next_extension_version }} in package.json" ${{ steps.setup_branch.outputs.branch}} ${{ steps.setup_branch.outputs.new_branch }}
 
       - name: Trigger next workflow for LSP Unit tests
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: 3. Unit tests for LSP and publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}" , "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}", "trigger_reason": "On new Prisma CLI version ${{github.event.inputs.version}}" }'
+          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}", "trigger_reason": "On new Prisma CLI version ${{github.event.inputs.version}}" }'
 
       - name: Slack Notification on Failure
         if: ${{ failure() }}
