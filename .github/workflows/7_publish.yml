@@ -35,6 +35,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Print inputs
         run: |
+          echo ${{github.event.inputs.asset_name}}
+          echo ${{github.event.inputs.tag_name}}
           echo ${{github.event.inputs.trigger_reason}}
       - name: Install Dependencies
         run: npm install

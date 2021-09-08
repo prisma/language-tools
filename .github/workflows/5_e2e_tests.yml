@@ -49,8 +49,9 @@ jobs:
       - uses: actions/checkout@v2
       - name: Print inputs
         run: |
-          echo ${{github.event.inputs.extension_version}}
           echo ${{github.event.inputs.npm_channel}}
+          echo ${{github.event.inputs.extension_version}}
+          echo ${{github.event.inputs.branch}}
           echo ${{github.event.inputs.trigger_reason}}
       - name: Trigger next workflow to build extension
         if: ${{ needs.tests.result == 'success' }}
