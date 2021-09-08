@@ -33,7 +33,7 @@
     "hasha": "5.2.2",
     "js-levenshtein": "1.1.6",
     "klona": "2.0.4",
-    "node-fetch": "2.6.1",
+    "node-fetch": "2.6.2",
     "p-retry": "4.6.1",
     "rimraf": "3.0.2",
     "tempy": "1.0.1",
