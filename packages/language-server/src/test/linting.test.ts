@@ -30,7 +30,7 @@ async function assertLinting(
 let binPathPrismaFmt = ''
 
 suite('Linting', () => {
-  suiteSetup(async () => {
+  suiteSetup(async (done) => {
     // install prisma-fmt binary
     if (binPathPrismaFmt === '') {
       binPathPrismaFmt = await getBinPath()
@@ -38,6 +38,7 @@ suite('Linting', () => {
     if (binaryIsNeeded(binPathPrismaFmt)) {
       await install(await getDownloadURL(), binPathPrismaFmt)
     }
+    done()
   })
 
   const fixturePathMissingArgument = './linting/missingArgument.prisma'

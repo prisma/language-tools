@@ -73,7 +73,7 @@ function assertCompletion(
 let binPathPrismaFmt = ''
 
 suite('Completions', () => {
-  suiteSetup(async () => {
+  suiteSetup(async (done) => {
     // install prisma-fmt binary
     if (binPathPrismaFmt === '') {
       binPathPrismaFmt = await getBinPath()
@@ -81,6 +81,7 @@ suite('Completions', () => {
     if (binaryIsNeeded(binPathPrismaFmt)) {
       await install(await getDownloadURL(), binPathPrismaFmt)
     }
+    done()
   })
 
   const emptyDocUri = 'completions/empty.prisma'
