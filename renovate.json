@@ -7,7 +7,7 @@
     "@prisma/fetch-engine"
   ],
   "masterIssue": true,
-  "reviewers": ["@carmenberndt"],
+  "reviewers": ["@Jolg42"],
   "rebaseWhen": "conflicted",
   "packageRules": [
     {
