@@ -151,8 +151,7 @@ export default async function install(
   try {
     fs.accessSync(targetDir, fs.constants.W_OK)
   } catch (e) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (e.code !== 'EACCES') {
+    if ((e as NodeJS.ErrnoException).code !== 'EACCES') {
       throw e
     } else {
       throw new Error(`Can't write to ${targetDir}`)
