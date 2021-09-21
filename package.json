@@ -1,6 +1,6 @@
 {
   "name": "@prisma/language-support",
-  "version": "31.0.81",
+  "version": "31.0.85",
   "author": "Prisma",
   "license": "Apache-2.0",
   "workspaces": [
@@ -11,7 +11,7 @@
     "@commitlint/cli": "13.1.0",
     "@commitlint/config-conventional": "13.1.0",
     "@commitlint/config-lerna-scopes": "13.1.0",
-    "@types/node": "14.17.15",
+    "@types/node": "14.17.17",
     "@typescript-eslint/eslint-plugin": "4.29.3",
     "@typescript-eslint/parser": "4.29.3",
     "eslint": "7.32.0",
