@@ -118,7 +118,7 @@
     "mocha": "9.1.2",
     "ovsx": "0.2.1",
     "typescript": "4.4.3",
-    "vsce": "1.100.0",
+    "vsce": "1.100.1",
     "vscode-test": "1.6.1"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
