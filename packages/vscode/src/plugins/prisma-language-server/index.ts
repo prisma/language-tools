@@ -71,7 +71,7 @@ const plugin: PrismaVSCodePlugin = {
   enabled: () => true,
   activate: async (context) => {
     const isDebugOrTest = isDebugOrTestSession()
-    const rootPath = workspace.rootPath
+    const rootPath = workspace.workspaceFolders?.[0].uri.path
 
     if (rootPath) {
       watcher = chokidar.watch(
