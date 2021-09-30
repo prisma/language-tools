@@ -1,7 +1,4 @@
 <h2 align="center">Prisma VS Code Extension - Insider</h2>
-<div align="center">
-</div>
-<hr>
 
 ## Insider Build
 
@@ -28,8 +25,8 @@ Please note that you should not have the regular and insider version of the exte
 
 ## Build information
 
-This version is built from commit [$commit-sha$](https://github.com/prisma/language-tools/commit/$commit-sha$).
-This is for Prisma CLI $prisma-cli-version$.
+- This version is built from commit [$commit-sha$](https://github.com/prisma/language-tools/commit/$commit-sha$).
+- This is for Prisma CLI $prisma-cli-version$.
 
 ## Contributing
 
