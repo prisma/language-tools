@@ -1,12 +1,10 @@
 name: CI tests
-# Run on push only for main, if not it will trigger push & pull_request on PRs at the same time
 on:
   pull_request:
     paths-ignore:
-      # Any update here needs to be done for
-      # - `push`see before
       - 'LICENSE'
-      - '*.md'
+      - 'README.md'
+      - 'SECURITY.md'
       - '.vscode/**'
       - '.github/ISSUE_TEMPLATE/**'
       - '.github/CODEOWNERS'
