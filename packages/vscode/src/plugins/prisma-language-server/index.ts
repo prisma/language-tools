@@ -79,6 +79,8 @@ const plugin: PrismaVSCodePlugin = {
         {
           // ignore dotfiles (except .prisma)
           ignored: /(^|[\/\\])\.(?!prisma)./,
+          // When false, only the symlinks themselves will be watched for changes
+          // instead of following the link references and bubbling events through the link's path.
           followSymlinks: false,
         },
       )
