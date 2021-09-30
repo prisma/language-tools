@@ -77,7 +77,7 @@ const plugin: PrismaVSCodePlugin = {
       watcher = chokidar.watch(
         path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts'),
         {
-          // ignore dotfiles (except .prisma)
+          // ignore dotfiles (except .prisma) adjusted from chokidar README example
           ignored: /(^|[\/\\])\.(?!prisma)./,
           // When false, only the symlinks themselves will be watched for changes
           // instead of following the link references and bubbling events through the link's path.
