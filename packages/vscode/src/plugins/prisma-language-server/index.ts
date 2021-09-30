@@ -71,13 +71,14 @@ const plugin: PrismaVSCodePlugin = {
   enabled: () => true,
   activate: async (context) => {
     const isDebugOrTest = isDebugOrTestSession()
-    const rootPath = workspace.rootPath
+    const rootPath = workspace.workspaceFolders?.[0].uri.path
 
     if (rootPath) {
       watcher = chokidar.watch(
         path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts'),
         {
-          usePolling: false,
+          // ignore dotfiles (except .prisma) adjusted from chokidar README example
+          ignored: /(^|[\/\\])\.(?!prisma)./,
           // limits how many levels of subdirectories will be traversed.
           // Note that `node_modules/.prisma/client/` counts for 3 already
           // Example
@@ -85,10 +86,13 @@ const plugin: PrismaVSCodePlugin = {
           // ./server/database/node_modules/.prisma/client/index.d.ts
           // then the depth is equal to 2 + 3 = 5
           depth: 7,
+          // When false, only the symlinks themselves will be watched for changes
+          // instead of following the link references and bubbling events through the link's path.
           followSymlinks: false,
         },
       )
     }
+
     if (isDebugMode() || isE2ETestOnPullRequest()) {
       // use LSP from folder for debugging
       console.log('Using local LSP')
@@ -96,7 +100,7 @@ const plugin: PrismaVSCodePlugin = {
         path.join('../../packages/language-server/dist/src/bin'),
       )
     } else {
-      console.log('Using published LSP.')
+      console.log('Using published LSP')
       // use published npm package for production
       serverModule = require.resolve('@prisma/language-server/dist/src/bin')
     }
@@ -138,6 +142,7 @@ const plugin: PrismaVSCodePlugin = {
             range: client.code2ProtocolConverter.asRange(range),
             context: client.code2ProtocolConverter.asCodeActionContext(context),
           }
+
           return client.sendRequest(CodeActionRequest.type, params, token).then(
             (values) => {
               if (values === null) return undefined
@@ -258,15 +263,20 @@ const plugin: PrismaVSCodePlugin = {
       const extensionId = 'prisma.' + packageJson.name
       // eslint-disable-next-line
       const extensionVersion = packageJson.version
+
       telemetry = new TelemetryReporter(extensionId, extensionVersion)
+
       context.subscriptions.push(telemetry)
+
       await telemetry.sendTelemetryEvent()
+
       if (extensionId === 'prisma.prisma-insider') {
         checkForOtherPrismaExtension()
       }
     }
 
     checkForMinimalColorTheme()
+
     if (watcher) {
       watcher.on('change', (path) => {
         console.log(`File ${path} has been changed. Restarting TS Server.`)
@@ -278,9 +288,11 @@ const plugin: PrismaVSCodePlugin = {
     if (!client) {
       return undefined
     }
+
     if (!isDebugOrTestSession()) {
       telemetry.dispose() // eslint-disable-line @typescript-eslint/no-floating-promises
     }
+
     return client.stop()
   },
 }
