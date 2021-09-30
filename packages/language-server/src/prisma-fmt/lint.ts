@@ -13,7 +13,7 @@ export default async function lint(
   onError?: (errorMessage: string) => void,
 ): Promise<LinterError[]> {
   try {
-    const result = await exec(execPath, ['lint', '--no-env-errors'], text)
+    const result = await exec(execPath, ['lint'], text)
     return JSON.parse(result) // eslint-disable-line @typescript-eslint/no-unsafe-return
   } catch (errors) {
     const errorMessage = "prisma-fmt error'd during linting.\n"

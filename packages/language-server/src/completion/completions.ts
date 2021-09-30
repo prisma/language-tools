@@ -596,10 +596,7 @@ export function getSuggestionForSupportedFields(
       }
       // previewFeatures
       if (currentLine.startsWith('previewFeatures')) {
-        const generatorPreviewFeatures: string[] = previewFeatures(
-          binPath,
-          false,
-        )
+        const generatorPreviewFeatures: string[] = previewFeatures(binPath)
         if (generatorPreviewFeatures.length > 0) {
           return handlePreviewFeatures(
             generatorPreviewFeatures,
