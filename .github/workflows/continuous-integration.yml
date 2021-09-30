@@ -1,6 +1,13 @@
 name: CI tests
-
-on: [pull_request]
+on:
+  pull_request:
+    paths-ignore:
+      - 'LICENSE'
+      - 'README.md'
+      - 'SECURITY.md'
+      - '.vscode/**'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/CODEOWNERS'
 
 env:
   PRISMA_TELEMETRY_INFORMATION: 'language-tools continuous-integration.yml'
@@ -14,6 +21,18 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v2
+      - name: Cache node modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          # npm cache files are stored in `~/.npm` on Linux/macOS
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
       - name: Install Dependencies
         run: npm install
       - name: Compile
