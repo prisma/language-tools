@@ -31,8 +31,8 @@ jobs:
           sh scripts/set_git_credentials.sh
       - name: Print inputs
         run: |
-          echo ${{github.event.inputs.version}}
           echo ${{github.event.inputs.npm_channel}}
+          echo ${{github.event.inputs.version}}
 
       - name: Update versions file in scripts folder
         run: |

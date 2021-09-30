@@ -2,7 +2,7 @@
   "name": "@prisma/language-server",
   "description": "Implementation of a language server in Node.",
   "displayName": "Prisma Language Server",
-  "version": "31.0.55",
+  "version": "31.0.140",
   "author": "Prisma",
   "license": "Apache-2.0",
   "publisher": "Prisma",
@@ -10,8 +10,8 @@
     "node": ">=10"
   },
   "prisma": {
-    "enginesVersion": "2452cc6313d52b8b9a96999ac0e974d0aedf88db",
-    "cliVersion": "3.1.0-dev.1"
+    "enginesVersion": "8a8bb09b003449c13728126bce82a9ed75da0047",
+    "cliVersion": "3.2.0-dev.43"
   },
   "bin": {
     "prisma-language-server": "dist/src/bin.js"
@@ -26,14 +26,14 @@
   "main": "./dist/index.js",
   "typings": "dist/src/index",
   "dependencies": {
-    "@prisma/fetch-engine": "3.1.0-1.2452cc6313d52b8b9a96999ac0e974d0aedf88db",
-    "@prisma/get-platform": "3.1.0-1.2452cc6313d52b8b9a96999ac0e974d0aedf88db",
+    "@prisma/fetch-engine": "3.2.0-27.8a8bb09b003449c13728126bce82a9ed75da0047",
+    "@prisma/get-platform": "3.2.0-27.8a8bb09b003449c13728126bce82a9ed75da0047",
     "@types/js-levenshtein": "1.1.0",
     "execa": "5.1.1",
     "hasha": "5.2.2",
     "js-levenshtein": "1.1.6",
     "klona": "2.0.4",
-    "node-fetch": "2.6.1",
+    "node-fetch": "2.6.5",
     "p-retry": "4.6.1",
     "rimraf": "3.0.2",
     "tempy": "1.0.1",
@@ -42,10 +42,11 @@
   },
   "devDependencies": {
     "@types/mocha": "9.0.0",
+    "@types/node": "14.17.20",
     "@types/node-fetch": "2.5.12",
     "@types/rimraf": "3.0.2",
-    "mocha": "9.1.0",
-    "typescript": "4.3.5"
+    "mocha": "9.1.2",
+    "typescript": "4.4.3"
   },
   "keywords": [
     "autocomplete",
