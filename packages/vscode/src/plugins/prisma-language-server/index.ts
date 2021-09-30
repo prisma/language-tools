@@ -77,7 +77,7 @@ const plugin: PrismaVSCodePlugin = {
       watcher = chokidar.watch(
         path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts'),
         {
-		  usePolling: false,
+          usePolling: false,
           // limits how many levels of subdirectories will be traversed.
           // Note that `node_modules/.prisma/client/` counts for 3 already
           // Example
