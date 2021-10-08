@@ -85,7 +85,7 @@ const plugin: PrismaVSCodePlugin = {
           // If vs code extension is open in root folder of a project and the path to index.d.ts is
           // ./server/database/node_modules/.prisma/client/index.d.ts
           // then the depth is equal to 2 + 3 = 5
-          depth: 7,
+          depth: 9,
           // When false, only the symlinks themselves will be watched for changes
           // instead of following the link references and bubbling events through the link's path.
           followSymlinks: false,
