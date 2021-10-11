@@ -56,5 +56,8 @@
     "packages/**/*.{js,ts}": [
       "eslint --fix"
     ]
+  },
+  "dependencies": {
+    "tomhoule-prisma-fmt-wasm-build-experiment": "^0.1.1"
   }
 }

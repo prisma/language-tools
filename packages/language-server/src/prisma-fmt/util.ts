@@ -1,12 +1,12 @@
+/* eslint-disable */
+
 /**
  * Imports
  */
 import { getPlatform, Platform } from '@prisma/get-platform'
 import path from 'path'
 import fs from 'fs'
-import exec from './exec'
 const packageJson = require('../../../package.json') // eslint-disable-line
-
 /**
  * Lookup Cache
  */
@@ -70,19 +70,18 @@ export function binaryIsNeeded(path: string): boolean {
   return !fs.existsSync(path)
 }
 
-export async function getBinaryVersion(path: string): Promise<string> {
+export function getBinaryVersion(path: string): string {
   try {
-    const output = await exec(path, ['--version'], '')
-    return output
+    return 'TODO: hardcoded_version'
   } catch (errors) {
     console.log(errors)
     return ''
   }
 }
 
-export async function testBinarySuccess(path: string): Promise<boolean> {
+export function testBinarySuccess(path: string): boolean {
   // try to execute version command
-  const version = await getBinaryVersion(path)
+  const version = getBinaryVersion(path)
   if (version === '') {
     console.log('Binary test failed. Re-attempting a download.')
     return false

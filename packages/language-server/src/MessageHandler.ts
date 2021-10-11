@@ -61,13 +61,13 @@ import {
   isRelationField,
 } from './rename/renameUtil'
 
-export async function handleDiagnosticsRequest(
+export function handleDiagnosticsRequest(
   document: TextDocument,
   binPath: string,
   onError?: (errorMessage: string) => void,
-): Promise<Diagnostic[]> {
+): Diagnostic[] {
   const text = document.getText(fullDocumentRange(document))
-  const res = await lint(text, (errorMessage: string) => {
+  const res = lint(text, (errorMessage: any) => {
     if (onError) {
       onError(errorMessage)
     }
@@ -193,17 +193,14 @@ export function handleDefinitionRequest(
 /**
  * This handler provides the modification to the document to be formatted.
  */
-export async function handleDocumentFormatting(
+export function handleDocumentFormatting(
   params: DocumentFormattingParams,
   document: TextDocument,
   binPath: string,
   onError?: (errorMessage: string) => void,
-): Promise<TextEdit[]> {
-  const options = params.options
-
-  return format(binPath, options.tabSize, document.getText(), onError).then(
-    (formatted) => [TextEdit.replace(fullDocumentRange(document), formatted)],
-  )
+): TextEdit[] {
+  const formatted = format(document.getText(), onError)
+  return [TextEdit.replace(fullDocumentRange(document), formatted)]
 }
 
 export function handleHoverRequest(

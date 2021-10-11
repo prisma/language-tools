@@ -1,11 +1,8 @@
 import assert from 'assert'
 import referentialActions from '../prisma-fmt/referentialActions'
-import * as util from '../prisma-fmt/util'
 
 suite('prisma-fmt subcommand: referential-actions', () => {
-  test('SQLite', async () => {
-    const binPath = await util.getBinPath()
-
+  test('SQLite', () => {
     const schema = `
         datasource db {
             provider = "sqlite"
@@ -17,7 +14,7 @@ suite('prisma-fmt subcommand: referential-actions', () => {
             previewFeatures = ["referentialActions"]
         }`
 
-    const actions = referentialActions(binPath, schema)
+    const actions = referentialActions(schema)
 
     assert.deepStrictEqual(actions, [
       'Cascade',
@@ -28,9 +25,7 @@ suite('prisma-fmt subcommand: referential-actions', () => {
     ])
   })
 
-  test('PostgreSQL - minimal', async () => {
-    const binPath = await util.getBinPath()
-
+  test('PostgreSQL - minimal', () => {
     const schema = `
         datasource db {
             provider = "postgresql"
@@ -42,7 +37,7 @@ suite('prisma-fmt subcommand: referential-actions', () => {
             previewFeatures = ["referentialActions"]
         }`
 
-    const actions = referentialActions(binPath, schema)
+    const actions = referentialActions(schema)
 
     assert.deepStrictEqual(actions, [
       'Cascade',
@@ -53,9 +48,7 @@ suite('prisma-fmt subcommand: referential-actions', () => {
     ])
   })
 
-  test('PostgreSQL - example', async () => {
-    const binPath = await util.getBinPath()
-
+  test('PostgreSQL - example', () => {
     const schema = `
         datasource db {
             provider = "postgresql"
@@ -94,7 +87,7 @@ suite('prisma-fmt subcommand: referential-actions', () => {
             posts TagOnPosts[]
         }`
 
-    const actions = referentialActions(binPath, schema)
+    const actions = referentialActions(schema)
 
     assert.deepStrictEqual(actions, [
       'Cascade',
@@ -105,9 +98,7 @@ suite('prisma-fmt subcommand: referential-actions', () => {
     ])
   })
 
-  test('MySQL', async () => {
-    const binPath = await util.getBinPath()
-
+  test('MySQL', () => {
     const schema = `
         datasource db {
             provider = "mysql"
@@ -119,7 +110,7 @@ suite('prisma-fmt subcommand: referential-actions', () => {
             previewFeatures = ["referentialActions"]
         }`
 
-    const actions = referentialActions(binPath, schema)
+    const actions = referentialActions(schema)
 
     assert.deepStrictEqual(actions, [
       'Cascade',
@@ -130,9 +121,7 @@ suite('prisma-fmt subcommand: referential-actions', () => {
     ])
   })
 
-  test('SQL Server', async () => {
-    const binPath = await util.getBinPath()
-
+  test('SQL Server', () => {
     const schema = `
         datasource db {
             provider = "sqlserver"
@@ -144,7 +133,7 @@ suite('prisma-fmt subcommand: referential-actions', () => {
             previewFeatures = ["microsoftSqlServer", "referentialActions"]
         }`
 
-    const actions = referentialActions(binPath, schema)
+    const actions = referentialActions(schema)
 
     assert.deepStrictEqual(actions, [
       'Cascade',
@@ -154,23 +143,19 @@ suite('prisma-fmt subcommand: referential-actions', () => {
     ])
   })
 
-  test('no datasource should return empty []', async () => {
-    const binPath = await util.getBinPath()
-
+  test('no datasource should return empty []', () => {
     const schema = `
         generator client {
             provider        = "prisma-client-js"
             previewFeatures = ["referentialActions"]
         }`
 
-    const actions = referentialActions(binPath, schema)
+    const actions = referentialActions(schema)
 
     assert.deepStrictEqual(actions, [])
   })
 
-  test('invalid schema should return empty []', async () => {
-    const binPath = await util.getBinPath()
-
+  test('invalid schema should return empty []', () => {
     const schema = `
         datasource db {
             provider = "sqlite"
@@ -185,7 +170,7 @@ suite('prisma-fmt subcommand: referential-actions', () => {
         model { sss } // invalid model
         `
 
-    const actions = referentialActions(binPath, schema)
+    const actions = referentialActions(schema)
 
     assert.deepStrictEqual(actions, [])
   })
