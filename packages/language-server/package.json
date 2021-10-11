@@ -29,6 +29,7 @@
     "@prisma/fetch-engine": "3.3.0-5.17c5b9131df745a2e82a69fe3ebdaeaa0d92c6a3",
     "@prisma/get-platform": "3.3.0-5.17c5b9131df745a2e82a69fe3ebdaeaa0d92c6a3",
     "@types/js-levenshtein": "1.1.0",
+    "tomhoule-prisma-fmt-wasm-build-experiment": "*",
     "execa": "5.1.1",
     "hasha": "5.2.2",
     "js-levenshtein": "1.1.6",

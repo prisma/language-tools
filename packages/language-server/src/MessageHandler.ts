@@ -67,7 +67,7 @@ export async function handleDiagnosticsRequest(
   onError?: (errorMessage: string) => void,
 ): Promise<Diagnostic[]> {
   const text = document.getText(fullDocumentRange(document))
-  const res = await lint(binPath, text, (errorMessage: string) => {
+  const res = await lint(text, (errorMessage: string) => {
     if (onError) {
       onError(errorMessage)
     }

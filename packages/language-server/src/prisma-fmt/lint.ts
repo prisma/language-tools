@@ -1,4 +1,4 @@
-import exec from './exec'
+const prismaFmt = require('tomhoule-prisma-fmt-wasm-build-experiment/prisma_fmt_build')
 
 export interface LinterError {
   start: number
@@ -13,7 +13,7 @@ export default async function lint(
   onError?: (errorMessage: string) => void,
 ): Promise<LinterError[]> {
   try {
-    const result = await exec(execPath, ['lint'], text)
+    const result = prismaFmt.lint(text)
     return JSON.parse(result) // eslint-disable-line @typescript-eslint/no-unsafe-return
   } catch (errors) {
     const errorMessage = "prisma-fmt error'd during linting.\n"
