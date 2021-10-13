@@ -2,7 +2,7 @@
   "name": "@prisma/language-server",
   "description": "Implementation of a language server in Node.",
   "displayName": "Prisma Language Server",
-  "version": "31.0.179",
+  "version": "31.0.180",
   "author": "Prisma",
   "license": "Apache-2.0",
   "publisher": "Prisma",
@@ -11,7 +11,7 @@
   },
   "prisma": {
     "enginesVersion": "869b44ea457ba802770bc71428f5a94073a9aac5",
-    "cliVersion": "3.3.0-dev.23"
+    "cliVersion": "3.3.0-dev.24"
   },
   "bin": {
     "prisma-language-server": "dist/src/bin.js"
