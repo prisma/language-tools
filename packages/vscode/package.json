@@ -115,9 +115,9 @@
     "@types/glob": "7.1.4",
     "@types/mocha": "9.0.0",
     "@types/vscode": "1.52.0",
-    "mocha": "9.1.2",
+    "mocha": "9.1.3",
     "ovsx": "0.2.1",
-    "typescript": "4.4.3",
+    "typescript": "4.4.4",
     "vsce": "1.100.1",
     "vscode-test": "1.6.1"
   },
