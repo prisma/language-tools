@@ -37,7 +37,8 @@
       "documentation": "Integer values that may be greater than 2^53"
     },
     {
-      "label": "Unsupported(\"\")",
+      "label": "Unsupported",
+      "insertText": "Unsupported(\"$0\")",
       "documentation": "An arbitrary database column type, for which Prisma has no syntax. Fields of type `Unsupported` work with Prisma Migrate and introspection, but are not exposed in Prisma Client.",
       "fullSignature": "Unsupported(_ name: String)",
       "params": [
@@ -51,99 +52,145 @@
   "blockTypes": [
     {
       "label": "datasource",
+      "insertText": "datasource $1 {\n\tprovider = \"$2\"\n\turl      = $3\n}",
       "documentation": "The datasource block tells the schema where the models are backed."
     },
     {
       "label": "generator",
+      "insertText": "generator ${1|client,\"\"|} {\n\tprovider = ${2|\"prisma-client-js\",\"\"|}\n}",
       "documentation": "Generator blocks configure which clients are generated and how they're generated. Language preferences and binary configuration will go in here."
     },
     {
       "label": "model",
+      "insertText": "model $1 {\n\t$0\n}",
       "documentation": "Models represent the entities of your application domain. They are defined using model blocks in the data model."
     },
     {
       "label": "enum",
+      "insertText": "enum $1 {\n\t$0\n}",
       "documentation": "Enums are defined via the enum block. You can define enums in your data model if they're supported by the data source you use:\n• PostgreSQL: Supported\n• MySQL: Supported\n• MariaDB: Supported\n• SQLite: Not supported"
     }
   ],
   "dataSourceFields": [
     {
       "label": "provider",
+      "insertText": "provider = ${1|sqlite,postgresql,mysql,sqlserver,mongodb|}",
       "documentation": "Describes which data source connector to use. Can be one of the following built in datasource providers: `postgresql`, `mysql` or `sqlite`."
     },
     {
       "label": "url",
+      "insertText": "url = env(\"$0\")",
       "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database, [learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema)."
     },
     {
       "label": "shadowDatabaseUrl",
+      "insertText": "shadowDatabaseUrl = env(\"$0\")",
       "documentation": "Connection URL including authentication info to use for Migrate's [shadow database](https://www.prisma.io/docs/concepts/components/prisma-migrate#shadow-database). Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database."
     }
   ],
   "generatorFields": [
     {
       "label": "provider",
+      "insertText": "provider = ${1|prisma-client-js,\"\"|}",
       "documentation": "Describes which generator to use. This can point to a file that implements a generator or specify a built-in generator directly."
     },
     {
       "label": "output",
+      "insertText": "output = \"$0\"",
       "documentation": "Determines the location for the generated client, [learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema)"
     },
     {
       "label": "binaryTargets",
+      "insertText": "binaryTargets = [\"$0\"]",
       "documentation": "Specifies the OS on which the Prisma Client will run to ensure binary compatibility of the query engine."
     },
     {
       "label": "previewFeatures",
+      "insertText": "previewFeatures = [\"$0\"]",
       "documentation": "Enables preview feature flags."
     },
     {
       "label": "engineType",
-      "documentation": "Defines the query engine type for Prisma Client"
+      "insertText": "engineType = ${1|library,binary|}",
+      "documentation": "Defines the query engine type for Prisma Client."
     }
   ],
   "blockAttributes": [
     {
-      "label": "@@map(\"\")",
+      "label": "@@map",
+      "insertText": "@@map(\"$0\")",
       "documentation": "Maps a model name from the Prisma schema to a different table name.",
       "fullSignature": "@@map(_ name: String)",
       "params": [
         {
           "label": "name",
+          "insertText": "name: \"$0\"",
           "documentation": "The name of the target database table."
         }
       ]
     },
     {
-      "label": "@@id([])",
+      "label": "@@id",
+      "insertText": "@@id([$0])",
       "documentation": "Defines a multi-field ID on the model.",
-      "fullSignature": "@@id(_ fields: FieldReference[])",
+      "fullSignature": "@@id(_ fields: FieldReference[], name: String?, map: String?)",
       "params": [
         {
           "label": "fields",
+          "insertText": "fields: [$0]",
           "documentation": "A list of references."
+        },
+        {
+          "label": "name",
+          "insertText": "name: \"$0\"",
+
+          "documentation": "Defines the naming of the TODO WhereUnique argument in the Prisma Client."
+        },
+        {
+          "label": "map",
+          "insertText": "map: \"$0\"",
+          "documentation": "Defines a custom name for the primary key in the database."
         }
       ]
     },
     {
-      "label": "@@unique([])",
+      "label": "@@unique",
+      "insertText": "@@unique([$0])",
       "documentation": "Defines a compound unique constraint for the specified fields.",
-      "fullSignature": "@@unique(_ fields: FieldReference[])",
+      "fullSignature": "@@unique(_ fields: FieldReference[], name: String?, map: String?)",
       "params": [
         {
           "label": "fields",
+          "insertText": "fields: [$0]",
           "documentation": "A list of references."
+        },
+        {
+          "label": "name",
+          "insertText": "name: \"$0\"",
+          "documentation": "For the naming of the WhereUnique argument in Prisma Client."
+        },
+        {
+          "label": "map",
+          "insertText": "map: \"$0\"",
+          "documentation": "Defines a custom constraint name in the database."
         }
       ]
     },
     {
-      "label": "@@index([])",
+      "label": "@@index",
+      "insertText": "@@index([$0])",
       "documentation": "Defines an index on the model.",
-      "fullSignature": "@@index(_ fields: FieldReference[])",
+      "fullSignature": "@@index(_ fields: FieldReference[], map: String?)",
       "params": [
         {
           "label": "fields",
+          "insertText": "fields: [$0]",
           "documentation": "A list of references."
+        },
+        {
+          "label": "map",
+          "insertText": "map: \"$0\"",
+          "documentation": "Defines a custom index name in the database."
         }
       ]
     },
@@ -159,16 +206,29 @@
       "label": "@id",
       "fullSignature": "@id",
       "documentation": "Defines a single-field ID on the model.",
-      "params": []
+      "params": [
+        {
+          "label": "map",
+          "insertText": "map: \"$0\"",
+          "documentation": "Defines a custom primary key name in the database."
+        }
+      ]
     },
     {
       "label": "@unique",
       "fullSignature": "@unique",
       "documentation": "Defines a unique constraint for this field.",
-      "params": []
+      "params": [
+        {
+          "label": "map",
+          "insertText": "map: \"$0\"",
+          "documentation": "Defines a custom name for the unique constraint in the database."
+        }
+      ]
     },
     {
-      "label": "@map(\"\")",
+      "label": "@map",
+      "insertText": "@map(\"$0\")",
       "documentation": "Maps a field name from the Prisma schema to a different column name.",
       "fullSignature": "@map(_ name: String)",
       "params": [
@@ -179,7 +239,8 @@
       ]
     },
     {
-      "label": "@default()",
+      "label": "@default",
+      "insertText": "@default($0)",
       "documentation": "Defines a default value for this field. `@default` takes an expression as an argument.",
       "fullSignature": "@default(_ expression: Expression)",
       "params": [
@@ -190,13 +251,18 @@
       ]
     },
     {
-      "label": "@relation()",
+      "label": "@relation",
+      "insertText": "@relation($0)",
       "documentation": "Defines meta information about the relation. [Learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema/relations#the-relation-attribute).",
-      "fullSignature": "@relation(_ name: String?, fields: FieldReference[]?, references: FieldReference[]?)",
+      "fullSignature": "@relation(_ name: String?, map: String?, fields: FieldReference[]?, references: FieldReference[]?)",
       "params": [
         {
           "label": "name",
           "documentation": "Defines the name of the relationship. In an m-n-relation, it also determines the name of the underlying relation table."
+        },
+        {
+          "label": "map",
+          "documentation": "Defines a custom name for the foreign key in the database."
         },
         {
           "label": "fields",
@@ -231,19 +297,22 @@
   ],
   "relationArguments": [
     {
-      "label": "references: []",
+      "label": "references",
+      "insertText": "references: [$0]",
       "fullSignature": "references: []",
       "documentation": "A list of field references of the model on *the other side of the relation*.",
       "params": []
     },
     {
-      "label": "fields: []",
+      "label": "fields",
+      "insertText": "fields: [$0]",
       "fullSignature": "fields: []",
       "documentation": "A list of field references of the *current* model.",
       "params": []
     },
     {
-      "label": "onDelete: ",
+      "label": "onDelete",
+      "insertText": "onDelete: ${1|Cascade,Restrict,NoAction,SetNull,SetDefault|}",
       "fullSignature": "onDelete: Cascade | Restrict | NoAction | SetNull | SetDefault",
       "documentation": "Specifies the action to perform when a referenced entry in the referenced model is being deleted, [learn more](https://www.prisma.io/docs/concepts/components/prisma-schema/relations/referential-actions).",
       "params": [
@@ -270,7 +339,8 @@
       ]
     },
     {
-      "label": "onUpdate: ",
+      "label": "onUpdate",
+      "insertText": "onUpdate: ${1|Cascade,Restrict,NoAction,SetNull,SetDefault|}",
       "fullSignature": "onUpdate: Cascade | Restrict | NoAction | SetNull | SetDefault",
       "documentation": "Specifies the action to perform when a referenced field in the referenced model is being updated to a new value, [learn more](https://www.prisma.io/docs/concepts/components/prisma-schema/relations/referential-actions).",
       "params": [
@@ -298,26 +368,37 @@
     },
     {
       "label": "\"\"",
+      "insertText": "\"$0\"",
       "fullSignature": "String",
       "documentation": "Defines the name of the relationship. In an m-n-relation, it also determines the name of the underlying relation table.",
       "params": []
     },
     {
-      "label": "name: ",
+      "label": "name",
+      "insertText": "name: \"$0\"",
       "fullSignature": "name: String",
       "documentation": "Defines the name of the relationship. In an m-n-relation, it also determines the name of the underlying relation table.",
+      "params": []
+    },
+    {
+      "label": "map",
+      "insertText": "map: \"$0\"",
+      "fullSignature": "map: String",
+      "documentation": "Defines a custom name for the foreign key in the database.",
       "params": []
     }
   ],
   "datasourceUrlArguments": [
     {
       "label": "\"\"",
+      "insertText": "\"$0\"",
       "fullSignature": "\"\"",
       "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database, [learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema).",
       "params": []
     },
     {
       "label": "env()",
+      "insertText": "env(\"$0\")",
       "fullSignature": "env(_ environmentVariable: string)",
       "documentation": "Specifies a data source via an environment variable. When running a Prisma CLI command that needs the database connection URL (e.g. `prisma generate`), you need to make sure that the `DATABASE_URL` environment variable is set. One way to do so is by creating a `.env` file. Note that the file must be in the same directory as your schema.prisma file to automatically be picked up by the Prisma CLI.",
       "params": [
@@ -337,6 +418,7 @@
   "generatorProviderArguments": [
     {
       "label": "\"\"",
+      "insertText": "\"$0\"",
       "documentation": "Specifies a single provider."
     }
   ],
@@ -353,6 +435,7 @@
   "engineTypeArguments": [
     {
       "label": "\"\"",
+      "insertText": "\"$0\"",
       "documentation": "Specifies the engine type."
     }
   ],
@@ -377,20 +460,24 @@
   "datasourceProviderArguments": [
     {
       "label": "[]",
+      "insertText": "[$0]",
       "documentation": "Specifies multiple providers."
     },
     {
       "label": "\"\"",
+      "insertText": "\"$0\"",
       "documentation": "Specifies a single provider."
     }
   ],
   "previewFeaturesArguments": [
     {
       "label": "[]",
+      "insertText": "[$0]",
       "documentation": "Enables preview feature flags."
     },
     {
       "label": "\"\"",
+      "insertText": "\"$0\"",
       "documentation": "Enables a preview feature flag."
     }
   ]

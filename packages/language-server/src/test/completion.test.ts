@@ -357,19 +357,19 @@ suite('Completions', () => {
 
   suite('BLOCK ATTRIBUTES', () => {
     const blockAttributeId = {
-      label: '@@id([])',
+      label: '@@id',
       kind: CompletionItemKind.Property,
     }
     const blockAttributeMap = {
-      label: '@@map("")',
+      label: '@@map',
       kind: CompletionItemKind.Property,
     }
     const blockAttributeUnique = {
-      label: '@@unique([])',
+      label: '@@unique',
       kind: CompletionItemKind.Property,
     }
     const blockAttributeIndex = {
-      label: '@@index([])',
+      label: '@@index',
       kind: CompletionItemKind.Property,
     }
     const blockAttributeIgnore = {
@@ -443,7 +443,7 @@ suite('Completions', () => {
             { label: 'Decimal', kind: CompletionItemKind.TypeParameter },
             { label: 'BigInt', kind: CompletionItemKind.TypeParameter },
             {
-              label: 'Unsupported("")',
+              label: 'Unsupported',
               kind: CompletionItemKind.TypeParameter,
             },
             { label: 'User', kind: CompletionItemKind.Reference },
@@ -474,15 +474,15 @@ suite('Completions', () => {
       kind: CompletionItemKind.Property,
     }
     const fieldAttributeMap = {
-      label: '@map("")',
+      label: '@map',
       kind: CompletionItemKind.Property,
     }
     const fieldAttributeDefault = {
-      label: '@default()',
+      label: '@default',
       kind: CompletionItemKind.Property,
     }
     const fieldAttributeRelation = {
-      label: '@relation()',
+      label: '@relation',
       kind: CompletionItemKind.Property,
     }
     const fieldAttributeUpdatedAt = {
@@ -532,19 +532,19 @@ suite('Completions', () => {
     }
 
     const fieldsProperty = {
-      label: 'fields: []',
+      label: 'fields',
       kind: CompletionItemKind.Property,
     }
     const referencesProperty = {
-      label: 'references: []',
+      label: 'references',
       kind: CompletionItemKind.Property,
     }
     const onDeleteProperty = {
-      label: 'onDelete: ',
+      label: 'onDelete',
       kind: CompletionItemKind.Property,
     }
     const onUpdateProperty = {
-      label: 'onUpdate: ',
+      label: 'onUpdate',
       kind: CompletionItemKind.Property,
     }
     const nameQuotesProperty = {
@@ -552,7 +552,11 @@ suite('Completions', () => {
       kind: CompletionItemKind.Property,
     }
     const nameProperty = {
-      label: 'name: ',
+      label: 'name',
+      kind: CompletionItemKind.Property,
+    }
+    const mapProperty = {
+      label: 'map',
       kind: CompletionItemKind.Property,
     }
 
@@ -745,6 +749,7 @@ suite('Completions', () => {
               onUpdateProperty,
               nameQuotesProperty,
               nameProperty,
+              mapProperty,
             ],
           },
         )
@@ -775,6 +780,7 @@ suite('Completions', () => {
               onUpdateProperty,
               nameQuotesProperty,
               nameProperty,
+              mapProperty,
             ],
           },
         )
@@ -791,6 +797,7 @@ suite('Completions', () => {
               onUpdateProperty,
               nameQuotesProperty,
               nameProperty,
+              mapProperty,
             ],
           },
         )
@@ -822,6 +829,7 @@ suite('Completions', () => {
               onUpdateProperty,
               nameQuotesProperty,
               nameProperty,
+              mapProperty,
             ],
           },
         )

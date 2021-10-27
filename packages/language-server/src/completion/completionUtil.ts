@@ -3,11 +3,13 @@ import {
   CompletionItemKind,
   MarkupKind,
   InsertTextFormat,
+  InsertTextMode,
 } from 'vscode-languageserver'
 import * as completions from './completions.json'
 
 type JSONSimpleCompletionItems = {
   label: string
+  insertText?: string // optional text to use as completion instead of label
   documentation?: string
 }[]
 
@@ -17,17 +19,19 @@ type JSONSimpleCompletionItems = {
 function convertToCompletionItems(
   completionItems: JSONSimpleCompletionItems,
   itemKind: CompletionItemKind,
-  insertTextFunc?: (label: string) => string,
 ): CompletionItem[] {
   const result: CompletionItem[] = []
   for (const item of completionItems) {
     result.push({
       label: item.label,
       kind: itemKind,
-      insertText: insertTextFunc ? insertTextFunc(item.label) : undefined,
-      insertTextFormat: insertTextFunc
+      insertText: item.insertText,
+      insertTextFormat: item.insertText
         ? InsertTextFormat.Snippet
         : InsertTextFormat.PlainText,
+      insertTextMode: item.insertText
+        ? InsertTextMode.adjustIndentation
+        : undefined,
       documentation: item.documentation
         ? { kind: MarkupKind.Markdown, value: item.documentation }
         : undefined,
@@ -38,8 +42,9 @@ function convertToCompletionItems(
 
 type JSONFullCompletionItems = {
   label: string
+  insertText?: string // optional text to use as completion instead of label
   documentation: string
-  fullSignature: string
+  fullSignature: string // custom signature to show
   params: { label: string; documentation: string }[]
 }[]
 
@@ -49,7 +54,6 @@ type JSONFullCompletionItems = {
 function convertAttributesToCompletionItems(
   completionItems: JSONFullCompletionItems,
   itemKind: CompletionItemKind,
-  insertTextFunc: (label: string) => string,
 ): CompletionItem[] {
   // https://code.visualstudio.com/api/references/vscode-api#CompletionItem
   const result: CompletionItem[] = []
@@ -68,8 +72,11 @@ function convertAttributesToCompletionItems(
     result.push({
       label: item.label,
       kind: itemKind,
-      insertText: insertTextFunc(item.label),
+      insertText: item.insertText,
       insertTextFormat: InsertTextFormat.Snippet,
+      insertTextMode: item.insertText
+        ? InsertTextMode.adjustIndentation
+        : undefined,
       documentation: {
         kind: MarkupKind.Markdown,
         value: docComment.join('\n'),
@@ -82,7 +89,6 @@ function convertAttributesToCompletionItems(
 export const corePrimitiveTypes: CompletionItem[] = convertToCompletionItems(
   completions.primitiveTypes,
   CompletionItemKind.TypeParameter,
-  (label: string) => label.replace('()', '($0)').replace('""', '"$0"'),
 )
 
 export const allowedBlockTypes: CompletionItem[] = convertToCompletionItems(
@@ -102,48 +108,70 @@ export const supportedGeneratorFields: CompletionItem[] =
     CompletionItemKind.Field,
   )
 
+export function givenBlockAttributeParams(
+  blockAttribute: string,
+): CompletionItem[] {
+  return convertToCompletionItems(
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    completions.blockAttributes.find((item) =>
+      item.label.includes(blockAttribute),
+    )!.params,
+    CompletionItemKind.Property,
+  )
+}
+
 export const blockAttributes: CompletionItem[] =
   convertAttributesToCompletionItems(
     completions.blockAttributes,
     CompletionItemKind.Property,
-    (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
   )
+
+export function givenFieldAttributeParams(
+  fieldAttribute: string,
+): CompletionItem[] {
+  return convertToCompletionItems(
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    completions.fieldAttributes.find((item) =>
+      item.label.includes(fieldAttribute),
+    )!.params,
+    CompletionItemKind.Property,
+  )
+}
 
 export const fieldAttributes: CompletionItem[] =
   convertAttributesToCompletionItems(
     completions.fieldAttributes,
     CompletionItemKind.Property,
-    (label: string) => label.replace('()', '($0)').replace('""', '"$0"'),
   )
 
 export const relationArguments: CompletionItem[] =
   convertAttributesToCompletionItems(
     completions.relationArguments,
     CompletionItemKind.Property,
-    (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
   )
+
+function givenReferentialActionParams(
+  referentialAction: 'onUpdate' | 'onDelete',
+): CompletionItem[] {
+  return convertToCompletionItems(
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    completions.relationArguments.find(
+      (item) => item.label === referentialAction,
+    )!.params,
+    CompletionItemKind.Enum,
+  )
+}
 
 export const relationOnDeleteArguments: CompletionItem[] =
-  convertToCompletionItems(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    completions.relationArguments.find((item) => item.label === 'onDelete: ')!
-      .params,
-    CompletionItemKind.Enum,
-  )
+  givenReferentialActionParams('onDelete')
 
 export const relationOnUpdateArguments: CompletionItem[] =
-  convertToCompletionItems(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    completions.relationArguments.find((item) => item.label === 'onUpdate: ')!
-      .params,
-    CompletionItemKind.Enum,
-  )
+  givenReferentialActionParams('onUpdate')
 
 export const dataSourceUrlArguments: CompletionItem[] =
   convertAttributesToCompletionItems(
     completions.datasourceUrlArguments,
     CompletionItemKind.Property,
-    (label: string) => label.replace('()', '($0)').replace('""', '"$0"'),
   )
 
 export const dataSourceProviders: CompletionItem[] = convertToCompletionItems(
@@ -155,7 +183,6 @@ export const dataSourceProviderArguments: CompletionItem[] =
   convertToCompletionItems(
     completions.datasourceProviderArguments,
     CompletionItemKind.Property,
-    (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
   )
 
 // generator.provider
@@ -169,7 +196,6 @@ export const generatorProviderArguments: CompletionItem[] =
   convertToCompletionItems(
     completions.generatorProviderArguments,
     CompletionItemKind.Property,
-    (label: string) => label.replace('""', '"$0"'),
   )
 
 // generator.engineType
@@ -182,7 +208,6 @@ export const engineTypes: CompletionItem[] = convertToCompletionItems(
 export const engineTypeArguments: CompletionItem[] = convertToCompletionItems(
   completions.engineTypeArguments,
   CompletionItemKind.Property,
-  (label: string) => label.replace('""', '"$0"'),
 )
 
 // generator.previewFeatures
@@ -190,5 +215,4 @@ export const previewFeaturesArguments: CompletionItem[] =
   convertToCompletionItems(
     completions.previewFeaturesArguments,
     CompletionItemKind.Property,
-    (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
   )

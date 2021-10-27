@@ -317,19 +317,19 @@ suite('Completions', () => {
 
   suite('BLOCK ATTRIBUTES', () => {
     const blockAttributeId = {
-      label: '@@id([])',
+      label: '@@id',
       kind: vscode.CompletionItemKind.Property,
     }
     const blockAttributeMap = {
-      label: '@@map("")',
+      label: '@@map',
       kind: vscode.CompletionItemKind.Property,
     }
     const blockAttributeUnique = {
-      label: '@@unique([])',
+      label: '@@unique',
       kind: vscode.CompletionItemKind.Property,
     }
     const blockAttributeIndex = {
-      label: '@@index([])',
+      label: '@@index',
       kind: vscode.CompletionItemKind.Property,
     }
     const blockAttributeIgnore = {
@@ -405,7 +405,7 @@ suite('Completions', () => {
             { label: 'Decimal', kind: vscode.CompletionItemKind.TypeParameter },
             { label: 'BigInt', kind: vscode.CompletionItemKind.TypeParameter },
             {
-              label: 'Unsupported("")',
+              label: 'Unsupported',
               kind: vscode.CompletionItemKind.TypeParameter,
             },
             { label: 'Test', kind: vscode.CompletionItemKind.Reference },
@@ -430,15 +430,15 @@ suite('Completions', () => {
       kind: vscode.CompletionItemKind.Property,
     }
     const fieldAttributeMap = {
-      label: '@map("")',
+      label: '@map',
       kind: vscode.CompletionItemKind.Property,
     }
     const fieldAttributeDefault = {
-      label: '@default()',
+      label: '@default',
       kind: vscode.CompletionItemKind.Property,
     }
     const fieldAttributeRelation = {
-      label: '@relation()',
+      label: '@relation',
       kind: vscode.CompletionItemKind.Property,
     }
     const fieldAttributeIgnore = {
@@ -474,19 +474,19 @@ suite('Completions', () => {
       kind: vscode.CompletionItemKind.Value,
     }
     const fieldsProperty = {
-      label: 'fields: []',
+      label: 'fields',
       kind: vscode.CompletionItemKind.Property,
     }
     const referencesProperty = {
-      label: 'references: []',
+      label: 'references',
       kind: vscode.CompletionItemKind.Property,
     }
     const onDeleteProperty = {
-      label: 'onDelete: ',
+      label: 'onDelete',
       kind: vscode.CompletionItemKind.Property,
     }
     const onUpdateProperty = {
-      label: 'onUpdate: ',
+      label: 'onUpdate',
       kind: vscode.CompletionItemKind.Property,
     }
     const nameQuotesProperty = {
@@ -494,7 +494,11 @@ suite('Completions', () => {
       kind: vscode.CompletionItemKind.Property,
     }
     const nameProperty = {
-      label: 'name: ',
+      label: 'name',
+      kind: vscode.CompletionItemKind.Property,
+    }
+    const mapProperty = {
+      label: 'map',
       kind: vscode.CompletionItemKind.Property,
     }
 
@@ -629,6 +633,7 @@ suite('Completions', () => {
           new vscode.CompletionList([
             nameQuotesProperty,
             nameProperty,
+            mapProperty,
             fieldsProperty,
             referencesProperty,
             onDeleteProperty,
@@ -656,6 +661,7 @@ suite('Completions', () => {
           new vscode.CompletionList([
             nameQuotesProperty,
             nameProperty,
+            mapProperty,
             fieldsProperty,
             onDeleteProperty,
             onUpdateProperty,
@@ -670,6 +676,7 @@ suite('Completions', () => {
           new vscode.CompletionList([
             nameQuotesProperty,
             nameProperty,
+            mapProperty,
             referencesProperty,
             onDeleteProperty,
             onUpdateProperty,
@@ -698,6 +705,7 @@ suite('Completions', () => {
           new vscode.CompletionList([
             nameQuotesProperty,
             nameProperty,
+            mapProperty,
             onDeleteProperty,
             onUpdateProperty,
           ]),
