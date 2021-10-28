@@ -131,7 +131,6 @@
         {
           "label": "name",
           "insertText": "name: \"$0\"",
-
           "documentation": "Defines the naming of the TODO WhereUnique argument in the Prisma Client."
         },
         {
