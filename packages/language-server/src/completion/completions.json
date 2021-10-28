@@ -131,7 +131,7 @@
         {
           "label": "name",
           "insertText": "name: \"$0\"",
-          "documentation": "Defines the naming of the TODO WhereUnique argument in the Prisma Client."
+          "documentation": "Defines the name in your Prisma Client API."
         },
         {
           "label": "map",
@@ -154,7 +154,7 @@
         {
           "label": "name",
           "insertText": "name: \"$0\"",
-          "documentation": "For the naming of the WhereUnique argument in Prisma Client."
+          "documentation": "Defines the name in your Prisma Client API."
         },
         {
           "label": "map",
