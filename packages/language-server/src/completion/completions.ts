@@ -1042,7 +1042,7 @@ function getSuggestionsForAttribute(
     }
 
     if (blockAtrributeArguments.length) {
-      suggestions = klona(blockAtrributeArguments)
+      suggestions = blockAtrributeArguments
     } else {
       let fieldAtrributeArguments: CompletionItem[] = []
       if (wordsBeforePosition.some((a) => a.includes('@unique'))) {
@@ -1052,7 +1052,7 @@ function getSuggestionsForAttribute(
       } else if (wordsBeforePosition.some((a) => a.includes('@index'))) {
         fieldAtrributeArguments = givenFieldAttributeParams('@index')
       }
-      suggestions = klona(fieldAtrributeArguments)
+      suggestions = fieldAtrributeArguments
     }
 
     return {
