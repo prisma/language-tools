@@ -1,0 +1,56 @@
+datasource db {
+    url      = env("DATABASE_URL")
+    provider = "postgresql"
+}
+
+// Constraint and index names
+// Testing `map:` and `name:`
+// @relation is tested in `relationDirective.prisma`
+// Docs https://www.prisma.io/docs/concepts/components/prisma-schema/names-in-underlying-database#constraint-and-index-names
+
+model AtId {
+    orderId Int @id()
+}
+
+model AtAtIdEmpty {
+    something Int
+    orderId   Int
+    @@id()
+}
+
+model AtAtId {
+    something Int
+    orderId   Int
+    @@id([orderId, something], )
+}
+
+model AtUnique {
+    email String @unique()
+}
+
+model AtAtUniqueEmpty {
+    something Int
+    email     String
+
+    @@unique()
+}
+
+model AtAtUnique {
+    something Int
+    email     String
+    @@unique([email, something], )
+}
+
+model AtIndexEmpty {
+    firstName String
+    lastName  String
+    email     String @unique
+
+    @@index()
+}
+
+model AtIndex {
+    firstName String
+    lastName String
+    @@index([firstName, lastName], )
+}

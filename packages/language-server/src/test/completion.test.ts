@@ -90,6 +90,7 @@ suite('Completions', () => {
   const modelBlocksUri = 'completions/modelBlocks.prisma'
   const enumCommentUri = 'completions/enumWithComments.prisma'
   const relationDirectiveUri = 'completions/relationDirective.prisma'
+  const namedConstraintsUri = 'completions/namedConstraints.prisma'
 
   // used both in generator and datasource
   const fieldProvider = {
@@ -879,6 +880,91 @@ suite('Completions', () => {
               { label: 'SetNull', kind: CompletionItemKind.Enum },
               { label: 'SetDefault', kind: CompletionItemKind.Enum },
             ],
+          },
+        )
+      })
+    })
+
+    suite('namedConstraints', function () {
+      test('@id(|)', () => {
+        assertCompletion(
+          namedConstraintsUri,
+          { line: 11, character: 20 },
+          {
+            isIncomplete: false,
+            items: [mapProperty],
+          },
+        )
+      })
+      test('@@id(|)', () => {
+        assertCompletion(
+          namedConstraintsUri,
+          { line: 17, character: 9 },
+          {
+            isIncomplete: false,
+            items: [fieldsProperty, nameProperty, mapProperty],
+          },
+        )
+      })
+      test('@@id([orderId, something], |)', () => {
+        assertCompletion(
+          namedConstraintsUri,
+          { line: 23, character: 31 },
+          {
+            isIncomplete: false,
+            items: [fieldsProperty, nameProperty, mapProperty],
+          },
+        )
+      })
+
+      test('@unique(|)', () => {
+        assertCompletion(
+          namedConstraintsUri,
+          { line: 27, character: 25 },
+          {
+            isIncomplete: false,
+            items: [mapProperty],
+          },
+        )
+      })
+      test('@@unique(|)', () => {
+        assertCompletion(
+          namedConstraintsUri,
+          { line: 34, character: 13 },
+          {
+            isIncomplete: false,
+            items: [fieldsProperty, nameProperty, mapProperty],
+          },
+        )
+      })
+      test('@@unique([email, something], |)', () => {
+        assertCompletion(
+          namedConstraintsUri,
+          { line: 40, character: 33 },
+          {
+            isIncomplete: false,
+            items: [fieldsProperty, nameProperty, mapProperty],
+          },
+        )
+      })
+
+      test('@@index(|)', () => {
+        assertCompletion(
+          namedConstraintsUri,
+          { line: 48, character: 12 },
+          {
+            isIncomplete: false,
+            items: [fieldsProperty, mapProperty],
+          },
+        )
+      })
+      test('@@index([firstName, lastName], |)', () => {
+        assertCompletion(
+          namedConstraintsUri,
+          { line: 54, character: 35 },
+          {
+            isIncomplete: false,
+            items: [fieldsProperty, mapProperty],
           },
         )
       })

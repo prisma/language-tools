@@ -57,6 +57,7 @@ async function testCompletion(
 }
 
 const dataSourceWithUri = getDocUri('completions/datasourceWithUrl.prisma')
+const namedConstraintsUri = getDocUri('completions/namedConstraints.prisma')
 const emptyBlocksUri = getDocUri('completions/emptyBlocks.prisma')
 const modelBlocksUri = getDocUri('completions/modelBlocks.prisma')
 const enumCommentUri = getDocUri('completions/enumWithComments.prisma')
@@ -751,6 +752,107 @@ suite('Completions', () => {
             { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
             { label: 'SetDefault', kind: vscode.CompletionItemKind.Enum },
           ]),
+          true,
+        )
+      })
+    })
+
+    suite('namedConstraints', function () {
+      test('@id(|)', async () => {
+        await activate(namedConstraintsUri)
+
+        await testCompletion(
+          namedConstraintsUri,
+          new vscode.Position(11, 20),
+          new vscode.CompletionList([mapProperty]),
+          true,
+        )
+      })
+      test('@@id(|)', async () => {
+        await activate(namedConstraintsUri)
+
+        await testCompletion(
+          namedConstraintsUri,
+          new vscode.Position(17, 9),
+          new vscode.CompletionList([
+            fieldsProperty,
+            mapProperty,
+            nameProperty,
+          ]),
+          true,
+        )
+      })
+      test('@@id([orderId, something], |)', async () => {
+        await activate(namedConstraintsUri)
+
+        await testCompletion(
+          namedConstraintsUri,
+          new vscode.Position(23, 31),
+          new vscode.CompletionList([
+            fieldsProperty,
+            mapProperty,
+            nameProperty,
+          ]),
+          true,
+        )
+      })
+
+      test('@unique(|)', async () => {
+        await activate(namedConstraintsUri)
+
+        await testCompletion(
+          namedConstraintsUri,
+          new vscode.Position(27, 25),
+          new vscode.CompletionList([mapProperty]),
+          true,
+        )
+      })
+      test('@@unique(|)', async () => {
+        await activate(namedConstraintsUri)
+
+        await testCompletion(
+          namedConstraintsUri,
+          new vscode.Position(34, 13),
+          new vscode.CompletionList([
+            fieldsProperty,
+            mapProperty,
+            nameProperty,
+          ]),
+          true,
+        )
+      })
+      test('@@unique([email, something], |)', async () => {
+        await activate(namedConstraintsUri)
+
+        await testCompletion(
+          namedConstraintsUri,
+          new vscode.Position(40, 33),
+          new vscode.CompletionList([
+            fieldsProperty,
+            mapProperty,
+            nameProperty,
+          ]),
+          true,
+        )
+      })
+
+      test('@@index(|)', async () => {
+        await activate(namedConstraintsUri)
+
+        await testCompletion(
+          namedConstraintsUri,
+          new vscode.Position(48, 12),
+          new vscode.CompletionList([fieldsProperty, mapProperty]),
+          true,
+        )
+      })
+      test('@@index([firstName, lastName], |)', async () => {
+        await activate(namedConstraintsUri)
+
+        await testCompletion(
+          namedConstraintsUri,
+          new vscode.Position(54, 35),
+          new vscode.CompletionList([fieldsProperty, mapProperty]),
           true,
         )
       })
