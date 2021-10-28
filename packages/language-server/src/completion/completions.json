@@ -52,66 +52,54 @@
   "blockTypes": [
     {
       "label": "datasource",
-      "insertText": "datasource $1 {\n\tprovider = \"$2\"\n\turl      = $3\n}",
       "documentation": "The datasource block tells the schema where the models are backed."
     },
     {
       "label": "generator",
-      "insertText": "generator ${1|client,\"\"|} {\n\tprovider = ${2|\"prisma-client-js\",\"\"|}\n}",
       "documentation": "Generator blocks configure which clients are generated and how they're generated. Language preferences and binary configuration will go in here."
     },
     {
       "label": "model",
-      "insertText": "model $1 {\n\t$0\n}",
       "documentation": "Models represent the entities of your application domain. They are defined using model blocks in the data model."
     },
     {
       "label": "enum",
-      "insertText": "enum $1 {\n\t$0\n}",
       "documentation": "Enums are defined via the enum block. You can define enums in your data model if they're supported by the data source you use:\n• PostgreSQL: Supported\n• MySQL: Supported\n• MariaDB: Supported\n• SQLite: Not supported"
     }
   ],
   "dataSourceFields": [
     {
       "label": "provider",
-      "insertText": "provider = ${1|sqlite,postgresql,mysql,sqlserver,mongodb|}",
       "documentation": "Describes which data source connector to use. Can be one of the following built in datasource providers: `postgresql`, `mysql` or `sqlite`."
     },
     {
       "label": "url",
-      "insertText": "url = env(\"$0\")",
       "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database, [learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema)."
     },
     {
       "label": "shadowDatabaseUrl",
-      "insertText": "shadowDatabaseUrl = env(\"$0\")",
       "documentation": "Connection URL including authentication info to use for Migrate's [shadow database](https://www.prisma.io/docs/concepts/components/prisma-migrate#shadow-database). Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database."
     }
   ],
   "generatorFields": [
     {
       "label": "provider",
-      "insertText": "provider = ${1|prisma-client-js,\"\"|}",
       "documentation": "Describes which generator to use. This can point to a file that implements a generator or specify a built-in generator directly."
     },
     {
       "label": "output",
-      "insertText": "output = \"$0\"",
       "documentation": "Determines the location for the generated client, [learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema)"
     },
     {
       "label": "binaryTargets",
-      "insertText": "binaryTargets = [\"$0\"]",
       "documentation": "Specifies the OS on which the Prisma Client will run to ensure binary compatibility of the query engine."
     },
     {
       "label": "previewFeatures",
-      "insertText": "previewFeatures = [\"$0\"]",
       "documentation": "Enables preview feature flags."
     },
     {
       "label": "engineType",
-      "insertText": "engineType = ${1|library,binary|}",
       "documentation": "Defines the query engine type for Prisma Client."
     }
   ],
