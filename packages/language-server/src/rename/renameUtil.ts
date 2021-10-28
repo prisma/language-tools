@@ -2,7 +2,7 @@ import { Position } from 'vscode-languageserver'
 import { TextEdit, TextDocument } from 'vscode-languageserver-textdocument'
 import {
   getTypesFromCurrentBlock,
-  getValuesInsideBrackets,
+  getValuesInsideSquareBrackets,
   getAllRelationNames,
 } from '../completion/completions'
 import {
@@ -261,7 +261,7 @@ export function renameReferencesForFieldValue(
         indexOfFieldEnd + 1,
       )
       const indexOfFoundValue = fields.indexOf(currentValue)
-      const fieldValues = getValuesInsideBrackets(fields)
+      const fieldValues = getValuesInsideSquareBrackets(fields)
       if (indexOfFoundValue !== -1 && fieldValues.includes(currentValue)) {
         // found a referenced field
         edits.push({
@@ -286,7 +286,8 @@ export function renameReferencesForFieldValue(
       item.includes(currentValue)
     ) {
       const currentLineUntrimmed = getCurrentLine(document, key)
-      const valuesInsideBracket = getValuesInsideBrackets(currentLineUntrimmed)
+      const valuesInsideBracket =
+        getValuesInsideSquareBrackets(currentLineUntrimmed)
       if (valuesInsideBracket.includes(currentValue)) {
         const indexOfCurrentValue = currentLineUntrimmed.indexOf(currentValue)
         edits.push({
@@ -324,7 +325,7 @@ export function renameReferencesForFieldValue(
         indexOfReferencesEnd + 1,
       )
       const indexOfFoundValue = references.indexOf(currentValue)
-      const referenceValues = getValuesInsideBrackets(references)
+      const referenceValues = getValuesInsideSquareBrackets(references)
       if (indexOfFoundValue !== -1 && referenceValues.includes(currentValue)) {
         edits.push({
           range: {

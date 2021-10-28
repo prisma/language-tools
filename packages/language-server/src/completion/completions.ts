@@ -24,6 +24,8 @@ import {
   previewFeaturesArguments,
   engineTypes,
   engineTypeArguments,
+  givenBlockAttributeParams,
+  givenFieldAttributeParams,
 } from './completionUtil'
 import { klona } from 'klona'
 import { extractModelName } from '../rename/renameUtil'
@@ -133,6 +135,7 @@ function removeInvalidAttributeSuggestions(
     }
 
     // TODO we should also remove the other suggestions if used (default()...)
+
     if (item.includes('@id')) {
       supportedAttributes = supportedAttributes.filter(
         (attribute) => !attribute.label.includes('id'),
@@ -151,9 +154,7 @@ function getSuggestionForModelBlockAttribute(
   }
   // create deep copy
   let suggestions: CompletionItem[] = klona(blockAttributes)
-
   suggestions = removeInvalidAttributeSuggestions(suggestions, block, lines)
-
   return suggestions
 }
 
@@ -284,7 +285,6 @@ export function getSuggestionsForTypes(
   currentLineUntrimmed: string,
 ): CompletionList {
   // create deep copy
-
   const suggestions: CompletionItem[] = klona(corePrimitiveTypes)
   if (foundBlock instanceof Block) {
     // get all model names
@@ -464,7 +464,7 @@ export function suggestEqualSymbol(
   }
 }
 
-export function getValuesInsideBrackets(line: string): string[] {
+export function getValuesInsideSquareBrackets(line: string): string[] {
   const regexp = /\[([^\]]+)\]/
   const matches = regexp.exec(line)
   if (!matches || !matches[1]) {
@@ -496,7 +496,7 @@ function handlePreviewFeatures(
   )
   if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
     if (isInsideQuotation) {
-      const usedValues = getValuesInsideBrackets(currentLineUntrimmed)
+      const usedValues = getValuesInsideSquareBrackets(currentLineUntrimmed)
       previewFeatures = previewFeatures.filter(
         (t) => !usedValues.includes(t.label),
       )
@@ -630,7 +630,8 @@ export function getSuggestionForSupportedFields(
         if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
           // return providers that haven't been used yet
           if (isInsideQuotation) {
-            const usedValues = getValuesInsideBrackets(currentLineUntrimmed)
+            const usedValues =
+              getValuesInsideSquareBrackets(currentLineUntrimmed)
             providers = providers.filter((t) => !usedValues.includes(t.label))
             return {
               items: providers,
@@ -764,7 +765,7 @@ function getDefaultValues(
 }
 
 // checks if e.g. inside 'fields' or 'references' attribute
-function isInsideFieldsOrReferences(
+function isInsideGivenProperty(
   currentLineUntrimmed: string,
   wordsBeforePosition: Array<string>,
   attributeName: string,
@@ -773,29 +774,30 @@ function isInsideFieldsOrReferences(
   if (!isInsideAttribute(currentLineUntrimmed, position, '[]')) {
     return false
   }
-  // check if in fields or references
-  const indexOfFields = wordsBeforePosition.findIndex((word) =>
-    word.includes('fields'),
-  )
-  const indexOfReferences = wordsBeforePosition.findIndex((word) =>
-    word.includes('references'),
-  )
-  if (indexOfFields === -1 && indexOfReferences === -1) {
+
+  // We sort all attributes by their position
+  const sortedAttributes = [
+    {
+      name: 'fields',
+      position: wordsBeforePosition.findIndex((word) =>
+        word.includes('fields'),
+      ),
+    },
+    {
+      name: 'references',
+      position: wordsBeforePosition.findIndex((word) =>
+        word.includes('references'),
+      ),
+    },
+  ].sort((a, b) => (a.position < b.position ? 1 : -1))
+
+  // If the last attribute (higher position)
+  // is the one we are looking for we are in this attribute
+  if (sortedAttributes[0].name === attributeName) {
+    return true
+  } else {
     return false
   }
-  if (
-    (indexOfFields === -1 && attributeName === 'fields') ||
-    (indexOfReferences === -1 && attributeName === 'references')
-  ) {
-    return false
-  }
-  if (attributeName === 'references') {
-    return indexOfReferences > indexOfFields
-  }
-  if (attributeName === 'fields') {
-    return indexOfFields > indexOfReferences
-  }
-  return false
 }
 
 function getFieldsFromCurrentBlock(
@@ -885,18 +887,27 @@ function getFieldType(line: string): string | undefined {
 //   )
 // }
 
-// @relation
-function getSuggestionsForRelationDirective(
-  wordsBeforePosition: string[],
-  currentLineUntrimmed: string,
-  lines: string[],
-  document: TextDocument, // eslint-disable-line @typescript-eslint/no-unused-vars
-  block: Block,
-  position: Position,
-  binPath: string, // eslint-disable-line @typescript-eslint/no-unused-vars
+function getSuggestionsForAttribute(
+  {
+    attribute,
+    wordsBeforePosition,
+    untrimmedCurrentLine,
+    lines,
+    block,
+    position,
+    document,
+    binPath,
+  }: {
+    attribute?: '@relation'
+    wordsBeforePosition: string[]
+    untrimmedCurrentLine: string
+    lines: string[]
+    block: Block
+    position: Position
+    document: TextDocument
+    binPath: string
+  }, // eslint-disable-line @typescript-eslint/no-unused-vars
 ): CompletionList | undefined {
-  // create deep copy
-  const suggestions: CompletionItem[] = klona(relationArguments)
   const firstWordBeforePosition =
     wordsBeforePosition[wordsBeforePosition.length - 1]
   const secondWordBeforePosition =
@@ -905,97 +916,152 @@ function getSuggestionsForRelationDirective(
     firstWordBeforePosition === ''
       ? secondWordBeforePosition
       : firstWordBeforePosition
-  const stringTilPosition = currentLineUntrimmed
+  const stringTilPosition = untrimmedCurrentLine
     .slice(0, position.character)
     .trim()
 
-  // This is basically hardcoding the suggestions
-  // because prisma-format referential-actions returns an empty array [] most of the time
-  // Main issue is that "Restrict" should be excluded if on SQL Server
-  //
-  // Note: needs to be before @relation condition because
-  // `@relation(onUpdate: |)` means wordBeforePosition = '@relation(onUpdate:'
-  if (wordBeforePosition.includes('onDelete:')) {
-    return {
-      items: relationOnDeleteArguments,
-      isIncomplete: false,
+  let suggestions: CompletionItem[] = []
+  // create deep copy with klona
+  if (attribute === '@relation') {
+    suggestions = klona(relationArguments)
+    // This is basically hardcoding the suggestions
+    // because prisma-format referential-actions returns an empty array [] most of the time
+    // Main issue is that "Restrict" should be excluded if on SQL Server
+    //
+    // Note: needs to be before @relation condition because
+    // `@relation(onUpdate: |)` means wordBeforePosition = '@relation(onUpdate:'
+    if (wordBeforePosition.includes('onDelete:')) {
+      return {
+        items: relationOnDeleteArguments,
+        isIncomplete: false,
+      }
     }
-  }
-  if (wordBeforePosition.includes('onUpdate:')) {
-    return {
-      items: relationOnUpdateArguments,
-      isIncomplete: false,
+    if (wordBeforePosition.includes('onUpdate:')) {
+      return {
+        items: relationOnUpdateArguments,
+        isIncomplete: false,
+      }
     }
-  }
 
-  // If we are right after @relation(
-  if (wordBeforePosition.includes('@relation')) {
+    // If we are right after @relation(
+    if (wordBeforePosition.includes('@relation')) {
+      return {
+        items: suggestions,
+        isIncomplete: false,
+      }
+    }
+
+    // Doesn't really work because prisma-fmt returns nothing when the schema is "invalid"
+    // but that also means that the schema is considered invalid when trying to autocomplete...
+    //
+    // if lastWord = onUpdate or onDelete
+    // then get suggestions by passing `referential-actions` arg to `prisma-fmt`
+    // if (definingReferentialAction(wordsBeforePosition)) {
+    //   const suggestionsForReferentialActions: CompletionItem[] = referentialActions(
+    //     binPath,
+    //     document.getText(),
+    //   ).map((action) => {
+    //     return CompletionItem.create(action)
+    //   })
+
+    //   return {
+    //     items: suggestionsForReferentialActions,
+    //     isIncomplete: false,
+    //   }
+    // }
+
+    if (
+      isInsideGivenProperty(
+        untrimmedCurrentLine,
+        wordsBeforePosition,
+        'fields',
+        position,
+      )
+    ) {
+      return {
+        items: toCompletionItems(
+          getFieldsFromCurrentBlock(lines, block, position),
+          CompletionItemKind.Field,
+        ),
+        isIncomplete: false,
+      }
+    }
+
+    if (
+      isInsideGivenProperty(
+        untrimmedCurrentLine,
+        wordsBeforePosition,
+        'references',
+        position,
+      )
+    ) {
+      const referencedModelName = wordsBeforePosition[1].replace('?', '')
+      const referencedBlock = getModelOrEnumBlock(referencedModelName, lines)
+      // referenced model does not exist
+      if (!referencedBlock || referencedBlock.type !== 'model') {
+        return
+      }
+      return {
+        items: toCompletionItems(
+          getFieldsFromCurrentBlock(lines, referencedBlock),
+          CompletionItemKind.Field,
+        ),
+        isIncomplete: false,
+      }
+    }
+  } else {
+    // @id, @unique, @index
+    // @@id, @@unique, @@index
+
+    if (isInsideAttribute(untrimmedCurrentLine, position, '[]')) {
+      let items = getFieldsFromCurrentBlock(lines, block, position)
+      // get parameters inside block attribute
+      const parameterMatch = new RegExp(/(?<=\[).+?(?=\])/).exec(
+        untrimmedCurrentLine,
+      )
+      if (parameterMatch) {
+        const existingParameters = parameterMatch[0]
+          .split(',')
+          .map((param) => param.trim())
+        items = items.filter((s) => !existingParameters.includes(s))
+      }
+
+      return {
+        items: toCompletionItems(items, CompletionItemKind.Field),
+        isIncomplete: false,
+      }
+    }
+
+    let blockAtrributeArguments: CompletionItem[] = []
+    if (wordsBeforePosition.some((a) => a.includes('@@unique'))) {
+      blockAtrributeArguments = givenBlockAttributeParams('@@unique')
+    } else if (wordsBeforePosition.some((a) => a.includes('@@id'))) {
+      blockAtrributeArguments = givenBlockAttributeParams('@@id')
+    } else if (wordsBeforePosition.some((a) => a.includes('@@index'))) {
+      blockAtrributeArguments = givenBlockAttributeParams('@@index')
+    }
+
+    if (blockAtrributeArguments.length) {
+      suggestions = blockAtrributeArguments
+    } else {
+      let fieldAtrributeArguments: CompletionItem[] = []
+      if (wordsBeforePosition.some((a) => a.includes('@unique'))) {
+        fieldAtrributeArguments = givenFieldAttributeParams('@unique')
+      } else if (wordsBeforePosition.some((a) => a.includes('@id'))) {
+        fieldAtrributeArguments = givenFieldAttributeParams('@id')
+      } else if (wordsBeforePosition.some((a) => a.includes('@index'))) {
+        fieldAtrributeArguments = givenFieldAttributeParams('@index')
+      }
+      suggestions = fieldAtrributeArguments
+    }
+
     return {
       items: suggestions,
       isIncomplete: false,
     }
   }
 
-  // Doesn't really work because prisma-fmt returns nothing when the schema is "invalid"
-  // but that also means that the schema is considered invalid when trying to autocomplete...
-  //
-  // if lastWord = onUpdate or onDelete
-  // then get suggestions by passing `referential-actions` arg to `prisma-fmt`
-  // if (definingReferentialAction(wordsBeforePosition)) {
-  //   const suggestionsForReferentialActions: CompletionItem[] = referentialActions(
-  //     binPath,
-  //     document.getText(),
-  //   ).map((action) => {
-  //     return CompletionItem.create(action)
-  //   })
-
-  //   return {
-  //     items: suggestionsForReferentialActions,
-  //     isIncomplete: false,
-  //   }
-  // }
-
-  if (
-    isInsideFieldsOrReferences(
-      currentLineUntrimmed,
-      wordsBeforePosition,
-      'fields',
-      position,
-    )
-  ) {
-    return {
-      items: toCompletionItems(
-        getFieldsFromCurrentBlock(lines, block, position),
-        CompletionItemKind.Field,
-      ),
-      isIncomplete: false,
-    }
-  }
-
-  if (
-    isInsideFieldsOrReferences(
-      currentLineUntrimmed,
-      wordsBeforePosition,
-      'references',
-      position,
-    )
-  ) {
-    const referencedModelName = wordsBeforePosition[1].replace('?', '')
-    const referencedBlock = getModelOrEnumBlock(referencedModelName, lines)
-
-    // referenced model does not exist
-    if (!referencedBlock || referencedBlock.type !== 'model') {
-      return
-    }
-    return {
-      items: toCompletionItems(
-        getFieldsFromCurrentBlock(lines, referencedBlock),
-        CompletionItemKind.Field,
-      ),
-      isIncomplete: false,
-    }
-  }
-
+  // Example: @relation(fields: [authorId], references: [id], |)
   if (stringTilPosition.endsWith(',')) {
     // Check which attributes are already present
     // so we can filter them out from the suggestions
@@ -1013,6 +1079,9 @@ function getSuggestionsForRelationDirective(
       }
       if (word.includes('onDelete')) {
         attributesFound.add('onDelete')
+      }
+      if (word.includes('map')) {
+        attributesFound.add('map')
       }
       if (word.includes('name') || /".*"/.exec(word)) {
         attributesFound.add('name')
@@ -1051,7 +1120,7 @@ function getSuggestionsForRelationDirective(
   }
 }
 
-export function getSuggestionsForInsideAttributes(
+export function getSuggestionsForInsideRoundBrackets(
   untrimmedCurrentLine: string,
   lines: Array<string>,
   document: TextDocument,
@@ -1059,7 +1128,6 @@ export function getSuggestionsForInsideAttributes(
   block: Block,
   binPath: string,
 ): CompletionList | undefined {
-  let suggestions: Array<string> = []
   const wordsBeforePosition = untrimmedCurrentLine
     .slice(0, position.character)
     .trimLeft()
@@ -1072,25 +1140,9 @@ export function getSuggestionsForInsideAttributes(
       items: getDefaultValues(lines[position.line], lines),
       isIncomplete: false,
     }
-  } else if (
-    wordsBeforePosition.some(
-      (a) =>
-        a.includes('@@unique') || a.includes('@@id') || a.includes('@@index'),
-    )
-  ) {
-    suggestions = getFieldsFromCurrentBlock(lines, block, position)
-    // get parameters inside block attribute
-    const parameterMatch = new RegExp(/(?<=\[).+?(?=\])/).exec(
-      untrimmedCurrentLine,
-    )
-    if (parameterMatch) {
-      const existingParameters = parameterMatch[0]
-        .split(',')
-        .map((par) => par.trim())
-      suggestions = suggestions.filter((s) => !existingParameters.includes(s))
-    }
   } else if (wordsBeforePosition.some((a) => a.includes('@relation'))) {
-    return getSuggestionsForRelationDirective(
+    return getSuggestionsForAttribute({
+      attribute: '@relation',
       wordsBeforePosition,
       untrimmedCurrentLine,
       lines,
@@ -1098,10 +1150,28 @@ export function getSuggestionsForInsideAttributes(
       block,
       position,
       binPath,
+    })
+  } else if (
+    wordsBeforePosition.some(
+      (a) => a.includes('@unique') || a.includes('@id') || a.includes('@index'),
     )
-  }
-  return {
-    items: toCompletionItems(suggestions, CompletionItemKind.Field),
-    isIncomplete: false,
+  ) {
+    // matches
+    // @id, @unique, @index
+    // @@id, @@unique, @@index
+    return getSuggestionsForAttribute({
+      wordsBeforePosition,
+      untrimmedCurrentLine,
+      lines,
+      document,
+      block,
+      position,
+      binPath,
+    })
+  } else {
+    return {
+      items: toCompletionItems([], CompletionItemKind.Field),
+      isIncomplete: false,
+    }
   }
 }

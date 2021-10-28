@@ -90,6 +90,7 @@ suite('Completions', () => {
   const modelBlocksUri = 'completions/modelBlocks.prisma'
   const enumCommentUri = 'completions/enumWithComments.prisma'
   const relationDirectiveUri = 'completions/relationDirective.prisma'
+  const namedConstraintsUri = 'completions/namedConstraints.prisma'
 
   // used both in generator and datasource
   const fieldProvider = {
@@ -357,19 +358,19 @@ suite('Completions', () => {
 
   suite('BLOCK ATTRIBUTES', () => {
     const blockAttributeId = {
-      label: '@@id([])',
+      label: '@@id',
       kind: CompletionItemKind.Property,
     }
     const blockAttributeMap = {
-      label: '@@map("")',
+      label: '@@map',
       kind: CompletionItemKind.Property,
     }
     const blockAttributeUnique = {
-      label: '@@unique([])',
+      label: '@@unique',
       kind: CompletionItemKind.Property,
     }
     const blockAttributeIndex = {
-      label: '@@index([])',
+      label: '@@index',
       kind: CompletionItemKind.Property,
     }
     const blockAttributeIgnore = {
@@ -443,7 +444,7 @@ suite('Completions', () => {
             { label: 'Decimal', kind: CompletionItemKind.TypeParameter },
             { label: 'BigInt', kind: CompletionItemKind.TypeParameter },
             {
-              label: 'Unsupported("")',
+              label: 'Unsupported',
               kind: CompletionItemKind.TypeParameter,
             },
             { label: 'User', kind: CompletionItemKind.Reference },
@@ -474,15 +475,15 @@ suite('Completions', () => {
       kind: CompletionItemKind.Property,
     }
     const fieldAttributeMap = {
-      label: '@map("")',
+      label: '@map',
       kind: CompletionItemKind.Property,
     }
     const fieldAttributeDefault = {
-      label: '@default()',
+      label: '@default',
       kind: CompletionItemKind.Property,
     }
     const fieldAttributeRelation = {
-      label: '@relation()',
+      label: '@relation',
       kind: CompletionItemKind.Property,
     }
     const fieldAttributeUpdatedAt = {
@@ -532,19 +533,19 @@ suite('Completions', () => {
     }
 
     const fieldsProperty = {
-      label: 'fields: []',
+      label: 'fields',
       kind: CompletionItemKind.Property,
     }
     const referencesProperty = {
-      label: 'references: []',
+      label: 'references',
       kind: CompletionItemKind.Property,
     }
     const onDeleteProperty = {
-      label: 'onDelete: ',
+      label: 'onDelete',
       kind: CompletionItemKind.Property,
     }
     const onUpdateProperty = {
-      label: 'onUpdate: ',
+      label: 'onUpdate',
       kind: CompletionItemKind.Property,
     }
     const nameQuotesProperty = {
@@ -552,7 +553,11 @@ suite('Completions', () => {
       kind: CompletionItemKind.Property,
     }
     const nameProperty = {
-      label: 'name: ',
+      label: 'name',
+      kind: CompletionItemKind.Property,
+    }
+    const mapProperty = {
+      label: 'map',
       kind: CompletionItemKind.Property,
     }
 
@@ -745,6 +750,7 @@ suite('Completions', () => {
               onUpdateProperty,
               nameQuotesProperty,
               nameProperty,
+              mapProperty,
             ],
           },
         )
@@ -775,6 +781,7 @@ suite('Completions', () => {
               onUpdateProperty,
               nameQuotesProperty,
               nameProperty,
+              mapProperty,
             ],
           },
         )
@@ -791,6 +798,7 @@ suite('Completions', () => {
               onUpdateProperty,
               nameQuotesProperty,
               nameProperty,
+              mapProperty,
             ],
           },
         )
@@ -822,6 +830,7 @@ suite('Completions', () => {
               onUpdateProperty,
               nameQuotesProperty,
               nameProperty,
+              mapProperty,
             ],
           },
         )
@@ -871,6 +880,91 @@ suite('Completions', () => {
               { label: 'SetNull', kind: CompletionItemKind.Enum },
               { label: 'SetDefault', kind: CompletionItemKind.Enum },
             ],
+          },
+        )
+      })
+    })
+
+    suite('namedConstraints', function () {
+      test('@id(|)', () => {
+        assertCompletion(
+          namedConstraintsUri,
+          { line: 11, character: 20 },
+          {
+            isIncomplete: false,
+            items: [mapProperty],
+          },
+        )
+      })
+      test('@@id(|)', () => {
+        assertCompletion(
+          namedConstraintsUri,
+          { line: 17, character: 9 },
+          {
+            isIncomplete: false,
+            items: [fieldsProperty, nameProperty, mapProperty],
+          },
+        )
+      })
+      test('@@id([orderId, something], |)', () => {
+        assertCompletion(
+          namedConstraintsUri,
+          { line: 23, character: 31 },
+          {
+            isIncomplete: false,
+            items: [fieldsProperty, nameProperty, mapProperty],
+          },
+        )
+      })
+
+      test('@unique(|)', () => {
+        assertCompletion(
+          namedConstraintsUri,
+          { line: 27, character: 25 },
+          {
+            isIncomplete: false,
+            items: [mapProperty],
+          },
+        )
+      })
+      test('@@unique(|)', () => {
+        assertCompletion(
+          namedConstraintsUri,
+          { line: 34, character: 13 },
+          {
+            isIncomplete: false,
+            items: [fieldsProperty, nameProperty, mapProperty],
+          },
+        )
+      })
+      test('@@unique([email, something], |)', () => {
+        assertCompletion(
+          namedConstraintsUri,
+          { line: 40, character: 33 },
+          {
+            isIncomplete: false,
+            items: [fieldsProperty, nameProperty, mapProperty],
+          },
+        )
+      })
+
+      test('@@index(|)', () => {
+        assertCompletion(
+          namedConstraintsUri,
+          { line: 48, character: 12 },
+          {
+            isIncomplete: false,
+            items: [fieldsProperty, mapProperty],
+          },
+        )
+      })
+      test('@@index([firstName, lastName], |)', () => {
+        assertCompletion(
+          namedConstraintsUri,
+          { line: 54, character: 35 },
+          {
+            isIncomplete: false,
+            items: [fieldsProperty, mapProperty],
           },
         )
       })

@@ -57,6 +57,7 @@ async function testCompletion(
 }
 
 const dataSourceWithUri = getDocUri('completions/datasourceWithUrl.prisma')
+const namedConstraintsUri = getDocUri('completions/namedConstraints.prisma')
 const emptyBlocksUri = getDocUri('completions/emptyBlocks.prisma')
 const modelBlocksUri = getDocUri('completions/modelBlocks.prisma')
 const enumCommentUri = getDocUri('completions/enumWithComments.prisma')
@@ -317,19 +318,19 @@ suite('Completions', () => {
 
   suite('BLOCK ATTRIBUTES', () => {
     const blockAttributeId = {
-      label: '@@id([])',
+      label: '@@id',
       kind: vscode.CompletionItemKind.Property,
     }
     const blockAttributeMap = {
-      label: '@@map("")',
+      label: '@@map',
       kind: vscode.CompletionItemKind.Property,
     }
     const blockAttributeUnique = {
-      label: '@@unique([])',
+      label: '@@unique',
       kind: vscode.CompletionItemKind.Property,
     }
     const blockAttributeIndex = {
-      label: '@@index([])',
+      label: '@@index',
       kind: vscode.CompletionItemKind.Property,
     }
     const blockAttributeIgnore = {
@@ -405,7 +406,7 @@ suite('Completions', () => {
             { label: 'Decimal', kind: vscode.CompletionItemKind.TypeParameter },
             { label: 'BigInt', kind: vscode.CompletionItemKind.TypeParameter },
             {
-              label: 'Unsupported("")',
+              label: 'Unsupported',
               kind: vscode.CompletionItemKind.TypeParameter,
             },
             { label: 'Test', kind: vscode.CompletionItemKind.Reference },
@@ -430,15 +431,15 @@ suite('Completions', () => {
       kind: vscode.CompletionItemKind.Property,
     }
     const fieldAttributeMap = {
-      label: '@map("")',
+      label: '@map',
       kind: vscode.CompletionItemKind.Property,
     }
     const fieldAttributeDefault = {
-      label: '@default()',
+      label: '@default',
       kind: vscode.CompletionItemKind.Property,
     }
     const fieldAttributeRelation = {
-      label: '@relation()',
+      label: '@relation',
       kind: vscode.CompletionItemKind.Property,
     }
     const fieldAttributeIgnore = {
@@ -474,19 +475,19 @@ suite('Completions', () => {
       kind: vscode.CompletionItemKind.Value,
     }
     const fieldsProperty = {
-      label: 'fields: []',
+      label: 'fields',
       kind: vscode.CompletionItemKind.Property,
     }
     const referencesProperty = {
-      label: 'references: []',
+      label: 'references',
       kind: vscode.CompletionItemKind.Property,
     }
     const onDeleteProperty = {
-      label: 'onDelete: ',
+      label: 'onDelete',
       kind: vscode.CompletionItemKind.Property,
     }
     const onUpdateProperty = {
-      label: 'onUpdate: ',
+      label: 'onUpdate',
       kind: vscode.CompletionItemKind.Property,
     }
     const nameQuotesProperty = {
@@ -494,7 +495,11 @@ suite('Completions', () => {
       kind: vscode.CompletionItemKind.Property,
     }
     const nameProperty = {
-      label: 'name: ',
+      label: 'name',
+      kind: vscode.CompletionItemKind.Property,
+    }
+    const mapProperty = {
+      label: 'map',
       kind: vscode.CompletionItemKind.Property,
     }
 
@@ -629,6 +634,7 @@ suite('Completions', () => {
           new vscode.CompletionList([
             nameQuotesProperty,
             nameProperty,
+            mapProperty,
             fieldsProperty,
             referencesProperty,
             onDeleteProperty,
@@ -656,6 +662,7 @@ suite('Completions', () => {
           new vscode.CompletionList([
             nameQuotesProperty,
             nameProperty,
+            mapProperty,
             fieldsProperty,
             onDeleteProperty,
             onUpdateProperty,
@@ -670,6 +677,7 @@ suite('Completions', () => {
           new vscode.CompletionList([
             nameQuotesProperty,
             nameProperty,
+            mapProperty,
             referencesProperty,
             onDeleteProperty,
             onUpdateProperty,
@@ -698,6 +706,7 @@ suite('Completions', () => {
           new vscode.CompletionList([
             nameQuotesProperty,
             nameProperty,
+            mapProperty,
             onDeleteProperty,
             onUpdateProperty,
           ]),
@@ -743,6 +752,107 @@ suite('Completions', () => {
             { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
             { label: 'SetDefault', kind: vscode.CompletionItemKind.Enum },
           ]),
+          true,
+        )
+      })
+    })
+
+    suite('namedConstraints', function () {
+      test('@id(|)', async () => {
+        await activate(namedConstraintsUri)
+
+        await testCompletion(
+          namedConstraintsUri,
+          new vscode.Position(11, 20),
+          new vscode.CompletionList([mapProperty]),
+          true,
+        )
+      })
+      test('@@id(|)', async () => {
+        await activate(namedConstraintsUri)
+
+        await testCompletion(
+          namedConstraintsUri,
+          new vscode.Position(17, 9),
+          new vscode.CompletionList([
+            fieldsProperty,
+            mapProperty,
+            nameProperty,
+          ]),
+          true,
+        )
+      })
+      test('@@id([orderId, something], |)', async () => {
+        await activate(namedConstraintsUri)
+
+        await testCompletion(
+          namedConstraintsUri,
+          new vscode.Position(23, 31),
+          new vscode.CompletionList([
+            fieldsProperty,
+            mapProperty,
+            nameProperty,
+          ]),
+          true,
+        )
+      })
+
+      test('@unique(|)', async () => {
+        await activate(namedConstraintsUri)
+
+        await testCompletion(
+          namedConstraintsUri,
+          new vscode.Position(27, 25),
+          new vscode.CompletionList([mapProperty]),
+          true,
+        )
+      })
+      test('@@unique(|)', async () => {
+        await activate(namedConstraintsUri)
+
+        await testCompletion(
+          namedConstraintsUri,
+          new vscode.Position(34, 13),
+          new vscode.CompletionList([
+            fieldsProperty,
+            mapProperty,
+            nameProperty,
+          ]),
+          true,
+        )
+      })
+      test('@@unique([email, something], |)', async () => {
+        await activate(namedConstraintsUri)
+
+        await testCompletion(
+          namedConstraintsUri,
+          new vscode.Position(40, 33),
+          new vscode.CompletionList([
+            fieldsProperty,
+            mapProperty,
+            nameProperty,
+          ]),
+          true,
+        )
+      })
+
+      test('@@index(|)', async () => {
+        await activate(namedConstraintsUri)
+
+        await testCompletion(
+          namedConstraintsUri,
+          new vscode.Position(48, 12),
+          new vscode.CompletionList([fieldsProperty, mapProperty]),
+          true,
+        )
+      })
+      test('@@index([firstName, lastName], |)', async () => {
+        await activate(namedConstraintsUri)
+
+        await testCompletion(
+          namedConstraintsUri,
+          new vscode.Position(54, 35),
+          new vscode.CompletionList([fieldsProperty, mapProperty]),
           true,
         )
       })

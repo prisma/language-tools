@@ -36,7 +36,7 @@ import {
   getSuggestionForBlockTypes,
   getSuggestionForFirstInsideBlock,
   getSuggestionForSupportedFields,
-  getSuggestionsForInsideAttributes,
+  getSuggestionsForInsideRoundBrackets,
   positionIsAfterFieldAndType,
   isInsideAttribute,
   getSymbolBeforePosition,
@@ -334,7 +334,7 @@ export function handleCompletionRequest(
     case 'model':
       // check if inside attribute
       if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
-        return getSuggestionsForInsideAttributes(
+        return getSuggestionsForInsideRoundBrackets(
           currentLineUntrimmed,
           lines,
           document,
