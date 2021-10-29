@@ -1,16 +1,16 @@
 import { Position } from 'vscode-languageserver'
 import { TextEdit, TextDocument } from 'vscode-languageserver-textdocument'
 import {
-  getCurrentLine,
-  Block,
-  getBlockAtPosition,
-  getWordAtPosition,
-} from '../MessageHandler'
-import {
   getTypesFromCurrentBlock,
-  getValuesInsideBrackets,
+  getValuesInsideSquareBrackets,
   getAllRelationNames,
 } from '../completion/completions'
+import {
+  Block,
+  getCurrentLine,
+  getWordAtPosition,
+  getBlockAtPosition,
+} from '../util'
 
 function extractFirstWord(line: string): string {
   return line.replace(/ .*/, '')
@@ -261,7 +261,7 @@ export function renameReferencesForFieldValue(
         indexOfFieldEnd + 1,
       )
       const indexOfFoundValue = fields.indexOf(currentValue)
-      const fieldValues = getValuesInsideBrackets(fields)
+      const fieldValues = getValuesInsideSquareBrackets(fields)
       if (indexOfFoundValue !== -1 && fieldValues.includes(currentValue)) {
         // found a referenced field
         edits.push({
@@ -286,7 +286,8 @@ export function renameReferencesForFieldValue(
       item.includes(currentValue)
     ) {
       const currentLineUntrimmed = getCurrentLine(document, key)
-      const valuesInsideBracket = getValuesInsideBrackets(currentLineUntrimmed)
+      const valuesInsideBracket =
+        getValuesInsideSquareBrackets(currentLineUntrimmed)
       if (valuesInsideBracket.includes(currentValue)) {
         const indexOfCurrentValue = currentLineUntrimmed.indexOf(currentValue)
         edits.push({
@@ -324,7 +325,7 @@ export function renameReferencesForFieldValue(
         indexOfReferencesEnd + 1,
       )
       const indexOfFoundValue = references.indexOf(currentValue)
-      const referenceValues = getValuesInsideBrackets(references)
+      const referenceValues = getValuesInsideSquareBrackets(references)
       if (indexOfFoundValue !== -1 && referenceValues.includes(currentValue)) {
         edits.push({
           range: {

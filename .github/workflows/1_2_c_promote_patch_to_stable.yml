@@ -4,17 +4,17 @@ name: 1/2c. Bump versions for extension only (promotes patch branch to stable re
 # This is used to manually promote the patch branch to stable and release a new stable version.
 
 on:
-    workflow_dispatch: 
+  workflow_dispatch:
 
 env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
-  PRISMA_TELEMETRY_INFORMATION: "language-tools 1_2_c_promote_patch_to_stable.yml"
+  PRISMA_TELEMETRY_INFORMATION: 'language-tools 1_2_c_promote_patch_to_stable.yml'
 
 jobs:
   bump:
     runs-on: ubuntu-latest
-    steps: 
+    steps:
       - uses: actions/checkout@v2
       - name: Use Node.js
         uses: actions/setup-node@v2
@@ -22,8 +22,8 @@ jobs:
           node-version: '12.x'
       - name: Install Dependencies
         run: npm install
-      - name: Checkout master
-        run: git fetch && git checkout master
+      - name: Checkout main
+        run: git fetch && git checkout main
       - name: Setup Git
         run: |
           sh scripts/set_git_credentials.sh
@@ -31,22 +31,22 @@ jobs:
         id: update
         run: node scripts/bump_extension_version.js "latest"
       - name: Commit and Push
-        run:  |
+        run: |
           sh scripts/commit_and_push.sh "bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}."
-      
-      - name: Switch branch 
+
+      - name: Switch branch
         id: setup_branch
         run: |
           sh scripts/setup_branch.sh "promote_patch-dev"
       - name: Update VSCode extension version
-        run:  |
+        run: |
           node scripts/update_package_json_files.js latest ${{ steps.update.outputs.next_extension_version }} ""
       - name: Install Dependencies
         run: npm install
       - name: Commit and Push
         run: |
           sh scripts/commit_and_push.sh "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}."
-      
+
       - name: Trigger next workflow for LSP Unit tests
         uses: benc-uk/workflow-dispatch@v1
         with:
@@ -56,13 +56,13 @@ jobs:
 
       - name: Slack Notification on Failure
         if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@v2.1.3
-        env:  
-          SLACK_TITLE: "1/2c. - Promoting patch branch to stable failed :x:"
+        uses: rtCamp/action-slack-notify@v2.2.0
+        env:
+          SLACK_TITLE: '1/2c. - Promoting patch branch to stable failed :x:'
           SLACK_COLOR: '#FF0000'
-          SLACK_MESSAGE: "${{ steps.update.outputs.next_extension_version  }} - On manual trigger promoting patch branch to stable."
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_CHANNEL: feed-language-tools
+          SLACK_MESSAGE: '${{ steps.update.outputs.next_extension_version  }} - On manual trigger promoting patch branch to stable.'
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_FAILURES }}
+          SLACK_CHANNEL: feed-language-tools-failures
           SLACK_USERNAME: Prismo
-          SLACK_ICON_EMOJI: ":boom:"
+          SLACK_ICON_EMOJI: ':boom:'
           SLACK_MSG_AUTHOR: prisma-bot

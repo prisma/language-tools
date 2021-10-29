@@ -6,8 +6,14 @@ import {
   TextEditorEdit,
   env,
   workspace,
+  ExtensionContext,
 } from 'vscode'
-import { CodeAction, TextDocumentIdentifier } from 'vscode-languageclient/node'
+import {
+  CodeAction,
+  TextDocumentIdentifier,
+  LanguageClientOptions,
+} from 'vscode-languageclient'
+import { LanguageClient, ServerOptions } from 'vscode-languageclient/node'
 import {
   denyListDarkColorThemes,
   denyListLightColorThemes,
@@ -15,6 +21,12 @@ import {
 import { homedir } from 'os'
 import { readdirSync } from 'fs'
 import path from 'path'
+import {
+  BinaryStorage,
+  checkAndAskForBinaryExecution,
+  printBinaryCheckWarning,
+  PRISMA_ALLOWED_BINS_KEY,
+} from './binaryValidator'
 
 export function isDebugOrTestSession(): boolean {
   return env.sessionId === 'someValue.sessionId'
@@ -115,5 +127,41 @@ export function applySnippetWorkspaceEdit(): (
       )
       await editor.insertSnippet(new SnippetString(snip.newText), range)
     }
+  }
+}
+
+export function createLanguageServer(
+  serverOptions: ServerOptions,
+  clientOptions: LanguageClientOptions,
+): LanguageClient {
+  return new LanguageClient(
+    'prisma',
+    'Prisma Language Server',
+    serverOptions,
+    clientOptions,
+  )
+}
+export const restartClient = async (
+  context: ExtensionContext,
+  client: LanguageClient,
+  serverOptions: ServerOptions,
+  clientOptions: LanguageClientOptions,
+): Promise<LanguageClient> => {
+  client?.diagnostics?.dispose()
+  if (client) await client.stop()
+  // try to create a new client if options are passed
+  const allowed = await checkAndAskForBinaryExecution(
+    context,
+    workspace.getConfiguration('prisma').get('prismaFmtBinPath'),
+    context.globalState.get<BinaryStorage>(PRISMA_ALLOWED_BINS_KEY),
+  )
+  if (allowed) {
+    client = createLanguageServer(serverOptions, clientOptions)
+    context.subscriptions.push(client.start())
+    await client.onReady()
+    return client
+  } else {
+    await printBinaryCheckWarning()
+    return client
   }
 }

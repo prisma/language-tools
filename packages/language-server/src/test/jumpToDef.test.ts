@@ -21,7 +21,7 @@ function assertJumpToDefinition(
   )
 
   assert.ok(defResult !== undefined)
-  assert.deepEqual(defResult.range, expectedRange)
+  assert.deepStrictEqual(defResult.range, expectedRange)
 }
 
 suite('Jump-to-Definition', () => {

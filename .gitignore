@@ -4,5 +4,5 @@ node_modules/
 .vscode-test
 dist
 *.vsix
-*.DS_Store
+**/*.DS_Store
 *.exe

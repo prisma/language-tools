@@ -1,8 +1,8 @@
 {
   "name": "prisma-insider",
   "displayName": "Prisma - Insider",
-  "description": "This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the dev version of the CLI.",
-  "version": "19.0.57",
+  "description": "This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the dev version of the CLI).",
+  "version": "31.0.248",
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
@@ -13,10 +13,9 @@
     "Programming Languages"
   ],
   "dependencies": {
-    "checkpoint-client": "1.1.19",
-    "crypto": "1.0.1",
-    "chokidar": "3.5.1",
-    "@prisma/language-server": "19.0.57",
+    "checkpoint-client": "1.1.20",
+    "chokidar": "3.5.2",
+    "@prisma/language-server": "31.0.247",
     "vscode-languageclient": "7.0.0"
   },
   "optionalDependencies": {
@@ -29,7 +28,7 @@
   "scripts": {
     "build": "tsc -p ./",
     "watch": "npm run build -- -w",
-    "test": "jest",
+    "test": "npm run build && node dist/src/test/runTest true",
     "vscode:prepublish": "cd .. && cd .. && tsc --build --clean && npm run compile",
     "package": "vsce package"
   },
@@ -99,19 +98,28 @@
         "command": "prisma.restartLanguageServer",
         "title": "Restart Language Server",
         "category": "Prisma"
+      },
+      {
+        "command": "prisma.resetCurrentFmtBinDecision",
+        "title": "Reset current Prisma format binary execution decision",
+        "category": "Prisma"
+      },
+      {
+        "command": "prisma.resetAllBinDecisions",
+        "title": "Reset all Prisma format binary execution decisions",
+        "category": "Prisma"
       }
     ]
   },
   "devDependencies": {
-    "@types/glob": "7.1.3",
-    "@types/mocha": "8.2.1",
+    "@types/glob": "7.2.0",
+    "@types/mocha": "9.0.0",
     "@types/vscode": "1.52.0",
-    "mocha": "8.3.2",
-    "ovsx": "0.1.0-next.e000fdb",
-    "semver": "7.3.4",
-    "typescript": "4.2.3",
-    "vsce": "1.87.0",
-    "vscode-test": "1.5.1"
+    "mocha": "9.1.3",
+    "ovsx": "0.2.1",
+    "typescript": "4.4.4",
+    "vsce": "1.100.2",
+    "vscode-test": "1.6.1"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
   "publishConfig": {

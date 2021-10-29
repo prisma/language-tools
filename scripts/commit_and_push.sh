@@ -15,7 +15,7 @@ fi
 COMMIT_MESSAGE=$1
 echo "COMMIT_MESSAGE: $COMMIT_MESSAGE"
 
-BRANCH=${2-master}
+BRANCH=${2-main}
 echo "BRANCH: $BRANCH"
 
 NEW_BRANCH=${3-false}

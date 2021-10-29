@@ -8,8 +8,8 @@ import {
   Range,
 } from 'vscode-languageserver'
 import { getAllRelationNames } from './completion/completions'
-import { convertDocumentTextToTrimmedLineArray } from './MessageHandler'
 import levenshtein from 'js-levenshtein'
+import { convertDocumentTextToTrimmedLineArray } from './util'
 
 function getInsertRange(document: TextDocument): Range {
   // to insert text into a document create a range where start === end.

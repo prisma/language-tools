@@ -67,3 +67,10 @@ enum UserType {
     ADMIN
     NORMAL
 }
+
+model ForthUser {
+    firstName String
+    lastName String
+
+    @@index([firstName, ])
+}

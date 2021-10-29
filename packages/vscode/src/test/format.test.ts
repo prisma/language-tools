@@ -21,7 +21,7 @@ async function testAutoFormat(
   const document = await vscode.workspace.openTextDocument(docUri)
   const actualResult = document.getText()
 
-  assert.equal(actualResult, expectedFormatted)
+  assert.strictEqual(actualResult, expectedFormatted)
 }
 
 suite('Should auto-format', () => {

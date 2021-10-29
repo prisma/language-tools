@@ -2,15 +2,9 @@ import execa from 'execa'
 
 export default function previewFeatures(
   execPath: string,
-  dataSourceOnly: boolean,
   onError?: (errorMessage: string) => void,
 ): string[] {
-  let result
-  if (dataSourceOnly) {
-    result = execa.sync(execPath, ['preview-features', '--datasource-only'])
-  } else {
-    result = execa.sync(execPath, ['preview-features'])
-  }
+  const result = execa.sync(execPath, ['preview-features'])
 
   if (result.exitCode !== 0) {
     const errorMessage =

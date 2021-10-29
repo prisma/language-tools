@@ -7,14 +7,15 @@ async function testJumpToDefinition(
   position: vscode.Position,
   expectedLocation: vscode.Location,
 ): Promise<void> {
-  const actualLocation: vscode.Location[] = (await vscode.commands.executeCommand(
-    'vscode.executeDefinitionProvider',
-    docUri,
-    position,
-  )) as vscode.Location[]
+  const actualLocation: vscode.Location[] =
+    (await vscode.commands.executeCommand(
+      'vscode.executeDefinitionProvider',
+      docUri,
+      position,
+    )) as vscode.Location[]
 
   assert.ok(actualLocation.length === 1)
-  assert.deepEqual(actualLocation[0].range, expectedLocation.range)
+  assert.deepStrictEqual(actualLocation[0].range, expectedLocation.range)
 }
 
 suite('Should jump-to-definition', () => {

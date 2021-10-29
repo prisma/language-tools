@@ -2,27 +2,36 @@ import {
   CompletionItem,
   CompletionItemKind,
   MarkupKind,
+  InsertTextFormat,
+  InsertTextMode,
 } from 'vscode-languageserver'
 import * as completions from './completions.json'
+
+type JSONSimpleCompletionItems = {
+  label: string
+  insertText?: string // optional text to use as completion instead of label
+  documentation?: string
+}[]
 
 /**
  * Converts a json object containing labels and documentations to CompletionItems.
  */
 function convertToCompletionItems(
-  completionItems: {
-    label: string
-    documentation?: string
-  }[],
+  completionItems: JSONSimpleCompletionItems,
   itemKind: CompletionItemKind,
-  insertTextFunc?: (label: string) => string,
 ): CompletionItem[] {
   const result: CompletionItem[] = []
   for (const item of completionItems) {
     result.push({
       label: item.label,
       kind: itemKind,
-      insertText: insertTextFunc ? insertTextFunc(item.label) : undefined,
-      insertTextFormat: insertTextFunc ? 2 : 1,
+      insertText: item.insertText,
+      insertTextFormat: item.insertText
+        ? InsertTextFormat.Snippet
+        : InsertTextFormat.PlainText,
+      insertTextMode: item.insertText
+        ? InsertTextMode.adjustIndentation
+        : undefined,
       documentation: item.documentation
         ? { kind: MarkupKind.Markdown, value: item.documentation }
         : undefined,
@@ -31,20 +40,24 @@ function convertToCompletionItems(
   return result
 }
 
+type JSONFullCompletionItems = {
+  label: string
+  insertText?: string // optional text to use as completion instead of label
+  documentation: string
+  fullSignature: string // custom signature to show
+  params: { label: string; documentation: string }[]
+}[]
+
 /**
  * Converts a json object containing attributes including function signatures to CompletionItems.
  */
 function convertAttributesToCompletionItems(
-  completionItems: {
-    label: string
-    documentation: string
-    fullSignature: string
-    params: { label: string; documentation: string }[]
-  }[],
+  completionItems: JSONFullCompletionItems,
   itemKind: CompletionItemKind,
-  insertTextFunc: (label: string) => string,
 ): CompletionItem[] {
+  // https://code.visualstudio.com/api/references/vscode-api#CompletionItem
   const result: CompletionItem[] = []
+
   for (const item of completionItems) {
     const docComment = [
       '```prisma',
@@ -59,8 +72,11 @@ function convertAttributesToCompletionItems(
     result.push({
       label: item.label,
       kind: itemKind,
-      insertText: insertTextFunc(item.label),
-      insertTextFormat: 2,
+      insertText: item.insertText,
+      insertTextFormat: InsertTextFormat.Snippet,
+      insertTextMode: item.insertText
+        ? InsertTextMode.adjustIndentation
+        : undefined,
       documentation: {
         kind: MarkupKind.Markdown,
         value: docComment.join('\n'),
@@ -73,7 +89,6 @@ function convertAttributesToCompletionItems(
 export const corePrimitiveTypes: CompletionItem[] = convertToCompletionItems(
   completions.primitiveTypes,
   CompletionItemKind.TypeParameter,
-  (label: string) => label.replace('()', '($0)').replace('""', '"$0"'),
 )
 
 export const allowedBlockTypes: CompletionItem[] = convertToCompletionItems(
@@ -81,64 +96,123 @@ export const allowedBlockTypes: CompletionItem[] = convertToCompletionItems(
   CompletionItemKind.Class,
 )
 
-export const supportedDataSourceFields: CompletionItem[] = convertToCompletionItems(
-  completions.dataSourceFields,
-  CompletionItemKind.Field,
-)
+export const supportedDataSourceFields: CompletionItem[] =
+  convertToCompletionItems(
+    completions.dataSourceFields,
+    CompletionItemKind.Field,
+  )
 
-export const supportedGeneratorFields: CompletionItem[] = convertToCompletionItems(
-  completions.generatorFields,
-  CompletionItemKind.Field,
-)
+export const supportedGeneratorFields: CompletionItem[] =
+  convertToCompletionItems(
+    completions.generatorFields,
+    CompletionItemKind.Field,
+  )
 
-export const blockAttributes: CompletionItem[] = convertAttributesToCompletionItems(
-  completions.blockAttributes,
-  CompletionItemKind.Property,
-  (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
-)
+export function givenBlockAttributeParams(
+  blockAttribute: string,
+): CompletionItem[] {
+  return convertToCompletionItems(
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    completions.blockAttributes.find((item) =>
+      item.label.includes(blockAttribute),
+    )!.params,
+    CompletionItemKind.Property,
+  )
+}
 
-export const fieldAttributes: CompletionItem[] = convertAttributesToCompletionItems(
-  completions.fieldAttributes,
-  CompletionItemKind.Property,
-  (label: string) => label.replace('()', '($0)').replace('""', '"$0"'),
-)
+export const blockAttributes: CompletionItem[] =
+  convertAttributesToCompletionItems(
+    completions.blockAttributes,
+    CompletionItemKind.Property,
+  )
 
-export const relationArguments: CompletionItem[] = convertAttributesToCompletionItems(
-  completions.relationArguments,
-  CompletionItemKind.Property,
-  (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
-)
+export function givenFieldAttributeParams(
+  fieldAttribute: string,
+): CompletionItem[] {
+  return convertToCompletionItems(
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    completions.fieldAttributes.find((item) =>
+      item.label.includes(fieldAttribute),
+    )!.params,
+    CompletionItemKind.Property,
+  )
+}
 
-export const dataSourceUrlArguments: CompletionItem[] = convertAttributesToCompletionItems(
-  completions.datasourceUrlArguments,
-  CompletionItemKind.Property,
-  (label: string) => label.replace('()', '($0)').replace('""', '"$0"'),
-)
+export const fieldAttributes: CompletionItem[] =
+  convertAttributesToCompletionItems(
+    completions.fieldAttributes,
+    CompletionItemKind.Property,
+  )
+
+export const relationArguments: CompletionItem[] =
+  convertAttributesToCompletionItems(
+    completions.relationArguments,
+    CompletionItemKind.Property,
+  )
+
+function givenReferentialActionParams(
+  referentialAction: 'onUpdate' | 'onDelete',
+): CompletionItem[] {
+  return convertToCompletionItems(
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    completions.relationArguments.find(
+      (item) => item.label === referentialAction,
+    )!.params,
+    CompletionItemKind.Enum,
+  )
+}
+
+export const relationOnDeleteArguments: CompletionItem[] =
+  givenReferentialActionParams('onDelete')
+
+export const relationOnUpdateArguments: CompletionItem[] =
+  givenReferentialActionParams('onUpdate')
+
+export const dataSourceUrlArguments: CompletionItem[] =
+  convertAttributesToCompletionItems(
+    completions.datasourceUrlArguments,
+    CompletionItemKind.Property,
+  )
 
 export const dataSourceProviders: CompletionItem[] = convertToCompletionItems(
   completions.datasourceProviders,
   CompletionItemKind.Constant,
 )
 
-export const dataSourceProviderArguments: CompletionItem[] = convertToCompletionItems(
-  completions.datasourceProviderArguments,
-  CompletionItemKind.Property,
-  (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
-)
+export const dataSourceProviderArguments: CompletionItem[] =
+  convertToCompletionItems(
+    completions.datasourceProviderArguments,
+    CompletionItemKind.Property,
+  )
+
+// generator.provider
 
 export const generatorProviders: CompletionItem[] = convertToCompletionItems(
   completions.generatorProviders,
   CompletionItemKind.Constant,
 )
 
-export const generatorProviderArguments: CompletionItem[] = convertToCompletionItems(
-  completions.generatorProviderArguments,
-  CompletionItemKind.Property,
-  (label: string) => label.replace('""', '"$0"'),
+export const generatorProviderArguments: CompletionItem[] =
+  convertToCompletionItems(
+    completions.generatorProviderArguments,
+    CompletionItemKind.Property,
+  )
+
+// generator.engineType
+
+export const engineTypes: CompletionItem[] = convertToCompletionItems(
+  completions.engineTypes,
+  CompletionItemKind.Constant,
 )
 
-export const previewFeaturesArguments: CompletionItem[] = convertToCompletionItems(
-  completions.previewFeaturesArguments,
+export const engineTypeArguments: CompletionItem[] = convertToCompletionItems(
+  completions.engineTypeArguments,
   CompletionItemKind.Property,
-  (label: string) => label.replace('[]', '[$0]').replace('""', '"$0"'),
 )
+
+// generator.previewFeatures
+export const previewFeaturesArguments: CompletionItem[] =
+  convertToCompletionItems(
+    completions.previewFeaturesArguments,
+    CompletionItemKind.Property,
+  )

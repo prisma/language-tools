@@ -21,7 +21,7 @@ import {
 } from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
-import * as util from './util'
+import * as util from './prisma-fmt/util'
 import install from './prisma-fmt/install'
 import { LSPOptions, LSPSettings } from './settings'
 import { existsSync } from 'fs'
@@ -75,8 +75,10 @@ export function startServer(options?: LSPOptions): void {
       // eslint-disable-next-line
       `Extension name ${packageJson.name} with version ${packageJson.version}`,
     )
-    const prismaCLIVersion = util.getCLIVersion()
-    connection.console.info(`Prisma CLI version: ${prismaCLIVersion}`)
+    const prismaEnginesVersion = util.getEnginesVersion()
+    connection.console.info(`Prisma Engines version: ${prismaEnginesVersion}`)
+    const prismaCliVersion = util.getCliVersion()
+    connection.console.info(`Prisma CLI version: ${prismaCliVersion}`)
 
     const result: InitializeResult = {
       capabilities: {
@@ -180,13 +182,14 @@ export function startServer(options?: LSPOptions): void {
   ): Promise<void> {
     const settings = await getDocumentSettings(textDocument.uri)
     const fmtBinPath = getPrismaFmtBinPath(settings.prismaFmtBinPath)
-    const diagnostics: Diagnostic[] = await MessageHandler.handleDiagnosticsRequest(
-      textDocument,
-      fmtBinPath,
-      (errorMessage: string) => {
-        connection.window.showErrorMessage(errorMessage)
-      },
-    )
+    const diagnostics: Diagnostic[] =
+      await MessageHandler.handleDiagnosticsRequest(
+        textDocument,
+        fmtBinPath,
+        (errorMessage: string) => {
+          connection.window.showErrorMessage(errorMessage)
+        },
+      )
     connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
   }
 
@@ -253,6 +256,7 @@ export function startServer(options?: LSPOptions): void {
     }
   })
 
+  // This handler resolves additional information for the item selected in the completion list.
   connection.onCompletionResolve((completionItem: CompletionItem) => {
     return MessageHandler.handleCompletionResolveRequest(completionItem)
   })

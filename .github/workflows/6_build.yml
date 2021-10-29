@@ -1,4 +1,4 @@
-name: 6. Build extension
+name: 6. Build extension # and upload as release to GitHub
 
 on:
   workflow_dispatch:
@@ -19,20 +19,18 @@ on:
 env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
-  PRISMA_TELEMETRY_INFORMATION: "language-tools 6_build.yml"
-  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-  SLACK_CHANNEL: feed-language-tools
+  PRISMA_TELEMETRY_INFORMATION: 'language-tools 6_build.yml'
   SLACK_USERNAME: Prismo
-  SLACK_ICON_EMOJI: ":ship:"
+  SLACK_ICON_EMOJI: ':ship:'
   SLACK_MSG_AUTHOR: prisma-bot
 
 jobs:
   build:
     name: Build extension
     runs-on: macos-latest
-    outputs: 
+    outputs:
       tag_name: ${{ steps.names.outputs.tag_name }}
-    steps: 
+    steps:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.branch }}
@@ -42,43 +40,48 @@ jobs:
           node-version: '12.x'
       - name: Print inputs
         run: |
-          echo ${{github.event.inputs.extension_version}}
           echo ${{github.event.inputs.npm_channel}}
+          echo ${{github.event.inputs.extension_version}}
+          echo ${{github.event.inputs.branch}}
           echo ${{github.event.inputs.trigger_reason}}
+
+      # Build the extension
       - name: Install Dependencies
         run: npm install
       - name: Compile
         run: npm run compile
-      - name: Replace Readme
+      - name: Replace Readme for marketplace
         run: node scripts/change_readme.js ${{ github.event.inputs.npm_channel }}
-      - name: Build vsix 
+      - name: Build vsix
         run: cd packages/vscode && npm run package
-      - name: Get tag and asset name
+
+      # Create Github Release and upload built result as asset
+      - name: Get git tag and asset name
         id: names
         run: node scripts/get_tag_name.js ${{ github.event.inputs.npm_channel }} ${{ github.event.inputs.extension_version }}
-      
-      - name: create a release
+      - name: create a GitHub release
         id: create_release
         uses: actions/create-release@v1
-        env: 
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.names.outputs.tag_name }}
           release_name: ${{ steps.names.outputs.tag_name }}
       - name: Get asset name for release asset
         id: get_asset_name
-        run: | 
+        run: |
           echo "::set-output name=asset_name::${{ steps.names.outputs.asset_name }}-${{ github.event.inputs.extension_version }}.vsix"
       - name: Upload Release Asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
-        env: 
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{github.workspace}}/packages/vscode/${{ steps.get_asset_name.outputs.asset_name }}
           asset_name: ${{ steps.get_asset_name.outputs.asset_name }}
           asset_content_type: application/zip
+
       - name: Trigger next workflow to publish extension
         uses: benc-uk/workflow-dispatch@v1
         with:
@@ -92,21 +95,25 @@ jobs:
     needs: [build]
     if: always()
     env:
-      SLACK_MESSAGE: "${{ needs.build.outputs.tag_name }} - ${{github.event.inputs.trigger_reason}} "
+      SLACK_MESSAGE: '${{ needs.build.outputs.tag_name }} - ${{github.event.inputs.trigger_reason}} '
     steps:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.branch }}
       - name: Slack Notification on Failure
         if: ${{ failure() || needs.build.result == 'failure' }}
-        uses: rtCamp/action-slack-notify@v2.1.3
-        env:  
-          SLACK_TITLE: "6. Release failed :x:"
+        uses: rtCamp/action-slack-notify@v2.2.0
+        env:
+          SLACK_TITLE: '6. Release failed :x:'
           SLACK_COLOR: '#FF0000'
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_FAILURES }}
+          SLACK_CHANNEL: feed-language-tools-failures
+
       - name: Slack Notification on Success
         if: ${{ success() && needs.build.result == 'success' }}
-        uses: rtCamp/action-slack-notify@v2.1.3
-        env:  
-          SLACK_TITLE: "6. Release was successful :white_check_mark:"
+        uses: rtCamp/action-slack-notify@v2.2.0
+        env:
+          SLACK_TITLE: '6. Release was successful :white_check_mark:'
           SLACK_COLOR: '#008000'
-      
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: feed-language-tools

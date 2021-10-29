@@ -37,7 +37,8 @@
       "documentation": "Integer values that may be greater than 2^53"
     },
     {
-      "label": "Unsupported(\"\")",
+      "label": "Unsupported",
+      "insertText": "Unsupported(\"$0\")",
       "documentation": "An arbitrary database column type, for which Prisma has no syntax. Fields of type `Unsupported` work with Prisma Migrate and introspection, but are not exposed in Prisma Client.",
       "fullSignature": "Unsupported(_ name: String)",
       "params": [
@@ -96,50 +97,87 @@
     {
       "label": "previewFeatures",
       "documentation": "Enables preview feature flags."
+    },
+    {
+      "label": "engineType",
+      "documentation": "Defines the query engine type for Prisma Client."
     }
   ],
   "blockAttributes": [
     {
-      "label": "@@map(\"\")",
+      "label": "@@map",
+      "insertText": "@@map(\"$0\")",
       "documentation": "Maps a model name from the Prisma schema to a different table name.",
       "fullSignature": "@@map(_ name: String)",
       "params": [
         {
           "label": "name",
+          "insertText": "name: \"$0\"",
           "documentation": "The name of the target database table."
         }
       ]
     },
     {
-      "label": "@@id([])",
+      "label": "@@id",
+      "insertText": "@@id([$0])",
       "documentation": "Defines a multi-field ID on the model.",
-      "fullSignature": "@@id(_ fields: FieldReference[])",
+      "fullSignature": "@@id(_ fields: FieldReference[], name: String?, map: String?)",
       "params": [
         {
           "label": "fields",
+          "insertText": "fields: [$0]",
           "documentation": "A list of references."
+        },
+        {
+          "label": "name",
+          "insertText": "name: \"$0\"",
+          "documentation": "Defines the name in your Prisma Client API."
+        },
+        {
+          "label": "map",
+          "insertText": "map: \"$0\"",
+          "documentation": "Defines a custom name for the primary key in the database."
         }
       ]
     },
     {
-      "label": "@@unique([])",
+      "label": "@@unique",
+      "insertText": "@@unique([$0])",
       "documentation": "Defines a compound unique constraint for the specified fields.",
-      "fullSignature": "@@unique(_ fields: FieldReference[])",
+      "fullSignature": "@@unique(_ fields: FieldReference[], name: String?, map: String?)",
       "params": [
         {
           "label": "fields",
+          "insertText": "fields: [$0]",
           "documentation": "A list of references."
+        },
+        {
+          "label": "name",
+          "insertText": "name: \"$0\"",
+          "documentation": "Defines the name in your Prisma Client API."
+        },
+        {
+          "label": "map",
+          "insertText": "map: \"$0\"",
+          "documentation": "Defines a custom constraint name in the database."
         }
       ]
     },
     {
-      "label": "@@index([])",
+      "label": "@@index",
+      "insertText": "@@index([$0])",
       "documentation": "Defines an index on the model.",
-      "fullSignature": "@@index(_ fields: FieldReference[])",
+      "fullSignature": "@@index(_ fields: FieldReference[], map: String?)",
       "params": [
         {
           "label": "fields",
+          "insertText": "fields: [$0]",
           "documentation": "A list of references."
+        },
+        {
+          "label": "map",
+          "insertText": "map: \"$0\"",
+          "documentation": "Defines a custom index name in the database."
         }
       ]
     },
@@ -155,16 +193,29 @@
       "label": "@id",
       "fullSignature": "@id",
       "documentation": "Defines a single-field ID on the model.",
-      "params": []
+      "params": [
+        {
+          "label": "map",
+          "insertText": "map: \"$0\"",
+          "documentation": "Defines a custom primary key name in the database."
+        }
+      ]
     },
     {
       "label": "@unique",
       "fullSignature": "@unique",
       "documentation": "Defines a unique constraint for this field.",
-      "params": []
+      "params": [
+        {
+          "label": "map",
+          "insertText": "map: \"$0\"",
+          "documentation": "Defines a custom name for the unique constraint in the database."
+        }
+      ]
     },
     {
-      "label": "@map(\"\")",
+      "label": "@map",
+      "insertText": "@map(\"$0\")",
       "documentation": "Maps a field name from the Prisma schema to a different column name.",
       "fullSignature": "@map(_ name: String)",
       "params": [
@@ -175,7 +226,8 @@
       ]
     },
     {
-      "label": "@default()",
+      "label": "@default",
+      "insertText": "@default($0)",
       "documentation": "Defines a default value for this field. `@default` takes an expression as an argument.",
       "fullSignature": "@default(_ expression: Expression)",
       "params": [
@@ -186,13 +238,18 @@
       ]
     },
     {
-      "label": "@relation()",
+      "label": "@relation",
+      "insertText": "@relation($0)",
       "documentation": "Defines meta information about the relation. [Learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema/relations#the-relation-attribute).",
-      "fullSignature": "@relation(_ name: String?, fields: FieldReference[]?, references: FieldReference[]?)",
+      "fullSignature": "@relation(_ name: String?, map: String?, fields: FieldReference[]?, references: FieldReference[]?)",
       "params": [
         {
           "label": "name",
           "documentation": "Defines the name of the relationship. In an m-n-relation, it also determines the name of the underlying relation table."
+        },
+        {
+          "label": "map",
+          "documentation": "Defines a custom name for the foreign key in the database."
         },
         {
           "label": "fields",
@@ -201,6 +258,14 @@
         {
           "label": "references",
           "documentation": "A list of field references of the model on *the other side of the relation*."
+        },
+        {
+          "label": "onDelete",
+          "documentation": "Specifies the action to perform when a referenced entry in the referenced model is being deleted."
+        },
+        {
+          "label": "onUpdate",
+          "documentation": "Specifies the action to perform when a referenced field in the referenced model is being updated to a new value."
         }
       ]
     },
@@ -219,33 +284,108 @@
   ],
   "relationArguments": [
     {
-      "label": "references: []",
+      "label": "references",
+      "insertText": "references: [$0]",
       "fullSignature": "references: []",
       "documentation": "A list of field references of the model on *the other side of the relation*.",
       "params": []
     },
     {
-      "label": "fields: []",
+      "label": "fields",
+      "insertText": "fields: [$0]",
       "fullSignature": "fields: []",
       "documentation": "A list of field references of the *current* model.",
       "params": []
     },
     {
+      "label": "onDelete",
+      "insertText": "onDelete: ${1|Cascade,Restrict,NoAction,SetNull,SetDefault|}",
+      "fullSignature": "onDelete: Cascade | Restrict | NoAction | SetNull | SetDefault",
+      "documentation": "Specifies the action to perform when a referenced entry in the referenced model is being deleted, [learn more](https://www.prisma.io/docs/concepts/components/prisma-schema/relations/referential-actions).",
+      "params": [
+        {
+          "label": "Cascade",
+          "documentation": "Deleting a referenced record will trigger the deletion of referencing record."
+        },
+        {
+          "label": "Restrict",
+          "documentation": "Prevents the deletion if any referencing records exist."
+        },
+        {
+          "label": "NoAction",
+          "documentation": "Is similar to Restrict, the difference between the two is dependant on the database being used, [learn more](https://www.prisma.io/docs/concepts/components/prisma-schema/relations/referential-actions)."
+        },
+        {
+          "label": "SetNull",
+          "documentation": "The scalar field of the referenced object will be set to NULL."
+        },
+        {
+          "label": "SetDefault",
+          "documentation": "The scalar field of the referencing object will be set to the fields default value."
+        }
+      ]
+    },
+    {
+      "label": "onUpdate",
+      "insertText": "onUpdate: ${1|Cascade,Restrict,NoAction,SetNull,SetDefault|}",
+      "fullSignature": "onUpdate: Cascade | Restrict | NoAction | SetNull | SetDefault",
+      "documentation": "Specifies the action to perform when a referenced field in the referenced model is being updated to a new value, [learn more](https://www.prisma.io/docs/concepts/components/prisma-schema/relations/referential-actions).",
+      "params": [
+        {
+          "label": "Cascade",
+          "documentation": "Updates the relation scalar fields if the referenced scalar fields of the dependant record are updated."
+        },
+        {
+          "label": "Restrict",
+          "documentation": "Prevents the identifier of a referenced record from being changed."
+        },
+        {
+          "label": "NoAction",
+          "documentation": "Is similar to Restrict, the difference between the two is dependant on the database being used, [learn more](https://www.prisma.io/docs/concepts/components/prisma-schema/relations/referential-actions)."
+        },
+        {
+          "label": "SetNull",
+          "documentation": "When updating the identifier of a referenced object, the scalar fields of the referencing objects will be set to NULL."
+        },
+        {
+          "label": "SetDefault",
+          "documentation": "The scalar field of the referencing object will be set to the fields default value."
+        }
+      ]
+    },
+    {
       "label": "\"\"",
-      "fullSignature": "\"\"",
+      "insertText": "\"$0\"",
+      "fullSignature": "String",
       "documentation": "Defines the name of the relationship. In an m-n-relation, it also determines the name of the underlying relation table.",
+      "params": []
+    },
+    {
+      "label": "name",
+      "insertText": "name: \"$0\"",
+      "fullSignature": "name: String",
+      "documentation": "Defines the name of the relationship. In an m-n-relation, it also determines the name of the underlying relation table.",
+      "params": []
+    },
+    {
+      "label": "map",
+      "insertText": "map: \"$0\"",
+      "fullSignature": "map: String",
+      "documentation": "Defines a custom name for the foreign key in the database.",
       "params": []
     }
   ],
   "datasourceUrlArguments": [
     {
       "label": "\"\"",
+      "insertText": "\"$0\"",
       "fullSignature": "\"\"",
       "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database, [learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema).",
       "params": []
     },
     {
       "label": "env()",
+      "insertText": "env(\"$0\")",
       "fullSignature": "env(_ environmentVariable: string)",
       "documentation": "Specifies a data source via an environment variable. When running a Prisma CLI command that needs the database connection URL (e.g. `prisma generate`), you need to make sure that the `DATABASE_URL` environment variable is set. One way to do so is by creating a `.env` file. Note that the file must be in the same directory as your schema.prisma file to automatically be picked up by the Prisma CLI.",
       "params": [
@@ -265,7 +405,25 @@
   "generatorProviderArguments": [
     {
       "label": "\"\"",
+      "insertText": "\"$0\"",
       "documentation": "Specifies a single provider."
+    }
+  ],
+  "engineTypes": [
+    {
+      "label": "library",
+      "documentation": "Node-API library. (Default)"
+    },
+    {
+      "label": "binary",
+      "documentation": "Executable binary."
+    }
+  ],
+  "engineTypeArguments": [
+    {
+      "label": "\"\"",
+      "insertText": "\"$0\"",
+      "documentation": "Specifies the engine type."
     }
   ],
   "datasourceProviders": [
@@ -289,20 +447,24 @@
   "datasourceProviderArguments": [
     {
       "label": "[]",
+      "insertText": "[$0]",
       "documentation": "Specifies multiple providers."
     },
     {
       "label": "\"\"",
+      "insertText": "\"$0\"",
       "documentation": "Specifies a single provider."
     }
   ],
   "previewFeaturesArguments": [
     {
       "label": "[]",
+      "insertText": "[$0]",
       "documentation": "Enables preview feature flags."
     },
     {
       "label": "\"\"",
+      "insertText": "\"$0\"",
       "documentation": "Enables a preview feature flag."
     }
   ]

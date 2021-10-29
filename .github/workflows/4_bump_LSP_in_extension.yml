@@ -19,7 +19,7 @@ on:
 env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
-  PRISMA_TELEMETRY_INFORMATION: "language-tools 4_bump_LSP_in_extension.yml"
+  PRISMA_TELEMETRY_INFORMATION: 'language-tools 4_bump_LSP_in_extension.yml'
 
 jobs:
   bump:
@@ -31,8 +31,9 @@ jobs:
           ref: ${{ github.event.inputs.branch }}
       - name: Print inputs
         run: |
-          echo ${{github.event.inputs.extension_version}}
           echo ${{github.event.inputs.npm_channel}}
+          echo ${{github.event.inputs.extension_version}}
+          echo ${{github.event.inputs.branch}}
           echo ${{github.event.inputs.trigger_reason}}
       - name: Install Dependencies
         run: npm install
@@ -45,37 +46,34 @@ jobs:
         run: |
           sh scripts/set_git_credentials.sh
 
-      - name: Read package.json versions
+      - name: Read package.json versions (enginesVersion) for the commit message
         id: packagejson
         run: |
           PACKAGE_JSON_PATH="./packages/language-server/package.json"
           echo $PACKAGE_JSON_PATH
-          ENGINES_VERSION=$(jq -r '.prisma.version' ${PACKAGE_JSON_PATH}) 
+          ENGINES_VERSION=$(jq -r '.prisma.enginesVersion' ${PACKAGE_JSON_PATH}) 
           echo "::set-output name=engines::$ENGINES_VERSION"
-          CLI_VERSION=$(jq -r '.dependencies."@prisma/get-platform"' ${PACKAGE_JSON_PATH}) 
-          echo "::set-output name=cli::$CLI_VERSION"
 
-      - name: Commit and push to branch 
+      - name: Commit and push to branch
         run: |
-          sh scripts/commit_and_push.sh "Bump LSP to ${{ github.event.inputs.extension_version }} in VSCode. Engines: ${{ steps.packagejson.engines }} CLI: ${{ steps.packagejson.cli }}"
-   
+          sh scripts/commit_and_push.sh "Bump LSP to ${{ github.event.inputs.extension_version }} in VSCode. Engines: ${{ steps.packagejson.outputs.engines }}"
+
       - name: Trigger next workflow for VSCode e2e tests
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: 5. Integration tests in VSCode folder with published LSP
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'
-      
 
       - name: Slack Notification on Failure
         if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@v2.1.3
-        env:  
-          SLACK_TITLE: "4. Bumping LSP in VSCode extension failed :x:"
+        uses: rtCamp/action-slack-notify@v2.2.0
+        env:
+          SLACK_TITLE: '4. Bumping LSP in VSCode extension failed :x:'
           SLACK_COLOR: '#FF0000'
-          SLACK_MESSAGE: "${{github.event.inputs.extension_version}} - ${{github.event.inputs.trigger_reason}} "
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_CHANNEL: feed-language-tools
+          SLACK_MESSAGE: '${{github.event.inputs.extension_version}} - ${{github.event.inputs.trigger_reason}} '
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_FAILURES }}
+          SLACK_CHANNEL: feed-language-tools-failures
           SLACK_USERNAME: Prismo
-          SLACK_ICON_EMOJI: ":boom:"
+          SLACK_ICON_EMOJI: ':boom:'
           SLACK_MSG_AUTHOR: prisma-bot
