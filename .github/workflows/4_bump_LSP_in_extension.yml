@@ -72,8 +72,8 @@ jobs:
           SLACK_TITLE: '4. Bumping LSP in VSCode extension failed :x:'
           SLACK_COLOR: '#FF0000'
           SLACK_MESSAGE: '${{github.event.inputs.extension_version}} - ${{github.event.inputs.trigger_reason}} '
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_CHANNEL: feed-language-tools
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_FAILURES }}
+          SLACK_CHANNEL: feed-language-tools-failures
           SLACK_USERNAME: Prismo
           SLACK_ICON_EMOJI: ':boom:'
           SLACK_MSG_AUTHOR: prisma-bot

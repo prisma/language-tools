@@ -61,8 +61,8 @@ jobs:
           SLACK_TITLE: '1/2c. - Promoting patch branch to stable failed :x:'
           SLACK_COLOR: '#FF0000'
           SLACK_MESSAGE: '${{ steps.update.outputs.next_extension_version  }} - On manual trigger promoting patch branch to stable.'
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_CHANNEL: feed-language-tools
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_FAILURES }}
+          SLACK_CHANNEL: feed-language-tools-failures
           SLACK_USERNAME: Prismo
           SLACK_ICON_EMOJI: ':boom:'
           SLACK_MSG_AUTHOR: prisma-bot
