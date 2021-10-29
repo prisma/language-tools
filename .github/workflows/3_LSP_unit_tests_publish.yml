@@ -80,9 +80,6 @@ jobs:
     env:
       SLACK_MESSAGE: '${{ needs.build.outputs.tag_name }} - ${{github.event.inputs.trigger_reason}} '
     steps:
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.inputs.branch }}
       - name: Slack Notification on Failure
         if: ${{ failure() || needs.tests.result == 'failure' || needs.bump.result == 'failure' }}
         uses: rtCamp/action-slack-notify@v2.2.0
