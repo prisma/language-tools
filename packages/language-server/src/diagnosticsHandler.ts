@@ -9,7 +9,7 @@ import {
   convertDocumentTextToTrimmedLineArray,
   getBlockAtPosition,
   getCurrentLine,
-} from './MessageHandler'
+} from './util'
 import { LinterError } from './prisma-fmt/lint'
 
 export function greyOutIgnoredParts(
@@ -82,9 +82,8 @@ export function checkForExperimentalFeaturesUSeage(
   document: TextDocument,
 ): Range | undefined {
   if (document.getText().includes('experimentalFeatures')) {
-    const experimentalFeaturesRange:
-      | Range
-      | undefined = getExperimentalFeaturesRange(document)
+    const experimentalFeaturesRange: Range | undefined =
+      getExperimentalFeaturesRange(document)
     return experimentalFeaturesRange
   }
 }
