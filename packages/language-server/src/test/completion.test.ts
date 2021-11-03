@@ -72,7 +72,11 @@ function assertCompletion(
 // Cache prisma-fmt binary path
 let binPathPrismaFmt = ''
 
-suite('Completions', () => {
+suite('Completions', function () {
+  // "big" timeout because dowloading of the prisma-fmt binary can take more or less time
+  // and causes failures of tests
+  this.timeout('60s')
+
   suiteSetup(async () => {
     // install prisma-fmt binary
     if (binPathPrismaFmt === '') {
