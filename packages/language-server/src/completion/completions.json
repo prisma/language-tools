@@ -417,6 +417,10 @@
     {
       "label": "binary",
       "documentation": "Executable binary."
+    },
+    {
+      "label": "dataproxy",
+      "documentation": "Prisma Data Proxy."
     }
   ],
   "engineTypeArguments": [
