@@ -308,6 +308,10 @@ suite('Completions', () => {
               label: 'binary',
               kind: vscode.CompletionItemKind.Constant,
             },
+            {
+              label: 'dataproxy',
+              kind: vscode.CompletionItemKind.Constant,
+            },
           ],
           true,
         ),
