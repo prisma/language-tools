@@ -263,7 +263,7 @@ function getFirstDatasourceName(lines: string[]): string | undefined {
 
 function getFirstDatasourceProvider(lines: string[]): string | undefined {
   // matches provider inside datasource in any position
-  // thanks to https://regex101.com for the onlie scratchpad
+  // thanks to https://regex101.com for the online scratchpad
   const result =
     /datasource.*\{(\n|\N)\s*(.*\n)?\n*\s*provider\s=\s(\"(.*)\")[^}]+}/.exec(
       lines.join('\n'),
