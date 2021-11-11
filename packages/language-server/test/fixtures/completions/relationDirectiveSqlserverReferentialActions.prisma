@@ -1,0 +1,35 @@
+datasource pg {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model OrderItemSeven {
+    id Int @id @default(autoincrement())
+    productName String
+    productPrice Int
+    quantity Int
+    orderId Int
+    order Order @relation(onDelete: )
+}
+
+model OrderItemEight {
+    id Int @id @default(autoincrement())
+    productName String
+    productPrice Int
+    quantity Int
+    orderId Int
+    order Order @relation(onUpdate: )
+}
+
+model OrderItemNine {
+    id Int @id @default(autoincrement())
+    productName String
+    productPrice Int
+    quantity Int
+    orderId Int
+    order Order @relation(fields: [orderId], references: [id], onDelete: )
+}

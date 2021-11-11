@@ -94,8 +94,9 @@ suite('Completions', function () {
   const modelBlocksUri = 'completions/modelBlocks.prisma'
   const enumCommentUri = 'completions/enumWithComments.prisma'
   const relationDirectiveUri = 'completions/relationDirective.prisma'
+  const relationDirectiveSqlserverReferentialActionsUri =
+    'completions/relationDirectiveSqlserverReferentialActions.prisma'
   const namedConstraintsUri = 'completions/namedConstraints.prisma'
-
   // used both in generator and datasource
   const fieldProvider = {
     label: 'provider',
@@ -884,6 +885,54 @@ suite('Completions', function () {
             items: [
               { label: 'Cascade', kind: CompletionItemKind.Enum },
               { label: 'Restrict', kind: CompletionItemKind.Enum },
+              { label: 'NoAction', kind: CompletionItemKind.Enum },
+              { label: 'SetNull', kind: CompletionItemKind.Enum },
+              { label: 'SetDefault', kind: CompletionItemKind.Enum },
+            ],
+          },
+        )
+      })
+
+      // SQL Server datasource
+      // Restrict option should be removed
+      test('sqlserver: @relation(onDelete: |)', () => {
+        assertCompletion(
+          relationDirectiveSqlserverReferentialActionsUri,
+          { line: 15, character: 36 },
+          {
+            isIncomplete: false,
+            items: [
+              { label: 'Cascade', kind: CompletionItemKind.Enum },
+              { label: 'NoAction', kind: CompletionItemKind.Enum },
+              { label: 'SetNull', kind: CompletionItemKind.Enum },
+              { label: 'SetDefault', kind: CompletionItemKind.Enum },
+            ],
+          },
+        )
+      })
+      test('sqlserver: @relation(onUpdate: |)', () => {
+        assertCompletion(
+          relationDirectiveSqlserverReferentialActionsUri,
+          { line: 24, character: 36 },
+          {
+            isIncomplete: false,
+            items: [
+              { label: 'Cascade', kind: CompletionItemKind.Enum },
+              { label: 'NoAction', kind: CompletionItemKind.Enum },
+              { label: 'SetNull', kind: CompletionItemKind.Enum },
+              { label: 'SetDefault', kind: CompletionItemKind.Enum },
+            ],
+          },
+        )
+      })
+      test('sqlserver: @relation(fields: [orderId], references: [id], onDelete: |)', () => {
+        assertCompletion(
+          relationDirectiveSqlserverReferentialActionsUri,
+          { line: 33, character: 73 },
+          {
+            isIncomplete: false,
+            items: [
+              { label: 'Cascade', kind: CompletionItemKind.Enum },
               { label: 'NoAction', kind: CompletionItemKind.Enum },
               { label: 'SetNull', kind: CompletionItemKind.Enum },
               { label: 'SetDefault', kind: CompletionItemKind.Enum },

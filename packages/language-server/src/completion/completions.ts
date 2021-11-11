@@ -261,6 +261,27 @@ function getFirstDatasourceName(lines: string[]): string | undefined {
     .trim()
 }
 
+function getFirstDatasourceProvider(lines: string[]): string | undefined {
+  // matches provider inside datasource in any position
+  // thanks to https://regex101.com for the onlie scratchpad
+  const result =
+    /datasource.*\{(\n|\N)\s*(.*\n)?\n*\s*provider\s=\s(\"(.*)\")[^}]+}/.exec(
+      lines.join('\n'),
+    )
+
+  if (!result || !result[4]) {
+    return undefined
+  }
+
+  const datasourceProvider = result[4]
+  if (
+    typeof datasourceProvider === 'string' &&
+    datasourceProvider.length >= 1
+  ) {
+    return datasourceProvider
+  }
+}
+
 export function getAllRelationNames(lines: Array<string>): Array<string> {
   const modelNames: Array<string> = []
   for (const item of lines) {
@@ -926,19 +947,32 @@ function getSuggestionsForAttribute(
     suggestions = klona(relationArguments)
     // This is basically hardcoding the suggestions
     // because prisma-format referential-actions returns an empty array [] most of the time
+    // because schema is considered invalid when it's sent to the subcommand because typing in progress.
     // Main issue is that "Restrict" should be excluded if on SQL Server
-    //
+    // We can filter on the datasource using `getFirstDatasourceProvider`
+    const datasourceProvider = getFirstDatasourceProvider(lines)
+
     // Note: needs to be before @relation condition because
     // `@relation(onUpdate: |)` means wordBeforePosition = '@relation(onUpdate:'
     if (wordBeforePosition.includes('onDelete:')) {
       return {
-        items: relationOnDeleteArguments,
+        items:
+          datasourceProvider === 'sqlserver'
+            ? relationOnDeleteArguments.filter(
+                (arg) => arg.label !== 'Restrict',
+              )
+            : relationOnDeleteArguments,
         isIncomplete: false,
       }
     }
     if (wordBeforePosition.includes('onUpdate:')) {
       return {
-        items: relationOnUpdateArguments,
+        items:
+          datasourceProvider === 'sqlserver'
+            ? relationOnUpdateArguments.filter(
+                (arg) => arg.label !== 'Restrict',
+              )
+            : relationOnUpdateArguments,
         isIncomplete: false,
       }
     }

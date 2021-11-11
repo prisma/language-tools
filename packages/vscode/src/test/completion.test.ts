@@ -64,6 +64,9 @@ const enumCommentUri = getDocUri('completions/enumWithComments.prisma')
 const emptyDocUri = getDocUri('completions/empty.prisma')
 const sqliteDocUri = getDocUri('completions/datasourceWithSqlite.prisma')
 const relationDirectiveUri = getDocUri('completions/relationDirective.prisma')
+const relationDirectiveSqlserverReferentialActionsUri = getDocUri(
+  'completions/relationDirectiveSqlserverReferentialActions.prisma',
+)
 
 const fieldPreviewFeatures = {
   label: 'previewFeatures',
@@ -752,6 +755,48 @@ suite('Completions', () => {
           new vscode.CompletionList([
             { label: 'Cascade', kind: vscode.CompletionItemKind.Enum },
             { label: 'Restrict', kind: vscode.CompletionItemKind.Enum },
+            { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetDefault', kind: vscode.CompletionItemKind.Enum },
+          ]),
+          true,
+        )
+      })
+
+      // SQL Server datasource
+      // Restrict option should be removed
+      test('sqlserver: @relation(onDelete: |)', async () => {
+        await testCompletion(
+          relationDirectiveSqlserverReferentialActionsUri,
+          new vscode.Position(15, 36),
+          new vscode.CompletionList([
+            { label: 'Cascade', kind: vscode.CompletionItemKind.Enum },
+            { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetDefault', kind: vscode.CompletionItemKind.Enum },
+          ]),
+          true,
+        )
+      })
+      test('sqlserver: @relation(onUpdate: |)', async () => {
+        await testCompletion(
+          relationDirectiveSqlserverReferentialActionsUri,
+          new vscode.Position(24, 36),
+          new vscode.CompletionList([
+            { label: 'Cascade', kind: vscode.CompletionItemKind.Enum },
+            { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetDefault', kind: vscode.CompletionItemKind.Enum },
+          ]),
+          true,
+        )
+      })
+      test('sqlserver: @relation(fields: [orderId], references: [id], onDelete: |)', async () => {
+        await testCompletion(
+          relationDirectiveSqlserverReferentialActionsUri,
+          new vscode.Position(33, 73),
+          new vscode.CompletionList([
+            { label: 'Cascade', kind: vscode.CompletionItemKind.Enum },
             { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
             { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
             { label: 'SetDefault', kind: vscode.CompletionItemKind.Enum },
