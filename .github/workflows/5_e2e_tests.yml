@@ -36,7 +36,7 @@ jobs:
       - name: Compile
         run: npm run compile
       - name: Headless e2e tests
-        uses: GabrielBB/xvfb-action@v1.5
+        uses: GabrielBB/xvfb-action@v1.6
         with:
           run: npm run test
 
