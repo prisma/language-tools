@@ -8,8 +8,6 @@ import {
 } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
-import { getBinPath, binaryIsNeeded, getDownloadURL } from '../prisma-fmt/util'
-import install from '../prisma-fmt/install'
 
 function assertCompletion(
   fixturePath: string,
@@ -29,7 +27,6 @@ function assertCompletion(
   const completionResult: CompletionList | undefined = handleCompletionRequest(
     params,
     document,
-    binPathPrismaFmt,
   )
 
   assert.ok(completionResult !== undefined)
@@ -69,23 +66,8 @@ function assertCompletion(
   )
 }
 
-// Cache prisma-fmt binary path
-let binPathPrismaFmt = ''
-
 suite('Completions', function () {
-  // "big" timeout because dowloading of the prisma-fmt binary can take more or less time
-  // and causes failures of tests
-  this.timeout('60s')
-
-  suiteSetup(async () => {
-    // install prisma-fmt binary
-    if (binPathPrismaFmt === '') {
-      binPathPrismaFmt = await getBinPath()
-    }
-    if (binaryIsNeeded(binPathPrismaFmt)) {
-      await install(await getDownloadURL(), binPathPrismaFmt)
-    }
-  })
+  suiteSetup(async () => { })
 
   const emptyDocUri = 'completions/empty.prisma'
   const sqliteDocUri = 'completions/datasourceWithSqlite.prisma'

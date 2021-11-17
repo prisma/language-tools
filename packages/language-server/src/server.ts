@@ -22,9 +22,7 @@ import {
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
 import * as util from './prisma-fmt/util'
-import install from './prisma-fmt/install'
 import { LSPOptions, LSPSettings } from './settings'
-import { existsSync } from 'fs'
 const packageJson = require('../../package.json') // eslint-disable-line
 
 function getConnection(options?: LSPOptions): Connection {
@@ -55,7 +53,6 @@ export function startServer(options?: LSPOptions): void {
   console.error = connection.console.error.bind(connection.console)
 
   const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
-  let defaultBinPath = ''
 
   connection.onInitialize(async (params: InitializeParams) => {
     const capabilities = params.capabilities
@@ -64,8 +61,6 @@ export function startServer(options?: LSPOptions): void {
       capabilities?.textDocument?.codeAction?.codeActionLiteralSupport,
     )
     hasConfigurationCapability = Boolean(capabilities?.workspace?.configuration)
-
-    defaultBinPath = await util.getBinPath()
 
     connection.console.info(
       `Default version of Prisma binary 'prisma-fmt': ${util.getVersion()}`,
@@ -115,10 +110,8 @@ export function startServer(options?: LSPOptions): void {
 
   // The global settings, used when the `workspace/configuration` request is not supported by the client or is not set by the user.
   // This does not apply to VSCode, as this client supports this setting.
-  const defaultSettings: LSPSettings = {
-    prismaFmtBinPath: defaultBinPath,
-  }
-  let globalSettings: LSPSettings = defaultSettings
+  // const defaultSettings: LSPSettings = { }
+  // let globalSettings: LSPSettings = defaultSettings // eslint-disable-line
 
   // Cache the settings of all open documents
   const documentSettings: Map<string, Thenable<LSPSettings>> = new Map<
@@ -132,9 +125,8 @@ export function startServer(options?: LSPOptions): void {
       // Reset all cached document settings
       documentSettings.clear()
     } else {
-      globalSettings = <LSPSettings>(change.settings.prisma || defaultSettings) // eslint-disable-line @typescript-eslint/no-unsafe-member-access
+      // globalSettings = <LSPSettings>(change.settings.prisma || defaultSettings) // eslint-disable-line @typescript-eslint/no-unsafe-member-access
     }
-    documents.all().forEach(async (d) => await installPrismaFmt(d.uri)) // eslint-disable-line @typescript-eslint/no-misused-promises
 
     // Revalidate all open prisma schemas
     documents.all().forEach(validateTextDocument) // eslint-disable-line @typescript-eslint/no-misused-promises
@@ -145,47 +137,28 @@ export function startServer(options?: LSPOptions): void {
     documentSettings.delete(e.document.uri)
   })
 
-  function getDocumentSettings(resource: string): Thenable<LSPSettings> {
-    if (!hasConfigurationCapability) {
-      connection.console.info(`Using default prisma-fmt binary path.`)
-      return Promise.resolve(globalSettings)
-    }
-    let result = documentSettings.get(resource)
-    if (!result) {
-      result = connection.workspace.getConfiguration({
-        scopeUri: resource,
-        section: 'prisma',
-      })
-      documentSettings.set(resource, result)
-    }
-    return result
-  }
-
-  function getPrismaFmtBinPath(binPathSetting: string | undefined): string {
-    if (!binPathSetting || binPathSetting.length === 0) {
-      return defaultBinPath
-    } else if (!existsSync(binPathSetting)) {
-      connection.window.showErrorMessage(
-        `Path to prisma-fmt binary (${binPathSetting}) does not exist. Using default prisma-fmt binary path instead.`,
-      )
-      return defaultBinPath
-    } else {
-      connection.console.log(
-        'Using binary path from Prisma Language Server configuration.',
-      )
-      return binPathSetting
-    }
-  }
+  // function getDocumentSettings(resource: string): Thenable<LSPSettings> {
+  //   if (!hasConfigurationCapability) {
+  //     connection.console.info(`Using default prisma-fmt binary path.`)
+  //     return Promise.resolve(globalSettings)
+  //   }
+  //   let result = documentSettings.get(resource)
+  //   if (!result) {
+  //     result = connection.workspace.getConfiguration({
+  //       scopeUri: resource,
+  //       section: 'prisma',
+  //     })
+  //     documentSettings.set(resource, result)
+  //   }
+  //   return result
+  // }
 
   async function validateTextDocument(
     textDocument: TextDocument,
   ): Promise<void> {
-    const settings = await getDocumentSettings(textDocument.uri)
-    const fmtBinPath = getPrismaFmtBinPath(settings.prismaFmtBinPath)
     const diagnostics: Diagnostic[] =
       await MessageHandler.handleDiagnosticsRequest(
         textDocument,
-        fmtBinPath,
         (errorMessage: string) => {
           connection.window.showErrorMessage(errorMessage)
         },
@@ -194,43 +167,8 @@ export function startServer(options?: LSPOptions): void {
   }
 
   documents.onDidChangeContent(async (change: { document: TextDocument }) => {
-    await installPrismaFmt(change.document.uri)
     await validateTextDocument(change.document)
   })
-
-  async function installPrismaFmt(documentUri: string) {
-    const settings = await getDocumentSettings(documentUri)
-    const prismaFmtBinPath = getPrismaFmtBinPath(settings.prismaFmtBinPath)
-    connection.console.info(`Local prisma-fmt path: ${prismaFmtBinPath}`)
-
-    const isInstallNecessary = util.binaryIsNeeded(prismaFmtBinPath)
-    if (
-      isInstallNecessary ||
-      (!isInstallNecessary && !(await util.testBinarySuccess(prismaFmtBinPath)))
-    ) {
-      const downloadUrl = await util.getDownloadURL()
-      connection.console.info(`Downloading prisma-fmt from ${downloadUrl}`)
-
-      try {
-        await install(downloadUrl, prismaFmtBinPath)
-        const version = await util.getBinaryVersion(prismaFmtBinPath)
-        connection.console.info(
-          `Prisma plugin prisma-fmt installation succeeded.`,
-        )
-        connection.console.info(
-          `Installed version ${version} of 'prisma-fmt' using path: ${prismaFmtBinPath}`,
-        )
-      } catch (err) {
-        const message = err instanceof Error ? err.message : `${err}` // eslint-disable-line @typescript-eslint/restrict-template-expressions
-        connection.console.error(
-          `Cannot install prisma-fmt: ${message}. Please:\n` +
-            '1. Check your network connection and run `Prisma: Restart Language Server`, or\n' +
-            '2. Manually download and uncompress the archive file, then set the path in `prisma.prismaFmtBinPath`\n\n' +
-            `The achieve file can be acquired at:\n  ${downloadUrl}\n\n`,
-        )
-      }
-    }
-  }
 
   function getDocument(uri: string): TextDocument | undefined {
     return documents.get(uri)
@@ -245,13 +183,10 @@ export function startServer(options?: LSPOptions): void {
 
   connection.onCompletion(async (params: CompletionParams) => {
     const doc = getDocument(params.textDocument.uri)
-    const settings = await getDocumentSettings(params.textDocument.uri)
-    const prismaFmtBinPath = getPrismaFmtBinPath(settings.prismaFmtBinPath)
     if (doc) {
       return MessageHandler.handleCompletionRequest(
         params,
         doc,
-        prismaFmtBinPath,
       )
     }
   })
@@ -279,13 +214,10 @@ export function startServer(options?: LSPOptions): void {
 
   connection.onDocumentFormatting(async (params: DocumentFormattingParams) => {
     const doc = getDocument(params.textDocument.uri)
-    const settings = await getDocumentSettings(params.textDocument.uri)
-    const prismaFmtBinPath = getPrismaFmtBinPath(settings.prismaFmtBinPath)
     if (doc) {
       return MessageHandler.handleDocumentFormatting(
         params,
         doc,
-        prismaFmtBinPath,
         (errorMessage: string) => {
           connection.window.showErrorMessage(errorMessage)
         },

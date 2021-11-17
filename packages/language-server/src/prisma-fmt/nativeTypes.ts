@@ -1,4 +1,4 @@
-import execa from 'execa'
+import prismaFmt from '@prisma/prisma-fmt-wasm'
 
 export interface NativeTypeConstructors {
   name: string
@@ -8,23 +8,9 @@ export interface NativeTypeConstructors {
 }
 
 export default function nativeTypeConstructors(
-  execPath: string,
   text: string,
   onError?: (errorMessage: string) => void,
 ): NativeTypeConstructors[] {
-  const result = execa.sync(execPath, ['native-types'], { input: text })
-
-  if (result.exitCode !== 0) {
-    const errorMessage =
-      "prisma-fmt error'd during getting available native types.\n"
-
-    if (onError) {
-      onError(errorMessage + result.stderr)
-    }
-
-    console.error(errorMessage)
-    console.error(result.stderr)
-    return []
-  }
-  return JSON.parse(result.stdout) as NativeTypeConstructors[]
+  const result = prismaFmt.native_types(JSON.stringify({ input: text }))
+  return JSON.parse(result) as NativeTypeConstructors[]
 }

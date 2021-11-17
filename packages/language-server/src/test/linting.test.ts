@@ -1,7 +1,5 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { handleDiagnosticsRequest } from '../MessageHandler'
-import { getBinPath, binaryIsNeeded, getDownloadURL } from '../prisma-fmt/util'
-import install from '../prisma-fmt/install'
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
@@ -14,7 +12,6 @@ async function assertLinting(
 
   const diagnosticsResults: Diagnostic[] = await handleDiagnosticsRequest(
     document,
-    binPathPrismaFmt,
   )
 
   assert.ok(diagnosticsResults.length != 0)
@@ -26,18 +23,8 @@ async function assertLinting(
   })
 }
 
-// Cache prisma-fmt binary path
-let binPathPrismaFmt = ''
-
 suite('Linting', () => {
   suiteSetup(async () => {
-    // install prisma-fmt binary
-    if (binPathPrismaFmt === '') {
-      binPathPrismaFmt = await getBinPath()
-    }
-    if (binaryIsNeeded(binPathPrismaFmt)) {
-      await install(await getDownloadURL(), binPathPrismaFmt)
-    }
   })
 
   const fixturePathMissingArgument = './linting/missingArgument.prisma'

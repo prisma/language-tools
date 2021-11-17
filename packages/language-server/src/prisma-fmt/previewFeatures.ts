@@ -1,22 +1,19 @@
-import execa from 'execa'
+import prismaFmt from '@prisma/prisma-fmt-wasm'
 
 export default function previewFeatures(
-  execPath: string,
   onError?: (errorMessage: string) => void,
 ): string[] {
-  const result = execa.sync(execPath, ['preview-features'])
-
-  if (result.exitCode !== 0) {
+  try {
+      const result = prismaFmt.preview_features()
+  return JSON.parse(result) as string[]
+  } catch (err) {
     const errorMessage =
       "prisma-fmt error'd during getting available preview features.\n"
 
     if (onError) {
-      onError(errorMessage + result.stderr)
+      onError(errorMessage + err)
     }
-
-    console.error(errorMessage)
-    console.error(result.stderr)
     return []
   }
-  return JSON.parse(result.stdout) as string[]
+
 }
