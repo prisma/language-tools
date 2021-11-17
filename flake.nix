@@ -8,58 +8,51 @@
       let pkgs = nixpkgs.legacyPackages.${system}; in
       {
         apps = {
-          # Build the vscode extension with pinned dependencies.
+          # Build the vscode extension with pinned dependencies and the local
+          # language server build. It will not package the vscode extension
+          # into a .vsix you can install directly, because this is proving
+          # extremely challenging to do locally.
           buildVscodeExtension = pkgs.writeShellScriptBin "buildVscodeExtension" ''
             PATH=${pkgs.nodejs}/bin:${pkgs.jq}/bin:$PATH
+
+            set -euxo pipefail
 
             echo -n 'npm --version: '
             npm --version
             echo -n 'node --version: '
             node --version
 
+            echo 'Deleting node modules...'
+            nix run .#deleteNodeModules
+
             echo 'Building language-server...'
             pushd ./packages/language-server
             npm install
             npm run build
+            npm prune --production
             popd
 
             echo 'Building VSCode extension...'
             pushd ./packages/vscode
-
-            TMP_PACKAGE_JSON=`jq '.dependencies."@prisma/language-server" = "../language-server"' package.json`
-            echo $TMP_PACKAGE_JSON > package.json
-
             npm install
             npm run build
-            npm run package -- --no-dependencies
             popd
 
             echo 'ok'
           '';
-          # Start a VSCode instance with completely default configuration in a
-          # temporary directory, but it has the local build of the extension
-          # installed (see buildVscodeExtension above) and an example Prisma
-          # schema.
+          # Start a VSCode instance with completely default configuration.
+          # Follow the instructions from CONTRIBUTING.md to manually start
+          # another instance of VSCode with the local build of the extension
+          # (unpackaged) locally.
           code = pkgs.writeShellScriptBin "code" ''
             TMPDIR=`mktemp -d`
             USER_DIR=$TMPDIR/user_dir
-            DATA_DIR=$TMPDIR/data_dir
             EXTENSIONS_DIR=$TMPDIR/extensions_dir
             CODE="${pkgs.vscodium}/bin/codium --user-data-dir $USER_DIR --extensions-dir=$EXTENSIONS_DIR"
-            EXTENSION_FILE=`find ./packages/vscode -name 'prisma-insider*.vsix' -print`
 
-            if [[ $EXTENSION_FILE == "" ]]; then
-              echo "Could not find extension file in packages/vscode"
-              exit 1
-            fi
+            mkdir $USER_DIR $EXTENSIONS_DIR
 
-            mkdir $USER_DIR $DATA_DIR $EXTENSIONS_DIR
-
-            cp ${./packages/vscode/src/test/testDb.prisma} $DATA_DIR/schema.prisma
-            chmod -R 777 $DATA_DIR
-
-            $CODE --install-extension $EXTENSION_FILE
-            $CODE $DATA_DIR --goto $DATA_DIR/schema.prisma:10
+            $CODE . --goto ./packages/vscode/src/test/testDb.prisma:10
           '';
           deleteNodeModules = pkgs.writeShellScriptBin "deleteNodeModules" ''
             find . -name 'node_modules' -prune

@@ -63,7 +63,7 @@ export function startServer(options?: LSPOptions): void {
     hasConfigurationCapability = Boolean(capabilities?.workspace?.configuration)
 
     connection.console.info(
-      `Default version of Prisma binary 'prisma-fmt': ${util.getVersion()}`,
+      `Default version of Prisma 'prisma-fmt': ${util.getVersion()}`,
     )
 
     connection.console.info(
