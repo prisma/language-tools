@@ -21,13 +21,6 @@ import {
 import { homedir } from 'os'
 import { readdirSync } from 'fs'
 import path from 'path'
-import {
-  BinaryStorage,
-  checkAndAskForBinaryExecution,
-  printBinaryCheckWarning,
-  PRISMA_ALLOWED_BINS_KEY,
-} from './binaryValidator'
-
 export function isDebugOrTestSession(): boolean {
   return env.sessionId === 'someValue.sessionId'
 }
@@ -149,19 +142,8 @@ export const restartClient = async (
 ): Promise<LanguageClient> => {
   client?.diagnostics?.dispose()
   if (client) await client.stop()
-  // try to create a new client if options are passed
-  const allowed = await checkAndAskForBinaryExecution(
-    context,
-    workspace.getConfiguration('prisma').get('prismaFmtBinPath'),
-    context.globalState.get<BinaryStorage>(PRISMA_ALLOWED_BINS_KEY),
-  )
-  if (allowed) {
     client = createLanguageServer(serverOptions, clientOptions)
     context.subscriptions.push(client.start())
     await client.onReady()
     return client
-  } else {
-    await printBinaryCheckWarning()
-    return client
-  }
 }
