@@ -30,6 +30,10 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.branch }}
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
       - name: Install Dependencies in LSP
         run: cd packages/language-server && npm install
       - name: Compile LSP
@@ -45,6 +49,12 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.branch }}
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+          # Setup .npmrc file to publish to npm
+          registry-url: 'https://registry.npmjs.org'
       - name: Print inputs
         run: |
           echo ${{github.event.inputs.npm_channel}}
@@ -56,12 +66,7 @@ jobs:
       - name: Compile LSP
         run: cd packages/language-server && npm run build
       - name: Publish LSP to npm
-        # Setup .npmrc file to publish to npm
-        uses: actions/setup-node@v2
-        with:
-          node-version: '12.x'
-          registry-url: 'https://registry.npmjs.org'
-      - run: cd packages/language-server && npm publish --tag ${{ github.event.inputs.npm_channel }} --access public
+        run: cd packages/language-server && npm publish --tag ${{ github.event.inputs.npm_channel }} --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
