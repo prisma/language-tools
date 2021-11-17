@@ -28,6 +28,7 @@
   "dependencies": {
     "@prisma/fetch-engine": "3.6.0-5.69248bcfa2cc55427e82052fc90590e65d9ed370",
     "@prisma/get-platform": "3.6.0-5.69248bcfa2cc55427e82052fc90590e65d9ed370",
+    "@prisma/prisma-fmt-wasm": "latest",
     "@types/js-levenshtein": "1.1.0",
     "execa": "5.1.1",
     "hasha": "5.2.2",
