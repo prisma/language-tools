@@ -19,7 +19,7 @@
 
             echo 'Building language-server...'
             pushd ./packages/language-server
-            npm clean-install --no-save
+            npm install
             npm run build
             popd
 
