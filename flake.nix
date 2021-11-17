@@ -41,20 +41,23 @@
           # installed (see buildVscodeExtension above) and an example Prisma
           # schema.
           code = pkgs.writeShellScriptBin "code" ''
-            USER_DIR=`mktemp -d`
-            DATA_DIR=`mktemp -d`
-            CODE="${pkgs.vscodium}/bin/codium --user-data-dir $USER_DIR"
-            EXTENSION_FILE=`find ./packages/vscode -name 'prisma-insider*.vsix' -print0`
+            TMPDIR=`mktemp -d`
+            USER_DIR=$TMPDIR/user_dir
+            DATA_DIR=$TMPDIR/data_dir
+            EXTENSIONS_DIR=$TMPDIR/extensions_dir
+            CODE="${pkgs.vscodium}/bin/codium --user-data-dir $USER_DIR --extensions-dir=$EXTENSIONS_DIR"
+            EXTENSION_FILE=`find ./packages/vscode -name 'prisma-insider*.vsix' -print`
 
             if [[ $EXTENSION_FILE == "" ]]; then
               echo "Could not find extension file in packages/vscode"
               exit 1
             fi
 
+            mkdir $USER_DIR $DATA_DIR $EXTENSIONS_DIR
+
             cp ${./packages/vscode/src/test/testDb.prisma} $DATA_DIR/schema.prisma
             chmod -R 777 $DATA_DIR
 
-            mkdir $USER_DIR $DATA_DIR
             $CODE --install-extension $EXTENSION_FILE
             $CODE $DATA_DIR --goto $DATA_DIR/schema.prisma:10
           '';
