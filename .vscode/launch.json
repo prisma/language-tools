@@ -70,10 +70,7 @@
   "compounds": [
     {
       "name": "VSCode + LSP",
-      "configurations": [
-        "Launch VSCode extension",
-        "Attach to Server"
-      ]
+      "configurations": ["Launch VSCode extension", "Attach to Server"]
     }
   ]
 }

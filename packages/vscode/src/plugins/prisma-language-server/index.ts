@@ -177,7 +177,7 @@ const plugin: PrismaVSCodePlugin = {
     // const config = workspace.getConfiguration('prisma')
 
     workspace.onDidChangeConfiguration(
-      async (e) => { },
+      async (e) => {},
       null,
       context.subscriptions,
     )
@@ -198,7 +198,7 @@ const plugin: PrismaVSCodePlugin = {
       ),
     )
 
-      activateClient(context, serverOptions, clientOptions)
+    activateClient(context, serverOptions, clientOptions)
 
     if (!isDebugOrTest) {
       // eslint-disable-next-line

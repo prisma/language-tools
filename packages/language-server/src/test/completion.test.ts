@@ -67,7 +67,7 @@ function assertCompletion(
 }
 
 suite('Completions', function () {
-  suiteSetup(async () => { })
+  suiteSetup(async () => {})
 
   const emptyDocUri = 'completions/empty.prisma'
   const sqliteDocUri = 'completions/datasourceWithSqlite.prisma'

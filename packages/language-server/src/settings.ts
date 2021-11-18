@@ -8,4 +8,4 @@ export interface LSPOptions {
   connection?: Connection
 }
 
-export interface LSPSettings { }
+export interface LSPSettings {}

@@ -86,12 +86,14 @@ function bumpVersionsInRepo({
       languageServerPackageJson['prisma']['enginesVersion'] = sha
 
       // engines version
-      languageServerPackageJson['dependencies']['@prisma/get-platform'] = engineVersion
-      languageServerPackageJson['dependencies']['@prisma/fetch-engine'] = engineVersion
+      languageServerPackageJson['dependencies']['@prisma/get-platform'] =
+        engineVersion
+      languageServerPackageJson['dependencies']['@prisma/fetch-engine'] =
+        engineVersion
 
       // CLI version
       languageServerPackageJson['prisma']['cliVersion'] = newPrismaVersion
-      
+
       writeJsonToPackageJson({
         content: languageServerPackageJson,
         path: languageServerPackageJsonPath,

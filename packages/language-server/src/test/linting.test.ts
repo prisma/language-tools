@@ -24,8 +24,7 @@ async function assertLinting(
 }
 
 suite('Linting', () => {
-  suiteSetup(async () => {
-  })
+  suiteSetup(async () => {})
 
   const fixturePathMissingArgument = './linting/missingArgument.prisma'
   const fixturePathWrongType = './linting/wrongType.prisma'

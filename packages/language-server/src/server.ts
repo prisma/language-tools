@@ -184,10 +184,7 @@ export function startServer(options?: LSPOptions): void {
   connection.onCompletion(async (params: CompletionParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      return MessageHandler.handleCompletionRequest(
-        params,
-        doc,
-      )
+      return MessageHandler.handleCompletionRequest(params, doc)
     }
   })
 

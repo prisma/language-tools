@@ -9,7 +9,7 @@ function isMinorOrMajorRelease(prismaVersion) {
     )
   }
   return tokens[2] === '0' || prismaVersion === '3.0.1' // <== special case for 3.x that will start with 3.0.1 instead :(
-  //                ^= e.g. 2.29.0       
+  //                ^= e.g. 2.29.0
   //                         4.0.0
 }
 
@@ -72,7 +72,10 @@ function nextVersion({
       return semVer.inc(currentVersion, 'patch')
     case 'latest':
       // Prisma CLI new latest version
-      if (isMinorOrMajorRelease(prisma_latest) && currentVersion != prisma_latest) {
+      if (
+        isMinorOrMajorRelease(prisma_latest) &&
+        currentVersion != prisma_latest
+      ) {
         // just adopt the version number from npm for extension as well
         return prisma_latest
       } else {
@@ -138,7 +141,7 @@ module.exports = {
 if (require.main === module) {
   const args = process.argv.slice(2)
   const npm_channel = args[0]
-  
+
   // Get extension version matching the npm channel
   const currentVersionOfExtension = currentExtensionVersion({
     branch_channel: npm_channel,

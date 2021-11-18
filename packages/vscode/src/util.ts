@@ -142,8 +142,8 @@ export const restartClient = async (
 ): Promise<LanguageClient> => {
   client?.diagnostics?.dispose()
   if (client) await client.stop()
-    client = createLanguageServer(serverOptions, clientOptions)
-    context.subscriptions.push(client.start())
-    await client.onReady()
-    return client
+  client = createLanguageServer(serverOptions, clientOptions)
+  context.subscriptions.push(client.start())
+  await client.onReady()
+  return client
 }
