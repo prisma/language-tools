@@ -11,6 +11,16 @@ export default function nativeTypeConstructors(
   text: string,
   onError?: (errorMessage: string) => void,
 ): NativeTypeConstructors[] {
-  const result = prismaFmt.native_types(JSON.stringify({ input: text }))
+  try {
+      const result = prismaFmt.native_types(text)
   return JSON.parse(result) as NativeTypeConstructors[]
+
+  } catch (err) {
+      if (onError) {
+        onError(`${err}`)
+      }
+      
+      return []
+  }
+
 }
