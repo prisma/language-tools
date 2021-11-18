@@ -29,7 +29,6 @@
     "@prisma/get-platform": "3.6.0-5.69248bcfa2cc55427e82052fc90590e65d9ed370",
     "@prisma/prisma-fmt-wasm": "latest",
     "@types/js-levenshtein": "1.1.0",
-    "hasha": "5.2.2",
     "js-levenshtein": "1.1.6",
     "klona": "2.0.5",
     "vscode-languageserver": "7.0.0",
