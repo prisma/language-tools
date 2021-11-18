@@ -29,13 +29,9 @@
     "@prisma/get-platform": "3.6.0-5.69248bcfa2cc55427e82052fc90590e65d9ed370",
     "@prisma/prisma-fmt-wasm": "latest",
     "@types/js-levenshtein": "1.1.0",
-    "execa": "5.1.1",
     "hasha": "5.2.2",
     "js-levenshtein": "1.1.6",
     "klona": "2.0.5",
-    "p-retry": "4.6.1",
-    "rimraf": "3.0.2",
-    "tempy": "1.0.1",
     "vscode-languageserver": "7.0.0",
     "vscode-languageserver-textdocument": "1.0.2"
   },

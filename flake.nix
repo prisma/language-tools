@@ -15,7 +15,7 @@
           buildVscodeExtension = pkgs.writeShellScriptBin "buildVscodeExtension" ''
             PATH=${pkgs.nodejs}/bin:${pkgs.jq}/bin:$PATH
 
-            set -euxo pipefail
+            set -euo pipefail
 
             echo -n 'npm --version: '
             npm --version
