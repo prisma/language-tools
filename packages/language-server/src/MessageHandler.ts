@@ -63,11 +63,10 @@ import {
 
 export async function handleDiagnosticsRequest(
   document: TextDocument,
-  binPath: string,
   onError?: (errorMessage: string) => void,
 ): Promise<Diagnostic[]> {
   const text = document.getText(fullDocumentRange(document))
-  const res = await lint(binPath, text, (errorMessage: string) => {
+  const res = lint(text, (errorMessage: string) => {
     if (onError) {
       onError(errorMessage)
     }
@@ -196,14 +195,12 @@ export function handleDefinitionRequest(
 export async function handleDocumentFormatting(
   params: DocumentFormattingParams,
   document: TextDocument,
-  binPath: string,
   onError?: (errorMessage: string) => void,
 ): Promise<TextEdit[]> {
   const options = params.options
 
-  return format(binPath, options.tabSize, document.getText(), onError).then(
-    (formatted) => [TextEdit.replace(fullDocumentRange(document), formatted)],
-  )
+  const formatted = format(options.tabSize, document.getText(), onError)
+  return [TextEdit.replace(fullDocumentRange(document), formatted)]
 }
 
 export function handleHoverRequest(
@@ -251,7 +248,6 @@ export function handleHoverRequest(
 export function handleCompletionRequest(
   params: CompletionParams,
   document: TextDocument,
-  binPath: string,
 ): CompletionList | undefined {
   const context = params.context
   const position = params.position
@@ -309,7 +305,6 @@ export function handleCompletionRequest(
           lines,
           wordsBeforePosition,
           document,
-          binPath,
         )
       case '"':
         return getSuggestionForSupportedFields(
@@ -317,14 +312,12 @@ export function handleCompletionRequest(
           lines[position.line],
           currentLineUntrimmed,
           position,
-          binPath,
         )
       case '.':
         return getSuggestionForNativeTypes(
           foundBlock,
           wordsBeforePosition,
           document,
-          binPath,
           lines,
         )
     }
@@ -340,7 +333,6 @@ export function handleCompletionRequest(
           document,
           position,
           foundBlock,
-          binPath,
         )
       }
       // check if type
@@ -360,7 +352,6 @@ export function handleCompletionRequest(
         lines,
         wordsBeforePosition,
         document,
-        binPath,
       )
     case 'datasource':
     case 'generator':
@@ -381,7 +372,6 @@ export function handleCompletionRequest(
           lines[position.line],
           currentLineUntrimmed,
           position,
-          binPath,
         )
       }
       break

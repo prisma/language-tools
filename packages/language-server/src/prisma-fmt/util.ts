@@ -2,9 +2,7 @@
  * Imports
  */
 import { getPlatform, Platform } from '@prisma/get-platform'
-import path from 'path'
-import fs from 'fs'
-import exec from './exec'
+import prismaFmt from '@prisma/prisma-fmt-wasm'
 const packageJson = require('../../../package.json') // eslint-disable-line
 
 /**
@@ -27,16 +25,6 @@ export function getVersion(): string {
   }
   // eslint-disable-next-line
   return packageJson.prisma.enginesVersion
-}
-
-/**
- * Get the exec path
- */
-export async function getBinPath(): Promise<string> {
-  platform = platform || (await getPlatform())
-  version = version || getVersion()
-  const extension = platform === 'windows' ? '.exe' : ''
-  return path.join(__dirname, `prisma-fmt.${version}${extension}`)
 }
 
 /**
@@ -66,27 +54,12 @@ export function getCliVersion(): string {
   return packageJson.prisma.cliVersion
 }
 
-export function binaryIsNeeded(path: string): boolean {
-  return !fs.existsSync(path)
-}
-
-export async function getBinaryVersion(path: string): Promise<string> {
+export function getBinaryVersion(): string {
   try {
-    const output = await exec(path, ['--version'], '')
+    const output = prismaFmt.version()
     return output
   } catch (errors) {
     console.log(errors)
     return ''
   }
-}
-
-export async function testBinarySuccess(path: string): Promise<boolean> {
-  // try to execute version command
-  const version = await getBinaryVersion(path)
-  if (version === '') {
-    console.log('Binary test failed. Re-attempting a download.')
-    return false
-  }
-  console.log('Binary test successful.')
-  return true
 }

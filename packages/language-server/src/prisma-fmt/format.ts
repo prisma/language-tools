@@ -1,13 +1,12 @@
-import exec from './exec'
+import prismaFmt from '@prisma/prisma-fmt-wasm'
 
-export default async function format(
-  execPath: string,
+export default function format(
   identWidth: number,
   text: string,
   onError?: (errorMessage: string) => void,
-): Promise<string> {
+): string {
   try {
-    return await exec(execPath, ['format', '-s', identWidth.toString()], text)
+    return prismaFmt.format(text)
   } catch (errors) {
     if (onError) {
       onError(

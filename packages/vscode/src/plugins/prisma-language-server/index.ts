@@ -24,12 +24,6 @@ import {
   ServerOptions,
   TransportKind,
 } from 'vscode-languageclient/node'
-import {
-  BinaryStorage,
-  checkAndAskForBinaryExecution,
-  printBinaryCheckWarning,
-  PRISMA_ALLOWED_BINS_KEY,
-} from '../../binaryValidator'
 import TelemetryReporter from '../../telemetryReporter'
 import {
   applySnippetWorkspaceEdit,
@@ -180,63 +174,15 @@ const plugin: PrismaVSCodePlugin = {
         },
       } as any,
     }
-    const config = workspace.getConfiguration('prisma')
-    const allowedBins = context.globalState.get<BinaryStorage>(
-      PRISMA_ALLOWED_BINS_KEY,
-    )
+    // const config = workspace.getConfiguration('prisma')
 
     workspace.onDidChangeConfiguration(
-      async (e) => {
-        const binChanged = e.affectsConfiguration('prisma.prismaFmtBinPath')
-        if (binChanged) {
-          client = await restartClient(
-            context,
-            client,
-            serverOptions,
-            clientOptions,
-          )
-        }
-      },
+      async (e) => {},
       null,
       context.subscriptions,
     )
 
-    const launchAllowed = await checkAndAskForBinaryExecution(
-      context,
-      config.get('prismaFmtBinPath'),
-      allowedBins,
-    )
     context.subscriptions.push(
-      commands.registerCommand('prisma.resetAllBinDecisions', async () => {
-        await context.globalState.update(PRISMA_ALLOWED_BINS_KEY, { libs: {} })
-        client = await restartClient(
-          context,
-          client,
-          serverOptions,
-          clientOptions,
-        )
-      }),
-      commands.registerCommand(
-        'prisma.resetCurrentFmtBinDecision',
-        async () => {
-          const decisions = context.globalState.get<BinaryStorage>(
-            PRISMA_ALLOWED_BINS_KEY,
-          )
-          const currentBin: string | undefined = workspace
-            .getConfiguration('prisma')
-            .get('prismaFmtBinPath')
-          if (decisions && currentBin && currentBin !== '') {
-            delete decisions.libs[currentBin]
-          }
-          await context.globalState.update(PRISMA_ALLOWED_BINS_KEY, decisions)
-          client = await restartClient(
-            context,
-            client,
-            serverOptions,
-            clientOptions,
-          )
-        },
-      ),
       commands.registerCommand('prisma.restartLanguageServer', async () => {
         client = await restartClient(
           context,
@@ -252,11 +198,7 @@ const plugin: PrismaVSCodePlugin = {
       ),
     )
 
-    if (launchAllowed) {
-      activateClient(context, serverOptions, clientOptions)
-    } else {
-      await printBinaryCheckWarning()
-    }
+    activateClient(context, serverOptions, clientOptions)
 
     if (!isDebugOrTest) {
       // eslint-disable-next-line

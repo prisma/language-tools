@@ -162,10 +162,9 @@ export function getSuggestionForNativeTypes(
   foundBlock: Block,
   wordsBeforePosition: string[],
   document: TextDocument,
-  binPath: string,
   lines: string[],
 ): CompletionList | undefined {
-  const activeFeatureFlag = declaredNativeTypes(document, binPath)
+  const activeFeatureFlag = declaredNativeTypes(document)
   if (
     foundBlock.type !== 'model' ||
     !activeFeatureFlag ||
@@ -183,7 +182,7 @@ export function getSuggestionForNativeTypes(
   }
 
   const prismaType = wordsBeforePosition[1].replace('?', '').replace('[]', '')
-  const suggestions = getNativeTypes(document, prismaType, binPath)
+  const suggestions = getNativeTypes(document, prismaType)
 
   return {
     items: suggestions,
@@ -197,7 +196,6 @@ export function getSuggestionForFieldAttribute(
   lines: string[],
   wordsBeforePosition: string[],
   document: TextDocument,
-  binPath: string,
 ): CompletionList | undefined {
   if (block.type !== 'model') {
     return
@@ -205,7 +203,7 @@ export function getSuggestionForFieldAttribute(
   // create deep copy
   let suggestions: CompletionItem[] = klona(fieldAttributes)
 
-  const enabledNativeTypes = declaredNativeTypes(document, binPath)
+  const enabledNativeTypes = declaredNativeTypes(document)
 
   if (!(currentLine.includes('Int') || currentLine.includes('String'))) {
     // id not allowed
@@ -221,7 +219,7 @@ export function getSuggestionForFieldAttribute(
   if (enabledNativeTypes && wordsBeforePosition.length >= 2) {
     const datasourceName = getFirstDatasourceName(lines)
     const prismaType = wordsBeforePosition[1]
-    const nativeTypeSuggestions = getNativeTypes(document, prismaType, binPath)
+    const nativeTypeSuggestions = getNativeTypes(document, prismaType)
 
     if (datasourceName && nativeTypeSuggestions.length !== 0) {
       if (!currentLine.includes('@' + datasourceName)) {
@@ -495,9 +493,8 @@ export function getValuesInsideSquareBrackets(line: string): string[] {
   return result.map((v) => v.trim().replace('"', '').replace('"', ''))
 }
 
-function declaredNativeTypes(document: TextDocument, binPath: string): boolean {
+function declaredNativeTypes(document: TextDocument): boolean {
   const nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(
-    binPath,
     document.getText(),
   )
   if (nativeTypes.length === 0) {
@@ -544,10 +541,8 @@ function handlePreviewFeatures(
 function getNativeTypes(
   document: TextDocument,
   prismaType: string,
-  binPath: string,
 ): CompletionItem[] {
   let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(
-    binPath,
     document.getText(),
   )
 
@@ -590,7 +585,6 @@ export function getSuggestionForSupportedFields(
   currentLine: string,
   currentLineUntrimmed: string,
   position: Position,
-  binPath: string,
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
   const isInsideQuotation: boolean = isInsideQuotationMark(
@@ -617,7 +611,7 @@ export function getSuggestionForSupportedFields(
       }
       // previewFeatures
       if (currentLine.startsWith('previewFeatures')) {
-        const generatorPreviewFeatures: string[] = previewFeatures(binPath)
+        const generatorPreviewFeatures: string[] = previewFeatures()
         if (generatorPreviewFeatures.length > 0) {
           return handlePreviewFeatures(
             generatorPreviewFeatures,
@@ -917,7 +911,6 @@ function getSuggestionsForAttribute(
     block,
     position,
     document,
-    binPath,
   }: {
     attribute?: '@relation'
     wordsBeforePosition: string[]
@@ -926,7 +919,6 @@ function getSuggestionsForAttribute(
     block: Block
     position: Position
     document: TextDocument
-    binPath: string
   }, // eslint-disable-line @typescript-eslint/no-unused-vars
 ): CompletionList | undefined {
   const firstWordBeforePosition =
@@ -1160,7 +1152,6 @@ export function getSuggestionsForInsideRoundBrackets(
   document: TextDocument,
   position: Position,
   block: Block,
-  binPath: string,
 ): CompletionList | undefined {
   const wordsBeforePosition = untrimmedCurrentLine
     .slice(0, position.character)
@@ -1183,7 +1174,6 @@ export function getSuggestionsForInsideRoundBrackets(
       document,
       block,
       position,
-      binPath,
     })
   } else if (
     wordsBeforePosition.some(
@@ -1200,7 +1190,6 @@ export function getSuggestionsForInsideRoundBrackets(
       document,
       block,
       position,
-      binPath,
     })
   } else {
     return {

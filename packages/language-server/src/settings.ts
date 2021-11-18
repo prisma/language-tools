@@ -8,6 +8,4 @@ export interface LSPOptions {
   connection?: Connection
 }
 
-export interface LSPSettings {
-  prismaFmtBinPath: string
-}
+export interface LSPSettings {}

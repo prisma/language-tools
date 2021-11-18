@@ -75,11 +75,6 @@
       "type": "object",
       "title": "Language server configuration",
       "properties": {
-        "prisma.prismaFmtBinPath": {
-          "scope": "resource",
-          "type": "string",
-          "description": "Option to set the path to the prisma-fmt binary."
-        },
         "prisma.trace.server": {
           "scope": "window",
           "type": "string",
@@ -97,16 +92,6 @@
       {
         "command": "prisma.restartLanguageServer",
         "title": "Restart Language Server",
-        "category": "Prisma"
-      },
-      {
-        "command": "prisma.resetCurrentFmtBinDecision",
-        "title": "Reset current Prisma format binary execution decision",
-        "category": "Prisma"
-      },
-      {
-        "command": "prisma.resetAllBinDecisions",
-        "title": "Reset all Prisma format binary execution decisions",
         "category": "Prisma"
       }
     ]

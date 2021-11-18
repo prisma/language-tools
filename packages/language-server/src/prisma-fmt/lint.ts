@@ -1,4 +1,4 @@
-import exec from './exec'
+import prismaFmt from '@prisma/prisma-fmt-wasm'
 
 export interface LinterError {
   start: number
@@ -7,13 +7,12 @@ export interface LinterError {
   is_warning: boolean
 }
 
-export default async function lint(
-  execPath: string,
+export default function lint(
   text: string,
   onError?: (errorMessage: string) => void,
-): Promise<LinterError[]> {
+): LinterError[] {
   try {
-    const result = await exec(execPath, ['lint'], text)
+    const result = prismaFmt.lint(text)
     return JSON.parse(result) // eslint-disable-line @typescript-eslint/no-unsafe-return
   } catch (errors) {
     const errorMessage = "prisma-fmt error'd during linting.\n"
