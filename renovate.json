@@ -4,7 +4,7 @@
   "ignoreDeps": [
     "@prisma/language-server",
     "@prisma/get-platform",
-    "@prisma/fetch-engine"
+    "@prisma/prisma-fmt-wasm"
   ],
   "masterIssue": true,
   "reviewers": ["@Jolg42"],
@@ -46,7 +46,7 @@
         "@prisma/language-server",
         "@prisma/get-platform",
         "@types/vscode",
-        "@prisma/fetch-engine"
+        "@prisma/prisma-fmt-wasm"
       ],
       "updateTypes": ["patch", "minor"]
     }
