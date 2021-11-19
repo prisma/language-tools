@@ -26,7 +26,7 @@
   "main": "./dist/index.js",
   "typings": "dist/src/index",
   "dependencies": {
-    "@prisma/prisma-fmt-wasm": "3.6.0-8.73bc19e7a4c491dd3b90a699ff24fd22eaa762c3",
+    "@prisma/prisma-fmt-wasm": "3.6.0-9.174142bd0b658f5d567cf37cc5c22eaf0a1ee355",
     "@prisma/get-platform": "3.6.0-8.73bc19e7a4c491dd3b90a699ff24fd22eaa762c3",
     "@types/js-levenshtein": "1.1.0",
     "js-levenshtein": "1.1.6",
