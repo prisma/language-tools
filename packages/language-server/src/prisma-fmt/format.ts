@@ -5,6 +5,7 @@ export default function format(
   text: string,
   onError?: (errorMessage: string) => void,
 ): string {
+  console.log("running format() from prisma-fmt");
   try {
     return prismaFmt.format(text)
   } catch (errors) {
