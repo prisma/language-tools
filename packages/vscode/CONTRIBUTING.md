@@ -44,7 +44,7 @@ On push to the `main` branch, a new Insider extension is released, with an incre
 - A new file should open in the [Extension Development Host] instance of VSCode.
 - Change the language to Prisma.
 - Make a change to the syntax
-- To reload, press the reload button in VSCode ( **Developer: Inspect TM Scopes** is helpful for debugging syntax issues )
+- To reload, press the reload button in VSCode (**Developer: Inspect TM Scopes** is helpful for debugging syntax issues)
 
 ### Dependencies
 

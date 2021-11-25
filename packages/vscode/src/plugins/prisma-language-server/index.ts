@@ -65,8 +65,8 @@ const plugin: PrismaVSCodePlugin = {
   enabled: () => true,
   activate: async (context) => {
     const isDebugOrTest = isDebugOrTestSession()
-    const rootPath = workspace.workspaceFolders?.[0].uri.path
 
+    const rootPath = workspace.workspaceFolders?.[0].uri.path
     if (rootPath) {
       watcher = chokidar.watch(
         path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts'),
@@ -100,7 +100,7 @@ const plugin: PrismaVSCodePlugin = {
     }
 
     // The debug options for the server
-    // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
+    // --inspect=6009: runs the server in Node's Inspector mode so VSCode can attach to the server for debugging
     const debugOptions = {
       execArgv: ['--nolazy', '--inspect=6009'],
       env: { DEBUG: true },
@@ -128,7 +128,7 @@ const plugin: PrismaVSCodePlugin = {
           range: Range,
           context: CodeActionContext,
           token: CancellationToken,
-          _: ProvideCodeActionsSignature,
+          _: ProvideCodeActionsSignature, // eslint-disable-line @typescript-eslint/no-unused-vars
         ) {
           const params: CodeActionParams = {
             textDocument:
@@ -169,15 +169,15 @@ const plugin: PrismaVSCodePlugin = {
               }
               return result
             },
-            (_) => undefined,
+            (_) => undefined, // eslint-disable-line @typescript-eslint/no-unused-vars
           )
         },
-      } as any,
+      } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
     }
     // const config = workspace.getConfiguration('prisma')
 
     workspace.onDidChangeConfiguration(
-      async (e) => {},
+      async (e) => {}, // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
       null,
       context.subscriptions,
     )
@@ -204,7 +204,7 @@ const plugin: PrismaVSCodePlugin = {
       // eslint-disable-next-line
       const extensionId = 'prisma.' + packageJson.name
       // eslint-disable-next-line
-      const extensionVersion = packageJson.version
+      const extensionVersion: string = packageJson.version
 
       telemetry = new TelemetryReporter(extensionId, extensionVersion)
 

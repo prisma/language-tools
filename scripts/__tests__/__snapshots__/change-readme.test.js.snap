@@ -100,12 +100,12 @@ exports[`changeReadme it should work with a stable release 1`] = `
 
 ## Features
 
-- Syntax highlighting
+- Syntax highlighting of \`schema.prisma\`
+- Linting
+  - Diagnostic tools are used to surface errors and warnings in your schema file as you type.
 - Code Completion
   - Completion results appear for symbols as you type.
   - You can trigger this manually with the \`Ctrl+Space\` shortcut.
-- Linting
-  - Diagnostic tools are used to surface errors and warnings in your schema file as you type.
 - Documentation help
   - Documentation of a completion result pops up as completion results are provided.
 - Quick info on hover
