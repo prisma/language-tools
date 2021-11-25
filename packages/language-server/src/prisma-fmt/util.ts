@@ -2,7 +2,6 @@
  * Imports
  */
 import { getPlatform, Platform } from '@prisma/get-platform'
-import prismaFmt from '@prisma/prisma-fmt-wasm'
 const packageJson = require('../../../package.json') // eslint-disable-line
 
 /**
@@ -52,14 +51,4 @@ export function getEnginesVersion(): string {
  */
 export function getCliVersion(): string {
   return packageJson.prisma.cliVersion
-}
-
-export function getBinaryVersion(): string {
-  try {
-    const output = prismaFmt.version()
-    return output
-  } catch (errors) {
-    console.log(errors)
-    return ''
-  }
 }
