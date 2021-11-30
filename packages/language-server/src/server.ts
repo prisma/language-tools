@@ -56,13 +56,7 @@ export function startServer(options?: LSPOptions): void {
   const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
   connection.onInitialize(async (params: InitializeParams) => {
-    const capabilities = params.capabilities
-
-    hasCodeActionLiteralsCapability = Boolean(
-      capabilities?.textDocument?.codeAction?.codeActionLiteralSupport,
-    )
-    hasConfigurationCapability = Boolean(capabilities?.workspace?.configuration)
-
+    // Logging first...
     connection.console.info(
       `Default version of Prisma 'prisma-fmt': ${util.getVersion()}`,
     )
@@ -75,6 +69,14 @@ export function startServer(options?: LSPOptions): void {
     connection.console.info(`Prisma Engines version: ${prismaEnginesVersion}`)
     const prismaCliVersion = util.getCliVersion()
     connection.console.info(`Prisma CLI version: ${prismaCliVersion}`)
+    
+    // ... and then capabilities of the language server
+    const capabilities = params.capabilities
+
+    hasCodeActionLiteralsCapability = Boolean(
+      capabilities?.textDocument?.codeAction?.codeActionLiteralSupport,
+    )
+    hasConfigurationCapability = Boolean(capabilities?.workspace?.configuration)
 
     const result: InitializeResult = {
       capabilities: {
