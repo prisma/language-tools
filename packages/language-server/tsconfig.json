@@ -5,7 +5,7 @@
     "target": "es6",
     "outDir": "dist",
     "noUnusedLocals": true,
-    "lib": ["es6"],
+    "lib": ["es6", "dom"],
     "sourceMap": true,
     "esModuleInterop": true,
     "strict": true,
