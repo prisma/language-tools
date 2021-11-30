@@ -121,6 +121,8 @@ const plugin: PrismaVSCodePlugin = {
     const clientOptions: LanguageClientOptions = {
       // Register the server for prisma documents
       documentSelector: [{ scheme: 'file', language: 'prisma' }],
+
+      /* This middleware is part of the workaround for https://github.com/prisma/language-tools/issues/311 */
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       middleware: {
         async provideCodeActions(
@@ -192,6 +194,7 @@ const plugin: PrismaVSCodePlugin = {
         )
         window.showInformationMessage('Prisma language server restarted.') // eslint-disable-line @typescript-eslint/no-floating-promises
       }),
+      /* This command is part of the workaround for https://github.com/prisma/language-tools/issues/311 */
       commands.registerCommand(
         'prisma.applySnippetWorkspaceEdit',
         applySnippetWorkspaceEdit(),
