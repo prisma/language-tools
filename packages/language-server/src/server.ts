@@ -47,6 +47,7 @@ let hasConfigurationCapability = false
  * @param options Options to customize behavior
  */
 export function startServer(options?: LSPOptions): void {
+  // Source code: https://github.com/microsoft/vscode-languageserver-node/blob/main/server/src/common/server.ts#L1044
   const connection: Connection = getConnection(options)
 
   console.log = connection.console.log.bind(connection.console)
@@ -193,6 +194,8 @@ export function startServer(options?: LSPOptions): void {
     return MessageHandler.handleCompletionResolveRequest(completionItem)
   })
 
+  // Unused now
+  // TODO remove or experiment new file watcher
   connection.onDidChangeWatchedFiles(() => {
     // Monitored files have changed in VS Code
     connection.console.log(
