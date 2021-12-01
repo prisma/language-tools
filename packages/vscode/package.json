@@ -2,7 +2,7 @@
   "name": "prisma-insider",
   "displayName": "Prisma - Insider",
   "description": "This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the dev version of the CLI).",
-  "version": "31.0.361",
+  "version": "31.0.369",
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
@@ -15,7 +15,7 @@
   "dependencies": {
     "checkpoint-client": "1.1.20",
     "chokidar": "3.5.2",
-    "@prisma/language-server": "31.0.361",
+    "@prisma/language-server": "31.0.369",
     "vscode-languageclient": "7.0.0"
   },
   "optionalDependencies": {
@@ -103,7 +103,7 @@
     "mocha": "9.1.3",
     "ovsx": "0.2.1",
     "typescript": "4.5.2",
-    "vsce": "2.5.0",
+    "vsce": "2.5.1",
     "vscode-test": "1.6.1"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",

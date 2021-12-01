@@ -107,6 +107,7 @@ export async function handleDiagnosticsRequest(
 
   // TODO can be removed? Since it was renamed to `previewFeatures`
   // check for experimentalFeatures inside generator block
+  // Related code in codeActionProvider.ts, around lines 185-204
   if (document.getText().includes('experimentalFeatures')) {
     const experimentalFeaturesRange: Range | undefined =
       getExperimentalFeaturesRange(document)

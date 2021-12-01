@@ -69,6 +69,7 @@ export function checkForMinimalColorTheme(): void {
   }
 }
 
+/* This function is part of the workaround for https://github.com/prisma/language-tools/issues/311 */
 export function isSnippetEdit(
   action: CodeAction,
   document: TextDocumentIdentifier,
@@ -82,6 +83,7 @@ export function isSnippetEdit(
   return false
 }
 
+/* This function is part of the workaround for https://github.com/prisma/language-tools/issues/311 */
 export function applySnippetWorkspaceEdit(): (
   edit: WorkspaceEdit,
 ) => Promise<void> {
