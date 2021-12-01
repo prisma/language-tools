@@ -1,14 +1,7 @@
 /**
  * Imports
  */
-import { getPlatform, Platform } from '@prisma/get-platform'
 const packageJson = require('../../../package.json') // eslint-disable-line
-
-/**
- * Lookup Cache
- */
-let platform: Platform | undefined
-let version: string | undefined
 
 /**
  * Lookup version
@@ -24,16 +17,6 @@ export function getVersion(): string {
   }
   // eslint-disable-next-line
   return packageJson.prisma.enginesVersion
-}
-
-/**
- * Gets the download URL for a platform
- */
-export async function getDownloadURL(): Promise<string> {
-  platform = platform || (await getPlatform())
-  version = version || getVersion()
-  const extension = platform === 'windows' ? '.exe.gz' : '.gz'
-  return `https://binaries.prisma.sh/all_commits/${version}/${platform}/prisma-fmt${extension}`
 }
 
 /**
