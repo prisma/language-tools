@@ -3,6 +3,10 @@
   "version": "31.0.369",
   "author": "Prisma",
   "license": "Apache-2.0",
+  "engines": {
+    "node": ">=16",
+    "npm": ">=7"
+  },
   "workspaces": [
     "packages/*"
   ],
