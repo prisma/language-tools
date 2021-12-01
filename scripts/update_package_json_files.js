@@ -86,8 +86,6 @@ function bumpVersionsInRepo({
       languageServerPackageJson['prisma']['enginesVersion'] = sha
 
       // engines version
-      languageServerPackageJson['dependencies']['@prisma/get-platform'] =
-        engineVersion
       languageServerPackageJson['dependencies']['@prisma/prisma-fmt-wasm'] =
         engineVersion
 

@@ -1,11 +1,7 @@
 {
   "extends": ["config:base"],
   "semanticCommits": true,
-  "ignoreDeps": [
-    "@prisma/language-server",
-    "@prisma/get-platform",
-    "@prisma/prisma-fmt-wasm"
-  ],
+  "ignoreDeps": ["@prisma/language-server", "@prisma/prisma-fmt-wasm"],
   "masterIssue": true,
   "reviewers": ["@Jolg42"],
   "rebaseWhen": "conflicted",
@@ -44,7 +40,6 @@
       "depTypeList": ["dependencies"],
       "excludePackageNames": [
         "@prisma/language-server",
-        "@prisma/get-platform",
         "@types/vscode",
         "@prisma/prisma-fmt-wasm"
       ],
