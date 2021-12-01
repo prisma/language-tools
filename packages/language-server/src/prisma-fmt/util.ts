@@ -20,12 +20,12 @@ export function getVersion(): string {
 }
 
 /**
- * Gets Engines Version from package.json, dependencies, `@prisma/get-platform`
+ * Gets Engines Version from package.json, dependencies, `@prisma/prisma-fmt-wasm`
  * @returns Something like `2.26.0-23.9b816b3aa13cc270074f172f30d6eda8a8ce867d`
  */
 export function getEnginesVersion(): string {
   // eslint-disable-next-line
-  return packageJson.dependencies['@prisma/get-platform']
+  return packageJson.dependencies['@prisma/prisma-fmt-wasm']
 }
 
 /**
