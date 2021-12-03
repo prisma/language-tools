@@ -1,0 +1,42 @@
+{
+  "name": "Prisma Client: raw SQL highlighting",
+  "scopeName": "client.rawsql.prisma",
+  "fileTypes": ["js", "jsx", "ts", "tsx", "vue"],
+  "injectionSelector": "L:source  -string -comment",
+  "patterns": [
+    {
+      "name": "rawSQLInTaggedTemplates",
+      "contentName": "meta.embedded.block.prisma-client-rawsql",
+      "begin": ".*(\\$queryRaw|\\$executeRaw|\\$queryRawUnsafe|\\$executeRawUnsafe)((`))",
+      "beginbegin": ".*\\$queryRaw((`))",
+      "beginCaptures": {
+        "1": {
+          "name": "entity.name.function.tagged-template.js"
+        },
+        "2": {
+          "name": "string"
+        },
+        "3": {
+          "name": "punctuation.definition.string.template.begin.js"
+        }
+      },
+      "end": "(`)",
+      "endCaptures": {
+        "0": {
+          "name": "string"
+        },
+        "1": {
+          "name": "punctuation.definition.string.template.end.js"
+        }
+      },
+      "patterns": [
+        {
+          "include": "source.ts#template-substitution-element"
+        },
+        {
+          "include": "source.sql"
+        }
+      ]
+    }
+  ]
+}
