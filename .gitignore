@@ -6,3 +6,4 @@ dist
 *.vsix
 **/*.DS_Store
 *.exe
+result

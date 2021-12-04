@@ -5,8 +5,20 @@
 
   outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
-      let pkgs = nixpkgs.legacyPackages.${system}; in
-      {
+    let
+      pkgs = nixpkgs.legacyPackages.${system};
+      nodejs = pkgs.nodejs-12_x;
+      nodeEnv = import ./packages/language-server/node-env.nix {
+        inherit (pkgs) stdenv lib python2 runCommand writeTextFile;
+        inherit pkgs nodejs;
+        libtool = if pkgs.stdenv.isDarwin then pkgs.darwin.cctools else null;
+      };
+      nodePkgs = import ./packages/language-server/node-packages.nix {
+        inherit (pkgs) fetchurl nix-gitignore stdenv lib fetchgit;
+        inherit nodeEnv;
+      };
+    in {
+        packages.prisma-language-server = nodePkgs.package;
         apps = {
           # Build the vscode extension with pinned dependencies and the local
           # language server build. It will not package the vscode extension
