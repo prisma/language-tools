@@ -280,6 +280,34 @@ function getFirstDatasourceProvider(lines: string[]): string | undefined {
   }
 }
 
+function getAllPreviewFeaturesFromGenerators(
+  lines: string[],
+): string[] | undefined {
+  // matches any `previewFeatures = [x]` in any position
+  // thanks to https://regex101.com for the online scratchpad
+  const previewFeaturesRegex = /previewFeatures\s=\s(\[.*\])/g
+
+  // we could match against all the `previewFeatures = [x]` (could be that there is more than one?)
+  // var matchAll = text.matchAll(regexp)
+  // for (const match of matchAll) {
+  //   console.log(match);
+  // }
+  const result = previewFeaturesRegex.exec(lines.join('\n'))
+
+  if (!result || !result[1]) {
+    return undefined
+  }
+
+  try {
+    const previewFeatures = JSON.parse(result[1])
+    if (Array.isArray(previewFeatures) && previewFeatures.length > 0) {
+      return previewFeatures
+    }
+  } catch (e) {}
+
+  return undefined
+}
+
 export function getAllRelationNames(lines: Array<string>): Array<string> {
   const modelNames: Array<string> = []
   for (const item of lines) {
@@ -1037,8 +1065,32 @@ function getSuggestionsForAttribute(
     }
   } else {
     // @id, @unique, @index
-    // @@id, @@unique, @@index
+    // @@id, @@unique, @@index, @@fulltext
 
+    // The length argument is available on MySQL on the
+    // @id, @@id, @unique, @@unique and @@index, @@fulltext fields.
+    // It allows Prisma to now support indexes and constraints on String with a TEXT native type and Bytes types.
+
+    // The sort argument is available for all databases on the
+    // @unique, @@unique and @@index fields.
+    // Additionally, SQL Server also allows it on @id and @@id.
+
+    // We can filter on the datasource
+    const datasourceProvider = getFirstDatasourceProvider(lines)
+    // We can filter on the previewFeatures enbabled
+    const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
+
+    // return {
+    //   items:
+    //     datasourceProvider === 'sqlserver'
+    //       ? relationOnDeleteArguments.filter(
+    //           (arg) => arg.label !== 'Restrict',
+    //         )
+    //       : relationOnDeleteArguments,
+    //   isIncomplete: false,
+    // }
+
+    // TODO
     if (isInsideAttribute(untrimmedCurrentLine, position, '[]')) {
       let items = getFieldsFromCurrentBlock(lines, block, position)
       // get parameters inside block attribute
@@ -1065,6 +1117,8 @@ function getSuggestionsForAttribute(
       blockAtrributeArguments = givenBlockAttributeParams('@@id')
     } else if (wordsBeforePosition.some((a) => a.includes('@@index'))) {
       blockAtrributeArguments = givenBlockAttributeParams('@@index')
+    } else if (wordsBeforePosition.some((a) => a.includes('@@fulltext'))) {
+      blockAtrributeArguments = givenBlockAttributeParams('@@fulltext')
     }
 
     if (blockAtrributeArguments.length) {
@@ -1072,11 +1126,23 @@ function getSuggestionsForAttribute(
     } else {
       let fieldAtrributeArguments: CompletionItem[] = []
       if (wordsBeforePosition.some((a) => a.includes('@unique'))) {
-        fieldAtrributeArguments = givenFieldAttributeParams('@unique')
+        fieldAtrributeArguments = givenFieldAttributeParams(
+          '@unique',
+          previewFeatures,
+          datasourceProvider,
+        )
       } else if (wordsBeforePosition.some((a) => a.includes('@id'))) {
-        fieldAtrributeArguments = givenFieldAttributeParams('@id')
+        fieldAtrributeArguments = givenFieldAttributeParams(
+          '@id',
+          previewFeatures,
+          datasourceProvider,
+        )
       } else if (wordsBeforePosition.some((a) => a.includes('@index'))) {
-        fieldAtrributeArguments = givenFieldAttributeParams('@index')
+        fieldAtrributeArguments = givenFieldAttributeParams(
+          '@index',
+          previewFeatures,
+          datasourceProvider,
+        )
       }
       suggestions = fieldAtrributeArguments
     }
@@ -1182,7 +1248,7 @@ export function getSuggestionsForInsideRoundBrackets(
   ) {
     // matches
     // @id, @unique, @index
-    // @@id, @@unique, @@index
+    // @@id, @@unique, @@index, @@fulltext
     return getSuggestionsForAttribute({
       wordsBeforePosition,
       untrimmedCurrentLine,

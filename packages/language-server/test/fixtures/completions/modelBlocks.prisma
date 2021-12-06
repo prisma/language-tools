@@ -73,4 +73,6 @@ model ForthUser {
     lastName String
 
     @@index([firstName, ])
+    @@fulltext()
+    @@fulltext([])
 }

@@ -340,6 +340,10 @@ suite('Completions', () => {
       label: '@@index',
       kind: vscode.CompletionItemKind.Property,
     }
+    const blockAttributeFulltextIndex = {
+      label: '@@fulltext',
+      kind: vscode.CompletionItemKind.Property,
+    }
     const blockAttributeIgnore = {
       label: '@@ignore',
       kind: vscode.CompletionItemKind.Property,
@@ -354,6 +358,7 @@ suite('Completions', () => {
           blockAttributeIndex,
           blockAttributeMap,
           blockAttributeUnique,
+          blockAttributeFulltextIndex,
           blockAttributeIgnore,
         ]),
         false,
@@ -366,6 +371,7 @@ suite('Completions', () => {
         modelBlocksUri,
         new vscode.Position(5, 0),
         new vscode.CompletionList([
+          blockAttributeFulltextIndex,
           blockAttributeId,
           blockAttributeIndex,
           blockAttributeMap,
@@ -538,6 +544,39 @@ suite('Completions', () => {
         ]),
         true,
       )
+      await testCompletion(
+        modelBlocksUri,
+        new vscode.Position(61, 20),
+        new vscode.CompletionList([
+          fieldAttributeDefault,
+          fieldAttributeMap,
+          fieldAttributeRelation,
+          fieldAttributeUnique,
+          fieldAttributeIgnore,
+        ]),
+        true,
+      )
+      await testCompletion(
+        modelBlocksUri,
+        new vscode.Position(13, 16),
+        new vscode.CompletionList([
+          fieldAttributeDefault,
+          fieldAttributeMap,
+          fieldAttributeRelation,
+          fieldAttributeUnique,
+          fieldAttributeIgnore,
+        ]),
+        true,
+      )
+      // fieldAttributeUpdatedAt,
+      await testCompletion(
+        modelBlocksUri,
+        new vscode.Position(74, 24),
+        new vscode.CompletionList([
+          { label: 'lastName', kind: vscode.CompletionItemKind.Field },
+        ]),
+        true,
+      )
     })
 
     test('Diagnoses functions as default values', async () => {
@@ -605,6 +644,20 @@ suite('Completions', () => {
     })
 
     test('Diagnoses arguments of @@index', async () => {
+      await testCompletion(
+        modelBlocksUri,
+        new vscode.Position(47, 13),
+        new vscode.CompletionList([
+          { label: 'firstName', kind: vscode.CompletionItemKind.Field },
+          { label: 'isAdmin', kind: vscode.CompletionItemKind.Field },
+          { label: 'lastName', kind: vscode.CompletionItemKind.Field },
+        ]),
+        true,
+      )
+    })
+
+    // TODO
+    test('Diagnoses arguments of @@fulltext', async () => {
       await testCompletion(
         modelBlocksUri,
         new vscode.Position(47, 13),
@@ -896,6 +949,27 @@ suite('Completions', () => {
         )
       })
       test('@@index([firstName, lastName], |)', async () => {
+        await activate(namedConstraintsUri)
+
+        await testCompletion(
+          namedConstraintsUri,
+          new vscode.Position(54, 35),
+          new vscode.CompletionList([fieldsProperty, mapProperty]),
+          true,
+        )
+      })
+
+      test('@@fulltext(|)', async () => {
+        await activate(namedConstraintsUri)
+
+        await testCompletion(
+          namedConstraintsUri,
+          new vscode.Position(48, 12),
+          new vscode.CompletionList([fieldsProperty, mapProperty]),
+          true,
+        )
+      })
+      test('@@fulltext([firstName, lastName], |)', async () => {
         await activate(namedConstraintsUri)
 
         await testCompletion(

@@ -41,7 +41,7 @@ model AtAtUnique {
     @@unique([email, something], )
 }
 
-model AtIndexEmpty {
+model AtAtIndexEmpty {
     firstName String
     lastName  String
     email     String @unique
@@ -49,8 +49,14 @@ model AtIndexEmpty {
     @@index()
 }
 
-model AtIndex {
+model AtAtIndex {
     firstName String
     lastName String
     @@index([firstName, lastName], )
+}
+
+model AtAtFulltext {
+    firstName String
+    lastName String
+    @@fulltext([firstName, lastName], )
 }

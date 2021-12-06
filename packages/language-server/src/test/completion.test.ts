@@ -364,6 +364,10 @@ suite('Completions', function () {
       label: '@@index',
       kind: CompletionItemKind.Property,
     }
+    const blockAttributeFulltextIndex = {
+      label: '@@fulltext',
+      kind: CompletionItemKind.Property,
+    }
     const blockAttributeIgnore = {
       label: '@@ignore',
       kind: CompletionItemKind.Property,
@@ -380,6 +384,7 @@ suite('Completions', function () {
             blockAttributeId,
             blockAttributeUnique,
             blockAttributeIndex,
+            blockAttributeFulltextIndex,
             blockAttributeIgnore,
           ],
         },
@@ -397,6 +402,7 @@ suite('Completions', function () {
             blockAttributeId,
             blockAttributeUnique,
             blockAttributeIndex,
+            blockAttributeFulltextIndex,
             blockAttributeIgnore,
           ],
         },
@@ -727,6 +733,22 @@ suite('Completions', function () {
       )
     })
 
+    // TODO
+    test('Diagnoses arguments of @@fulltext', () => {
+      assertCompletion(
+        modelBlocksUri,
+        { line: 47, character: 13 },
+        {
+          isIncomplete: false,
+          items: [
+            { label: 'firstName', kind: CompletionItemKind.Field },
+            { label: 'lastName', kind: CompletionItemKind.Field },
+            { label: 'isAdmin', kind: CompletionItemKind.Field },
+          ],
+        },
+      )
+    })
+
     suite('Diagnoses arguments of @relation directive', function () {
       test('@relation(|)', () => {
         assertCompletion(
@@ -998,6 +1020,28 @@ suite('Completions', function () {
         )
       })
       test('@@index([firstName, lastName], |)', () => {
+        assertCompletion(
+          namedConstraintsUri,
+          { line: 54, character: 35 },
+          {
+            isIncomplete: false,
+            items: [fieldsProperty, mapProperty],
+          },
+        )
+      })
+
+      // TODO
+      test('@@fulltext(|)', () => {
+        assertCompletion(
+          namedConstraintsUri,
+          { line: 48, character: 12 },
+          {
+            isIncomplete: false,
+            items: [fieldsProperty, mapProperty],
+          },
+        )
+      })
+      test('@@fulltext([firstName, lastName], |)', () => {
         assertCompletion(
           namedConstraintsUri,
           { line: 54, character: 35 },

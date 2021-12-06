@@ -1,0 +1,62 @@
+generator js {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextIndex", "extendedIndexes"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model A {
+  id      Int    @id
+  title   String @db.VarChar(255)
+  content String @db.Text
+
+  @@fulltext([title, content])
+}
+
+model Id {
+  // id()
+  id String @id @db.VarChar(3000)
+}
+
+model IdWithLength {
+  id String @id(length: 100) @db.VarChar(3000)
+}
+
+model Unique {
+  unique Int @unique(sort: Desc)
+}
+
+model CompoundId {
+  id_1 String @db.VarChar(3000)
+  id_2 String @db.VarChar(3000)
+
+  @@id([id_1(length: 100), id_2(length: 10)])
+}
+
+model CompoundUnique {
+  unique_1 Int
+  unique_2 Int
+
+  @@unique([unique_1(sort: Desc), unique_2])
+}
+
+model Post {
+  title      String   @db.VarChar(300)
+  abstract   String   @db.VarChar(3000)
+  slug       String   @unique(sort: Desc, length: 42) @db.VarChar(3000)
+  author     String
+  created_at DateTime
+
+  @@id([title(length: 100, sort: Desc), abstract(length: 10)])
+  @@index([author, created_at(sort: Desc)])
+}
+
+model Example {
+  id    Int @id
+  value Int
+
+  @@index([value], type: Hash)
+}

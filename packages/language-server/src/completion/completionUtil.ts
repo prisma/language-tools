@@ -127,15 +127,44 @@ export const blockAttributes: CompletionItem[] =
   )
 
 export function givenFieldAttributeParams(
-  fieldAttribute: string,
+  fieldAttribute: '@unique' | '@id' | '@index',
+  previewFeatures: string[] | undefined,
+  datasourceProvider: string | undefined,
 ): CompletionItem[] {
-  return convertToCompletionItems(
+  const items = convertToCompletionItems(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     completions.fieldAttributes.find((item) =>
       item.label.includes(fieldAttribute),
     )!.params,
     CompletionItemKind.Property,
   )
+
+  if (fieldAttribute === '@index') {
+    // filter length and sort out
+    return items.filter((arg) => arg.label !== 'length' && arg.label !== 'sort')
+  }
+
+  if (previewFeatures?.includes('extendedIndexes')) {
+    // The sort argument is available for all databases on @unique
+    // The length argument is available on MySQL on @id, @unique
+    // Additionally, SQL Server also allows it on @id
+    if (datasourceProvider === 'mysql') {
+      return items
+    } else if (datasourceProvider === 'sqlserver') {
+      if (fieldAttribute === '@id') {
+        return items
+      } else {
+        return items.filter((arg) => arg.label !== 'length')
+      }
+    }
+
+    if (datasourceProvider !== 'mysql') {
+      return items.filter((arg) => arg.label !== 'length')
+    }
+  }
+
+  // filter length and sort out
+  return items.filter((arg) => arg.label !== 'length' && arg.label !== 'sort')
 }
 
 export const fieldAttributes: CompletionItem[] =

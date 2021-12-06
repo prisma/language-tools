@@ -1,58 +1,77 @@
 model User {
-    firstName String
-    lastName String
-    email String @unique
-    isAdmin Boolean @default(false)
+  firstName String
+  lastName  String
+  email     String  @unique
+  isAdmin   Boolean @default(false)
 
 
 }
 
-
 model Post {
-    id Int @id @default()
-    email String? @unique
-    name String
+  id    Int     @id @default
+  email String? @unique
+  name  String
 
 }
 
 model Person {
-    id String 
-    name Post 
+  id   String
+  name Post
 }
 
 model Test {
-  email    String  @unique
-  isAdmin  Boolean @default()
+  email   String  @unique
+  isAdmin Boolean @default
 }
 
 model Cat {
-    id String @id @default()
-    name String
-    createdAt  DateTime    @default()
+  id        String   @id @default
+  name      String
+  createdAt DateTime @default
 }
 
 model SecondUser {
-    firstName String
-    lastName String
-    isAdmin Boolean @default(false)
-     
-     @@unique([])
+  firstName String
+  lastName  String
+  isAdmin   Boolean @default(false)
+
+  @@unique([])
 }
 
 model ThirdUser {
-    firstName String
-    lastName String
-    isAdmin Boolean @default(false)
+  firstName String
+  lastName  String
+  isAdmin   Boolean @default(false)
 
-    @@id([])
-    @@index([])
+  @@id([])
+  @@index([])
 }
 
 model TypeCheck {
-    hi 
+  hi
 }
 
 enum Hello {
-    Hey
-    Hallo
+  Hey
+  Hallo
+}
+
+model DateTest {
+    id Int @id @default(autoincrement())
+    update DateTime  
+    type UserType @default()
+}
+
+enum UserType {
+    ADMIN
+    NORMAL
+}
+
+model ForthUser {
+    firstName String
+    lastName String
+
+    @@index([firstName, ])
+    @@fulltext()
+    @@fulltext([])
 }

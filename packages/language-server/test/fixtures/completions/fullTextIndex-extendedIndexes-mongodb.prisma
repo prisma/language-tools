@@ -1,0 +1,28 @@
+generator js {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextIndex", "extendedIndexes", "mongoDb"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model PostFulltextEmpty {
+  id      String @id @map("_id") @db.ObjectId
+  title   String
+  content String
+
+  @@fulltext()
+}
+
+// https://www.prisma.io/docs/concepts/components/prisma-schema/indexes#examples
+// On MongoDB, the fullTextIndex and extendedIndexes preview features can be combined
+// to add fields in ascending or descending order to your full-text index:
+model Post {
+  id      String @id @map("_id") @db.ObjectId
+  title   String
+  content String
+
+  @@fulltext([title(sort: Desc), content])
+}

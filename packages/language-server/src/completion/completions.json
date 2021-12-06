@@ -182,6 +182,24 @@
       ]
     },
     {
+      "label": "@@fulltext",
+      "insertText": "@@fulltext([$0])",
+      "documentation": "Defines a full-text index on the model.",
+      "fullSignature": "@@fulltext(_ fields: FieldReference[], map: String?)",
+      "params": [
+        {
+          "label": "fields",
+          "insertText": "fields: [$0]",
+          "documentation": "A list of references."
+        },
+        {
+          "label": "map",
+          "insertText": "map: \"$0\"",
+          "documentation": "Defines a custom index name in the database."
+        }
+      ]
+    },
+    {
       "label": "@@ignore",
       "documentation": "A model with an `@@ignore` attribute can be kept in sync with the database schema using Prisma Migrate and Introspection, but won't be exposed in Prisma Client.",
       "fullSignature": "@@ignore",
@@ -210,6 +228,16 @@
           "label": "map",
           "insertText": "map: \"$0\"",
           "documentation": "Defines a custom name for the unique constraint in the database."
+        },
+        {
+          "label": "length",
+          "insertText": "length: \"$0\"",
+          "documentation": "Defines a maximum length for the subpart of the value to be indexed in cases where the full value would exceed MySQL's limits for index sizes. See https://dev.mysql.com/doc/refman/8.0/en/innodb-limits.html"
+        },
+        {
+          "label": "sort",
+          "insertText": "sort: \"$0\"",
+          "documentation": "Specify in which order the entries of the index are stored in the database. This can have an effect on whether the database is able to use an index for specific queries."
         }
       ]
     },
