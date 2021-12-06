@@ -8,7 +8,6 @@
       "name": "rawSQLInTaggedTemplates",
       "contentName": "meta.embedded.block.prisma-client-rawsql",
       "begin": ".*(\\$queryRaw|\\$executeRaw|\\$queryRawUnsafe|\\$executeRawUnsafe)((`))",
-      "beginbegin": ".*\\$queryRaw((`))",
       "beginCaptures": {
         "1": {
           "name": "entity.name.function.tagged-template.js"
