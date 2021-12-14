@@ -8,12 +8,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model A {
+model Fulltext {
   id      Int    @id
   title   String @db.VarChar(255)
   content String @db.Text
-
-  @@fulltext([title, content])
+  
+  @@fulltext()
+  @@fulltext([title, content], )
 }
 
 model Id {
@@ -59,4 +60,5 @@ model Example {
   value Int
 
   @@index([value], type: Hash)
+  // @@index([value], type: BTree, name: "sss")
 }

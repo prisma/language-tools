@@ -153,8 +153,30 @@ function getSuggestionForModelBlockAttribute(
     return []
   }
   // create deep copy
-  let suggestions: CompletionItem[] = klona(blockAttributes)
-  suggestions = removeInvalidAttributeSuggestions(suggestions, block, lines)
+  const suggestions: CompletionItem[] = removeInvalidAttributeSuggestions(
+    klona(blockAttributes),
+    block,
+    lines,
+  )
+
+  // We can filter on the datasource
+  const datasourceProvider = getFirstDatasourceProvider(lines)
+  // We can filter on the previewFeatures enbabled
+  const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
+
+  // Full text indexes (MySQL and MongoDB)
+  // https://www.prisma.io/docs/concepts/components/prisma-schema/indexes#full-text-indexes-mysql-and-mongodb
+  const isFullTextAvailable = Boolean(
+    datasourceProvider &&
+      ['mysql', 'mongodb'].includes(datasourceProvider) &&
+      previewFeatures?.includes('fullTextIndex'),
+  )
+
+  if (isFullTextAvailable === false) {
+    // fullTextIndex is not available, we need to filter it out
+    return suggestions.filter((arg) => arg.label !== '@@fulltext')
+  }
+
   return suggestions
 }
 
@@ -299,9 +321,10 @@ function getAllPreviewFeaturesFromGenerators(
   }
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const previewFeatures = JSON.parse(result[1])
     if (Array.isArray(previewFeatures) && previewFeatures.length > 0) {
-      return previewFeatures
+      return previewFeatures as string[]
     }
   } catch (e) {}
 
@@ -938,15 +961,15 @@ function getSuggestionsForAttribute(
     lines,
     block,
     position,
-    document,
-  }: {
+  }: // document,
+  {
     attribute?: '@relation'
     wordsBeforePosition: string[]
     untrimmedCurrentLine: string
     lines: string[]
     block: Block
     position: Position
-    document: TextDocument
+    // document: TextDocument
   }, // eslint-disable-line @typescript-eslint/no-unused-vars
 ): CompletionList | undefined {
   const firstWordBeforePosition =
@@ -1080,17 +1103,6 @@ function getSuggestionsForAttribute(
     // We can filter on the previewFeatures enbabled
     const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
 
-    // return {
-    //   items:
-    //     datasourceProvider === 'sqlserver'
-    //       ? relationOnDeleteArguments.filter(
-    //           (arg) => arg.label !== 'Restrict',
-    //         )
-    //       : relationOnDeleteArguments,
-    //   isIncomplete: false,
-    // }
-
-    // TODO
     if (isInsideAttribute(untrimmedCurrentLine, position, '[]')) {
       let items = getFieldsFromCurrentBlock(lines, block, position)
       // get parameters inside block attribute
@@ -1237,23 +1249,27 @@ export function getSuggestionsForInsideRoundBrackets(
       wordsBeforePosition,
       untrimmedCurrentLine,
       lines,
-      document,
+      // document,
       block,
       position,
     })
   } else if (
-    wordsBeforePosition.some(
-      (a) => a.includes('@unique') || a.includes('@id') || a.includes('@index'),
-    )
-  ) {
     // matches
     // @id, @unique, @index
     // @@id, @@unique, @@index, @@fulltext
+    wordsBeforePosition.some(
+      (a) =>
+        a.includes('@unique') ||
+        a.includes('@id') ||
+        a.includes('@index') ||
+        a.includes('@@fulltext'),
+    )
+  ) {
     return getSuggestionsForAttribute({
       wordsBeforePosition,
       untrimmedCurrentLine,
       lines,
-      document,
+      // document,
       block,
       position,
     })

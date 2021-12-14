@@ -67,8 +67,6 @@ function assertCompletion(
 }
 
 suite('Completions', function () {
-  suiteSetup(async () => {})
-
   const emptyDocUri = 'completions/empty.prisma'
   const sqliteDocUri = 'completions/datasourceWithSqlite.prisma'
   const dataSourceWithUri = 'completions/datasourceWithUrl.prisma'
@@ -79,6 +77,13 @@ suite('Completions', function () {
   const relationDirectiveSqlserverReferentialActionsUri =
     'completions/relationDirectiveSqlserverReferentialActions.prisma'
   const namedConstraintsUri = 'completions/namedConstraints.prisma'
+  const fullTextIndex_extendedIndexes_mongodb =
+    'completions/fullTextIndex_extendedIndexes_mongodb.prisma'
+  const fullTextIndex_extendedIndexes_postgresql =
+    'completions/fullTextIndex_extendedIndexes_postgresql.prisma'
+  const fullTextIndex_extendedIndexes_mysql =
+    'completions/fullTextIndex_extendedIndexes_mysql.prisma'
+
   // used both in generator and datasource
   const fieldProvider = {
     label: 'provider',
@@ -384,7 +389,6 @@ suite('Completions', function () {
             blockAttributeId,
             blockAttributeUnique,
             blockAttributeIndex,
-            blockAttributeFulltextIndex,
             blockAttributeIgnore,
           ],
         },
@@ -402,7 +406,6 @@ suite('Completions', function () {
             blockAttributeId,
             blockAttributeUnique,
             blockAttributeIndex,
-            blockAttributeFulltextIndex,
             blockAttributeIgnore,
           ],
         },
@@ -414,6 +417,98 @@ suite('Completions', function () {
           isIncomplete: false,
           items: [
             blockAttributeMap,
+            blockAttributeUnique,
+            blockAttributeIndex,
+            blockAttributeIgnore,
+          ],
+        },
+      )
+    })
+
+    //
+    // previewFeatures
+    // tests which are feature preview / database dependent
+    //
+
+    test('fullTextIndex - Diagnoses block attribute suggestions first in a line - mysql', () => {
+      assertCompletion(
+        fullTextIndex_extendedIndexes_mysql,
+        { line: 14, character: 2 },
+        {
+          isIncomplete: false,
+          items: [
+            blockAttributeMap,
+            // blockAttributeId,
+            blockAttributeUnique,
+            blockAttributeIndex,
+            blockAttributeFulltextIndex,
+            blockAttributeIgnore,
+          ],
+        },
+      )
+    })
+    test('@@fulltext(|) - mysql', () => {
+      assertCompletion(
+        fullTextIndex_extendedIndexes_mysql,
+        { line: 15, character: 13 },
+        {
+          isIncomplete: false,
+          items: [
+            blockAttributeMap,
+            // blockAttributeId,
+            blockAttributeUnique,
+            blockAttributeIndex,
+            blockAttributeFulltextIndex,
+            blockAttributeIgnore,
+          ],
+        },
+      )
+    })
+    test('@@fulltext([title, content], |) - mysql', () => {
+      assertCompletion(
+        fullTextIndex_extendedIndexes_mysql,
+        { line: 16, character: 31 },
+        {
+          isIncomplete: false,
+          items: [
+            blockAttributeMap,
+            // blockAttributeId,
+            blockAttributeUnique,
+            blockAttributeIndex,
+            blockAttributeFulltextIndex,
+            blockAttributeIgnore,
+          ],
+        },
+      )
+    })
+
+    test('fullTextIndex - Diagnoses block attribute suggestions first in a line - mongodb', () => {
+      assertCompletion(
+        fullTextIndex_extendedIndexes_mongodb,
+        { line: 14, character: 2 },
+        {
+          isIncomplete: false,
+          items: [
+            blockAttributeMap,
+            // blockAttributeId,
+            blockAttributeUnique,
+            blockAttributeIndex,
+            blockAttributeFulltextIndex,
+            blockAttributeIgnore,
+          ],
+        },
+      )
+    })
+
+    test('fullTextIndex - Diagnoses block attribute suggestions first in a line - postgresql', () => {
+      assertCompletion(
+        fullTextIndex_extendedIndexes_postgresql,
+        { line: 14, character: 2 },
+        {
+          isIncomplete: false,
+          items: [
+            blockAttributeMap,
+            // blockAttributeId,
             blockAttributeUnique,
             blockAttributeIndex,
             blockAttributeIgnore,
@@ -719,22 +814,6 @@ suite('Completions', function () {
     })
 
     test('Diagnoses arguments of @@index', () => {
-      assertCompletion(
-        modelBlocksUri,
-        { line: 47, character: 13 },
-        {
-          isIncomplete: false,
-          items: [
-            { label: 'firstName', kind: CompletionItemKind.Field },
-            { label: 'lastName', kind: CompletionItemKind.Field },
-            { label: 'isAdmin', kind: CompletionItemKind.Field },
-          ],
-        },
-      )
-    })
-
-    // TODO
-    test('Diagnoses arguments of @@fulltext', () => {
       assertCompletion(
         modelBlocksUri,
         { line: 47, character: 13 },

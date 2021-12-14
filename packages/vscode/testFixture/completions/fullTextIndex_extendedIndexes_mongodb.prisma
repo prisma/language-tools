@@ -8,12 +8,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model PostFulltextEmpty {
+model Fulltext {
   id      String @id @map("_id") @db.ObjectId
   title   String
   content String
-
+  
   @@fulltext()
+  @@fulltext([title, content], )
 }
 
 // https://www.prisma.io/docs/concepts/components/prisma-schema/indexes#examples

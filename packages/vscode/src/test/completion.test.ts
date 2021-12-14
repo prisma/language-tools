@@ -24,19 +24,26 @@ async function testCompletion(
   assert.deepStrictEqual(
     actualCompletions.isIncomplete,
     expectedCompletionList.isIncomplete,
-    // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
-    `Expected isIncomplete to be '${expectedCompletionList.isIncomplete}' but got '${actualCompletions.isIncomplete}'`,
+    /* eslint-disable @typescript-eslint/restrict-template-expressions */
+    `Expected isIncomplete to be '${
+      expectedCompletionList.isIncomplete
+    }' but got '${actualCompletions.isIncomplete}'
+expected:
+${JSON.stringify(expectedCompletionList, undefined, 2)}
+but got (actual):
+${JSON.stringify(actualCompletions, undefined, 2)}`,
+    /* eslint-enable @typescript-eslint/restrict-template-expressions */
   )
 
   assert.deepStrictEqual(
-    actualCompletions.items.map((items) => items.label).sort(),
-    expectedCompletionList.items.map((items) => items.label).sort(),
+    actualCompletions.items.map((items) => items.label),
+    expectedCompletionList.items.map((items) => items.label),
     'mapped items => item.label',
   )
 
   assert.deepStrictEqual(
-    actualCompletions.items.map((item) => item.kind).sort(),
-    expectedCompletionList.items.map((item) => item.kind).sort(),
+    actualCompletions.items.map((item) => item.kind),
+    expectedCompletionList.items.map((item) => item.kind),
     'mapped items => item.kind',
   )
 
@@ -66,6 +73,15 @@ const sqliteDocUri = getDocUri('completions/datasourceWithSqlite.prisma')
 const relationDirectiveUri = getDocUri('completions/relationDirective.prisma')
 const relationDirectiveSqlserverReferentialActionsUri = getDocUri(
   'completions/relationDirectiveSqlserverReferentialActions.prisma',
+)
+const fullTextIndex_extendedIndexes_mongodb = getDocUri(
+  'completions/fullTextIndex_extendedIndexes_mongodb.prisma',
+)
+const fullTextIndex_extendedIndexes_postgresql = getDocUri(
+  'completions/fullTextIndex_extendedIndexes_postgresql.prisma',
+)
+const fullTextIndex_extendedIndexes_mysql = getDocUri(
+  'completions/fullTextIndex_extendedIndexes_mysql.prisma',
 )
 
 const fieldPreviewFeatures = {
@@ -146,8 +162,8 @@ suite('Completions', () => {
         new vscode.Position(1, 0),
         new vscode.CompletionList([
           fieldProvider,
-          fieldUrl,
           fieldShadowDatabaseUrl,
+          fieldUrl,
         ]),
         false,
       )
@@ -157,7 +173,7 @@ suite('Completions', () => {
       await testCompletion(
         sqliteDocUri,
         new vscode.Position(2, 0),
-        new vscode.CompletionList([fieldUrl, fieldShadowDatabaseUrl]),
+        new vscode.CompletionList([fieldShadowDatabaseUrl, fieldUrl]),
         false,
       )
       await testCompletion(
@@ -243,10 +259,10 @@ suite('Completions', () => {
         new vscode.Position(5, 0),
         new vscode.CompletionList([
           fieldBinaryTargets,
+          fieldEngineType,
           fieldOutput,
           fieldPreviewFeatures,
           fieldProvider,
-          fieldEngineType,
         ]),
         false,
       )
@@ -259,9 +275,9 @@ suite('Completions', () => {
         new vscode.Position(2, 0),
         new vscode.CompletionList([
           fieldBinaryTargets,
+          fieldEngineType,
           fieldOutput,
           fieldPreviewFeatures,
-          fieldEngineType,
         ]),
         true,
       )
@@ -270,9 +286,9 @@ suite('Completions', () => {
         new vscode.Position(7, 0),
         new vscode.CompletionList([
           fieldBinaryTargets,
+          fieldEngineType,
           fieldPreviewFeatures,
           fieldProvider,
-          fieldEngineType,
         ]),
         true,
       )
@@ -304,15 +320,15 @@ suite('Completions', () => {
         new vscode.CompletionList(
           [
             {
-              label: 'library',
-              kind: vscode.CompletionItemKind.Constant,
-            },
-            {
               label: 'binary',
               kind: vscode.CompletionItemKind.Constant,
             },
             {
               label: 'dataproxy',
+              kind: vscode.CompletionItemKind.Constant,
+            },
+            {
+              label: 'library',
               kind: vscode.CompletionItemKind.Constant,
             },
           ],
@@ -355,11 +371,10 @@ suite('Completions', () => {
         new vscode.Position(9, 0),
         new vscode.CompletionList([
           blockAttributeId,
+          blockAttributeIgnore,
           blockAttributeIndex,
           blockAttributeMap,
           blockAttributeUnique,
-          blockAttributeFulltextIndex,
-          blockAttributeIgnore,
         ]),
         false,
       )
@@ -371,12 +386,11 @@ suite('Completions', () => {
         modelBlocksUri,
         new vscode.Position(5, 0),
         new vscode.CompletionList([
-          blockAttributeFulltextIndex,
           blockAttributeId,
+          blockAttributeIgnore,
           blockAttributeIndex,
           blockAttributeMap,
           blockAttributeUnique,
-          blockAttributeIgnore,
         ]),
         true,
       )
@@ -384,12 +398,95 @@ suite('Completions', () => {
         modelBlocksUri,
         new vscode.Position(14, 0),
         new vscode.CompletionList([
+          blockAttributeIgnore,
           blockAttributeIndex,
           blockAttributeMap,
           blockAttributeUnique,
-          blockAttributeIgnore,
         ]),
         true,
+      )
+    })
+
+    //
+    // previewFeatures
+    // tests which are feature preview / database dependent
+    //
+
+    test('fullTextIndex - Diagnoses block attribute suggestions first in a line - mysql', async () => {
+      await testCompletion(
+        fullTextIndex_extendedIndexes_mysql,
+        new vscode.Position(14, 2),
+        new vscode.CompletionList([
+          // blockAttributeId,
+          blockAttributeFulltextIndex,
+          blockAttributeIgnore,
+          blockAttributeIndex,
+          blockAttributeMap,
+          blockAttributeUnique,
+        ]),
+        false,
+      )
+    })
+    test('@@fulltext(|) - mysql', async () => {
+      await testCompletion(
+        fullTextIndex_extendedIndexes_mysql,
+        new vscode.Position(15, 13),
+        new vscode.CompletionList([
+          // blockAttributeId,
+          blockAttributeFulltextIndex,
+          blockAttributeIgnore,
+          blockAttributeIndex,
+          blockAttributeMap,
+          blockAttributeUnique,
+        ]),
+        false,
+      )
+    })
+    test('@@fulltext([title, content], |) - mysql', async () => {
+      await testCompletion(
+        fullTextIndex_extendedIndexes_mysql,
+        new vscode.Position(16, 31),
+        new vscode.CompletionList([
+          // blockAttributeId,
+          blockAttributeFulltextIndex,
+          blockAttributeIgnore,
+          blockAttributeIndex,
+          blockAttributeMap,
+          blockAttributeUnique,
+        ]),
+        false,
+      )
+    })
+
+    test('fullTextIndex - Diagnoses block attribute suggestions first in a line - mongodb', async () => {
+      await testCompletion(
+        fullTextIndex_extendedIndexes_mongodb,
+        new vscode.Position(14, 2),
+        new vscode.CompletionList([
+          // blockAttributeId,
+          blockAttributeFulltextIndex,
+          blockAttributeIgnore,
+          blockAttributeIndex,
+          blockAttributeMap,
+          blockAttributeUnique,
+        ]),
+        false,
+      )
+    })
+
+    test('fullTextIndex - Diagnoses block attribute suggestions first in a line - postgresql', async () => {
+      await testCompletion(
+        fullTextIndex_extendedIndexes_postgresql,
+        new vscode.Position(14, 2),
+        new vscode.CompletionList([
+          // blockAttributeId,
+          // blockAttributeFulltextIndex,
+          blockAttributeIgnore,
+          blockAttributeIndex,
+          blockAttributeMap,
+          blockAttributeUnique,
+        ]),
+        false,
       )
     })
   })
@@ -401,13 +498,18 @@ suite('Completions', () => {
         new vscode.Position(51, 7),
         new vscode.CompletionList(
           [
+            { label: 'BigInt', kind: vscode.CompletionItemKind.TypeParameter },
             { label: 'Boolean', kind: vscode.CompletionItemKind.TypeParameter },
+            { label: 'Bytes', kind: vscode.CompletionItemKind.TypeParameter },
             { label: 'Cat', kind: vscode.CompletionItemKind.Reference },
+            { label: 'DateTest', kind: vscode.CompletionItemKind.Reference },
             {
               label: 'DateTime',
               kind: vscode.CompletionItemKind.TypeParameter,
             },
+            { label: 'Decimal', kind: vscode.CompletionItemKind.TypeParameter },
             { label: 'Float', kind: vscode.CompletionItemKind.TypeParameter },
+            { label: 'ForthUser', kind: vscode.CompletionItemKind.Reference },
             { label: 'Hello', kind: vscode.CompletionItemKind.Reference },
             { label: 'Int', kind: vscode.CompletionItemKind.TypeParameter },
             { label: 'Json', kind: vscode.CompletionItemKind.TypeParameter },
@@ -415,17 +517,15 @@ suite('Completions', () => {
             { label: 'Post', kind: vscode.CompletionItemKind.Reference },
             { label: 'SecondUser', kind: vscode.CompletionItemKind.Reference },
             { label: 'String', kind: vscode.CompletionItemKind.TypeParameter },
-            { label: 'Bytes', kind: vscode.CompletionItemKind.TypeParameter },
-            { label: 'Decimal', kind: vscode.CompletionItemKind.TypeParameter },
-            { label: 'BigInt', kind: vscode.CompletionItemKind.TypeParameter },
+            { label: 'Test', kind: vscode.CompletionItemKind.Reference },
+            { label: 'ThirdUser', kind: vscode.CompletionItemKind.Reference },
+            { label: 'TypeCheck', kind: vscode.CompletionItemKind.Reference },
             {
               label: 'Unsupported',
               kind: vscode.CompletionItemKind.TypeParameter,
             },
-            { label: 'Test', kind: vscode.CompletionItemKind.Reference },
-            { label: 'ThirdUser', kind: vscode.CompletionItemKind.Reference },
-            { label: 'TypeCheck', kind: vscode.CompletionItemKind.Reference },
             { label: 'User', kind: vscode.CompletionItemKind.Reference },
+            { label: 'UserType', kind: vscode.CompletionItemKind.Reference },
           ],
           true,
         ),
@@ -453,6 +553,10 @@ suite('Completions', () => {
     }
     const fieldAttributeRelation = {
       label: '@relation',
+      kind: vscode.CompletionItemKind.Property,
+    }
+    const fieldAttributeUpdatedAt = {
+      label: '@updatedAt',
       kind: vscode.CompletionItemKind.Property,
     }
     const fieldAttributeIgnore = {
@@ -525,10 +629,10 @@ suite('Completions', () => {
         new vscode.CompletionList([
           fieldAttributeDefault,
           fieldAttributeId,
+          fieldAttributeIgnore,
           fieldAttributeMap,
           fieldAttributeRelation,
           fieldAttributeUnique,
-          fieldAttributeIgnore,
         ]),
         true,
       )
@@ -537,10 +641,10 @@ suite('Completions', () => {
         new vscode.Position(19, 14),
         new vscode.CompletionList([
           fieldAttributeDefault,
+          fieldAttributeIgnore,
           fieldAttributeMap,
           fieldAttributeRelation,
           fieldAttributeUnique,
-          fieldAttributeIgnore,
         ]),
         true,
       )
@@ -549,10 +653,11 @@ suite('Completions', () => {
         new vscode.Position(61, 20),
         new vscode.CompletionList([
           fieldAttributeDefault,
+          fieldAttributeIgnore,
           fieldAttributeMap,
           fieldAttributeRelation,
           fieldAttributeUnique,
-          fieldAttributeIgnore,
+          fieldAttributeUpdatedAt,
         ]),
         true,
       )
@@ -561,14 +666,13 @@ suite('Completions', () => {
         new vscode.Position(13, 16),
         new vscode.CompletionList([
           fieldAttributeDefault,
+          fieldAttributeIgnore,
           fieldAttributeMap,
           fieldAttributeRelation,
           fieldAttributeUnique,
-          fieldAttributeIgnore,
         ]),
         true,
       )
-      // fieldAttributeUpdatedAt,
       await testCompletion(
         modelBlocksUri,
         new vscode.Position(74, 24),
@@ -583,15 +687,15 @@ suite('Completions', () => {
       await testCompletion(
         modelBlocksUri,
         new vscode.Position(11, 24),
-        new vscode.CompletionList([functionDbGenerated, functionAutoInc]),
+        new vscode.CompletionList([functionAutoInc, functionDbGenerated]),
         true,
       )
       await testCompletion(
         modelBlocksUri,
         new vscode.Position(28, 27),
         new vscode.CompletionList([
-          functionDbGenerated,
           functionCuid,
+          functionDbGenerated,
           functionUuid,
         ]),
         true,
@@ -656,27 +760,13 @@ suite('Completions', () => {
       )
     })
 
-    // TODO
-    test('Diagnoses arguments of @@fulltext', async () => {
-      await testCompletion(
-        modelBlocksUri,
-        new vscode.Position(47, 13),
-        new vscode.CompletionList([
-          { label: 'firstName', kind: vscode.CompletionItemKind.Field },
-          { label: 'isAdmin', kind: vscode.CompletionItemKind.Field },
-          { label: 'lastName', kind: vscode.CompletionItemKind.Field },
-        ]),
-        true,
-      )
-    })
-
     test('Diagnoses default suggestions for enum values excluding comments', async () => {
       await testCompletion(
         enumCommentUri,
         new vscode.Position(11, 30),
         new vscode.CompletionList([
-          functionDbGenerated,
           { label: 'ADMIN', kind: vscode.CompletionItemKind.Value },
+          functionDbGenerated,
           { label: 'NORMAL', kind: vscode.CompletionItemKind.Value },
         ]),
 
@@ -693,12 +783,12 @@ suite('Completions', () => {
           new vscode.Position(12, 26),
           new vscode.CompletionList([
             nameQuotesProperty,
-            nameProperty,
-            mapProperty,
             fieldsProperty,
-            referencesProperty,
+            mapProperty,
+            nameProperty,
             onDeleteProperty,
             onUpdateProperty,
+            referencesProperty,
           ]),
           true,
         )
@@ -721,9 +811,9 @@ suite('Completions', () => {
           new vscode.Position(30, 44),
           new vscode.CompletionList([
             nameQuotesProperty,
-            nameProperty,
-            mapProperty,
             fieldsProperty,
+            mapProperty,
+            nameProperty,
             onDeleteProperty,
             onUpdateProperty,
           ]),
@@ -736,11 +826,11 @@ suite('Completions', () => {
           new vscode.Position(39, 45),
           new vscode.CompletionList([
             nameQuotesProperty,
-            nameProperty,
             mapProperty,
-            referencesProperty,
+            nameProperty,
             onDeleteProperty,
             onUpdateProperty,
+            referencesProperty,
           ]),
           true,
         )
@@ -765,8 +855,8 @@ suite('Completions', () => {
           new vscode.Position(57, 62),
           new vscode.CompletionList([
             nameQuotesProperty,
-            nameProperty,
             mapProperty,
+            nameProperty,
             onDeleteProperty,
             onUpdateProperty,
           ]),
@@ -779,10 +869,10 @@ suite('Completions', () => {
           new vscode.Position(66, 36),
           new vscode.CompletionList([
             { label: 'Cascade', kind: vscode.CompletionItemKind.Enum },
-            { label: 'Restrict', kind: vscode.CompletionItemKind.Enum },
             { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
-            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
+            { label: 'Restrict', kind: vscode.CompletionItemKind.Enum },
             { label: 'SetDefault', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
           ]),
           true,
         )
@@ -793,10 +883,10 @@ suite('Completions', () => {
           new vscode.Position(75, 36),
           new vscode.CompletionList([
             { label: 'Cascade', kind: vscode.CompletionItemKind.Enum },
-            { label: 'Restrict', kind: vscode.CompletionItemKind.Enum },
             { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
-            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
+            { label: 'Restrict', kind: vscode.CompletionItemKind.Enum },
             { label: 'SetDefault', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
           ]),
           true,
         )
@@ -807,10 +897,10 @@ suite('Completions', () => {
           new vscode.Position(84, 73),
           new vscode.CompletionList([
             { label: 'Cascade', kind: vscode.CompletionItemKind.Enum },
-            { label: 'Restrict', kind: vscode.CompletionItemKind.Enum },
             { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
-            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
+            { label: 'Restrict', kind: vscode.CompletionItemKind.Enum },
             { label: 'SetDefault', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
           ]),
           true,
         )
@@ -825,8 +915,8 @@ suite('Completions', () => {
           new vscode.CompletionList([
             { label: 'Cascade', kind: vscode.CompletionItemKind.Enum },
             { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
-            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
             { label: 'SetDefault', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
           ]),
           true,
         )
@@ -838,8 +928,8 @@ suite('Completions', () => {
           new vscode.CompletionList([
             { label: 'Cascade', kind: vscode.CompletionItemKind.Enum },
             { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
-            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
             { label: 'SetDefault', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
           ]),
           true,
         )
@@ -851,8 +941,8 @@ suite('Completions', () => {
           new vscode.CompletionList([
             { label: 'Cascade', kind: vscode.CompletionItemKind.Enum },
             { label: 'NoAction', kind: vscode.CompletionItemKind.Enum },
-            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
             { label: 'SetDefault', kind: vscode.CompletionItemKind.Enum },
+            { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
           ]),
           true,
         )
