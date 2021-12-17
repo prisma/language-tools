@@ -426,48 +426,13 @@ suite('Completions', function () {
     })
 
     //
-    // previewFeatures
-    // tests which are feature preview / database dependent
+    // previewFeatures = ["fullTextIndex"]
+    // = tests which are feature preview / database dependent
     //
-
     test('fullTextIndex - Diagnoses block attribute suggestions first in a line - mysql', () => {
       assertCompletion(
         fullTextIndex_extendedIndexes_mysql,
         { line: 14, character: 2 },
-        {
-          isIncomplete: false,
-          items: [
-            blockAttributeMap,
-            // blockAttributeId,
-            blockAttributeUnique,
-            blockAttributeIndex,
-            blockAttributeFulltextIndex,
-            blockAttributeIgnore,
-          ],
-        },
-      )
-    })
-    test('@@fulltext(|) - mysql', () => {
-      assertCompletion(
-        fullTextIndex_extendedIndexes_mysql,
-        { line: 15, character: 13 },
-        {
-          isIncomplete: false,
-          items: [
-            blockAttributeMap,
-            // blockAttributeId,
-            blockAttributeUnique,
-            blockAttributeIndex,
-            blockAttributeFulltextIndex,
-            blockAttributeIgnore,
-          ],
-        },
-      )
-    })
-    test('@@fulltext([title, content], |) - mysql', () => {
-      assertCompletion(
-        fullTextIndex_extendedIndexes_mysql,
-        { line: 16, character: 31 },
         {
           isIncomplete: false,
           items: [
@@ -1023,6 +988,48 @@ suite('Completions', function () {
           },
         )
       })
+
+      test('@@fulltext(|) - mysql', () => {
+        assertCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          { line: 15, character: 13 },
+          {
+            isIncomplete: false,
+            items: [fieldsProperty, mapProperty],
+          },
+        )
+      })
+      test('@@fulltext([title, content], |) - mysql', () => {
+        assertCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          { line: 16, character: 31 },
+          {
+            isIncomplete: false,
+            items: [fieldsProperty, mapProperty],
+          },
+        )
+      })
+
+      test('@@fulltext(|) - mongodb', () => {
+        assertCompletion(
+          fullTextIndex_extendedIndexes_mongodb,
+          { line: 15, character: 13 },
+          {
+            isIncomplete: false,
+            items: [fieldsProperty, mapProperty],
+          },
+        )
+      })
+      test('@@fulltext([title, content], |) - mongodb', () => {
+        assertCompletion(
+          fullTextIndex_extendedIndexes_mongodb,
+          { line: 16, character: 31 },
+          {
+            isIncomplete: false,
+            items: [fieldsProperty, mapProperty],
+          },
+        )
+      })
     })
 
     suite('namedConstraints', function () {
@@ -1109,7 +1116,7 @@ suite('Completions', function () {
         )
       })
 
-      // TODO
+      // TODO ?
       test('@@fulltext(|)', () => {
         assertCompletion(
           namedConstraintsUri,

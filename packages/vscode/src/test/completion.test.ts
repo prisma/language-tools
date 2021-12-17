@@ -408,44 +408,13 @@ suite('Completions', () => {
     })
 
     //
-    // previewFeatures
-    // tests which are feature preview / database dependent
+    // previewFeatures = ["fullTextIndex"]
+    // = tests which are feature preview / database dependent
     //
-
     test('fullTextIndex - Diagnoses block attribute suggestions first in a line - mysql', async () => {
       await testCompletion(
         fullTextIndex_extendedIndexes_mysql,
         new vscode.Position(14, 2),
-        new vscode.CompletionList([
-          // blockAttributeId,
-          blockAttributeFulltextIndex,
-          blockAttributeIgnore,
-          blockAttributeIndex,
-          blockAttributeMap,
-          blockAttributeUnique,
-        ]),
-        false,
-      )
-    })
-    test('@@fulltext(|) - mysql', async () => {
-      await testCompletion(
-        fullTextIndex_extendedIndexes_mysql,
-        new vscode.Position(15, 13),
-        new vscode.CompletionList([
-          // blockAttributeId,
-          blockAttributeFulltextIndex,
-          blockAttributeIgnore,
-          blockAttributeIndex,
-          blockAttributeMap,
-          blockAttributeUnique,
-        ]),
-        false,
-      )
-    })
-    test('@@fulltext([title, content], |) - mysql', async () => {
-      await testCompletion(
-        fullTextIndex_extendedIndexes_mysql,
-        new vscode.Position(16, 31),
         new vscode.CompletionList([
           // blockAttributeId,
           blockAttributeFulltextIndex,
@@ -945,6 +914,40 @@ suite('Completions', () => {
             { label: 'SetNull', kind: vscode.CompletionItemKind.Enum },
           ]),
           true,
+        )
+      })
+
+      test('@@fulltext(|) - mysql', async () => {
+        await testCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          new vscode.Position(15, 13),
+          new vscode.CompletionList([fieldsProperty, mapProperty]),
+          false,
+        )
+      })
+      test('@@fulltext([title, content], |) - mysql', async () => {
+        await testCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          new vscode.Position(16, 31),
+          new vscode.CompletionList([fieldsProperty, mapProperty]),
+          false,
+        )
+      })
+
+      test('@@fulltext(|) - mongodb', async () => {
+        await testCompletion(
+          fullTextIndex_extendedIndexes_mongodb,
+          new vscode.Position(15, 13),
+          new vscode.CompletionList([fieldsProperty, mapProperty]),
+          false,
+        )
+      })
+      test('@@fulltext([title, content], |) - mongodb', async () => {
+        await testCompletion(
+          fullTextIndex_extendedIndexes_mongodb,
+          new vscode.Position(16, 31),
+          new vscode.CompletionList([fieldsProperty, mapProperty]),
+          false,
         )
       })
     })
