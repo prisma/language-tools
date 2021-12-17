@@ -35,6 +35,7 @@ import nativeTypeConstructors, {
   NativeTypeConstructors,
 } from '../prisma-fmt/nativeTypes'
 import { Block, BlockType, getModelOrEnumBlock } from '../util'
+import { PreviewFeatures } from '../previewFeatures'
 
 function toCompletionItems(
   allowedTypes: string[],
@@ -169,7 +170,7 @@ function getSuggestionForModelBlockAttribute(
   const isFullTextAvailable = Boolean(
     datasourceProvider &&
       ['mysql', 'mongodb'].includes(datasourceProvider) &&
-      previewFeatures?.includes('fullTextIndex'),
+      previewFeatures?.includes('fulltextindex'),
   )
 
   if (isFullTextAvailable === false) {
@@ -304,7 +305,7 @@ function getFirstDatasourceProvider(lines: string[]): string | undefined {
 
 function getAllPreviewFeaturesFromGenerators(
   lines: string[],
-): string[] | undefined {
+): PreviewFeatures[] | undefined {
   // matches any `previewFeatures = [x]` in any position
   // thanks to https://regex101.com for the online scratchpad
   const previewFeaturesRegex = /previewFeatures\s=\s(\[.*\])/g
@@ -324,7 +325,9 @@ function getAllPreviewFeaturesFromGenerators(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const previewFeatures = JSON.parse(result[1])
     if (Array.isArray(previewFeatures) && previewFeatures.length > 0) {
-      return previewFeatures as string[]
+      return previewFeatures.map((it: string) =>
+        it.toLowerCase(),
+      ) as PreviewFeatures[]
     }
   } catch (e) {}
 
@@ -636,6 +639,7 @@ export function getSuggestionForSupportedFields(
   currentLine: string,
   currentLineUntrimmed: string,
   position: Position,
+  lines: string[],
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
   const isInsideQuotation: boolean = isInsideQuotationMark(
@@ -676,9 +680,22 @@ export function getSuggestionForSupportedFields(
       if (currentLine.startsWith('engineType')) {
         const engineTypesCompletion: CompletionItem[] = engineTypes
         if (isInsideQuotation) {
-          return {
-            items: engineTypesCompletion,
-            isIncomplete: true,
+          // We can filter on the previewFeatures enbabled
+          const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
+
+          if (previewFeatures?.includes('dataproxy')) {
+            return {
+              items: engineTypesCompletion,
+              isIncomplete: true,
+            }
+          } else {
+            // filter out dataproxy engineType
+            return {
+              items: engineTypesCompletion.filter(
+                (arg) => arg.label !== 'dataproxy',
+              ),
+              isIncomplete: true,
+            }
           }
         } else {
           return {

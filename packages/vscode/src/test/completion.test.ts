@@ -253,6 +253,10 @@ suite('Completions', () => {
     const generatorWithExistingFieldsUri = getDocUri(
       'completions/generatorWithExistingFields.prisma',
     )
+    const generatorWithdataProxyPreviewFeature = getDocUri(
+      'completions/generatorWithdataProxyPreviewFeature.prisma',
+    )
+
     test('Diagnoses generator field suggestions in empty block', async () => {
       await testCompletion(
         emptyBlocksUri,
@@ -294,9 +298,7 @@ suite('Completions', () => {
       )
     })
 
-    test('Diagnoses engineType value suggestions', async () => {
-      await activate(generatorWithExistingFieldsUri)
-
+    test('engineType = |', async () => {
       await testCompletion(
         generatorWithExistingFieldsUri,
         new vscode.Position(11, 17),
@@ -309,11 +311,34 @@ suite('Completions', () => {
           ],
           true,
         ),
-        true,
+        false,
       )
+    })
+    test('engineType = "|"', async () => {
       await testCompletion(
         generatorWithExistingFieldsUri,
         new vscode.Position(15, 18),
+        new vscode.CompletionList(
+          [
+            {
+              label: 'binary',
+              kind: vscode.CompletionItemKind.Constant,
+            },
+            {
+              label: 'library',
+              kind: vscode.CompletionItemKind.Constant,
+            },
+          ],
+          true,
+        ),
+        false,
+      )
+    })
+    // With Preview Feature Flag
+    test('dataProxy: engineType = ""', async () => {
+      await testCompletion(
+        generatorWithdataProxyPreviewFeature,
+        new vscode.Position(2, 21),
         new vscode.CompletionList(
           [
             {
@@ -331,7 +356,7 @@ suite('Completions', () => {
           ],
           true,
         ),
-        true,
+        false,
       )
     })
   })

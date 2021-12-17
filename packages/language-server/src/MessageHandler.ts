@@ -254,6 +254,7 @@ export function handleCompletionRequest(
   const position = params.position
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
+
   const currentLineUntrimmed = getCurrentLine(document, position.line)
   const currentLineTillPosition = currentLineUntrimmed
     .slice(0, position.character - 1)
@@ -313,6 +314,7 @@ export function handleCompletionRequest(
           lines[position.line],
           currentLineUntrimmed,
           position,
+          lines,
         )
       case '.':
         return getSuggestionForNativeTypes(
@@ -373,6 +375,7 @@ export function handleCompletionRequest(
           lines[position.line],
           currentLineUntrimmed,
           position,
+          lines,
         )
       }
       break

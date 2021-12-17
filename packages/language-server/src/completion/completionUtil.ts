@@ -6,6 +6,7 @@ import {
   InsertTextMode,
 } from 'vscode-languageserver'
 import * as completions from './completions.json'
+import type { PreviewFeatures } from '../previewFeatures'
 
 type JSONSimpleCompletionItems = {
   label: string
@@ -110,7 +111,7 @@ export const supportedGeneratorFields: CompletionItem[] =
 
 export function givenBlockAttributeParams(
   blockAttribute: '@@unique' | '@@id' | '@@index' | '@@fulltext',
-  previewFeatures?: string[] | undefined,
+  previewFeatures?: PreviewFeatures[] | undefined,
   datasourceProvider?: string | undefined,
 ): CompletionItem[] {
   const items = convertToCompletionItems(
@@ -123,7 +124,7 @@ export function givenBlockAttributeParams(
 
   if (blockAttribute === '@@index') {
     if (
-      previewFeatures?.includes('extendedIndexes') &&
+      previewFeatures?.includes('extendedindexes') &&
       datasourceProvider === 'postgresql'
     ) {
       // The type argument is only available for PostgreSQL on @@index
@@ -154,7 +155,7 @@ export const blockAttributes: CompletionItem[] =
 
 export function givenFieldAttributeParams(
   fieldAttribute: '@unique' | '@id' | '@index',
-  previewFeatures: string[] | undefined,
+  previewFeatures: PreviewFeatures[] | undefined,
   datasourceProvider: string | undefined,
 ): CompletionItem[] {
   const items = convertToCompletionItems(
@@ -170,7 +171,7 @@ export function givenFieldAttributeParams(
     return items.filter((arg) => arg.label !== 'length' && arg.label !== 'sort')
   }
 
-  if (previewFeatures?.includes('extendedIndexes')) {
+  if (previewFeatures?.includes('extendedindexes')) {
     // The sort argument is available for all databases on @unique
     // The length argument is available on MySQL on @id, @unique
     // Additionally, SQL Server also allows it on @id

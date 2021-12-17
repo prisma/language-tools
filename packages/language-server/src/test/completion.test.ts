@@ -281,6 +281,8 @@ suite('Completions', function () {
 
     const generatorWithExistingFieldsUri =
       'completions/generatorWithExistingFields.prisma'
+    const generatorWithdataProxyPreviewFeature =
+      'completions/generatorWithdataProxyPreviewFeature.prisma'
 
     test('Diagnoses generator field suggestions with existing fields', () => {
       assertCompletion(
@@ -311,10 +313,7 @@ suite('Completions', function () {
       )
     })
 
-    // TODO provider autocompletion
-    // TODO previewFeatures autocompletion
-
-    test('Diagnoses engineType value suggestions', () => {
+    test('engineType = |', () => {
       assertCompletion(
         generatorWithExistingFieldsUri,
         { line: 11, character: 17 },
@@ -328,9 +327,31 @@ suite('Completions', function () {
           ],
         },
       )
+    })
+    test('engineType = "|"', () => {
       assertCompletion(
         generatorWithExistingFieldsUri,
         { line: 15, character: 18 },
+        {
+          isIncomplete: true,
+          items: [
+            {
+              label: 'library',
+              kind: CompletionItemKind.Constant,
+            },
+            {
+              label: 'binary',
+              kind: CompletionItemKind.Constant,
+            },
+          ],
+        },
+      )
+    })
+    // With Preview Feature Flag
+    test('dataProxy: engineType = ""', () => {
+      assertCompletion(
+        generatorWithdataProxyPreviewFeature,
+        { line: 2, character: 21 },
         {
           isIncomplete: true,
           items: [
