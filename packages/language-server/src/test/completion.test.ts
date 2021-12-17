@@ -790,28 +790,6 @@ suite('Completions', function () {
       )
     })
 
-    // previewFeatures = ["extendedIndexes"]
-    test('extendedIndexes: @unique(|)', () => {
-      assertCompletion(
-        fullTextIndex_extendedIndexes_mysql,
-        { line: 50, character: 30 },
-        {
-          isIncomplete: false,
-          items: [mapProperty, lengthProperty, sortProperty],
-        },
-      )
-    })
-    test('extendedIndexes: @unique(sort: |)', () => {
-      assertCompletion(
-        fullTextIndex_extendedIndexes_mysql,
-        { line: 49, character: 36 },
-        {
-          isIncomplete: false,
-          items: [asc, desc],
-        },
-      )
-    })
-
     test('@@unique([|])', () => {
       assertCompletion(
         modelBlocksUri,
@@ -1175,6 +1153,27 @@ suite('Completions', function () {
           },
         )
       })
+      // previewFeatures = ["extendedIndexes"]
+      test('extendedIndexes: @@id([title(length: 100, |), abstract()])', () => {
+        assertCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          { line: 54, character: 27 },
+          {
+            isIncomplete: false,
+            items: [lengthProperty, sortProperty],
+          },
+        )
+      })
+      test('extendedIndexes: @@id([title(length: 100, ), abstract(|)])', () => {
+        assertCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          { line: 54, character: 39 },
+          {
+            isIncomplete: false,
+            items: [lengthProperty, sortProperty],
+          },
+        )
+      })
 
       test('@unique(|)', () => {
         assertCompletion(
@@ -1206,6 +1205,27 @@ suite('Completions', function () {
           },
         )
       })
+      // previewFeatures = ["extendedIndexes"]
+      test('extendedIndexes: @unique(|)', () => {
+        assertCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          { line: 29, character: 21 },
+          {
+            isIncomplete: false,
+            items: [mapProperty, lengthProperty, sortProperty],
+          },
+        )
+      })
+      test('extendedIndexes: @unique(sort: |)', () => {
+        assertCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          { line: 49, character: 36 },
+          {
+            isIncomplete: false,
+            items: [asc, desc],
+          },
+        )
+      })
 
       test('@@index(|)', () => {
         assertCompletion(
@@ -1224,6 +1244,51 @@ suite('Completions', function () {
           {
             isIncomplete: false,
             items: [fieldsProperty, mapProperty],
+          },
+        )
+      })
+      // previewFeatures = ["extendedIndexes"]
+      test('extendedIndexes: @@index([author, created_at(sort: |)])', () => {
+        assertCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          { line: 55, character: 36 },
+          {
+            isIncomplete: false,
+            items: [asc, desc],
+          },
+        )
+      })
+      test('extendedIndexes: @@index([author, |])', () => {
+        assertCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          { line: 56, character: 19 },
+          {
+            isIncomplete: false,
+            items: [
+              { label: 'title', kind: CompletionItemKind.Field },
+              { label: 'abstract', kind: CompletionItemKind.Field },
+              { label: 'slug', kind: CompletionItemKind.Field },
+              { label: 'slug2', kind: CompletionItemKind.Field },
+              // { label: 'author', kind: CompletionItemKind.Field },
+              { label: 'created_at', kind: CompletionItemKind.Field },
+            ],
+          },
+        )
+      })
+      test('extendedIndexes: @@index([|])', () => {
+        assertCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          { line: 57, character: 11 },
+          {
+            isIncomplete: false,
+            items: [
+              { label: 'title', kind: CompletionItemKind.Field },
+              { label: 'abstract', kind: CompletionItemKind.Field },
+              { label: 'slug', kind: CompletionItemKind.Field },
+              { label: 'slug2', kind: CompletionItemKind.Field },
+              { label: 'author', kind: CompletionItemKind.Field },
+              { label: 'created_at', kind: CompletionItemKind.Field },
+            ],
           },
         )
       })

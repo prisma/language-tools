@@ -759,24 +759,6 @@ suite('Completions', () => {
       )
     })
 
-    // previewFeatures = ["extendedIndexes"]
-    test('extendedIndexes: @unique(|)', async () => {
-      await testCompletion(
-        fullTextIndex_extendedIndexes_mysql,
-        new vscode.Position(50, 30),
-        new vscode.CompletionList([lengthProperty, mapProperty, sortProperty]),
-        true,
-      )
-    })
-    test('extendedIndexes: @unique(sort: |)', async () => {
-      await testCompletion(
-        fullTextIndex_extendedIndexes_mysql,
-        new vscode.Position(49, 36),
-        new vscode.CompletionList([asc, desc]),
-        true,
-      )
-    })
-
     test('@@unique([|])', async () => {
       await testCompletion(
         modelBlocksUri,
@@ -1105,6 +1087,23 @@ suite('Completions', () => {
           true,
         )
       })
+      // previewFeatures = ["extendedIndexes"]
+      test('extendedIndexes: @@id([title(length: 100, |), abstract()])', async () => {
+        await testCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          new vscode.Position(54, 27),
+          new vscode.CompletionList([lengthProperty, sortProperty]),
+          true,
+        )
+      })
+      test('extendedIndexes: @@id([title(length: 100, ), abstract(|)])', async () => {
+        await testCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          new vscode.Position(54, 39),
+          new vscode.CompletionList([lengthProperty, sortProperty]),
+          true,
+        )
+      })
 
       test('@unique(|)', async () => {
         await activate(namedConstraintsUri)
@@ -1144,6 +1143,27 @@ suite('Completions', () => {
           true,
         )
       })
+      // previewFeatures = ["extendedIndexes"]
+      test('extendedIndexes: @unique(|)', async () => {
+        await testCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          new vscode.Position(29, 21),
+          new vscode.CompletionList([
+            lengthProperty,
+            mapProperty,
+            sortProperty,
+          ]),
+          true,
+        )
+      })
+      test('extendedIndexes: @unique(sort: |)', async () => {
+        await testCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          new vscode.Position(49, 36),
+          new vscode.CompletionList([asc, desc]),
+          true,
+        )
+      })
 
       test('@@index(|)', async () => {
         await activate(namedConstraintsUri)
@@ -1163,6 +1183,45 @@ suite('Completions', () => {
           new vscode.Position(54, 35),
           new vscode.CompletionList([fieldsProperty, mapProperty]),
           true,
+        )
+      })
+      // previewFeatures = ["extendedIndexes"]
+      test('extendedIndexes: @@index([author, created_at(sort: |)])', async () => {
+        await testCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          new vscode.Position(55, 36),
+          new vscode.CompletionList([asc, desc]),
+          false,
+        )
+      })
+      test('extendedIndexes: @@index([author, |])', async () => {
+        await testCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          new vscode.Position(56, 19),
+          new vscode.CompletionList([
+            { label: 'abstract', kind: vscode.CompletionItemKind.Field },
+            // { label: 'author', kind: vscode.CompletionItemKind.Field },
+            { label: 'created_at', kind: vscode.CompletionItemKind.Field },
+            { label: 'slug', kind: vscode.CompletionItemKind.Field },
+            { label: 'slug2', kind: vscode.CompletionItemKind.Field },
+            { label: 'title', kind: vscode.CompletionItemKind.Field },
+          ]),
+          false,
+        )
+      })
+      test('extendedIndexes: @@index([|])', async () => {
+        await testCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          new vscode.Position(57, 11),
+          new vscode.CompletionList([
+            { label: 'abstract', kind: vscode.CompletionItemKind.Field },
+            { label: 'author', kind: vscode.CompletionItemKind.Field },
+            { label: 'created_at', kind: vscode.CompletionItemKind.Field },
+            { label: 'slug', kind: vscode.CompletionItemKind.Field },
+            { label: 'slug2', kind: vscode.CompletionItemKind.Field },
+            { label: 'title', kind: vscode.CompletionItemKind.Field },
+          ]),
+          false,
         )
       })
 

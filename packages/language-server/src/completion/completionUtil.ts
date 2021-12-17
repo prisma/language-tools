@@ -153,6 +153,27 @@ export const blockAttributes: CompletionItem[] =
     CompletionItemKind.Property,
   )
 
+export const sortAutoCompletionItems: CompletionItem[] = [
+  {
+    label: 'Asc',
+    kind: 13,
+    insertTextFormat: 1,
+    documentation: {
+      kind: 'markdown',
+      value: 'Ascending',
+    },
+  },
+  {
+    label: 'Desc',
+    kind: 13,
+    insertTextFormat: 1,
+    documentation: {
+      kind: 'markdown',
+      value: 'Descending',
+    },
+  },
+]
+
 export function givenFieldAttributeParams(
   fieldAttribute: '@unique' | '@id' | '@index',
   previewFeatures: PreviewFeatures[] | undefined,
@@ -171,28 +192,6 @@ export function givenFieldAttributeParams(
     // filter length and sort out
     return items.filter((arg) => arg.label !== 'length' && arg.label !== 'sort')
   }
-
-  // TODO move in completions.json
-  const sortAutoCompletionItems: CompletionItem[] = [
-    {
-      label: 'Asc',
-      kind: 13,
-      insertTextFormat: 1,
-      documentation: {
-        kind: 'markdown',
-        value: 'Ascending',
-      },
-    },
-    {
-      label: 'Desc',
-      kind: 13,
-      insertTextFormat: 1,
-      documentation: {
-        kind: 'markdown',
-        value: 'Descending',
-      },
-    },
-  ]
 
   if (previewFeatures?.includes('extendedindexes')) {
     // The sort argument is available for all databases on @unique
@@ -225,6 +224,17 @@ export function givenFieldAttributeParams(
 export const fieldAttributes: CompletionItem[] =
   convertAttributesToCompletionItems(
     completions.fieldAttributes,
+    CompletionItemKind.Property,
+  )
+
+export const sortLengthProperties: CompletionItem[] =
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  convertToCompletionItems(
+    completions.fieldAttributes
+      .find((item) => item.label === '@unique')!
+      .params.filter(
+        (item) => item.label === 'length' || item.label === 'sort',
+      ),
     CompletionItemKind.Property,
   )
 

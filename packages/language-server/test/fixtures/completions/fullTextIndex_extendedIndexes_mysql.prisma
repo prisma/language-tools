@@ -18,8 +18,8 @@ model Fulltext {
 }
 
 model Id {
-  // id()
-  id String @id @db.VarChar(3000)
+  
+  id String @id() @db.VarChar(3000)
 }
 
 model IdWithLength {
@@ -52,8 +52,10 @@ model Post {
   author     String
   created_at DateTime
 
-  @@id([title(length: 100, sort: Desc), abstract(length: 10)])
-  @@index([author, created_at(sort: Desc)])
+  @@id([title(length: 100, ), abstract()])
+  @@index([author, created_at(sort: )])
+  @@index([author, ])
+  @@index([])
 }
 
 model Example {

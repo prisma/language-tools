@@ -26,6 +26,8 @@ import {
   engineTypeArguments,
   givenBlockAttributeParams,
   givenFieldAttributeParams,
+  sortLengthProperties,
+  sortAutoCompletionItems,
 } from './completionUtil'
 import { klona } from 'klona'
 import { extractModelName } from '../rename/renameUtil'
@@ -42,6 +44,25 @@ function toCompletionItems(
   kind: CompletionItemKind,
 ): CompletionItem[] {
   return allowedTypes.map((label) => ({ label, kind }))
+}
+
+export function isInsideFieldArgument(
+  currentLineUntrimmed: string,
+  position: Position,
+): boolean {
+  const symbols = '()'
+  let numberOfOpenBrackets = 0
+  let numberOfClosedBrackets = 0
+  for (let i = 0; i < position.character; i++) {
+    if (currentLineUntrimmed[i] === symbols[0]) {
+      numberOfOpenBrackets++
+    } else if (currentLineUntrimmed[i] === symbols[1]) {
+      numberOfClosedBrackets++
+    }
+  }
+  return (
+    numberOfOpenBrackets >= 2 && numberOfOpenBrackets > numberOfClosedBrackets
+  )
 }
 
 /***
@@ -1120,6 +1141,23 @@ function getSuggestionsForAttribute(
     const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
 
     if (isInsideAttribute(untrimmedCurrentLine, position, '[]')) {
+      // extendedIndexes
+      if (
+        previewFeatures?.includes('extendedindexes') &&
+        isInsideFieldArgument(untrimmedCurrentLine, position)
+      ) {
+        if (wordBeforePosition.includes('sort:')) {
+          return {
+            items: sortAutoCompletionItems,
+            isIncomplete: false,
+          }
+        }
+        return {
+          items: sortLengthProperties,
+          isIncomplete: false,
+        }
+      }
+
       let items = getFieldsFromCurrentBlock(lines, block, position)
       // get parameters inside block attribute
       const parameterMatch = new RegExp(/(?<=\[).+?(?=\])/).exec(
@@ -1151,27 +1189,31 @@ function getSuggestionsForAttribute(
         datasourceProvider === 'postgresql' &&
         wordBeforePosition.includes('type:')
       ) {
+        // TODO move away
+        const indexTypeCompletionItems: CompletionItem[] = [
+          {
+            label: 'Hash',
+            kind: 13,
+            insertTextFormat: 1,
+            documentation: {
+              kind: 'markdown',
+              value:
+                'The Hash index can perform a faster lookup than a B-Tree index. However, the key downside of the Hash index is that its use is limited to equality operators that will perform matching operations.',
+            },
+          },
+          {
+            label: 'BTree',
+            kind: 13,
+            insertTextFormat: 1,
+            documentation: {
+              kind: 'markdown',
+              value:
+                "The B-tree index is the default, it creates a self-balanced tree, in other words, it sorts itself. It will maintain its balance throughout operations such as insertions, deletions and searches. Using a B-tree index speeds up scan operations because it doesn't have to scan pages or records sequentially in a linear fashion.",
+            },
+          },
+        ]
         return {
-          items: [
-            {
-              label: 'Hash',
-              kind: 13,
-              insertTextFormat: 1,
-              documentation: {
-                kind: 'markdown',
-                value: 'The default.',
-              },
-            },
-            {
-              label: 'BTree',
-              kind: 13,
-              insertTextFormat: 1,
-              documentation: {
-                kind: 'markdown',
-                value: 'The default.',
-              },
-            },
-          ],
+          items: indexTypeCompletionItems,
           isIncomplete: false,
         }
       }
