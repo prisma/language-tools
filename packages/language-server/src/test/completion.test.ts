@@ -642,6 +642,23 @@ suite('Completions', function () {
       label: 'type',
       kind: CompletionItemKind.Property,
     }
+    const sortProperty = {
+      label: 'sort',
+      kind: CompletionItemKind.Property,
+    }
+    const lengthProperty = {
+      label: 'length',
+      kind: CompletionItemKind.Property,
+    }
+
+    const asc = {
+      label: 'Asc',
+      kind: CompletionItemKind.Enum,
+    }
+    const desc = {
+      label: 'Desc',
+      kind: CompletionItemKind.Enum,
+    }
 
     test('Diagnoses field and block attribute suggestions', () => {
       assertCompletion(
@@ -769,6 +786,28 @@ suite('Completions', function () {
         {
           isIncomplete: false,
           items: [functionDbGenerated, enumValueOne, enumValueTwo],
+        },
+      )
+    })
+
+    // previewFeatures = ["extendedIndexes"]
+    test('extendedIndexes: @unique(|)', () => {
+      assertCompletion(
+        fullTextIndex_extendedIndexes_mysql,
+        { line: 50, character: 30 },
+        {
+          isIncomplete: false,
+          items: [mapProperty, lengthProperty, sortProperty],
+        },
+      )
+    })
+    test('extendedIndexes: @unique(sort: |)', () => {
+      assertCompletion(
+        fullTextIndex_extendedIndexes_mysql,
+        { line: 49, character: 36 },
+        {
+          isIncomplete: false,
+          items: [asc, desc],
         },
       )
     })

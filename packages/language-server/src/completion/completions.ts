@@ -136,7 +136,6 @@ function removeInvalidAttributeSuggestions(
     }
 
     // TODO we should also remove the other suggestions if used (default()...)
-
     if (item.includes('@id')) {
       supportedAttributes = supportedAttributes.filter(
         (attribute) => !attribute.label.includes('id'),
@@ -1196,18 +1195,21 @@ function getSuggestionsForAttribute(
           '@unique',
           previewFeatures,
           datasourceProvider,
+          wordBeforePosition,
         )
       } else if (wordsBeforePosition.some((a) => a.includes('@id'))) {
         fieldAtrributeArguments = givenFieldAttributeParams(
           '@id',
           previewFeatures,
           datasourceProvider,
+          wordBeforePosition,
         )
       } else if (wordsBeforePosition.some((a) => a.includes('@index'))) {
         fieldAtrributeArguments = givenFieldAttributeParams(
           '@index',
           previewFeatures,
           datasourceProvider,
+          wordBeforePosition,
         )
       }
       suggestions = fieldAtrributeArguments

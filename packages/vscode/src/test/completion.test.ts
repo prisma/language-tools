@@ -614,6 +614,23 @@ suite('Completions', () => {
       label: 'type',
       kind: vscode.CompletionItemKind.Property,
     }
+    const sortProperty = {
+      label: 'sort',
+      kind: vscode.CompletionItemKind.Property,
+    }
+    const lengthProperty = {
+      label: 'length',
+      kind: vscode.CompletionItemKind.Property,
+    }
+
+    const asc = {
+      label: 'Asc',
+      kind: vscode.CompletionItemKind.Enum,
+    }
+    const desc = {
+      label: 'Desc',
+      kind: vscode.CompletionItemKind.Enum,
+    }
 
     test('Diagnoses field and block attribute suggestions', async () => {
       await activate(modelBlocksUri)
@@ -739,6 +756,24 @@ suite('Completions', () => {
           { label: 'NORMAL', kind: vscode.CompletionItemKind.Value },
         ]),
         false,
+      )
+    })
+
+    // previewFeatures = ["extendedIndexes"]
+    test('extendedIndexes: @unique(|)', async () => {
+      await testCompletion(
+        fullTextIndex_extendedIndexes_mysql,
+        new vscode.Position(50, 30),
+        new vscode.CompletionList([lengthProperty, mapProperty, sortProperty]),
+        true,
+      )
+    })
+    test('extendedIndexes: @unique(sort: |)', async () => {
+      await testCompletion(
+        fullTextIndex_extendedIndexes_mysql,
+        new vscode.Position(49, 36),
+        new vscode.CompletionList([asc, desc]),
+        true,
       )
     })
 

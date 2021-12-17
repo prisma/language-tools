@@ -24,6 +24,7 @@ model Post {
   id      String @id @map("_id") @db.ObjectId
   title   String
   content String
+  slug    String   @unique(sort: )
 
   @@fulltext([title(sort: Desc), content])
 }

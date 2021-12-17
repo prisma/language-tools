@@ -17,4 +17,5 @@ model Type {
   @@index([title], )
   @@index([title], type: )
   @@index([title], type: Hash, )
+  @@index([title], sort: )
 }

@@ -157,6 +157,7 @@ export function givenFieldAttributeParams(
   fieldAttribute: '@unique' | '@id' | '@index',
   previewFeatures: PreviewFeatures[] | undefined,
   datasourceProvider: string | undefined,
+  wordBeforePosition: string,
 ): CompletionItem[] {
   const items = convertToCompletionItems(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -171,10 +172,39 @@ export function givenFieldAttributeParams(
     return items.filter((arg) => arg.label !== 'length' && arg.label !== 'sort')
   }
 
+  // TODO move in completions.json
+  const sortAutoCompletionItems: CompletionItem[] = [
+    {
+      label: 'Asc',
+      kind: 13,
+      insertTextFormat: 1,
+      documentation: {
+        kind: 'markdown',
+        value: 'Ascending',
+      },
+    },
+    {
+      label: 'Desc',
+      kind: 13,
+      insertTextFormat: 1,
+      documentation: {
+        kind: 'markdown',
+        value: 'Descending',
+      },
+    },
+  ]
+
   if (previewFeatures?.includes('extendedindexes')) {
     // The sort argument is available for all databases on @unique
     // The length argument is available on MySQL on @id, @unique
     // Additionally, SQL Server also allows it on @id
+
+    // Auto completion for Desc | Asc
+    // includes because `@unique(sort: |)` means wordBeforePosition = '@unique(sort:'
+    if (wordBeforePosition.includes('sort:')) {
+      return sortAutoCompletionItems
+    }
+
     if (datasourceProvider === 'mysql') {
       return items
     } else if (datasourceProvider === 'sqlserver') {
@@ -183,9 +213,7 @@ export function givenFieldAttributeParams(
       } else {
         return items.filter((arg) => arg.label !== 'length')
       }
-    }
-
-    if (datasourceProvider !== 'mysql') {
+    } else {
       return items.filter((arg) => arg.label !== 'length')
     }
   }
