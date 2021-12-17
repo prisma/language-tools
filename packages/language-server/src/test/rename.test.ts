@@ -443,6 +443,7 @@ suite('Rename', () => {
       { line: 4, character: 12 },
     )
   })
+  // TODO?
   test('Field referenced in @@index attribute', () => {
     assertRename(
       {

@@ -11,7 +11,7 @@ model User {
 model Post {
     id Int @id @default()
     email String? @unique
-    name String
+    name String 
 
 }
 
@@ -55,4 +55,24 @@ model TypeCheck {
 enum Hello {
     Hey
     Hallo
+}
+
+model DateTest {
+    id Int @id @default(autoincrement())
+    update DateTime  
+    type UserType @default()
+}
+
+enum UserType {
+    ADMIN
+    NORMAL
+}
+
+model ForthUser {
+    firstName String
+    lastName String
+
+    @@index([firstName, ])
+    @@fulltext()
+    @@fulltext([])
 }

@@ -6,6 +6,7 @@ import {
   InsertTextMode,
 } from 'vscode-languageserver'
 import * as completions from './completions.json'
+import type { PreviewFeatures } from '../previewFeatures'
 
 type JSONSimpleCompletionItems = {
   label: string
@@ -109,15 +110,41 @@ export const supportedGeneratorFields: CompletionItem[] =
   )
 
 export function givenBlockAttributeParams(
-  blockAttribute: string,
+  blockAttribute: '@@unique' | '@@id' | '@@index' | '@@fulltext',
+  previewFeatures?: PreviewFeatures[] | undefined,
+  datasourceProvider?: string | undefined,
 ): CompletionItem[] {
-  return convertToCompletionItems(
+  const items = convertToCompletionItems(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     completions.blockAttributes.find((item) =>
       item.label.includes(blockAttribute),
     )!.params,
     CompletionItemKind.Property,
   )
+
+  if (blockAttribute === '@@index') {
+    if (
+      previewFeatures?.includes('extendedindexes') &&
+      datasourceProvider === 'postgresql'
+    ) {
+      // The type argument is only available for PostgreSQL on @@index
+      items.push({
+        label: 'type',
+        kind: 10,
+        insertText: 'type: [$0]',
+        insertTextFormat: 2,
+        insertTextMode: 2,
+        documentation: {
+          kind: 'markdown',
+          value: 'Defines the access type of indexes: BTree (default) or Hash.',
+        },
+      })
+
+      return items
+    }
+  }
+
+  return items
 }
 
 export const blockAttributes: CompletionItem[] =
@@ -126,21 +153,88 @@ export const blockAttributes: CompletionItem[] =
     CompletionItemKind.Property,
   )
 
+export const sortAutoCompletionItems: CompletionItem[] = [
+  {
+    label: 'Asc',
+    kind: 13,
+    insertTextFormat: 1,
+    documentation: {
+      kind: 'markdown',
+      value: 'Ascending',
+    },
+  },
+  {
+    label: 'Desc',
+    kind: 13,
+    insertTextFormat: 1,
+    documentation: {
+      kind: 'markdown',
+      value: 'Descending',
+    },
+  },
+]
+
 export function givenFieldAttributeParams(
-  fieldAttribute: string,
+  fieldAttribute: '@unique' | '@id' | '@index',
+  previewFeatures: PreviewFeatures[] | undefined,
+  datasourceProvider: string | undefined,
+  wordBeforePosition: string,
 ): CompletionItem[] {
-  return convertToCompletionItems(
+  const items = convertToCompletionItems(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     completions.fieldAttributes.find((item) =>
       item.label.includes(fieldAttribute),
     )!.params,
     CompletionItemKind.Property,
   )
+
+  if (fieldAttribute === '@index') {
+    // filter length and sort out
+    return items.filter((arg) => arg.label !== 'length' && arg.label !== 'sort')
+  }
+
+  if (previewFeatures?.includes('extendedindexes')) {
+    // The sort argument is available for all databases on @unique
+    // The length argument is available on MySQL on @id, @unique
+    // Additionally, SQL Server also allows it on @id
+
+    // Auto completion for Desc | Asc
+    // includes because `@unique(sort: |)` means wordBeforePosition = '@unique(sort:'
+    if (wordBeforePosition.includes('sort:')) {
+      return sortAutoCompletionItems
+    }
+
+    if (datasourceProvider === 'mysql') {
+      return items
+    } else if (datasourceProvider === 'sqlserver') {
+      if (fieldAttribute === '@id') {
+        return items
+      } else {
+        return items.filter((arg) => arg.label !== 'length')
+      }
+    } else {
+      return items.filter((arg) => arg.label !== 'length')
+    }
+  }
+
+  // filter length and sort out
+  return items.filter((arg) => arg.label !== 'length' && arg.label !== 'sort')
 }
 
 export const fieldAttributes: CompletionItem[] =
   convertAttributesToCompletionItems(
     completions.fieldAttributes,
+    CompletionItemKind.Property,
+  )
+
+export const sortLengthProperties: CompletionItem[] =
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  convertToCompletionItems(
+    completions.fieldAttributes
+      .find((item) => item.label === '@unique')!
+      .params.filter(
+        (item) => item.label === 'length' || item.label === 'sort',
+      ),
     CompletionItemKind.Property,
   )
 

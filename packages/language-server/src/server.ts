@@ -55,7 +55,7 @@ export function startServer(options?: LSPOptions): void {
 
   const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
-  connection.onInitialize(async (params: InitializeParams) => {
+  connection.onInitialize((params: InitializeParams) => {
     // Logging first...
     connection.console.info(
       `Default version of Prisma 'prisma-fmt': ${util.getVersion()}`,
@@ -69,7 +69,7 @@ export function startServer(options?: LSPOptions): void {
     connection.console.info(`Prisma Engines version: ${prismaEnginesVersion}`)
     const prismaCliVersion = util.getCliVersion()
     connection.console.info(`Prisma CLI version: ${prismaCliVersion}`)
-    
+
     // ... and then capabilities of the language server
     const capabilities = params.capabilities
 
@@ -156,21 +156,18 @@ export function startServer(options?: LSPOptions): void {
   //   return result
   // }
 
-  async function validateTextDocument(
-    textDocument: TextDocument,
-  ): Promise<void> {
-    const diagnostics: Diagnostic[] =
-      await MessageHandler.handleDiagnosticsRequest(
-        textDocument,
-        (errorMessage: string) => {
-          connection.window.showErrorMessage(errorMessage)
-        },
-      )
+  function validateTextDocument(textDocument: TextDocument) {
+    const diagnostics: Diagnostic[] = MessageHandler.handleDiagnosticsRequest(
+      textDocument,
+      (errorMessage: string) => {
+        connection.window.showErrorMessage(errorMessage)
+      },
+    )
     connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
   }
 
-  documents.onDidChangeContent(async (change: { document: TextDocument }) => {
-    await validateTextDocument(change.document)
+  documents.onDidChangeContent((change: { document: TextDocument }) => {
+    validateTextDocument(change.document)
   })
 
   function getDocument(uri: string): TextDocument | undefined {
@@ -184,7 +181,7 @@ export function startServer(options?: LSPOptions): void {
     }
   })
 
-  connection.onCompletion(async (params: CompletionParams) => {
+  connection.onCompletion((params: CompletionParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
       return MessageHandler.handleCompletionRequest(params, doc)
@@ -214,7 +211,7 @@ export function startServer(options?: LSPOptions): void {
     }
   })
 
-  connection.onDocumentFormatting(async (params: DocumentFormattingParams) => {
+  connection.onDocumentFormatting((params: DocumentFormattingParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
       return MessageHandler.handleDocumentFormatting(

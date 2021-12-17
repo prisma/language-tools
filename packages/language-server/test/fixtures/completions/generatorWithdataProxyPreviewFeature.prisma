@@ -1,0 +1,4 @@
+generator engineTypeQuotes {
+  previewFeatures = ["dataProxy"]
+  engineType      = ""
+}

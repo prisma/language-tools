@@ -26,6 +26,8 @@ import {
   engineTypeArguments,
   givenBlockAttributeParams,
   givenFieldAttributeParams,
+  sortLengthProperties,
+  sortAutoCompletionItems,
 } from './completionUtil'
 import { klona } from 'klona'
 import { extractModelName } from '../rename/renameUtil'
@@ -35,12 +37,32 @@ import nativeTypeConstructors, {
   NativeTypeConstructors,
 } from '../prisma-fmt/nativeTypes'
 import { Block, BlockType, getModelOrEnumBlock } from '../util'
+import { PreviewFeatures } from '../previewFeatures'
 
 function toCompletionItems(
   allowedTypes: string[],
   kind: CompletionItemKind,
 ): CompletionItem[] {
   return allowedTypes.map((label) => ({ label, kind }))
+}
+
+export function isInsideFieldArgument(
+  currentLineUntrimmed: string,
+  position: Position,
+): boolean {
+  const symbols = '()'
+  let numberOfOpenBrackets = 0
+  let numberOfClosedBrackets = 0
+  for (let i = 0; i < position.character; i++) {
+    if (currentLineUntrimmed[i] === symbols[0]) {
+      numberOfOpenBrackets++
+    } else if (currentLineUntrimmed[i] === symbols[1]) {
+      numberOfClosedBrackets++
+    }
+  }
+  return (
+    numberOfOpenBrackets >= 2 && numberOfOpenBrackets > numberOfClosedBrackets
+  )
 }
 
 /***
@@ -135,7 +157,6 @@ function removeInvalidAttributeSuggestions(
     }
 
     // TODO we should also remove the other suggestions if used (default()...)
-
     if (item.includes('@id')) {
       supportedAttributes = supportedAttributes.filter(
         (attribute) => !attribute.label.includes('id'),
@@ -153,8 +174,30 @@ function getSuggestionForModelBlockAttribute(
     return []
   }
   // create deep copy
-  let suggestions: CompletionItem[] = klona(blockAttributes)
-  suggestions = removeInvalidAttributeSuggestions(suggestions, block, lines)
+  const suggestions: CompletionItem[] = removeInvalidAttributeSuggestions(
+    klona(blockAttributes),
+    block,
+    lines,
+  )
+
+  // We can filter on the datasource
+  const datasourceProvider = getFirstDatasourceProvider(lines)
+  // We can filter on the previewFeatures enbabled
+  const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
+
+  // Full text indexes (MySQL and MongoDB)
+  // https://www.prisma.io/docs/concepts/components/prisma-schema/indexes#full-text-indexes-mysql-and-mongodb
+  const isFullTextAvailable = Boolean(
+    datasourceProvider &&
+      ['mysql', 'mongodb'].includes(datasourceProvider) &&
+      previewFeatures?.includes('fulltextindex'),
+  )
+
+  if (isFullTextAvailable === false) {
+    // fullTextIndex is not available, we need to filter it out
+    return suggestions.filter((arg) => arg.label !== '@@fulltext')
+  }
+
   return suggestions
 }
 
@@ -278,6 +321,37 @@ function getFirstDatasourceProvider(lines: string[]): string | undefined {
   ) {
     return datasourceProvider
   }
+}
+
+function getAllPreviewFeaturesFromGenerators(
+  lines: string[],
+): PreviewFeatures[] | undefined {
+  // matches any `previewFeatures = [x]` in any position
+  // thanks to https://regex101.com for the online scratchpad
+  const previewFeaturesRegex = /previewFeatures\s=\s(\[.*\])/g
+
+  // we could match against all the `previewFeatures = [x]` (could be that there is more than one?)
+  // var matchAll = text.matchAll(regexp)
+  // for (const match of matchAll) {
+  //   console.log(match);
+  // }
+  const result = previewFeaturesRegex.exec(lines.join('\n'))
+
+  if (!result || !result[1]) {
+    return undefined
+  }
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const previewFeatures = JSON.parse(result[1])
+    if (Array.isArray(previewFeatures) && previewFeatures.length > 0) {
+      return previewFeatures.map((it: string) =>
+        it.toLowerCase(),
+      ) as PreviewFeatures[]
+    }
+  } catch (e) {}
+
+  return undefined
 }
 
 export function getAllRelationNames(lines: Array<string>): Array<string> {
@@ -585,6 +659,7 @@ export function getSuggestionForSupportedFields(
   currentLine: string,
   currentLineUntrimmed: string,
   position: Position,
+  lines: string[],
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
   const isInsideQuotation: boolean = isInsideQuotationMark(
@@ -625,9 +700,22 @@ export function getSuggestionForSupportedFields(
       if (currentLine.startsWith('engineType')) {
         const engineTypesCompletion: CompletionItem[] = engineTypes
         if (isInsideQuotation) {
-          return {
-            items: engineTypesCompletion,
-            isIncomplete: true,
+          // We can filter on the previewFeatures enbabled
+          const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
+
+          if (previewFeatures?.includes('dataproxy')) {
+            return {
+              items: engineTypesCompletion,
+              isIncomplete: true,
+            }
+          } else {
+            // filter out dataproxy engineType
+            return {
+              items: engineTypesCompletion.filter(
+                (arg) => arg.label !== 'dataproxy',
+              ),
+              isIncomplete: true,
+            }
           }
         } else {
           return {
@@ -910,15 +998,15 @@ function getSuggestionsForAttribute(
     lines,
     block,
     position,
-    document,
-  }: {
+  }: // document,
+  {
     attribute?: '@relation'
     wordsBeforePosition: string[]
     untrimmedCurrentLine: string
     lines: string[]
     block: Block
     position: Position
-    document: TextDocument
+    // document: TextDocument
   }, // eslint-disable-line @typescript-eslint/no-unused-vars
 ): CompletionList | undefined {
   const firstWordBeforePosition =
@@ -945,7 +1033,7 @@ function getSuggestionsForAttribute(
     const datasourceProvider = getFirstDatasourceProvider(lines)
 
     // Note: needs to be before @relation condition because
-    // `@relation(onUpdate: |)` means wordBeforePosition = '@relation(onUpdate:'
+    // includes because `@relation(onUpdate: |)` means wordBeforePosition = '@relation(onUpdate:'
     if (wordBeforePosition.includes('onDelete:')) {
       return {
         items:
@@ -1037,9 +1125,39 @@ function getSuggestionsForAttribute(
     }
   } else {
     // @id, @unique, @index
-    // @@id, @@unique, @@index
+    // @@id, @@unique, @@index, @@fulltext
+
+    // The length argument is available on MySQL on the
+    // @id, @@id, @unique, @@unique and @@index, @@fulltext fields.
+    // It allows Prisma to now support indexes and constraints on String with a TEXT native type and Bytes types.
+
+    // The sort argument is available for all databases on the
+    // @unique, @@unique and @@index fields.
+    // Additionally, SQL Server also allows it on @id and @@id.
+
+    // We can filter on the datasource
+    const datasourceProvider = getFirstDatasourceProvider(lines)
+    // We can filter on the previewFeatures enbabled
+    const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
 
     if (isInsideAttribute(untrimmedCurrentLine, position, '[]')) {
+      // extendedIndexes
+      if (
+        previewFeatures?.includes('extendedindexes') &&
+        isInsideFieldArgument(untrimmedCurrentLine, position)
+      ) {
+        if (wordBeforePosition.includes('sort:')) {
+          return {
+            items: sortAutoCompletionItems,
+            isIncomplete: false,
+          }
+        }
+        return {
+          items: sortLengthProperties,
+          isIncomplete: false,
+        }
+      }
+
       let items = getFieldsFromCurrentBlock(lines, block, position)
       // get parameters inside block attribute
       const parameterMatch = new RegExp(/(?<=\[).+?(?=\])/).exec(
@@ -1058,32 +1176,85 @@ function getSuggestionsForAttribute(
       }
     }
 
+    // "@@" block attributes
     let blockAtrributeArguments: CompletionItem[] = []
     if (wordsBeforePosition.some((a) => a.includes('@@unique'))) {
       blockAtrributeArguments = givenBlockAttributeParams('@@unique')
     } else if (wordsBeforePosition.some((a) => a.includes('@@id'))) {
       blockAtrributeArguments = givenBlockAttributeParams('@@id')
     } else if (wordsBeforePosition.some((a) => a.includes('@@index'))) {
-      blockAtrributeArguments = givenBlockAttributeParams('@@index')
+      // Auto completion for Hash and BTree
+      // includes because `@index(type: |)` means wordBeforePosition = '@index(type:'
+      if (
+        datasourceProvider === 'postgresql' &&
+        wordBeforePosition.includes('type:')
+      ) {
+        // TODO move away
+        const indexTypeCompletionItems: CompletionItem[] = [
+          {
+            label: 'Hash',
+            kind: 13,
+            insertTextFormat: 1,
+            documentation: {
+              kind: 'markdown',
+              value:
+                'The Hash index can perform a faster lookup than a B-Tree index. However, the key downside of the Hash index is that its use is limited to equality operators that will perform matching operations.',
+            },
+          },
+          {
+            label: 'BTree',
+            kind: 13,
+            insertTextFormat: 1,
+            documentation: {
+              kind: 'markdown',
+              value:
+                "The B-tree index is the default, it creates a self-balanced tree, in other words, it sorts itself. It will maintain its balance throughout operations such as insertions, deletions and searches. Using a B-tree index speeds up scan operations because it doesn't have to scan pages or records sequentially in a linear fashion.",
+            },
+          },
+        ]
+        return {
+          items: indexTypeCompletionItems,
+          isIncomplete: false,
+        }
+      }
+
+      blockAtrributeArguments = givenBlockAttributeParams(
+        '@@index',
+        previewFeatures,
+        datasourceProvider,
+      )
+    } else if (wordsBeforePosition.some((a) => a.includes('@@fulltext'))) {
+      blockAtrributeArguments = givenBlockAttributeParams('@@fulltext')
     }
 
     if (blockAtrributeArguments.length) {
       suggestions = blockAtrributeArguments
     } else {
+      // "@" field attributes
       let fieldAtrributeArguments: CompletionItem[] = []
       if (wordsBeforePosition.some((a) => a.includes('@unique'))) {
-        fieldAtrributeArguments = givenFieldAttributeParams('@unique')
+        fieldAtrributeArguments = givenFieldAttributeParams(
+          '@unique',
+          previewFeatures,
+          datasourceProvider,
+          wordBeforePosition,
+        )
       } else if (wordsBeforePosition.some((a) => a.includes('@id'))) {
-        fieldAtrributeArguments = givenFieldAttributeParams('@id')
+        fieldAtrributeArguments = givenFieldAttributeParams(
+          '@id',
+          previewFeatures,
+          datasourceProvider,
+          wordBeforePosition,
+        )
       } else if (wordsBeforePosition.some((a) => a.includes('@index'))) {
-        fieldAtrributeArguments = givenFieldAttributeParams('@index')
+        fieldAtrributeArguments = givenFieldAttributeParams(
+          '@index',
+          previewFeatures,
+          datasourceProvider,
+          wordBeforePosition,
+        )
       }
       suggestions = fieldAtrributeArguments
-    }
-
-    return {
-      items: suggestions,
-      isIncomplete: false,
     }
   }
 
@@ -1112,6 +1283,9 @@ function getSuggestionsForAttribute(
       if (word.includes('name') || /".*"/.exec(word)) {
         attributesFound.add('name')
         attributesFound.add('""')
+      }
+      if (word.includes('type')) {
+        attributesFound.add('type')
       }
     }
 
@@ -1144,6 +1318,11 @@ function getSuggestionsForAttribute(
       isIncomplete: false,
     }
   }
+
+  return {
+    items: suggestions,
+    isIncomplete: false,
+  }
 }
 
 export function getSuggestionsForInsideRoundBrackets(
@@ -1171,23 +1350,27 @@ export function getSuggestionsForInsideRoundBrackets(
       wordsBeforePosition,
       untrimmedCurrentLine,
       lines,
-      document,
+      // document,
       block,
       position,
     })
   } else if (
-    wordsBeforePosition.some(
-      (a) => a.includes('@unique') || a.includes('@id') || a.includes('@index'),
-    )
-  ) {
     // matches
     // @id, @unique, @index
-    // @@id, @@unique, @@index
+    // @@id, @@unique, @@index, @@fulltext
+    wordsBeforePosition.some(
+      (a) =>
+        a.includes('@unique') ||
+        a.includes('@id') ||
+        a.includes('@index') ||
+        a.includes('@@fulltext'),
+    )
+  ) {
     return getSuggestionsForAttribute({
       wordsBeforePosition,
       untrimmedCurrentLine,
       lines,
-      document,
+      // document,
       block,
       position,
     })

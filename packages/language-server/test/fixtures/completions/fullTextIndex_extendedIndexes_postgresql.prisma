@@ -1,0 +1,21 @@
+generator js {
+  provider        = "prisma-client-js"
+  previewFeatures = ["extendedIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Type {
+  id    Int @id
+  title   String
+  content String
+  
+  @@index()
+  @@index([title], )
+  @@index([title], type: )
+  @@index([title], type: Hash, )
+  @@index([title], sort: )
+}
