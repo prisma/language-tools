@@ -294,9 +294,6 @@ suite('Completions', () => {
       )
     })
 
-    // TODO provider autocompletion
-    // TODO previewFeatures autocompletion
-
     test('Diagnoses engineType value suggestions', async () => {
       await activate(generatorWithExistingFieldsUri)
 
@@ -588,6 +585,10 @@ suite('Completions', () => {
       label: 'map',
       kind: vscode.CompletionItemKind.Property,
     }
+    const typeProperty = {
+      label: 'type',
+      kind: vscode.CompletionItemKind.Property,
+    }
 
     test('Diagnoses field and block attribute suggestions', async () => {
       await activate(modelBlocksUri)
@@ -690,42 +691,16 @@ suite('Completions', () => {
       )
     })
 
-    test('Diagnoses arguments of @@unique', async () => {
+    test('Diagnoses default suggestions for enum values', async () => {
       await testCompletion(
         modelBlocksUri,
-        new vscode.Position(38, 15),
+        new vscode.Position(62, 27),
         new vscode.CompletionList([
-          { label: 'firstName', kind: vscode.CompletionItemKind.Field },
-          { label: 'isAdmin', kind: vscode.CompletionItemKind.Field },
-          { label: 'lastName', kind: vscode.CompletionItemKind.Field },
+          { label: 'ADMIN', kind: vscode.CompletionItemKind.Value },
+          functionDbGenerated,
+          { label: 'NORMAL', kind: vscode.CompletionItemKind.Value },
         ]),
-        true,
-      )
-    })
-
-    test('Diagnoses arguments of @@id', async () => {
-      await testCompletion(
-        modelBlocksUri,
-        new vscode.Position(46, 10),
-        new vscode.CompletionList([
-          { label: 'firstName', kind: vscode.CompletionItemKind.Field },
-          { label: 'isAdmin', kind: vscode.CompletionItemKind.Field },
-          { label: 'lastName', kind: vscode.CompletionItemKind.Field },
-        ]),
-        true,
-      )
-    })
-
-    test('Diagnoses arguments of @@index', async () => {
-      await testCompletion(
-        modelBlocksUri,
-        new vscode.Position(47, 13),
-        new vscode.CompletionList([
-          { label: 'firstName', kind: vscode.CompletionItemKind.Field },
-          { label: 'isAdmin', kind: vscode.CompletionItemKind.Field },
-          { label: 'lastName', kind: vscode.CompletionItemKind.Field },
-        ]),
-        true,
+        false,
       )
     })
 
@@ -738,8 +713,84 @@ suite('Completions', () => {
           functionDbGenerated,
           { label: 'NORMAL', kind: vscode.CompletionItemKind.Value },
         ]),
-
         false,
+      )
+    })
+
+    test('@@unique([|])', async () => {
+      await testCompletion(
+        modelBlocksUri,
+        new vscode.Position(38, 15),
+        new vscode.CompletionList([
+          { label: 'firstName', kind: vscode.CompletionItemKind.Field },
+          { label: 'isAdmin', kind: vscode.CompletionItemKind.Field },
+          { label: 'lastName', kind: vscode.CompletionItemKind.Field },
+        ]),
+        true,
+      )
+    })
+
+    test('@@id([|])', async () => {
+      await testCompletion(
+        modelBlocksUri,
+        new vscode.Position(46, 10),
+        new vscode.CompletionList([
+          { label: 'firstName', kind: vscode.CompletionItemKind.Field },
+          { label: 'isAdmin', kind: vscode.CompletionItemKind.Field },
+          { label: 'lastName', kind: vscode.CompletionItemKind.Field },
+        ]),
+        true,
+      )
+    })
+
+    test('@@index([|])', async () => {
+      await testCompletion(
+        modelBlocksUri,
+        new vscode.Position(47, 13),
+        new vscode.CompletionList([
+          { label: 'firstName', kind: vscode.CompletionItemKind.Field },
+          { label: 'isAdmin', kind: vscode.CompletionItemKind.Field },
+          { label: 'lastName', kind: vscode.CompletionItemKind.Field },
+        ]),
+        true,
+      )
+    })
+
+    // previewFeatures = ["extendedIndexes"]
+    // provider = "postgresql"
+    test('extendedIndexes: @@index(|) - postgresql', async () => {
+      await testCompletion(
+        fullTextIndex_extendedIndexes_postgresql,
+        new vscode.Position(15, 10),
+        new vscode.CompletionList([fieldsProperty, mapProperty, typeProperty]),
+        true,
+      )
+    })
+    test('extendedIndexes: @@index([title], |) - postgresql', async () => {
+      await testCompletion(
+        fullTextIndex_extendedIndexes_postgresql,
+        new vscode.Position(16, 19),
+        new vscode.CompletionList([fieldsProperty, mapProperty, typeProperty]),
+        true,
+      )
+    })
+    test('extendedIndexes: @@index([title], type: |) - postgresql', async () => {
+      await testCompletion(
+        fullTextIndex_extendedIndexes_postgresql,
+        new vscode.Position(17, 25),
+        new vscode.CompletionList([
+          { label: 'BTree', kind: vscode.CompletionItemKind.Enum },
+          { label: 'Hash', kind: vscode.CompletionItemKind.Enum },
+        ]),
+        true,
+      )
+    })
+    test('extendedIndexes: @@index([title], type: Hash, |) - postgresql', async () => {
+      await testCompletion(
+        fullTextIndex_extendedIndexes_postgresql,
+        new vscode.Position(18, 31),
+        new vscode.CompletionList([fieldsProperty, mapProperty]),
+        true,
       )
     })
 
@@ -876,7 +927,6 @@ suite('Completions', () => {
       })
 
       // SQL Server datasource
-      // Restrict option should be removed
       test('sqlserver: @relation(onDelete: |)', async () => {
         await testCompletion(
           relationDirectiveSqlserverReferentialActionsUri,
@@ -917,6 +967,10 @@ suite('Completions', () => {
         )
       })
 
+      //
+      // previewFeatures = ["fullTextIndex"]
+      // = tests which are feature preview / database dependent
+      //
       test('@@fulltext(|) - mysql', async () => {
         await testCompletion(
           fullTextIndex_extendedIndexes_mysql,

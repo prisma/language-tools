@@ -109,15 +109,41 @@ export const supportedGeneratorFields: CompletionItem[] =
   )
 
 export function givenBlockAttributeParams(
-  blockAttribute: string,
+  blockAttribute: '@@unique' | '@@id' | '@@index' | '@@fulltext',
+  previewFeatures?: string[] | undefined,
+  datasourceProvider?: string | undefined,
 ): CompletionItem[] {
-  return convertToCompletionItems(
+  const items = convertToCompletionItems(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     completions.blockAttributes.find((item) =>
       item.label.includes(blockAttribute),
     )!.params,
     CompletionItemKind.Property,
   )
+
+  if (blockAttribute === '@@index') {
+    if (
+      previewFeatures?.includes('extendedIndexes') &&
+      datasourceProvider === 'postgresql'
+    ) {
+      // The type argument is only available for PostgreSQL on @@index
+      items.push({
+        label: 'type',
+        kind: 10,
+        insertText: 'type: [$0]',
+        insertTextFormat: 2,
+        insertTextMode: 2,
+        documentation: {
+          kind: 'markdown',
+          value: 'Defines the access type of indexes: BTree (default) or Hash.',
+        },
+      })
+
+      return items
+    }
+  }
+
+  return items
 }
 
 export const blockAttributes: CompletionItem[] =

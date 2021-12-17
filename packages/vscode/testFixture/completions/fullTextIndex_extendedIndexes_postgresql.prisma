@@ -1,6 +1,6 @@
 generator js {
   provider        = "prisma-client-js"
-  previewFeatures = ["fullTextIndex", "extendedIndexes"]
+  previewFeatures = ["extendedIndexes"]
 }
 
 datasource db {
@@ -13,5 +13,8 @@ model Type {
   title   String
   content String
   
+  @@index()
+  @@index([title], )
   @@index([title], type: )
+  @@index([title], type: Hash, )
 }

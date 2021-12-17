@@ -617,6 +617,10 @@ suite('Completions', function () {
       label: 'map',
       kind: CompletionItemKind.Property,
     }
+    const typeProperty = {
+      label: 'type',
+      kind: CompletionItemKind.Property,
+    }
 
     test('Diagnoses field and block attribute suggestions', () => {
       assertCompletion(
@@ -748,7 +752,7 @@ suite('Completions', function () {
       )
     })
 
-    test('Diagnoses arguments of @@unique', () => {
+    test('@@unique([|])', () => {
       assertCompletion(
         modelBlocksUri,
         { line: 38, character: 15 },
@@ -763,7 +767,7 @@ suite('Completions', function () {
       )
     })
 
-    test('Diagnoses arguments of @@id', () => {
+    test('@@id([|])', () => {
       assertCompletion(
         modelBlocksUri,
         { line: 46, character: 10 },
@@ -778,7 +782,7 @@ suite('Completions', function () {
       )
     })
 
-    test('Diagnoses arguments of @@index', () => {
+    test('@@index([|])', () => {
       assertCompletion(
         modelBlocksUri,
         { line: 47, character: 13 },
@@ -789,6 +793,51 @@ suite('Completions', function () {
             { label: 'lastName', kind: CompletionItemKind.Field },
             { label: 'isAdmin', kind: CompletionItemKind.Field },
           ],
+        },
+      )
+    })
+    // previewFeatures = ["extendedIndexes"]
+    // provider = "postgresql"
+    test('extendedIndexes: @@index(|) - postgresql', () => {
+      assertCompletion(
+        fullTextIndex_extendedIndexes_postgresql,
+        { line: 15, character: 10 },
+        {
+          isIncomplete: false,
+          items: [fieldsProperty, mapProperty, typeProperty],
+        },
+      )
+    })
+    test('extendedIndexes: @@index([title], |) - postgresql', () => {
+      assertCompletion(
+        fullTextIndex_extendedIndexes_postgresql,
+        { line: 16, character: 19 },
+        {
+          isIncomplete: false,
+          items: [fieldsProperty, mapProperty, typeProperty],
+        },
+      )
+    })
+    test('extendedIndexes: @@index([title], type: |) - postgresql', () => {
+      assertCompletion(
+        fullTextIndex_extendedIndexes_postgresql,
+        { line: 17, character: 25 },
+        {
+          isIncomplete: false,
+          items: [
+            { label: 'Hash', kind: CompletionItemKind.Enum },
+            { label: 'BTree', kind: CompletionItemKind.Enum },
+          ],
+        },
+      )
+    })
+    test('extendedIndexes: @@index([title], type: Hash, |) - postgresql', () => {
+      assertCompletion(
+        fullTextIndex_extendedIndexes_postgresql,
+        { line: 18, character: 31 },
+        {
+          isIncomplete: false,
+          items: [fieldsProperty, mapProperty],
         },
       )
     })
@@ -942,7 +991,6 @@ suite('Completions', function () {
       })
 
       // SQL Server datasource
-      // Restrict option should be removed
       test('sqlserver: @relation(onDelete: |)', () => {
         assertCompletion(
           relationDirectiveSqlserverReferentialActionsUri,
@@ -989,6 +1037,10 @@ suite('Completions', function () {
         )
       })
 
+      //
+      // previewFeatures = ["fullTextIndex"]
+      // = tests which are feature preview / database dependent
+      //
       test('@@fulltext(|) - mysql', () => {
         assertCompletion(
           fullTextIndex_extendedIndexes_mysql,
@@ -1116,7 +1168,6 @@ suite('Completions', function () {
         )
       })
 
-      // TODO ?
       test('@@fulltext(|)', () => {
         assertCompletion(
           namedConstraintsUri,

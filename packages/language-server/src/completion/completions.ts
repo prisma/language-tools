@@ -996,7 +996,7 @@ function getSuggestionsForAttribute(
     const datasourceProvider = getFirstDatasourceProvider(lines)
 
     // Note: needs to be before @relation condition because
-    // `@relation(onUpdate: |)` means wordBeforePosition = '@relation(onUpdate:'
+    // includes because `@relation(onUpdate: |)` means wordBeforePosition = '@relation(onUpdate:'
     if (wordBeforePosition.includes('onDelete:')) {
       return {
         items:
@@ -1122,13 +1122,49 @@ function getSuggestionsForAttribute(
       }
     }
 
+    // "@@" block attributes
     let blockAtrributeArguments: CompletionItem[] = []
     if (wordsBeforePosition.some((a) => a.includes('@@unique'))) {
       blockAtrributeArguments = givenBlockAttributeParams('@@unique')
     } else if (wordsBeforePosition.some((a) => a.includes('@@id'))) {
       blockAtrributeArguments = givenBlockAttributeParams('@@id')
     } else if (wordsBeforePosition.some((a) => a.includes('@@index'))) {
-      blockAtrributeArguments = givenBlockAttributeParams('@@index')
+      // Auto completion for Hash and BTree
+      // includes because `@index(type: |)` means wordBeforePosition = '@index(type:'
+      if (
+        datasourceProvider === 'postgresql' &&
+        wordBeforePosition.includes('type:')
+      ) {
+        return {
+          items: [
+            {
+              label: 'Hash',
+              kind: 13,
+              insertTextFormat: 1,
+              documentation: {
+                kind: 'markdown',
+                value: 'The default.',
+              },
+            },
+            {
+              label: 'BTree',
+              kind: 13,
+              insertTextFormat: 1,
+              documentation: {
+                kind: 'markdown',
+                value: 'The default.',
+              },
+            },
+          ],
+          isIncomplete: false,
+        }
+      }
+
+      blockAtrributeArguments = givenBlockAttributeParams(
+        '@@index',
+        previewFeatures,
+        datasourceProvider,
+      )
     } else if (wordsBeforePosition.some((a) => a.includes('@@fulltext'))) {
       blockAtrributeArguments = givenBlockAttributeParams('@@fulltext')
     }
@@ -1136,6 +1172,7 @@ function getSuggestionsForAttribute(
     if (blockAtrributeArguments.length) {
       suggestions = blockAtrributeArguments
     } else {
+      // "@" field attributes
       let fieldAtrributeArguments: CompletionItem[] = []
       if (wordsBeforePosition.some((a) => a.includes('@unique'))) {
         fieldAtrributeArguments = givenFieldAttributeParams(
@@ -1157,11 +1194,6 @@ function getSuggestionsForAttribute(
         )
       }
       suggestions = fieldAtrributeArguments
-    }
-
-    return {
-      items: suggestions,
-      isIncomplete: false,
     }
   }
 
@@ -1190,6 +1222,9 @@ function getSuggestionsForAttribute(
       if (word.includes('name') || /".*"/.exec(word)) {
         attributesFound.add('name')
         attributesFound.add('""')
+      }
+      if (word.includes('type')) {
+        attributesFound.add('type')
       }
     }
 
@@ -1221,6 +1256,11 @@ function getSuggestionsForAttribute(
       items: filteredSuggestions,
       isIncomplete: false,
     }
+  }
+
+  return {
+    items: suggestions,
+    isIncomplete: false,
   }
 }
 
