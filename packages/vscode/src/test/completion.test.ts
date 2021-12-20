@@ -1093,8 +1093,8 @@ suite('Completions', () => {
           fullTextIndex_extendedIndexes_mysql,
           new vscode.Position(21, 16),
           new vscode.CompletionList([
-            mapProperty,
             lengthProperty,
+            mapProperty,
             sortProperty,
           ]),
           true,
