@@ -1160,7 +1160,7 @@ suite('Completions', function () {
           { line: 21, character: 16 },
           {
             isIncomplete: false,
-            items: [mapProperty, lengthProperty, sortProperty],
+            items: [mapProperty, lengthProperty],
           },
         )
       })
@@ -1170,7 +1170,7 @@ suite('Completions', function () {
           { line: 54, character: 27 },
           {
             isIncomplete: false,
-            items: [lengthProperty, sortProperty],
+            items: [lengthProperty],
           },
         )
       })
@@ -1180,7 +1180,7 @@ suite('Completions', function () {
           { line: 54, character: 39 },
           {
             isIncomplete: false,
-            items: [lengthProperty, sortProperty],
+            items: [lengthProperty],
           },
         )
       })

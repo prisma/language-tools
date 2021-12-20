@@ -133,7 +133,7 @@ export function givenBlockAttributeParams(
       items.push({
         label: 'type',
         kind: 10,
-        insertText: 'type: [$0]',
+        insertText: 'type: $0',
         insertTextFormat: 2,
         insertTextMode: 2,
         documentation: {
@@ -175,7 +175,7 @@ export const sortAutoCompletionItems: CompletionItem[] = [
 ]
 
 export function givenFieldAttributeParams(
-  fieldAttribute: '@unique' | '@id' | '@index',
+  fieldAttribute: '@unique' | '@id' | '@@index',
   previewFeatures: PreviewFeatures[] | undefined,
   datasourceProvider: string | undefined,
   wordBeforePosition: string,
@@ -188,31 +188,70 @@ export function givenFieldAttributeParams(
     CompletionItemKind.Property,
   )
 
-  if (fieldAttribute === '@index') {
-    return items
-  }
+  return filterSortLengthBasedOnInput(
+    fieldAttribute,
+    previewFeatures,
+    datasourceProvider,
+    wordBeforePosition,
+    items,
+  )
+}
 
+export function filterSortLengthBasedOnInput(
+  attribute: '@@unique' | '@unique' | '@@id' | '@id' | '@@index',
+  previewFeatures: PreviewFeatures[] | undefined,
+  datasourceProvider: string | undefined,
+  wordBeforePosition: string,
+  items: CompletionItem[],
+): CompletionItem[] {
   if (previewFeatures?.includes('extendedindexes')) {
-    // The sort argument is available for all databases on @unique
-    // The length argument is available on MySQL on @id, @unique
-    // Additionally, SQL Server also allows it on @id
-
     // Auto completion for Desc | Asc
     // includes because `@unique(sort: |)` means wordBeforePosition = '@unique(sort:'
     if (wordBeforePosition.includes('sort:')) {
       return sortAutoCompletionItems
     }
 
+    // The length argument is available on MySQL only on the
+    // @id, @@id, @unique, @@unique and @@index fields.
+
+    // The sort argument is available for all databases on the
+    // @unique, @@unique and @@index fields.
+    // Additionally, SQL Server also allows it on @id and @@id.
+
+    // Which translates too
+    // - `length` argument for `@id`, `@@id`, `@unique`, `@@unique` and `@@index` (MySQL only)
+    // - Note that on the `@@` the argument is on available a field - not on the top level attribute
+    // - `sort` argument for `@unique`, `@@unique` and `@@index` (Additionally `@id` and `@@id` for SQL Server)
+
     if (datasourceProvider === 'mysql') {
-      return items
-    } else if (datasourceProvider === 'sqlserver') {
-      if (fieldAttribute === '@id') {
+      if (['@unique', '@@unique', '@@index'].includes(attribute)) {
         return items
       } else {
+        // filter sort out
+        return items.filter((arg) => arg.label !== 'sort')
+      }
+    } else if (datasourceProvider === 'sqlserver') {
+      if (
+        ['@unique', '@@unique', '@@index', '@id', '@@id'].includes(attribute)
+      ) {
+        // only filter length out
         return items.filter((arg) => arg.label !== 'length')
+      } else {
+        // filter length and sort out
+        return items.filter(
+          (arg) => arg.label !== 'length' && arg.label !== 'sort',
+        )
       }
     } else {
-      return items.filter((arg) => arg.label !== 'length')
+      if (['@unique', '@@unique', '@@index'].includes(attribute)) {
+        // only filter length out
+        return items.filter((arg) => arg.label !== 'length')
+      } else {
+        // filter length and sort out
+        return items.filter(
+          (arg) => arg.label !== 'length' && arg.label !== 'sort',
+        )
+      }
     }
   }
 

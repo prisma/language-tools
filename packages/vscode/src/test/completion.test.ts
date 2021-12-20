@@ -1092,11 +1092,7 @@ suite('Completions', () => {
         await testCompletion(
           fullTextIndex_extendedIndexes_mysql,
           new vscode.Position(21, 16),
-          new vscode.CompletionList([
-            lengthProperty,
-            mapProperty,
-            sortProperty,
-          ]),
+          new vscode.CompletionList([lengthProperty, mapProperty]),
           true,
         )
       })
@@ -1104,7 +1100,7 @@ suite('Completions', () => {
         await testCompletion(
           fullTextIndex_extendedIndexes_mysql,
           new vscode.Position(54, 27),
-          new vscode.CompletionList([lengthProperty, sortProperty]),
+          new vscode.CompletionList([lengthProperty]),
           true,
         )
       })
@@ -1112,7 +1108,7 @@ suite('Completions', () => {
         await testCompletion(
           fullTextIndex_extendedIndexes_mysql,
           new vscode.Position(54, 39),
-          new vscode.CompletionList([lengthProperty, sortProperty]),
+          new vscode.CompletionList([lengthProperty]),
           true,
         )
       })
