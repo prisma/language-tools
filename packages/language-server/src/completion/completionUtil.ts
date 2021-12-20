@@ -198,7 +198,7 @@ export function givenFieldAttributeParams(
 }
 
 export function filterSortLengthBasedOnInput(
-  attribute: '@@unique' | '@unique' | '@@id' | '@id' | '@@index' | '@@fulltext',
+  attribute: '@@unique' | '@unique' | '@@id' | '@id' | '@@index',
   previewFeatures: PreviewFeatures[] | undefined,
   datasourceProvider: string | undefined,
   wordBeforePosition: string,
@@ -212,7 +212,7 @@ export function filterSortLengthBasedOnInput(
     }
 
     // The length argument is available on MySQL only on the
-    // @id, @@id, @unique, @@unique and @@index, @@fulltext fields.
+    // @id, @@id, @unique, @@unique and @@index fields.
 
     // The sort argument is available for all databases on the
     // @unique, @@unique and @@index fields.
@@ -224,9 +224,7 @@ export function filterSortLengthBasedOnInput(
     // - `sort` argument for `@unique`, `@@unique` and `@@index` (Additionally `@id` and `@@id` for SQL Server)
 
     if (datasourceProvider === 'mysql') {
-      if (
-        ['@unique', '@@unique', '@@index', '@@fulltext'].includes(attribute)
-      ) {
+      if (['@unique', '@@unique', '@@index'].includes(attribute)) {
         return items
       } else {
         // filter sort out

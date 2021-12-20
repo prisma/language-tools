@@ -1128,7 +1128,7 @@ function getSuggestionsForAttribute(
     // @@id, @@unique, @@index, @@fulltext
 
     // The length argument is available on MySQL only on the
-    // @id, @@id, @unique, @@unique and @@index, @@fulltext fields.
+    // @id, @@id, @unique, @@unique and @@index fields.
 
     // The sort argument is available for all databases on the
     // @unique, @@unique and @@index fields.
@@ -1151,7 +1151,6 @@ function getSuggestionsForAttribute(
           | '@@id'
           | '@id'
           | '@@index'
-          | '@@fulltext'
           | undefined = undefined
 
         if (wordsBeforePosition.some((a) => a.includes('@@id'))) {
@@ -1164,11 +1163,6 @@ function getSuggestionsForAttribute(
           attribute = '@unique'
         } else if (wordsBeforePosition.some((a) => a.includes('@@index'))) {
           attribute = '@@index'
-        } else if (
-          previewFeatures?.includes('fulltextindex') &&
-          wordsBeforePosition.some((a) => a.includes('@@fulltext'))
-        ) {
-          attribute = '@@fulltext'
         }
 
         if (attribute) {
