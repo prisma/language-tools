@@ -123,9 +123,11 @@ export function givenBlockAttributeParams(
   )
 
   if (blockAttribute === '@@index') {
+    // TODO figure out if we need to add cockroachdb provider here
     if (
       previewFeatures?.includes('extendedindexes') &&
-      datasourceProvider === 'postgresql'
+      datasourceProvider &&
+      ['postgresql', 'postgres'].includes(datasourceProvider)
     ) {
       // The type argument is only available for PostgreSQL on @@index
       items.push({
@@ -139,8 +141,6 @@ export function givenBlockAttributeParams(
           value: 'Defines the access type of indexes: BTree (default) or Hash.',
         },
       })
-
-      return items
     }
   }
 
@@ -189,8 +189,7 @@ export function givenFieldAttributeParams(
   )
 
   if (fieldAttribute === '@index') {
-    // filter length and sort out
-    return items.filter((arg) => arg.label !== 'length' && arg.label !== 'sort')
+    return items
   }
 
   if (previewFeatures?.includes('extendedindexes')) {

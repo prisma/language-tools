@@ -1154,6 +1154,16 @@ suite('Completions', function () {
         )
       })
       // previewFeatures = ["extendedIndexes"]
+      test('extendedIndexes: @id(|)', () => {
+        assertCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          { line: 21, character: 16 },
+          {
+            isIncomplete: false,
+            items: [mapProperty, lengthProperty, sortProperty],
+          },
+        )
+      })
       test('extendedIndexes: @@id([title(length: 100, |), abstract()])', () => {
         assertCompletion(
           fullTextIndex_extendedIndexes_mysql,
