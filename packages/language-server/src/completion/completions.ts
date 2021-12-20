@@ -27,7 +27,7 @@ import {
   givenBlockAttributeParams,
   givenFieldAttributeParams,
   sortLengthProperties,
-  sortAutoCompletionItems,
+  filterSortLengthBasedOnInput,
 } from './completionUtil'
 import { klona } from 'klona'
 import { extractModelName } from '../rename/renameUtil'
@@ -1124,12 +1124,11 @@ function getSuggestionsForAttribute(
       }
     }
   } else {
-    // @id, @unique, @index
+    // @id, @unique
     // @@id, @@unique, @@index, @@fulltext
 
-    // The length argument is available on MySQL on the
+    // The length argument is available on MySQL only on the
     // @id, @@id, @unique, @@unique and @@index, @@fulltext fields.
-    // It allows Prisma to now support indexes and constraints on String with a TEXT native type and Bytes types.
 
     // The sort argument is available for all databases on the
     // @unique, @@unique and @@index fields.
@@ -1146,17 +1145,43 @@ function getSuggestionsForAttribute(
         previewFeatures?.includes('extendedindexes') &&
         isInsideFieldArgument(untrimmedCurrentLine, position)
       ) {
-        if (wordBeforePosition.includes('sort:')) {
-          return {
-            items: sortAutoCompletionItems,
-            isIncomplete: false,
-          }
+        let attribute:
+          | '@@unique'
+          | '@unique'
+          | '@@id'
+          | '@id'
+          | '@@index'
+          | '@@fulltext'
+          | undefined = undefined
+
+        if (wordsBeforePosition.some((a) => a.includes('@@id'))) {
+          attribute = '@@id'
+        } else if (wordsBeforePosition.some((a) => a.includes('@id'))) {
+          attribute = '@id'
+        } else if (wordsBeforePosition.some((a) => a.includes('@@unique'))) {
+          attribute = '@@unique'
+        } else if (wordsBeforePosition.some((a) => a.includes('@unique'))) {
+          attribute = '@unique'
+        } else if (wordsBeforePosition.some((a) => a.includes('@@index'))) {
+          attribute = '@@index'
+        } else if (
+          previewFeatures?.includes('fulltextindex') &&
+          wordsBeforePosition.some((a) => a.includes('@@fulltext'))
+        ) {
+          attribute = '@@fulltext'
         }
 
-        // TODO filter by provider
-        return {
-          items: sortLengthProperties,
-          isIncomplete: false,
+        if (attribute) {
+          return {
+            items: filterSortLengthBasedOnInput(
+              attribute,
+              previewFeatures,
+              datasourceProvider,
+              wordBeforePosition,
+              sortLengthProperties,
+            ),
+            isIncomplete: false,
+          }
         }
       }
 
@@ -1186,7 +1211,7 @@ function getSuggestionsForAttribute(
       blockAtrributeArguments = givenBlockAttributeParams('@@id')
     } else if (wordsBeforePosition.some((a) => a.includes('@@index'))) {
       // Auto completion for Hash and BTree for PostgreSQL
-      // includes because `@index(type: |)` means wordBeforePosition = '@index(type:'
+      // includes because `@@index(type: |)` means wordBeforePosition = '@@index(type:'
       // TODO figure out if we need to add cockroachdb provider here
       if (
         datasourceProvider &&
@@ -1250,9 +1275,9 @@ function getSuggestionsForAttribute(
           datasourceProvider,
           wordBeforePosition,
         )
-      } else if (wordsBeforePosition.some((a) => a.includes('@index'))) {
+      } else if (wordsBeforePosition.some((a) => a.includes('@@index'))) {
         fieldAtrributeArguments = givenFieldAttributeParams(
-          '@index',
+          '@@index',
           previewFeatures,
           datasourceProvider,
           wordBeforePosition,
@@ -1360,13 +1385,13 @@ export function getSuggestionsForInsideRoundBrackets(
     })
   } else if (
     // matches
-    // @id, @unique, @index
+    // @id, @unique
     // @@id, @@unique, @@index, @@fulltext
     wordsBeforePosition.some(
       (a) =>
         a.includes('@unique') ||
         a.includes('@id') ||
-        a.includes('@index') ||
+        a.includes('@@index') ||
         a.includes('@@fulltext'),
     )
   ) {
