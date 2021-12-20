@@ -1088,6 +1088,18 @@ suite('Completions', () => {
         )
       })
       // previewFeatures = ["extendedIndexes"]
+      test('extendedIndexes: @id(|)])', async () => {
+        await testCompletion(
+          fullTextIndex_extendedIndexes_mysql,
+          new vscode.Position(21, 16),
+          new vscode.CompletionList([
+            lengthProperty,
+            mapProperty,
+            sortProperty,
+          ]),
+          true,
+        )
+      })
       test('extendedIndexes: @@id([title(length: 100, |), abstract()])', async () => {
         await testCompletion(
           fullTextIndex_extendedIndexes_mysql,

@@ -1152,6 +1152,8 @@ function getSuggestionsForAttribute(
             isIncomplete: false,
           }
         }
+
+        // TODO filter by provider
         return {
           items: sortLengthProperties,
           isIncomplete: false,
@@ -1183,10 +1185,12 @@ function getSuggestionsForAttribute(
     } else if (wordsBeforePosition.some((a) => a.includes('@@id'))) {
       blockAtrributeArguments = givenBlockAttributeParams('@@id')
     } else if (wordsBeforePosition.some((a) => a.includes('@@index'))) {
-      // Auto completion for Hash and BTree
+      // Auto completion for Hash and BTree for PostgreSQL
       // includes because `@index(type: |)` means wordBeforePosition = '@index(type:'
+      // TODO figure out if we need to add cockroachdb provider here
       if (
-        datasourceProvider === 'postgresql' &&
+        datasourceProvider &&
+        ['postgresql', 'postgres'].includes(datasourceProvider) &&
         wordBeforePosition.includes('type:')
       ) {
         // TODO move away
