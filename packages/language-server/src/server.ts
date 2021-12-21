@@ -113,7 +113,7 @@ export function startServer(options?: LSPOptions): void {
 
   // The global settings, used when the `workspace/configuration` request is not supported by the client or is not set by the user.
   // This does not apply to VSCode, as this client supports this setting.
-  // const defaultSettings: LSPSettings = { }
+  // const defaultSettings: LSPSettings = {}
   // let globalSettings: LSPSettings = defaultSettings // eslint-disable-line
 
   // Cache the settings of all open documents
@@ -122,6 +122,7 @@ export function startServer(options?: LSPOptions): void {
     Thenable<LSPSettings>
   >()
 
+  // eslint-disable-line @typescript-eslint/no-unused-vars
   connection.onDidChangeConfiguration((change) => {
     connection.console.info('Configuration changed.')
     if (hasConfigurationCapability) {
@@ -142,9 +143,12 @@ export function startServer(options?: LSPOptions): void {
 
   // function getDocumentSettings(resource: string): Thenable<LSPSettings> {
   //   if (!hasConfigurationCapability) {
-  //     connection.console.info(`Using default prisma-fmt binary path.`)
+  //     connection.console.info(
+  //       `hasConfigurationCapability === false. Defaults will be used.`,
+  //     )
   //     return Promise.resolve(globalSettings)
   //   }
+
   //   let result = documentSettings.get(resource)
   //   if (!result) {
   //     result = connection.workspace.getConfiguration({
