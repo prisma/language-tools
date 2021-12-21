@@ -337,7 +337,7 @@
     },
     {
       "label": "onDelete",
-      "insertText": "onDelete: ${1|Cascade,Restrict,NoAction,SetNull,SetDefault|}",
+      "insertText": "onDelete: $0",
       "fullSignature": "onDelete: Cascade | Restrict | NoAction | SetNull | SetDefault",
       "documentation": "Specifies the action to perform when a referenced entry in the referenced model is being deleted, [learn more](https://www.prisma.io/docs/concepts/components/prisma-schema/relations/referential-actions).",
       "params": [
@@ -365,7 +365,7 @@
     },
     {
       "label": "onUpdate",
-      "insertText": "onUpdate: ${1|Cascade,Restrict,NoAction,SetNull,SetDefault|}",
+      "insertText": "onUpdate: $0",
       "fullSignature": "onUpdate: Cascade | Restrict | NoAction | SetNull | SetDefault",
       "documentation": "Specifies the action to perform when a referenced field in the referenced model is being updated to a new value, [learn more](https://www.prisma.io/docs/concepts/components/prisma-schema/relations/referential-actions).",
       "params": [
