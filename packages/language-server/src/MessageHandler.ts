@@ -30,6 +30,7 @@ import {
 } from './util'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import format from './prisma-fmt/format'
+import textDocumentCompletion from './prisma-fmt/textDocumentCompletion'
 import {
   getSuggestionForFieldAttribute,
   getSuggestionsForTypes,
@@ -248,6 +249,18 @@ export function handleCompletionRequest(
   params: CompletionParams,
   document: TextDocument,
 ): CompletionList | undefined {
+  const schemaString = document.getText()
+  console.log("Calling prismaFmt.text_document_completion() with schema:")
+  console.log(JSON.stringify(schemaString));
+  console.log(JSON.stringify("meow"));
+  const prismaFmtCompletions: CompletionList = textDocumentCompletion(schemaString, params)
+  console.log(JSON.stringify(prismaFmtCompletions))
+
+  if (!prismaFmtCompletions.isIncomplete) {
+    console.log("Using prisma-fmt completions.")
+    return prismaFmtCompletions
+  }
+
   const context = params.context
   const position = params.position
 
