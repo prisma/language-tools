@@ -73,8 +73,14 @@
     ],
     "configuration": {
       "type": "object",
-      "title": "Language server configuration",
+      "title": "Prisma",
       "properties": {
+        "prisma.fileWatcher": {
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "description": "Enable/disable the File Watcher functionality for Prisma Client."
+        },
         "prisma.trace.server": {
           "scope": "window",
           "type": "string",
@@ -84,7 +90,7 @@
             "verbose"
           ],
           "default": "off",
-          "description": "Traces the communication between VS Code and the language server."
+          "description": "Setting for logging between the VS Code extension and the language server."
         }
       }
     },
@@ -92,6 +98,16 @@
       {
         "command": "prisma.restartLanguageServer",
         "title": "Restart Language Server",
+        "category": "Prisma"
+      },
+      {
+        "command": "prisma.filewatcherEnable",
+        "title": "Enable the File Watcher functionality for Prisma Client.",
+        "category": "Prisma"
+      },
+      {
+        "command": "prisma.filewatcherDisable",
+        "title": "Disable the File Watcher functionality for Prisma Client.",
         "category": "Prisma"
       }
     ]
