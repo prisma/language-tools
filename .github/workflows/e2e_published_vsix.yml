@@ -57,6 +57,9 @@ jobs:
         if: ${{needs.test.result == 'success' && needs.test.outputs.installed-extension }}
         run: npm run test:bump ${{ github.event.inputs.extension_type }} ${{ github.event.inputs.extension_version }}
 
+      - name: 'Set current job url in SLACK_FOOTER env var'
+        run: echo "SLACK_FOOTER=<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|Click here to go to the job logs>" >> $GITHUB_ENV
+
       - name: Slack Notification on Failure
         if: ${{ needs.test.result == 'failure' && needs.test.outputs.installed-extension }}
         uses: rtCamp/action-slack-notify@v2.2.0
