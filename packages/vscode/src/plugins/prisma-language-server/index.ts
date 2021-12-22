@@ -94,6 +94,7 @@ const plugin: PrismaVSCodePlugin = {
 
     const rootPath = workspace.workspaceFolders?.[0].uri.path
     if (rootPath) {
+      // This setting defaults to true (see package.json of vscode extension)
       const isFileWatcherEnabled = workspace
         .getConfiguration('prisma')
         .get('fileWatcher')
@@ -210,16 +211,29 @@ const plugin: PrismaVSCodePlugin = {
             .get('fileWatcher')
 
           const rootPath = workspace.workspaceFolders?.[0].uri.path
+
+          // This setting defaults to true (see package.json of vscode extension)
           if (isFileWatcherEnabled) {
-            // Let's start it
-            if (rootPath) {
-              watcher = startFileWatcher(rootPath)
-              watcher.on('change', onFileChange)
+            // if watcher.closed === true, the watcher was closed previously and can be safely restarted
+            // if watcher.closed === false, it is already running
+            // but if the JSON settings are empty like {} and the user enables the file watcher
+            // we need to catch that case to avoid starting another extra file watcher
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+            if (watcher && (watcher as any).closed === false) {
               console.debug(
-                'onDidChangeConfiguration: File Watcher is now enabled and started.',
+                "onDidChangeConfiguration: watcher.closed === false so it's already running. Do nothing.",
               )
             } else {
-              console.debug('onDidChangeConfiguration: rootPath is falsy')
+              // Let's start it
+              if (rootPath) {
+                watcher = startFileWatcher(rootPath)
+                watcher.on('change', onFileChange)
+                console.debug(
+                  'onDidChangeConfiguration: File Watcher is now enabled and started.',
+                )
+              } else {
+                console.debug('onDidChangeConfiguration: rootPath is falsy')
+              }
             }
           } else {
             // Let's stop it
