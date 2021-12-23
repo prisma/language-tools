@@ -8,10 +8,16 @@ export default function referentialActions(
     console.log('running referential_actions() from prisma-fmt')
     const result = prismaFmt.referential_actions(text)
     return JSON.parse(result) as string[]
-  } catch (err) {
+  } catch (e) {
+    const errorMessage =
+      "prisma-fmt error'd during getting available referential actions.\n"
+
     if (onError) {
-      onError(`prisma-fmt error'd during getting available referential actions. ${err}`)
+      onError(`${errorMessage} ${e as string}`)
     }
+
+    console.error(errorMessage)
+    console.error(e)
 
     return []
   }

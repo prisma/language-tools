@@ -7,13 +7,17 @@ export default function previewFeatures(
   try {
     const result = prismaFmt.preview_features()
     return JSON.parse(result) as string[]
-  } catch (err) {
+  } catch (e) {
     const errorMessage =
       "prisma-fmt error'd during getting available preview features.\n"
 
     if (onError) {
-      onError(errorMessage + err)
+      onError(`${errorMessage} ${e as string}`)
     }
+
+    console.error(errorMessage)
+    console.error(e)
+
     return []
   }
 }

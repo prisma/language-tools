@@ -15,15 +15,16 @@ export default function lint(
   try {
     const result = prismaFmt.lint(text)
     return JSON.parse(result) // eslint-disable-line @typescript-eslint/no-unsafe-return
-  } catch (errors) {
+  } catch (e) {
     const errorMessage = "prisma-fmt error'd during linting.\n"
 
     if (onError) {
-      onError(errorMessage + errors) // eslint-disable-line @typescript-eslint/restrict-plus-operands
+      onError(`${errorMessage} ${e as string}`)
     }
 
     console.error(errorMessage)
-    console.error(errors)
+    console.error(e)
+
     return []
   }
 }

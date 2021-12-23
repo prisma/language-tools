@@ -15,10 +15,16 @@ export default function nativeTypeConstructors(
   try {
     const result = prismaFmt.native_types(text)
     return JSON.parse(result) as NativeTypeConstructors[]
-  } catch (err) {
+  } catch (e) {
+    const errorMessage =
+      "prisma-fmt error'd during getting available native types.\n"
+
     if (onError) {
-      onError(`prisma-fmt error'd during getting available native types. ${err}`)
+      onError(`${errorMessage} ${e as string}`)
     }
+
+    console.error(errorMessage)
+    console.error(e)
 
     return []
   }
