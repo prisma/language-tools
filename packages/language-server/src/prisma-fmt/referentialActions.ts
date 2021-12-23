@@ -10,7 +10,9 @@ export default function referentialActions(
     return JSON.parse(result) as string[]
   } catch (err) {
     if (onError) {
-      onError(`prisma-fmt error'd during getting available referential actions. ${err}`)
+      onError(
+        `prisma-fmt error'd during getting available referential actions. ${err}`,
+      )
     }
 
     return []

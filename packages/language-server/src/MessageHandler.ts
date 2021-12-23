@@ -249,149 +249,165 @@ export function handleCompletionRequest(
   params: CompletionParams,
   document: TextDocument,
 ): CompletionList | undefined {
-  const schemaString = document.getText()
-  console.log("Calling prismaFmt.text_document_completion() with schema:")
-  console.log(JSON.stringify(schemaString));
-  console.log(JSON.stringify("meow"));
-  const prismaFmtCompletions: CompletionList = textDocumentCompletion(schemaString, params)
-  console.log(JSON.stringify(prismaFmtCompletions))
+  const fromWasm = prismaFmtCompletions(params, document)
+  const fromTs = languageServerCompletions(params, document)
 
-  if (!prismaFmtCompletions.isIncomplete) {
-    console.log("Using prisma-fmt completions.")
-    return prismaFmtCompletions
+  return {
+    isIncomplete: fromTs ? fromTs.isIncomplete : true,
+    items: [...fromWasm.items, ...(fromTs?.items || [])],
   }
 
-  const context = params.context
-  const position = params.position
+  function prismaFmtCompletions(
+    params: CompletionParams,
+    document: TextDocument,
+  ): CompletionList {
+    const schemaString = document.getText()
+    console.log('Calling prismaFmt.text_document_completion() with schema:')
+    console.log(JSON.stringify(schemaString))
+    console.log(JSON.stringify('meow'))
+    return textDocumentCompletion(schemaString, params)
+  }
 
-  const lines = convertDocumentTextToTrimmedLineArray(document)
+  function languageServerCompletions(
+    params: CompletionParams,
+    document: TextDocument,
+  ): CompletionList | undefined {
+    const context = params.context
+    const position = params.position
 
-  const currentLineUntrimmed = getCurrentLine(document, position.line)
-  const currentLineTillPosition = currentLineUntrimmed
-    .slice(0, position.character - 1)
-    .trim()
-  const wordsBeforePosition: string[] = currentLineTillPosition.split(/\s+/)
+    const lines = convertDocumentTextToTrimmedLineArray(document)
 
-  const symbolBeforePosition = getSymbolBeforePosition(document, position)
-  const symbolBeforePositionIsWhiteSpace =
-    symbolBeforePosition.search(/\s/) !== -1
+    const currentLineUntrimmed = getCurrentLine(document, position.line)
+    const currentLineTillPosition = currentLineUntrimmed
+      .slice(0, position.character - 1)
+      .trim()
+    const wordsBeforePosition: string[] = currentLineTillPosition.split(/\s+/)
 
-  const positionIsAfterArray: boolean =
-    wordsBeforePosition.length >= 3 &&
-    !currentLineTillPosition.includes('[') &&
-    symbolBeforePositionIsWhiteSpace
+    const symbolBeforePosition = getSymbolBeforePosition(document, position)
+    const symbolBeforePositionIsWhiteSpace =
+      symbolBeforePosition.search(/\s/) !== -1
 
-  // datasource, generator, model or enum
-  const foundBlock = getBlockAtPosition(position.line, lines)
-  if (!foundBlock) {
-    if (
-      wordsBeforePosition.length > 1 ||
-      (wordsBeforePosition.length === 1 && symbolBeforePositionIsWhiteSpace)
-    ) {
-      return
+    const positionIsAfterArray: boolean =
+      wordsBeforePosition.length >= 3 &&
+      !currentLineTillPosition.includes('[') &&
+      symbolBeforePositionIsWhiteSpace
+
+    // datasource, generator, model or enum
+    const foundBlock = getBlockAtPosition(position.line, lines)
+    if (!foundBlock) {
+      if (
+        wordsBeforePosition.length > 1 ||
+        (wordsBeforePosition.length === 1 && symbolBeforePositionIsWhiteSpace)
+      ) {
+        return
+      }
+      return getSuggestionForBlockTypes(lines)
     }
-    return getSuggestionForBlockTypes(lines)
-  }
 
-  if (isFirstInsideBlock(position, getCurrentLine(document, position.line))) {
-    return getSuggestionForFirstInsideBlock(
-      foundBlock.type,
-      lines,
-      position,
-      foundBlock,
-    )
-  }
+    if (isFirstInsideBlock(position, getCurrentLine(document, position.line))) {
+      return getSuggestionForFirstInsideBlock(
+        foundBlock.type,
+        lines,
+        position,
+        foundBlock,
+      )
+    }
 
-  // Completion was triggered by a triggerCharacter
-  // triggerCharacters defined in src/server.ts
-  if (context?.triggerKind === CompletionTriggerKind.TriggerCharacter) {
-    switch (context.triggerCharacter as '@' | '"' | '.') {
-      case '@':
+    // Completion was triggered by a triggerCharacter
+    // triggerCharacters defined in src/server.ts
+    if (context?.triggerKind === CompletionTriggerKind.TriggerCharacter) {
+      switch (context.triggerCharacter as '@' | '"' | '.') {
+        case '@':
+          if (
+            !positionIsAfterFieldAndType(
+              position,
+              document,
+              wordsBeforePosition,
+            )
+          ) {
+            return
+          }
+          return getSuggestionForFieldAttribute(
+            foundBlock,
+            getCurrentLine(document, position.line),
+            lines,
+            wordsBeforePosition,
+            document,
+          )
+        case '"':
+          return getSuggestionForSupportedFields(
+            foundBlock.type,
+            lines[position.line],
+            currentLineUntrimmed,
+            position,
+            lines,
+          )
+        case '.':
+          return getSuggestionForNativeTypes(
+            foundBlock,
+            wordsBeforePosition,
+            document,
+            lines,
+          )
+      }
+    }
+
+    switch (foundBlock.type) {
+      case 'model':
+        // check if inside attribute
+        if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
+          return getSuggestionsForInsideRoundBrackets(
+            currentLineUntrimmed,
+            lines,
+            document,
+            position,
+            foundBlock,
+          )
+        }
+        // check if type
         if (
           !positionIsAfterFieldAndType(position, document, wordsBeforePosition)
         ) {
-          return
+          return getSuggestionsForTypes(
+            foundBlock,
+            lines,
+            position,
+            currentLineUntrimmed,
+          )
         }
         return getSuggestionForFieldAttribute(
           foundBlock,
-          getCurrentLine(document, position.line),
-          lines,
-          wordsBeforePosition,
-          document,
-        )
-      case '"':
-        return getSuggestionForSupportedFields(
-          foundBlock.type,
           lines[position.line],
-          currentLineUntrimmed,
-          position,
           lines,
-        )
-      case '.':
-        return getSuggestionForNativeTypes(
-          foundBlock,
           wordsBeforePosition,
           document,
-          lines,
         )
+      case 'datasource':
+      case 'generator':
+        if (
+          wordsBeforePosition.length === 1 &&
+          symbolBeforePositionIsWhiteSpace
+        ) {
+          return suggestEqualSymbol(foundBlock.type)
+        }
+        if (
+          currentLineTillPosition.includes('=') &&
+          !currentLineTillPosition.includes(']') &&
+          !positionIsAfterArray &&
+          symbolBeforePosition !== ','
+        ) {
+          return getSuggestionForSupportedFields(
+            foundBlock.type,
+            lines[position.line],
+            currentLineUntrimmed,
+            position,
+            lines,
+          )
+        }
+        break
+      case 'enum':
+        break
     }
-  }
-
-  switch (foundBlock.type) {
-    case 'model':
-      // check if inside attribute
-      if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
-        return getSuggestionsForInsideRoundBrackets(
-          currentLineUntrimmed,
-          lines,
-          document,
-          position,
-          foundBlock,
-        )
-      }
-      // check if type
-      if (
-        !positionIsAfterFieldAndType(position, document, wordsBeforePosition)
-      ) {
-        return getSuggestionsForTypes(
-          foundBlock,
-          lines,
-          position,
-          currentLineUntrimmed,
-        )
-      }
-      return getSuggestionForFieldAttribute(
-        foundBlock,
-        lines[position.line],
-        lines,
-        wordsBeforePosition,
-        document,
-      )
-    case 'datasource':
-    case 'generator':
-      if (
-        wordsBeforePosition.length === 1 &&
-        symbolBeforePositionIsWhiteSpace
-      ) {
-        return suggestEqualSymbol(foundBlock.type)
-      }
-      if (
-        currentLineTillPosition.includes('=') &&
-        !currentLineTillPosition.includes(']') &&
-        !positionIsAfterArray &&
-        symbolBeforePosition !== ','
-      ) {
-        return getSuggestionForSupportedFields(
-          foundBlock.type,
-          lines[position.line],
-          currentLineUntrimmed,
-          position,
-          lines,
-        )
-      }
-      break
-    case 'enum':
-      break
   }
 }
 
