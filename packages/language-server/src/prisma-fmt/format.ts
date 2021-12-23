@@ -1,13 +1,14 @@
 import prismaFmt from '@prisma/prisma-fmt-wasm'
+import { DocumentFormattingParams } from 'vscode-languageserver'
 
 export default function format(
-  identWidth: number,
-  text: string,
+  schema: string,
+  options: DocumentFormattingParams,
   onError?: (errorMessage: string) => void,
 ): string {
   console.log('running format() from prisma-fmt')
   try {
-    return prismaFmt.format(text)
+    return prismaFmt.format(schema, JSON.stringify(options))
   } catch (errors) {
     if (onError) {
       onError(
@@ -19,6 +20,6 @@ export default function format(
     )
     console.warn(errors)
 
-    return text
+    return schema
   }
 }

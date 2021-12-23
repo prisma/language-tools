@@ -198,9 +198,7 @@ export function handleDocumentFormatting(
   document: TextDocument,
   onError?: (errorMessage: string) => void,
 ): TextEdit[] {
-  const options = params.options
-
-  const formatted = format(options.tabSize, document.getText(), onError)
+  const formatted = format(document.getText(), params, onError)
   return [TextEdit.replace(fullDocumentRange(document), formatted)]
 }
 
