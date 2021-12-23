@@ -250,6 +250,11 @@ export function handleCompletionRequest(
   document: TextDocument,
 ): CompletionList | undefined {
   const fromWasm = prismaFmtCompletions(params, document)
+
+  if (!fromWasm.isIncomplete) {
+      return fromWasm
+  }
+
   const fromTs = languageServerCompletions(params, document)
 
   return {
