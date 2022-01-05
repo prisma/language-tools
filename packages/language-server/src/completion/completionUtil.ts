@@ -282,24 +282,6 @@ export const relationArguments: CompletionItem[] =
     CompletionItemKind.Property,
   )
 
-function givenReferentialActionParams(
-  referentialAction: 'onUpdate' | 'onDelete',
-): CompletionItem[] {
-  return convertToCompletionItems(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    completions.relationArguments.find(
-      (item) => item.label === referentialAction,
-    )!.params,
-    CompletionItemKind.Enum,
-  )
-}
-
-export const relationOnDeleteArguments: CompletionItem[] =
-  givenReferentialActionParams('onDelete')
-
-export const relationOnUpdateArguments: CompletionItem[] =
-  givenReferentialActionParams('onUpdate')
-
 export const dataSourceUrlArguments: CompletionItem[] =
   convertAttributesToCompletionItems(
     completions.datasourceUrlArguments,

@@ -18,7 +18,7 @@ function assertCompletion(
 
   const params: CompletionParams = {
     textDocument: document,
-    position: position,
+    position,
     context: {
       triggerKind: 1,
     },

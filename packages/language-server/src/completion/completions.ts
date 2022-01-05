@@ -14,8 +14,6 @@ import {
   supportedDataSourceFields,
   supportedGeneratorFields,
   relationArguments,
-  relationOnDeleteArguments,
-  relationOnUpdateArguments,
   dataSourceUrlArguments,
   dataSourceProviders,
   dataSourceProviderArguments,
@@ -32,7 +30,6 @@ import {
 import { klona } from 'klona'
 import { extractModelName } from '../rename/renameUtil'
 import previewFeatures from '../prisma-fmt/previewFeatures'
-// import referentialActions from '../prisma-fmt/referentialActions'
 import nativeTypeConstructors, {
   NativeTypeConstructors,
 } from '../prisma-fmt/nativeTypes'
@@ -980,16 +977,6 @@ function getFieldType(line: string): string | undefined {
   return undefined
 }
 
-// function definingReferentialAction(
-//   wordsBeforePosition: Array<string>,
-// ): boolean {
-//   const lastWord = wordsBeforePosition[wordsBeforePosition.length - 2]
-//   return (
-//     lastWord != undefined &&
-//     (lastWord.includes('onDelete') || lastWord.includes('onUpdate'))
-//   )
-// }
-
 function getSuggestionsForAttribute(
   {
     attribute,
@@ -1025,37 +1012,6 @@ function getSuggestionsForAttribute(
   // create deep copy with klona
   if (attribute === '@relation') {
     suggestions = klona(relationArguments)
-    // This is basically hardcoding the suggestions
-    // because prisma-format referential-actions returns an empty array [] most of the time
-    // because schema is considered invalid when it's sent to the subcommand because typing in progress.
-    // Main issue is that "Restrict" should be excluded if on SQL Server
-    // We can filter on the datasource using `getFirstDatasourceProvider`
-    const datasourceProvider = getFirstDatasourceProvider(lines)
-
-    // Note: needs to be before @relation condition because
-    // includes because `@relation(onUpdate: |)` means wordBeforePosition = '@relation(onUpdate:'
-    if (wordBeforePosition.includes('onDelete:')) {
-      return {
-        items:
-          datasourceProvider === 'sqlserver'
-            ? relationOnDeleteArguments.filter(
-                (arg) => arg.label !== 'Restrict',
-              )
-            : relationOnDeleteArguments,
-        isIncomplete: false,
-      }
-    }
-    if (wordBeforePosition.includes('onUpdate:')) {
-      return {
-        items:
-          datasourceProvider === 'sqlserver'
-            ? relationOnUpdateArguments.filter(
-                (arg) => arg.label !== 'Restrict',
-              )
-            : relationOnUpdateArguments,
-        isIncomplete: false,
-      }
-    }
 
     // If we are right after @relation(
     if (wordBeforePosition.includes('@relation')) {
@@ -1064,25 +1020,6 @@ function getSuggestionsForAttribute(
         isIncomplete: false,
       }
     }
-
-    // Doesn't really work because prisma-fmt returns nothing when the schema is "invalid"
-    // but that also means that the schema is considered invalid when trying to autocomplete...
-    //
-    // if lastWord = onUpdate or onDelete
-    // then get suggestions by passing `referential-actions` arg to `prisma-fmt`
-    // if (definingReferentialAction(wordsBeforePosition)) {
-    //   const suggestionsForReferentialActions: CompletionItem[] = referentialActions(
-    //     binPath,
-    //     document.getText(),
-    //   ).map((action) => {
-    //     return CompletionItem.create(action)
-    //   })
-
-    //   return {
-    //     items: suggestionsForReferentialActions,
-    //     isIncomplete: false,
-    //   }
-    // }
 
     if (
       isInsideGivenProperty(
