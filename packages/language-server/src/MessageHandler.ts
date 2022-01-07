@@ -30,6 +30,7 @@ import {
 } from './util'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import format from './prisma-fmt/format'
+import textDocumentCompletion from './prisma-fmt/textDocumentCompletion'
 import {
   getSuggestionForFieldAttribute,
   getSuggestionsForTypes,
@@ -240,11 +241,22 @@ export function handleHoverRequest(
   return
 }
 
-/**
- *
- * This handler provides the initial list of the completion items.
- */
-export function handleCompletionRequest(
+function prismaFmtCompletions(
+  params: CompletionParams,
+  document: TextDocument,
+): CompletionList | undefined {
+  const text = document.getText(fullDocumentRange(document))
+
+  const completionList = textDocumentCompletion(text, params)
+
+  if (completionList.items.length === 0) {
+    return undefined
+  } else {
+    return completionList
+  }
+}
+
+function localCompletions(
   params: CompletionParams,
   document: TextDocument,
 ): CompletionList | undefined {
@@ -380,6 +392,19 @@ export function handleCompletionRequest(
     case 'enum':
       break
   }
+}
+
+/**
+ *
+ * This handler provides the initial list of the completion items.
+ */
+export function handleCompletionRequest(
+  params: CompletionParams,
+  document: TextDocument,
+): CompletionList | undefined {
+  return (
+    prismaFmtCompletions(params, document) || localCompletions(params, document)
+  )
 }
 
 export function handleRenameRequest(

@@ -17,7 +17,9 @@ export default function nativeTypeConstructors(
     return JSON.parse(result) as NativeTypeConstructors[]
   } catch (err) {
     if (onError) {
-      onError(`prisma-fmt error'd during getting available native types. ${err}`)
+      onError(
+        `prisma-fmt error'd during getting available native types. ${err}`,
+      )
     }
 
     return []
