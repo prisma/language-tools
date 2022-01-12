@@ -54,7 +54,7 @@ jobs:
       - name: publish vsix to marketplace
         run: cd packages/vscode && ./node_modules/.bin/vsce publish --pat ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN}} --packagePath ${{github.workspace}}/${{ github.event.inputs.asset_name }}
 
-      - name: Workflow dispatch to pimeeys/nixos-prisma for version update
+      - name: Workflow dispatch to pimeys/nixos-prisma for version update
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Build and publish packages
