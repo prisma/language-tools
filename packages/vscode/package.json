@@ -114,7 +114,7 @@
   },
   "devDependencies": {
     "@types/glob": "7.2.0",
-    "@types/mocha": "9.0.0",
+    "@types/mocha": "9.1.0",
     "@types/vscode": "1.52.0",
     "mocha": "9.1.4",
     "ovsx": "0.2.1",
