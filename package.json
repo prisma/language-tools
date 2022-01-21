@@ -22,7 +22,7 @@
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-prettier": "4.0.0",
     "execa": "5.1.1",
-    "husky": "4.3.8",
+    "husky": "7.0.4",
     "jest": "27.4.7",
     "lint-staged": "12.2.2",
     "prettier": "2.5.1",
@@ -42,22 +42,18 @@
     "test": "sh scripts/e2e.sh",
     "test:e2e": "sh scripts/e2eTestsOnVsix/test.sh",
     "testScripts": "jest __tests__",
-    "test:bump": "sh scripts/e2eTestsOnVsix/bump_version.sh"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
+    "test:bump": "sh scripts/e2eTestsOnVsix/bump_version.sh",
+    "prepare": "husky install"
   },
   "publishConfig": {
     "access": "public"
   },
   "lint-staged": {
-    "packages/**/*.{js,ts,css,json,md}": [
+    "*.{js,ts,css,json,md,yml}": [
       "prettier --write",
       "git add"
     ],
-    "packages/**/*.{js,ts}": [
+    "*.{js,ts}": [
       "eslint --fix"
     ]
   }
