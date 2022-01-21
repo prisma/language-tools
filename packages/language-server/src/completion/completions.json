@@ -449,7 +449,7 @@
     },
     {
       "label": "cockroachdb",
-      "documentation": "Specifies a CockroachDB data source."
+      "documentation": "Specifies a CockroachDB data source. Learn more about the CockroachDB data source connector [here](https://pris.ly/d/cockroachdb-connector)"
     }
   ],
   "datasourceProviderArguments": [
