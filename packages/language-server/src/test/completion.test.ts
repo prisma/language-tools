@@ -135,7 +135,7 @@ suite('Completions', function () {
       label: 'postgresql',
       kind: CompletionItemKind.Constant,
     }
-    const mssql = {
+    const sqlserver = {
       label: 'sqlserver',
       kind: CompletionItemKind.Constant,
     }
@@ -211,7 +211,7 @@ suite('Completions', function () {
         { line: 14, character: 14 },
         {
           isIncomplete: true,
-          items: [mysql, postgresql, sqlite, mssql, mongodb, cockroachdb],
+          items: [mysql, postgresql, sqlite, sqlserver, mongodb, cockroachdb],
         },
       ),
         assertCompletion(
@@ -230,7 +230,7 @@ suite('Completions', function () {
         { line: 6, character: 15 },
         {
           isIncomplete: true,
-          items: [mysql, postgresql, sqlite, mssql, mongodb, cockroachdb],
+          items: [mysql, postgresql, sqlite, sqlserver, mongodb, cockroachdb],
         },
       ),
         assertCompletion(
@@ -246,7 +246,7 @@ suite('Completions', function () {
         { line: 10, character: 25 },
         {
           isIncomplete: true,
-          items: [mysql, postgresql, mssql, mongodb, cockroachdb],
+          items: [mysql, postgresql, sqlserver, mongodb, cockroachdb],
         },
       )
     })

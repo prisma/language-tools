@@ -141,7 +141,7 @@ suite('Completions', () => {
       label: 'postgresql',
       kind: vscode.CompletionItemKind.Constant,
     }
-    const mssql = {
+    const sqlserver = {
       label: 'sqlserver',
       kind: vscode.CompletionItemKind.Constant,
     }
@@ -212,7 +212,7 @@ suite('Completions', () => {
         sqliteDocUri,
         new vscode.Position(14, 14),
         new vscode.CompletionList(
-          [mysql, postgresql, sqlite, mongodb, cockroachdb],
+          [cockroachdb, mongodb, mysql, postgresql, sqlite, sqlserver],
           true,
         ),
         false,
@@ -230,7 +230,7 @@ suite('Completions', () => {
         sqliteDocUri,
         new vscode.Position(6, 15),
         new vscode.CompletionList(
-          [mysql, postgresql, sqlite, mssql, mongodb, cockroachdb],
+          [cockroachdb, mongodb, mysql, postgresql, sqlite, sqlserver],
           true,
         ),
         true,
@@ -245,7 +245,7 @@ suite('Completions', () => {
         sqliteDocUri,
         new vscode.Position(10, 25),
         new vscode.CompletionList(
-          [mysql, postgresql, mssql, mongodb, cockroachdb],
+          [cockroachdb, mongodb, mysql, postgresql, sqlserver],
           true,
         ),
         true,
