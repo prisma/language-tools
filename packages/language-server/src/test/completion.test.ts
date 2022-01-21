@@ -139,6 +139,12 @@ suite('Completions', function () {
       label: 'sqlserver',
       kind: CompletionItemKind.Constant,
     }
+    const mongodb = { label: 'mongodb', kind: CompletionItemKind.Constant }
+    const cockroachdb = {
+      label: 'cockroachdb',
+      kind: CompletionItemKind.Constant,
+    }
+
     const array = { label: '[]', kind: CompletionItemKind.Property }
     const quotationMarks = {
       label: '""',
@@ -205,7 +211,7 @@ suite('Completions', function () {
         { line: 14, character: 14 },
         {
           isIncomplete: true,
-          items: [mysql, postgresql, sqlite, mssql],
+          items: [mysql, postgresql, sqlite, mssql, mongodb, cockroachdb],
         },
       ),
         assertCompletion(
@@ -224,7 +230,7 @@ suite('Completions', function () {
         { line: 6, character: 15 },
         {
           isIncomplete: true,
-          items: [mysql, postgresql, sqlite, mssql],
+          items: [mysql, postgresql, sqlite, mssql, mongodb, cockroachdb],
         },
       ),
         assertCompletion(
@@ -240,7 +246,7 @@ suite('Completions', function () {
         { line: 10, character: 25 },
         {
           isIncomplete: true,
-          items: [mysql, postgresql, mssql],
+          items: [mysql, postgresql, mssql, mongodb, cockroachdb],
         },
       )
     })

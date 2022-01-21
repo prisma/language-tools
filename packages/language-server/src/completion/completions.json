@@ -442,6 +442,14 @@
     {
       "label": "sqlserver",
       "documentation": "Specifies a Microsoft SQL Server data source. Learn more about this connector [here](https://pris.ly/d/mssql-connector)"
+    },
+    {
+      "label": "mongodb",
+      "documentation": "Specifies a MongoDB data source. Learn more about this connector [here](https://pris.ly/d/mongodb-connector)"
+    },
+    {
+      "label": "cockroachdb",
+      "documentation": "Specifies a CockroachDB data source."
     }
   ],
   "datasourceProviderArguments": [

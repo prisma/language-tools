@@ -145,6 +145,14 @@ suite('Completions', () => {
       label: 'sqlserver',
       kind: vscode.CompletionItemKind.Constant,
     }
+    const mongodb = {
+      label: 'mongodb',
+      kind: vscode.CompletionItemKind.Constant,
+    }
+    const cockroachdb = {
+      label: 'cockroachdb',
+      kind: vscode.CompletionItemKind.Constant,
+    }
     const array = { label: '[]', kind: vscode.CompletionItemKind.Property }
     const quotationMarks = {
       label: '""',
@@ -203,7 +211,10 @@ suite('Completions', () => {
       await testCompletion(
         sqliteDocUri,
         new vscode.Position(14, 14),
-        new vscode.CompletionList([mysql, postgresql, sqlite, mssql], true),
+        new vscode.CompletionList(
+          [mysql, postgresql, sqlite, mongodb, cockroachdb],
+          true,
+        ),
         false,
       ),
         await testCompletion(
@@ -218,7 +229,10 @@ suite('Completions', () => {
       await testCompletion(
         sqliteDocUri,
         new vscode.Position(6, 15),
-        new vscode.CompletionList([mysql, postgresql, sqlite, mssql], true),
+        new vscode.CompletionList(
+          [mysql, postgresql, sqlite, mssql, mongodb, cockroachdb],
+          true,
+        ),
         true,
       ),
         await testCompletion(
@@ -230,7 +244,10 @@ suite('Completions', () => {
       await testCompletion(
         sqliteDocUri,
         new vscode.Position(10, 25),
-        new vscode.CompletionList([mysql, postgresql, mssql], true),
+        new vscode.CompletionList(
+          [mysql, postgresql, mssql, mongodb, cockroachdb],
+          true,
+        ),
         true,
       )
     })
