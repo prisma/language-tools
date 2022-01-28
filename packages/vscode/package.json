@@ -13,7 +13,7 @@
     "Programming Languages"
   ],
   "dependencies": {
-    "@prisma/language-server": "31.0.565",
+    "@prisma/language-server": "31.0.566",
     "checkpoint-client": "1.1.20",
     "vscode-languageclient": "7.0.0"
   },
