@@ -2,7 +2,7 @@
   "name": "@prisma/language-server",
   "description": "Implementation of a language server in Node.",
   "displayName": "Prisma Language Server",
-  "version": "31.0.566",
+  "version": "31.0.567",
   "author": "Prisma",
   "license": "Apache-2.0",
   "publisher": "Prisma",
@@ -11,7 +11,7 @@
   },
   "prisma": {
     "enginesVersion": "965af575d6fda329cab342f8bff0beffc151e1ac",
-    "cliVersion": "3.9.0-dev.52"
+    "cliVersion": "3.9.0-dev.53"
   },
   "bin": {
     "prisma-language-server": "dist/src/bin.js"
@@ -26,7 +26,7 @@
   "main": "./dist/index.js",
   "typings": "dist/src/index",
   "dependencies": {
-    "@prisma/prisma-fmt-wasm": "3.9.0-51.965af575d6fda329cab342f8bff0beffc151e1ac",
+    "@prisma/prisma-fmt-wasm": "3.9.0-52.965af575d6fda329cab342f8bff0beffc151e1ac",
     "@types/js-levenshtein": "1.1.1",
     "chokidar": "3.5.3",
     "js-levenshtein": "1.1.6",
