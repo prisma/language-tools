@@ -55,6 +55,7 @@ jobs:
           inputs: '{ "npm_channel": "latest", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "stable", "trigger_reason": "On manual trigger promoting patch branch to stable." }'
 
       - name: 'Set current job url in SLACK_FOOTER env var'
+        if: ${{ failure() }}
         run: echo "SLACK_FOOTER=<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|Click here to go to the job logs>" >> $GITHUB_ENV
 
       - name: Slack Notification on Failure

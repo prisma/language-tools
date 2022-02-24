@@ -86,6 +86,7 @@ jobs:
       SLACK_MESSAGE: '${{ needs.build.outputs.tag_name }} - ${{github.event.inputs.trigger_reason}} '
     steps:
       - name: 'Set current job url in SLACK_FOOTER env var'
+        if: ${{ always() }}
         run: echo "SLACK_FOOTER=<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|Click here to go to the job logs>" >> $GITHUB_ENV
 
       - name: Slack Notification on Failure
