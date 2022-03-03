@@ -1,7 +1,7 @@
 import { Position } from 'vscode-languageserver'
 import { TextEdit, TextDocument } from 'vscode-languageserver-textdocument'
 import {
-  getTypesFromCurrentBlock,
+  getFieldTypesFromCurrentBlock,
   getValuesInsideSquareBrackets,
   getAllRelationNames,
 } from '../completion/completions'
@@ -48,6 +48,7 @@ export function isValidFieldName(
 ): boolean {
   if (
     currentBlock.type !== 'model' ||
+    // TODO type
     position.line == currentBlock.start.line ||
     position.line == currentBlock.end.line
   ) {
@@ -124,6 +125,7 @@ function renameModelOrEnumWhereUsedAsType(
   position: Position,
   blockType: string,
 ): boolean {
+  // TODO type?
   if (block.type !== 'model') {
     return false
   }
@@ -403,10 +405,11 @@ export function renameReferencesForModelName(
       positionIsNotInsideSearchedBlocks(index, searchedBlocks)
     ) {
       const block = getBlockAtPosition(index, lines)
+      // TODO type
       if (block && block.type == 'model') {
         searchedBlocks.push(block)
         // search block for references
-        const types: Map<string, number[]> = getTypesFromCurrentBlock(
+        const types: Map<string, number[]> = getFieldTypesFromCurrentBlock(
           lines,
           block,
         )

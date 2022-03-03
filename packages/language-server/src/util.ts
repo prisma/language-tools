@@ -1,7 +1,7 @@
 import { TextDocument, Range } from 'vscode-languageserver-textdocument'
 import { Position } from 'vscode-languageserver'
 
-export type BlockType = 'generator' | 'datasource' | 'model' | 'enum'
+export type BlockType = 'generator' | 'datasource' | 'model' | 'type' | 'enum'
 
 export class Block {
   type: BlockType
@@ -86,7 +86,13 @@ export function getBlockAtPosition(
   let blockName = ''
   let blockStart: Position = Position.create(0, 0)
   let blockEnd: Position = Position.create(0, 0)
-  const allowedBlockIdentifiers = ['model', 'enum', 'datasource', 'generator']
+  const allowedBlockIdentifiers: BlockType[] = [
+    'model',
+    'type',
+    'enum',
+    'datasource',
+    'generator',
+  ]
 
   // get block beginning
   let reachedLine = false
@@ -136,15 +142,16 @@ export function getBlockAtPosition(
   return
 }
 
-export function getModelOrEnumBlock(
+export function getModelOrTypeOrEnumBlock(
   blockName: string,
   lines: string[],
 ): Block | void {
-  // get start position of model type
+  // get start position of block
   const results: number[] = lines
     .map((line, index) => {
       if (
         (line.includes('model') && line.includes(blockName)) ||
+        (line.includes('type') && line.includes(blockName)) ||
         (line.includes('enum') && line.includes(blockName))
       ) {
         return index

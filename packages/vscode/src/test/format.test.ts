@@ -27,10 +27,10 @@ async function testAutoFormat(
 suite('Should auto-format', () => {
   const docUri = getDocUri('formatting/autoFormat.prisma')
 
-  const docUriExpected = getDocUri('correct.prisma')
+  const docUriExpected = getDocUri('correct_sqlite.prisma')
   const textDocument = fs.readFileSync(docUriExpected.fsPath, 'utf8')
 
-  test('Diagnoses auto-format', async () => {
+  test('Diagnoses auto-format', async function () {
     await testAutoFormat(docUri, textDocument)
   })
 })

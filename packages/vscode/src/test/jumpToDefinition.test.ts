@@ -3,14 +3,14 @@ import assert from 'assert'
 import { getDocUri, activate, toRange } from './helper'
 
 async function testJumpToDefinition(
-  docUri: vscode.Uri,
+  fixturePathSqlite: vscode.Uri,
   position: vscode.Position,
   expectedLocation: vscode.Location,
 ): Promise<void> {
   const actualLocation: vscode.Location[] =
     (await vscode.commands.executeCommand(
       'vscode.executeDefinitionProvider',
-      docUri,
+      fixturePathSqlite,
       position,
     )) as vscode.Location[]
 
@@ -18,26 +18,37 @@ async function testJumpToDefinition(
   assert.deepStrictEqual(actualLocation[0].range, expectedLocation.range)
 }
 
-suite('Should jump-to-definition', () => {
-  const docUri = getDocUri('correct.prisma')
+suite('Jump-to-definition', () => {
+  const fixturePathSqlite = getDocUri('correct_sqlite.prisma')
+  const fixturePathMongodb = getDocUri('correct_mongodb.prisma')
 
-  test('Diagnoses jump from attribute to model', async () => {
-    await activate(docUri)
+  test('SQLite: from attribute to model', async function () {
+    await activate(fixturePathSqlite)
 
     await testJumpToDefinition(
-      docUri,
-      new vscode.Position(22, 9),
-      new vscode.Location(docUri, toRange(9, 0, 16, 1)),
-    )
-    await testJumpToDefinition(
-      docUri,
-      new vscode.Position(14, 14),
-      new vscode.Location(docUri, toRange(18, 0, 24, 1)),
-    )
-    await testJumpToDefinition(
-      docUri,
+      fixturePathSqlite,
       new vscode.Position(11, 16),
-      new vscode.Location(docUri, toRange(26, 0, 31, 1)),
+      new vscode.Location(fixturePathSqlite, toRange(26, 0, 31, 1)),
+    )
+    await testJumpToDefinition(
+      fixturePathSqlite,
+      new vscode.Position(14, 14),
+      new vscode.Location(fixturePathSqlite, toRange(18, 0, 24, 1)),
+    )
+    await testJumpToDefinition(
+      fixturePathSqlite,
+      new vscode.Position(22, 9),
+      new vscode.Location(fixturePathSqlite, toRange(9, 0, 16, 1)),
+    )
+  })
+
+  test('MongoDB: from attribute to type', async function () {
+    await activate(fixturePathMongodb)
+
+    await testJumpToDefinition(
+      fixturePathMongodb,
+      new vscode.Position(13, 11),
+      new vscode.Location(fixturePathMongodb, toRange(16, 0, 20, 1)),
     )
   })
 })

@@ -25,47 +25,14 @@ function assertJumpToDefinition(
 }
 
 suite('Jump-to-Definition', () => {
-  const fixturePath = './correct.prisma'
+  const fixturePathSqlite = './correct_sqlite.prisma'
+  const fixturePathMongodb = './correct_mongodb.prisma'
 
-  test('Diagnoses jump from attribute to model', () => {
+  test('SQLite: from attribute to model', () => {
     assertJumpToDefinition(
       {
-        character: 9,
-        line: 22,
-      },
-      {
-        start: {
-          line: 9,
-          character: 0,
-        },
-        end: {
-          line: 16,
-          character: 1,
-        },
-      },
-      fixturePath,
-    )
-    assertJumpToDefinition(
-      {
-        character: 14,
-        line: 14,
-      },
-      {
-        start: {
-          line: 18,
-          character: 0,
-        },
-        end: {
-          line: 24,
-          character: 1,
-        },
-      },
-      fixturePath,
-    )
-    assertJumpToDefinition(
-      {
-        character: 16,
         line: 11,
+        character: 16,
       },
       {
         start: {
@@ -77,7 +44,61 @@ suite('Jump-to-Definition', () => {
           character: 1,
         },
       },
-      fixturePath,
+      fixturePathSqlite,
+    )
+    assertJumpToDefinition(
+      {
+        line: 14,
+        character: 14,
+      },
+      {
+        start: {
+          line: 18,
+          character: 0,
+        },
+        end: {
+          line: 24,
+          character: 1,
+        },
+      },
+      fixturePathSqlite,
+    )
+    assertJumpToDefinition(
+      {
+        line: 22,
+        character: 9,
+      },
+      {
+        start: {
+          line: 9,
+          character: 0,
+        },
+        end: {
+          line: 16,
+          character: 1,
+        },
+      },
+      fixturePathSqlite,
+    )
+  })
+
+  test('MongoDB: from attribute to type', () => {
+    assertJumpToDefinition(
+      {
+        line: 13,
+        character: 11,
+      },
+      {
+        start: {
+          line: 16,
+          character: 0,
+        },
+        end: {
+          line: 20,
+          character: 1,
+        },
+      },
+      fixturePathMongodb,
     )
   })
 })
