@@ -2,6 +2,8 @@ import vscode, { CompletionList } from 'vscode'
 import assert from 'assert'
 import { getDocUri, activate } from './helper'
 
+/* eslint-disable @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-misused-promises */
+
 async function testCompletion(
   docUri: vscode.Uri,
   position: vscode.Position,
@@ -24,34 +26,35 @@ async function testCompletion(
   assert.deepStrictEqual(
     actualCompletions.isIncomplete,
     expectedCompletionList.isIncomplete,
-    /* eslint-disable @typescript-eslint/restrict-template-expressions */
-    `Expected isIncomplete to be '${
-      expectedCompletionList.isIncomplete
-    }' but got '${actualCompletions.isIncomplete}'
+    `Line ${position.line} - Character ${position.character}
+Expected isIncomplete to be '${expectedCompletionList.isIncomplete}' but got '${
+      actualCompletions.isIncomplete
+    }'
 expected:
 ${JSON.stringify(expectedCompletionList, undefined, 2)}
 but got (actual):
 ${JSON.stringify(actualCompletions, undefined, 2)}`,
-    /* eslint-enable @typescript-eslint/restrict-template-expressions */
   )
 
   assert.deepStrictEqual(
     actualCompletions.items.map((items) => items.label),
     expectedCompletionList.items.map((items) => items.label),
-    'mapped items => item.label',
+    `Line ${position.line} - Character ${position.character}
+mapped items => item.label`,
   )
 
   assert.deepStrictEqual(
     actualCompletions.items.map((item) => item.kind),
     expectedCompletionList.items.map((item) => item.kind),
-    'mapped items => item.kind',
+    `Line ${position.line} - Character ${position.character}
+mapped items => item.kind`,
   )
 
   assert.deepStrictEqual(
     actualCompletions.items.length,
     expectedCompletionList.items.length,
-    // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
-    `Expected ${expectedCompletionList.items.length} suggestions and got ${
+    `Line ${position.line} - Character ${position.character}
+Expected ${expectedCompletionList.items.length} suggestions and got ${
       actualCompletions.items.length
     }: ${JSON.stringify(actualCompletions.items, undefined, 2)}`, // TODO only 1 value is output here :(
   )
@@ -59,7 +62,8 @@ ${JSON.stringify(actualCompletions, undefined, 2)}`,
   assert.deepStrictEqual(
     actualCompletions.items.length,
     expectedCompletionList.items.length,
-    'items.length',
+    `Line ${position.line} - Character ${position.character}
+items.length`,
   )
 }
 
@@ -71,6 +75,7 @@ const enumCommentUri = getDocUri('completions/enumWithComments.prisma')
 const emptyDocUri = getDocUri('completions/empty.prisma')
 const sqliteDocUri = getDocUri('completions/datasourceWithSqlite.prisma')
 const relationDirectiveUri = getDocUri('completions/relationDirective.prisma')
+
 const relationDirectiveSqlserverReferentialActionsUri = getDocUri(
   'completions/relationDirectiveSqlserverReferentialActions.prisma',
 )
@@ -83,6 +88,8 @@ const fullTextIndex_extendedIndexes_postgresql = getDocUri(
 const fullTextIndex_extendedIndexes_mysql = getDocUri(
   'completions/fullTextIndex_extendedIndexes_mysql.prisma',
 )
+
+const mongoDBAtdefaultUri = getDocUri('completions/mongodb_@default().prisma')
 
 const fieldPreviewFeatures = {
   label: 'previewFeatures',
@@ -579,7 +586,11 @@ suite('Completions', () => {
       label: 'uuid()',
       kind: vscode.CompletionItemKind.Function,
     }
-    const functionAutoInc = {
+    const functionAuto = {
+      label: 'auto()',
+      kind: vscode.CompletionItemKind.Function,
+    }
+    const functionAutoincrement = {
       label: 'autoincrement()',
       kind: vscode.CompletionItemKind.Function,
     }
@@ -712,68 +723,135 @@ suite('Completions', () => {
       )
     })
 
-    test('Diagnoses functions as default values', async () => {
-      await testCompletion(
-        modelBlocksUri,
-        new vscode.Position(11, 24),
-        new vscode.CompletionList([functionAutoInc, functionDbGenerated]),
-        true,
-      )
-      await testCompletion(
-        modelBlocksUri,
-        new vscode.Position(28, 27),
-        new vscode.CompletionList([
-          functionCuid,
-          functionDbGenerated,
-          functionUuid,
-        ]),
-        true,
-      )
-      await testCompletion(
-        modelBlocksUri,
-        new vscode.Position(30, 36),
-        new vscode.CompletionList([functionDbGenerated, functionNow]),
-        true,
-      )
+    suite('no provider', function () {
+      test('Int @id @default(|)', async () => {
+        await testCompletion(
+          modelBlocksUri,
+          new vscode.Position(11, 24),
+          new vscode.CompletionList([
+            functionAutoincrement,
+            functionDbGenerated,
+          ]),
+          true,
+        )
+      })
+      test('String @id @default(|)', async () => {
+        await testCompletion(
+          modelBlocksUri,
+          new vscode.Position(28, 27),
+          new vscode.CompletionList([
+            functionCuid,
+            functionDbGenerated,
+            functionUuid,
+          ]),
+          true,
+        )
+      })
+      test('DateTime @default(|)', async () => {
+        await testCompletion(
+          modelBlocksUri,
+          new vscode.Position(30, 36),
+          new vscode.CompletionList([functionDbGenerated, functionNow]),
+          true,
+        )
+      })
+      test('Boolean @default(|)', async () => {
+        await testCompletion(
+          modelBlocksUri,
+          new vscode.Position(24, 28),
+          new vscode.CompletionList([
+            functionDbGenerated,
+            staticValueFalse,
+            staticValueTrue,
+          ]),
+          true,
+        )
+      })
+      test('Enum @default(|)', async () => {
+        await testCompletion(
+          modelBlocksUri,
+          new vscode.Position(62, 27),
+          new vscode.CompletionList([
+            { label: 'ADMIN', kind: vscode.CompletionItemKind.Value },
+            functionDbGenerated,
+            { label: 'NORMAL', kind: vscode.CompletionItemKind.Value },
+          ]),
+          false,
+        )
+      })
+      test('Enum @default(|) (enum with comments)', async () => {
+        await testCompletion(
+          enumCommentUri,
+          new vscode.Position(11, 30),
+          new vscode.CompletionList([
+            { label: 'ADMIN', kind: vscode.CompletionItemKind.Value },
+            functionDbGenerated,
+            { label: 'NORMAL', kind: vscode.CompletionItemKind.Value },
+          ]),
+          false,
+        )
+      })
     })
 
-    test('Diagnoses static default values', async () => {
-      await testCompletion(
-        modelBlocksUri,
-        new vscode.Position(24, 28),
-        new vscode.CompletionList([
-          functionDbGenerated,
-          staticValueFalse,
-          staticValueTrue,
-        ]),
-        true,
-      )
-    })
+    suite.only('MongoDB', function () {
+      test('String @id @default(|)', async () => {
+        await activate(mongoDBAtdefaultUri)
 
-    test('Diagnoses default suggestions for enum values', async () => {
-      await testCompletion(
-        modelBlocksUri,
-        new vscode.Position(62, 27),
-        new vscode.CompletionList([
-          { label: 'ADMIN', kind: vscode.CompletionItemKind.Value },
-          functionDbGenerated,
-          { label: 'NORMAL', kind: vscode.CompletionItemKind.Value },
-        ]),
-        false,
-      )
-    })
-
-    test('Diagnoses default suggestions for enum values excluding comments', async () => {
-      await testCompletion(
-        enumCommentUri,
-        new vscode.Position(11, 30),
-        new vscode.CompletionList([
-          { label: 'ADMIN', kind: vscode.CompletionItemKind.Value },
-          functionDbGenerated,
-          { label: 'NORMAL', kind: vscode.CompletionItemKind.Value },
-        ]),
-        false,
-      )
+        await testCompletion(
+          mongoDBAtdefaultUri,
+          new vscode.Position(11, 33),
+          new vscode.CompletionList([functionAuto, functionCuid, functionUuid]),
+          true,
+        )
+      })
+      test('Int @id @default(|)', async () => {
+        await testCompletion(
+          mongoDBAtdefaultUri,
+          new vscode.Position(24, 22),
+          new vscode.CompletionList([functionAuto, functionAutoincrement]),
+          true,
+        )
+      })
+      test('String @default(|)', async () => {
+        await testCompletion(
+          mongoDBAtdefaultUri,
+          new vscode.Position(12, 29),
+          new vscode.CompletionList([functionAuto, functionCuid, functionUuid]),
+          true,
+        )
+      })
+      test('Boolean @default(|)', async () => {
+        await testCompletion(
+          mongoDBAtdefaultUri,
+          new vscode.Position(13, 29),
+          new vscode.CompletionList([
+            functionAuto,
+            staticValueFalse,
+            staticValueTrue,
+          ]),
+          true,
+        )
+      })
+      test('DateTime @default(|)', async () => {
+        await testCompletion(
+          mongoDBAtdefaultUri,
+          new vscode.Position(14, 29),
+          new vscode.CompletionList([functionAuto, functionNow]),
+          true,
+        )
+      })
+      test('Enum @default(|)', async () => {
+        await testCompletion(
+          mongoDBAtdefaultUri,
+          new vscode.Position(15, 29),
+          new vscode.CompletionList([
+            { label: 'ADMIN', kind: vscode.CompletionItemKind.Value },
+            functionAuto,
+            { label: 'NORMAL', kind: vscode.CompletionItemKind.Value },
+          ]),
+          false,
+        )
+      })
     })
 
     test('@@unique([|])', async () => {

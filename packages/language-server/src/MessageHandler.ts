@@ -24,7 +24,7 @@ import {
   getBlockAtPosition,
   getCurrentLine,
   getExperimentalFeaturesRange,
-  getModelOrEnumBlock,
+  getModelOrTypeOrEnumBlock,
   getWordAtPosition,
   isFirstInsideBlock,
 } from './util'
@@ -33,7 +33,7 @@ import format from './prisma-fmt/format'
 import textDocumentCompletion from './prisma-fmt/textDocumentCompletion'
 import {
   getSuggestionForFieldAttribute,
-  getSuggestionsForTypes,
+  getSuggestionsForFieldTypes,
   getSuggestionForBlockTypes,
   getSuggestionForFirstInsideBlock,
   getSuggestionForSupportedFields,
@@ -143,11 +143,12 @@ export function handleDefinitionRequest(
     return
   }
 
-  // get start position of model type
+  // get start position of block
   const results: number[] = lines
     .map((line, index) => {
       if (
         (line.includes('model') && line.includes(word)) ||
+        (line.includes('type') && line.includes(word)) ||
         (line.includes('enum') && line.includes(word))
       ) {
         return index
@@ -216,7 +217,7 @@ export function handleHoverRequest(
     return
   }
 
-  const foundBlock = getModelOrEnumBlock(word, lines)
+  const foundBlock = getModelOrTypeOrEnumBlock(word, lines)
   if (!foundBlock) {
     return
   }
@@ -280,7 +281,7 @@ function localCompletions(
     !currentLineTillPosition.includes('[') &&
     symbolBeforePositionIsWhiteSpace
 
-  // datasource, generator, model or enum
+  // datasource, generator, model, type or enum
   const foundBlock = getBlockAtPosition(position.line, lines)
   if (!foundBlock) {
     if (
@@ -329,15 +330,16 @@ function localCompletions(
       case '.':
         return getSuggestionForNativeTypes(
           foundBlock,
+          lines,
           wordsBeforePosition,
           document,
-          lines,
         )
     }
   }
 
   switch (foundBlock.type) {
     case 'model':
+    case 'type':
       // check if inside attribute
       if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
         return getSuggestionsForInsideRoundBrackets(
@@ -348,11 +350,11 @@ function localCompletions(
           foundBlock,
         )
       }
-      // check if type
+      // check if field type
       if (
         !positionIsAfterFieldAndType(position, document, wordsBeforePosition)
       ) {
-        return getSuggestionsForTypes(
+        return getSuggestionsForFieldTypes(
           foundBlock,
           lines,
           position,

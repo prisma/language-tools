@@ -33,7 +33,7 @@ import previewFeatures from '../prisma-fmt/previewFeatures'
 import nativeTypeConstructors, {
   NativeTypeConstructors,
 } from '../prisma-fmt/nativeTypes'
-import { Block, BlockType, getModelOrEnumBlock } from '../util'
+import { Block, BlockType, getModelOrTypeOrEnumBlock } from '../util'
 import { PreviewFeatures } from '../previewFeatures'
 
 function toCompletionItems(
@@ -200,12 +200,13 @@ function getSuggestionForModelBlockAttribute(
 
 export function getSuggestionForNativeTypes(
   foundBlock: Block,
+  lines: string[],
   wordsBeforePosition: string[],
   document: TextDocument,
-  lines: string[],
 ): CompletionList | undefined {
   const activeFeatureFlag = declaredNativeTypes(document)
   if (
+    // TODO type? native "@db." types?
     foundBlock.type !== 'model' ||
     !activeFeatureFlag ||
     wordsBeforePosition.length < 2
@@ -221,6 +222,7 @@ export function getSuggestionForNativeTypes(
     return undefined
   }
 
+  // line
   const prismaType = wordsBeforePosition[1].replace('?', '').replace('[]', '')
   const suggestions = getNativeTypes(document, prismaType)
 
@@ -237,25 +239,14 @@ export function getSuggestionForFieldAttribute(
   wordsBeforePosition: string[],
   document: TextDocument,
 ): CompletionList | undefined {
+  // TODO type? suggestions for "@..." for type?
   if (block.type !== 'model') {
     return
   }
-  // create deep copy
-  let suggestions: CompletionItem[] = klona(fieldAttributes)
+  let suggestions: CompletionItem[] = []
 
   const enabledNativeTypes = declaredNativeTypes(document)
-
-  if (!(currentLine.includes('Int') || currentLine.includes('String'))) {
-    // id not allowed
-    suggestions = suggestions.filter((sugg) => sugg.label !== '@id')
-  }
-  if (!currentLine.includes('DateTime')) {
-    // updatedAt not allowed
-    suggestions = suggestions.filter((sugg) => sugg.label !== '@updatedAt')
-  }
-
-  suggestions = removeInvalidAttributeSuggestions(suggestions, block, lines)
-
+  // Because @.?
   if (enabledNativeTypes && wordsBeforePosition.length >= 2) {
     const datasourceName = getFirstDatasourceName(lines)
     const prismaType = wordsBeforePosition[1]
@@ -268,10 +259,20 @@ export function getSuggestionForFieldAttribute(
           kind: CompletionItemKind.Property,
           label: '@' + datasourceName,
           documentation:
-            'Defines a custom type that should be used for this field.',
+            'Defines a native database type that should be used for this field. See https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#native-types-mapping',
+          insertText: '@db.$0',
+          insertTextFormat: 2,
         })
-      } else {
+      } else if (
+        // Check that we are not separated by a space like `@db. |`
+        wordsBeforePosition[wordsBeforePosition.length - 1] ===
+        `@${datasourceName}`
+      ) {
         suggestions.push(...nativeTypeSuggestions)
+        return {
+          items: suggestions,
+          isIncomplete: false,
+        }
       }
     } else {
       console.log(
@@ -279,6 +280,19 @@ export function getSuggestionForFieldAttribute(
       )
     }
   }
+
+  suggestions.push(...fieldAttributes)
+
+  if (!(currentLine.includes('Int') || currentLine.includes('String'))) {
+    // id not allowed
+    suggestions = suggestions.filter((sugg) => sugg.label !== '@id')
+  }
+  if (!currentLine.includes('DateTime')) {
+    // updatedAt not allowed
+    suggestions = suggestions.filter((sugg) => sugg.label !== '@updatedAt')
+  }
+
+  suggestions = removeInvalidAttributeSuggestions(suggestions, block, lines)
 
   return {
     items: suggestions,
@@ -355,6 +369,7 @@ export function getAllRelationNames(lines: Array<string>): Array<string> {
   const modelNames: Array<string> = []
   for (const item of lines) {
     if (
+      // TODO type?
       (item.includes('model') || item.includes('enum')) &&
       item.includes('{')
     ) {
@@ -368,7 +383,7 @@ export function getAllRelationNames(lines: Array<string>): Array<string> {
   return modelNames
 }
 
-export function getSuggestionsForTypes(
+export function getSuggestionsForFieldTypes(
   foundBlock: Block,
   lines: Array<string>,
   position: Position,
@@ -500,6 +515,9 @@ export function getSuggestionForFirstInsideBlock(
       break
     case 'model':
       suggestions = getSuggestionForModelBlockAttribute(block, lines)
+      break
+    case 'type':
+      // No suggestions
       break
   }
 
@@ -789,16 +807,30 @@ function getDefaultValues(
   currentLine: string,
   lines: string[],
 ): CompletionItem[] {
-  const suggestions: CompletionItem[] = [
-    {
+  const suggestions: CompletionItem[] = []
+
+  const datasourceProvider = getFirstDatasourceProvider(lines)
+  // MongoDB only
+  if (datasourceProvider === 'mongodb') {
+    suggestions.push({
+      label: 'auto()',
+      kind: CompletionItemKind.Function,
+      documentation:
+        'Represents default values that are automatically generated by the database.',
+      insertText: 'auto()',
+      insertTextFormat: 2,
+    })
+  } else {
+    suggestions.push({
       label: 'dbgenerated("")',
       kind: CompletionItemKind.Function,
       documentation:
         'The SQL definition of the default value which is generated by the database. This is not validated by Prisma.',
       insertText: 'dbgenerated("$0")',
       insertTextFormat: 2,
-    },
-  ]
+    })
+  }
+
   const fieldType = getFieldType(currentLine)
   if (!fieldType) {
     return []
@@ -852,7 +884,7 @@ function getDefaultValues(
       )
       break
   }
-  const modelOrEnum = getModelOrEnumBlock(fieldType, lines)
+  const modelOrEnum = getModelOrTypeOrEnumBlock(fieldType, lines)
   if (modelOrEnum && modelOrEnum.type === 'enum') {
     // get fields from enum block for suggestions
     const values: string[] = getFieldsFromCurrentBlock(lines, modelOrEnum)
@@ -929,7 +961,7 @@ function getFieldsFromCurrentBlock(
   return suggestions
 }
 
-export function getTypesFromCurrentBlock(
+export function getFieldTypesFromCurrentBlock(
   lines: Array<string>,
   block: Block,
   position?: Position,
@@ -1010,8 +1042,22 @@ function getSuggestionsForAttribute(
 
   let suggestions: CompletionItem[] = []
   // create deep copy with klona
+  // We can filter on the datasource
+  const datasourceProvider = getFirstDatasourceProvider(lines)
+  // We can filter on the previewFeatures enbabled
+  const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
+
   if (attribute === '@relation') {
-    suggestions = klona(relationArguments)
+    if (datasourceProvider === 'mongodb') {
+      suggestions = relationArguments.filter(
+        (arg) =>
+          arg.label !== 'map' &&
+          arg.label !== 'onDelete' &&
+          arg.label !== 'onUpdate',
+      )
+    } else {
+      suggestions = relationArguments
+    }
 
     // If we are right after @relation(
     if (wordBeforePosition.includes('@relation')) {
@@ -1047,8 +1093,12 @@ function getSuggestionsForAttribute(
       )
     ) {
       const referencedModelName = wordsBeforePosition[1].replace('?', '')
-      const referencedBlock = getModelOrEnumBlock(referencedModelName, lines)
+      const referencedBlock = getModelOrTypeOrEnumBlock(
+        referencedModelName,
+        lines,
+      )
       // referenced model does not exist
+      // TODO type?
       if (!referencedBlock || referencedBlock.type !== 'model') {
         return
       }
@@ -1070,11 +1120,6 @@ function getSuggestionsForAttribute(
     // The sort argument is available for all databases on the
     // @unique, @@unique and @@index fields.
     // Additionally, SQL Server also allows it on @id and @@id.
-
-    // We can filter on the datasource
-    const datasourceProvider = getFirstDatasourceProvider(lines)
-    // We can filter on the previewFeatures enbabled
-    const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
 
     if (isInsideAttribute(untrimmedCurrentLine, position, '[]')) {
       // extendedIndexes

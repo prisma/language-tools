@@ -9,6 +9,8 @@ import {
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
 
+/* eslint-disable @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-misused-promises */
+
 function assertCompletion(
   fixturePath: string,
   position: Position,
@@ -34,27 +36,29 @@ function assertCompletion(
   assert.deepStrictEqual(
     completionResult.isIncomplete,
     expected.isIncomplete,
-    // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
-    `Expected isIncomplete to be '${expected.isIncomplete}' but got '${completionResult.isIncomplete}'`,
+    `Line ${position.line} - Character ${position.character}
+Expected isIncomplete to be '${expected.isIncomplete}' but got '${completionResult.isIncomplete}'`,
   )
 
   assert.deepStrictEqual(
     completionResult.items.map((item) => item.label),
     expected.items.map((item) => item.label),
-    'mapped items => item.label',
+    `Line ${position.line} - Character ${position.character}
+mapped items => item.label`,
   )
 
   assert.deepStrictEqual(
     completionResult.items.map((item) => item.kind),
     expected.items.map((item) => item.kind),
-    'mapped items => item.kind',
+    `Line ${position.line} - Character ${position.character}
+mapped items => item.kind`,
   )
 
   assert.deepStrictEqual(
     completionResult.items.length,
     expected.items.length,
-    // eslint-disable-next-line  @typescript-eslint/restrict-template-expressions
-    `Expected ${expected.items.length} suggestions and got ${
+    `Line ${position.line} - Character ${position.character}
+Expected ${expected.items.length} suggestions and got ${
       completionResult.items.length
     }: ${JSON.stringify(completionResult.items, undefined, 2)}`, // TODO: This is missing the output of `expected.items` so one can compare
   )
@@ -62,7 +66,8 @@ function assertCompletion(
   assert.deepStrictEqual(
     completionResult.items.length,
     expected.items.length,
-    'items.length',
+    `Line ${position.line} - Character ${position.character}
+items.length`,
   )
 }
 
@@ -77,12 +82,15 @@ suite('Completions', function () {
   const relationDirectiveSqlserverReferentialActionsUri =
     'completions/relationDirectiveSqlserverReferentialActions.prisma'
   const namedConstraintsUri = 'completions/namedConstraints.prisma'
+
   const fullTextIndex_extendedIndexes_mongodb =
     'completions/fullTextIndex_extendedIndexes_mongodb.prisma'
   const fullTextIndex_extendedIndexes_postgresql =
     'completions/fullTextIndex_extendedIndexes_postgresql.prisma'
   const fullTextIndex_extendedIndexes_mysql =
     'completions/fullTextIndex_extendedIndexes_mysql.prisma'
+
+  const mongoDBAtdefaultUri = 'completions/mongodb_@default().prisma'
 
   // used both in generator and datasource
   const fieldProvider = {
@@ -587,7 +595,11 @@ suite('Completions', function () {
       label: 'uuid()',
       kind: CompletionItemKind.Function,
     }
-    const functionAutoInc = {
+    const functionAuto = {
+      label: 'auto()',
+      kind: CompletionItemKind.Function,
+    }
+    const functionAutoincrement = {
       label: 'autoincrement()',
       kind: CompletionItemKind.Function,
     }
@@ -736,64 +748,130 @@ suite('Completions', function () {
       )
     })
 
-    test('Diagnoses functions as default values', () => {
-      assertCompletion(
-        modelBlocksUri,
-        { line: 11, character: 24 },
-        {
-          isIncomplete: false,
-          items: [functionDbGenerated, functionAutoInc],
-        },
-      )
-      assertCompletion(
-        modelBlocksUri,
-        { line: 28, character: 27 },
-        {
-          isIncomplete: false,
-          items: [functionDbGenerated, functionUuid, functionCuid],
-        },
-      )
-      assertCompletion(
-        modelBlocksUri,
-        { line: 30, character: 36 },
-        {
-          isIncomplete: false,
-          items: [functionDbGenerated, functionNow],
-        },
-      )
+    suite('No provider', function () {
+      test('Int @id @default(|)', () => {
+        assertCompletion(
+          modelBlocksUri,
+          { line: 11, character: 24 },
+          {
+            isIncomplete: false,
+            items: [functionDbGenerated, functionAutoincrement],
+          },
+        )
+      })
+      test('String @id @default(|)', () => {
+        assertCompletion(
+          modelBlocksUri,
+          { line: 28, character: 27 },
+          {
+            isIncomplete: false,
+            items: [functionDbGenerated, functionUuid, functionCuid],
+          },
+        )
+      })
+      test('DateTime @default(|)', () => {
+        assertCompletion(
+          modelBlocksUri,
+          { line: 30, character: 36 },
+          {
+            isIncomplete: false,
+            items: [functionDbGenerated, functionNow],
+          },
+        )
+      })
+      test('Boolean @default(|)', () => {
+        assertCompletion(
+          modelBlocksUri,
+          { line: 24, character: 28 },
+          {
+            isIncomplete: false,
+            items: [functionDbGenerated, staticValueTrue, staticValueFalse],
+          },
+        )
+      })
+      test('Enum @default(|)', () => {
+        assertCompletion(
+          modelBlocksUri,
+          { line: 62, character: 27 },
+          {
+            isIncomplete: false,
+            items: [functionDbGenerated, enumValueOne, enumValueTwo],
+          },
+        )
+      })
+      test('Enum @default(|) (enum with comments)', () => {
+        assertCompletion(
+          enumCommentUri,
+          { line: 11, character: 30 },
+          {
+            isIncomplete: false,
+            items: [functionDbGenerated, enumValueOne, enumValueTwo],
+          },
+        )
+      })
     })
 
-    test('Diagnoses static default values', () => {
-      assertCompletion(
-        modelBlocksUri,
-        { line: 24, character: 28 },
-        {
-          isIncomplete: false,
-          items: [functionDbGenerated, staticValueTrue, staticValueFalse],
-        },
-      )
-    })
-
-    test('Diagnoses default suggestions for enum values', () => {
-      assertCompletion(
-        modelBlocksUri,
-        { line: 62, character: 27 },
-        {
-          isIncomplete: false,
-          items: [functionDbGenerated, enumValueOne, enumValueTwo],
-        },
-      )
-    })
-
-    test('Diagnoses default suggestions for enum values excluding comments', () => {
-      assertCompletion(
-        enumCommentUri,
-        { line: 11, character: 30 },
-        {
-          isIncomplete: false,
-          items: [functionDbGenerated, enumValueOne, enumValueTwo],
-        },
-      )
+    suite('MongoDB', function () {
+      test('String @id @default(|)', () => {
+        assertCompletion(
+          mongoDBAtdefaultUri,
+          { line: 11, character: 33 },
+          {
+            isIncomplete: false,
+            items: [functionAuto, functionUuid, functionCuid],
+          },
+        )
+      })
+      test('Int @id @default(|)', () => {
+        assertCompletion(
+          mongoDBAtdefaultUri,
+          { line: 24, character: 22 },
+          {
+            isIncomplete: false,
+            items: [functionAuto, functionAutoincrement],
+          },
+        )
+      })
+      test('String @default(|)', () => {
+        assertCompletion(
+          mongoDBAtdefaultUri,
+          { line: 12, character: 29 },
+          {
+            isIncomplete: false,
+            items: [functionAuto, functionUuid, functionCuid],
+          },
+        )
+      })
+      test('Boolean @default(|)', () => {
+        assertCompletion(
+          mongoDBAtdefaultUri,
+          { line: 13, character: 29 },
+          {
+            isIncomplete: false,
+            items: [functionAuto, staticValueTrue, staticValueFalse],
+          },
+        )
+      })
+      test('DateTime @default(|)', () => {
+        assertCompletion(
+          mongoDBAtdefaultUri,
+          { line: 14, character: 29 },
+          {
+            isIncomplete: false,
+            items: [functionAuto, functionNow],
+          },
+        )
+      })
+      test('Enum @default(|)', () => {
+        assertCompletion(
+          mongoDBAtdefaultUri,
+          { line: 15, character: 29 },
+          {
+            isIncomplete: false,
+            items: [functionAuto, enumValueOne, enumValueTwo],
+          },
+        )
+      })
     })
 
     test('@@unique([|])', () => {
