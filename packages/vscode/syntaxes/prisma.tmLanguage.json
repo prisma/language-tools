@@ -1,6 +1,9 @@
 {
   "name": "Prisma",
   "scopeName": "source.prisma",
+  "fileTypes": [
+    "prisma"
+  ],
   "patterns": [
     {
       "include": "#triple_comment"
