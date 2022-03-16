@@ -3,7 +3,6 @@
   Adds syntax highlighting, linting, code completion, formatting, jump-to-definition and more for <a href="https://www.prisma.io/docs/concepts/components/prisma-schema">Prisma Schema</a> files.
 </div>
 
-
 ## Features
 
 - Syntax highlighting of `schema.prisma`
@@ -45,32 +44,38 @@
 <details>
   <summary>Syntax-Highlighting</summary>
 
-  Syntax highlighting eases visual comprehension of the Prisma schema.
+Syntax highlighting eases visual comprehension of the Prisma schema.
 ![Preview Schema](https://user-images.githubusercontent.com/1328733/147264843-fc32c2aa-7490-4e49-9478-abc16cbd0682.png)
+
 </details>
 <details>
   <summary>Formatting</summary>
 
-  Formatting ensures consistent indentation of your models for better readability.
+Formatting ensures consistent indentation of your models for better readability.
 ![Formatting](https://user-images.githubusercontent.com/1328733/147264852-849cb539-9bdc-4916-9d0f-483536061f7c.gif)
+
 </details>
 <details>
   <summary>Linting and autocompletion</summary>
-  
-  Linting shows inline errors in the schema, and autocompletion assists in defining the correct type.
+
+Linting shows inline errors in the schema, and autocompletion assists in defining the correct type.
 ![Linting and autocompletion](https://user-images.githubusercontent.com/1328733/147265321-2e1956ec-9f57-4ff3-9493-8163a727308d.gif)
+
 </details>
 <details>
   <summary>Contextual suggestions</summary>
-  
-  Contextual suggestions assist in defining field types, models, and relations while formatting automatically defines back relations.
+
+Contextual suggestions assist in defining field types, models, and relations while formatting automatically defines back relations.
 ![Contextual suggestions](https://user-images.githubusercontent.com/1328733/147265323-4eb397b4-acda-4c78-9f27-1230d7ea4603.gif)
+
 </details>
 <details>
   <summary>Jump-to-definition</summary>
-  
-  Easily navigate definitions, i.e. models in the Prisma schema.
+
+Easily navigate definitions, i.e. models in the Prisma schema.
+
 ![Jump-to-definition](https://user-images.githubusercontent.com/1328733/147265315-838cd63c-e0c6-485c-aec9-1b1707291719.gif)
+
 </details>
 
 ## Contributing
