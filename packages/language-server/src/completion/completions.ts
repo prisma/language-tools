@@ -179,7 +179,7 @@ function getSuggestionForModelBlockAttribute(
 
   // We can filter on the datasource
   const datasourceProvider = getFirstDatasourceProvider(lines)
-  // We can filter on the previewFeatures enbabled
+  // We can filter on the previewFeatures enabled
   const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
 
   // Full text indexes (MySQL and MongoDB)
@@ -715,7 +715,7 @@ export function getSuggestionForSupportedFields(
       if (currentLine.startsWith('engineType')) {
         const engineTypesCompletion: CompletionItem[] = engineTypes
         if (isInsideQuotation) {
-          // We can filter on the previewFeatures enbabled
+          // We can filter on the previewFeatures enabled
           const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
 
           if (previewFeatures?.includes('dataproxy')) {
@@ -1044,7 +1044,7 @@ function getSuggestionsForAttribute(
   // create deep copy with klona
   // We can filter on the datasource
   const datasourceProvider = getFirstDatasourceProvider(lines)
-  // We can filter on the previewFeatures enbabled
+  // We can filter on the previewFeatures enabled
   const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
 
   if (attribute === '@relation') {

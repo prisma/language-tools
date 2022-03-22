@@ -30,7 +30,7 @@
       "outFiles": ["${workspaceFolder}/packages/language-server/dist/**/*.js"]
     },
     {
-      "name": "Run LSP Tests",
+      "name": "Run LS Tests",
       "type": "node",
       "request": "launch",
       "program": "${workspaceRoot}/packages/language-server/node_modules/mocha/bin/_mocha",
@@ -69,7 +69,7 @@
   ],
   "compounds": [
     {
-      "name": "VSCode + LSP",
+      "name": "VSCode + LS",
       "configurations": ["Launch VSCode extension", "Attach to Server"]
     }
   ]

@@ -3,11 +3,12 @@
  */
 const packageJson = require('../../../package.json') // eslint-disable-line
 
+/* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return */
+
 /**
  * Lookup version
  */
 export function getVersion(): string {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   if (
     !packageJson ||
     !packageJson.prisma ||
@@ -15,7 +16,6 @@ export function getVersion(): string {
   ) {
     return 'latest'
   }
-  // eslint-disable-next-line
   return packageJson.prisma.enginesVersion
 }
 
@@ -24,7 +24,6 @@ export function getVersion(): string {
  * @returns Something like `2.26.0-23.9b816b3aa13cc270074f172f30d6eda8a8ce867d`
  */
 export function getEnginesVersion(): string {
-  // eslint-disable-next-line
   return packageJson.dependencies['@prisma/prisma-fmt-wasm']
 }
 
