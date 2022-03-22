@@ -4,15 +4,10 @@ import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
 
-async function assertLinting(
-  expected: Diagnostic[],
-  fixturePath: string,
-): Promise<void> {
+function assertLinting(expected: Diagnostic[], fixturePath: string): void {
   const document: TextDocument = getTextDocument(fixturePath)
 
-  const diagnosticsResults: Diagnostic[] = await handleDiagnosticsRequest(
-    document,
-  )
+  const diagnosticsResults: Diagnostic[] = handleDiagnosticsRequest(document)
 
   assert.ok(diagnosticsResults.length != 0)
   expected.forEach((expectedDiagnostic, i) => {
@@ -24,13 +19,11 @@ async function assertLinting(
 }
 
 suite('Linting', () => {
-  suiteSetup(async () => {})
-
   const fixturePathMissingArgument = './linting/missingArgument.prisma'
   const fixturePathWrongType = './linting/wrongType.prisma'
 
-  test('Missing argument', async () => {
-    await assertLinting(
+  test('Missing argument', () => {
+    assertLinting(
       [
         {
           message: 'Argument "provider" is missing in data source block "db".',
@@ -44,8 +37,8 @@ suite('Linting', () => {
       fixturePathMissingArgument,
     )
   })
-  test('Wrong type', async () => {
-    await assertLinting(
+  test('Wrong type', () => {
+    assertLinting(
       [
         {
           message:

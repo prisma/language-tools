@@ -1,7 +1,7 @@
 {
   "name": "prisma-insider",
   "displayName": "Prisma - Insider",
-  "description": "This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the dev version of the CLI).",
+  "description": "Insider Build of the Prisma VS Code extension (only use it if you are also using the dev version of the CLI).",
   "version": "31.0.743",
   "license": "Apache-2.0",
   "icon": "logo_white.png",
@@ -21,8 +21,9 @@
     "fsevents": "2.3.2"
   },
   "repository": {
-    "type": "github",
-    "url": "https://github.com/prisma/language-tools"
+    "type": "git",
+    "url": "https://github.com/prisma/language-tools.git",
+    "directory": "packages/vscode"
   },
   "scripts": {
     "build": "tsc -p ./",

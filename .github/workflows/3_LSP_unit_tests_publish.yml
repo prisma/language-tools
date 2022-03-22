@@ -1,4 +1,4 @@
-name: 3. Unit tests for LSP and publish
+name: 3. Unit tests for LS and publish
 
 on:
   workflow_dispatch:
@@ -34,15 +34,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-      - name: Install Dependencies in LSP
+      - name: Install Dependencies in LS
         run: cd packages/language-server && npm install
-      - name: Compile LSP
+      - name: Compile LS
         run: cd packages/language-server && npm run build
-      - name: LSP unit tests
+      - name: LS unit tests
         run: cd packages/language-server && npm test
 
   bump:
-    name: Bump LSP version
+    name: Bump LS version
     needs: [tests]
     runs-on: ubuntu-latest
     steps:
@@ -61,19 +61,19 @@ jobs:
           echo ${{github.event.inputs.extension_version}}
           echo ${{github.event.inputs.branch}}
           echo ${{github.event.inputs.trigger_reason}}
-      - name: Install Dependencies in LSP
+      - name: Install Dependencies in LS
         run: cd packages/language-server && npm install
-      - name: Compile LSP
+      - name: Compile LS
         run: cd packages/language-server && npm run build
-      - name: Publish LSP to npm
+      - name: Publish LS to npm
         run: cd packages/language-server && npm publish --tag ${{ github.event.inputs.npm_channel }} --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Trigger next workflow for bumping LSP in extension
+      - name: Trigger next workflow for bumping LS in extension
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: 4. Bump LSP in VSCode extension
+          workflow: 4. Bump LS in VSCode extension
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'
 
@@ -93,7 +93,7 @@ jobs:
         if: ${{ failure() || needs.tests.result == 'failure' || needs.bump.result == 'failure' }}
         uses: rtCamp/action-slack-notify@v2.2.0
         env:
-          SLACK_TITLE: '3. Unit tests for LSP and publish failed :x:'
+          SLACK_TITLE: '3. Unit tests for LS and publish failed :x:'
           SLACK_COLOR: '#FF0000'
           SLACK_MESSAGE: '${{github.event.inputs.extension_version}} - ${{github.event.inputs.trigger_reason}} '
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_FAILURES }}

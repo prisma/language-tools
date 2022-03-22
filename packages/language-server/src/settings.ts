@@ -8,4 +8,5 @@ export interface LSPOptions {
   connection?: Connection
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface LSPSettings {}

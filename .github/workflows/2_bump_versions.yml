@@ -66,10 +66,10 @@ jobs:
         run: |
           sh scripts/commit_and_push.sh "bump extension version to ${{ steps.update.outputs.next_extension_version }} in package.json" ${{ steps.setup_branch.outputs.branch}} ${{ steps.setup_branch.outputs.new_branch }}
 
-      - name: Trigger next workflow for LSP Unit tests
+      - name: Trigger next workflow for LS Unit tests
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: 3. Unit tests for LSP and publish
+          workflow: 3. Unit tests for LS and publish
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}", "trigger_reason": "On new Prisma CLI version ${{github.event.inputs.version}}" }'
 

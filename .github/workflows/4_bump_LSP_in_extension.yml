@@ -1,4 +1,4 @@
-name: 4. Bump LSP in VSCode extension
+name: 4. Bump LS in VSCode extension
 
 on:
   workflow_dispatch:
@@ -23,7 +23,7 @@ env:
 
 jobs:
   bump:
-    name: Bump LSP in VSCode extension
+    name: Bump LS in VSCode extension
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -41,7 +41,7 @@ jobs:
           echo ${{github.event.inputs.trigger_reason}}
       - name: Install Dependencies
         run: npm install
-      - name: Bump LSP version in extension
+      - name: Bump LS version in extension
         run: |
           node scripts/update_package_json_files.js ${{ github.event.inputs.extension_version }}
       - name: Install Dependencies
@@ -60,12 +60,12 @@ jobs:
 
       - name: Commit and push to branch
         run: |
-          sh scripts/commit_and_push.sh "Bump LSP to ${{ github.event.inputs.extension_version }} in VSCode. Engines: ${{ steps.packagejson.outputs.engines }}"
+          sh scripts/commit_and_push.sh "Bump LS to ${{ github.event.inputs.extension_version }} in VSCode. Engines: ${{ steps.packagejson.outputs.engines }}"
 
       - name: Trigger next workflow for VSCode e2e tests
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: 5. Integration tests in VSCode folder with published LSP
+          workflow: 5. Integration tests in VSCode folder with published LS
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'
 
@@ -77,7 +77,7 @@ jobs:
         if: ${{ failure() }}
         uses: rtCamp/action-slack-notify@v2.2.0
         env:
-          SLACK_TITLE: '4. Bumping LSP in VSCode extension failed :x:'
+          SLACK_TITLE: '4. Bumping LS in VSCode extension failed :x:'
           SLACK_COLOR: '#FF0000'
           SLACK_MESSAGE: '${{github.event.inputs.extension_version}} - ${{github.event.inputs.trigger_reason}} '
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_FAILURES }}
