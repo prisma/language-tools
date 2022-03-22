@@ -1036,9 +1036,6 @@ function getSuggestionsForAttribute(
     firstWordBeforePosition === ''
       ? secondWordBeforePosition
       : firstWordBeforePosition
-  const stringTilPosition = untrimmedCurrentLine
-    .slice(0, position.character)
-    .trim()
 
   let suggestions: CompletionItem[] = []
   // create deep copy with klona
