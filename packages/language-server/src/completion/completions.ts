@@ -1263,69 +1263,61 @@ function getSuggestionsForAttribute(
     }
   }
 
-  // Example: @relation(fields: [authorId], references: [id], |)
-  if (stringTilPosition.endsWith(',')) {
-    // Check which attributes are already present
-    // so we can filter them out from the suggestions
-    const attributesFound: Set<string> = new Set()
+  // Check which attributes are already present
+  // so we can filter them out from the suggestions
+  const attributesFound: Set<string> = new Set()
 
-    for (const word of wordsBeforePosition) {
-      if (word.includes('references')) {
-        attributesFound.add('references')
-      }
-      if (word.includes('fields')) {
-        attributesFound.add('fields')
-      }
-      if (word.includes('onUpdate')) {
-        attributesFound.add('onUpdate')
-      }
-      if (word.includes('onDelete')) {
-        attributesFound.add('onDelete')
-      }
-      if (word.includes('map')) {
-        attributesFound.add('map')
-      }
-      if (word.includes('name') || /".*"/.exec(word)) {
-        attributesFound.add('name')
-        attributesFound.add('""')
-      }
-      if (word.includes('type')) {
-        attributesFound.add('type')
-      }
+  for (const word of wordsBeforePosition) {
+    if (word.includes('references')) {
+      attributesFound.add('references')
     }
-
-    // now filter them out of the suggestions as they are already present
-    const filteredSuggestions: CompletionItem[] = suggestions.reduce(
-      (accumulator: CompletionItem[] & unknown[], sugg) => {
-        let suggestionMatch = false
-        for (const attribute of attributesFound) {
-          if (sugg.label.includes(attribute)) {
-            suggestionMatch = true
-          }
-        }
-
-        if (!suggestionMatch) {
-          accumulator.push(sugg)
-        }
-
-        return accumulator
-      },
-      [],
-    )
-
-    // nothing to present any more, return
-    if (filteredSuggestions.length === 0) {
-      return
+    if (word.includes('fields')) {
+      attributesFound.add('fields')
     }
-
-    return {
-      items: filteredSuggestions,
-      isIncomplete: false,
+    if (word.includes('onUpdate')) {
+      attributesFound.add('onUpdate')
+    }
+    if (word.includes('onDelete')) {
+      attributesFound.add('onDelete')
+    }
+    if (word.includes('map')) {
+      attributesFound.add('map')
+    }
+    if (word.includes('name') || /".*"/.exec(word)) {
+      attributesFound.add('name')
+      attributesFound.add('""')
+    }
+    if (word.includes('type')) {
+      attributesFound.add('type')
     }
   }
 
+  // now filter them out of the suggestions as they are already present
+  const filteredSuggestions: CompletionItem[] = suggestions.reduce(
+    (accumulator: CompletionItem[] & unknown[], sugg) => {
+      let suggestionMatch = false
+      for (const attribute of attributesFound) {
+        if (sugg.label.includes(attribute)) {
+          suggestionMatch = true
+        }
+      }
+
+      if (!suggestionMatch) {
+        accumulator.push(sugg)
+      }
+
+      return accumulator
+    },
+    [],
+  )
+
+  // nothing to present any more, return
+  if (filteredSuggestions.length === 0) {
+    return
+  }
+
   return {
-    items: suggestions,
+    items: filteredSuggestions,
     isIncomplete: false,
   }
 }
