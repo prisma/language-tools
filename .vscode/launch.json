@@ -30,7 +30,7 @@
       "outFiles": ["${workspaceFolder}/packages/language-server/dist/**/*.js"]
     },
     {
-      "name": "Run LS Tests",
+      "name": "Run Language Server Tests",
       "type": "node",
       "request": "launch",
       "program": "${workspaceRoot}/packages/language-server/node_modules/mocha/bin/_mocha",
@@ -69,7 +69,7 @@
   ],
   "compounds": [
     {
-      "name": "VSCode + LS",
+      "name": "VSCode + Language Server",
       "configurations": ["Launch VSCode extension", "Attach to Server"]
     }
   ]

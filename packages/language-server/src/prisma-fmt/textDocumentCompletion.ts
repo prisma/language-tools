@@ -1,5 +1,5 @@
 import prismaFmt from '@prisma/prisma-fmt-wasm'
-import * as lsp from 'vscode-languageserver'
+import { CompletionParams, CompletionList } from 'vscode-languageserver'
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return */
 
@@ -7,9 +7,9 @@ import * as lsp from 'vscode-languageserver'
 // bug to be fixed. prisma-fmt will return an empty CompletionList on error.
 export default function textDocumentCompletion(
   schema: string,
-  params: lsp.CompletionParams,
-): lsp.CompletionList {
-  // lsp.CompletionParams.textDocument doesn't match the LS JSON-RPC protocol
+  params: CompletionParams,
+): CompletionList {
+  // CompletionParams.textDocument doesn't match the Language Server JSON-RPC protocol
   // as defined by the spec. In the spec, it is an object with one property:
   // uri, which is a string. The above `params` are a structured object with
   // methods, and `__uri` and `__contents` properties.

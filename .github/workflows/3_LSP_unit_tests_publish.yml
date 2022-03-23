@@ -17,7 +17,7 @@ on:
         required: true
 
 env:
-  PRISMA_TELEMETRY_INFORMATION: 'language-tools 3_LSP_unit_tests_publish.yml'
+  PRISMA_TELEMETRY_INFORMATION: 'language-tools 3_LS_unit_tests_publish.yml'
 
 jobs:
   tests:
@@ -34,15 +34,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-      - name: Install Dependencies in LS
+      - name: Install Dependencies in Language Server
         run: cd packages/language-server && npm install
-      - name: Compile LS
+      - name: Build Language Server
         run: cd packages/language-server && npm run build
-      - name: LS unit tests
+      - name: Run Language Server tests
         run: cd packages/language-server && npm test
 
   bump:
-    name: Bump LS version
+    name: Bump Language Server version
     needs: [tests]
     runs-on: ubuntu-latest
     steps:
@@ -61,16 +61,16 @@ jobs:
           echo ${{github.event.inputs.extension_version}}
           echo ${{github.event.inputs.branch}}
           echo ${{github.event.inputs.trigger_reason}}
-      - name: Install Dependencies in LS
+      - name: Install Dependencies in Language Server
         run: cd packages/language-server && npm install
-      - name: Compile LS
+      - name: Build Language Server
         run: cd packages/language-server && npm run build
-      - name: Publish LS to npm
+      - name: Publish Language Server to npm
         run: cd packages/language-server && npm publish --tag ${{ github.event.inputs.npm_channel }} --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Trigger next workflow for bumping LS in extension
+      - name: Trigger next workflow for bumping Language Server in extension
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: 4. Bump LS in VSCode extension

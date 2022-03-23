@@ -26,8 +26,7 @@ async function main(): Promise<void> {
         '--disable-extensions',
       ],
       extensionTestsEnv: {
-        // TODO rename to PRISMA_USE_LOCAL_LS
-        localLS: args[0],
+        PRISMA_USE_LOCAL_LS: args[0],
       },
     })
   } catch (err) {

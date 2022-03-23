@@ -19,7 +19,7 @@ on:
 env:
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
-  PRISMA_TELEMETRY_INFORMATION: 'language-tools 4_bump_LSP_in_extension.yml'
+  PRISMA_TELEMETRY_INFORMATION: 'language-tools 4_bump_LS_in_extension.yml'
 
 jobs:
   bump:

@@ -22,7 +22,7 @@ function bumpVersionInVSCodeRepo({
   writeJsonToPackageJson({ content: content, path: vscodePackageJsonPath })
 }
 
-function bumpLSPVersionInExtension({ version }) {
+function bumpLSVersionInExtension({ version }) {
   const vscodePackageJsonPath = path.join(
     __dirname,
     '../packages/vscode/package.json',
@@ -107,14 +107,14 @@ function bumpVersionsInRepo({
     path: rootPackageJsonPath,
   })
 
-  // update version in LS
-  const lspPackageJsonPath = path.join(
+  // update version in Language Server
+  const lsPackageJsonPath = path.join(
     __dirname,
     '../packages/language-server/package.json',
   )
-  let lspPackageJson = getPackageJsonContent({ path: lspPackageJsonPath })
+  let lspPackageJson = getPackageJsonContent({ path: lsPackageJsonPath })
   lspPackageJson['version'] = newExtensionVersion
-  writeJsonToPackageJson({ content: lspPackageJson, path: lspPackageJsonPath })
+  writeJsonToPackageJson({ content: lspPackageJson, path: lsPackageJsonPath })
 }
 
 module.exports = { bumpVersionsInRepo }
@@ -122,22 +122,24 @@ module.exports = { bumpVersionsInRepo }
 if (require.main === module) {
   const args = process.argv.slice(2)
   if (args.length === 3) {
-    console.log('Bumping Prisma CLI version, extension and LS version in repo.')
+    console.log(
+      'Bumping Prisma CLI version, extension and Language Server version in repo.',
+    )
     bumpVersionsInRepo({
       channel: args[0],
       newExtensionVersion: args[1],
       newPrismaVersion: args[2],
     })
   } else if (args.length === 2) {
-    console.log('Bumping extension and LS version in repo.')
+    console.log('Bumping extension and Language Server version in repo.')
     bumpVersionsInRepo({
       channel: args[0],
       newExtensionVersion: args[1],
     })
   } else if (args.length === 1) {
-    // only bump LS version in extension
-    console.log('Bumping LS version in extension.')
-    bumpLSPVersionInExtension({
+    // only bump Language Server version in extension
+    console.log('Bumping Language Server version in extension.')
+    bumpLSVersionInExtension({
       version: args[0],
     })
   } else {
