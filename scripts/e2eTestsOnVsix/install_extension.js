@@ -1,4 +1,4 @@
-const vscodeTest = require('vscode-test')
+const vscodeTest = require('@vscode/test-electron')
 const chileProcess = require('child_process')
 
 async function installExtension({ extensionType, extensionVersion }) {
