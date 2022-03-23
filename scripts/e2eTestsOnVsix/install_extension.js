@@ -1,5 +1,5 @@
 const vscodeTest = require('@vscode/test-electron')
-const chileProcess = require('child_process')
+const childProcess = require('child_process')
 
 async function installExtension({ extensionType, extensionVersion }) {
   try {
@@ -17,9 +17,9 @@ async function installExtension({ extensionType, extensionVersion }) {
     // Install VSCode extension
     const cliPath =
       vscodeTest.resolveCliPathFromVSCodeExecutablePath(vscodeExecutablePath)
-    const result = chileProcess.spawnSync(
+    const result = childProcess.spawnSync(
       cliPath,
-      ['--install-extension', extensionName + '@' + extensionVersion],
+      ['--install-extension', `${extensionName}@${extensionVersion}`],
       {
         encoding: 'utf-8',
         stdio: 'pipe',

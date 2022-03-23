@@ -70,7 +70,7 @@ End-to-End tests:
 
 When running the End-to-End tests in GitHub Actions before publishing, the script `scripts/e2e.sh` is run. By default, the published Language Server is used. Adding the parameter `useLocalLS` will run the tests using the local Language Server.
 The End-to-End tests that are run after the publish of the extension are located in `scripts/e2eTestsOnVsix/test.sh`.
-In both cases the tests in `packages/vscode/src/test` with the schmeas located in `packages/vscode/testFixture` are used.
+In both cases the tests in `packages/vscode/src/__test__` with the schmeas located in `packages/vscode/testFixture` are used.
 
 ## Publishing
 

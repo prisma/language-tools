@@ -60,7 +60,7 @@
 
               mkdir $USER_DIR $EXTENSIONS_DIR
 
-              $CODE . --goto ./packages/vscode/src/test/testDb.prisma:10
+              $CODE . --goto ./packages/vscode/src/__test__/testDb.prisma:10
             '';
             deleteNodeModules = pkgs.writeShellScriptBin "deleteNodeModules" ''
               find . -name 'node_modules' -prune

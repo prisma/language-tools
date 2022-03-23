@@ -43,14 +43,14 @@
         "tdd",
         "--useColors",
         "true",
-        "./dist/src/test/**/*.test.js"
+        "./dist/src/__test__/**/*.test.js"
       ],
       "cwd": "${workspaceRoot}/packages/language-server",
       "runtimeExecutable": null,
       "runtimeArgs": [],
       "env": {},
       "outFiles": [
-        "${workspaceRoot}/packages/language-server/dist/src/test/**/*.js"
+        "${workspaceRoot}/packages/language-server/dist/src/__test__/**/*.js"
       ],
       "preLaunchTask": "npm: watch"
     },
@@ -61,10 +61,12 @@
       "runtimeExecutable": "${execPath}",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode",
-        "--extensionTestsPath=${workspaceFolder}/packages/vscode/dist/src/test/index",
+        "--extensionTestsPath=${workspaceFolder}/packages/vscode/dist/src/__test__/index",
         "${workspaceFolder}/packages/vscode/testFixture"
       ],
-      "outFiles": ["${workspaceFolder}/packages/vscode/dist/src/test/**/*.js"]
+      "outFiles": [
+        "${workspaceFolder}/packages/vscode/dist/src/__test__/**/*.js"
+      ]
     }
   ],
   "compounds": [
