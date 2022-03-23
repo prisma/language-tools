@@ -29,12 +29,12 @@ cd "$EXTENSION_INSTALL_PATH" &&  npm install && cd "$WORKING_DIRECTORY"
 echo "Finished installing dependencies."
 
 
-CODE_TESTS_PATH="$EXTENSION_INSTALL_PATH/dist/src/test"
+CODE_TESTS_PATH="$EXTENSION_INSTALL_PATH/dist/src/__test__"
 export CODE_TESTS_PATH
 
 CODE_TESTS_WORKSPACE="$EXTENSION_INSTALL_PATH/testFixture"
 export CODE_TESTS_WORKSPACE
 
 echo "Starting e2e tests."
-node "$EXTENSION_INSTALL_PATH/dist/src/test/runTest" "false"
+node "$EXTENSION_INSTALL_PATH/dist/src/__test__/runTest" "false"
 echo "Completed e2e tests."
