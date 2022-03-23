@@ -793,7 +793,7 @@ suite('Completions', () => {
       })
     })
 
-    suite.only('MongoDB', function () {
+    suite('MongoDB', function () {
       test('String @id @default(|)', async () => {
         await activate(mongoDBAtdefaultUri)
 
