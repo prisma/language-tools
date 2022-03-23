@@ -56,18 +56,18 @@ jobs:
         run: |
           sh scripts/commit_and_push.sh "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}." ${{ steps.setup_branch.outputs.new_branch }}
 
-      - name: Trigger next workflow for LS Unit tests
+      - name: Trigger next workflow for Language Server tests
         if: endsWith(github.ref, '/main')
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: 3. Unit tests for LS and publish
+          workflow: 3. Test Language Server and publish
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "main", "trigger_reason": "On push to ${{ steps.extract_branch.outputs.branch }}." }'
-      - name: Trigger next workflow for LS Unit tests
+      - name: Trigger next workflow for Language Server tests
         if: endsWith(github.ref, '/main') == false
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: 3. Unit tests for LS and publish
+          workflow: 3. Test Language Server and publish
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "patch-dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.extract_branch.outputs.branch}}", "trigger_reason": "On push to ${{ steps.extract_branch.outputs.branch }}." }'
 

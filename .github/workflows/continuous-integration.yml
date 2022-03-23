@@ -41,9 +41,9 @@ jobs:
         run: npm install
       - name: Compile
         run: npm run compile
-      - name: Unit tests
+      - name: Run Language Server tests
         run: cd packages/language-server && npm test
-      - name: Run headless test
+      - name: Run VS Code extension tests in headless mode
         uses: GabrielBB/xvfb-action@v1.6
         with:
           run: npm test "useLocalLS"

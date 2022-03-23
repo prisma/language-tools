@@ -1,4 +1,4 @@
-name: 3. Unit tests for LS and publish
+name: 3. Test Language Server and publish
 
 on:
   workflow_dispatch:
@@ -21,7 +21,7 @@ env:
 
 jobs:
   tests:
-    name: Run unit tests
+    name: Run tests
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -93,7 +93,7 @@ jobs:
         if: ${{ failure() || needs.tests.result == 'failure' || needs.bump.result == 'failure' }}
         uses: rtCamp/action-slack-notify@v2.2.0
         env:
-          SLACK_TITLE: '3. Unit tests for LS and publish failed :x:'
+          SLACK_TITLE: '3. Test Language Server and publish failed :x:'
           SLACK_COLOR: '#FF0000'
           SLACK_MESSAGE: '${{github.event.inputs.extension_version}} - ${{github.event.inputs.trigger_reason}} '
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_FAILURES }}
