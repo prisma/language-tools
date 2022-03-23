@@ -1,6 +1,6 @@
 import vscode from 'vscode'
 import assert from 'assert'
-import { getDocUri, activate } from './helper'
+import { getDocUri, activate } from '../helper'
 import fs from 'fs'
 
 async function testAutoFormat(
@@ -24,13 +24,13 @@ async function testAutoFormat(
   assert.strictEqual(actualResult, expectedFormatted)
 }
 
-suite('Should auto-format', () => {
-  const docUri = getDocUri('formatting/autoFormat.prisma')
+suite('Should format', () => {
+  const docUri = getDocUri('format/schema.prisma')
 
-  const docUriExpected = getDocUri('correct_sqlite.prisma')
+  const docUriExpected = getDocUri('format/expected.prisma')
   const textDocument = fs.readFileSync(docUriExpected.fsPath, 'utf8')
 
-  test('Diagnoses auto-format', async function () {
+  test('Diagnoses format', async function () {
     await testAutoFormat(docUri, textDocument)
   })
 })

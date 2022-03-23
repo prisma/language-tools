@@ -5,7 +5,7 @@ USE_LOCAL=${1-false}
 CODE_TESTS_PATH="$(pwd)/packages/vscode/dist/src/__test__"
 export CODE_TESTS_PATH
 
-CODE_TESTS_WORKSPACE="$(pwd)/packages/vscode/testFixture"
+CODE_TESTS_WORKSPACE="$(pwd)/packages/vscode/fixtures"
 export CODE_TESTS_WORKSPACE
 
 if [ "$USE_LOCAL" = "useLocalLS" ]; then 

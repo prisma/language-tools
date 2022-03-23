@@ -1,6 +1,6 @@
 import vscode, { Hover } from 'vscode'
 import assert from 'assert'
-import { getDocUri, activate } from './helper'
+import { getDocUri, activate } from '../helper'
 
 async function testHover(
   docUri: vscode.Uri,
@@ -20,7 +20,7 @@ async function testHover(
 }
 
 suite('Should show /// documentation comments for', () => {
-  const docUri = getDocUri('hover.prisma')
+  const docUri = getDocUri('hover/schema.prisma')
 
   test('model', async () => {
     await activate(docUri)
@@ -30,14 +30,9 @@ suite('Should show /// documentation comments for', () => {
       'Post including an author and content.',
     )
   })
-  test('enum', async () => {
-    await testHover(
-      docUri,
-      new vscode.Position(24, 17),
-      'This is an enum specifying the UserName.',
-    )
-  })
 })
+
+// TODO do we still need this?
 // TODO uncomment once https://github.com/prisma/prisma/issues/2546 is resolved!
 /*
 suite('Should show // comments for', () => {
