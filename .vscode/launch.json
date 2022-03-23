@@ -62,7 +62,7 @@
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode",
         "--extensionTestsPath=${workspaceFolder}/packages/vscode/dist/src/__test__/index",
-        "${workspaceFolder}/packages/vscode/testFixture"
+        "${workspaceFolder}/packages/vscode/fixtures"
       ],
       "outFiles": [
         "${workspaceFolder}/packages/vscode/dist/src/__test__/**/*.js"

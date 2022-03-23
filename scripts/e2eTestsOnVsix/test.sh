@@ -32,7 +32,7 @@ echo "Finished installing dependencies."
 CODE_TESTS_PATH="$EXTENSION_INSTALL_PATH/dist/src/__test__"
 export CODE_TESTS_PATH
 
-CODE_TESTS_WORKSPACE="$EXTENSION_INSTALL_PATH/testFixture"
+CODE_TESTS_WORKSPACE="$EXTENSION_INSTALL_PATH/fixtures"
 export CODE_TESTS_WORKSPACE
 
 echo "Starting e2e tests."

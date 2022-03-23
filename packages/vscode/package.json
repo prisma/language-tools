@@ -28,7 +28,7 @@
   "scripts": {
     "build": "tsc -p ./",
     "watch": "npm run build -- -w",
-    "test": "npm run build && node dist/src/__test__/runTest true",
+    "test": "rm -rf ./dist && npm run build && node dist/src/__test__/runTest true",
     "vscode:prepublish": "cd .. && cd .. && tsc --build --clean && npm run compile",
     "package": "vsce package"
   },
