@@ -5,7 +5,7 @@
 Beforehand:
 
 - disable prisma vscode plugin
-- install `prisma-lsp-0.0.31.vsix`
+- install `prisma-ls-0.0.31.vsix`
 
 Syntax highlighting
 
@@ -37,7 +37,7 @@ Auto-formatting
 Beforehand:
 
 - disable prisma vscode plugin
-- install `prisma-lsp-jump-to-def-0.0.31.vsix`
+- install `prisma-ls-jump-to-def-0.0.31.vsix`
 
 Jump-to-definition
 

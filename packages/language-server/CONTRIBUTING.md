@@ -24,4 +24,4 @@ Unit tests:
 
 ## Publishing
 
-The extension is automatically published to npm via Github actions (see `.github/workflows`).
+The extension is automatically published to npm via GitHub actions (see `.github/workflows`).

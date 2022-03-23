@@ -22,10 +22,10 @@ import {
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
 import * as util from './prisma-fmt/util'
-import { LSPOptions, LSPSettings } from './settings'
+import { LSOptions, LSSettings } from './settings'
 const packageJson = require('../../package.json') // eslint-disable-line
 
-function getConnection(options?: LSPOptions): Connection {
+function getConnection(options?: LSOptions): Connection {
   let connection = options?.connection
   if (!connection) {
     connection = process.argv.includes('--stdio')
@@ -46,7 +46,7 @@ let hasConfigurationCapability = false
  *
  * @param options Options to customize behavior
  */
-export function startServer(options?: LSPOptions): void {
+export function startServer(options?: LSOptions): void {
   // Source code: https://github.com/microsoft/vscode-languageserver-node/blob/main/server/src/common/server.ts#L1044
   const connection: Connection = getConnection(options)
 
@@ -113,13 +113,13 @@ export function startServer(options?: LSPOptions): void {
 
   // The global settings, used when the `workspace/configuration` request is not supported by the client or is not set by the user.
   // This does not apply to VSCode, as this client supports this setting.
-  // const defaultSettings: LSPSettings = {}
-  // let globalSettings: LSPSettings = defaultSettings // eslint-disable-line
+  // const defaultSettings: LSSettings = {}
+  // let globalSettings: LSSettings = defaultSettings // eslint-disable-line
 
   // Cache the settings of all open documents
-  const documentSettings: Map<string, Thenable<LSPSettings>> = new Map<
+  const documentSettings: Map<string, Thenable<LSSettings>> = new Map<
     string,
-    Thenable<LSPSettings>
+    Thenable<LSSettings>
   >()
 
   // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -129,7 +129,7 @@ export function startServer(options?: LSPOptions): void {
       // Reset all cached document settings
       documentSettings.clear()
     } else {
-      // globalSettings = <LSPSettings>(change.settings.prisma || defaultSettings) // eslint-disable-line @typescript-eslint/no-unsafe-member-access
+      // globalSettings = <LSSettings>(change.settings.prisma || defaultSettings) // eslint-disable-line @typescript-eslint/no-unsafe-member-access
     }
 
     // Revalidate all open prisma schemas
@@ -141,7 +141,7 @@ export function startServer(options?: LSPOptions): void {
     documentSettings.delete(e.document.uri)
   })
 
-  // function getDocumentSettings(resource: string): Thenable<LSPSettings> {
+  // function getDocumentSettings(resource: string): Thenable<LSSettings> {
   //   if (!hasConfigurationCapability) {
   //     connection.console.info(
   //       `hasConfigurationCapability === false. Defaults will be used.`,

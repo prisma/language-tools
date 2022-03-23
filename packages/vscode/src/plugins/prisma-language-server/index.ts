@@ -44,8 +44,7 @@ let telemetry: TelemetryReporter
 let watcher: chokidar.FSWatcher
 
 const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
-// TODO rename to PRISMA_USE_LOCAL_LS
-const isE2ETestOnPullRequest = () => process.env.localLS === 'true'
+const isE2ETestOnPullRequest = () => process.env.PRISMA_USE_LOCAL_LS === 'true'
 
 const activateClient = (
   context: ExtensionContext,
@@ -111,13 +110,13 @@ const plugin: PrismaVSCodePlugin = {
     }
 
     if (isDebugMode() || isE2ETestOnPullRequest()) {
-      // use LS from folder for debugging
-      console.log('Using local LSP')
+      // use Language Server from folder for debugging
+      console.log('Using local Language Server')
       serverModule = context.asAbsolutePath(
         path.join('../../packages/language-server/dist/src/bin'),
       )
     } else {
-      console.log('Using published LSP')
+      console.log('Using published Language Server')
       // use published npm package for production
       serverModule = require.resolve('@prisma/language-server/dist/src/bin')
     }

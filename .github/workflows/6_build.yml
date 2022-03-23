@@ -55,7 +55,7 @@ jobs:
       - name: Build vsix
         run: cd packages/vscode && npm run package
 
-      # Create Github Release and upload built result as asset
+      # Create GitHub Release and upload built result as asset
       - name: Get git tag and asset name
         id: names
         run: node scripts/get_tag_name.js ${{ github.event.inputs.npm_channel }} ${{ github.event.inputs.extension_version }}

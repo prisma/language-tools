@@ -39,7 +39,7 @@ On push to the `main` branch, a new Insider extension is released, with an incre
 - Open VS Code on this folder.
 - Switch to the debug viewlet.
 - Select `Launch VSCode extension` from the drop down.
-- Run the launch config. (This will always use the local LS, not the published one.)
+- Run the launch config. (This will always use the local Language Server, not the published one.)
 - If you want to debug the server as well use the launch configuration `Attach to Server` afterwards.
 - A new file should open in the [Extension Development Host] instance of VSCode.
 - Change the language to Prisma.
@@ -65,16 +65,16 @@ End-to-End tests:
 - Open VS Code on this folder.
 - Switch to the debug viewlet.
 - Select `Integration Tests` from the drop down.
-- Run the launch config. (This will use the local LS.)
+- Run the launch config. (This will use the local Language Server.)
 - Open the debug console to view the test results.
 
-When running the End-to-End tests in Github Actions before publishing, the script `scripts/e2e.sh` is run. By default, the published LS is used. Adding the parameter `useLocalLS` will run the tests using the local LS.
+When running the End-to-End tests in GitHub Actions before publishing, the script `scripts/e2e.sh` is run. By default, the published Language Server is used. Adding the parameter `useLocalLS` will run the tests using the local Language Server.
 The End-to-End tests that are run after the publish of the extension are located in `scripts/e2eTestsOnVsix/test.sh`.
 In both cases the tests in `packages/vscode/src/test` with the schmeas located in `packages/vscode/testFixture` are used.
 
 ## Publishing
 
-The extension is automatically published using a [Azure Devops Personal Access Token](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) via Github actions (see `.github/workflows/publish.yml`).
+The extension is automatically published using a [Azure Devops Personal Access Token](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) via GitHub actions (see `.github/workflows/publish.yml`).
 
 Note that the personal access token is only valid for a year and will need to be renewed manually.
 

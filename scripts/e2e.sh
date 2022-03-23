@@ -9,9 +9,9 @@ CODE_TESTS_WORKSPACE="$(pwd)/packages/vscode/testFixture"
 export CODE_TESTS_WORKSPACE
 
 if [ "$USE_LOCAL" = "useLocalLS" ]; then 
-    echo "Using local LS."
+    echo "Using local Language Server."
     node "$(pwd)/packages/vscode/dist/src/test/runTest" "true"
 else 
-    echo "Using published LS."
+    echo "Using published Language Server."
     node "$(pwd)/packages/vscode/dist/src/test/runTest" "false"
 fi
