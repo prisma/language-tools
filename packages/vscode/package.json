@@ -69,6 +69,16 @@
         "embeddedLanguages": {
           "meta.embedded.block.prisma": "prisma"
         }
+      },
+      {
+        "scopeName": "markdown.prisma.codeblock",
+        "path": "./syntaxes/prisma.markdown.json",
+        "injectTo": [
+          "text.html.markdown"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.block.prisma": "prisma"
+        }
       }
     ],
     "configuration": {
