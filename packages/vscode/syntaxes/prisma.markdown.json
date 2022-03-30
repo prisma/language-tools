@@ -3,11 +3,11 @@
   "injectionSelector": "L:text.html.markdown",
   "patterns": [
     {
-      "include": "#prisma-code-block"
+      "include": "#fenced_code_block_prisma"
     }
   ],
   "repository": {
-    "prisma-code-block": {
+    "fenced_code_block_prisma": {
       "name": "markup.fenced_code.block.markdown",
       "begin": "(^|\\G)(\\s*)(`{3,}|~{3,})\\s*(?i:(prisma)((\\s+|:|,|\\{|\\?)[^`~]*)?$)",
       "end": "(^|\\G)(\\2|\\s{0,3})(\\3)\\s*$",
