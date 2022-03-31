@@ -23,7 +23,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "watch": "npm run build -- -w",
+    "build:clean": "tsc --build --clean",
+    "watch": "pnpm run build -- -w",
     "test": "mocha --ui tdd --useColors true  ./dist/src/__test__/**/*.test.js",
     "pretest": "tsc"
   },

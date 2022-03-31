@@ -31,18 +31,21 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.branch }}
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+      - uses: pnpm/action-setup@v2.2.1
         with:
+          version: latest
+      - uses: actions/setup-node@v3
+        with:
+          cache: 'pnpm'
           node-version: '16'
       - name: Install Dependencies
-        run: npm install
-      - name: Compile
-        run: npm run compile
+        run: pnpm install
+      - name: Build all packages
+        run: pnpm -r run build
       - name: Headless e2e tests
         uses: GabrielBB/xvfb-action@v1.6
         with:
-          run: npm run test
+          run: pnpm run test
 
   trigger:
     name: Trigger next workflow
@@ -50,11 +53,6 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
       - name: Print inputs
         run: |
           echo ${{github.event.inputs.npm_channel}}

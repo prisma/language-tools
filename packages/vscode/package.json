@@ -15,6 +15,7 @@
   "dependencies": {
     "@prisma/language-server": "31.0.765",
     "checkpoint-client": "1.1.21",
+    "chokidar": "3.5.3",
     "vscode-languageclient": "7.0.0"
   },
   "optionalDependencies": {
@@ -26,10 +27,11 @@
     "directory": "packages/vscode"
   },
   "scripts": {
-    "build": "tsc -p ./",
-    "watch": "npm run build -- -w",
-    "test": "rm -rf ./dist && npm run build && node dist/src/__test__/runTest true",
-    "vscode:prepublish": "cd .. && cd .. && tsc --build --clean && npm run compile",
+    "build": "tsc",
+    "build:clean": "tsc --build --clean",
+    "watch": "pnpm run build -- -w",
+    "test": "rm -rf ./dist && pnpm run build && node dist/src/__test__/runTest true",
+    "vscode:prepublish": "pnpm -r run build:clean",
     "package": "vsce package"
   },
   "main": "./dist/src/extension.js",
@@ -126,11 +128,11 @@
     "@types/glob": "7.2.0",
     "@types/mocha": "9.1.0",
     "@types/vscode": "1.52.0",
+    "@vscode/test-electron": "1.6.2",
     "mocha": "9.2.2",
     "ovsx": "0.3.0",
     "typescript": "4.6.2",
-    "vsce": "2.7.0",
-    "@vscode/test-electron": "1.6.2"
+    "vsce": "2.7.0"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
   "publishConfig": {

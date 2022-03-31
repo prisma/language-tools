@@ -31,9 +31,12 @@ jobs:
       SLACK_MESSAGE: '${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}'
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+      - uses: pnpm/action-setup@v2.2.1
         with:
+          version: latest
+      - uses: actions/setup-node@v3
+        with:
+          cache: 'pnpm'
           node-version: '16'
       - name: Print inputs
         run: |
@@ -41,7 +44,7 @@ jobs:
           echo ${{github.event.inputs.tag_name}}
           echo ${{github.event.inputs.trigger_reason}}
       - name: Install Dependencies
-        run: npm install
+        run: pnpm install
 
       # Download Asset from GH release and publish to VSCode marketplace
       - uses: dsaltares/fetch-gh-release-asset@master
@@ -83,15 +86,18 @@ jobs:
       SLACK_MESSAGE: '${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}'
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+      - uses: pnpm/action-setup@v2.2.1
         with:
+          version: latest
+      - uses: actions/setup-node@v3
+        with:
+          cache: 'pnpm'
           node-version: '16'
       - name: Print inputs
         run: |
           echo ${{github.event.inputs.trigger_reason}}
       - name: Install Dependencies
-        run: npm install
+        run: pnpm install
 
       # Download Asset from GH release and publish to open-vsx
       - uses: dsaltares/fetch-gh-release-asset@master

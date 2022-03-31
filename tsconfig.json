@@ -7,7 +7,6 @@
       "path": "./packages/language-server"
     }
   ],
-  "exclude": ["**/node_modules", ".vscode-test"],
-  "files": [],
-  "include": []
+  "include": ["**/*", ".eslintrc.js"],
+  "exclude": ["**/node_modules"]
 }

@@ -2,8 +2,8 @@
 
 ## Development
 
-- Run `npm install` in the root folder. This installs all necessary npm modules in both the vscode and language-server folder.
-- Run `npm run watch`.
+- Run `pnpm install` in the root folder. This installs all necessary npm modules in both the vscode and language-server folder.
+- Run `pnpm run watch`.
 - Open VS Code on this folder.
 - Switch to the debug viewlet.
 - Select `Launch VSCode extension` from the drop down.

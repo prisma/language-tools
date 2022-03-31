@@ -29,9 +29,12 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.branch }}
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+      - uses: pnpm/action-setup@v2.2.1
         with:
+          version: latest
+      - uses: actions/setup-node@v3
+        with:
+          cache: 'pnpm'
           node-version: '16'
       - name: Print inputs
         run: |
@@ -40,12 +43,12 @@ jobs:
           echo ${{github.event.inputs.branch}}
           echo ${{github.event.inputs.trigger_reason}}
       - name: Install Dependencies
-        run: npm install
+        run: pnpm install
       - name: Bump LS version in extension
         run: |
           node scripts/update_package_json_files.js ${{ github.event.inputs.extension_version }}
       - name: Install Dependencies
-        run: npm install
+        run: pnpm install
       - name: Setup Git
         run: |
           sh scripts/set_git_credentials.sh
