@@ -73,7 +73,7 @@ importers:
 
   packages/vscode:
     specifiers:
-      '@prisma/language-server': 31.0.788
+      '@prisma/language-server': 31.0.789
       '@types/glob': 7.2.0
       '@types/mocha': 9.1.0
       '@types/vscode': 1.52.0
