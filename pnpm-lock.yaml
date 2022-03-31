@@ -73,7 +73,7 @@ importers:
 
   packages/vscode:
     specifiers:
-      '@prisma/language-server': 31.0.765
+      '@prisma/language-server': 31.0.788
       '@types/glob': 7.2.0
       '@types/mocha': 9.1.0
       '@types/vscode': 1.52.0
@@ -88,7 +88,7 @@ importers:
       vsce: 2.7.0
       vscode-languageclient: 7.0.0
     dependencies:
-      '@prisma/language-server': 31.0.765
+      '@prisma/language-server': link:../language-server
       checkpoint-client: 1.1.21
       chokidar: 3.5.3
       vscode-languageclient: 7.0.0
@@ -1003,24 +1003,6 @@ packages:
     dependencies:
       '@octokit/openapi-types': 11.2.0
     dev: true
-
-  /@prisma/language-server/31.0.765:
-    resolution: {integrity: sha512-gyLpsz9DvVFkuHjjMlYKpUpoyvYztkBTy3cZIB5KcC6GGc9lKTTH/9Tk2/181mBrSzMHvyxg0/7+6Zh6nk+WoA==}
-    engines: {node: '>=10'}
-    hasBin: true
-    dependencies:
-      '@prisma/prisma-fmt-wasm': 3.12.0-18.e9aaf2ae00c5c7a241450d0e08165acb030422d0
-      '@types/js-levenshtein': 1.1.1
-      chokidar: 3.5.3
-      js-levenshtein: 1.1.6
-      klona: 2.0.5
-      vscode-languageserver: 7.0.0
-      vscode-languageserver-textdocument: 1.0.4
-    dev: false
-
-  /@prisma/prisma-fmt-wasm/3.12.0-18.e9aaf2ae00c5c7a241450d0e08165acb030422d0:
-    resolution: {integrity: sha512-bH9PlChxhza/4CT/jOIuPlgDPycOdQc9u4WBmZReklfYfy2+90BIeBCcDie3bWv2iPRK2h0MG6WBT+9VRuIr3w==}
-    dev: false
 
   /@prisma/prisma-fmt-wasm/3.12.0-30.6f1b5b24baff9909403d1355bfee5155e02940b8:
     resolution: {integrity: sha512-0a37eVcMLJTRFeFZ3+xbEMnyQkg+SdeM49gcelJZEdUQkQBGHzqkIO53ggt4tkdH9LRW7Zvu0QObY8sV6BJfzw==}
