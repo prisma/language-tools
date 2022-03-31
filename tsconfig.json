@@ -1,12 +1,5 @@
 {
-  "references": [
-    {
-      "path": "./packages/vscode"
-    },
-    {
-      "path": "./packages/language-server"
-    }
-  ],
+  "extends": "./tsconfig.build.json",
   "include": ["**/*", ".eslintrc.js"],
   "exclude": ["**/node_modules"]
 }

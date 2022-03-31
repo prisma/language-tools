@@ -1,0 +1,12 @@
+{
+  "references": [
+    {
+      "path": "./packages/vscode"
+    },
+    {
+      "path": "./packages/language-server"
+    }
+  ],
+  "include": ["**/*", ".eslintrc.js"],
+  "exclude": ["**/node_modules"]
+}
