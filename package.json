@@ -1,15 +1,14 @@
 {
-  "name": "@prisma/language-support",
+  "name": "language-tools",
+  "private": true,
   "version": "31.0.785",
   "author": "Prisma",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=16",
-    "npm": ">=7"
+    "npm": ">=7",
+    "pnpm": ">=6.14.1"
   },
-  "workspaces": [
-    "packages/*"
-  ],
   "devDependencies": {
     "@actions/github": "5.0.0",
     "@commitlint/cli": "16.2.3",
@@ -32,12 +31,9 @@
     "@vscode/test-electron": "1.6.2"
   },
   "scripts": {
-    "build": "tsc -b",
-    "postinstall": "cd packages/language-server && npm install && cd ../vscode && npm install && cd .. && cd .. ",
     "format": "prettier \"packages/**/*.{ts,js,json,md}\" --write",
     "lint": "eslint \"packages/**/*.{js,ts}\" --fix",
-    "compile": "cd packages/language-server && npm run build && cd ../vscode && npm run build && cd .. && cd ..",
-    "watch": "npm run build -- -w",
+    "watch": "pnpm -r run build -- -w",
     "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "sh scripts/e2e.sh",
     "test:e2e": "sh scripts/e2eTestsOnVsix/test.sh",
