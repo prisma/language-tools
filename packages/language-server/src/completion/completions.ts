@@ -915,10 +915,14 @@ function getSuggestionsForAttribute(
     // document: TextDocument
   }, // eslint-disable-line @typescript-eslint/no-unused-vars
 ): CompletionList | undefined {
-  const firstWordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
-  const secondWordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 2]
-  const wordBeforePosition = firstWordBeforePosition === '' ? secondWordBeforePosition : firstWordBeforePosition
-  const stringTilPosition = untrimmedCurrentLine.slice(0, position.character).trim()
+  const firstWordBeforePosition =
+    wordsBeforePosition[wordsBeforePosition.length - 1]
+  const secondWordBeforePosition =
+    wordsBeforePosition[wordsBeforePosition.length - 2]
+  const wordBeforePosition =
+    firstWordBeforePosition === ''
+      ? secondWordBeforePosition
+      : firstWordBeforePosition
 
   let suggestions: CompletionItem[] = []
   // create deep copy with klona
@@ -951,9 +955,22 @@ function getSuggestionsForAttribute(
       }
     }
 
-    if (isInsideGivenProperty(untrimmedCurrentLine, wordsBeforePosition, 'references', position)) {
-      const referencedModelName = wordsBeforePosition[1].replace('?', '')
-      const referencedBlock = getModelOrTypeOrEnumBlock(referencedModelName, lines)
+    if (
+      isInsideGivenProperty(
+        untrimmedCurrentLine,
+        wordsBeforePosition,
+        'references',
+        position,
+      )
+    ) {
+      // Get the name by potentially removing ? and [] from Foo? or Foo[]
+      const referencedModelName = wordsBeforePosition[1]
+        .replace('?', '')
+        .replace('[]', '')
+      const referencedBlock = getModelOrTypeOrEnumBlock(
+        referencedModelName,
+        lines,
+      )
       // referenced model does not exist
       // TODO type?
       if (!referencedBlock || referencedBlock.type !== 'model') {
@@ -1100,69 +1117,61 @@ function getSuggestionsForAttribute(
     }
   }
 
-  // Example: @relation(fields: [authorId], references: [id], |)
-  if (stringTilPosition.endsWith(',')) {
-    // Check which attributes are already present
-    // so we can filter them out from the suggestions
-    const attributesFound: Set<string> = new Set()
+  // Check which attributes are already present
+  // so we can filter them out from the suggestions
+  const attributesFound: Set<string> = new Set()
 
-    for (const word of wordsBeforePosition) {
-      if (word.includes('references')) {
-        attributesFound.add('references')
-      }
-      if (word.includes('fields')) {
-        attributesFound.add('fields')
-      }
-      if (word.includes('onUpdate')) {
-        attributesFound.add('onUpdate')
-      }
-      if (word.includes('onDelete')) {
-        attributesFound.add('onDelete')
-      }
-      if (word.includes('map')) {
-        attributesFound.add('map')
-      }
-      if (word.includes('name') || /".*"/.exec(word)) {
-        attributesFound.add('name')
-        attributesFound.add('""')
-      }
-      if (word.includes('type')) {
-        attributesFound.add('type')
-      }
+  for (const word of wordsBeforePosition) {
+    if (word.includes('references')) {
+      attributesFound.add('references')
     }
-
-    // now filter them out of the suggestions as they are already present
-    const filteredSuggestions: CompletionItem[] = suggestions.reduce(
-      (accumulator: CompletionItem[] & unknown[], sugg) => {
-        let suggestionMatch = false
-        for (const attribute of attributesFound) {
-          if (sugg.label.includes(attribute)) {
-            suggestionMatch = true
-          }
-        }
-
-        if (!suggestionMatch) {
-          accumulator.push(sugg)
-        }
-
-        return accumulator
-      },
-      [],
-    )
-
-    // nothing to present any more, return
-    if (filteredSuggestions.length === 0) {
-      return
+    if (word.includes('fields')) {
+      attributesFound.add('fields')
     }
-
-    return {
-      items: filteredSuggestions,
-      isIncomplete: false,
+    if (word.includes('onUpdate')) {
+      attributesFound.add('onUpdate')
+    }
+    if (word.includes('onDelete')) {
+      attributesFound.add('onDelete')
+    }
+    if (word.includes('map')) {
+      attributesFound.add('map')
+    }
+    if (word.includes('name') || /".*"/.exec(word)) {
+      attributesFound.add('name')
+      attributesFound.add('""')
+    }
+    if (word.includes('type')) {
+      attributesFound.add('type')
     }
   }
 
+  // now filter them out of the suggestions as they are already present
+  const filteredSuggestions: CompletionItem[] = suggestions.reduce(
+    (accumulator: CompletionItem[] & unknown[], sugg) => {
+      let suggestionMatch = false
+      for (const attribute of attributesFound) {
+        if (sugg.label.includes(attribute)) {
+          suggestionMatch = true
+        }
+      }
+
+      if (!suggestionMatch) {
+        accumulator.push(sugg)
+      }
+
+      return accumulator
+    },
+    [],
+  )
+
+  // nothing to present any more, return
+  if (filteredSuggestions.length === 0) {
+    return
+  }
+
   return {
-    items: suggestions,
+    items: filteredSuggestions,
     isIncomplete: false,
   }
 }

@@ -79,6 +79,7 @@ suite('Completions', function () {
 
   const mongoDBAtdefaultUri = 'completions/mongodb_@default().prisma'
   const mongoDBFieldTypes = 'completions/mongodb_field_types.prisma'
+  const mongoDBEmbeddedM2mUri = 'completions/mongodb_embedded_m2m.prisma'
 
   // used both in generator and datasource
   const fieldProvider = {
@@ -973,6 +974,20 @@ suite('Completions', function () {
               { label: 'id', kind: CompletionItemKind.Field },
               { label: 'items', kind: CompletionItemKind.Field },
               { label: 'total', kind: CompletionItemKind.Field },
+            ],
+          },
+        )
+      })
+      test('MongoDB: embedded m2m @relation(references: [|])', () => {
+        assertCompletion(
+          mongoDBEmbeddedM2mUri,
+          { line: 13, character: 58 },
+          {
+            isIncomplete: false,
+            items: [
+              { label: 'id', kind: CompletionItemKind.Field },
+              { label: 'bar_ids', kind: CompletionItemKind.Field },
+              { label: 'bar', kind: CompletionItemKind.Field },
             ],
           },
         )
