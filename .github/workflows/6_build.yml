@@ -57,7 +57,7 @@ jobs:
       - name: Delete root node_modules
         run: rm -rf node_modules
       - name: Install Dependencies in ./packages/vscode
-        run: cd packages/vscode && npm install
+        run: cd packages/vscode && npm install --workspaces=false
       - name: Build vsix
         run: cd packages/vscode && npm run package
 
