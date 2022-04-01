@@ -47,12 +47,15 @@ jobs:
           echo ${{github.event.inputs.trigger_reason}}
 
       # Build the extension
-      - name: Install Dependencies in ./vscode
-        run: cd packages/vscode && npm install
+      - name: Install Dependencies
+        run: npm install
       - name: Build all packages
         run: npm run compile
       - name: Replace Readme for marketplace
         run: node scripts/change_readme.js ${{ github.event.inputs.npm_channel }}
+      # This is done like this (cd & install) because vsce is very picky on what it expects
+      - name: Install Dependencies in ./packages/vscode
+        run: cd packages/vscode && npm install
       - name: Build vsix
         run: cd packages/vscode && npm run package
 
