@@ -34,12 +34,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-      - name: Install Dependencies in Language Server
-        run: cd packages/language-server && npm install
+      - name: Install Dependencies
+        run: npm install
       - name: Build Language Server
-        run: cd packages/language-server && npm run build
+        run: npm run build --workspace @prisma/language-server
       - name: Run Language Server tests
-        run: cd packages/language-server && npm test
+        run: npm run test --workspace @prisma/language-server
 
   bump:
     name: Bump Language Server version
@@ -61,12 +61,12 @@ jobs:
           echo ${{github.event.inputs.extension_version}}
           echo ${{github.event.inputs.branch}}
           echo ${{github.event.inputs.trigger_reason}}
-      - name: Install Dependencies in Language Server
-        run: cd packages/language-server && npm install
+      - name: Install Dependencies
+        run: npm install
       - name: Build Language Server
-        run: cd packages/language-server && npm run build
+        run: npm run build --workspace @prisma/language-server
       - name: Publish Language Server to npm
-        run: cd packages/language-server && npm publish --tag ${{ github.event.inputs.npm_channel }} --access public
+        run: npm publish --workspace @prisma/language-server --tag ${{ github.event.inputs.npm_channel }} --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

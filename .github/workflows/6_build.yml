@@ -53,7 +53,7 @@ jobs:
       - name: Replace Readme for marketplace
         run: node scripts/change_readme.js ${{ github.event.inputs.npm_channel }}
       - name: Build vsix
-        run: cd packages/vscode && npm run package
+        run: npm run package --workspace prisma-insider
 
       # Create GitHub Release and upload built result as asset
       - name: Get git tag and asset name
