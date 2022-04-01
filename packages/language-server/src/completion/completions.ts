@@ -1092,7 +1092,10 @@ function getSuggestionsForAttribute(
         position,
       )
     ) {
-      const referencedModelName = wordsBeforePosition[1].replace('?', '')
+      // Get the name by potentially removing ? and [] from Foo? or Foo[]
+      const referencedModelName = wordsBeforePosition[1]
+        .replace('?', '')
+        .replace('[]', '')
       const referencedBlock = getModelOrTypeOrEnumBlock(
         referencedModelName,
         lines,
