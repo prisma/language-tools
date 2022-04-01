@@ -35,6 +35,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
+          cache: 'npm'
       - name: Print inputs
         run: |
           echo ${{github.event.inputs.asset_name}}
@@ -87,6 +88,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
+          cache: 'npm'
       - name: Print inputs
         run: |
           echo ${{github.event.inputs.trigger_reason}}

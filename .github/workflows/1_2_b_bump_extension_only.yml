@@ -26,6 +26,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
+          cache: 'npm'
       - name: Install Dependencies
         run: npm install
       - name: Extract branch name # needed because github.ref will contain sth like refs/heads/2.6.x, so pushing to that will fail
