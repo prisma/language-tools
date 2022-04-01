@@ -29,7 +29,7 @@
     "build": "tsc -p ./",
     "watch": "npm run build -- -w",
     "test": "rm -rf ./dist && npm run build && node dist/src/__test__/runTest true",
-    "vscode:prepublish": "cd .. && cd .. && tsc --build --clean && npm run compile",
+    "vscode:prepublish": "npm run build",
     "package": "vsce package"
   },
   "main": "./dist/src/extension.js",
