@@ -9,7 +9,7 @@
     "npm": ">=7"
   },
   "workspaces": [
-    "packages/*"
+    "./packages/*"
   ],
   "devDependencies": {
     "@actions/github": "5.0.0",
@@ -34,10 +34,9 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "postinstall": "cd packages/language-server && npm install && cd ../vscode && npm install && cd .. && cd .. ",
     "format": "prettier \"packages/**/*.{ts,js,json,md}\" --write",
     "lint": "eslint \"packages/**/*.{js,ts}\" --fix",
-    "compile": "cd packages/language-server && npm run build && cd ../vscode && npm run build && cd .. && cd ..",
+    "compile": "npm run build --workspaces",
     "watch": "npm run build -- -w",
     "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "sh scripts/e2e.sh",
