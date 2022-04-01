@@ -2,15 +2,16 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es2018",
-    "lib": ["es2018"],
-    "outDir": "dist",
     "noUnusedLocals": true,
+    "target": "es6",
+    "outDir": "dist",
+    "lib": ["es6"],
     "sourceMap": true,
     "esModuleInterop": true,
     "strict": true,
     "composite": true,
     "declaration": true
   },
-  "include": ["src/**/*"]
+  "include": ["src"],
+  "exclude": ["node_modules", ".vscode-test"]
 }

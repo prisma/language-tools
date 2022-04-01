@@ -29,23 +29,21 @@
               npm --version
               echo -n 'node --version: '
               node --version
-              echo -n 'pnpm --version: '
-              pnpm --version
 
               echo 'Deleting node modules...'
               nix run .#deleteNodeModules
 
               echo 'Building language-server...'
               pushd ./packages/language-server
-              pnpm install
-              pnpm -r run build
-              pnpm prune --production
+              npm install
+              npm run build
+              npm prune --production
               popd
 
               echo 'Building VSCode extension...'
               pushd ./packages/vscode
-              pnpm install
-              pnpm -r run build
+              npm install
+              npm run build
               popd
 
               echo 'ok'

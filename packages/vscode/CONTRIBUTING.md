@@ -34,8 +34,8 @@ On push to the `main` branch, a new Insider extension is released, with an incre
 
 ## Development
 
-- Run `pnpm install` in the root folder. This installs all necessary npm modules in both the vscode and language-server folder.
-- Run `pnpm run watch`.
+- Run `npm install` in the root folder. This installs all necessary npm modules in both the vscode and language-server folder.
+- Run `npm run watch`.
 - Open VS Code on this folder.
 - Switch to the debug viewlet.
 - Select `Launch VSCode extension` from the drop down.
@@ -61,7 +61,7 @@ Instructions on manual testing can be found [here](TESTING.md).
 
 End-to-End tests:
 
-- Run `pnpm install` in the root folder.
+- Run `npm install` in the root folder.
 - Open VS Code on this folder.
 - Switch to the debug viewlet.
 - Select `Integration Tests` from the drop down.
