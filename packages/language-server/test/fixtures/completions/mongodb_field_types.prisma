@@ -9,7 +9,7 @@ generator client {
 }
 
 model Post {
-  id
+  something   
 }
 
 enum PostType {

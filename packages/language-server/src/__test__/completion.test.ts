@@ -512,7 +512,7 @@ suite('Completions', function () {
     test('Diagnoses type suggestions in model block - MongoDB', () => {
       assertCompletion(
         mongoDBFieldTypes,
-        { line: 11, character: 6 },
+        { line: 11, character: 14 },
         {
           isIncomplete: true,
           items: [
@@ -531,8 +531,6 @@ suite('Completions', function () {
             { label: 'Post', kind: CompletionItemKind.Reference },
             { label: 'PostType', kind: CompletionItemKind.Reference },
             { label: 'Something', kind: CompletionItemKind.Reference },
-            { label: 'Int?', kind: CompletionItemKind.TypeParameter },
-            { label: 'Int[]', kind: CompletionItemKind.TypeParameter },
           ],
         },
       )
