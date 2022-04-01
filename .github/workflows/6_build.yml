@@ -47,14 +47,14 @@ jobs:
           echo ${{github.event.inputs.trigger_reason}}
 
       # Build the extension
-      - name: Install Dependencies
-        run: npm install
-      - name: Compile
+      - name: Install Dependencies in ./vscode
+        run: cd packages/vscode && npm install
+      - name: Build all packages
         run: npm run compile
       - name: Replace Readme for marketplace
         run: node scripts/change_readme.js ${{ github.event.inputs.npm_channel }}
       - name: Build vsix
-        run: npm run package --workspace prisma-insider
+        run: cd packages/vscode && npm run package
 
       # Create GitHub Release and upload built result as asset
       - name: Get git tag and asset name
