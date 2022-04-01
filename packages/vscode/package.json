@@ -31,7 +31,7 @@
     "build:clean": "tsc --build --clean",
     "watch": "pnpm run build -- -w",
     "test": "rm -rf ./dist && pnpm run build && node dist/src/__test__/runTest true",
-    "vscode:prepublish": "pnpm -r run build",
+    "vscode:prepublish": "pnpm -r run build:clean",
     "package": "vsce package"
   },
   "main": "./dist/src/extension.js",
