@@ -53,13 +53,8 @@ jobs:
         run: npm run compile
       - name: Replace Readme for marketplace
         run: node scripts/change_readme.js ${{ github.event.inputs.npm_channel }}
-      # This is done like this (cd & install) because vsce is very picky on what it expects
-      - name: Delete root node_modules
-        run: rm -rf node_modules
-      - name: Install Dependencies in ./packages/vscode
-        run: cd packages/vscode && npm install --workspaces=false
       - name: Build vsix
-        run: cd packages/vscode && npm run package
+        run: npm --workspace prisma-insider run package -- --yarn
 
       # Create GitHub Release and upload built result as asset
       - name: Get git tag and asset name
