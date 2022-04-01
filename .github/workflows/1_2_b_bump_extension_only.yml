@@ -29,8 +29,6 @@ jobs:
         with:
           cache: 'pnpm'
           node-version: '16'
-      - name: Install Dependencies
-        run: pnpm install
       - name: Extract branch name # needed because github.ref will contain sth like refs/heads/2.6.x, so pushing to that will fail
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
