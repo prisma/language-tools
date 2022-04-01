@@ -56,7 +56,7 @@ jobs:
       - name: Replace Readme for marketplace
         run: node scripts/change_readme.js ${{ github.event.inputs.npm_channel }}
       - name: Build vsix
-        run: pnpm --filter "prisma-insider" package
+        run: pnpm --filter "vscode" package
 
       # Create GitHub Release and upload built result as asset
       - name: Get git tag and asset name
