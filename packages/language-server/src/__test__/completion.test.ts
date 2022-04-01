@@ -1,21 +1,12 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { handleCompletionRequest } from '../MessageHandler'
-import {
-  CompletionList,
-  CompletionParams,
-  Position,
-  CompletionItemKind,
-} from 'vscode-languageserver'
+import { CompletionList, CompletionParams, Position, CompletionItemKind } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
 
 /* eslint-disable @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-misused-promises */
 
-function assertCompletion(
-  fixturePath: string,
-  position: Position,
-  expected: CompletionList,
-): void {
+function assertCompletion(fixturePath: string, position: Position, expected: CompletionList): void {
   const document: TextDocument = getTextDocument(fixturePath)
 
   const params: CompletionParams = {
@@ -26,10 +17,7 @@ function assertCompletion(
     },
   }
 
-  const completionResult: CompletionList | undefined = handleCompletionRequest(
-    params,
-    document,
-  )
+  const completionResult: CompletionList | undefined = handleCompletionRequest(params, document)
 
   assert.ok(completionResult !== undefined)
 
@@ -58,9 +46,11 @@ mapped items => item.kind`,
     completionResult.items.length,
     expected.items.length,
     `Line ${position.line} - Character ${position.character}
-Expected ${expected.items.length} suggestions and got ${
-      completionResult.items.length
-    }: ${JSON.stringify(completionResult.items, undefined, 2)}`, // TODO: This is missing the output of `expected.items` so one can compare
+Expected ${expected.items.length} suggestions and got ${completionResult.items.length}: ${JSON.stringify(
+      completionResult.items,
+      undefined,
+      2,
+    )}`, // TODO: This is missing the output of `expected.items` so one can compare
   )
 
   assert.deepStrictEqual(
@@ -83,14 +73,12 @@ suite('Completions', function () {
     'completions/relationDirectiveSqlserverReferentialActions.prisma'
   const namedConstraintsUri = 'completions/namedConstraints.prisma'
 
-  const fullTextIndex_extendedIndexes_mongodb =
-    'completions/fullTextIndex_extendedIndexes_mongodb.prisma'
-  const fullTextIndex_extendedIndexes_postgresql =
-    'completions/fullTextIndex_extendedIndexes_postgresql.prisma'
-  const fullTextIndex_extendedIndexes_mysql =
-    'completions/fullTextIndex_extendedIndexes_mysql.prisma'
+  const fullTextIndex_extendedIndexes_mongodb = 'completions/fullTextIndex_extendedIndexes_mongodb.prisma'
+  const fullTextIndex_extendedIndexes_postgresql = 'completions/fullTextIndex_extendedIndexes_postgresql.prisma'
+  const fullTextIndex_extendedIndexes_mysql = 'completions/fullTextIndex_extendedIndexes_mysql.prisma'
 
   const mongoDBAtdefaultUri = 'completions/mongodb_@default().prisma'
+  const mongoDBFieldTypes = 'completions/mongodb_field_types.prisma'
 
   // used both in generator and datasource
   const fieldProvider = {
@@ -282,21 +270,13 @@ suite('Completions', function () {
         { line: 5, character: 0 },
         {
           isIncomplete: false,
-          items: [
-            fieldProvider,
-            fieldOutput,
-            fieldBinaryTargets,
-            fieldPreviewFeatures,
-            fieldEngineType,
-          ],
+          items: [fieldProvider, fieldOutput, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
         },
       )
     })
 
-    const generatorWithExistingFieldsUri =
-      'completions/generatorWithExistingFields.prisma'
-    const generatorWithdataProxyPreviewFeature =
-      'completions/generatorWithdataProxyPreviewFeature.prisma'
+    const generatorWithExistingFieldsUri = 'completions/generatorWithExistingFields.prisma'
+    const generatorWithdataProxyPreviewFeature = 'completions/generatorWithdataProxyPreviewFeature.prisma'
 
     test('Diagnoses generator field suggestions with existing fields', () => {
       assertCompletion(
@@ -304,12 +284,7 @@ suite('Completions', function () {
         { line: 2, character: 0 },
         {
           isIncomplete: false,
-          items: [
-            fieldOutput,
-            fieldBinaryTargets,
-            fieldPreviewFeatures,
-            fieldEngineType,
-          ],
+          items: [fieldOutput, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
         },
       )
       assertCompletion(
@@ -317,12 +292,7 @@ suite('Completions', function () {
         { line: 7, character: 0 },
         {
           isIncomplete: false,
-          items: [
-            fieldProvider,
-            fieldBinaryTargets,
-            fieldPreviewFeatures,
-            fieldEngineType,
-          ],
+          items: [fieldProvider, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
         },
       )
     })
@@ -419,13 +389,7 @@ suite('Completions', function () {
         { line: 9, character: 0 },
         {
           isIncomplete: false,
-          items: [
-            blockAttributeMap,
-            blockAttributeId,
-            blockAttributeUnique,
-            blockAttributeIndex,
-            blockAttributeIgnore,
-          ],
+          items: [blockAttributeMap, blockAttributeId, blockAttributeUnique, blockAttributeIndex, blockAttributeIgnore],
         },
       )
     })
@@ -436,13 +400,7 @@ suite('Completions', function () {
         { line: 5, character: 0 },
         {
           isIncomplete: false,
-          items: [
-            blockAttributeMap,
-            blockAttributeId,
-            blockAttributeUnique,
-            blockAttributeIndex,
-            blockAttributeIgnore,
-          ],
+          items: [blockAttributeMap, blockAttributeId, blockAttributeUnique, blockAttributeIndex, blockAttributeIgnore],
         },
       )
       assertCompletion(
@@ -450,12 +408,7 @@ suite('Completions', function () {
         { line: 14, character: 0 },
         {
           isIncomplete: false,
-          items: [
-            blockAttributeMap,
-            blockAttributeUnique,
-            blockAttributeIndex,
-            blockAttributeIgnore,
-          ],
+          items: [blockAttributeMap, blockAttributeUnique, blockAttributeIndex, blockAttributeIgnore],
         },
       )
     })
@@ -551,6 +504,35 @@ suite('Completions', function () {
             { label: 'DateTest', kind: CompletionItemKind.Reference },
             { label: 'UserType', kind: CompletionItemKind.Reference },
             { label: 'ForthUser', kind: CompletionItemKind.Reference },
+          ],
+        },
+      )
+    })
+
+    test('Diagnoses type suggestions in model block - MongoDB', () => {
+      assertCompletion(
+        mongoDBFieldTypes,
+        { line: 11, character: 6 },
+        {
+          isIncomplete: true,
+          items: [
+            { label: 'String', kind: CompletionItemKind.TypeParameter },
+            { label: 'Boolean', kind: CompletionItemKind.TypeParameter },
+            { label: 'Int', kind: CompletionItemKind.TypeParameter },
+            { label: 'Float', kind: CompletionItemKind.TypeParameter },
+            { label: 'DateTime', kind: CompletionItemKind.TypeParameter },
+            { label: 'Json', kind: CompletionItemKind.TypeParameter },
+            { label: 'Bytes', kind: CompletionItemKind.TypeParameter },
+            { label: 'BigInt', kind: CompletionItemKind.TypeParameter },
+            {
+              label: 'Unsupported',
+              kind: CompletionItemKind.TypeParameter,
+            },
+            { label: 'Post', kind: CompletionItemKind.Reference },
+            { label: 'PostType', kind: CompletionItemKind.Reference },
+            { label: 'Something', kind: CompletionItemKind.Reference },
+            { label: 'Int?', kind: CompletionItemKind.TypeParameter },
+            { label: 'Int[]', kind: CompletionItemKind.TypeParameter },
           ],
         },
       )
@@ -1003,14 +985,7 @@ suite('Completions', function () {
           { line: 30, character: 44 },
           {
             isIncomplete: false,
-            items: [
-              fieldsProperty,
-              onDeleteProperty,
-              onUpdateProperty,
-              nameQuotesProperty,
-              nameProperty,
-              mapProperty,
-            ],
+            items: [fieldsProperty, onDeleteProperty, onUpdateProperty, nameQuotesProperty, nameProperty, mapProperty],
           },
         )
       })
@@ -1053,13 +1028,7 @@ suite('Completions', function () {
           { line: 57, character: 62 },
           {
             isIncomplete: false,
-            items: [
-              onDeleteProperty,
-              onUpdateProperty,
-              nameQuotesProperty,
-              nameProperty,
-              mapProperty,
-            ],
+            items: [onDeleteProperty, onUpdateProperty, nameQuotesProperty, nameProperty, mapProperty],
           },
         )
       })
