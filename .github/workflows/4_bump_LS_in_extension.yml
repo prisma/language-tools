@@ -48,7 +48,7 @@ jobs:
         run: |
           node scripts/update_package_json_files.js ${{ github.event.inputs.extension_version }}
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install
       - name: Setup Git
         run: |
           sh scripts/set_git_credentials.sh

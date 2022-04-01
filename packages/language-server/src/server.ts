@@ -14,7 +14,11 @@ import {
   DidChangeConfigurationNotification,
   Connection,
 } from 'vscode-languageserver'
-import { createConnection, IPCMessageReader, IPCMessageWriter } from 'vscode-languageserver/node'
+import {
+  createConnection,
+  IPCMessageReader,
+  IPCMessageWriter,
+} from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
 import * as util from './prisma-fmt/util'
@@ -26,7 +30,10 @@ function getConnection(options?: LSOptions): Connection {
   if (!connection) {
     connection = process.argv.includes('--stdio')
       ? createConnection(process.stdin, process.stdout)
-      : createConnection(new IPCMessageReader(process), new IPCMessageWriter(process))
+      : createConnection(
+          new IPCMessageReader(process),
+          new IPCMessageWriter(process),
+        )
   }
   return connection
 }
@@ -43,16 +50,16 @@ export function startServer(options?: LSOptions): void {
   // Source code: https://github.com/microsoft/vscode-languageserver-node/blob/main/server/src/common/server.ts#L1044
   const connection: Connection = getConnection(options)
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   console.log = connection.console.log.bind(connection.console)
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   console.error = connection.console.error.bind(connection.console)
 
   const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
   connection.onInitialize((params: InitializeParams) => {
     // Logging first...
-    connection.console.info(`Default version of Prisma 'prisma-fmt': ${util.getVersion()}`)
+    connection.console.info(
+      `Default version of Prisma 'prisma-fmt': ${util.getVersion()}`,
+    )
 
     connection.console.info(
       // eslint-disable-next-line
@@ -66,7 +73,9 @@ export function startServer(options?: LSOptions): void {
     // ... and then capabilities of the language server
     const capabilities = params.capabilities
 
-    hasCodeActionLiteralsCapability = Boolean(capabilities?.textDocument?.codeAction?.codeActionLiteralSupport)
+    hasCodeActionLiteralsCapability = Boolean(
+      capabilities?.textDocument?.codeAction?.codeActionLiteralSupport,
+    )
     hasConfigurationCapability = Boolean(capabilities?.workspace?.configuration)
 
     const result: InitializeResult = {
@@ -95,7 +104,10 @@ export function startServer(options?: LSOptions): void {
     if (hasConfigurationCapability) {
       // Register for all configuration changes.
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      connection.client.register(DidChangeConfigurationNotification.type, undefined)
+      connection.client.register(
+        DidChangeConfigurationNotification.type,
+        undefined,
+      )
     }
   })
 
@@ -105,7 +117,10 @@ export function startServer(options?: LSOptions): void {
   // let globalSettings: LSSettings = defaultSettings // eslint-disable-line
 
   // Cache the settings of all open documents
-  const documentSettings: Map<string, Thenable<LSSettings>> = new Map<string, Thenable<LSSettings>>()
+  const documentSettings: Map<string, Thenable<LSSettings>> = new Map<
+    string,
+    Thenable<LSSettings>
+  >()
 
   // eslint-disable-line @typescript-eslint/no-unused-vars
   connection.onDidChangeConfiguration((change) => {
@@ -146,9 +161,12 @@ export function startServer(options?: LSOptions): void {
   // }
 
   function validateTextDocument(textDocument: TextDocument) {
-    const diagnostics: Diagnostic[] = MessageHandler.handleDiagnosticsRequest(textDocument, (errorMessage: string) => {
-      connection.window.showErrorMessage(errorMessage)
-    })
+    const diagnostics: Diagnostic[] = MessageHandler.handleDiagnosticsRequest(
+      textDocument,
+      (errorMessage: string) => {
+        connection.window.showErrorMessage(errorMessage)
+      },
+    )
     connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
   }
 
@@ -183,7 +201,9 @@ export function startServer(options?: LSOptions): void {
   // TODO remove or experiment new file watcher
   connection.onDidChangeWatchedFiles(() => {
     // Monitored files have changed in VS Code
-    connection.console.log(`Types have changed. Sending request to restart TS Language Server.`)
+    connection.console.log(
+      `Types have changed. Sending request to restart TS Language Server.`,
+    )
     // Restart TS Language Server
     connection.sendNotification('prisma/didChangeWatchedFiles', {})
   })
@@ -198,9 +218,13 @@ export function startServer(options?: LSOptions): void {
   connection.onDocumentFormatting((params: DocumentFormattingParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      return MessageHandler.handleDocumentFormatting(params, doc, (errorMessage: string) => {
-        connection.window.showErrorMessage(errorMessage)
-      })
+      return MessageHandler.handleDocumentFormatting(
+        params,
+        doc,
+        (errorMessage: string) => {
+          connection.window.showErrorMessage(errorMessage)
+        },
+      )
     }
   })
 
