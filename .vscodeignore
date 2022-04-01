@@ -1,8 +1,0 @@
-.vscode/**
-.vscode-test/**
-.gitignore
-**/tsconfig.json
-src
-fixtures
-.eslintignore
-.prettierignore

@@ -3,6 +3,5 @@
 .gitignore
 **/tsconfig.json
 src
-fixtures
 .eslintignore
 .prettierignore
