@@ -78,6 +78,7 @@ suite('Completions', function () {
   const fullTextIndex_extendedIndexes_mysql = 'completions/fullTextIndex_extendedIndexes_mysql.prisma'
 
   const mongoDBAtdefaultUri = 'completions/mongodb_@default().prisma'
+  const mongoDBFieldTypes = 'completions/mongodb_field_types.prisma'
   const mongoDBEmbeddedM2mUri = 'completions/mongodb_embedded_m2m.prisma'
 
   // used both in generator and datasource
@@ -504,6 +505,33 @@ suite('Completions', function () {
             { label: 'DateTest', kind: CompletionItemKind.Reference },
             { label: 'UserType', kind: CompletionItemKind.Reference },
             { label: 'ForthUser', kind: CompletionItemKind.Reference },
+          ],
+        },
+      )
+    })
+
+    test('Diagnoses type suggestions in model block - MongoDB', () => {
+      assertCompletion(
+        mongoDBFieldTypes,
+        { line: 11, character: 14 },
+        {
+          isIncomplete: true,
+          items: [
+            { label: 'String', kind: CompletionItemKind.TypeParameter },
+            { label: 'Boolean', kind: CompletionItemKind.TypeParameter },
+            { label: 'Int', kind: CompletionItemKind.TypeParameter },
+            { label: 'Float', kind: CompletionItemKind.TypeParameter },
+            { label: 'DateTime', kind: CompletionItemKind.TypeParameter },
+            { label: 'Json', kind: CompletionItemKind.TypeParameter },
+            { label: 'Bytes', kind: CompletionItemKind.TypeParameter },
+            { label: 'BigInt', kind: CompletionItemKind.TypeParameter },
+            {
+              label: 'Unsupported',
+              kind: CompletionItemKind.TypeParameter,
+            },
+            { label: 'Post', kind: CompletionItemKind.Reference },
+            { label: 'PostType', kind: CompletionItemKind.Reference },
+            { label: 'Something', kind: CompletionItemKind.Reference },
           ],
         },
       )

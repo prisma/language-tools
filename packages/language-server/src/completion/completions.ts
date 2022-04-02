@@ -1,10 +1,4 @@
-import {
-  CompletionItem,
-  CompletionList,
-  CompletionItemKind,
-  Position,
-  MarkupKind,
-} from 'vscode-languageserver'
+import { CompletionItem, CompletionList, CompletionItemKind, Position, MarkupKind } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import {
   blockAttributes,
@@ -30,23 +24,15 @@ import {
 import { klona } from 'klona'
 import { extractModelName } from '../rename/renameUtil'
 import previewFeatures from '../prisma-fmt/previewFeatures'
-import nativeTypeConstructors, {
-  NativeTypeConstructors,
-} from '../prisma-fmt/nativeTypes'
+import nativeTypeConstructors, { NativeTypeConstructors } from '../prisma-fmt/nativeTypes'
 import { Block, BlockType, getModelOrTypeOrEnumBlock } from '../util'
 import { PreviewFeatures } from '../previewFeatures'
 
-function toCompletionItems(
-  allowedTypes: string[],
-  kind: CompletionItemKind,
-): CompletionItem[] {
+function toCompletionItems(allowedTypes: string[], kind: CompletionItemKind): CompletionItem[] {
   return allowedTypes.map((label) => ({ label, kind }))
 }
 
-export function isInsideFieldArgument(
-  currentLineUntrimmed: string,
-  position: Position,
-): boolean {
+export function isInsideFieldArgument(currentLineUntrimmed: string, position: Position): boolean {
   const symbols = '()'
   let numberOfOpenBrackets = 0
   let numberOfClosedBrackets = 0
@@ -57,19 +43,13 @@ export function isInsideFieldArgument(
       numberOfClosedBrackets++
     }
   }
-  return (
-    numberOfOpenBrackets >= 2 && numberOfOpenBrackets > numberOfClosedBrackets
-  )
+  return numberOfOpenBrackets >= 2 && numberOfOpenBrackets > numberOfClosedBrackets
 }
 
 /***
  * @param symbols expects e.g. '()', '[]' or '""'
  */
-export function isInsideAttribute(
-  currentLineUntrimmed: string,
-  position: Position,
-  symbols: string,
-): boolean {
+export function isInsideAttribute(currentLineUntrimmed: string, position: Position, symbols: string): boolean {
   let numberOfOpenBrackets = 0
   let numberOfClosedBrackets = 0
   for (let i = 0; i < position.character; i++) {
@@ -86,10 +66,7 @@ export function isInsideAttribute(
  * Checks if inside e.g. "here"
  * Does not check for escaped quotation marks.
  */
-export function isInsideQuotationMark(
-  currentLineUntrimmed: string,
-  position: Position,
-): boolean {
+export function isInsideQuotationMark(currentLineUntrimmed: string, position: Position): boolean {
   let insideQuotation = false
   for (let i = 0; i < position.character; i++) {
     if (currentLineUntrimmed[i] === '"') {
@@ -99,10 +76,7 @@ export function isInsideQuotationMark(
   return insideQuotation
 }
 
-export function getSymbolBeforePosition(
-  document: TextDocument,
-  position: Position,
-): string {
+export function getSymbolBeforePosition(document: TextDocument, position: Position): string {
   return document.getText({
     start: {
       line: position.line,
@@ -120,16 +94,10 @@ export function positionIsAfterFieldAndType(
   const symbolBeforePosition = getSymbolBeforePosition(document, position)
   const symbolBeforeIsWhiteSpace = symbolBeforePosition.search(/\s/)
 
-  const hasAtRelation =
-    wordsBeforePosition.length === 2 && symbolBeforePosition === '@'
-  const hasWhiteSpaceBeforePosition =
-    wordsBeforePosition.length === 2 && symbolBeforeIsWhiteSpace !== -1
+  const hasAtRelation = wordsBeforePosition.length === 2 && symbolBeforePosition === '@'
+  const hasWhiteSpaceBeforePosition = wordsBeforePosition.length === 2 && symbolBeforeIsWhiteSpace !== -1
 
-  return (
-    wordsBeforePosition.length > 2 ||
-    hasAtRelation ||
-    hasWhiteSpaceBeforePosition
-  )
+  return wordsBeforePosition.length > 2 || hasAtRelation || hasWhiteSpaceBeforePosition
 }
 
 /**
@@ -155,27 +123,18 @@ function removeInvalidAttributeSuggestions(
 
     // TODO we should also remove the other suggestions if used (default()...)
     if (item.includes('@id')) {
-      supportedAttributes = supportedAttributes.filter(
-        (attribute) => !attribute.label.includes('id'),
-      )
+      supportedAttributes = supportedAttributes.filter((attribute) => !attribute.label.includes('id'))
     }
   }
   return supportedAttributes
 }
 
-function getSuggestionForModelBlockAttribute(
-  block: Block,
-  lines: string[],
-): CompletionItem[] {
+function getSuggestionForModelBlockAttribute(block: Block, lines: string[]): CompletionItem[] {
   if (block.type !== 'model') {
     return []
   }
   // create deep copy
-  const suggestions: CompletionItem[] = removeInvalidAttributeSuggestions(
-    klona(blockAttributes),
-    block,
-    lines,
-  )
+  const suggestions: CompletionItem[] = removeInvalidAttributeSuggestions(klona(blockAttributes), block, lines)
 
   // We can filter on the datasource
   const datasourceProvider = getFirstDatasourceProvider(lines)
@@ -215,10 +174,7 @@ export function getSuggestionForNativeTypes(
   }
 
   const datasourceName = getFirstDatasourceName(lines)
-  if (
-    !datasourceName ||
-    wordsBeforePosition[wordsBeforePosition.length - 1] !== `@${datasourceName}`
-  ) {
+  if (!datasourceName || wordsBeforePosition[wordsBeforePosition.length - 1] !== `@${datasourceName}`) {
     return undefined
   }
 
@@ -265,8 +221,7 @@ export function getSuggestionForFieldAttribute(
         })
       } else if (
         // Check that we are not separated by a space like `@db. |`
-        wordsBeforePosition[wordsBeforePosition.length - 1] ===
-        `@${datasourceName}`
+        wordsBeforePosition[wordsBeforePosition.length - 1] === `@${datasourceName}`
       ) {
         suggestions.push(...nativeTypeSuggestions)
         return {
@@ -275,9 +230,7 @@ export function getSuggestionForFieldAttribute(
         }
       }
     } else {
-      console.log(
-        'Did not receive any native type suggestions from prisma-fmt call.',
-      )
+      console.log('Did not receive any native type suggestions from prisma-fmt call.')
     }
   }
 
@@ -301,42 +254,30 @@ export function getSuggestionForFieldAttribute(
 }
 
 function getFirstDatasourceName(lines: string[]): string | undefined {
-  const datasourceBlockFirstLine = lines.find(
-    (l) => l.startsWith('datasource') && l.includes('{'),
-  )
+  const datasourceBlockFirstLine = lines.find((l) => l.startsWith('datasource') && l.includes('{'))
   if (!datasourceBlockFirstLine) {
     return undefined
   }
   const indexOfBracket = datasourceBlockFirstLine.indexOf('{')
-  return datasourceBlockFirstLine
-    .slice('datasource'.length, indexOfBracket)
-    .trim()
+  return datasourceBlockFirstLine.slice('datasource'.length, indexOfBracket).trim()
 }
 
 function getFirstDatasourceProvider(lines: string[]): string | undefined {
   // matches provider inside datasource in any position
   // thanks to https://regex101.com for the online scratchpad
-  const result =
-    /datasource.*\{(\n|\N)\s*(.*\n)?\n*\s*provider\s=\s(\"(.*)\")[^}]+}/.exec(
-      lines.join('\n'),
-    )
+  const result = /datasource.*\{(\n|\N)\s*(.*\n)?\n*\s*provider\s=\s(\"(.*)\")[^}]+}/.exec(lines.join('\n'))
 
   if (!result || !result[4]) {
     return undefined
   }
 
   const datasourceProvider = result[4]
-  if (
-    typeof datasourceProvider === 'string' &&
-    datasourceProvider.length >= 1
-  ) {
+  if (typeof datasourceProvider === 'string' && datasourceProvider.length >= 1) {
     return datasourceProvider
   }
 }
 
-function getAllPreviewFeaturesFromGenerators(
-  lines: string[],
-): PreviewFeatures[] | undefined {
+function getAllPreviewFeaturesFromGenerators(lines: string[]): PreviewFeatures[] | undefined {
   // matches any `previewFeatures = [x]` in any position
   // thanks to https://regex101.com for the online scratchpad
   const previewFeaturesRegex = /previewFeatures\s=\s(\[.*\])/g
@@ -356,9 +297,7 @@ function getAllPreviewFeaturesFromGenerators(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const previewFeatures = JSON.parse(result[1])
     if (Array.isArray(previewFeatures) && previewFeatures.length > 0) {
-      return previewFeatures.map((it: string) =>
-        it.toLowerCase(),
-      ) as PreviewFeatures[]
+      return previewFeatures.map((it: string) => it.toLowerCase()) as PreviewFeatures[]
     }
   } catch (e) {}
 
@@ -389,23 +328,25 @@ export function getSuggestionsForFieldTypes(
   position: Position,
   currentLineUntrimmed: string,
 ): CompletionList {
-  // create deep copy
-  const suggestions: CompletionItem[] = klona(corePrimitiveTypes)
+  const suggestions: CompletionItem[] = []
+
+  const datasourceProvider = getFirstDatasourceProvider(lines)
+  // MongoDB doesn't support Decimal
+  if (datasourceProvider === 'mongodb') {
+    suggestions.push(...corePrimitiveTypes.filter((s) => s.label !== 'Decimal'))
+  } else {
+    suggestions.push(...corePrimitiveTypes)
+  }
+
   if (foundBlock instanceof Block) {
     // get all model names
     const modelNames: Array<string> = getAllRelationNames(lines)
-    suggestions.push(
-      ...toCompletionItems(modelNames, CompletionItemKind.Reference),
-    )
+    suggestions.push(...toCompletionItems(modelNames, CompletionItemKind.Reference))
   }
 
-  const wordsBeforePosition = currentLineUntrimmed
-    .slice(0, position.character)
-    .split(' ')
+  const wordsBeforePosition = currentLineUntrimmed.slice(0, position.character).split(' ')
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
-  const completeSuggestions = suggestions.filter(
-    (s) => s.label.length === wordBeforePosition.length,
-  )
+  const completeSuggestions = suggestions.filter((s) => s.label.length === wordBeforePosition.length)
   if (completeSuggestions.length !== 0) {
     for (const sugg of completeSuggestions) {
       suggestions.push(
@@ -460,11 +401,7 @@ function removeInvalidFieldSuggestions(
   return supportedFields
 }
 
-function getSuggestionForDataSourceField(
-  block: Block,
-  lines: Array<string>,
-  position: Position,
-): CompletionItem[] {
+function getSuggestionForDataSourceField(block: Block, lines: Array<string>, position: Position): CompletionItem[] {
   // create deep copy
   const suggestions: CompletionItem[] = klona(supportedDataSourceFields)
 
@@ -478,11 +415,7 @@ function getSuggestionForDataSourceField(
   return suggestions.filter((item) => labels.includes(item.label))
 }
 
-function getSuggestionForGeneratorField(
-  block: Block,
-  lines: Array<string>,
-  position: Position,
-): CompletionItem[] {
+function getSuggestionForGeneratorField(block: Block, lines: Array<string>, position: Position): CompletionItem[] {
   // create deep copy
   const suggestions: CompletionItem[] = klona(supportedGeneratorFields)
 
@@ -527,9 +460,7 @@ export function getSuggestionForFirstInsideBlock(
   }
 }
 
-export function getSuggestionForBlockTypes(
-  lines: Array<string>,
-): CompletionList {
+export function getSuggestionForBlockTypes(lines: Array<string>): CompletionList {
   // create deep copy
   const suggestions: CompletionItem[] = klona(allowedBlockTypes)
 
@@ -559,9 +490,7 @@ export function getSuggestionForBlockTypes(
   }
 }
 
-export function suggestEqualSymbol(
-  blockType: BlockType,
-): CompletionList | undefined {
+export function suggestEqualSymbol(blockType: BlockType): CompletionList | undefined {
   if (!(blockType == 'datasource' || blockType == 'generator')) {
     return
   }
@@ -583,9 +512,7 @@ export function getValuesInsideSquareBrackets(line: string): string[] {
 }
 
 function declaredNativeTypes(document: TextDocument): boolean {
-  const nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(
-    document.getText(),
-  )
+  const nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(document.getText())
   if (nativeTypes.length === 0) {
     return false
   }
@@ -598,24 +525,18 @@ function handlePreviewFeatures(
   currentLineUntrimmed: string,
   isInsideQuotation: boolean,
 ): CompletionList {
-  let previewFeatures: CompletionItem[] = previewFeaturesArray.map((pf) =>
-    CompletionItem.create(pf),
-  )
+  let previewFeatures: CompletionItem[] = previewFeaturesArray.map((pf) => CompletionItem.create(pf))
   if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
     if (isInsideQuotation) {
       const usedValues = getValuesInsideSquareBrackets(currentLineUntrimmed)
-      previewFeatures = previewFeatures.filter(
-        (t) => !usedValues.includes(t.label),
-      )
+      previewFeatures = previewFeatures.filter((t) => !usedValues.includes(t.label))
       return {
         items: previewFeatures,
         isIncomplete: true,
       }
     } else {
       return {
-        items: previewFeaturesArguments.filter(
-          (arg) => !arg.label.includes('['),
-        ),
+        items: previewFeaturesArguments.filter((arg) => !arg.label.includes('[')),
         isIncomplete: true,
       }
     }
@@ -627,13 +548,8 @@ function handlePreviewFeatures(
   }
 }
 
-function getNativeTypes(
-  document: TextDocument,
-  prismaType: string,
-): CompletionItem[] {
-  let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(
-    document.getText(),
-  )
+function getNativeTypes(document: TextDocument, prismaType: string): CompletionItem[] {
+  let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(document.getText())
 
   if (nativeTypes.length === 0) {
     return []
@@ -677,10 +593,7 @@ export function getSuggestionForSupportedFields(
   lines: string[],
 ): CompletionList | undefined {
   let suggestions: Array<string> = []
-  const isInsideQuotation: boolean = isInsideQuotationMark(
-    currentLineUntrimmed,
-    position,
-  )
+  const isInsideQuotation: boolean = isInsideQuotationMark(currentLineUntrimmed, position)
 
   switch (blockType) {
     case 'generator':
@@ -703,12 +616,7 @@ export function getSuggestionForSupportedFields(
       if (currentLine.startsWith('previewFeatures')) {
         const generatorPreviewFeatures: string[] = previewFeatures()
         if (generatorPreviewFeatures.length > 0) {
-          return handlePreviewFeatures(
-            generatorPreviewFeatures,
-            position,
-            currentLineUntrimmed,
-            isInsideQuotation,
-          )
+          return handlePreviewFeatures(generatorPreviewFeatures, position, currentLineUntrimmed, isInsideQuotation)
         }
       }
       // engineType
@@ -726,9 +634,7 @@ export function getSuggestionForSupportedFields(
           } else {
             // filter out dataproxy engineType
             return {
-              items: engineTypesCompletion.filter(
-                (arg) => arg.label !== 'dataproxy',
-              ),
+              items: engineTypesCompletion.filter((arg) => arg.label !== 'dataproxy'),
               isIncomplete: true,
             }
           }
@@ -748,8 +654,7 @@ export function getSuggestionForSupportedFields(
         if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
           // return providers that haven't been used yet
           if (isInsideQuotation) {
-            const usedValues =
-              getValuesInsideSquareBrackets(currentLineUntrimmed)
+            const usedValues = getValuesInsideSquareBrackets(currentLineUntrimmed)
             providers = providers.filter((t) => !usedValues.includes(t.label))
             return {
               items: providers,
@@ -757,9 +662,7 @@ export function getSuggestionForSupportedFields(
             }
           } else {
             return {
-              items: dataSourceProviderArguments.filter(
-                (arg) => !arg.label.includes('['),
-              ),
+              items: dataSourceProviderArguments.filter((arg) => !arg.label.includes('[')),
               isIncomplete: true,
             }
           }
@@ -782,9 +685,7 @@ export function getSuggestionForSupportedFields(
         } else {
           if (currentLine.includes('env')) {
             return {
-              items: dataSourceUrlArguments.filter(
-                (a) => !a.label.includes('env'),
-              ),
+              items: dataSourceUrlArguments.filter((a) => !a.label.includes('env')),
               isIncomplete: true,
             }
           }
@@ -803,10 +704,7 @@ export function getSuggestionForSupportedFields(
   }
 }
 
-function getDefaultValues(
-  currentLine: string,
-  lines: string[],
-): CompletionItem[] {
+function getDefaultValues(currentLine: string, lines: string[]): CompletionItem[] {
   const suggestions: CompletionItem[] = []
 
   const datasourceProvider = getFirstDatasourceProvider(lines)
@@ -815,8 +713,7 @@ function getDefaultValues(
     suggestions.push({
       label: 'auto()',
       kind: CompletionItemKind.Function,
-      documentation:
-        'Represents default values that are automatically generated by the database.',
+      documentation: 'Represents default values that are automatically generated by the database.',
       insertText: 'auto()',
       insertTextFormat: 2,
     })
@@ -888,9 +785,7 @@ function getDefaultValues(
   if (modelOrEnum && modelOrEnum.type === 'enum') {
     // get fields from enum block for suggestions
     const values: string[] = getFieldsFromCurrentBlock(lines, modelOrEnum)
-    values.forEach((v) =>
-      suggestions.push({ label: v, kind: CompletionItemKind.Value }),
-    )
+    values.forEach((v) => suggestions.push({ label: v, kind: CompletionItemKind.Value }))
   }
 
   return suggestions
@@ -911,15 +806,11 @@ function isInsideGivenProperty(
   const sortedAttributes = [
     {
       name: 'fields',
-      position: wordsBeforePosition.findIndex((word) =>
-        word.includes('fields'),
-      ),
+      position: wordsBeforePosition.findIndex((word) => word.includes('fields')),
     },
     {
       name: 'references',
-      position: wordsBeforePosition.findIndex((word) =>
-        word.includes('references'),
-      ),
+      position: wordsBeforePosition.findIndex((word) => word.includes('references')),
     },
   ].sort((a, b) => (a.position < b.position ? 1 : -1))
 
@@ -932,11 +823,7 @@ function isInsideGivenProperty(
   }
 }
 
-function getFieldsFromCurrentBlock(
-  lines: Array<string>,
-  block: Block,
-  position?: Position,
-): Array<string> {
+function getFieldsFromCurrentBlock(lines: Array<string>, block: Block, position?: Position): Array<string> {
   const suggestions: Array<string> = []
 
   let reachedStartLine = false
@@ -1047,10 +934,7 @@ function getSuggestionsForAttribute(
   if (attribute === '@relation') {
     if (datasourceProvider === 'mongodb') {
       suggestions = relationArguments.filter(
-        (arg) =>
-          arg.label !== 'map' &&
-          arg.label !== 'onDelete' &&
-          arg.label !== 'onUpdate',
+        (arg) => arg.label !== 'map' && arg.label !== 'onDelete' && arg.label !== 'onUpdate',
       )
     } else {
       suggestions = relationArguments
@@ -1064,19 +948,9 @@ function getSuggestionsForAttribute(
       }
     }
 
-    if (
-      isInsideGivenProperty(
-        untrimmedCurrentLine,
-        wordsBeforePosition,
-        'fields',
-        position,
-      )
-    ) {
+    if (isInsideGivenProperty(untrimmedCurrentLine, wordsBeforePosition, 'fields', position)) {
       return {
-        items: toCompletionItems(
-          getFieldsFromCurrentBlock(lines, block, position),
-          CompletionItemKind.Field,
-        ),
+        items: toCompletionItems(getFieldsFromCurrentBlock(lines, block, position), CompletionItemKind.Field),
         isIncomplete: false,
       }
     }
@@ -1103,10 +977,7 @@ function getSuggestionsForAttribute(
         return
       }
       return {
-        items: toCompletionItems(
-          getFieldsFromCurrentBlock(lines, referencedBlock),
-          CompletionItemKind.Field,
-        ),
+        items: toCompletionItems(getFieldsFromCurrentBlock(lines, referencedBlock), CompletionItemKind.Field),
         isIncomplete: false,
       }
     }
@@ -1123,17 +994,8 @@ function getSuggestionsForAttribute(
 
     if (isInsideAttribute(untrimmedCurrentLine, position, '[]')) {
       // extendedIndexes
-      if (
-        previewFeatures?.includes('extendedindexes') &&
-        isInsideFieldArgument(untrimmedCurrentLine, position)
-      ) {
-        let attribute:
-          | '@@unique'
-          | '@unique'
-          | '@@id'
-          | '@id'
-          | '@@index'
-          | undefined = undefined
+      if (previewFeatures?.includes('extendedindexes') && isInsideFieldArgument(untrimmedCurrentLine, position)) {
+        let attribute: '@@unique' | '@unique' | '@@id' | '@id' | '@@index' | undefined = undefined
 
         if (wordsBeforePosition.some((a) => a.includes('@@id'))) {
           attribute = '@@id'
@@ -1163,13 +1025,9 @@ function getSuggestionsForAttribute(
 
       let items = getFieldsFromCurrentBlock(lines, block, position)
       // get parameters inside block attribute
-      const parameterMatch = new RegExp(/(?<=\[).+?(?=\])/).exec(
-        untrimmedCurrentLine,
-      )
+      const parameterMatch = new RegExp(/(?<=\[).+?(?=\])/).exec(untrimmedCurrentLine)
       if (parameterMatch) {
-        const existingParameters = parameterMatch[0]
-          .split(',')
-          .map((param) => param.trim())
+        const existingParameters = parameterMatch[0].split(',').map((param) => param.trim())
         items = items.filter((s) => !existingParameters.includes(s))
       }
 
@@ -1223,11 +1081,7 @@ function getSuggestionsForAttribute(
         }
       }
 
-      blockAtrributeArguments = givenBlockAttributeParams(
-        '@@index',
-        previewFeatures,
-        datasourceProvider,
-      )
+      blockAtrributeArguments = givenBlockAttributeParams('@@index', previewFeatures, datasourceProvider)
     } else if (wordsBeforePosition.some((a) => a.includes('@@fulltext'))) {
       blockAtrributeArguments = givenBlockAttributeParams('@@fulltext')
     }
@@ -1329,10 +1183,7 @@ export function getSuggestionsForInsideRoundBrackets(
   position: Position,
   block: Block,
 ): CompletionList | undefined {
-  const wordsBeforePosition = untrimmedCurrentLine
-    .slice(0, position.character)
-    .trimLeft()
-    .split(/\s+/)
+  const wordsBeforePosition = untrimmedCurrentLine.slice(0, position.character).trimLeft().split(/\s+/)
 
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
 
@@ -1356,11 +1207,7 @@ export function getSuggestionsForInsideRoundBrackets(
     // @id, @unique
     // @@id, @@unique, @@index, @@fulltext
     wordsBeforePosition.some(
-      (a) =>
-        a.includes('@unique') ||
-        a.includes('@id') ||
-        a.includes('@@index') ||
-        a.includes('@@fulltext'),
+      (a) => a.includes('@unique') || a.includes('@id') || a.includes('@@index') || a.includes('@@fulltext'),
     )
   ) {
     return getSuggestionsForAttribute({
