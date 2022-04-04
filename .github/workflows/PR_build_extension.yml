@@ -44,8 +44,8 @@ jobs:
         run: npm install
       - name: Build all packages
         run: npm run compile
-      # - name: Replace Readme for marketplace
-      #   run: node scripts/change_readme.js dev
+      - name: Replace Readme for marketplace
+        run: node scripts/change_readme.js dev
       - name: Delete node_modules because of npm workspaces and vsce incompatibility
         run: rm -rf node_modules
       - name: Install dependencies in ./packages/vscode
