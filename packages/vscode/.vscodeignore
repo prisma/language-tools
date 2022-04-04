@@ -4,5 +4,5 @@
 **/tsconfig.json
 src
 .eslintignore
-**/.eslintignore
+.eslintrc.js
 .prettierignore

@@ -26,7 +26,7 @@ jobs:
           node-version: '16'
           cache: 'npm'
       - name: Install Dependencies
-        run: npm install
+        run: npm install && npm run bootstrap
       - name: Setup Git
         run: |
           sh scripts/set_git_credentials.sh
@@ -62,7 +62,7 @@ jobs:
         run: |
           node scripts/update_package_json_files.js ${{ github.event.inputs.npm_channel }} ${{ steps.update.outputs.next_extension_version }} ${{ github.event.inputs.version }}
       - name: Install Dependencies to update lock file
-        run: npm install
+        run: npm install && npm run bootstrap
       - name: Push to branch
         run: |
           sh scripts/commit_and_push.sh "bump extension version to ${{ steps.update.outputs.next_extension_version }} in package.json" ${{ steps.setup_branch.outputs.branch}} ${{ steps.setup_branch.outputs.new_branch }}

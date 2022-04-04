@@ -8,9 +8,6 @@
     "node": ">=16",
     "npm": ">=7"
   },
-  "workspaces": [
-    "./packages/*"
-  ],
   "devDependencies": {
     "@actions/github": "5.0.1",
     "@commitlint/cli": "16.2.3",
@@ -27,6 +24,7 @@
     "husky": "7.0.4",
     "is-ci": "3.0.1",
     "jest": "27.5.1",
+    "lerna": "4.0.0",
     "lint-staged": "12.3.7",
     "prettier": "2.6.2",
     "semver": "7.3.5",
@@ -34,11 +32,12 @@
     "vsce": "2.7.0"
   },
   "scripts": {
+    "bootstrap": "lerna exec npm install",
     "build": "tsc -b",
     "format": "prettier \"packages/**/*.{ts,js,json,md}\" --write",
     "lint": "eslint \"packages/**/*.{js,ts}\" --fix",
-    "compile": "npm run build --workspaces",
-    "watch": "npm run build -- -w",
+    "compile": "lerna run build",
+    "watch": "lerna run build -- -w",
     "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "sh scripts/e2e.sh",
     "test:e2e": "sh scripts/e2eTestsOnVsix/test.sh",
