@@ -38,7 +38,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-          # cache: 'npm'
+          cache: 'npm'
       - name: Print inputs
         run: |
           echo ${{github.event.inputs.npm_channel}}
@@ -48,15 +48,11 @@ jobs:
 
       # Build the extension
       - name: Install Dependencies
-        run: npm install
+        run: npm install && npm run bootstrap
       - name: Build all packages
         run: npm run compile
       - name: Replace Readme for marketplace
         run: node scripts/change_readme.js ${{ github.event.inputs.npm_channel }}
-      - name: Delete node_modules because of npm workspaces and vsce incompatibility
-        run: rm -rf node_modules
-      - name: Install dependencies in ./packages/vscode
-        run: cd packages/vscode && npm install
       - name: Build vsix
         run: cd packages/vscode && npm run package --
 

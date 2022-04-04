@@ -36,11 +36,11 @@ jobs:
 
       # Build the extension
       - name: Install Dependencies
-        run: npm install
+        run: npm install && npm run bootstrap
       - name: Build all packages
         run: npm run compile
-      - run: rm -rf node_modules
-      - run: cd packages/vscode && npm install
+      - name: Replace Readme for marketplace
+        run: node scripts/change_readme.js dev
       - name: Build vsix
         run: cd packages/vscode && npm run package -- --out=prisma.vsix
 

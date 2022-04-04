@@ -28,7 +28,7 @@ jobs:
           node-version: '16'
           cache: 'npm'
       - name: Install Dependencies
-        run: npm install
+        run: npm install && npm run bootstrap
       - name: Extract branch name # needed because github.ref will contain sth like refs/heads/2.6.x, so pushing to that will fail
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
@@ -53,7 +53,7 @@ jobs:
         run: |
           node scripts/update_package_json_files.js dev ${{ steps.update.outputs.next_extension_version }} ""
       - name: Install Dependencies
-        run: npm install
+        run: npm install && npm run bootstrap
       - name: Commit and Push
         run: |
           sh scripts/commit_and_push.sh "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}." ${{ steps.setup_branch.outputs.new_branch }}

@@ -42,7 +42,7 @@ jobs:
           echo ${{github.event.inputs.tag_name}}
           echo ${{github.event.inputs.trigger_reason}}
       - name: Install Dependencies
-        run: npm install
+        run: npm install && npm run bootstrap
 
       # Download Asset from GH release and publish to VSCode marketplace
       - uses: dsaltares/fetch-gh-release-asset@master
@@ -93,7 +93,7 @@ jobs:
         run: |
           echo ${{github.event.inputs.trigger_reason}}
       - name: Install Dependencies
-        run: npm install
+        run: npm install && npm run bootstrap
 
       # Download Asset from GH release and publish to open-vsx
       - uses: dsaltares/fetch-gh-release-asset@master

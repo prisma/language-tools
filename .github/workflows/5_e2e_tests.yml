@@ -36,7 +36,7 @@ jobs:
         with:
           node-version: '16'
       - name: Install Dependencies
-        run: npm install
+        run: npm install && npm run bootstrap
       - name: Compile
         run: npm run compile
       - name: Headless e2e tests

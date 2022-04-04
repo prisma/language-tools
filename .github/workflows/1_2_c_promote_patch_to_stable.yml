@@ -22,7 +22,7 @@ jobs:
           node-version: '16'
           cache: 'npm'
       - name: Install Dependencies
-        run: npm install
+        run: npm install && npm run bootstrap
       - name: Checkout main
         run: git fetch && git checkout main
       - name: Setup Git
@@ -43,7 +43,7 @@ jobs:
         run: |
           node scripts/update_package_json_files.js latest ${{ steps.update.outputs.next_extension_version }} ""
       - name: Install Dependencies
-        run: npm install
+        run: npm install && npm run bootstrap
       - name: Commit and Push
         run: |
           sh scripts/commit_and_push.sh "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}."

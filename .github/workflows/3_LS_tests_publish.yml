@@ -36,11 +36,11 @@ jobs:
           node-version: '16'
           cache: 'npm'
       - name: Install Dependencies
-        run: npm install
+        run: npm install && npm run bootstrap
       - name: Build Language Server
-        run: npm run build --workspace @prisma/language-server
+        run: npx lerna run build --scope @prisma/language-server
       - name: Run Language Server tests
-        run: npm run test --workspace @prisma/language-server
+        run: npx lerna run test --scope @prisma/language-server
 
   bump:
     name: Bump Language Server version
@@ -64,11 +64,11 @@ jobs:
           echo ${{github.event.inputs.branch}}
           echo ${{github.event.inputs.trigger_reason}}
       - name: Install Dependencies
-        run: npm install
+        run: npm install && npm run bootstrap
       - name: Build Language Server
-        run: npm run build --workspace @prisma/language-server
+        run: npx lerna run build --scope @prisma/language-server
       - name: Publish Language Server to npm
-        run: npm publish --workspace @prisma/language-server --tag ${{ github.event.inputs.npm_channel }} --access public
+        run: npx lerna exec npm publish --scope @prisma/language-server --tag ${{ github.event.inputs.npm_channel }} --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
