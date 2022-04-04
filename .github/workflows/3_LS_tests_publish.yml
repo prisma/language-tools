@@ -38,7 +38,7 @@ jobs:
       - name: Install Dependencies
         run: npm install && npm run bootstrap
       - name: Build Language Server
-        run: lerna run build --workspace @prisma/language-server
+        run: lerna run build --scope @prisma/language-server
       - name: Run Language Server tests
         run: lerna run test --scope @prisma/language-server
 

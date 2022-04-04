@@ -31,7 +31,7 @@ jobs:
       - name: Build all packages
         run: npm run compile
       - name: Run Language Server tests
-        run: npm run test --workspace @prisma/language-server
+        run: lerna run test --scope @prisma/language-server
       - name: Run VS Code extension tests in headless mode
         uses: GabrielBB/xvfb-action@v1.6
         with:
