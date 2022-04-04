@@ -32,7 +32,7 @@
     "vsce": "2.7.0"
   },
   "scripts": {
-    "bootstrap": "lerna exec npm install",
+    "bootstrap": "lerna exec -- npm install",
     "build": "tsc -b",
     "format": "prettier \"packages/**/*.{ts,js,json,md}\" --write",
     "lint": "eslint \"packages/**/*.{js,ts}\" --fix",
