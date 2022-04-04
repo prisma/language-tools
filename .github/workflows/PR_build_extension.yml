@@ -22,7 +22,6 @@ jobs:
   build:
     name: Build extension
     runs-on: ubuntu-latest
-    # runs-on: macos-latest
     outputs:
       tag_name: ${{ steps.names.outputs.tag_name }}
     steps:
@@ -43,7 +42,7 @@ jobs:
       - run: rm -rf node_modules
       - run: cd packages/vscode && npm install
       - name: Build vsix
-        run: npm --workspace prisma-insider run package -- --yarn
+        run: npm --workspace prisma-insider run package -- --yarn --out=prisma.vsix
 
       # This is very limited
       # Only 90 days rentention and cannot get a link easily
@@ -60,7 +59,7 @@ jobs:
           artifacts-branch: artifacts
           artifacts-dir: pull-request-artifacts
           artifacts: |
-            ./packages/vscode/*.vsix
+            ./packages/vscode/prisma.vsix
 
   slack:
     name: Send slack notification
