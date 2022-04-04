@@ -34,15 +34,27 @@ jobs:
           node-version: '16'
           cache: 'npm'
 
+      - name: Build vsix
+
+      - name: Print things
+        run: |
+          npm -v
+          node -v
+
       # Build the extension
       - name: Install Dependencies
         run: npm install
       - name: Build all packages
         run: npm run compile
-      - run: rm -rf node_modules
-      - run: cd packages/vscode && npm install
+      - name: Replace Readme for marketplace
+        run: node scripts/change_readme.js dev
+      - name: Delete node_modules because of npm workspaces and vsce incompatibility
+        run: rm -rf node_modules
+      - name: Install dependencies in ./packages/vscode
+        run: cd packages/vscode && npm install
       - name: Build vsix
-        run: cd packages/vscode && npm run package -- --out=prisma.vsix
+        run: cd packages/vscode && npm run package --
+        # run: cd packages/vscode && npm run package -- --out=prisma.vsix
 
       # This is very limited
       # Only 90 days rentention and cannot get a link easily
@@ -51,15 +63,15 @@ jobs:
           name: pr-artifact
           path: ./packages/vscode/*.vsix
 
-      - name: Add artifact to PR
-        uses: gavv/pull-request-artifacts@v1.0.0
-        with:
-          commit: ${{ github.event.pull_request.head.sha }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts-branch: artifacts
-          artifacts-dir: pull-request-artifacts
-          artifacts: |
-            ./packages/vscode/prisma.vsix
+      # - name: Add artifact to PR
+      #   uses: gavv/pull-request-artifacts@v1.0.0
+      #   with:
+      #     commit: ${{ github.event.pull_request.head.sha }}
+      #     repo-token: ${{ secrets.GITHUB_TOKEN }}
+      #     artifacts-branch: artifacts
+      #     artifacts-dir: pull-request-artifacts
+      #     artifacts: |
+      #       ./packages/vscode/prisma.vsix
 
   slack:
     name: Send slack notification
