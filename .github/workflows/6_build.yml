@@ -58,7 +58,7 @@ jobs:
       - name: Install dependencies in ./packages/vscode
         run: cd packages/vscode && npm install
       - name: Build vsix
-        run: npm --workspace prisma-insider run package -- --yarn
+        run: npm --workspace prisma-insider run package --
 
       # Create GitHub Release and upload built result as asset
       - name: Get git tag and asset name
