@@ -34,11 +34,6 @@ jobs:
           node-version: '16'
           cache: 'npm'
 
-      - name: Print things
-        run: |
-          npm -v
-          node -v
-
       # Build the extension
       - name: Install Dependencies
         run: npm install && npm run bootstrap
