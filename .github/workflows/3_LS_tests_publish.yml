@@ -38,9 +38,9 @@ jobs:
       - name: Install Dependencies
         run: npm install && npm run bootstrap
       - name: Build Language Server
-        run: lerna run build --scope @prisma/language-server
+        run: npx lerna run build --scope @prisma/language-server
       - name: Run Language Server tests
-        run: lerna run test --scope @prisma/language-server
+        run: npx lerna run test --scope @prisma/language-server
 
   bump:
     name: Bump Language Server version
@@ -66,9 +66,9 @@ jobs:
       - name: Install Dependencies
         run: npm install && npm run bootstrap
       - name: Build Language Server
-        run: lerna run build --scope @prisma/language-server
+        run: npx lerna run build --scope @prisma/language-server
       - name: Publish Language Server to npm
-        run: lerna exec npm publish --scope @prisma/language-server --tag ${{ github.event.inputs.npm_channel }} --access public
+        run: npx lerna exec npm publish --scope @prisma/language-server --tag ${{ github.event.inputs.npm_channel }} --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
