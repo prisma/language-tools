@@ -39,18 +39,29 @@ jobs:
         run: npm install
       - name: Build all packages
         run: npm run compile
-      - name: Build vsix
-        run: npm --workspace prisma-insider run package -- --yarn
+      - run: rm -rf node_modules
+      - run: cd packages/vscode && npm install
 
-      - name: Add artifact to PR
-        uses: gavv/pull-request-artifacts@v1.0.0
+      - name: Build vsix 1
+        run: npm --workspace prisma-insider run package --
+
+      # - name: Build vsix 2
+      #   run: npm --workspace prisma-insider run package -- --yarn
+
+      - uses: actions/upload-artifact@v3
         with:
-          commit: ${{ github.event.pull_request.head.sha }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts-branch: artifacts
-          artifacts-dir: pull-request-artifacts
-          artifacts: |
-            ./packages/vscode/${{ steps.names.outputs.asset_name }}-${{ github.event.inputs.extension_version }}.vsix
+          name: pr-artifact
+          path: ./packages/vscode/*.vsix
+
+      # - name: Add artifact to PR
+      #   uses: gavv/pull-request-artifacts@v1.0.0
+      #   with:
+      #     commit: ${{ github.event.pull_request.head.sha }}
+      #     repo-token: ${{ secrets.GITHUB_TOKEN }}
+      #     artifacts-branch: artifacts
+      #     artifacts-dir: pull-request-artifacts
+      #     artifacts: |
+      #       ./packages/vscode/prisma-insider-.vsix
 
   slack:
     name: Send slack notification
