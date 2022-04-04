@@ -38,7 +38,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-          cache: 'npm'
+          # cache: 'npm'
       - name: Print inputs
         run: |
           echo ${{github.event.inputs.npm_channel}}
@@ -58,7 +58,7 @@ jobs:
       - name: Install dependencies in ./packages/vscode
         run: cd packages/vscode && npm install
       - name: Build vsix
-        run: npm --workspace prisma-insider run package --
+        run: cd packages/vscode && npm run package --
 
       # Create GitHub Release and upload built result as asset
       - name: Get git tag and asset name

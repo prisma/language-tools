@@ -42,7 +42,7 @@ jobs:
       - run: rm -rf node_modules
       - run: cd packages/vscode && npm install
       - name: Build vsix
-        run: npm --workspace prisma-insider run package -- --out=prisma.vsix
+        run: cd packages/vscode && npm run package -- --out=prisma.vsix
 
       # This is very limited
       # Only 90 days rentention and cannot get a link easily
