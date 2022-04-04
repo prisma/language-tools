@@ -21,7 +21,8 @@ env:
 jobs:
   build:
     name: Build extension
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
+    # runs-on: macos-latest
     outputs:
       tag_name: ${{ steps.names.outputs.tag_name }}
     steps:
