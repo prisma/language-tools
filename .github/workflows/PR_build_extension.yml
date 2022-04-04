@@ -51,6 +51,8 @@ jobs:
       - name: Install dependencies in ./packages/vscode
         run: cd packages/vscode && npm install
       - run: find . -name ".eslintignore" -type f -delete
+      - run: .eslintrc.js
+      - run: git status
       - name: Build vsix
         run: cd packages/vscode && npm run package -- --ignoreFile=.vscodeignore
         # run: cd packages/vscode && npm run package -- --out=prisma.vsix
