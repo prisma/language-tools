@@ -34,8 +34,6 @@ jobs:
           node-version: '16'
           cache: 'npm'
 
-      - name: Build vsix
-
       - name: Print things
         run: |
           npm -v
