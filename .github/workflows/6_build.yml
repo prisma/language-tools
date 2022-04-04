@@ -27,7 +27,7 @@ env:
 jobs:
   build:
     name: Build extension
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     outputs:
       tag_name: ${{ steps.names.outputs.tag_name }}
     steps:
@@ -53,8 +53,12 @@ jobs:
         run: npm run compile
       - name: Replace Readme for marketplace
         run: node scripts/change_readme.js ${{ github.event.inputs.npm_channel }}
+      - name: Delete node_modules because of npm workspaces and vsce incompatibility
+        run: rm -rf node_modules
+      - name: Install dependencies in ./packages/vscode
+        run: cd packages/vscode && npm install
       - name: Build vsix
-        run: npm --workspace prisma-insider run package -- --yarn
+        run: npm --workspace prisma-insider run package --
 
       # Create GitHub Release and upload built result as asset
       - name: Get git tag and asset name
