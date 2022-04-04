@@ -1,4 +1,4 @@
-import * as chokidar from 'chokidar'
+import chokidar from 'chokidar'
 import path from 'path'
 import {
   CancellationToken,
@@ -19,11 +19,7 @@ import {
   LanguageClientOptions,
   ProvideCodeActionsSignature,
 } from 'vscode-languageclient'
-import {
-  LanguageClient,
-  ServerOptions,
-  TransportKind,
-} from 'vscode-languageclient/node'
+import { LanguageClient, ServerOptions, TransportKind } from 'vscode-languageclient/node'
 import TelemetryReporter from '../../telemetryReporter'
 import {
   applySnippetWorkspaceEdit,
@@ -62,23 +58,20 @@ const activateClient = (
 
 const startFileWatcher = (rootPath: string): chokidar.FSWatcher => {
   console.debug('Starting File Watcher')
-  return chokidar.watch(
-    path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts'),
-    {
-      // ignore dotfiles (except .prisma) adjusted from chokidar README example
-      ignored: /(^|[\/\\])\.(?!prisma)./,
-      // limits how many levels of subdirectories will be traversed.
-      // Note that `node_modules/.prisma/client/` counts for 3 already
-      // Example
-      // If vs code extension is open in root folder of a project and the path to index.d.ts is
-      // ./server/database/node_modules/.prisma/client/index.d.ts
-      // then the depth is equal to 2 + 3 = 5
-      depth: 9,
-      // When false, only the symlinks themselves will be watched for changes
-      // instead of following the link references and bubbling events through the link's path.
-      followSymlinks: false,
-    },
-  )
+  return chokidar.watch(path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts'), {
+    // ignore dotfiles (except .prisma) adjusted from chokidar README example
+    ignored: /(^|[\/\\])\.(?!prisma)./,
+    // limits how many levels of subdirectories will be traversed.
+    // Note that `node_modules/.prisma/client/` counts for 3 already
+    // Example
+    // If vs code extension is open in root folder of a project and the path to index.d.ts is
+    // ./server/database/node_modules/.prisma/client/index.d.ts
+    // then the depth is equal to 2 + 3 = 5
+    depth: 9,
+    // When false, only the symlinks themselves will be watched for changes
+    // instead of following the link references and bubbling events through the link's path.
+    followSymlinks: false,
+  })
 }
 
 const onFileChange = (path: string) => {
@@ -95,9 +88,7 @@ const plugin: PrismaVSCodePlugin = {
     const rootPath = workspace.workspaceFolders?.[0].uri.path
     if (rootPath) {
       // This setting defaults to true (see package.json of vscode extension)
-      const isFileWatcherEnabled = workspace
-        .getConfiguration('prisma')
-        .get('fileWatcher')
+      const isFileWatcherEnabled = workspace.getConfiguration('prisma').get('fileWatcher')
 
       if (isFileWatcherEnabled) {
         watcher = startFileWatcher(rootPath)
@@ -112,9 +103,7 @@ const plugin: PrismaVSCodePlugin = {
     if (isDebugMode() || isE2ETestOnPullRequest()) {
       // use Language Server from folder for debugging
       console.log('Using local Language Server')
-      serverModule = context.asAbsolutePath(
-        path.join('../../packages/language-server/dist/src/bin'),
-      )
+      serverModule = context.asAbsolutePath(path.join('../../packages/language-server/dist/src/bin'))
     } else {
       console.log('Using published Language Server')
       // use published npm package for production
@@ -155,8 +144,7 @@ const plugin: PrismaVSCodePlugin = {
           _: ProvideCodeActionsSignature, // eslint-disable-line @typescript-eslint/no-unused-vars
         ) {
           const params: CodeActionParams = {
-            textDocument:
-              client.code2ProtocolConverter.asTextDocumentIdentifier(document),
+            textDocument: client.code2ProtocolConverter.asTextDocumentIdentifier(document),
             range: client.code2ProtocolConverter.asRange(range),
             context: client.code2ProtocolConverter.asCodeActionContext(context),
           }
@@ -167,15 +155,9 @@ const plugin: PrismaVSCodePlugin = {
               const result: (CodeAction | Command)[] = []
               for (const item of values) {
                 if (lsCodeAction.is(item)) {
-                  const action =
-                    client.protocol2CodeConverter.asCodeAction(item)
+                  const action = client.protocol2CodeConverter.asCodeAction(item)
                   if (
-                    isSnippetEdit(
-                      item,
-                      client.code2ProtocolConverter.asTextDocumentIdentifier(
-                        document,
-                      ),
-                    ) &&
+                    isSnippetEdit(item, client.code2ProtocolConverter.asTextDocumentIdentifier(document)) &&
                     item.edit !== undefined
                   ) {
                     action.command = {
@@ -202,13 +184,10 @@ const plugin: PrismaVSCodePlugin = {
 
     workspace.onDidChangeConfiguration(
       async (event) => {
-        const fileWatcherConfigChanged =
-          event.affectsConfiguration('prisma.fileWatcher')
+        const fileWatcherConfigChanged = event.affectsConfiguration('prisma.fileWatcher')
 
         if (fileWatcherConfigChanged) {
-          const isFileWatcherEnabled = workspace
-            .getConfiguration('prisma')
-            .get('fileWatcher')
+          const isFileWatcherEnabled = workspace.getConfiguration('prisma').get('fileWatcher')
 
           const rootPath = workspace.workspaceFolders?.[0].uri.path
 
@@ -220,17 +199,13 @@ const plugin: PrismaVSCodePlugin = {
             // we need to catch that case to avoid starting another extra file watcher
             // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
             if (watcher && (watcher as any).closed === false) {
-              console.debug(
-                "onDidChangeConfiguration: watcher.closed === false so it's already running. Do nothing.",
-              )
+              console.debug("onDidChangeConfiguration: watcher.closed === false so it's already running. Do nothing.")
             } else {
               // Let's start it
               if (rootPath) {
                 watcher = startFileWatcher(rootPath)
                 watcher.on('change', onFileChange)
-                console.debug(
-                  'onDidChangeConfiguration: File Watcher is now enabled and started.',
-                )
+                console.debug('onDidChangeConfiguration: File Watcher is now enabled and started.')
               } else {
                 console.debug('onDidChangeConfiguration: rootPath is falsy')
               }
@@ -252,20 +227,12 @@ const plugin: PrismaVSCodePlugin = {
 
     context.subscriptions.push(
       commands.registerCommand('prisma.restartLanguageServer', async () => {
-        client = await restartClient(
-          context,
-          client,
-          serverOptions,
-          clientOptions,
-        )
+        client = await restartClient(context, client, serverOptions, clientOptions)
         window.showInformationMessage('Prisma language server restarted.') // eslint-disable-line @typescript-eslint/no-floating-promises
       }),
 
       /* This command is part of the workaround for https://github.com/prisma/language-tools/issues/311 */
-      commands.registerCommand(
-        'prisma.applySnippetWorkspaceEdit',
-        applySnippetWorkspaceEdit(),
-      ),
+      commands.registerCommand('prisma.applySnippetWorkspaceEdit', applySnippetWorkspaceEdit()),
 
       commands.registerCommand('prisma.filewatcherEnable', async () => {
         const prismaConfig = workspace.getConfiguration('prisma')
