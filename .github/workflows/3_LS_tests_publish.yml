@@ -68,7 +68,7 @@ jobs:
       - name: Build Language Server
         run: npx lerna run build --scope @prisma/language-server
       - name: Publish Language Server to npm
-        run: npx lerna exec -- npm publish --scope @prisma/language-server --tag ${{ github.event.inputs.npm_channel }} --access public
+        run: npx lerna exec --scope @prisma/language-server -- npm publish --tag ${{ github.event.inputs.npm_channel }} --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
