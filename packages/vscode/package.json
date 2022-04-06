@@ -126,7 +126,7 @@
   "devDependencies": {
     "@types/glob": "7.2.0",
     "@types/mocha": "9.1.0",
-    "@types/vscode": "1.52.0",
+    "@types/vscode": "1.66.0",
     "@vscode/test-electron": "1.6.2",
     "is-ci": "3.0.1",
     "mocha": "9.2.2",
