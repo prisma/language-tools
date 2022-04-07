@@ -10,16 +10,14 @@ async function installExtension({ extensionType, extensionVersion }) {
     const extensionName = `Prisma.prisma${vsceArgument}`
 
     // Install VSCode
-    const vscodeExecutablePath = await vscodeTest.downloadAndUnzipVSCode(
-      'stable',
-    )
+    const vscodeExecutablePath = await vscodeTest.downloadAndUnzipVSCode('stable')
 
     // Install VSCode extension
-    const cliPath =
-      vscodeTest.resolveCliPathFromVSCodeExecutablePath(vscodeExecutablePath)
+    const [cli, ...args] = vscodeTest.resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath)
+
     const result = childProcess.spawnSync(
-      cliPath,
-      ['--install-extension', `${extensionName}@${extensionVersion}`],
+      cli,
+      [...args, '--install-extension', `${extensionName}@${extensionVersion}`],
       {
         encoding: 'utf-8',
         stdio: 'pipe',
