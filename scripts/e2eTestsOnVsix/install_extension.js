@@ -12,17 +12,18 @@ async function installExtension({ extensionType, extensionVersion }) {
     // Install VSCode
     const vscodeExecutablePath = await vscodeTest.downloadAndUnzipVSCode('stable')
 
+    console.debug({ vscodeExecutablePath })
+
     // Install VSCode extension
     const [cli, ...args] = vscodeTest.resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath)
 
-    const result = childProcess.spawnSync(
-      cli,
-      [...args, '--install-extension', `${extensionName}@${extensionVersion}`],
-      {
-        encoding: 'utf-8',
-        stdio: 'pipe',
-      },
-    )
+    console.debug({ cli })
+    console.debug({ args })
+
+    const result = childProcess.spawnSync(cli, ['--install-extension', `${extensionName}@${extensionVersion}`], {
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    })
     console.log(result)
     if (result.stderr.includes('Failed')) {
       console.log("It's not ready to be installed yet.")
