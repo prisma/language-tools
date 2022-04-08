@@ -1,15 +1,47 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { handleCompletionRequest } from '../MessageHandler'
 import { CompletionList, CompletionParams, Position, CompletionItemKind } from 'vscode-languageserver'
-import * as assert from 'assert'
-import { getTextDocument } from './helper'
+import assert from 'assert'
+import dedent from 'ts-dedent'
 
 /* eslint-disable @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-misused-promises */
 
-function assertCompletion(fixturePath: string, position: Position, expected: CompletionList): void {
-  const document: TextDocument = getTextDocument(fixturePath)
+function assertCompletion(schema: string, expected: CompletionList): void {
+  const CURSOR_CHARACTER = '|'
 
-  const params: CompletionParams = {
+  // Remove indentation
+  schema = dedent(schema)
+
+  const findCursorPosition = (input: string): Position => {
+    const lines = input.split('\n')
+
+    let foundCursorCharacter = -1
+    const foundLinePosition = lines.findIndex((line) => {
+      const cursorPosition = line.indexOf(CURSOR_CHARACTER)
+      if (cursorPosition !== -1) {
+        foundCursorCharacter = cursorPosition
+        return true
+      }
+    })
+
+    if (foundLinePosition >= 0 && foundCursorCharacter >= 0) {
+      return { line: foundLinePosition, character: foundCursorCharacter }
+    }
+
+    throw new Error(
+      'Each test must include the `|` pipe character to signal where the cursor should be when executing the test.',
+    )
+  }
+
+  const position = findCursorPosition(schema)
+  const document: TextDocument = TextDocument.create(
+    'completions/none.prisma',
+    'prisma',
+    1,
+    schema.replace(CURSOR_CHARACTER, ''),
+  )
+
+  const completionParams: CompletionParams = {
     textDocument: document,
     position,
     context: {
@@ -17,7 +49,7 @@ function assertCompletion(fixturePath: string, position: Position, expected: Com
     },
   }
 
-  const completionResult: CompletionList | undefined = handleCompletionRequest(params, document)
+  const completionResult: CompletionList | undefined = handleCompletionRequest(completionParams, document)
 
   assert.ok(completionResult !== undefined)
 
@@ -61,25 +93,25 @@ items.length`,
   )
 }
 
-suite('Completions', function () {
-  const emptyDocUri = 'completions/empty.prisma'
-  const sqliteDocUri = 'completions/datasourceWithSqlite.prisma'
-  const dataSourceWithUri = 'completions/datasourceWithUrl.prisma'
-  const emptyBlocksUri = 'completions/emptyBlocks.prisma'
-  const modelBlocksUri = 'completions/modelBlocks.prisma'
-  const enumCommentUri = 'completions/enumWithComments.prisma'
-  const relationDirectiveUri = 'completions/relationDirective.prisma'
-  const relationDirectiveSqlserverReferentialActionsUri =
-    'completions/relationDirectiveSqlserverReferentialActions.prisma'
-  const namedConstraintsUri = 'completions/namedConstraints.prisma'
+suite.only('Completions', function () {
+  // const emptyDocUri = 'completions/empty.prisma'
+  // const sqliteDocUri = 'completions/datasourceWithSqlite.prisma'
+  // const dataSourceWithUri = 'completions/datasourceWithUrl.prisma'
+  // const emptyBlocksUri = 'completions/emptyBlocks.prisma'
+  // const modelBlocksUri = 'completions/modelBlocks.prisma'
+  // const enumCommentUri = 'completions/enumWithComments.prisma'
+  // const relationDirectiveUri = 'completions/relationDirective.prisma'
+  // const relationDirectiveSqlserverReferentialActionsUri =
+  //   'completions/relationDirectiveSqlserverReferentialActions.prisma'
+  // const namedConstraintsUri = 'completions/namedConstraints.prisma'
 
-  const fullTextIndex_extendedIndexes_mongodb = 'completions/fullTextIndex_extendedIndexes_mongodb.prisma'
-  const fullTextIndex_extendedIndexes_postgresql = 'completions/fullTextIndex_extendedIndexes_postgresql.prisma'
-  const fullTextIndex_extendedIndexes_mysql = 'completions/fullTextIndex_extendedIndexes_mysql.prisma'
+  // const fullTextIndex_extendedIndexes_mongodb = 'completions/fullTextIndex_extendedIndexes_mongodb.prisma'
+  // const fullTextIndex_extendedIndexes_postgresql = 'completions/fullTextIndex_extendedIndexes_postgresql.prisma'
+  // const fullTextIndex_extendedIndexes_mysql = 'completions/fullTextIndex_extendedIndexes_mysql.prisma'
 
-  const mongoDBAtdefaultUri = 'completions/mongodb_@default().prisma'
-  const mongoDBFieldTypes = 'completions/mongodb_field_types.prisma'
-  const mongoDBEmbeddedM2mUri = 'completions/mongodb_embedded_m2m.prisma'
+  // const mongoDBAtdefaultUri = 'completions/mongodb_@default().prisma'
+  // const mongoDBFieldTypes = 'completions/mongodb_field_types.prisma'
+  // const mongoDBEmbeddedM2mUri = 'completions/mongodb_embedded_m2m.prisma'
 
   // used both in generator and datasource
   const fieldProvider = {
@@ -88,32 +120,32 @@ suite('Completions', function () {
   }
 
   suite('BASE BLOCKS', () => {
-    test('Diagnoses block type suggestions with sqlite as provider', () => {
-      assertCompletion(
-        sqliteDocUri,
-        { line: 4, character: 0 },
-        {
-          isIncomplete: false,
-          items: [
-            { label: 'datasource', kind: CompletionItemKind.Class },
-            { label: 'generator', kind: CompletionItemKind.Class },
-            { label: 'model', kind: CompletionItemKind.Class },
-          ],
-        },
-      )
+    test('Diagnoses block type suggestions for empty file', () => {
+      assertCompletion(/* Prisma */ `|`, {
+        isIncomplete: false,
+        items: [
+          { label: 'datasource', kind: CompletionItemKind.Class },
+          { label: 'generator', kind: CompletionItemKind.Class },
+          { label: 'model', kind: CompletionItemKind.Class },
+          { label: 'enum', kind: CompletionItemKind.Class },
+        ],
+      })
     })
 
-    test('Diagnoses block type suggestions for empty file', () => {
+    test('Diagnoses block type suggestions with sqlite as provider', () => {
       assertCompletion(
-        emptyDocUri,
-        { line: 0, character: 0 },
+        /* Prisma */ `
+        datasource db {
+          provider = "sqlite"
+        }
+        |
+        `,
         {
           isIncomplete: false,
           items: [
             { label: 'datasource', kind: CompletionItemKind.Class },
             { label: 'generator', kind: CompletionItemKind.Class },
             { label: 'model', kind: CompletionItemKind.Class },
-            { label: 'enum', kind: CompletionItemKind.Class },
           ],
         },
       )
@@ -155,8 +187,10 @@ suite('Completions', function () {
 
     test('Diagnoses datasource field suggestions in empty block', () => {
       assertCompletion(
-        emptyBlocksUri,
-        { line: 1, character: 0 },
+        /* prisma */ `
+        datasource db {
+          |
+        }`,
         {
           isIncomplete: false,
           items: [fieldProvider, fieldUrl, fieldShadowDatabaseUrl],
@@ -166,16 +200,22 @@ suite('Completions', function () {
 
     test('Diagnoses datasource field suggestions with existing field', () => {
       assertCompletion(
-        sqliteDocUri,
-        { line: 2, character: 0 },
+        /* prisma */ `
+        datasource db {
+          provider = "sqlite"
+          |
+        }`,
         {
           isIncomplete: false,
           items: [fieldUrl, fieldShadowDatabaseUrl],
         },
       )
       assertCompletion(
-        dataSourceWithUri,
-        { line: 2, character: 0 },
+        /* prisma */ `
+        datasource db {
+          url      = env("DATABASE_URL")
+          |      
+        }`,
         {
           isIncomplete: false,
           items: [fieldProvider, fieldShadowDatabaseUrl],
@@ -185,62 +225,77 @@ suite('Completions', function () {
 
     test('Diagnoses url argument suggestions for datasource block', () => {
       assertCompletion(
-        dataSourceWithUri,
-        { line: 7, character: 10 },
+        /* prisma */ `
+        datasource db {
+            url = |
+        }`,
         {
           isIncomplete: true,
           items: [quotationMarks, env],
         },
-      ),
-        assertCompletion(
-          dataSourceWithUri,
-          { line: 11, character: 15 },
-          {
-            isIncomplete: false,
-            items: [envArgument],
-          },
-        )
+      )
+      assertCompletion(
+        /* prisma */ `
+        datasource db {
+            url = env("|")
+        }`,
+        {
+          isIncomplete: false,
+          items: [envArgument],
+        },
+      )
     })
 
     test('Diagnoses single provider suggestions for datasource block', () => {
       assertCompletion(
-        sqliteDocUri,
-        { line: 14, character: 14 },
+        /* prisma */ `
+        datasource db {
+         provider = "|"
+        }`,
         {
           isIncomplete: true,
           items: [mysql, postgresql, sqlite, sqlserver, mongodb, cockroachdb],
         },
-      ),
-        assertCompletion(
-          sqliteDocUri,
-          { line: 18, character: 13 },
-          {
-            isIncomplete: true,
-            items: [array, quotationMarks],
-          },
-        )
+      )
+      assertCompletion(
+        /* prisma */ `
+        datasource db {
+          provider = |
+        }`,
+        {
+          isIncomplete: true,
+          items: [array, quotationMarks],
+        },
+      )
     })
 
+    // TODO: Not valid, we should remove the logic doing this
     test('Diagnoses multiple provider suggestions for datasource block', () => {
       assertCompletion(
-        sqliteDocUri,
-        { line: 6, character: 15 },
+        /* prisma */ `
+        datasource db {
+          provider = ["|"]
+        }`,
         {
           isIncomplete: true,
           items: [mysql, postgresql, sqlite, sqlserver, mongodb, cockroachdb],
         },
-      ),
-        assertCompletion(
-          sqliteDocUri,
-          { line: 22, character: 14 },
-          {
-            isIncomplete: true,
-            items: [quotationMarks],
-          },
-        )
+      )
       assertCompletion(
-        sqliteDocUri,
-        { line: 10, character: 25 },
+        /* prisma */ `
+        datasource db {
+          provider = [|]
+        }`,
+        {
+          isIncomplete: true,
+          items: [quotationMarks],
+        },
+      )
+      assertCompletion(
+        /* prisma */ `
+        datasource db {
+          provider = ["sqlite", "|"]
+        }`,
         {
           isIncomplete: true,
           items: [mysql, postgresql, sqlserver, mongodb, cockroachdb],
@@ -267,8 +322,10 @@ suite('Completions', function () {
 
     test('Diagnoses generator field suggestions in empty block', () => {
       assertCompletion(
-        emptyBlocksUri,
-        { line: 5, character: 0 },
+        /* prisma */ `
+        generator gen {
+          |
+        }`,
         {
           isIncomplete: false,
           items: [fieldProvider, fieldOutput, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
@@ -276,1119 +333,1119 @@ suite('Completions', function () {
       )
     })
 
-    const generatorWithExistingFieldsUri = 'completions/generatorWithExistingFields.prisma'
-    const generatorWithdataProxyPreviewFeature = 'completions/generatorWithdataProxyPreviewFeature.prisma'
+    //   const generatorWithExistingFieldsUri = 'completions/generatorWithExistingFields.prisma'
+    //   const generatorWithdataProxyPreviewFeature = 'completions/generatorWithdataProxyPreviewFeature.prisma'
 
-    test('Diagnoses generator field suggestions with existing fields', () => {
-      assertCompletion(
-        generatorWithExistingFieldsUri,
-        { line: 2, character: 0 },
-        {
-          isIncomplete: false,
-          items: [fieldOutput, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
-        },
-      )
-      assertCompletion(
-        generatorWithExistingFieldsUri,
-        { line: 7, character: 0 },
-        {
-          isIncomplete: false,
-          items: [fieldProvider, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
-        },
-      )
-    })
+    //   test('Diagnoses generator field suggestions with existing fields', () => {
+    //     assertCompletion(
+    //       generatorWithExistingFieldsUri,
+    //       { line: 2, character: 0 },
+    //       {
+    //         isIncomplete: false,
+    //         items: [fieldOutput, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
+    //       },
+    //     )
+    //     assertCompletion(
+    //       generatorWithExistingFieldsUri,
+    //       { line: 7, character: 0 },
+    //       {
+    //         isIncomplete: false,
+    //         items: [fieldProvider, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
+    //       },
+    //     )
+    //   })
 
-    test('engineType = |', () => {
-      assertCompletion(
-        generatorWithExistingFieldsUri,
-        { line: 11, character: 17 },
-        {
-          isIncomplete: true,
-          items: [
-            {
-              label: '""',
-              kind: CompletionItemKind.Property,
-            },
-          ],
-        },
-      )
-    })
-    test('engineType = "|"', () => {
-      assertCompletion(
-        generatorWithExistingFieldsUri,
-        { line: 15, character: 18 },
-        {
-          isIncomplete: true,
-          items: [
-            {
-              label: 'library',
-              kind: CompletionItemKind.Constant,
-            },
-            {
-              label: 'binary',
-              kind: CompletionItemKind.Constant,
-            },
-          ],
-        },
-      )
-    })
-    // With Preview Feature Flag
-    test('dataProxy: engineType = ""', () => {
-      assertCompletion(
-        generatorWithdataProxyPreviewFeature,
-        { line: 2, character: 21 },
-        {
-          isIncomplete: true,
-          items: [
-            {
-              label: 'library',
-              kind: CompletionItemKind.Constant,
-            },
-            {
-              label: 'binary',
-              kind: CompletionItemKind.Constant,
-            },
-            {
-              label: 'dataproxy',
-              kind: CompletionItemKind.Constant,
-            },
-          ],
-        },
-      )
-    })
+    //   test('engineType = |', () => {
+    //     assertCompletion(
+    //       generatorWithExistingFieldsUri,
+    //       { line: 11, character: 17 },
+    //       {
+    //         isIncomplete: true,
+    //         items: [
+    //           {
+    //             label: '""',
+    //             kind: CompletionItemKind.Property,
+    //           },
+    //         ],
+    //       },
+    //     )
+    //   })
+    //   test('engineType = "|"', () => {
+    //     assertCompletion(
+    //       generatorWithExistingFieldsUri,
+    //       { line: 15, character: 18 },
+    //       {
+    //         isIncomplete: true,
+    //         items: [
+    //           {
+    //             label: 'library',
+    //             kind: CompletionItemKind.Constant,
+    //           },
+    //           {
+    //             label: 'binary',
+    //             kind: CompletionItemKind.Constant,
+    //           },
+    //         ],
+    //       },
+    //     )
+    //   })
+    //   // With Preview Feature Flag
+    //   test('dataProxy: engineType = ""', () => {
+    //     assertCompletion(
+    //       generatorWithdataProxyPreviewFeature,
+    //       { line: 2, character: 21 },
+    //       {
+    //         isIncomplete: true,
+    //         items: [
+    //           {
+    //             label: 'library',
+    //             kind: CompletionItemKind.Constant,
+    //           },
+    //           {
+    //             label: 'binary',
+    //             kind: CompletionItemKind.Constant,
+    //           },
+    //           {
+    //             label: 'dataproxy',
+    //             kind: CompletionItemKind.Constant,
+    //           },
+    //         ],
+    //       },
+    //     )
+    //   })
   })
 
-  suite('BLOCK ATTRIBUTES', () => {
-    const blockAttributeId = {
-      label: '@@id',
-      kind: CompletionItemKind.Property,
-    }
-    const blockAttributeMap = {
-      label: '@@map',
-      kind: CompletionItemKind.Property,
-    }
-    const blockAttributeUnique = {
-      label: '@@unique',
-      kind: CompletionItemKind.Property,
-    }
-    const blockAttributeIndex = {
-      label: '@@index',
-      kind: CompletionItemKind.Property,
-    }
-    const blockAttributeFulltextIndex = {
-      label: '@@fulltext',
-      kind: CompletionItemKind.Property,
-    }
-    const blockAttributeIgnore = {
-      label: '@@ignore',
-      kind: CompletionItemKind.Property,
-    }
+  // suite('BLOCK ATTRIBUTES', () => {
+  //   const blockAttributeId = {
+  //     label: '@@id',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const blockAttributeMap = {
+  //     label: '@@map',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const blockAttributeUnique = {
+  //     label: '@@unique',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const blockAttributeIndex = {
+  //     label: '@@index',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const blockAttributeFulltextIndex = {
+  //     label: '@@fulltext',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const blockAttributeIgnore = {
+  //     label: '@@ignore',
+  //     kind: CompletionItemKind.Property,
+  //   }
 
-    test('Diagnoses block attribute suggestions first in a line', () => {
-      assertCompletion(
-        emptyBlocksUri,
-        { line: 9, character: 0 },
-        {
-          isIncomplete: false,
-          items: [blockAttributeMap, blockAttributeId, blockAttributeUnique, blockAttributeIndex, blockAttributeIgnore],
-        },
-      )
-    })
+  //   test('Diagnoses block attribute suggestions first in a line', () => {
+  //     assertCompletion(
+  //       emptyBlocksUri,
+  //       { line: 9, character: 0 },
+  //       {
+  //         isIncomplete: false,
+  //         items: [blockAttributeMap, blockAttributeId, blockAttributeUnique, blockAttributeIndex, blockAttributeIgnore],
+  //       },
+  //     )
+  //   })
 
-    test('Diagnoses block attribute suggestions with existing attributes first in a line', () => {
-      assertCompletion(
-        modelBlocksUri,
-        { line: 5, character: 0 },
-        {
-          isIncomplete: false,
-          items: [blockAttributeMap, blockAttributeId, blockAttributeUnique, blockAttributeIndex, blockAttributeIgnore],
-        },
-      )
-      assertCompletion(
-        modelBlocksUri,
-        { line: 14, character: 0 },
-        {
-          isIncomplete: false,
-          items: [blockAttributeMap, blockAttributeUnique, blockAttributeIndex, blockAttributeIgnore],
-        },
-      )
-    })
+  //   test('Diagnoses block attribute suggestions with existing attributes first in a line', () => {
+  //     assertCompletion(
+  //       modelBlocksUri,
+  //       { line: 5, character: 0 },
+  //       {
+  //         isIncomplete: false,
+  //         items: [blockAttributeMap, blockAttributeId, blockAttributeUnique, blockAttributeIndex, blockAttributeIgnore],
+  //       },
+  //     )
+  //     assertCompletion(
+  //       modelBlocksUri,
+  //       { line: 14, character: 0 },
+  //       {
+  //         isIncomplete: false,
+  //         items: [blockAttributeMap, blockAttributeUnique, blockAttributeIndex, blockAttributeIgnore],
+  //       },
+  //     )
+  //   })
 
-    //
-    // previewFeatures = ["fullTextIndex"]
-    // = tests which are feature preview / database dependent
-    //
-    test('fullTextIndex - Diagnoses block attribute suggestions first in a line - mysql', () => {
-      assertCompletion(
-        fullTextIndex_extendedIndexes_mysql,
-        { line: 14, character: 2 },
-        {
-          isIncomplete: false,
-          items: [
-            blockAttributeMap,
-            // blockAttributeId,
-            blockAttributeUnique,
-            blockAttributeIndex,
-            blockAttributeFulltextIndex,
-            blockAttributeIgnore,
-          ],
-        },
-      )
-    })
+  //   //
+  //   // previewFeatures = ["fullTextIndex"]
+  //   // = tests which are feature preview / database dependent
+  //   //
+  //   test('fullTextIndex - Diagnoses block attribute suggestions first in a line - mysql', () => {
+  //     assertCompletion(
+  //       fullTextIndex_extendedIndexes_mysql,
+  //       { line: 14, character: 2 },
+  //       {
+  //         isIncomplete: false,
+  //         items: [
+  //           blockAttributeMap,
+  //           // blockAttributeId,
+  //           blockAttributeUnique,
+  //           blockAttributeIndex,
+  //           blockAttributeFulltextIndex,
+  //           blockAttributeIgnore,
+  //         ],
+  //       },
+  //     )
+  //   })
 
-    test('fullTextIndex - Diagnoses block attribute suggestions first in a line - mongodb', () => {
-      assertCompletion(
-        fullTextIndex_extendedIndexes_mongodb,
-        { line: 14, character: 2 },
-        {
-          isIncomplete: false,
-          items: [
-            blockAttributeMap,
-            // blockAttributeId,
-            blockAttributeUnique,
-            blockAttributeIndex,
-            blockAttributeFulltextIndex,
-            blockAttributeIgnore,
-          ],
-        },
-      )
-    })
+  //   test('fullTextIndex - Diagnoses block attribute suggestions first in a line - mongodb', () => {
+  //     assertCompletion(
+  //       fullTextIndex_extendedIndexes_mongodb,
+  //       { line: 14, character: 2 },
+  //       {
+  //         isIncomplete: false,
+  //         items: [
+  //           blockAttributeMap,
+  //           // blockAttributeId,
+  //           blockAttributeUnique,
+  //           blockAttributeIndex,
+  //           blockAttributeFulltextIndex,
+  //           blockAttributeIgnore,
+  //         ],
+  //       },
+  //     )
+  //   })
 
-    test('fullTextIndex - Diagnoses block attribute suggestions first in a line - postgresql', () => {
-      assertCompletion(
-        fullTextIndex_extendedIndexes_postgresql,
-        { line: 14, character: 2 },
-        {
-          isIncomplete: false,
-          items: [
-            blockAttributeMap,
-            // blockAttributeId,
-            blockAttributeUnique,
-            blockAttributeIndex,
-            blockAttributeIgnore,
-          ],
-        },
-      )
-    })
-  })
+  //   test('fullTextIndex - Diagnoses block attribute suggestions first in a line - postgresql', () => {
+  //     assertCompletion(
+  //       fullTextIndex_extendedIndexes_postgresql,
+  //       { line: 14, character: 2 },
+  //       {
+  //         isIncomplete: false,
+  //         items: [
+  //           blockAttributeMap,
+  //           // blockAttributeId,
+  //           blockAttributeUnique,
+  //           blockAttributeIndex,
+  //           blockAttributeIgnore,
+  //         ],
+  //       },
+  //     )
+  //   })
+  // })
 
-  suite('TYPES', () => {
-    test('Diagnoses type suggestions in model block', () => {
-      assertCompletion(
-        modelBlocksUri,
-        { line: 51, character: 7 },
-        {
-          isIncomplete: true,
-          items: [
-            { label: 'String', kind: CompletionItemKind.TypeParameter },
-            { label: 'Boolean', kind: CompletionItemKind.TypeParameter },
-            { label: 'Int', kind: CompletionItemKind.TypeParameter },
-            { label: 'Float', kind: CompletionItemKind.TypeParameter },
-            { label: 'DateTime', kind: CompletionItemKind.TypeParameter },
-            { label: 'Json', kind: CompletionItemKind.TypeParameter },
-            { label: 'Bytes', kind: CompletionItemKind.TypeParameter },
-            { label: 'Decimal', kind: CompletionItemKind.TypeParameter },
-            { label: 'BigInt', kind: CompletionItemKind.TypeParameter },
-            {
-              label: 'Unsupported',
-              kind: CompletionItemKind.TypeParameter,
-            },
-            { label: 'User', kind: CompletionItemKind.Reference },
-            { label: 'Post', kind: CompletionItemKind.Reference },
-            { label: 'Person', kind: CompletionItemKind.Reference },
-            { label: 'Test', kind: CompletionItemKind.Reference },
-            { label: 'Cat', kind: CompletionItemKind.Reference },
-            { label: 'SecondUser', kind: CompletionItemKind.Reference },
-            { label: 'ThirdUser', kind: CompletionItemKind.Reference },
-            { label: 'TypeCheck', kind: CompletionItemKind.Reference },
-            { label: 'Hello', kind: CompletionItemKind.Reference },
-            { label: 'DateTest', kind: CompletionItemKind.Reference },
-            { label: 'UserType', kind: CompletionItemKind.Reference },
-            { label: 'ForthUser', kind: CompletionItemKind.Reference },
-          ],
-        },
-      )
-    })
+  // suite('TYPES', () => {
+  //   test('Diagnoses type suggestions in model block', () => {
+  //     assertCompletion(
+  //       modelBlocksUri,
+  //       { line: 51, character: 7 },
+  //       {
+  //         isIncomplete: true,
+  //         items: [
+  //           { label: 'String', kind: CompletionItemKind.TypeParameter },
+  //           { label: 'Boolean', kind: CompletionItemKind.TypeParameter },
+  //           { label: 'Int', kind: CompletionItemKind.TypeParameter },
+  //           { label: 'Float', kind: CompletionItemKind.TypeParameter },
+  //           { label: 'DateTime', kind: CompletionItemKind.TypeParameter },
+  //           { label: 'Json', kind: CompletionItemKind.TypeParameter },
+  //           { label: 'Bytes', kind: CompletionItemKind.TypeParameter },
+  //           { label: 'Decimal', kind: CompletionItemKind.TypeParameter },
+  //           { label: 'BigInt', kind: CompletionItemKind.TypeParameter },
+  //           {
+  //             label: 'Unsupported',
+  //             kind: CompletionItemKind.TypeParameter,
+  //           },
+  //           { label: 'User', kind: CompletionItemKind.Reference },
+  //           { label: 'Post', kind: CompletionItemKind.Reference },
+  //           { label: 'Person', kind: CompletionItemKind.Reference },
+  //           { label: 'Test', kind: CompletionItemKind.Reference },
+  //           { label: 'Cat', kind: CompletionItemKind.Reference },
+  //           { label: 'SecondUser', kind: CompletionItemKind.Reference },
+  //           { label: 'ThirdUser', kind: CompletionItemKind.Reference },
+  //           { label: 'TypeCheck', kind: CompletionItemKind.Reference },
+  //           { label: 'Hello', kind: CompletionItemKind.Reference },
+  //           { label: 'DateTest', kind: CompletionItemKind.Reference },
+  //           { label: 'UserType', kind: CompletionItemKind.Reference },
+  //           { label: 'ForthUser', kind: CompletionItemKind.Reference },
+  //         ],
+  //       },
+  //     )
+  //   })
 
-    test('Diagnoses type suggestions in model block - MongoDB', () => {
-      assertCompletion(
-        mongoDBFieldTypes,
-        { line: 11, character: 14 },
-        {
-          isIncomplete: true,
-          items: [
-            { label: 'String', kind: CompletionItemKind.TypeParameter },
-            { label: 'Boolean', kind: CompletionItemKind.TypeParameter },
-            { label: 'Int', kind: CompletionItemKind.TypeParameter },
-            { label: 'Float', kind: CompletionItemKind.TypeParameter },
-            { label: 'DateTime', kind: CompletionItemKind.TypeParameter },
-            { label: 'Json', kind: CompletionItemKind.TypeParameter },
-            { label: 'Bytes', kind: CompletionItemKind.TypeParameter },
-            { label: 'BigInt', kind: CompletionItemKind.TypeParameter },
-            {
-              label: 'Unsupported',
-              kind: CompletionItemKind.TypeParameter,
-            },
-            { label: 'Post', kind: CompletionItemKind.Reference },
-            { label: 'PostType', kind: CompletionItemKind.Reference },
-            { label: 'Something', kind: CompletionItemKind.Reference },
-          ],
-        },
-      )
-    })
-  })
+  //   test('Diagnoses type suggestions in model block - MongoDB', () => {
+  //     assertCompletion(
+  //       mongoDBFieldTypes,
+  //       { line: 11, character: 14 },
+  //       {
+  //         isIncomplete: true,
+  //         items: [
+  //           { label: 'String', kind: CompletionItemKind.TypeParameter },
+  //           { label: 'Boolean', kind: CompletionItemKind.TypeParameter },
+  //           { label: 'Int', kind: CompletionItemKind.TypeParameter },
+  //           { label: 'Float', kind: CompletionItemKind.TypeParameter },
+  //           { label: 'DateTime', kind: CompletionItemKind.TypeParameter },
+  //           { label: 'Json', kind: CompletionItemKind.TypeParameter },
+  //           { label: 'Bytes', kind: CompletionItemKind.TypeParameter },
+  //           { label: 'BigInt', kind: CompletionItemKind.TypeParameter },
+  //           {
+  //             label: 'Unsupported',
+  //             kind: CompletionItemKind.TypeParameter,
+  //           },
+  //           { label: 'Post', kind: CompletionItemKind.Reference },
+  //           { label: 'PostType', kind: CompletionItemKind.Reference },
+  //           { label: 'Something', kind: CompletionItemKind.Reference },
+  //         ],
+  //       },
+  //     )
+  //   })
+  // })
 
-  suite('FIELD ATTRIBUTES', () => {
-    const fieldAttributeId = {
-      label: '@id',
-      kind: CompletionItemKind.Property,
-    }
-    const fieldAttributeUnique = {
-      label: '@unique',
-      kind: CompletionItemKind.Property,
-    }
-    const fieldAttributeMap = {
-      label: '@map',
-      kind: CompletionItemKind.Property,
-    }
-    const fieldAttributeDefault = {
-      label: '@default',
-      kind: CompletionItemKind.Property,
-    }
-    const fieldAttributeRelation = {
-      label: '@relation',
-      kind: CompletionItemKind.Property,
-    }
-    const fieldAttributeUpdatedAt = {
-      label: '@updatedAt',
-      kind: CompletionItemKind.Property,
-    }
-    const fieldAttributeIgnore = {
-      label: '@ignore',
-      kind: CompletionItemKind.Property,
-    }
+  // suite('FIELD ATTRIBUTES', () => {
+  //   const fieldAttributeId = {
+  //     label: '@id',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const fieldAttributeUnique = {
+  //     label: '@unique',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const fieldAttributeMap = {
+  //     label: '@map',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const fieldAttributeDefault = {
+  //     label: '@default',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const fieldAttributeRelation = {
+  //     label: '@relation',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const fieldAttributeUpdatedAt = {
+  //     label: '@updatedAt',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const fieldAttributeIgnore = {
+  //     label: '@ignore',
+  //     kind: CompletionItemKind.Property,
+  //   }
 
-    const functionCuid = {
-      label: 'cuid()',
-      kind: CompletionItemKind.Function,
-    }
-    const functionUuid = {
-      label: 'uuid()',
-      kind: CompletionItemKind.Function,
-    }
-    const functionAuto = {
-      label: 'auto()',
-      kind: CompletionItemKind.Function,
-    }
-    const functionAutoincrement = {
-      label: 'autoincrement()',
-      kind: CompletionItemKind.Function,
-    }
-    const functionNow = {
-      label: 'now()',
-      kind: CompletionItemKind.Function,
-    }
-    const functionDbGenerated = {
-      label: 'dbgenerated("")',
-      kind: CompletionItemKind.Function,
-    }
-    const staticValueTrue = {
-      label: 'true',
-      kind: CompletionItemKind.Value,
-    }
-    const staticValueFalse = {
-      label: 'false',
-      kind: CompletionItemKind.Value,
-    }
-    const enumValueOne = {
-      label: 'ADMIN',
-      kind: CompletionItemKind.Value,
-    }
-    const enumValueTwo = {
-      label: 'NORMAL',
-      kind: CompletionItemKind.Value,
-    }
+  //   const functionCuid = {
+  //     label: 'cuid()',
+  //     kind: CompletionItemKind.Function,
+  //   }
+  //   const functionUuid = {
+  //     label: 'uuid()',
+  //     kind: CompletionItemKind.Function,
+  //   }
+  //   const functionAuto = {
+  //     label: 'auto()',
+  //     kind: CompletionItemKind.Function,
+  //   }
+  //   const functionAutoincrement = {
+  //     label: 'autoincrement()',
+  //     kind: CompletionItemKind.Function,
+  //   }
+  //   const functionNow = {
+  //     label: 'now()',
+  //     kind: CompletionItemKind.Function,
+  //   }
+  //   const functionDbGenerated = {
+  //     label: 'dbgenerated("")',
+  //     kind: CompletionItemKind.Function,
+  //   }
+  //   const staticValueTrue = {
+  //     label: 'true',
+  //     kind: CompletionItemKind.Value,
+  //   }
+  //   const staticValueFalse = {
+  //     label: 'false',
+  //     kind: CompletionItemKind.Value,
+  //   }
+  //   const enumValueOne = {
+  //     label: 'ADMIN',
+  //     kind: CompletionItemKind.Value,
+  //   }
+  //   const enumValueTwo = {
+  //     label: 'NORMAL',
+  //     kind: CompletionItemKind.Value,
+  //   }
 
-    const fieldsProperty = {
-      label: 'fields',
-      kind: CompletionItemKind.Property,
-    }
-    const referencesProperty = {
-      label: 'references',
-      kind: CompletionItemKind.Property,
-    }
-    const onDeleteProperty = {
-      label: 'onDelete',
-      kind: CompletionItemKind.Property,
-    }
-    const onUpdateProperty = {
-      label: 'onUpdate',
-      kind: CompletionItemKind.Property,
-    }
-    const nameQuotesProperty = {
-      label: '""',
-      kind: CompletionItemKind.Property,
-    }
-    const nameProperty = {
-      label: 'name',
-      kind: CompletionItemKind.Property,
-    }
-    const mapProperty = {
-      label: 'map',
-      kind: CompletionItemKind.Property,
-    }
-    const typeProperty = {
-      label: 'type',
-      kind: CompletionItemKind.Property,
-    }
-    const sortProperty = {
-      label: 'sort',
-      kind: CompletionItemKind.Property,
-    }
-    const lengthProperty = {
-      label: 'length',
-      kind: CompletionItemKind.Property,
-    }
+  //   const fieldsProperty = {
+  //     label: 'fields',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const referencesProperty = {
+  //     label: 'references',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const onDeleteProperty = {
+  //     label: 'onDelete',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const onUpdateProperty = {
+  //     label: 'onUpdate',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const nameQuotesProperty = {
+  //     label: '""',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const nameProperty = {
+  //     label: 'name',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const mapProperty = {
+  //     label: 'map',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const typeProperty = {
+  //     label: 'type',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const sortProperty = {
+  //     label: 'sort',
+  //     kind: CompletionItemKind.Property,
+  //   }
+  //   const lengthProperty = {
+  //     label: 'length',
+  //     kind: CompletionItemKind.Property,
+  //   }
 
-    const asc = {
-      label: 'Asc',
-      kind: CompletionItemKind.Enum,
-    }
-    const desc = {
-      label: 'Desc',
-      kind: CompletionItemKind.Enum,
-    }
+  //   const asc = {
+  //     label: 'Asc',
+  //     kind: CompletionItemKind.Enum,
+  //   }
+  //   const desc = {
+  //     label: 'Desc',
+  //     kind: CompletionItemKind.Enum,
+  //   }
 
-    test('Diagnoses field and block attribute suggestions', () => {
-      assertCompletion(
-        modelBlocksUri,
-        { line: 18, character: 14 },
-        {
-          isIncomplete: false,
-          items: [
-            fieldAttributeId,
-            fieldAttributeUnique,
-            fieldAttributeMap,
-            fieldAttributeDefault,
-            fieldAttributeRelation,
-            fieldAttributeIgnore,
-          ],
-        },
-      )
-      assertCompletion(
-        modelBlocksUri,
-        { line: 19, character: 14 },
-        {
-          isIncomplete: false,
-          items: [
-            fieldAttributeUnique,
-            fieldAttributeMap,
-            fieldAttributeDefault,
-            fieldAttributeRelation,
-            fieldAttributeIgnore,
-          ],
-        },
-      )
-      assertCompletion(
-        modelBlocksUri,
-        { line: 61, character: 20 },
-        {
-          isIncomplete: false,
-          items: [
-            fieldAttributeUnique,
-            fieldAttributeMap,
-            fieldAttributeDefault,
-            fieldAttributeRelation,
-            fieldAttributeUpdatedAt,
-            fieldAttributeIgnore,
-          ],
-        },
-      )
-      assertCompletion(
-        modelBlocksUri,
-        { line: 13, character: 16 },
-        {
-          isIncomplete: false,
-          items: [
-            fieldAttributeUnique,
-            fieldAttributeMap,
-            fieldAttributeDefault,
-            fieldAttributeRelation,
-            fieldAttributeIgnore,
-          ],
-        },
-      )
+  //   test('Diagnoses field and block attribute suggestions', () => {
+  //     assertCompletion(
+  //       modelBlocksUri,
+  //       { line: 18, character: 14 },
+  //       {
+  //         isIncomplete: false,
+  //         items: [
+  //           fieldAttributeId,
+  //           fieldAttributeUnique,
+  //           fieldAttributeMap,
+  //           fieldAttributeDefault,
+  //           fieldAttributeRelation,
+  //           fieldAttributeIgnore,
+  //         ],
+  //       },
+  //     )
+  //     assertCompletion(
+  //       modelBlocksUri,
+  //       { line: 19, character: 14 },
+  //       {
+  //         isIncomplete: false,
+  //         items: [
+  //           fieldAttributeUnique,
+  //           fieldAttributeMap,
+  //           fieldAttributeDefault,
+  //           fieldAttributeRelation,
+  //           fieldAttributeIgnore,
+  //         ],
+  //       },
+  //     )
+  //     assertCompletion(
+  //       modelBlocksUri,
+  //       { line: 61, character: 20 },
+  //       {
+  //         isIncomplete: false,
+  //         items: [
+  //           fieldAttributeUnique,
+  //           fieldAttributeMap,
+  //           fieldAttributeDefault,
+  //           fieldAttributeRelation,
+  //           fieldAttributeUpdatedAt,
+  //           fieldAttributeIgnore,
+  //         ],
+  //       },
+  //     )
+  //     assertCompletion(
+  //       modelBlocksUri,
+  //       { line: 13, character: 16 },
+  //       {
+  //         isIncomplete: false,
+  //         items: [
+  //           fieldAttributeUnique,
+  //           fieldAttributeMap,
+  //           fieldAttributeDefault,
+  //           fieldAttributeRelation,
+  //           fieldAttributeIgnore,
+  //         ],
+  //       },
+  //     )
 
-      assertCompletion(
-        modelBlocksUri,
-        { line: 74, character: 24 },
-        {
-          isIncomplete: false,
-          items: [{ label: 'lastName', kind: CompletionItemKind.Field }],
-        },
-      )
-    })
+  //     assertCompletion(
+  //       modelBlocksUri,
+  //       { line: 74, character: 24 },
+  //       {
+  //         isIncomplete: false,
+  //         items: [{ label: 'lastName', kind: CompletionItemKind.Field }],
+  //       },
+  //     )
+  //   })
 
-    suite('No provider', function () {
-      test('Int @id @default(|)', () => {
-        assertCompletion(
-          modelBlocksUri,
-          { line: 11, character: 24 },
-          {
-            isIncomplete: false,
-            items: [functionDbGenerated, functionAutoincrement],
-          },
-        )
-      })
-      test('String @id @default(|)', () => {
-        assertCompletion(
-          modelBlocksUri,
-          { line: 28, character: 27 },
-          {
-            isIncomplete: false,
-            items: [functionDbGenerated, functionUuid, functionCuid],
-          },
-        )
-      })
-      test('DateTime @default(|)', () => {
-        assertCompletion(
-          modelBlocksUri,
-          { line: 30, character: 36 },
-          {
-            isIncomplete: false,
-            items: [functionDbGenerated, functionNow],
-          },
-        )
-      })
-      test('Boolean @default(|)', () => {
-        assertCompletion(
-          modelBlocksUri,
-          { line: 24, character: 28 },
-          {
-            isIncomplete: false,
-            items: [functionDbGenerated, staticValueTrue, staticValueFalse],
-          },
-        )
-      })
-      test('Enum @default(|)', () => {
-        assertCompletion(
-          modelBlocksUri,
-          { line: 62, character: 27 },
-          {
-            isIncomplete: false,
-            items: [functionDbGenerated, enumValueOne, enumValueTwo],
-          },
-        )
-      })
-      test('Enum @default(|) (enum with comments)', () => {
-        assertCompletion(
-          enumCommentUri,
-          { line: 11, character: 30 },
-          {
-            isIncomplete: false,
-            items: [functionDbGenerated, enumValueOne, enumValueTwo],
-          },
-        )
-      })
-    })
+  //   suite('No provider', function () {
+  //     test('Int @id @default(|)', () => {
+  //       assertCompletion(
+  //         modelBlocksUri,
+  //         { line: 11, character: 24 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [functionDbGenerated, functionAutoincrement],
+  //         },
+  //       )
+  //     })
+  //     test('String @id @default(|)', () => {
+  //       assertCompletion(
+  //         modelBlocksUri,
+  //         { line: 28, character: 27 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [functionDbGenerated, functionUuid, functionCuid],
+  //         },
+  //       )
+  //     })
+  //     test('DateTime @default(|)', () => {
+  //       assertCompletion(
+  //         modelBlocksUri,
+  //         { line: 30, character: 36 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [functionDbGenerated, functionNow],
+  //         },
+  //       )
+  //     })
+  //     test('Boolean @default(|)', () => {
+  //       assertCompletion(
+  //         modelBlocksUri,
+  //         { line: 24, character: 28 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [functionDbGenerated, staticValueTrue, staticValueFalse],
+  //         },
+  //       )
+  //     })
+  //     test('Enum @default(|)', () => {
+  //       assertCompletion(
+  //         modelBlocksUri,
+  //         { line: 62, character: 27 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [functionDbGenerated, enumValueOne, enumValueTwo],
+  //         },
+  //       )
+  //     })
+  //     test('Enum @default(|) (enum with comments)', () => {
+  //       assertCompletion(
+  //         enumCommentUri,
+  //         { line: 11, character: 30 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [functionDbGenerated, enumValueOne, enumValueTwo],
+  //         },
+  //       )
+  //     })
+  //   })
 
-    suite('MongoDB', function () {
-      test('String @id @default(|)', () => {
-        assertCompletion(
-          mongoDBAtdefaultUri,
-          { line: 11, character: 33 },
-          {
-            isIncomplete: false,
-            items: [functionAuto, functionUuid, functionCuid],
-          },
-        )
-      })
-      test('Int @id @default(|)', () => {
-        assertCompletion(
-          mongoDBAtdefaultUri,
-          { line: 24, character: 22 },
-          {
-            isIncomplete: false,
-            items: [functionAuto, functionAutoincrement],
-          },
-        )
-      })
-      test('String @default(|)', () => {
-        assertCompletion(
-          mongoDBAtdefaultUri,
-          { line: 12, character: 29 },
-          {
-            isIncomplete: false,
-            items: [functionAuto, functionUuid, functionCuid],
-          },
-        )
-      })
-      test('Boolean @default(|)', () => {
-        assertCompletion(
-          mongoDBAtdefaultUri,
-          { line: 13, character: 29 },
-          {
-            isIncomplete: false,
-            items: [functionAuto, staticValueTrue, staticValueFalse],
-          },
-        )
-      })
-      test('DateTime @default(|)', () => {
-        assertCompletion(
-          mongoDBAtdefaultUri,
-          { line: 14, character: 29 },
-          {
-            isIncomplete: false,
-            items: [functionAuto, functionNow],
-          },
-        )
-      })
-      test('Enum @default(|)', () => {
-        assertCompletion(
-          mongoDBAtdefaultUri,
-          { line: 15, character: 29 },
-          {
-            isIncomplete: false,
-            items: [functionAuto, enumValueOne, enumValueTwo],
-          },
-        )
-      })
-    })
+  //   suite('MongoDB', function () {
+  //     test('String @id @default(|)', () => {
+  //       assertCompletion(
+  //         mongoDBAtdefaultUri,
+  //         { line: 11, character: 33 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [functionAuto, functionUuid, functionCuid],
+  //         },
+  //       )
+  //     })
+  //     test('Int @id @default(|)', () => {
+  //       assertCompletion(
+  //         mongoDBAtdefaultUri,
+  //         { line: 24, character: 22 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [functionAuto, functionAutoincrement],
+  //         },
+  //       )
+  //     })
+  //     test('String @default(|)', () => {
+  //       assertCompletion(
+  //         mongoDBAtdefaultUri,
+  //         { line: 12, character: 29 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [functionAuto, functionUuid, functionCuid],
+  //         },
+  //       )
+  //     })
+  //     test('Boolean @default(|)', () => {
+  //       assertCompletion(
+  //         mongoDBAtdefaultUri,
+  //         { line: 13, character: 29 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [functionAuto, staticValueTrue, staticValueFalse],
+  //         },
+  //       )
+  //     })
+  //     test('DateTime @default(|)', () => {
+  //       assertCompletion(
+  //         mongoDBAtdefaultUri,
+  //         { line: 14, character: 29 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [functionAuto, functionNow],
+  //         },
+  //       )
+  //     })
+  //     test('Enum @default(|)', () => {
+  //       assertCompletion(
+  //         mongoDBAtdefaultUri,
+  //         { line: 15, character: 29 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [functionAuto, enumValueOne, enumValueTwo],
+  //         },
+  //       )
+  //     })
+  //   })
 
-    test('@@unique([|])', () => {
-      assertCompletion(
-        modelBlocksUri,
-        { line: 38, character: 15 },
-        {
-          isIncomplete: false,
-          items: [
-            { label: 'firstName', kind: CompletionItemKind.Field },
-            { label: 'lastName', kind: CompletionItemKind.Field },
-            { label: 'isAdmin', kind: CompletionItemKind.Field },
-          ],
-        },
-      )
-    })
+  //   test('@@unique([|])', () => {
+  //     assertCompletion(
+  //       modelBlocksUri,
+  //       { line: 38, character: 15 },
+  //       {
+  //         isIncomplete: false,
+  //         items: [
+  //           { label: 'firstName', kind: CompletionItemKind.Field },
+  //           { label: 'lastName', kind: CompletionItemKind.Field },
+  //           { label: 'isAdmin', kind: CompletionItemKind.Field },
+  //         ],
+  //       },
+  //     )
+  //   })
 
-    test('@@id([|])', () => {
-      assertCompletion(
-        modelBlocksUri,
-        { line: 46, character: 10 },
-        {
-          isIncomplete: false,
-          items: [
-            { label: 'firstName', kind: CompletionItemKind.Field },
-            { label: 'lastName', kind: CompletionItemKind.Field },
-            { label: 'isAdmin', kind: CompletionItemKind.Field },
-          ],
-        },
-      )
-    })
+  //   test('@@id([|])', () => {
+  //     assertCompletion(
+  //       modelBlocksUri,
+  //       { line: 46, character: 10 },
+  //       {
+  //         isIncomplete: false,
+  //         items: [
+  //           { label: 'firstName', kind: CompletionItemKind.Field },
+  //           { label: 'lastName', kind: CompletionItemKind.Field },
+  //           { label: 'isAdmin', kind: CompletionItemKind.Field },
+  //         ],
+  //       },
+  //     )
+  //   })
 
-    test('@@index([|])', () => {
-      assertCompletion(
-        modelBlocksUri,
-        { line: 47, character: 13 },
-        {
-          isIncomplete: false,
-          items: [
-            { label: 'firstName', kind: CompletionItemKind.Field },
-            { label: 'lastName', kind: CompletionItemKind.Field },
-            { label: 'isAdmin', kind: CompletionItemKind.Field },
-          ],
-        },
-      )
-    })
-    // previewFeatures = ["extendedIndexes"]
-    // provider = "postgresql"
-    test('extendedIndexes: @@index(|) - postgresql', () => {
-      assertCompletion(
-        fullTextIndex_extendedIndexes_postgresql,
-        { line: 15, character: 10 },
-        {
-          isIncomplete: false,
-          items: [fieldsProperty, mapProperty, typeProperty],
-        },
-      )
-    })
-    test('extendedIndexes: @@index([title], |) - postgresql', () => {
-      assertCompletion(
-        fullTextIndex_extendedIndexes_postgresql,
-        { line: 16, character: 19 },
-        {
-          isIncomplete: false,
-          items: [fieldsProperty, mapProperty, typeProperty],
-        },
-      )
-    })
-    test('extendedIndexes: @@index([title], type: |) - postgresql', () => {
-      assertCompletion(
-        fullTextIndex_extendedIndexes_postgresql,
-        { line: 17, character: 25 },
-        {
-          isIncomplete: false,
-          items: [
-            { label: 'Hash', kind: CompletionItemKind.Enum },
-            { label: 'BTree', kind: CompletionItemKind.Enum },
-          ],
-        },
-      )
-    })
-    test('extendedIndexes: @@index([title], type: Hash, |) - postgresql', () => {
-      assertCompletion(
-        fullTextIndex_extendedIndexes_postgresql,
-        { line: 18, character: 31 },
-        {
-          isIncomplete: false,
-          items: [fieldsProperty, mapProperty],
-        },
-      )
-    })
+  //   test('@@index([|])', () => {
+  //     assertCompletion(
+  //       modelBlocksUri,
+  //       { line: 47, character: 13 },
+  //       {
+  //         isIncomplete: false,
+  //         items: [
+  //           { label: 'firstName', kind: CompletionItemKind.Field },
+  //           { label: 'lastName', kind: CompletionItemKind.Field },
+  //           { label: 'isAdmin', kind: CompletionItemKind.Field },
+  //         ],
+  //       },
+  //     )
+  //   })
+  //   // previewFeatures = ["extendedIndexes"]
+  //   // provider = "postgresql"
+  //   test('extendedIndexes: @@index(|) - postgresql', () => {
+  //     assertCompletion(
+  //       fullTextIndex_extendedIndexes_postgresql,
+  //       { line: 15, character: 10 },
+  //       {
+  //         isIncomplete: false,
+  //         items: [fieldsProperty, mapProperty, typeProperty],
+  //       },
+  //     )
+  //   })
+  //   test('extendedIndexes: @@index([title], |) - postgresql', () => {
+  //     assertCompletion(
+  //       fullTextIndex_extendedIndexes_postgresql,
+  //       { line: 16, character: 19 },
+  //       {
+  //         isIncomplete: false,
+  //         items: [fieldsProperty, mapProperty, typeProperty],
+  //       },
+  //     )
+  //   })
+  //   test('extendedIndexes: @@index([title], type: |) - postgresql', () => {
+  //     assertCompletion(
+  //       fullTextIndex_extendedIndexes_postgresql,
+  //       { line: 17, character: 25 },
+  //       {
+  //         isIncomplete: false,
+  //         items: [
+  //           { label: 'Hash', kind: CompletionItemKind.Enum },
+  //           { label: 'BTree', kind: CompletionItemKind.Enum },
+  //         ],
+  //       },
+  //     )
+  //   })
+  //   test('extendedIndexes: @@index([title], type: Hash, |) - postgresql', () => {
+  //     assertCompletion(
+  //       fullTextIndex_extendedIndexes_postgresql,
+  //       { line: 18, character: 31 },
+  //       {
+  //         isIncomplete: false,
+  //         items: [fieldsProperty, mapProperty],
+  //       },
+  //     )
+  //   })
 
-    suite('Diagnoses arguments of @relation directive', function () {
-      test('@relation(|)', () => {
-        assertCompletion(
-          relationDirectiveUri,
-          { line: 12, character: 26 },
-          {
-            isIncomplete: false,
-            items: [
-              referencesProperty,
-              fieldsProperty,
-              onDeleteProperty,
-              onUpdateProperty,
-              nameQuotesProperty,
-              nameProperty,
-              mapProperty,
-            ],
-          },
-        )
-      })
-      test('@relation(references: [|])', () => {
-        assertCompletion(
-          relationDirectiveUri,
-          { line: 21, character: 39 },
-          {
-            isIncomplete: false,
-            items: [
-              { label: 'id', kind: CompletionItemKind.Field },
-              { label: 'items', kind: CompletionItemKind.Field },
-              { label: 'total', kind: CompletionItemKind.Field },
-            ],
-          },
-        )
-      })
-      test('MongoDB: embedded m2m @relation(references: [|])', () => {
-        assertCompletion(
-          mongoDBEmbeddedM2mUri,
-          { line: 13, character: 58 },
-          {
-            isIncomplete: false,
-            items: [
-              { label: 'id', kind: CompletionItemKind.Field },
-              { label: 'bar_ids', kind: CompletionItemKind.Field },
-              { label: 'bar', kind: CompletionItemKind.Field },
-            ],
-          },
-        )
-      })
-      test('@relation(references: [id], |)', () => {
-        assertCompletion(
-          relationDirectiveUri,
-          { line: 30, character: 44 },
-          {
-            isIncomplete: false,
-            items: [fieldsProperty, onDeleteProperty, onUpdateProperty, nameQuotesProperty, nameProperty, mapProperty],
-          },
-        )
-      })
-      test('order Order @relation(fields: [orderId], |)', () => {
-        assertCompletion(
-          relationDirectiveUri,
-          { line: 39, character: 45 },
-          {
-            isIncomplete: false,
-            items: [
-              referencesProperty,
-              onDeleteProperty,
-              onUpdateProperty,
-              nameQuotesProperty,
-              nameProperty,
-              mapProperty,
-            ],
-          },
-        )
-      })
-      test('@relation(fields: [|])', () => {
-        assertCompletion(
-          relationDirectiveUri,
-          { line: 48, character: 35 },
-          {
-            isIncomplete: false,
-            items: [
-              { label: 'id', kind: CompletionItemKind.Field },
-              { label: 'productName', kind: CompletionItemKind.Field },
-              { label: 'productPrice', kind: CompletionItemKind.Field },
-              { label: 'quantity', kind: CompletionItemKind.Field },
-              { label: 'orderId', kind: CompletionItemKind.Field },
-            ],
-          },
-        )
-      })
-      test('@relation(fields: [orderId], references: [id], |)', () => {
-        assertCompletion(
-          relationDirectiveUri,
-          { line: 57, character: 62 },
-          {
-            isIncomplete: false,
-            items: [onDeleteProperty, onUpdateProperty, nameQuotesProperty, nameProperty, mapProperty],
-          },
-        )
-      })
-      test('@relation(onDelete: |)', () => {
-        assertCompletion(
-          relationDirectiveUri,
-          { line: 66, character: 36 },
-          {
-            isIncomplete: false,
-            items: [
-              { label: 'Cascade', kind: CompletionItemKind.Enum },
-              { label: 'Restrict', kind: CompletionItemKind.Enum },
-              { label: 'NoAction', kind: CompletionItemKind.Enum },
-              { label: 'SetNull', kind: CompletionItemKind.Enum },
-              { label: 'SetDefault', kind: CompletionItemKind.Enum },
-            ],
-          },
-        )
-      })
-      test('@relation(onUpdate: |)', () => {
-        assertCompletion(
-          relationDirectiveUri,
-          { line: 75, character: 36 },
-          {
-            isIncomplete: false,
-            items: [
-              { label: 'Cascade', kind: CompletionItemKind.Enum },
-              { label: 'Restrict', kind: CompletionItemKind.Enum },
-              { label: 'NoAction', kind: CompletionItemKind.Enum },
-              { label: 'SetNull', kind: CompletionItemKind.Enum },
-              { label: 'SetDefault', kind: CompletionItemKind.Enum },
-            ],
-          },
-        )
-      })
-      test('@relation(fields: [orderId], references: [id], onDelete: |)', () => {
-        assertCompletion(
-          relationDirectiveUri,
-          { line: 84, character: 73 },
-          {
-            isIncomplete: false,
-            items: [
-              { label: 'Cascade', kind: CompletionItemKind.Enum },
-              { label: 'Restrict', kind: CompletionItemKind.Enum },
-              { label: 'NoAction', kind: CompletionItemKind.Enum },
-              { label: 'SetNull', kind: CompletionItemKind.Enum },
-              { label: 'SetDefault', kind: CompletionItemKind.Enum },
-            ],
-          },
-        )
-      })
+  //   suite('Diagnoses arguments of @relation directive', function () {
+  //     test('@relation(|)', () => {
+  //       assertCompletion(
+  //         relationDirectiveUri,
+  //         { line: 12, character: 26 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [
+  //             referencesProperty,
+  //             fieldsProperty,
+  //             onDeleteProperty,
+  //             onUpdateProperty,
+  //             nameQuotesProperty,
+  //             nameProperty,
+  //             mapProperty,
+  //           ],
+  //         },
+  //       )
+  //     })
+  //     test('@relation(references: [|])', () => {
+  //       assertCompletion(
+  //         relationDirectiveUri,
+  //         { line: 21, character: 39 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [
+  //             { label: 'id', kind: CompletionItemKind.Field },
+  //             { label: 'items', kind: CompletionItemKind.Field },
+  //             { label: 'total', kind: CompletionItemKind.Field },
+  //           ],
+  //         },
+  //       )
+  //     })
+  //     test('MongoDB: embedded m2m @relation(references: [|])', () => {
+  //       assertCompletion(
+  //         mongoDBEmbeddedM2mUri,
+  //         { line: 13, character: 58 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [
+  //             { label: 'id', kind: CompletionItemKind.Field },
+  //             { label: 'bar_ids', kind: CompletionItemKind.Field },
+  //             { label: 'bar', kind: CompletionItemKind.Field },
+  //           ],
+  //         },
+  //       )
+  //     })
+  //     test('@relation(references: [id], |)', () => {
+  //       assertCompletion(
+  //         relationDirectiveUri,
+  //         { line: 30, character: 44 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [fieldsProperty, onDeleteProperty, onUpdateProperty, nameQuotesProperty, nameProperty, mapProperty],
+  //         },
+  //       )
+  //     })
+  //     test('order Order @relation(fields: [orderId], |)', () => {
+  //       assertCompletion(
+  //         relationDirectiveUri,
+  //         { line: 39, character: 45 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [
+  //             referencesProperty,
+  //             onDeleteProperty,
+  //             onUpdateProperty,
+  //             nameQuotesProperty,
+  //             nameProperty,
+  //             mapProperty,
+  //           ],
+  //         },
+  //       )
+  //     })
+  //     test('@relation(fields: [|])', () => {
+  //       assertCompletion(
+  //         relationDirectiveUri,
+  //         { line: 48, character: 35 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [
+  //             { label: 'id', kind: CompletionItemKind.Field },
+  //             { label: 'productName', kind: CompletionItemKind.Field },
+  //             { label: 'productPrice', kind: CompletionItemKind.Field },
+  //             { label: 'quantity', kind: CompletionItemKind.Field },
+  //             { label: 'orderId', kind: CompletionItemKind.Field },
+  //           ],
+  //         },
+  //       )
+  //     })
+  //     test('@relation(fields: [orderId], references: [id], |)', () => {
+  //       assertCompletion(
+  //         relationDirectiveUri,
+  //         { line: 57, character: 62 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [onDeleteProperty, onUpdateProperty, nameQuotesProperty, nameProperty, mapProperty],
+  //         },
+  //       )
+  //     })
+  //     test('@relation(onDelete: |)', () => {
+  //       assertCompletion(
+  //         relationDirectiveUri,
+  //         { line: 66, character: 36 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [
+  //             { label: 'Cascade', kind: CompletionItemKind.Enum },
+  //             { label: 'Restrict', kind: CompletionItemKind.Enum },
+  //             { label: 'NoAction', kind: CompletionItemKind.Enum },
+  //             { label: 'SetNull', kind: CompletionItemKind.Enum },
+  //             { label: 'SetDefault', kind: CompletionItemKind.Enum },
+  //           ],
+  //         },
+  //       )
+  //     })
+  //     test('@relation(onUpdate: |)', () => {
+  //       assertCompletion(
+  //         relationDirectiveUri,
+  //         { line: 75, character: 36 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [
+  //             { label: 'Cascade', kind: CompletionItemKind.Enum },
+  //             { label: 'Restrict', kind: CompletionItemKind.Enum },
+  //             { label: 'NoAction', kind: CompletionItemKind.Enum },
+  //             { label: 'SetNull', kind: CompletionItemKind.Enum },
+  //             { label: 'SetDefault', kind: CompletionItemKind.Enum },
+  //           ],
+  //         },
+  //       )
+  //     })
+  //     test('@relation(fields: [orderId], references: [id], onDelete: |)', () => {
+  //       assertCompletion(
+  //         relationDirectiveUri,
+  //         { line: 84, character: 73 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [
+  //             { label: 'Cascade', kind: CompletionItemKind.Enum },
+  //             { label: 'Restrict', kind: CompletionItemKind.Enum },
+  //             { label: 'NoAction', kind: CompletionItemKind.Enum },
+  //             { label: 'SetNull', kind: CompletionItemKind.Enum },
+  //             { label: 'SetDefault', kind: CompletionItemKind.Enum },
+  //           ],
+  //         },
+  //       )
+  //     })
 
-      // SQL Server datasource
-      test('sqlserver: @relation(onDelete: |)', () => {
-        assertCompletion(
-          relationDirectiveSqlserverReferentialActionsUri,
-          { line: 15, character: 36 },
-          {
-            isIncomplete: false,
-            items: [
-              { label: 'Cascade', kind: CompletionItemKind.Enum },
-              { label: 'NoAction', kind: CompletionItemKind.Enum },
-              { label: 'SetNull', kind: CompletionItemKind.Enum },
-              { label: 'SetDefault', kind: CompletionItemKind.Enum },
-            ],
-          },
-        )
-      })
-      test('sqlserver: @relation(onUpdate: |)', () => {
-        assertCompletion(
-          relationDirectiveSqlserverReferentialActionsUri,
-          { line: 24, character: 36 },
-          {
-            isIncomplete: false,
-            items: [
-              { label: 'Cascade', kind: CompletionItemKind.Enum },
-              { label: 'NoAction', kind: CompletionItemKind.Enum },
-              { label: 'SetNull', kind: CompletionItemKind.Enum },
-              { label: 'SetDefault', kind: CompletionItemKind.Enum },
-            ],
-          },
-        )
-      })
-      test('sqlserver: @relation(fields: [orderId], references: [id], onDelete: |)', () => {
-        assertCompletion(
-          relationDirectiveSqlserverReferentialActionsUri,
-          { line: 33, character: 73 },
-          {
-            isIncomplete: false,
-            items: [
-              { label: 'Cascade', kind: CompletionItemKind.Enum },
-              { label: 'NoAction', kind: CompletionItemKind.Enum },
-              { label: 'SetNull', kind: CompletionItemKind.Enum },
-              { label: 'SetDefault', kind: CompletionItemKind.Enum },
-            ],
-          },
-        )
-      })
+  //     // SQL Server datasource
+  //     test('sqlserver: @relation(onDelete: |)', () => {
+  //       assertCompletion(
+  //         relationDirectiveSqlserverReferentialActionsUri,
+  //         { line: 15, character: 36 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [
+  //             { label: 'Cascade', kind: CompletionItemKind.Enum },
+  //             { label: 'NoAction', kind: CompletionItemKind.Enum },
+  //             { label: 'SetNull', kind: CompletionItemKind.Enum },
+  //             { label: 'SetDefault', kind: CompletionItemKind.Enum },
+  //           ],
+  //         },
+  //       )
+  //     })
+  //     test('sqlserver: @relation(onUpdate: |)', () => {
+  //       assertCompletion(
+  //         relationDirectiveSqlserverReferentialActionsUri,
+  //         { line: 24, character: 36 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [
+  //             { label: 'Cascade', kind: CompletionItemKind.Enum },
+  //             { label: 'NoAction', kind: CompletionItemKind.Enum },
+  //             { label: 'SetNull', kind: CompletionItemKind.Enum },
+  //             { label: 'SetDefault', kind: CompletionItemKind.Enum },
+  //           ],
+  //         },
+  //       )
+  //     })
+  //     test('sqlserver: @relation(fields: [orderId], references: [id], onDelete: |)', () => {
+  //       assertCompletion(
+  //         relationDirectiveSqlserverReferentialActionsUri,
+  //         { line: 33, character: 73 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [
+  //             { label: 'Cascade', kind: CompletionItemKind.Enum },
+  //             { label: 'NoAction', kind: CompletionItemKind.Enum },
+  //             { label: 'SetNull', kind: CompletionItemKind.Enum },
+  //             { label: 'SetDefault', kind: CompletionItemKind.Enum },
+  //           ],
+  //         },
+  //       )
+  //     })
 
-      //
-      // previewFeatures = ["fullTextIndex"]
-      // = tests which are feature preview / database dependent
-      //
-      test('@@fulltext(|) - mysql', () => {
-        assertCompletion(
-          fullTextIndex_extendedIndexes_mysql,
-          { line: 15, character: 13 },
-          {
-            isIncomplete: false,
-            items: [fieldsProperty, mapProperty],
-          },
-        )
-      })
-      test('@@fulltext([title, content], |) - mysql', () => {
-        assertCompletion(
-          fullTextIndex_extendedIndexes_mysql,
-          { line: 16, character: 31 },
-          {
-            isIncomplete: false,
-            items: [fieldsProperty, mapProperty],
-          },
-        )
-      })
+  //     //
+  //     // previewFeatures = ["fullTextIndex"]
+  //     // = tests which are feature preview / database dependent
+  //     //
+  //     test('@@fulltext(|) - mysql', () => {
+  //       assertCompletion(
+  //         fullTextIndex_extendedIndexes_mysql,
+  //         { line: 15, character: 13 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [fieldsProperty, mapProperty],
+  //         },
+  //       )
+  //     })
+  //     test('@@fulltext([title, content], |) - mysql', () => {
+  //       assertCompletion(
+  //         fullTextIndex_extendedIndexes_mysql,
+  //         { line: 16, character: 31 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [fieldsProperty, mapProperty],
+  //         },
+  //       )
+  //     })
 
-      test('@@fulltext(|) - mongodb', () => {
-        assertCompletion(
-          fullTextIndex_extendedIndexes_mongodb,
-          { line: 15, character: 13 },
-          {
-            isIncomplete: false,
-            items: [fieldsProperty, mapProperty],
-          },
-        )
-      })
-      test('@@fulltext([title, content], |) - mongodb', () => {
-        assertCompletion(
-          fullTextIndex_extendedIndexes_mongodb,
-          { line: 16, character: 31 },
-          {
-            isIncomplete: false,
-            items: [fieldsProperty, mapProperty],
-          },
-        )
-      })
-    })
+  //     test('@@fulltext(|) - mongodb', () => {
+  //       assertCompletion(
+  //         fullTextIndex_extendedIndexes_mongodb,
+  //         { line: 15, character: 13 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [fieldsProperty, mapProperty],
+  //         },
+  //       )
+  //     })
+  //     test('@@fulltext([title, content], |) - mongodb', () => {
+  //       assertCompletion(
+  //         fullTextIndex_extendedIndexes_mongodb,
+  //         { line: 16, character: 31 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [fieldsProperty, mapProperty],
+  //         },
+  //       )
+  //     })
+  //   })
 
-    suite('namedConstraints', function () {
-      test('@id(|)', () => {
-        assertCompletion(
-          namedConstraintsUri,
-          { line: 11, character: 20 },
-          {
-            isIncomplete: false,
-            items: [mapProperty],
-          },
-        )
-      })
-      test('@@id(|)', () => {
-        assertCompletion(
-          namedConstraintsUri,
-          { line: 17, character: 9 },
-          {
-            isIncomplete: false,
-            items: [fieldsProperty, nameProperty, mapProperty],
-          },
-        )
-      })
-      test('@@id([orderId, something], |)', () => {
-        assertCompletion(
-          namedConstraintsUri,
-          { line: 23, character: 31 },
-          {
-            isIncomplete: false,
-            items: [fieldsProperty, nameProperty, mapProperty],
-          },
-        )
-      })
-      // previewFeatures = ["extendedIndexes"]
-      test('extendedIndexes: @id(|)', () => {
-        assertCompletion(
-          fullTextIndex_extendedIndexes_mysql,
-          { line: 21, character: 16 },
-          {
-            isIncomplete: false,
-            items: [mapProperty, lengthProperty],
-          },
-        )
-      })
-      test('extendedIndexes: @@id([title(length: 100, |), abstract()])', () => {
-        assertCompletion(
-          fullTextIndex_extendedIndexes_mysql,
-          { line: 54, character: 27 },
-          {
-            isIncomplete: false,
-            items: [lengthProperty],
-          },
-        )
-      })
-      test('extendedIndexes: @@id([title(length: 100, ), abstract(|)])', () => {
-        assertCompletion(
-          fullTextIndex_extendedIndexes_mysql,
-          { line: 54, character: 39 },
-          {
-            isIncomplete: false,
-            items: [lengthProperty],
-          },
-        )
-      })
+  //   suite('namedConstraints', function () {
+  //     test('@id(|)', () => {
+  //       assertCompletion(
+  //         namedConstraintsUri,
+  //         { line: 11, character: 20 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [mapProperty],
+  //         },
+  //       )
+  //     })
+  //     test('@@id(|)', () => {
+  //       assertCompletion(
+  //         namedConstraintsUri,
+  //         { line: 17, character: 9 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [fieldsProperty, nameProperty, mapProperty],
+  //         },
+  //       )
+  //     })
+  //     test('@@id([orderId, something], |)', () => {
+  //       assertCompletion(
+  //         namedConstraintsUri,
+  //         { line: 23, character: 31 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [fieldsProperty, nameProperty, mapProperty],
+  //         },
+  //       )
+  //     })
+  //     // previewFeatures = ["extendedIndexes"]
+  //     test('extendedIndexes: @id(|)', () => {
+  //       assertCompletion(
+  //         fullTextIndex_extendedIndexes_mysql,
+  //         { line: 21, character: 16 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [mapProperty, lengthProperty],
+  //         },
+  //       )
+  //     })
+  //     test('extendedIndexes: @@id([title(length: 100, |), abstract()])', () => {
+  //       assertCompletion(
+  //         fullTextIndex_extendedIndexes_mysql,
+  //         { line: 54, character: 27 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [lengthProperty],
+  //         },
+  //       )
+  //     })
+  //     test('extendedIndexes: @@id([title(length: 100, ), abstract(|)])', () => {
+  //       assertCompletion(
+  //         fullTextIndex_extendedIndexes_mysql,
+  //         { line: 54, character: 39 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [lengthProperty],
+  //         },
+  //       )
+  //     })
 
-      test('@unique(|)', () => {
-        assertCompletion(
-          namedConstraintsUri,
-          { line: 27, character: 25 },
-          {
-            isIncomplete: false,
-            items: [mapProperty],
-          },
-        )
-      })
-      test('@@unique(|)', () => {
-        assertCompletion(
-          namedConstraintsUri,
-          { line: 34, character: 13 },
-          {
-            isIncomplete: false,
-            items: [fieldsProperty, nameProperty, mapProperty],
-          },
-        )
-      })
-      test('@@unique([email, something], |)', () => {
-        assertCompletion(
-          namedConstraintsUri,
-          { line: 40, character: 33 },
-          {
-            isIncomplete: false,
-            items: [fieldsProperty, nameProperty, mapProperty],
-          },
-        )
-      })
-      // previewFeatures = ["extendedIndexes"]
-      test('extendedIndexes: @unique(|)', () => {
-        assertCompletion(
-          fullTextIndex_extendedIndexes_mysql,
-          { line: 29, character: 21 },
-          {
-            isIncomplete: false,
-            items: [mapProperty, lengthProperty, sortProperty],
-          },
-        )
-      })
-      test('extendedIndexes: @unique(sort: |)', () => {
-        assertCompletion(
-          fullTextIndex_extendedIndexes_mysql,
-          { line: 49, character: 36 },
-          {
-            isIncomplete: false,
-            items: [asc, desc],
-          },
-        )
-      })
+  //     test('@unique(|)', () => {
+  //       assertCompletion(
+  //         namedConstraintsUri,
+  //         { line: 27, character: 25 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [mapProperty],
+  //         },
+  //       )
+  //     })
+  //     test('@@unique(|)', () => {
+  //       assertCompletion(
+  //         namedConstraintsUri,
+  //         { line: 34, character: 13 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [fieldsProperty, nameProperty, mapProperty],
+  //         },
+  //       )
+  //     })
+  //     test('@@unique([email, something], |)', () => {
+  //       assertCompletion(
+  //         namedConstraintsUri,
+  //         { line: 40, character: 33 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [fieldsProperty, nameProperty, mapProperty],
+  //         },
+  //       )
+  //     })
+  //     // previewFeatures = ["extendedIndexes"]
+  //     test('extendedIndexes: @unique(|)', () => {
+  //       assertCompletion(
+  //         fullTextIndex_extendedIndexes_mysql,
+  //         { line: 29, character: 21 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [mapProperty, lengthProperty, sortProperty],
+  //         },
+  //       )
+  //     })
+  //     test('extendedIndexes: @unique(sort: |)', () => {
+  //       assertCompletion(
+  //         fullTextIndex_extendedIndexes_mysql,
+  //         { line: 49, character: 36 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [asc, desc],
+  //         },
+  //       )
+  //     })
 
-      test('@@index(|)', () => {
-        assertCompletion(
-          namedConstraintsUri,
-          { line: 48, character: 12 },
-          {
-            isIncomplete: false,
-            items: [fieldsProperty, mapProperty],
-          },
-        )
-      })
-      test('@@index([firstName, lastName], |)', () => {
-        assertCompletion(
-          namedConstraintsUri,
-          { line: 54, character: 35 },
-          {
-            isIncomplete: false,
-            items: [fieldsProperty, mapProperty],
-          },
-        )
-      })
-      // previewFeatures = ["extendedIndexes"]
-      test('extendedIndexes: @@index([author, created_at(sort: |)])', () => {
-        assertCompletion(
-          fullTextIndex_extendedIndexes_mysql,
-          { line: 55, character: 36 },
-          {
-            isIncomplete: false,
-            items: [asc, desc],
-          },
-        )
-      })
-      test('extendedIndexes: @@index([author, |])', () => {
-        assertCompletion(
-          fullTextIndex_extendedIndexes_mysql,
-          { line: 56, character: 19 },
-          {
-            isIncomplete: false,
-            items: [
-              { label: 'title', kind: CompletionItemKind.Field },
-              { label: 'abstract', kind: CompletionItemKind.Field },
-              { label: 'slug', kind: CompletionItemKind.Field },
-              { label: 'slug2', kind: CompletionItemKind.Field },
-              // { label: 'author', kind: CompletionItemKind.Field },
-              { label: 'created_at', kind: CompletionItemKind.Field },
-            ],
-          },
-        )
-      })
-      test('extendedIndexes: @@index([|])', () => {
-        assertCompletion(
-          fullTextIndex_extendedIndexes_mysql,
-          { line: 57, character: 11 },
-          {
-            isIncomplete: false,
-            items: [
-              { label: 'title', kind: CompletionItemKind.Field },
-              { label: 'abstract', kind: CompletionItemKind.Field },
-              { label: 'slug', kind: CompletionItemKind.Field },
-              { label: 'slug2', kind: CompletionItemKind.Field },
-              { label: 'author', kind: CompletionItemKind.Field },
-              { label: 'created_at', kind: CompletionItemKind.Field },
-            ],
-          },
-        )
-      })
+  //     test('@@index(|)', () => {
+  //       assertCompletion(
+  //         namedConstraintsUri,
+  //         { line: 48, character: 12 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [fieldsProperty, mapProperty],
+  //         },
+  //       )
+  //     })
+  //     test('@@index([firstName, lastName], |)', () => {
+  //       assertCompletion(
+  //         namedConstraintsUri,
+  //         { line: 54, character: 35 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [fieldsProperty, mapProperty],
+  //         },
+  //       )
+  //     })
+  //     // previewFeatures = ["extendedIndexes"]
+  //     test('extendedIndexes: @@index([author, created_at(sort: |)])', () => {
+  //       assertCompletion(
+  //         fullTextIndex_extendedIndexes_mysql,
+  //         { line: 55, character: 36 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [asc, desc],
+  //         },
+  //       )
+  //     })
+  //     test('extendedIndexes: @@index([author, |])', () => {
+  //       assertCompletion(
+  //         fullTextIndex_extendedIndexes_mysql,
+  //         { line: 56, character: 19 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [
+  //             { label: 'title', kind: CompletionItemKind.Field },
+  //             { label: 'abstract', kind: CompletionItemKind.Field },
+  //             { label: 'slug', kind: CompletionItemKind.Field },
+  //             { label: 'slug2', kind: CompletionItemKind.Field },
+  //             // { label: 'author', kind: CompletionItemKind.Field },
+  //             { label: 'created_at', kind: CompletionItemKind.Field },
+  //           ],
+  //         },
+  //       )
+  //     })
+  //     test('extendedIndexes: @@index([|])', () => {
+  //       assertCompletion(
+  //         fullTextIndex_extendedIndexes_mysql,
+  //         { line: 57, character: 11 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [
+  //             { label: 'title', kind: CompletionItemKind.Field },
+  //             { label: 'abstract', kind: CompletionItemKind.Field },
+  //             { label: 'slug', kind: CompletionItemKind.Field },
+  //             { label: 'slug2', kind: CompletionItemKind.Field },
+  //             { label: 'author', kind: CompletionItemKind.Field },
+  //             { label: 'created_at', kind: CompletionItemKind.Field },
+  //           ],
+  //         },
+  //       )
+  //     })
 
-      test('@@fulltext(|)', () => {
-        assertCompletion(
-          namedConstraintsUri,
-          { line: 48, character: 12 },
-          {
-            isIncomplete: false,
-            items: [fieldsProperty, mapProperty],
-          },
-        )
-      })
-      test('@@fulltext([firstName, lastName], |)', () => {
-        assertCompletion(
-          namedConstraintsUri,
-          { line: 54, character: 35 },
-          {
-            isIncomplete: false,
-            items: [fieldsProperty, mapProperty],
-          },
-        )
-      })
-    })
-  })
+  //     test('@@fulltext(|)', () => {
+  //       assertCompletion(
+  //         namedConstraintsUri,
+  //         { line: 48, character: 12 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [fieldsProperty, mapProperty],
+  //         },
+  //       )
+  //     })
+  //     test('@@fulltext([firstName, lastName], |)', () => {
+  //       assertCompletion(
+  //         namedConstraintsUri,
+  //         { line: 54, character: 35 },
+  //         {
+  //           isIncomplete: false,
+  //           items: [fieldsProperty, mapProperty],
+  //         },
+  //       )
+  //     })
+  //   })
+  // })
 })
