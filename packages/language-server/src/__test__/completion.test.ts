@@ -130,7 +130,7 @@ items.length`,
   )
 }
 
-suite.only('Completions', function () {
+suite('Completions', function () {
   // used both in generator and datasource
   const fieldProvider = {
     label: 'provider',
