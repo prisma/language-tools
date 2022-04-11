@@ -6,7 +6,9 @@ import dedent from 'ts-dedent'
 
 /* eslint-disable @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-misused-promises */
 
-const baseSchema = (provider: string, previewFeatures: string[]) => {
+type DatasourceProvider = 'sqlite' | 'postgresql' | 'mysql' | 'mongodb' | 'sqlserver' | 'cockroachdb'
+
+const baseSchema = (provider: DatasourceProvider, previewFeatures: string[]) => {
   let base = /* Prisma */ `
   datasource db {
     provider = "${provider}"
@@ -30,7 +32,7 @@ function assertCompletion({
   schema,
   expected,
 }: {
-  provider?: string
+  provider?: DatasourceProvider
   previewFeatures?: string[]
   schema: string
   expected: CompletionList
@@ -46,8 +48,6 @@ function assertCompletion({
     ${schema}
     `
   }
-
-  console.debug(schema)
 
   const findCursorPosition = (input: string): Position => {
     const lines = input.split('\n')
@@ -880,11 +880,8 @@ suite.only('Completions', function () {
     }
 
     test('Diagnoses field and block attribute suggestions', () => {
-      assertCompletion(
-        // modelBlocksUri,
-        // { line: 18, character: 14 },
-        {
-          schema: /* Prisma */ `
+      assertCompletion({
+        schema: /* Prisma */ `
           model Post {
             id Int @id @default()
             email String? @unique
@@ -895,19 +892,18 @@ suite.only('Completions', function () {
               id String |
               name Post 
           }`,
-          expected: {
-            isIncomplete: false,
-            items: [
-              fieldAttributeId,
-              fieldAttributeUnique,
-              fieldAttributeMap,
-              fieldAttributeDefault,
-              fieldAttributeRelation,
-              fieldAttributeIgnore,
-            ],
-          },
+        expected: {
+          isIncomplete: false,
+          items: [
+            fieldAttributeId,
+            fieldAttributeUnique,
+            fieldAttributeMap,
+            fieldAttributeDefault,
+            fieldAttributeRelation,
+            fieldAttributeIgnore,
+          ],
         },
-      )
+      })
       assertCompletion({
         schema: /* Prisma */ `
           model Post {
@@ -990,176 +986,245 @@ suite.only('Completions', function () {
       })
     })
 
-    //   suite('No provider', function () {
-    //     test('Int @id @default(|)', () => {
-    //       assertCompletion(
-    //         modelBlocksUri,
-    //         { line: 11, character: 24 },
-    //         {
-    //           isIncomplete: false,
-    //           items: [functionDbGenerated, functionAutoincrement],
-    //         },
-    //       )
-    //     })
-    //     test('String @id @default(|)', () => {
-    //       assertCompletion(
-    //         modelBlocksUri,
-    //         { line: 28, character: 27 },
-    //         {
-    //           isIncomplete: false,
-    //           items: [functionDbGenerated, functionUuid, functionCuid],
-    //         },
-    //       )
-    //     })
-    //     test('DateTime @default(|)', () => {
-    //       assertCompletion(
-    //         modelBlocksUri,
-    //         { line: 30, character: 36 },
-    //         {
-    //           isIncomplete: false,
-    //           items: [functionDbGenerated, functionNow],
-    //         },
-    //       )
-    //     })
-    //     test('Boolean @default(|)', () => {
-    //       assertCompletion(
-    //         modelBlocksUri,
-    //         { line: 24, character: 28 },
-    //         {
-    //           isIncomplete: false,
-    //           items: [functionDbGenerated, staticValueTrue, staticValueFalse],
-    //         },
-    //       )
-    //     })
-    //     test('Enum @default(|)', () => {
-    //       assertCompletion(
-    //         modelBlocksUri,
-    //         { line: 62, character: 27 },
-    //         {
-    //           isIncomplete: false,
-    //           items: [functionDbGenerated, enumValueOne, enumValueTwo],
-    //         },
-    //       )
-    //     })
-    //     test('Enum @default(|) (enum with comments)', () => {
-    //       assertCompletion(
-    //         enumCommentUri,
-    //         { line: 11, character: 30 },
-    //         {
-    //           isIncomplete: false,
-    //           items: [functionDbGenerated, enumValueOne, enumValueTwo],
-    //         },
-    //       )
-    //     })
-    //   })
+    suite('No provider', function () {
+      test('Int @id @default(|)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+                    model Post {
+                        id Int @id @default(|)
+                        email String? @unique
+                        name String 
+                    }`,
+          expected: {
+            isIncomplete: false,
+            items: [functionDbGenerated, functionAutoincrement],
+          },
+        })
+      })
+      test('String @id @default(|)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+                  model Cat {
+                    id String @id @default(|)
+                    name String
+                    createdAt  DateTime @default()
+                }`,
+          expected: {
+            isIncomplete: false,
+            items: [functionDbGenerated, functionUuid, functionCuid],
+          },
+        })
+      })
+      test('DateTime @default(|)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+                  model Cat {
+                    id String @id @default()
+                    name String
+                    createdAt  DateTime @default(|)
+                }`,
+          expected: {
+            isIncomplete: false,
+            items: [functionDbGenerated, functionNow],
+          },
+        })
+      })
+      test('Boolean @default(|)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+                  model Test {
+                    email    String  @unique
+                    isAdmin  Boolean @default(|)
+                  }`,
+          expected: {
+            isIncomplete: false,
+            items: [functionDbGenerated, staticValueTrue, staticValueFalse],
+          },
+        })
+      })
+      test('Enum @default(|)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+                  model DateTest {
+                    id Int @id @default(autoincrement())
+                    update DateTime  
+                    type UserType @default(|)
+                  }
+                  enum UserType {
+                    ADMIN
+                    NORMAL
+                  }`,
+          expected: {
+            isIncomplete: false,
+            items: [functionDbGenerated, enumValueOne, enumValueTwo],
+          },
+        })
+      })
+      test('Enum @default(|) (enum with comments)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+              model Test {
+                id Int @id
+                enum CommentEnum @default(|)
+              }
+              enum CommentEnum {
+                ADMIN
+                NORMAL
+              }`,
+          expected: {
+            isIncomplete: false,
+            items: [functionDbGenerated, enumValueOne, enumValueTwo],
+          },
+        })
+      })
+    })
+    suite('MongoDB', function () {
+      test('String @id @default(|)', () => {
+        assertCompletion({
+          provider: 'mongodb',
+          schema: /* Prisma */ `
+            model Post {
+              id       String   @id @default(|) @map("_id") @db.ObjectId
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [functionAuto, functionUuid, functionCuid],
+          },
+        })
+      })
+      test('Int @id @default(|)', () => {
+        assertCompletion({
+          provider: 'mongodb',
+          schema: /* Prisma */ `
+            model Something {
+              id Int @id @default(|) @map("_id") @db.ObjectId
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [functionAuto, functionAutoincrement],
+          },
+        })
+      })
+      test('String @default(|)', () => {
+        assertCompletion({
+          provider: 'mongodb',
+          schema: /* Prisma */ `
+            model Post {
+              string   String   @default(|)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [functionAuto, functionUuid, functionCuid],
+          },
+        })
+      })
+      test('Boolean @default(|)', () => {
+        assertCompletion({
+          provider: 'mongodb',
+          schema: /* Prisma */ `
+            model Post {
+              boolean  Boolean  @default(|)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [functionAuto, staticValueTrue, staticValueFalse],
+          },
+        })
+      })
+      test('DateTime @default(|)', () => {
+        assertCompletion({
+          provider: 'mongodb',
+          schema: /* Prisma */ `
+            model Post {
+              datetime DateTime @default(|)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [functionAuto, functionNow],
+          },
+        })
+      })
+      test('Enum @default(|)', () => {
+        assertCompletion({
+          provider: 'mongodb',
+          schema: /* Prisma */ `
+            model Post {
+              enum     PostType @default(|)
+            }
+            enum PostType {
+              ADMIN
+              NORMAL
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [functionAuto, enumValueOne, enumValueTwo],
+          },
+        })
+      })
+    })
 
-    //   suite('MongoDB', function () {
-    //     test('String @id @default(|)', () => {
-    //       assertCompletion(
-    //         mongoDBAtdefaultUri,
-    //         { line: 11, character: 33 },
-    //         {
-    //           isIncomplete: false,
-    //           items: [functionAuto, functionUuid, functionCuid],
-    //         },
-    //       )
-    //     })
-    //     test('Int @id @default(|)', () => {
-    //       assertCompletion(
-    //         mongoDBAtdefaultUri,
-    //         { line: 24, character: 22 },
-    //         {
-    //           isIncomplete: false,
-    //           items: [functionAuto, functionAutoincrement],
-    //         },
-    //       )
-    //     })
-    //     test('String @default(|)', () => {
-    //       assertCompletion(
-    //         mongoDBAtdefaultUri,
-    //         { line: 12, character: 29 },
-    //         {
-    //           isIncomplete: false,
-    //           items: [functionAuto, functionUuid, functionCuid],
-    //         },
-    //       )
-    //     })
-    //     test('Boolean @default(|)', () => {
-    //       assertCompletion(
-    //         mongoDBAtdefaultUri,
-    //         { line: 13, character: 29 },
-    //         {
-    //           isIncomplete: false,
-    //           items: [functionAuto, staticValueTrue, staticValueFalse],
-    //         },
-    //       )
-    //     })
-    //     test('DateTime @default(|)', () => {
-    //       assertCompletion(
-    //         mongoDBAtdefaultUri,
-    //         { line: 14, character: 29 },
-    //         {
-    //           isIncomplete: false,
-    //           items: [functionAuto, functionNow],
-    //         },
-    //       )
-    //     })
-    //     test('Enum @default(|)', () => {
-    //       assertCompletion(
-    //         mongoDBAtdefaultUri,
-    //         { line: 15, character: 29 },
-    //         {
-    //           isIncomplete: false,
-    //           items: [functionAuto, enumValueOne, enumValueTwo],
-    //         },
-    //       )
-    //     })
-    //   })
+    test('@@unique([|])', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+              model SecondUser {
+                firstName String
+                lastName String
+                isAdmin Boolean @default(false)
+                
+                @@unique([|])
+            }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'firstName', kind: CompletionItemKind.Field },
+            { label: 'lastName', kind: CompletionItemKind.Field },
+            { label: 'isAdmin', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
 
-    //   test('@@unique([|])', () => {
-    //     assertCompletion(
-    //       modelBlocksUri,
-    //       { line: 38, character: 15 },
-    //       {
-    //         isIncomplete: false,
-    //         items: [
-    //           { label: 'firstName', kind: CompletionItemKind.Field },
-    //           { label: 'lastName', kind: CompletionItemKind.Field },
-    //           { label: 'isAdmin', kind: CompletionItemKind.Field },
-    //         ],
-    //       },
-    //     )
-    //   })
+    test('@@id([|])', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+              model ThirdUser {
+                  firstName String
+                  lastName String
+                  isAdmin Boolean @default(false)
 
-    //   test('@@id([|])', () => {
-    //     assertCompletion(
-    //       modelBlocksUri,
-    //       { line: 46, character: 10 },
-    //       {
-    //         isIncomplete: false,
-    //         items: [
-    //           { label: 'firstName', kind: CompletionItemKind.Field },
-    //           { label: 'lastName', kind: CompletionItemKind.Field },
-    //           { label: 'isAdmin', kind: CompletionItemKind.Field },
-    //         ],
-    //       },
-    //     )
-    //   })
+                  @@id([|])
+              }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'firstName', kind: CompletionItemKind.Field },
+            { label: 'lastName', kind: CompletionItemKind.Field },
+            { label: 'isAdmin', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
 
-    //   test('@@index([|])', () => {
-    //     assertCompletion(
-    //       modelBlocksUri,
-    //       { line: 47, character: 13 },
-    //       {
-    //         isIncomplete: false,
-    //         items: [
-    //           { label: 'firstName', kind: CompletionItemKind.Field },
-    //           { label: 'lastName', kind: CompletionItemKind.Field },
-    //           { label: 'isAdmin', kind: CompletionItemKind.Field },
-    //         ],
-    //       },
-    //     )
-    //   })
+    test('@@index([|])', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+              model ThirdUser {
+                  firstName String
+                  lastName String
+                  isAdmin Boolean @default(false)
+
+                  @@index([|])
+              }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'firstName', kind: CompletionItemKind.Field },
+            { label: 'lastName', kind: CompletionItemKind.Field },
+            { label: 'isAdmin', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
     // previewFeatures = ["extendedIndexes"]
     // provider = "postgresql"
     test('extendedIndexes: @@index(|) - postgresql', () => {
@@ -1244,200 +1309,302 @@ suite.only('Completions', function () {
     })
 
     suite('Diagnoses arguments of @relation directive', function () {
-      //     test('@relation(|)', () => {
-      //       assertCompletion(
-      //         relationDirectiveUri,
-      //         { line: 12, character: 26 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [
-      //             referencesProperty,
-      //             fieldsProperty,
-      //             onDeleteProperty,
-      //             onUpdateProperty,
-      //             nameQuotesProperty,
-      //             nameProperty,
-      //             mapProperty,
-      //           ],
-      //         },
-      //       )
-      //     })
-      //     test('@relation(references: [|])', () => {
-      //       assertCompletion(
-      //         relationDirectiveUri,
-      //         { line: 21, character: 39 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [
-      //             { label: 'id', kind: CompletionItemKind.Field },
-      //             { label: 'items', kind: CompletionItemKind.Field },
-      //             { label: 'total', kind: CompletionItemKind.Field },
-      //           ],
-      //         },
-      //       )
-      //     })
-      //     test('MongoDB: embedded m2m @relation(references: [|])', () => {
-      //       assertCompletion(
-      //         mongoDBEmbeddedM2mUri,
-      //         { line: 13, character: 58 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [
-      //             { label: 'id', kind: CompletionItemKind.Field },
-      //             { label: 'bar_ids', kind: CompletionItemKind.Field },
-      //             { label: 'bar', kind: CompletionItemKind.Field },
-      //           ],
-      //         },
-      //       )
-      //     })
-      //     test('@relation(references: [id], |)', () => {
-      //       assertCompletion(
-      //         relationDirectiveUri,
-      //         { line: 30, character: 44 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [fieldsProperty, onDeleteProperty, onUpdateProperty, nameQuotesProperty, nameProperty, mapProperty],
-      //         },
-      //       )
-      //     })
-      //     test('order Order @relation(fields: [orderId], |)', () => {
-      //       assertCompletion(
-      //         relationDirectiveUri,
-      //         { line: 39, character: 45 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [
-      //             referencesProperty,
-      //             onDeleteProperty,
-      //             onUpdateProperty,
-      //             nameQuotesProperty,
-      //             nameProperty,
-      //             mapProperty,
-      //           ],
-      //         },
-      //       )
-      //     })
-      //     test('@relation(fields: [|])', () => {
-      //       assertCompletion(
-      //         relationDirectiveUri,
-      //         { line: 48, character: 35 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [
-      //             { label: 'id', kind: CompletionItemKind.Field },
-      //             { label: 'productName', kind: CompletionItemKind.Field },
-      //             { label: 'productPrice', kind: CompletionItemKind.Field },
-      //             { label: 'quantity', kind: CompletionItemKind.Field },
-      //             { label: 'orderId', kind: CompletionItemKind.Field },
-      //           ],
-      //         },
-      //       )
-      //     })
-      //     test('@relation(fields: [orderId], references: [id], |)', () => {
-      //       assertCompletion(
-      //         relationDirectiveUri,
-      //         { line: 57, character: 62 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [onDeleteProperty, onUpdateProperty, nameQuotesProperty, nameProperty, mapProperty],
-      //         },
-      //       )
-      //     })
-      //     test('@relation(onDelete: |)', () => {
-      //       assertCompletion(
-      //         relationDirectiveUri,
-      //         { line: 66, character: 36 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [
-      //             { label: 'Cascade', kind: CompletionItemKind.Enum },
-      //             { label: 'Restrict', kind: CompletionItemKind.Enum },
-      //             { label: 'NoAction', kind: CompletionItemKind.Enum },
-      //             { label: 'SetNull', kind: CompletionItemKind.Enum },
-      //             { label: 'SetDefault', kind: CompletionItemKind.Enum },
-      //           ],
-      //         },
-      //       )
-      //     })
-      //     test('@relation(onUpdate: |)', () => {
-      //       assertCompletion(
-      //         relationDirectiveUri,
-      //         { line: 75, character: 36 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [
-      //             { label: 'Cascade', kind: CompletionItemKind.Enum },
-      //             { label: 'Restrict', kind: CompletionItemKind.Enum },
-      //             { label: 'NoAction', kind: CompletionItemKind.Enum },
-      //             { label: 'SetNull', kind: CompletionItemKind.Enum },
-      //             { label: 'SetDefault', kind: CompletionItemKind.Enum },
-      //           ],
-      //         },
-      //       )
-      //     })
-      //     test('@relation(fields: [orderId], references: [id], onDelete: |)', () => {
-      //       assertCompletion(
-      //         relationDirectiveUri,
-      //         { line: 84, character: 73 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [
-      //             { label: 'Cascade', kind: CompletionItemKind.Enum },
-      //             { label: 'Restrict', kind: CompletionItemKind.Enum },
-      //             { label: 'NoAction', kind: CompletionItemKind.Enum },
-      //             { label: 'SetNull', kind: CompletionItemKind.Enum },
-      //             { label: 'SetDefault', kind: CompletionItemKind.Enum },
-      //           ],
-      //         },
-      //       )
-      //     })
+      test('@relation(|)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model OrderItem {
+              id Int @id @default(autoincrement())
+              productName String
+              productPrice Int
+              quantity Int
+              orderId Int
+              order Order @relation(|)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [
+              referencesProperty,
+              fieldsProperty,
+              onDeleteProperty,
+              onUpdateProperty,
+              nameQuotesProperty,
+              nameProperty,
+              mapProperty,
+            ],
+          },
+        })
+      })
+      test('@relation(references: [|])', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model Order {
+              id Int @id @default(autoincrement())
+              items OrderItem[]
+              total Int
+            }
+            model OrderItemTwo {
+              id Int @id @default(autoincrement())
+              productName String
+              productPrice Int
+              quantity Int
+              orderId Int
+              order Order @relation(references: [|])
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [
+              { label: 'id', kind: CompletionItemKind.Field },
+              { label: 'items', kind: CompletionItemKind.Field },
+              { label: 'total', kind: CompletionItemKind.Field },
+            ],
+          },
+        })
+      })
+      test('MongoDB: embedded m2m @relation(references: [|])', () => {
+        assertCompletion({
+          provider: 'mongodb',
+          schema: /* Prisma */ `
+            model Bar {
+              id      Int   @id @map("_id")
+              foo_ids Int[]
+              foo     Foo[] @relation(fields: [foo_ids], references: [|])
+            }
+            model Foo {
+              id      Int   @id @map("_id")
+              bar_ids Int[]
+              bar     Bar[] @relation(fields: [bar_ids], references: [id])
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [
+              { label: 'id', kind: CompletionItemKind.Field },
+              { label: 'bar_ids', kind: CompletionItemKind.Field },
+              { label: 'bar', kind: CompletionItemKind.Field },
+            ],
+          },
+        })
+      })
+      test('@relation(references: [id], |)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model OrderItem {
+              id Int @id @default(autoincrement())
+              productName String
+              productPrice Int
+              quantity Int
+              orderId Int
+              order Order @relation(references: [id], |)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [fieldsProperty, onDeleteProperty, onUpdateProperty, nameQuotesProperty, nameProperty, mapProperty],
+          },
+        })
+      })
+      test('order Order @relation(fields: [orderId], |)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model OrderItem {
+              id Int @id @default(autoincrement())
+              productName String
+              productPrice Int
+              quantity Int
+              orderId Int
+              order Order @relation(fields: [orderId], |)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [
+              referencesProperty,
+              onDeleteProperty,
+              onUpdateProperty,
+              nameQuotesProperty,
+              nameProperty,
+              mapProperty,
+            ],
+          },
+        })
+      })
+      test('@relation(fields: [|])', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model OrderItem {
+              id Int @id @default(autoincrement())
+              productName String
+              productPrice Int
+              quantity Int
+              orderId Int
+              order Order @relation(fields: [|])
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [
+              { label: 'id', kind: CompletionItemKind.Field },
+              { label: 'productName', kind: CompletionItemKind.Field },
+              { label: 'productPrice', kind: CompletionItemKind.Field },
+              { label: 'quantity', kind: CompletionItemKind.Field },
+              { label: 'orderId', kind: CompletionItemKind.Field },
+            ],
+          },
+        })
+      })
+      test('@relation(fields: [orderId], references: [id], |)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model OrderItem {
+              id           Int    @id @default(autoincrement())
+              productName  String
+              productPrice Int
+              quantity     Int
+              orderId      Int
+              order Order @relation(fields: [orderId], references: [id], |)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [onDeleteProperty, onUpdateProperty, nameQuotesProperty, nameProperty, mapProperty],
+          },
+        })
+      })
+      test('@relation(onDelete: |)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model OrderItem {
+              id Int @id @default(autoincrement())
+              productName String
+              productPrice Int
+              quantity Int
+              orderId Int
+              order Order @relation(onDelete: |)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [
+              { label: 'Cascade', kind: CompletionItemKind.Enum },
+              { label: 'Restrict', kind: CompletionItemKind.Enum },
+              { label: 'NoAction', kind: CompletionItemKind.Enum },
+              { label: 'SetNull', kind: CompletionItemKind.Enum },
+              { label: 'SetDefault', kind: CompletionItemKind.Enum },
+            ],
+          },
+        })
+      })
+      test('@relation(onUpdate: |)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model OrderItem {
+              id Int @id @default(autoincrement())
+              productName String
+              productPrice Int
+              quantity Int
+              orderId Int
+              order Order @relation(onUpdate: |)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [
+              { label: 'Cascade', kind: CompletionItemKind.Enum },
+              { label: 'Restrict', kind: CompletionItemKind.Enum },
+              { label: 'NoAction', kind: CompletionItemKind.Enum },
+              { label: 'SetNull', kind: CompletionItemKind.Enum },
+              { label: 'SetDefault', kind: CompletionItemKind.Enum },
+            ],
+          },
+        })
+      })
+      test('@relation(fields: [orderId], references: [id], onDelete: |)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model OrderItem {
+              id Int @id @default(autoincrement())
+              productName String
+              productPrice Int
+              quantity Int
+              orderId Int
+              order Order @relation(fields: [orderId], references: [id], onDelete: |)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [
+              { label: 'Cascade', kind: CompletionItemKind.Enum },
+              { label: 'Restrict', kind: CompletionItemKind.Enum },
+              { label: 'NoAction', kind: CompletionItemKind.Enum },
+              { label: 'SetNull', kind: CompletionItemKind.Enum },
+              { label: 'SetDefault', kind: CompletionItemKind.Enum },
+            ],
+          },
+        })
+      })
 
-      //     // SQL Server datasource
-      //     test('sqlserver: @relation(onDelete: |)', () => {
-      //       assertCompletion(
-      //         relationDirectiveSqlserverReferentialActionsUri,
-      //         { line: 15, character: 36 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [
-      //             { label: 'Cascade', kind: CompletionItemKind.Enum },
-      //             { label: 'NoAction', kind: CompletionItemKind.Enum },
-      //             { label: 'SetNull', kind: CompletionItemKind.Enum },
-      //             { label: 'SetDefault', kind: CompletionItemKind.Enum },
-      //           ],
-      //         },
-      //       )
-      //     })
-      //     test('sqlserver: @relation(onUpdate: |)', () => {
-      //       assertCompletion(
-      //         relationDirectiveSqlserverReferentialActionsUri,
-      //         { line: 24, character: 36 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [
-      //             { label: 'Cascade', kind: CompletionItemKind.Enum },
-      //             { label: 'NoAction', kind: CompletionItemKind.Enum },
-      //             { label: 'SetNull', kind: CompletionItemKind.Enum },
-      //             { label: 'SetDefault', kind: CompletionItemKind.Enum },
-      //           ],
-      //         },
-      //       )
-      //     })
-      //     test('sqlserver: @relation(fields: [orderId], references: [id], onDelete: |)', () => {
-      //       assertCompletion(
-      //         relationDirectiveSqlserverReferentialActionsUri,
-      //         { line: 33, character: 73 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [
-      //             { label: 'Cascade', kind: CompletionItemKind.Enum },
-      //             { label: 'NoAction', kind: CompletionItemKind.Enum },
-      //             { label: 'SetNull', kind: CompletionItemKind.Enum },
-      //             { label: 'SetDefault', kind: CompletionItemKind.Enum },
-      //           ],
-      //         },
-      //       )
-      //     })
+      // SQL Server datasource
+      test('sqlserver: @relation(onDelete: |)', () => {
+        assertCompletion({
+          provider: 'sqlserver',
+          schema: /* Prisma */ `
+            model OrderItem {
+              id Int @id @default(autoincrement())
+              productName String
+              productPrice Int
+              quantity Int
+              orderId Int
+              order Order @relation(onDelete: |)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [
+              { label: 'Cascade', kind: CompletionItemKind.Enum },
+              { label: 'NoAction', kind: CompletionItemKind.Enum },
+              { label: 'SetNull', kind: CompletionItemKind.Enum },
+              { label: 'SetDefault', kind: CompletionItemKind.Enum },
+            ],
+          },
+        })
+      })
+      test('sqlserver: @relation(onUpdate: |)', () => {
+        assertCompletion({
+          provider: 'sqlserver',
+          schema: /* Prisma */ `
+            model OrderItem {
+              id Int @id @default(autoincrement())
+              productName String
+              productPrice Int
+              quantity Int
+              orderId Int
+              order Order @relation(onUpdate: |)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [
+              { label: 'Cascade', kind: CompletionItemKind.Enum },
+              { label: 'NoAction', kind: CompletionItemKind.Enum },
+              { label: 'SetNull', kind: CompletionItemKind.Enum },
+              { label: 'SetDefault', kind: CompletionItemKind.Enum },
+            ],
+          },
+        })
+      })
+      test('sqlserver: @relation(fields: [orderId], references: [id], onDelete: |)', () => {
+        assertCompletion({
+          provider: 'sqlserver',
+          schema: /* Prisma */ `
+            model OrderItem {
+              id Int @id @default(autoincrement())
+              productName String
+              productPrice Int
+              quantity Int
+              orderId Int
+              order Order @relation(fields: [orderId], references: [id], onDelete: |)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [
+              { label: 'Cascade', kind: CompletionItemKind.Enum },
+              { label: 'NoAction', kind: CompletionItemKind.Enum },
+              { label: 'SetNull', kind: CompletionItemKind.Enum },
+              { label: 'SetDefault', kind: CompletionItemKind.Enum },
+            ],
+          },
+        })
+      })
 
       //
       // previewFeatures = ["fullTextIndex"]
@@ -1550,36 +1717,46 @@ suite.only('Completions', function () {
     })
 
     suite('namedConstraints', function () {
-      //     test('@id(|)', () => {
-      //       assertCompletion(
-      //         namedConstraintsUri,
-      //         { line: 11, character: 20 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [mapProperty],
-      //         },
-      //       )
-      //     })
-      //     test('@@id(|)', () => {
-      //       assertCompletion(
-      //         namedConstraintsUri,
-      //         { line: 17, character: 9 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [fieldsProperty, nameProperty, mapProperty],
-      //         },
-      //       )
-      //     })
-      //     test('@@id([orderId, something], |)', () => {
-      //       assertCompletion(
-      //         namedConstraintsUri,
-      //         { line: 23, character: 31 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [fieldsProperty, nameProperty, mapProperty],
-      //         },
-      //       )
-      //     })
+      test('@id(|)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model AtId {
+              orderId Int @id(|)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [mapProperty],
+          },
+        })
+      })
+      test('@@id(|)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model AtAtIdEmpty {
+              something Int
+              orderId   Int
+              @@id(|)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [fieldsProperty, nameProperty, mapProperty],
+          },
+        })
+      })
+      test('@@id([orderId, something], |)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model AtAtId {
+              something Int
+              orderId   Int
+              @@id([orderId, something], |)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [fieldsProperty, nameProperty, mapProperty],
+          },
+        })
+      })
       // previewFeatures = ["extendedIndexes"]
       test('extendedIndexes: @id(|)', () => {
         assertCompletion({
@@ -1717,144 +1894,208 @@ suite.only('Completions', function () {
         })
       })
 
-      //     test('@unique(|)', () => {
-      //       assertCompletion(
-      //         namedConstraintsUri,
-      //         { line: 27, character: 25 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [mapProperty],
-      //         },
-      //       )
-      //     })
-      //     test('@@unique(|)', () => {
-      //       assertCompletion(
-      //         namedConstraintsUri,
-      //         { line: 34, character: 13 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [fieldsProperty, nameProperty, mapProperty],
-      //         },
-      //       )
-      //     })
-      //     test('@@unique([email, something], |)', () => {
-      //       assertCompletion(
-      //         namedConstraintsUri,
-      //         { line: 40, character: 33 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [fieldsProperty, nameProperty, mapProperty],
-      //         },
-      //       )
-      //     })
-      // // previewFeatures = ["extendedIndexes"]
-      // test('extendedIndexes: @unique(|)', () => {
-      //   assertCompletion(
-      //     fullTextIndex_extendedIndexes_mysql,
-      //     { line: 29, character: 21 },
-      //     {
-      //       isIncomplete: false,
-      //       items: [mapProperty, lengthProperty, sortProperty],
-      //     },
-      //   )
-      // })
-      // test('extendedIndexes: @unique(sort: |)', () => {
-      //   assertCompletion(
-      //     fullTextIndex_extendedIndexes_mysql,
-      //     { line: 49, character: 36 },
-      //     {
-      //       isIncomplete: false,
-      //       items: [asc, desc],
-      //     },
-      //   )
-      // })
+      test('@unique(|)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model AtUnique {
+              email String @unique(|)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [mapProperty],
+          },
+        })
+      })
+      test('@@unique(|)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model AtAtUniqueEmpty {
+              something Int
+              email     String
+              @@unique(|)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [fieldsProperty, nameProperty, mapProperty],
+          },
+        })
+      })
+      test('@@unique([email, something], |)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model AtAtUnique {
+              something Int
+              email     String
+              @@unique([email, something], |)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [fieldsProperty, nameProperty, mapProperty],
+          },
+        })
+      })
+      // previewFeatures = ["extendedIndexes"]
+      test('extendedIndexes: @unique(|)', () => {
+        assertCompletion({
+          provider: 'mysql',
+          previewFeatures: ['extendedIndexes'],
+          schema: /* Prisma */ `
+            model Unique {
+              unique Int @unique(|)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [mapProperty, lengthProperty, sortProperty],
+          },
+        })
+      })
+      test('extendedIndexes: @unique(sort: |)', () => {
+        assertCompletion({
+          provider: 'mysql',
+          previewFeatures: ['extendedIndexes'],
+          schema: /* Prisma */ `
+            model Post {
+              slug String @unique(sort: |, length: 42) @db.VarChar(3000)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [asc, desc],
+          },
+        })
+      })
 
-      //     test('@@index(|)', () => {
-      //       assertCompletion(
-      //         namedConstraintsUri,
-      //         { line: 48, character: 12 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [fieldsProperty, mapProperty],
-      //         },
-      //       )
-      //     })
-      //     test('@@index([firstName, lastName], |)', () => {
-      //       assertCompletion(
-      //         namedConstraintsUri,
-      //         { line: 54, character: 35 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [fieldsProperty, mapProperty],
-      //         },
-      //       )
-      //     })
-      // // previewFeatures = ["extendedIndexes"]
-      // test('extendedIndexes: @@index([author, created_at(sort: |)])', () => {
-      //   assertCompletion(
-      //     fullTextIndex_extendedIndexes_mysql,
-      //     { line: 55, character: 36 },
-      //     {
-      //       isIncomplete: false,
-      //       items: [asc, desc],
-      //     },
-      //   )
-      // })
-      // test('extendedIndexes: @@index([author, |])', () => {
-      //   assertCompletion(
-      //   fullTextIndex_extendedIndexes_mysql,
-      //     { line: 56, character: 19 },
-      //     {
-      //       isIncomplete: false,
-      //       items: [
-      //         { label: 'title', kind: CompletionItemKind.Field },
-      //         { label: 'abstract', kind: CompletionItemKind.Field },
-      //         { label: 'slug', kind: CompletionItemKind.Field },
-      //         { label: 'slug2', kind: CompletionItemKind.Field },
-      //         // { label: 'author', kind: CompletionItemKind.Field },
-      //         { label: 'created_at', kind: CompletionItemKind.Field },
-      //       ],
-      //     },
-      //   )
-      // })
-      // test('extendedIndexes: @@index([|])', () => {
-      //   assertCompletion(
-      //     fullTextIndex_extendedIndexes_mysql,
-      //     { line: 57, character: 11 },
-      //     {
-      //       isIncomplete: false,
-      //       items: [
-      //         { label: 'title', kind: CompletionItemKind.Field },
-      //         { label: 'abstract', kind: CompletionItemKind.Field },
-      //         { label: 'slug', kind: CompletionItemKind.Field },
-      //         { label: 'slug2', kind: CompletionItemKind.Field },
-      //         { label: 'author', kind: CompletionItemKind.Field },
-      //         { label: 'created_at', kind: CompletionItemKind.Field },
-      //       ],
-      //     },
-      //   )
-      // })
+      test('@@index(|)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model AtAtIndexEmpty {
+              firstName String
+              lastName  String
+              email     String @unique
+              @@index(|)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [fieldsProperty, mapProperty],
+          },
+        })
+      })
+      test('@@index([firstName, lastName], |)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model AtAtIndex {
+              firstName String
+              lastName String
+              @@index([firstName, lastName], |)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [fieldsProperty, mapProperty],
+          },
+        })
+      })
+      // previewFeatures = ["extendedIndexes"]
+      test('extendedIndexes: @@index([author, created_at(sort: |)])', () => {
+        assertCompletion({
+          provider: 'mysql',
+          previewFeatures: ['extendedIndexes'],
+          schema: /* Prisma */ `
+            model Post {
+              title      String   @db.VarChar(300)
+              @@index([author, created_at(sort: |)])
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [asc, desc],
+          },
+        })
+      })
+      test('extendedIndexes: @@index([author, |])', () => {
+        assertCompletion({
+          provider: 'mysql',
+          previewFeatures: ['extendedIndexes'],
+          schema: /* Prisma */ `
+            model Post {
+              title      String   @db.VarChar(300)
+              abstract   String   @db.VarChar(3000)
+              slug       String   @unique(sort: , length: 42) @db.VarChar(3000)
+              slug2      String   @unique() @db.VarChar(3000)
+              author     String
+              created_at DateTime
 
-      //     test('@@fulltext(|)', () => {
-      //       assertCompletion(
-      //         namedConstraintsUri,
-      //         { line: 48, character: 12 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [fieldsProperty, mapProperty],
-      //         },
-      //       )
-      //     })
-      //     test('@@fulltext([firstName, lastName], |)', () => {
-      //       assertCompletion(
-      //         namedConstraintsUri,
-      //         { line: 54, character: 35 },
-      //         {
-      //           isIncomplete: false,
-      //           items: [fieldsProperty, mapProperty],
-      //         },
-      //       )
-      //     })
+              @@index([author, |])
+              @@index([])
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [
+              { label: 'title', kind: CompletionItemKind.Field },
+              { label: 'abstract', kind: CompletionItemKind.Field },
+              { label: 'slug', kind: CompletionItemKind.Field },
+              { label: 'slug2', kind: CompletionItemKind.Field },
+              // { label: 'author', kind: CompletionItemKind.Field },
+              { label: 'created_at', kind: CompletionItemKind.Field },
+            ],
+          },
+        })
+      })
+      test('extendedIndexes: @@index([|])', () => {
+        assertCompletion({
+          provider: 'mysql',
+          previewFeatures: ['extendedIndexes'],
+          schema: /* Prisma */ `
+            model Post {
+              title      String   @db.VarChar(300)
+              abstract   String   @db.VarChar(3000)
+              slug       String   @unique(sort: , length: 42) @db.VarChar(3000)
+              slug2      String   @unique() @db.VarChar(3000)
+              author     String
+              created_at DateTime
+
+              @@index([|])
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [
+              { label: 'title', kind: CompletionItemKind.Field },
+              { label: 'abstract', kind: CompletionItemKind.Field },
+              { label: 'slug', kind: CompletionItemKind.Field },
+              { label: 'slug2', kind: CompletionItemKind.Field },
+              { label: 'author', kind: CompletionItemKind.Field },
+              { label: 'created_at', kind: CompletionItemKind.Field },
+            ],
+          },
+        })
+      })
+
+      test('@@fulltext(|)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model AtAtIndexEmpty {
+              firstName String
+              lastName  String
+              email     String @unique
+              @@index(|)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [fieldsProperty, mapProperty],
+          },
+        })
+      })
+      test('@@fulltext([firstName, lastName], |)', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model AtAtIndex {
+              firstName String
+              lastName String
+              @@index([firstName, lastName], |)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [fieldsProperty, mapProperty],
+          },
+        })
+      })
     })
   })
 })
