@@ -195,7 +195,6 @@ suite('Completions', function () {
       kind: CompletionItemKind.Constant,
     }
 
-    const array = { label: '[]', kind: CompletionItemKind.Property }
     const quotationMarks = {
       label: '""',
       kind: CompletionItemKind.Property,
@@ -285,41 +284,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: true,
-          items: [array, quotationMarks],
-        },
-      })
-    })
-
-    // TODO: Not valid, we should remove the logic doing this
-    test('Diagnoses multiple provider suggestions for datasource block', () => {
-      assertCompletion({
-        schema: /* Prisma */ `
-        datasource db {
-          provider = ["|"]
-        }`,
-        expected: {
-          isIncomplete: true,
-          items: [mysql, postgresql, sqlite, sqlserver, mongodb, cockroachdb],
-        },
-      })
-      assertCompletion({
-        schema: /* Prisma */ `
-        datasource db {
-          provider = [|]
-        }`,
-        expected: {
-          isIncomplete: true,
           items: [quotationMarks],
-        },
-      })
-      assertCompletion({
-        schema: /* Prisma */ `
-        datasource db {
-          provider = ["sqlite", "|"]
-        }`,
-        expected: {
-          isIncomplete: true,
-          items: [mysql, postgresql, sqlserver, mongodb, cockroachdb],
         },
       })
     })
