@@ -64,21 +64,21 @@
     },
     {
       "label": "enum",
-      "documentation": "Enums are defined via the enum block. You can define enums in your data model if they're supported by the data source you use:\n• PostgreSQL: Supported\n• MySQL: Supported\n• MariaDB: Supported\n• SQLite: Not supported"
+      "documentation": "Enums are defined via the enum block. You can define enums in your data model if they're supported by the datasource you use (e.g SQLite: not supported)."
     }
   ],
   "dataSourceFields": [
     {
       "label": "provider",
-      "documentation": "Describes which data source connector to use. Can be one of the following built in datasource providers: `postgresql`, `mysql` or `sqlite`."
+      "documentation": "Describes which datasource connector to use. Can be one of the following datasource providers: `postgresql`, `mysql`, `sqlserver`, `sqlite`, `mongodb` or `cockroachdb`."
     },
     {
       "label": "url",
-      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database, [learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema)."
+      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database [learn more](https://pris.ly/d/connection-strings)."
     },
     {
       "label": "shadowDatabaseUrl",
-      "documentation": "Connection URL including authentication info to use for Migrate's [shadow database](https://www.prisma.io/docs/concepts/components/prisma-migrate#shadow-database). Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database."
+      "documentation": "Connection URL including authentication info to use for Migrate's [shadow database](https://pris.ly/d/migrate-shadow). Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database."
     }
   ],
   "generatorFields": [
@@ -88,7 +88,7 @@
     },
     {
       "label": "output",
-      "documentation": "Determines the location for the generated client, [learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema)"
+      "documentation": "Determines the location for the generated client [learn more](https://pris.ly/d/prisma-schema)"
     },
     {
       "label": "binaryTargets",
@@ -278,7 +278,7 @@
     {
       "label": "@relation",
       "insertText": "@relation($0)",
-      "documentation": "Defines meta information about the relation. [Learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema/relations#the-relation-attribute).",
+      "documentation": "Defines a connection between two models. [Learn more](https://pris.ly/d/relation-attribute).",
       "fullSignature": "@relation(_ name: String?, map: String?, fields: FieldReference[]?, references: FieldReference[]?)",
       "params": [
         {
@@ -339,14 +339,14 @@
       "label": "onDelete",
       "insertText": "onDelete: $0",
       "fullSignature": "onDelete: Cascade | Restrict | NoAction | SetNull | SetDefault",
-      "documentation": "Specifies the action to perform when a referenced entry in the referenced model is being deleted, [learn more](https://www.prisma.io/docs/concepts/components/prisma-schema/relations/referential-actions).",
+      "documentation": "Specifies the action to perform when a referenced entry in the referenced model is being deleted [learn more](https://pris.ly/d/referential-actions).",
       "params": []
     },
     {
       "label": "onUpdate",
       "insertText": "onUpdate: $0",
       "fullSignature": "onUpdate: Cascade | Restrict | NoAction | SetNull | SetDefault",
-      "documentation": "Specifies the action to perform when a referenced field in the referenced model is being updated to a new value, [learn more](https://www.prisma.io/docs/concepts/components/prisma-schema/relations/referential-actions).",
+      "documentation": "Specifies the action to perform when a referenced field in the referenced model is being updated to a new value [learn more](https://pris.ly/d/referential-actions).",
       "params": []
     },
     {
@@ -376,14 +376,14 @@
       "label": "\"\"",
       "insertText": "\"$0\"",
       "fullSignature": "\"\"",
-      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database, [learn more](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-schema).",
+      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database [learn more](https://pris.ly/d/prisma-schema).",
       "params": []
     },
     {
       "label": "env()",
       "insertText": "env(\"$0\")",
       "fullSignature": "env(_ environmentVariable: string)",
-      "documentation": "Specifies a data source via an environment variable. When running a Prisma CLI command that needs the database connection URL (e.g. `prisma generate`), you need to make sure that the `DATABASE_URL` environment variable is set. One way to do so is by creating a `.env` file. Note that the file must be in the same directory as your schema.prisma file to automatically be picked up by the Prisma CLI.",
+      "documentation": "Specifies a datasource via an environment variable. When running a Prisma CLI command that needs the database connection URL (e.g. `prisma generate`), you need to make sure that the `DATABASE_URL` environment variable is set. One way to do so is by creating a `.env` file. Note that the file must be in the same directory as your schema.prisma file to automatically be picked up by the Prisma CLI.",
       "params": [
         {
           "label": "environmentVariable",
@@ -429,35 +429,30 @@
   "datasourceProviders": [
     {
       "label": "mysql",
-      "documentation": "Specifies a MySQL data source. Learn more about the MySQL data source connector [here](https://www.prisma.io/docs/reference/database-connectors/mysql)."
+      "documentation": "Specifies a MySQL datasource. Learn more about this connector [here](https://pris.ly/d/mysql-connector)."
     },
     {
       "label": "postgresql",
-      "documentation": "Specifies a PostGreSQL data source. Learn more about the PostgreSQL data source connector [here](https://www.prisma.io/docs/reference/database-connectors/postgresql)."
+      "documentation": "Specifies a PostgreSQL datasource. Learn more about this connector [here](https://pris.ly/d/postgresql-connector)."
     },
     {
       "label": "sqlite",
-      "documentation": "Specifies a SQLite data source. Learn more about the SQLite data source connector [here](https://www.prisma.io/docs/reference/database-connectors/sqlite)."
+      "documentation": "Specifies a SQLite datasource. Learn more about this connector [here](https://pris.ly/d/sqlite-connector)."
     },
     {
       "label": "sqlserver",
-      "documentation": "Specifies a Microsoft SQL Server data source. Learn more about this connector [here](https://pris.ly/d/mssql-connector)"
+      "documentation": "Specifies a Microsoft SQL Server datasource. Learn more about this connector [here](https://pris.ly/d/sqlserver-connector)."
     },
     {
       "label": "mongodb",
-      "documentation": "Specifies a MongoDB data source. Learn more about this connector [here](https://pris.ly/d/mongodb-connector)"
+      "documentation": "Specifies a MongoDB datasource. Learn more about this connector [here](https://pris.ly/d/mongodb-connector)."
     },
     {
       "label": "cockroachdb",
-      "documentation": "Specifies a CockroachDB data source. Learn more about the CockroachDB data source connector [here](https://pris.ly/d/cockroachdb-connector)"
+      "documentation": "Specifies a CockroachDB datasource. Learn more about this connector [here](https://pris.ly/d/cockroachdb-connector)."
     }
   ],
   "datasourceProviderArguments": [
-    {
-      "label": "[]",
-      "insertText": "[$0]",
-      "documentation": "Specifies multiple providers."
-    },
     {
       "label": "\"\"",
       "insertText": "\"$0\"",

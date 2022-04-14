@@ -649,24 +649,9 @@ export function getSuggestionForSupportedFields(
     case 'datasource':
       // provider
       if (currentLine.startsWith('provider')) {
-        let providers: CompletionItem[] = klona(dataSourceProviders)
+        const providers: CompletionItem[] = dataSourceProviders
 
-        if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
-          // return providers that haven't been used yet
-          if (isInsideQuotation) {
-            const usedValues = getValuesInsideSquareBrackets(currentLineUntrimmed)
-            providers = providers.filter((t) => !usedValues.includes(t.label))
-            return {
-              items: providers,
-              isIncomplete: true,
-            }
-          } else {
-            return {
-              items: dataSourceProviderArguments.filter((arg) => !arg.label.includes('[')),
-              isIncomplete: true,
-            }
-          }
-        } else if (isInsideQuotation) {
+        if (isInsideQuotation) {
           return {
             items: providers,
             isIncomplete: true,
@@ -915,14 +900,9 @@ function getSuggestionsForAttribute(
     // document: TextDocument
   }, // eslint-disable-line @typescript-eslint/no-unused-vars
 ): CompletionList | undefined {
-  const firstWordBeforePosition =
-    wordsBeforePosition[wordsBeforePosition.length - 1]
-  const secondWordBeforePosition =
-    wordsBeforePosition[wordsBeforePosition.length - 2]
-  const wordBeforePosition =
-    firstWordBeforePosition === ''
-      ? secondWordBeforePosition
-      : firstWordBeforePosition
+  const firstWordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
+  const secondWordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 2]
+  const wordBeforePosition = firstWordBeforePosition === '' ? secondWordBeforePosition : firstWordBeforePosition
 
   let suggestions: CompletionItem[] = []
   // create deep copy with klona
@@ -955,22 +935,10 @@ function getSuggestionsForAttribute(
       }
     }
 
-    if (
-      isInsideGivenProperty(
-        untrimmedCurrentLine,
-        wordsBeforePosition,
-        'references',
-        position,
-      )
-    ) {
+    if (isInsideGivenProperty(untrimmedCurrentLine, wordsBeforePosition, 'references', position)) {
       // Get the name by potentially removing ? and [] from Foo? or Foo[]
-      const referencedModelName = wordsBeforePosition[1]
-        .replace('?', '')
-        .replace('[]', '')
-      const referencedBlock = getModelOrTypeOrEnumBlock(
-        referencedModelName,
-        lines,
-      )
+      const referencedModelName = wordsBeforePosition[1].replace('?', '').replace('[]', '')
+      const referencedBlock = getModelOrTypeOrEnumBlock(referencedModelName, lines)
       // referenced model does not exist
       // TODO type?
       if (!referencedBlock || referencedBlock.type !== 'model') {
