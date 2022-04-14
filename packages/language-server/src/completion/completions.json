@@ -74,11 +74,11 @@
     },
     {
       "label": "url",
-      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database [learn more](https://pris.ly/connection-strings)."
+      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database [learn more](https://pris.ly/d/connection-strings)."
     },
     {
       "label": "shadowDatabaseUrl",
-      "documentation": "Connection URL including authentication info to use for Migrate's [shadow database](https://pris.ly/migrate-shadow). Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database."
+      "documentation": "Connection URL including authentication info to use for Migrate's [shadow database](https://pris.ly/d/migrate-shadow). Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database."
     }
   ],
   "generatorFields": [
@@ -88,7 +88,7 @@
     },
     {
       "label": "output",
-      "documentation": "Determines the location for the generated client [learn more](https://pris.ly/prisma-schema)"
+      "documentation": "Determines the location for the generated client [learn more](https://pris.ly/d/prisma-schema)"
     },
     {
       "label": "binaryTargets",
@@ -278,7 +278,7 @@
     {
       "label": "@relation",
       "insertText": "@relation($0)",
-      "documentation": "Defines a connection between two models. [Learn more](https://pris.ly/relation-attribute).",
+      "documentation": "Defines a connection between two models. [Learn more](https://pris.ly/d/relation-attribute).",
       "fullSignature": "@relation(_ name: String?, map: String?, fields: FieldReference[]?, references: FieldReference[]?)",
       "params": [
         {
@@ -339,14 +339,14 @@
       "label": "onDelete",
       "insertText": "onDelete: $0",
       "fullSignature": "onDelete: Cascade | Restrict | NoAction | SetNull | SetDefault",
-      "documentation": "Specifies the action to perform when a referenced entry in the referenced model is being deleted [learn more](https://pris.ly/referential-actions).",
+      "documentation": "Specifies the action to perform when a referenced entry in the referenced model is being deleted [learn more](https://pris.ly/d/referential-actions).",
       "params": []
     },
     {
       "label": "onUpdate",
       "insertText": "onUpdate: $0",
       "fullSignature": "onUpdate: Cascade | Restrict | NoAction | SetNull | SetDefault",
-      "documentation": "Specifies the action to perform when a referenced field in the referenced model is being updated to a new value [learn more](https://pris.ly/referential-actions).",
+      "documentation": "Specifies the action to perform when a referenced field in the referenced model is being updated to a new value [learn more](https://pris.ly/d/referential-actions).",
       "params": []
     },
     {
@@ -376,7 +376,7 @@
       "label": "\"\"",
       "insertText": "\"$0\"",
       "fullSignature": "\"\"",
-      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database [learn more](https://pris.ly/prisma-schema).",
+      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database [learn more](https://pris.ly/d/prisma-schema).",
       "params": []
     },
     {
