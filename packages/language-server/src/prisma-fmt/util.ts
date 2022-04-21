@@ -9,11 +9,7 @@ const packageJson = require('../../../package.json') // eslint-disable-line
  * Lookup version
  */
 export function getVersion(): string {
-  if (
-    !packageJson ||
-    !packageJson.prisma ||
-    !packageJson.prisma.enginesVersion
-  ) {
+  if (!packageJson || !packageJson.prisma || !packageJson.prisma.enginesVersion) {
     return 'latest'
   }
   return packageJson.prisma.enginesVersion

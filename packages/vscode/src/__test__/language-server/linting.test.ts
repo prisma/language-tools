@@ -2,10 +2,7 @@ import * as vscode from 'vscode'
 import * as assert from 'assert'
 import { getDocUri, activate, toRange } from '../helper'
 
-async function testDiagnostics(
-  docUri: vscode.Uri,
-  expectedDiagnostics: vscode.Diagnostic[],
-): Promise<void> {
+async function testDiagnostics(docUri: vscode.Uri, expectedDiagnostics: vscode.Diagnostic[]): Promise<void> {
   await activate(docUri)
 
   const actualDiagnostics = vscode.languages.getDiagnostics(docUri)

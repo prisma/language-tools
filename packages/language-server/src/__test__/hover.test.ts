@@ -4,11 +4,7 @@ import { Hover } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
 
-function assertHover(
-  position: Position,
-  expected: Hover,
-  fixturePath: string,
-): void {
+function assertHover(position: Position, expected: Hover, fixturePath: string): void {
   const document: TextDocument = getTextDocument(fixturePath)
 
   const params = {

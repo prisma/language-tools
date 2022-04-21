@@ -4,22 +4,14 @@ import { WorkspaceEdit, RenameParams, Position } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
 
-function assertRename(
-  expected: WorkspaceEdit,
-  document: TextDocument,
-  newName: string,
-  position: Position,
-): void {
+function assertRename(expected: WorkspaceEdit, document: TextDocument, newName: string, position: Position): void {
   const params: RenameParams = {
     textDocument: document,
     newName: newName,
     position: position,
   }
 
-  const renameResult: WorkspaceEdit | undefined = handleRenameRequest(
-    params,
-    document,
-  )
+  const renameResult: WorkspaceEdit | undefined = handleRenameRequest(params, document)
 
   assert.notStrictEqual(renameResult, undefined)
   assert.deepStrictEqual(renameResult, expected)
@@ -30,23 +22,16 @@ suite('Rename', () => {
   const renameFieldPath = './rename/renameFields.prisma'
   const renameEnumPath = './rename/renameEnum.prisma'
   const renameFieldLargeSchemaPath = './rename/renameFieldLargeSchema.prisma'
-  const renameModelWithJsonDefaultPath =
-    './rename/renameModelWithJsonDefault.prisma'
+  const renameModelWithJsonDefaultPath = './rename/renameModelWithJsonDefault.prisma'
   const renameMultipleModelsPath = './rename/renameMultipleModels.prisma'
   const renameModelBugPath = './rename/renameModelBug.prisma'
 
   const renameModel: TextDocument = getTextDocument(renameModelPath)
   const renameField: TextDocument = getTextDocument(renameFieldPath)
   const renameEnum: TextDocument = getTextDocument(renameEnumPath)
-  const renameModelWithJsonDefault: TextDocument = getTextDocument(
-    renameModelWithJsonDefaultPath,
-  )
-  const renameFieldLargeSchema: TextDocument = getTextDocument(
-    renameFieldLargeSchemaPath,
-  )
-  const renameMultipleModels: TextDocument = getTextDocument(
-    renameMultipleModelsPath,
-  )
+  const renameModelWithJsonDefault: TextDocument = getTextDocument(renameModelWithJsonDefaultPath)
+  const renameFieldLargeSchema: TextDocument = getTextDocument(renameFieldLargeSchemaPath)
+  const renameMultipleModels: TextDocument = getTextDocument(renameMultipleModelsPath)
   const renameModelBug: TextDocument = getTextDocument(renameModelBugPath)
 
   const newModelName = 'Customer'

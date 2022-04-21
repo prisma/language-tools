@@ -32,18 +32,13 @@ export function getCurrentLine(document: TextDocument, line: number): string {
   })
 }
 
-export function convertDocumentTextToTrimmedLineArray(
-  document: TextDocument,
-): Array<string> {
+export function convertDocumentTextToTrimmedLineArray(document: TextDocument): Array<string> {
   return Array(document.lineCount)
     .fill(0)
     .map((_, i) => getCurrentLine(document, i).trim())
 }
 
-export function isFirstInsideBlock(
-  position: Position,
-  currentLine: string,
-): boolean {
+export function isFirstInsideBlock(position: Position, currentLine: string): boolean {
   if (currentLine.trim().length === 0) {
     return true
   }
@@ -61,16 +56,11 @@ export function isFirstInsideBlock(
   )
 }
 
-export function getWordAtPosition(
-  document: TextDocument,
-  position: Position,
-): string {
+export function getWordAtPosition(document: TextDocument, position: Position): string {
   const currentLine = getCurrentLine(document, position.line)
 
   // search for the word's beginning and end
-  const beginning: number = currentLine
-    .slice(0, position.character + 1)
-    .search(/\S+$/)
+  const beginning: number = currentLine.slice(0, position.character + 1).search(/\S+$/)
   const end: number = currentLine.slice(position.character).search(/\W/)
   if (end < 0) {
     return ''
@@ -78,21 +68,12 @@ export function getWordAtPosition(
   return currentLine.slice(beginning, end + position.character)
 }
 
-export function getBlockAtPosition(
-  line: number,
-  lines: Array<string>,
-): Block | void {
+export function getBlockAtPosition(line: number, lines: Array<string>): Block | void {
   let blockType = ''
   let blockName = ''
   let blockStart: Position = Position.create(0, 0)
   let blockEnd: Position = Position.create(0, 0)
-  const allowedBlockIdentifiers: BlockType[] = [
-    'model',
-    'type',
-    'enum',
-    'datasource',
-    'generator',
-  ]
+  const allowedBlockIdentifiers: BlockType[] = ['model', 'type', 'enum', 'datasource', 'generator']
 
   // get block beginning
   let reachedLine = false
@@ -104,16 +85,9 @@ export function getBlockAtPosition(
     if (!reachedLine) {
       continue
     }
-    if (
-      allowedBlockIdentifiers.some((identifier) =>
-        item.startsWith(identifier),
-      ) &&
-      item.includes('{')
-    ) {
+    if (allowedBlockIdentifiers.some((identifier) => item.startsWith(identifier)) && item.includes('{')) {
       const index = item.search(/\s+/)
-      blockType = ~index
-        ? (item.slice(0, index) as BlockType)
-        : (item as BlockType)
+      blockType = ~index ? (item.slice(0, index) as BlockType) : (item as BlockType)
       blockName = item.slice(blockType.length, item.length - 2).trim()
       blockStart = Position.create(actualIndex, 0)
       break
@@ -142,10 +116,7 @@ export function getBlockAtPosition(
   return
 }
 
-export function getModelOrTypeOrEnumBlock(
-  blockName: string,
-  lines: string[],
-): Block | void {
+export function getModelOrTypeOrEnumBlock(blockName: string, lines: string[]): Block | void {
   // get start position of block
   const results: number[] = lines
     .map((line, index) => {
@@ -184,9 +155,7 @@ export function getModelOrTypeOrEnumBlock(
 }
 
 // TODO can be removed? Since it was renamed to `previewFeatures`
-export function getExperimentalFeaturesRange(
-  document: TextDocument,
-): Range | undefined {
+export function getExperimentalFeaturesRange(document: TextDocument): Range | undefined {
   const lines = convertDocumentTextToTrimmedLineArray(document)
   const experimentalFeatures = 'experimentalFeatures'
   let reachedStartLine = false
@@ -202,9 +171,7 @@ export function getExperimentalFeaturesRange(
     }
 
     if (item.startsWith(experimentalFeatures)) {
-      const startIndex = getCurrentLine(document, key).indexOf(
-        experimentalFeatures,
-      )
+      const startIndex = getCurrentLine(document, key).indexOf(experimentalFeatures)
       return {
         start: { line: key, character: startIndex },
         end: { line: key, character: startIndex + experimentalFeatures.length },

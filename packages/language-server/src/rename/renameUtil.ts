@@ -5,12 +5,7 @@ import {
   getValuesInsideSquareBrackets,
   getAllRelationNames,
 } from '../completion/completions'
-import {
-  Block,
-  getCurrentLine,
-  getWordAtPosition,
-  getBlockAtPosition,
-} from '../util'
+import { Block, getCurrentLine, getWordAtPosition, getBlockAtPosition } from '../util'
 
 function extractFirstWord(line: string): string {
   return line.replace(/ .*/, '')
@@ -64,8 +59,7 @@ export function isValidFieldName(
   const indexOfFirstWord = currentLineUntrimmed.indexOf(firstWord)
 
   const isFieldName: boolean =
-    indexOfFirstWord <= position.character &&
-    indexOfFirstWord + firstWord.length >= position.character
+    indexOfFirstWord <= position.character && indexOfFirstWord + firstWord.length >= position.character
 
   if (!isFieldName) {
     return false
@@ -76,12 +70,7 @@ export function isValidFieldName(
   return type !== '' && type !== undefined
 }
 
-export function isModelName(
-  position: Position,
-  block: Block,
-  lines: string[],
-  document: TextDocument,
-): boolean {
+export function isModelName(position: Position, block: Block, lines: string[], document: TextDocument): boolean {
   if (block.type !== 'model') {
     return false
   }
@@ -90,32 +79,15 @@ export function isModelName(
     return position.character > 5
   }
 
-  return renameModelOrEnumWhereUsedAsType(
-    block,
-    lines,
-    document,
-    position,
-    'model',
-  )
+  return renameModelOrEnumWhereUsedAsType(block, lines, document, position, 'model')
 }
 
-export function isEnumName(
-  position: Position,
-  block: Block,
-  lines: string[],
-  document: TextDocument,
-): boolean {
+export function isEnumName(position: Position, block: Block, lines: string[], document: TextDocument): boolean {
   if (block.type === 'enum' && position.line === block.start.line) {
     return position.character > 4
   }
 
-  return renameModelOrEnumWhereUsedAsType(
-    block,
-    lines,
-    document,
-    position,
-    'enum',
-  )
+  return renameModelOrEnumWhereUsedAsType(block, lines, document, position, 'enum')
 }
 
 function renameModelOrEnumWhereUsedAsType(
@@ -136,9 +108,7 @@ function renameModelOrEnumWhereUsedAsType(
   if (!isRelation) {
     return false
   }
-  const indexOfRelation = lines.findIndex(
-    (l) => l.startsWith(blockType) && l.includes(currentName),
-  )
+  const indexOfRelation = lines.findIndex((l) => l.startsWith(blockType) && l.includes(currentName))
   return indexOfRelation !== -1
 }
 
@@ -207,16 +177,11 @@ function insertMapBlockAttribute(oldName: string, block: Block): TextEdit {
   }
 }
 
-function positionIsNotInsideSearchedBlocks(
-  line: number,
-  searchedBlocks: Block[],
-): boolean {
+function positionIsNotInsideSearchedBlocks(line: number, searchedBlocks: Block[]): boolean {
   if (searchedBlocks.length === 0) {
     return true
   }
-  return !searchedBlocks.some(
-    (block) => line >= block.start.line && line <= block.end.line,
-  )
+  return !searchedBlocks.some((block) => line >= block.start.line && line <= block.end.line)
 }
 
 /**
@@ -247,21 +212,12 @@ export function renameReferencesForFieldValue(
     if (key === block.end.line) {
       break
     }
-    if (
-      item.includes(relationAttribute) &&
-      item.includes(currentValue) &&
-      !isRelationFieldRename
-    ) {
+    if (item.includes(relationAttribute) && item.includes(currentValue) && !isRelationFieldRename) {
       // search for fields references
       const currentLineUntrimmed = getCurrentLine(document, key)
       const indexOfFieldsStart = currentLineUntrimmed.indexOf('fields:')
-      const indexOfFieldEnd =
-        currentLineUntrimmed.slice(indexOfFieldsStart).indexOf(']') +
-        indexOfFieldsStart
-      const fields = currentLineUntrimmed.slice(
-        indexOfFieldsStart,
-        indexOfFieldEnd + 1,
-      )
+      const indexOfFieldEnd = currentLineUntrimmed.slice(indexOfFieldsStart).indexOf(']') + indexOfFieldsStart
+      const fields = currentLineUntrimmed.slice(indexOfFieldsStart, indexOfFieldEnd + 1)
       const indexOfFoundValue = fields.indexOf(currentValue)
       const fieldValues = getValuesInsideSquareBrackets(fields)
       if (indexOfFoundValue !== -1 && fieldValues.includes(currentValue)) {
@@ -274,8 +230,7 @@ export function renameReferencesForFieldValue(
             },
             end: {
               line: key,
-              character:
-                indexOfFieldsStart + indexOfFoundValue + currentValue.length,
+              character: indexOfFieldsStart + indexOfFoundValue + currentValue.length,
             },
           },
           newText: newName,
@@ -283,13 +238,9 @@ export function renameReferencesForFieldValue(
       }
     }
     // search for references in index, id and unique block attributes
-    if (
-      searchStringsSameBlock.some((s) => item.includes(s)) &&
-      item.includes(currentValue)
-    ) {
+    if (searchStringsSameBlock.some((s) => item.includes(s)) && item.includes(currentValue)) {
       const currentLineUntrimmed = getCurrentLine(document, key)
-      const valuesInsideBracket =
-        getValuesInsideSquareBrackets(currentLineUntrimmed)
+      const valuesInsideBracket = getValuesInsideSquareBrackets(currentLineUntrimmed)
       if (valuesInsideBracket.includes(currentValue)) {
         const indexOfCurrentValue = currentLineUntrimmed.indexOf(currentValue)
         edits.push({
@@ -311,21 +262,12 @@ export function renameReferencesForFieldValue(
 
   // search for references in other model blocks
   for (const [index, value] of lines.entries()) {
-    if (
-      value.includes(block.name) &&
-      value.includes(currentValue) &&
-      value.includes(relationAttribute)
-    ) {
+    if (value.includes(block.name) && value.includes(currentValue) && value.includes(relationAttribute)) {
       const currentLineUntrimmed = getCurrentLine(document, index)
       // get the index of the second word
       const indexOfReferences = currentLineUntrimmed.indexOf('references:')
-      const indexOfReferencesEnd =
-        currentLineUntrimmed.slice(indexOfReferences).indexOf(']') +
-        indexOfReferences
-      const references = currentLineUntrimmed.slice(
-        indexOfReferences,
-        indexOfReferencesEnd + 1,
-      )
+      const indexOfReferencesEnd = currentLineUntrimmed.slice(indexOfReferences).indexOf(']') + indexOfReferences
+      const references = currentLineUntrimmed.slice(indexOfReferences, indexOfReferencesEnd + 1)
       const indexOfFoundValue = references.indexOf(currentValue)
       const referenceValues = getValuesInsideSquareBrackets(references)
       if (indexOfFoundValue !== -1 && referenceValues.includes(currentValue)) {
@@ -337,8 +279,7 @@ export function renameReferencesForFieldValue(
             },
             end: {
               line: index,
-              character:
-                indexOfReferences + indexOfFoundValue + currentValue.length,
+              character: indexOfReferences + indexOfFoundValue + currentValue.length,
             },
           },
           newText: newName,
@@ -400,19 +341,13 @@ export function renameReferencesForModelName(
 
   for (const [index, value] of lines.entries()) {
     // check if inside model
-    if (
-      value.includes(currentName) &&
-      positionIsNotInsideSearchedBlocks(index, searchedBlocks)
-    ) {
+    if (value.includes(currentName) && positionIsNotInsideSearchedBlocks(index, searchedBlocks)) {
       const block = getBlockAtPosition(index, lines)
       // TODO type
       if (block && block.type == 'model') {
         searchedBlocks.push(block)
         // search block for references
-        const types: Map<string, number[]> = getFieldTypesFromCurrentBlock(
-          lines,
-          block,
-        )
+        const types: Map<string, number[]> = getFieldTypesFromCurrentBlock(lines, block)
         for (const f of types.keys()) {
           if (f.replace('?', '').replace('[]', '') === currentName) {
             // replace here
@@ -424,9 +359,7 @@ export function renameReferencesForModelName(
               const currentLineUntrimmed = getCurrentLine(document, line)
               const wordsInLine: string[] = lines[line].split(/\s+/)
               // get the index of the second word
-              const indexOfFirstWord = currentLineUntrimmed.indexOf(
-                wordsInLine[0],
-              )
+              const indexOfFirstWord = currentLineUntrimmed.indexOf(wordsInLine[0])
               const indexOfCurrentName = currentLineUntrimmed.indexOf(
                 currentName,
                 indexOfFirstWord + wordsInLine[0].length,
@@ -457,10 +390,7 @@ function mapFieldAttributeExistsAlready(line: string): boolean {
   return line.includes('@map(')
 }
 
-function mapBlockAttributeExistsAlready(
-  block: Block,
-  lines: string[],
-): boolean {
+function mapBlockAttributeExistsAlready(block: Block, lines: string[]): boolean {
   let reachedStartLine = false
   for (const [key, item] of lines.entries()) {
     if (key === block.start.line + 1) {
@@ -540,11 +470,7 @@ export function extractCurrentName(
   if (isModelOrEnumRename) {
     const currentLineUntrimmed = getCurrentLine(document, position.line)
     const currentLineTillPosition = currentLineUntrimmed
-      .slice(
-        0,
-        position.character +
-          currentLineUntrimmed.slice(position.character).search(/\W/),
-      )
+      .slice(0, position.character + currentLineUntrimmed.slice(position.character).search(/\W/))
       .trim()
     const wordsBeforePosition: string[] = currentLineTillPosition.split(/\s+/)
     if (wordsBeforePosition.length < 2) {

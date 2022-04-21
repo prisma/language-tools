@@ -4,21 +4,14 @@ import { Location, Range } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
 
-function assertJumpToDefinition(
-  position: Position,
-  expectedRange: Range,
-  fixturePath: string,
-): void {
+function assertJumpToDefinition(position: Position, expectedRange: Range, fixturePath: string): void {
   const document: TextDocument = getTextDocument(fixturePath)
 
   const params = {
     textDocument: document,
     position: position,
   }
-  const defResult: Location | undefined = handleDefinitionRequest(
-    document,
-    params,
-  )
+  const defResult: Location | undefined = handleDefinitionRequest(document, params)
 
   assert.ok(defResult !== undefined)
   assert.deepStrictEqual(defResult.range, expectedRange)

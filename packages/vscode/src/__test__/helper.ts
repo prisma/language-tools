@@ -34,12 +34,7 @@ export async function activate(docUri: vscode.Uri): Promise<void> {
   }
 }
 
-export function toRange(
-  sLine: number,
-  sChar: number,
-  eLine: number,
-  eChar: number,
-): vscode.Range {
+export function toRange(sLine: number, sChar: number, eLine: number, eChar: number): vscode.Range {
   const start = new vscode.Position(sLine, sChar)
   const end = new vscode.Position(eLine, eChar)
   return new vscode.Range(start, end)
@@ -53,9 +48,6 @@ export const getDocUri = (p: string): vscode.Uri => {
 }
 
 export async function setTestContent(content: string): Promise<boolean> {
-  const all = new vscode.Range(
-    doc.positionAt(0),
-    doc.positionAt(doc.getText().length),
-  )
+  const all = new vscode.Range(doc.positionAt(0), doc.positionAt(doc.getText().length))
   return editor.edit((eb) => eb.replace(all, content))
 }

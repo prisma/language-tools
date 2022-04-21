@@ -15,21 +15,18 @@ async function testCompletion(
     await activate(docUri)
   }
 
-  const actualCompletions: vscode.CompletionList =
-    (await vscode.commands.executeCommand(
-      'vscode.executeCompletionItemProvider',
-      docUri,
-      position,
-      triggerCharacter,
-    )) as vscode.CompletionList
+  const actualCompletions: vscode.CompletionList = (await vscode.commands.executeCommand(
+    'vscode.executeCompletionItemProvider',
+    docUri,
+    position,
+    triggerCharacter,
+  )) as vscode.CompletionList
 
   assert.deepStrictEqual(
     actualCompletions.isIncomplete,
     expectedCompletionList.isIncomplete,
     `Line ${position.line} - Character ${position.character}
-Expected isIncomplete to be '${expectedCompletionList.isIncomplete}' but got '${
-      actualCompletions.isIncomplete
-    }'
+Expected isIncomplete to be '${expectedCompletionList.isIncomplete}' but got '${actualCompletions.isIncomplete}'
 expected:
 ${JSON.stringify(expectedCompletionList, undefined, 2)}
 but got (actual):
@@ -54,9 +51,11 @@ mapped items => item.kind`,
     actualCompletions.items.length,
     expectedCompletionList.items.length,
     `Line ${position.line} - Character ${position.character}
-Expected ${expectedCompletionList.items.length} suggestions and got ${
-      actualCompletions.items.length
-    }: ${JSON.stringify(actualCompletions.items, undefined, 2)}`, // TODO only 1 value is output here :(
+Expected ${expectedCompletionList.items.length} suggestions and got ${actualCompletions.items.length}: ${JSON.stringify(
+      actualCompletions.items,
+      undefined,
+      2,
+    )}`, // TODO only 1 value is output here :(
   )
 
   assert.deepStrictEqual(

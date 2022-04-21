@@ -3,17 +3,13 @@ import assert from 'assert'
 import { getDocUri, activate } from '../helper'
 import fs from 'fs'
 
-async function testAutoFormat(
-  docUri: vscode.Uri,
-  expectedFormatted: string,
-): Promise<void> {
+async function testAutoFormat(docUri: vscode.Uri, expectedFormatted: string): Promise<void> {
   await activate(docUri)
 
-  const actualFormatted = (await vscode.commands.executeCommand(
-    'vscode.executeFormatDocumentProvider',
-    docUri,
-    { insertSpaces: true, tabSize: 2 },
-  )) as vscode.TextEdit[]
+  const actualFormatted = (await vscode.commands.executeCommand('vscode.executeFormatDocumentProvider', docUri, {
+    insertSpaces: true,
+    tabSize: 2,
+  })) as vscode.TextEdit[]
 
   const workEdits = new vscode.WorkspaceEdit()
   workEdits.set(docUri, actualFormatted)

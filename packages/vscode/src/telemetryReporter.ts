@@ -10,9 +10,7 @@ export default class TelemetryReporter {
 
   constructor(private extensionId: string, private extensionVersion: string) {
     this.updateUserOptIn()
-    this.configListener = workspace.onDidChangeConfiguration(() =>
-      this.updateUserOptIn(),
-    )
+    this.configListener = workspace.onDidChangeConfiguration(() => this.updateUserOptIn())
   }
 
   public async sendTelemetryEvent(): Promise<void> {
@@ -26,17 +24,9 @@ export default class TelemetryReporter {
   }
 
   private updateUserOptIn() {
-    const config = workspace.getConfiguration(
-      TelemetryReporter.TELEMETRY_CONFIG_ID,
-    )
-    if (
-      this.userOptIn !==
-      config.get<boolean>(TelemetryReporter.TELEMETRY_CONFIG_ENABLED_ID, true)
-    ) {
-      this.userOptIn = config.get<boolean>(
-        TelemetryReporter.TELEMETRY_CONFIG_ENABLED_ID,
-        true,
-      )
+    const config = workspace.getConfiguration(TelemetryReporter.TELEMETRY_CONFIG_ID)
+    if (this.userOptIn !== config.get<boolean>(TelemetryReporter.TELEMETRY_CONFIG_ENABLED_ID, true)) {
+      this.userOptIn = config.get<boolean>(TelemetryReporter.TELEMETRY_CONFIG_ENABLED_ID, true)
     }
   }
 

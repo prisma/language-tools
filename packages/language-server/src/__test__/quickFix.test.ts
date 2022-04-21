@@ -11,12 +11,7 @@ import {
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
 
-function assertQuickFix(
-  expected: CodeAction[],
-  fixturePath: string,
-  range: Range,
-  diagnostics: Diagnostic[],
-): void {
+function assertQuickFix(expected: CodeAction[], fixturePath: string, range: Range, diagnostics: Diagnostic[]): void {
   const document: TextDocument = getTextDocument(fixturePath)
 
   const params: CodeActionParams = {
@@ -33,15 +28,10 @@ function assertQuickFix(
   assert.deepStrictEqual(quickFixResult, expected)
 }
 
-function createDiagnosticErrorUnknownType(
-  unknownType: string,
-  range: Range,
-): Diagnostic {
+function createDiagnosticErrorUnknownType(unknownType: string, range: Range): Diagnostic {
   return {
     message:
-      'Type "' +
-      unknownType +
-      '" is neither a built-in type, nor refers to another model, custom type, or enum.',
+      'Type "' + unknownType + '" is neither a built-in type, nor refers to another model, custom type, or enum.',
     severity: DiagnosticSeverity.Error,
     range: range,
   }
@@ -67,15 +57,9 @@ suite('Quick Fix', () => {
     end: { line: 35, character: 0 },
   }
 
-  const diagnosticsNewModel: Diagnostic[] = [
-    createDiagnosticErrorUnknownType('NewModel', rangeNewModel),
-  ]
-  const diagnosticsNewEnum: Diagnostic[] = [
-    createDiagnosticErrorUnknownType('NewEnum', rangeNewEnum),
-  ]
-  const diagnosticsPorst: Diagnostic[] = [
-    createDiagnosticErrorUnknownType('Porst', rangePorst),
-  ]
+  const diagnosticsNewModel: Diagnostic[] = [createDiagnosticErrorUnknownType('NewModel', rangeNewModel)]
+  const diagnosticsNewEnum: Diagnostic[] = [createDiagnosticErrorUnknownType('NewEnum', rangeNewEnum)]
+  const diagnosticsPorst: Diagnostic[] = [createDiagnosticErrorUnknownType('Porst', rangePorst)]
 
   test('Model/enum creations', () => {
     assertQuickFix(

@@ -10,11 +10,7 @@ export async function getProjectHash(): Promise<string> {
   projectPath = projectPath || process.cwd() // Default to cwd if the schema couldn't be found
   console.log('projectPath: ' + projectPath)
 
-  return crypto
-    .createHash('sha256')
-    .update(projectPath)
-    .digest('hex')
-    .substring(0, 8)
+  return crypto.createHash('sha256').update(projectPath).digest('hex').substring(0, 8)
 }
 
 async function getSchemaPath(): Promise<string | null> {
@@ -25,10 +21,7 @@ async function getSchemaPath(): Promise<string | null> {
   }
 
   // try the workspace
-  const fileInWorkspace = await workspace.findFiles(
-    '**/schema.prisma',
-    '**/node_modules/**',
-  )
+  const fileInWorkspace = await workspace.findFiles('**/schema.prisma', '**/node_modules/**')
   if (fileInWorkspace.length !== 0) {
     return fileInWorkspace[0].toString()
   }

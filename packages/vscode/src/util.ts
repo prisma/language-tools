@@ -8,16 +8,9 @@ import {
   workspace,
   ExtensionContext,
 } from 'vscode'
-import {
-  CodeAction,
-  TextDocumentIdentifier,
-  LanguageClientOptions,
-} from 'vscode-languageclient'
+import { CodeAction, TextDocumentIdentifier, LanguageClientOptions } from 'vscode-languageclient'
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node'
-import {
-  denyListDarkColorThemes,
-  denyListLightColorThemes,
-} from './denyListColorThemes'
+import { denyListDarkColorThemes, denyListLightColorThemes } from './denyListColorThemes'
 import { homedir } from 'os'
 import { readdirSync } from 'fs'
 import path from 'path'
@@ -27,25 +20,18 @@ export function isDebugOrTestSession(): boolean {
 
 export function checkForOtherPrismaExtension(): void {
   const files = readdirSync(path.join(homedir(), '.vscode/extensions')).filter(
-    (fn) =>
-      fn.toLowerCase().startsWith('prisma.prisma-') &&
-      !fn.toLowerCase().startsWith('prisma.prisma-insider-'),
+    (fn) => fn.toLowerCase().startsWith('prisma.prisma-') && !fn.toLowerCase().startsWith('prisma.prisma-insider-'),
   )
   if (files.length !== 0) {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     window.showInformationMessage(
       `You have both the Insider and stable Prisma VSCode extension installed. Please uninstall or disable one of them for a better experience.`,
     )
-    console.log(
-      'Both the insider and stable Prisma VSCode extension are being used.',
-    )
+    console.log('Both the insider and stable Prisma VSCode extension are being used.')
   }
 }
 
-function showToastToSwitchColorTheme(
-  currentTheme: string,
-  suggestedTheme: string,
-): void {
+function showToastToSwitchColorTheme(currentTheme: string, suggestedTheme: string): void {
   // We do not want to block on this UI message, therefore disabling the linter here.
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
   window.showWarningMessage(
@@ -70,10 +56,7 @@ export function checkForMinimalColorTheme(): void {
 }
 
 /* This function is part of the workaround for https://github.com/prisma/language-tools/issues/311 */
-export function isSnippetEdit(
-  action: CodeAction,
-  document: TextDocumentIdentifier,
-): boolean {
+export function isSnippetEdit(action: CodeAction, document: TextDocumentIdentifier): boolean {
   const changes = action.edit?.changes
   if (changes !== undefined && changes[document.uri]) {
     if (changes[document.uri].some((e) => e.newText.includes('{\n\n}\n'))) {
@@ -84,15 +67,11 @@ export function isSnippetEdit(
 }
 
 /* This function is part of the workaround for https://github.com/prisma/language-tools/issues/311 */
-export function applySnippetWorkspaceEdit(): (
-  edit: WorkspaceEdit,
-) => Promise<void> {
+export function applySnippetWorkspaceEdit(): (edit: WorkspaceEdit) => Promise<void> {
   return async (edit: WorkspaceEdit) => {
     const [uri, edits] = edit.entries()[0]
 
-    const editor = window.visibleTextEditors.find(
-      (it) => it.document.uri.toString() === uri.toString(),
-    )
+    const editor = window.visibleTextEditors.find((it) => it.document.uri.toString() === uri.toString())
     if (!editor) return
 
     let editWithSnippet: TextEdit | undefined = undefined
@@ -106,9 +85,7 @@ export function applySnippetWorkspaceEdit(): (
           editWithSnippet = indel
         } else {
           if (!editWithSnippet) {
-            lineDelta =
-              (indel.newText.match(/\n/g) || []).length -
-              (indel.range.end.line - indel.range.start.line)
+            lineDelta = (indel.newText.match(/\n/g) || []).length - (indel.range.end.line - indel.range.start.line)
           }
           builder.replace(indel.range, indel.newText)
         }
@@ -129,12 +106,7 @@ export function createLanguageServer(
   serverOptions: ServerOptions,
   clientOptions: LanguageClientOptions,
 ): LanguageClient {
-  return new LanguageClient(
-    'prisma',
-    'Prisma Language Server',
-    serverOptions,
-    clientOptions,
-  )
+  return new LanguageClient('prisma', 'Prisma Language Server', serverOptions, clientOptions)
 }
 export const restartClient = async (
   context: ExtensionContext,

@@ -2,11 +2,7 @@ import vscode, { Hover } from 'vscode'
 import assert from 'assert'
 import { getDocUri, activate } from '../helper'
 
-async function testHover(
-  docUri: vscode.Uri,
-  position: vscode.Position,
-  expectedHover: string,
-): Promise<void> {
+async function testHover(docUri: vscode.Uri, position: vscode.Position, expectedHover: string): Promise<void> {
   const actualHover: Hover[] = (await vscode.commands.executeCommand(
     'vscode.executeHoverProvider',
     docUri,
@@ -24,11 +20,7 @@ suite('Should show /// documentation comments for', () => {
 
   test('model', async () => {
     await activate(docUri)
-    await testHover(
-      docUri,
-      new vscode.Position(23, 10),
-      'Post including an author and content.',
-    )
+    await testHover(docUri, new vscode.Position(23, 10), 'Post including an author and content.')
   })
 })
 

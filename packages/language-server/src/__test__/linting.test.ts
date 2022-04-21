@@ -41,8 +41,7 @@ suite('Linting', () => {
     assertLinting(
       [
         {
-          message:
-            'Type "Use" is neither a built-in type, nor refers to another model, custom type, or enum.',
+          message: 'Type "Use" is neither a built-in type, nor refers to another model, custom type, or enum.',
           range: {
             start: { line: 14, character: 12 },
             end: { line: 14, character: 15 },
