@@ -1,6 +1,17 @@
-import { CompletionItem, CompletionItemKind, MarkupKind, InsertTextFormat, InsertTextMode } from 'vscode-languageserver'
+import type { TextDocument } from 'vscode-languageserver-textdocument'
+import type { CompletionList } from 'vscode-languageserver'
+import {
+  CompletionItem,
+  CompletionItemKind,
+  MarkupKind,
+  InsertTextFormat,
+  InsertTextMode,
+  Position,
+} from 'vscode-languageserver'
 import * as completions from './completions.json'
 import type { PreviewFeatures } from '../previewFeatures'
+import nativeTypeConstructors, { NativeTypeConstructors } from '../prisma-fmt/nativeTypes'
+import { Block, getValuesInsideSquareBrackets, isInsideAttribute } from '../util'
 
 type JSONSimpleCompletionItems = {
   label: string
@@ -283,3 +294,132 @@ export const previewFeaturesArguments: CompletionItem[] = convertToCompletionIte
   completions.previewFeaturesArguments,
   CompletionItemKind.Property,
 )
+
+export function toCompletionItems(allowedTypes: string[], kind: CompletionItemKind): CompletionItem[] {
+  return allowedTypes.map((label) => ({ label, kind }))
+}
+
+/**
+ * Removes all block attribute suggestions that are invalid in this context.
+ * E.g. `@@id()` when already used should not be in the suggestions.
+ */
+export function removeInvalidAttributeSuggestions(
+  supportedAttributes: CompletionItem[],
+  block: Block,
+  lines: string[],
+): CompletionItem[] {
+  let reachedStartLine = false
+  for (const [key, item] of lines.entries()) {
+    if (key === block.start.line + 1) {
+      reachedStartLine = true
+    }
+    if (!reachedStartLine) {
+      continue
+    }
+    if (key === block.end.line) {
+      break
+    }
+
+    // TODO we should also remove the other suggestions if used (default()...)
+    if (item.includes('@id')) {
+      supportedAttributes = supportedAttributes.filter((attribute) => !attribute.label.includes('id'))
+    }
+  }
+  return supportedAttributes
+}
+
+/**
+ * Removes all field suggestion that are invalid in this context. E.g. fields that are used already in a block will not be suggested again.
+ * This function removes all field suggestion that are invalid in a certain context. E.g. in a generator block `provider, output, platforms, pinnedPlatForm`
+ * are possible fields. But those fields are only valid suggestions if they haven't been used in this block yet. So in case `provider` has already been used, only
+ * `output, platforms, pinnedPlatform` will be suggested.
+ */
+export function removeInvalidFieldSuggestions(
+  supportedFields: string[],
+  block: Block,
+  lines: string[],
+  position: Position,
+): string[] {
+  let reachedStartLine = false
+  for (const [key, item] of lines.entries()) {
+    if (key === block.start.line + 1) {
+      reachedStartLine = true
+    }
+    if (!reachedStartLine || key === position.line) {
+      continue
+    }
+    if (key === block.end.line) {
+      break
+    }
+    const fieldName = item.replace(/ .*/, '')
+    if (supportedFields.includes(fieldName)) {
+      supportedFields = supportedFields.filter((field) => field !== fieldName)
+    }
+  }
+  return supportedFields
+}
+
+export function handlePreviewFeatures(
+  previewFeaturesArray: string[],
+  position: Position,
+  currentLineUntrimmed: string,
+  isInsideQuotation: boolean,
+): CompletionList {
+  let previewFeatures: CompletionItem[] = previewFeaturesArray.map((pf) => CompletionItem.create(pf))
+  if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
+    if (isInsideQuotation) {
+      const usedValues = getValuesInsideSquareBrackets(currentLineUntrimmed)
+      previewFeatures = previewFeatures.filter((t) => !usedValues.includes(t.label))
+      return {
+        items: previewFeatures,
+        isIncomplete: true,
+      }
+    } else {
+      return {
+        items: previewFeaturesArguments.filter((arg) => !arg.label.includes('[')),
+        isIncomplete: true,
+      }
+    }
+  } else {
+    return {
+      items: previewFeaturesArguments.filter((arg) => !arg.label.includes('"')),
+      isIncomplete: true,
+    }
+  }
+}
+
+export function getNativeTypes(document: TextDocument, prismaType: string): CompletionItem[] {
+  let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(document.getText())
+
+  if (nativeTypes.length === 0) {
+    return []
+  }
+
+  const suggestions: CompletionItem[] = []
+  nativeTypes = nativeTypes.filter((n) => n.prisma_types.includes(prismaType))
+  nativeTypes.forEach((element) => {
+    if (element._number_of_args + element._number_of_optional_args !== 0) {
+      let documentation = ''
+      if (element._number_of_optional_args !== 0) {
+        documentation = `${documentation}Number of optional arguments: ${element._number_of_optional_args}.\n'`
+      }
+      if (element._number_of_args !== 0) {
+        documentation = `${documentation}Number of required arguments: ${element._number_of_args}.\n`
+      }
+      suggestions.push({
+        label: `${element.name}()`,
+        kind: CompletionItemKind.TypeParameter,
+        insertText: `${element.name}($0)`,
+        documentation: { kind: MarkupKind.Markdown, value: documentation },
+        insertTextFormat: 2,
+      })
+    } else {
+      suggestions.push({
+        label: element.name,
+        kind: CompletionItemKind.TypeParameter,
+      })
+    }
+  })
+
+  return suggestions
+}

@@ -1,5 +1,6 @@
 import { CompletionItem, CompletionList, CompletionItemKind, Position, MarkupKind } from 'vscode-languageserver'
-import { TextDocument } from 'vscode-languageserver-textdocument'
+import type { TextDocument } from 'vscode-languageserver-textdocument'
+import { klona } from 'klona'
 import {
   blockAttributes,
   fieldAttributes,
@@ -13,121 +14,37 @@ import {
   dataSourceProviderArguments,
   generatorProviders,
   generatorProviderArguments,
-  previewFeaturesArguments,
   engineTypes,
   engineTypeArguments,
   givenBlockAttributeParams,
   givenFieldAttributeParams,
   sortLengthProperties,
   filterSortLengthBasedOnInput,
-} from './completionUtil'
-import { klona } from 'klona'
-import { extractModelName } from '../rename/renameUtil'
+  toCompletionItems,
+  removeInvalidAttributeSuggestions,
+  removeInvalidFieldSuggestions,
+  getNativeTypes,
+  handlePreviewFeatures,
+} from './completionUtils'
 import previewFeatures from '../prisma-fmt/previewFeatures'
-import nativeTypeConstructors, { NativeTypeConstructors } from '../prisma-fmt/nativeTypes'
-import { Block, BlockType, getModelOrTypeOrEnumBlock } from '../util'
-import { PreviewFeatures } from '../previewFeatures'
-
-function toCompletionItems(allowedTypes: string[], kind: CompletionItemKind): CompletionItem[] {
-  return allowedTypes.map((label) => ({ label, kind }))
-}
-
-export function isInsideFieldArgument(currentLineUntrimmed: string, position: Position): boolean {
-  const symbols = '()'
-  let numberOfOpenBrackets = 0
-  let numberOfClosedBrackets = 0
-  for (let i = 0; i < position.character; i++) {
-    if (currentLineUntrimmed[i] === symbols[0]) {
-      numberOfOpenBrackets++
-    } else if (currentLineUntrimmed[i] === symbols[1]) {
-      numberOfClosedBrackets++
-    }
-  }
-  return numberOfOpenBrackets >= 2 && numberOfOpenBrackets > numberOfClosedBrackets
-}
-
-/***
- * @param symbols expects e.g. '()', '[]' or '""'
- */
-export function isInsideAttribute(currentLineUntrimmed: string, position: Position, symbols: string): boolean {
-  let numberOfOpenBrackets = 0
-  let numberOfClosedBrackets = 0
-  for (let i = 0; i < position.character; i++) {
-    if (currentLineUntrimmed[i] === symbols[0]) {
-      numberOfOpenBrackets++
-    } else if (currentLineUntrimmed[i] === symbols[1]) {
-      numberOfClosedBrackets++
-    }
-  }
-  return numberOfOpenBrackets > numberOfClosedBrackets
-}
-
-/***
- * Checks if inside e.g. "here"
- * Does not check for escaped quotation marks.
- */
-export function isInsideQuotationMark(currentLineUntrimmed: string, position: Position): boolean {
-  let insideQuotation = false
-  for (let i = 0; i < position.character; i++) {
-    if (currentLineUntrimmed[i] === '"') {
-      insideQuotation = !insideQuotation
-    }
-  }
-  return insideQuotation
-}
-
-export function getSymbolBeforePosition(document: TextDocument, position: Position): string {
-  return document.getText({
-    start: {
-      line: position.line,
-      character: position.character - 1,
-    },
-    end: { line: position.line, character: position.character },
-  })
-}
-
-export function positionIsAfterFieldAndType(
-  position: Position,
-  document: TextDocument,
-  wordsBeforePosition: string[],
-): boolean {
-  const symbolBeforePosition = getSymbolBeforePosition(document, position)
-  const symbolBeforeIsWhiteSpace = symbolBeforePosition.search(/\s/)
-
-  const hasAtRelation = wordsBeforePosition.length === 2 && symbolBeforePosition === '@'
-  const hasWhiteSpaceBeforePosition = wordsBeforePosition.length === 2 && symbolBeforeIsWhiteSpace !== -1
-
-  return wordsBeforePosition.length > 2 || hasAtRelation || hasWhiteSpaceBeforePosition
-}
-
-/**
- * Removes all block attribute suggestions that are invalid in this context.
- * E.g. `@@id()` when already used should not be in the suggestions.
- */
-function removeInvalidAttributeSuggestions(
-  supportedAttributes: CompletionItem[],
-  block: Block,
-  lines: string[],
-): CompletionItem[] {
-  let reachedStartLine = false
-  for (const [key, item] of lines.entries()) {
-    if (key === block.start.line + 1) {
-      reachedStartLine = true
-    }
-    if (!reachedStartLine) {
-      continue
-    }
-    if (key === block.end.line) {
-      break
-    }
-
-    // TODO we should also remove the other suggestions if used (default()...)
-    if (item.includes('@id')) {
-      supportedAttributes = supportedAttributes.filter((attribute) => !attribute.label.includes('id'))
-    }
-  }
-  return supportedAttributes
-}
+import {
+  Block,
+  BlockType,
+  getModelOrTypeOrEnumBlock,
+  declaredNativeTypes,
+  getAllRelationNames,
+  isInsideAttribute,
+  isInsideQuotationMark,
+  isInsideFieldArgument,
+  isInsideGivenProperty,
+  getFirstDatasourceName,
+  getFirstDatasourceProvider,
+  getAllPreviewFeaturesFromGenerators,
+  getFieldsFromCurrentBlock,
+  getFieldType,
+  getAllTypeNames,
+  getFieldTypesFromCurrentBlock,
+} from '../util'
 
 function getSuggestionForModelBlockAttribute(block: Block, lines: string[]): CompletionItem[] {
   if (block.type !== 'model') {
@@ -253,78 +170,9 @@ export function getSuggestionForFieldAttribute(
   }
 }
 
-function getFirstDatasourceName(lines: string[]): string | undefined {
-  const datasourceBlockFirstLine = lines.find((l) => l.startsWith('datasource') && l.includes('{'))
-  if (!datasourceBlockFirstLine) {
-    return undefined
-  }
-  const indexOfBracket = datasourceBlockFirstLine.indexOf('{')
-  return datasourceBlockFirstLine.slice('datasource'.length, indexOfBracket).trim()
-}
-
-function getFirstDatasourceProvider(lines: string[]): string | undefined {
-  // matches provider inside datasource in any position
-  // thanks to https://regex101.com for the online scratchpad
-  const result = /datasource.*\{(\n|\N)\s*(.*\n)?\n*\s*provider\s=\s(\"(.*)\")[^}]+}/.exec(lines.join('\n'))
-
-  if (!result || !result[4]) {
-    return undefined
-  }
-
-  const datasourceProvider = result[4]
-  if (typeof datasourceProvider === 'string' && datasourceProvider.length >= 1) {
-    return datasourceProvider
-  }
-}
-
-function getAllPreviewFeaturesFromGenerators(lines: string[]): PreviewFeatures[] | undefined {
-  // matches any `previewFeatures = [x]` in any position
-  // thanks to https://regex101.com for the online scratchpad
-  const previewFeaturesRegex = /previewFeatures\s=\s(\[.*\])/g
-
-  // we could match against all the `previewFeatures = [x]` (could be that there is more than one?)
-  // var matchAll = text.matchAll(regexp)
-  // for (const match of matchAll) {
-  //   console.log(match);
-  // }
-  const result = previewFeaturesRegex.exec(lines.join('\n'))
-
-  if (!result || !result[1]) {
-    return undefined
-  }
-
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const previewFeatures = JSON.parse(result[1])
-    if (Array.isArray(previewFeatures) && previewFeatures.length > 0) {
-      return previewFeatures.map((it: string) => it.toLowerCase()) as PreviewFeatures[]
-    }
-  } catch (e) {}
-
-  return undefined
-}
-
-export function getAllRelationNames(lines: Array<string>): Array<string> {
-  const modelNames: Array<string> = []
-  for (const item of lines) {
-    if (
-      // TODO type?
-      (item.includes('model') || item.includes('enum')) &&
-      item.includes('{')
-    ) {
-      // found a block
-      const blockName = extractModelName(item)
-
-      modelNames.push(blockName)
-      // block is at least 2 lines long
-    }
-  }
-  return modelNames
-}
-
 export function getSuggestionsForFieldTypes(
   foundBlock: Block,
-  lines: Array<string>,
+  lines: string[],
   position: Position,
   currentLineUntrimmed: string,
 ): CompletionList {
@@ -340,7 +188,7 @@ export function getSuggestionsForFieldTypes(
 
   if (foundBlock instanceof Block) {
     // get all model names
-    const modelNames: Array<string> = getAllRelationNames(lines)
+    const modelNames: string[] = getAllRelationNames(lines)
     suggestions.push(...toCompletionItems(modelNames, CompletionItemKind.Reference))
   }
 
@@ -370,42 +218,11 @@ export function getSuggestionsForFieldTypes(
   }
 }
 
-/**
- * Removes all field suggestion that are invalid in this context. E.g. fields that are used already in a block will not be suggested again.
- * This function removes all field suggestion that are invalid in a certain context. E.g. in a generator block `provider, output, platforms, pinnedPlatForm`
- * are possible fields. But those fields are only valid suggestions if they haven't been used in this block yet. So in case `provider` has already been used, only
- * `output, platforms, pinnedPlatform` will be suggested.
- */
-function removeInvalidFieldSuggestions(
-  supportedFields: Array<string>,
-  block: Block,
-  lines: Array<string>,
-  position: Position,
-): Array<string> {
-  let reachedStartLine = false
-  for (const [key, item] of lines.entries()) {
-    if (key === block.start.line + 1) {
-      reachedStartLine = true
-    }
-    if (!reachedStartLine || key === position.line) {
-      continue
-    }
-    if (key === block.end.line) {
-      break
-    }
-    const fieldName = item.replace(/ .*/, '')
-    if (supportedFields.includes(fieldName)) {
-      supportedFields = supportedFields.filter((field) => field !== fieldName)
-    }
-  }
-  return supportedFields
-}
-
-function getSuggestionForDataSourceField(block: Block, lines: Array<string>, position: Position): CompletionItem[] {
+function getSuggestionForDataSourceField(block: Block, lines: string[], position: Position): CompletionItem[] {
   // create deep copy
   const suggestions: CompletionItem[] = klona(supportedDataSourceFields)
 
-  const labels: Array<string> = removeInvalidFieldSuggestions(
+  const labels: string[] = removeInvalidFieldSuggestions(
     suggestions.map((item) => item.label),
     block,
     lines,
@@ -415,7 +232,7 @@ function getSuggestionForDataSourceField(block: Block, lines: Array<string>, pos
   return suggestions.filter((item) => labels.includes(item.label))
 }
 
-function getSuggestionForGeneratorField(block: Block, lines: Array<string>, position: Position): CompletionItem[] {
+function getSuggestionForGeneratorField(block: Block, lines: string[], position: Position): CompletionItem[] {
   // create deep copy
   const suggestions: CompletionItem[] = klona(supportedGeneratorFields)
 
@@ -434,7 +251,7 @@ function getSuggestionForGeneratorField(block: Block, lines: Array<string>, posi
  */
 export function getSuggestionForFirstInsideBlock(
   blockType: BlockType,
-  lines: Array<string>,
+  lines: string[],
   position: Position,
   block: Block,
 ): CompletionList {
@@ -460,7 +277,7 @@ export function getSuggestionForFirstInsideBlock(
   }
 }
 
-export function getSuggestionForBlockTypes(lines: Array<string>): CompletionList {
+export function getSuggestionForBlockTypes(lines: string[]): CompletionList {
   // create deep copy
   const suggestions: CompletionItem[] = klona(allowedBlockTypes)
 
@@ -501,89 +318,6 @@ export function suggestEqualSymbol(blockType: BlockType): CompletionList | undef
   }
 }
 
-export function getValuesInsideSquareBrackets(line: string): string[] {
-  const regexp = /\[([^\]]+)\]/
-  const matches = regexp.exec(line)
-  if (!matches || !matches[1]) {
-    return []
-  }
-  const result = matches[1].split(',')
-  return result.map((v) => v.trim().replace('"', '').replace('"', ''))
-}
-
-function declaredNativeTypes(document: TextDocument): boolean {
-  const nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(document.getText())
-  if (nativeTypes.length === 0) {
-    return false
-  }
-  return true
-}
-
-function handlePreviewFeatures(
-  previewFeaturesArray: string[],
-  position: Position,
-  currentLineUntrimmed: string,
-  isInsideQuotation: boolean,
-): CompletionList {
-  let previewFeatures: CompletionItem[] = previewFeaturesArray.map((pf) => CompletionItem.create(pf))
-  if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
-    if (isInsideQuotation) {
-      const usedValues = getValuesInsideSquareBrackets(currentLineUntrimmed)
-      previewFeatures = previewFeatures.filter((t) => !usedValues.includes(t.label))
-      return {
-        items: previewFeatures,
-        isIncomplete: true,
-      }
-    } else {
-      return {
-        items: previewFeaturesArguments.filter((arg) => !arg.label.includes('[')),
-        isIncomplete: true,
-      }
-    }
-  } else {
-    return {
-      items: previewFeaturesArguments.filter((arg) => !arg.label.includes('"')),
-      isIncomplete: true,
-    }
-  }
-}
-
-function getNativeTypes(document: TextDocument, prismaType: string): CompletionItem[] {
-  let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(document.getText())
-
-  if (nativeTypes.length === 0) {
-    return []
-  }
-
-  const suggestions: CompletionItem[] = []
-  nativeTypes = nativeTypes.filter((n) => n.prisma_types.includes(prismaType))
-  nativeTypes.forEach((element) => {
-    if (element._number_of_args + element._number_of_optional_args !== 0) {
-      let documentation = ''
-      if (element._number_of_optional_args !== 0) {
-        documentation = `${documentation}Number of optional arguments: ${element._number_of_optional_args}.\n'`
-      }
-      if (element._number_of_args !== 0) {
-        documentation = `${documentation}Number of required arguments: ${element._number_of_args}.\n`
-      }
-      suggestions.push({
-        label: `${element.name}()`,
-        kind: CompletionItemKind.TypeParameter,
-        insertText: `${element.name}($0)`,
-        documentation: { kind: MarkupKind.Markdown, value: documentation },
-        insertTextFormat: 2,
-      })
-    } else {
-      suggestions.push({
-        label: element.name,
-        kind: CompletionItemKind.TypeParameter,
-      })
-    }
-  })
-
-  return suggestions
-}
-
 // Suggest fields for a BlockType
 export function getSuggestionForSupportedFields(
   blockType: BlockType,
@@ -592,7 +326,7 @@ export function getSuggestionForSupportedFields(
   position: Position,
   lines: string[],
 ): CompletionList | undefined {
-  let suggestions: Array<string> = []
+  let suggestions: string[] = []
   const isInsideQuotation: boolean = isInsideQuotationMark(currentLineUntrimmed, position)
 
   switch (blockType) {
@@ -776,111 +510,6 @@ function getDefaultValues(currentLine: string, lines: string[]): CompletionItem[
   return suggestions
 }
 
-// checks if e.g. inside 'fields' or 'references' attribute
-function isInsideGivenProperty(
-  currentLineUntrimmed: string,
-  wordsBeforePosition: Array<string>,
-  attributeName: string,
-  position: Position,
-): boolean {
-  if (!isInsideAttribute(currentLineUntrimmed, position, '[]')) {
-    return false
-  }
-
-  // We sort all attributes by their position
-  const sortedAttributes = [
-    {
-      name: 'fields',
-      position: wordsBeforePosition.findIndex((word) => word.includes('fields')),
-    },
-    {
-      name: 'references',
-      position: wordsBeforePosition.findIndex((word) => word.includes('references')),
-    },
-  ].sort((a, b) => (a.position < b.position ? 1 : -1))
-
-  // If the last attribute (higher position)
-  // is the one we are looking for we are in this attribute
-  if (sortedAttributes[0].name === attributeName) {
-    return true
-  } else {
-    return false
-  }
-}
-
-function getFieldsFromCurrentBlock(lines: Array<string>, block: Block, position?: Position): Array<string> {
-  const suggestions: Array<string> = []
-
-  let reachedStartLine = false
-  let field = ''
-  for (const [key, item] of lines.entries()) {
-    if (key === block.start.line + 1) {
-      reachedStartLine = true
-    }
-    if (!reachedStartLine) {
-      continue
-    }
-    if (key === block.end.line) {
-      break
-    }
-    if (!item.startsWith('@@') && (!position || key !== position.line)) {
-      field = item.replace(/ .*/, '')
-      if (field !== '' && !field.startsWith('//')) {
-        suggestions.push(field)
-      }
-    }
-  }
-  return suggestions
-}
-
-export function getFieldTypesFromCurrentBlock(
-  lines: Array<string>,
-  block: Block,
-  position?: Position,
-): Map<string, number[]> {
-  const suggestions: Map<string, number[]> = new Map<string, number[]>()
-
-  let reachedStartLine = false
-  for (const [key, item] of lines.entries()) {
-    if (key === block.start.line + 1) {
-      reachedStartLine = true
-    }
-    if (!reachedStartLine) {
-      continue
-    }
-    if (key === block.end.line) {
-      break
-    }
-    if (!item.startsWith('@@') && (!position || key !== position.line)) {
-      const type = getFieldType(item)
-      if (type !== undefined) {
-        /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-        const existingSuggestion = suggestions.get(type)
-        if (!existingSuggestion) {
-          suggestions.set(type, [key])
-        } else {
-          existingSuggestion.push(key)
-          suggestions.set(type, existingSuggestion)
-        }
-        /* eslint-enable @typescript-eslint/no-unsafe-assignment */
-      }
-    }
-  }
-  return suggestions
-}
-
-function getFieldType(line: string): string | undefined {
-  const wordsInLine: string[] = line.split(/\s+/)
-  if (wordsInLine.length < 2) {
-    return undefined
-  }
-  const type = wordsInLine[1]
-  if (type.length !== 0) {
-    return type
-  }
-  return undefined
-}
-
 function getSuggestionsForAttribute(
   {
     attribute,
@@ -961,32 +590,34 @@ function getSuggestionsForAttribute(
     // Additionally, SQL Server also allows it on @id and @@id.
 
     if (isInsideAttribute(untrimmedCurrentLine, position, '[]')) {
-      // extendedIndexes
-      if (previewFeatures?.includes('extendedindexes') && isInsideFieldArgument(untrimmedCurrentLine, position)) {
-        let attribute: '@@unique' | '@unique' | '@@id' | '@id' | '@@index' | undefined = undefined
+      if (isInsideFieldArgument(untrimmedCurrentLine, position)) {
+        // extendedIndexes
+        if (previewFeatures?.includes('extendedindexes')) {
+          let attribute: '@@unique' | '@unique' | '@@id' | '@id' | '@@index' | undefined = undefined
 
-        if (wordsBeforePosition.some((a) => a.includes('@@id'))) {
-          attribute = '@@id'
-        } else if (wordsBeforePosition.some((a) => a.includes('@id'))) {
-          attribute = '@id'
-        } else if (wordsBeforePosition.some((a) => a.includes('@@unique'))) {
-          attribute = '@@unique'
-        } else if (wordsBeforePosition.some((a) => a.includes('@unique'))) {
-          attribute = '@unique'
-        } else if (wordsBeforePosition.some((a) => a.includes('@@index'))) {
-          attribute = '@@index'
-        }
+          if (wordsBeforePosition.some((a) => a.includes('@@id'))) {
+            attribute = '@@id'
+          } else if (wordsBeforePosition.some((a) => a.includes('@id'))) {
+            attribute = '@id'
+          } else if (wordsBeforePosition.some((a) => a.includes('@@unique'))) {
+            attribute = '@@unique'
+          } else if (wordsBeforePosition.some((a) => a.includes('@unique'))) {
+            attribute = '@unique'
+          } else if (wordsBeforePosition.some((a) => a.includes('@@index'))) {
+            attribute = '@@index'
+          }
 
-        if (attribute) {
-          return {
-            items: filterSortLengthBasedOnInput(
-              attribute,
-              previewFeatures,
-              datasourceProvider,
-              wordBeforePosition,
-              sortLengthProperties,
-            ),
-            isIncomplete: false,
+          if (attribute) {
+            return {
+              items: filterSortLengthBasedOnInput(
+                attribute,
+                previewFeatures,
+                datasourceProvider,
+                wordBeforePosition,
+                sortLengthProperties,
+              ),
+              isIncomplete: false,
+            }
           }
         }
       }
@@ -1000,7 +631,7 @@ function getSuggestionsForAttribute(
       }
 
       return {
-        items: toCompletionItems(items, CompletionItemKind.Field),
+        items: toCompletionItems(fieldsFromCurrentBlock, CompletionItemKind.Field),
         isIncomplete: false,
       }
     }
@@ -1146,7 +777,7 @@ function getSuggestionsForAttribute(
 
 export function getSuggestionsForInsideRoundBrackets(
   untrimmedCurrentLine: string,
-  lines: Array<string>,
+  lines: string[],
   document: TextDocument,
   position: Position,
   block: Block,

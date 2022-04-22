@@ -1,5 +1,7 @@
-import { TextDocument, Range } from 'vscode-languageserver-textdocument'
+import type { TextDocument, Range } from 'vscode-languageserver-textdocument'
 import { Position } from 'vscode-languageserver'
+import nativeTypeConstructors, { NativeTypeConstructors } from './prisma-fmt/nativeTypes'
+import { PreviewFeatures } from './previewFeatures'
 
 export type BlockType = 'generator' | 'datasource' | 'model' | 'type' | 'enum'
 
@@ -32,7 +34,7 @@ export function getCurrentLine(document: TextDocument, line: number): string {
   })
 }
 
-export function convertDocumentTextToTrimmedLineArray(document: TextDocument): Array<string> {
+export function convertDocumentTextToTrimmedLineArray(document: TextDocument): string[] {
   return Array(document.lineCount)
     .fill(0)
     .map((_, i) => getCurrentLine(document, i).trim())
@@ -68,7 +70,7 @@ export function getWordAtPosition(document: TextDocument, position: Position): s
   return currentLine.slice(beginning, end + position.character)
 }
 
-export function getBlockAtPosition(line: number, lines: Array<string>): Block | void {
+export function getBlockAtPosition(line: number, lines: string[]): Block | void {
   let blockType = ''
   let blockName = ''
   let blockStart: Position = Position.create(0, 0)
@@ -154,7 +156,7 @@ export function getModelOrTypeOrEnumBlock(blockName: string, lines: string[]): B
   return foundBlocks[0]
 }
 
-// TODO can be removed? Since it was renamed to `previewFeatures`
+// TODO can be removed? Since it was renamed to `previewFeatures` a long time ago
 export function getExperimentalFeaturesRange(document: TextDocument): Range | undefined {
   const lines = convertDocumentTextToTrimmedLineArray(document)
   const experimentalFeatures = 'experimentalFeatures'
@@ -178,4 +180,286 @@ export function getExperimentalFeaturesRange(document: TextDocument): Range | un
       }
     }
   }
+}
+
+export function getValuesInsideSquareBrackets(line: string): string[] {
+  const regexp = /\[([^\]]+)\]/
+  const matches = regexp.exec(line)
+  if (!matches || !matches[1]) {
+    return []
+  }
+  const result = matches[1].split(',')
+  return result.map((v) => v.trim().replace('"', '').replace('"', ''))
+}
+
+export function declaredNativeTypes(document: TextDocument): boolean {
+  const nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(document.getText())
+  if (nativeTypes.length === 0) {
+    return false
+  }
+  return true
+}
+
+export function extractFirstWord(line: string): string {
+  return line.replace(/ .*/, '')
+}
+
+export function extractBlockName(line: string): string {
+  const blockType = extractFirstWord(line)
+  return line.slice(blockType.length, line.length - 1).trim()
+}
+
+export function getAllRelationNames(lines: string[]): string[] {
+  const modelNames: string[] = []
+  for (const line of lines) {
+    const modelOrEnumRegex = /^(model|enum)\s+(\w+)\s+{/gm
+    const result = modelOrEnumRegex.exec(line)
+    if (result && result[2]) {
+      modelNames.push(result[2])
+    }
+  }
+  return modelNames
+}
+
+export function getAllTypeNames(lines: string[]): string[] {
+  const typeNames: string[] = []
+  for (const line of lines) {
+    const typeRegex = /^type\s+(\w+)\s+{/gm
+    const result = typeRegex.exec(line)
+    if (result && result[1]) {
+      typeNames.push(result[1])
+    }
+  }
+  return typeNames
+}
+
+export function isInsideFieldArgument(currentLineUntrimmed: string, position: Position): boolean {
+  const symbols = '()'
+  let numberOfOpenBrackets = 0
+  let numberOfClosedBrackets = 0
+  for (let i = 0; i < position.character; i++) {
+    if (currentLineUntrimmed[i] === symbols[0]) {
+      numberOfOpenBrackets++
+    } else if (currentLineUntrimmed[i] === symbols[1]) {
+      numberOfClosedBrackets++
+    }
+  }
+  return numberOfOpenBrackets >= 2 && numberOfOpenBrackets > numberOfClosedBrackets
+}
+
+/***
+ * @param symbols expects e.g. '()', '[]' or '""'
+ */
+export function isInsideAttribute(currentLineUntrimmed: string, position: Position, symbols: string): boolean {
+  let numberOfOpenBrackets = 0
+  let numberOfClosedBrackets = 0
+  for (let i = 0; i < position.character; i++) {
+    if (currentLineUntrimmed[i] === symbols[0]) {
+      numberOfOpenBrackets++
+    } else if (currentLineUntrimmed[i] === symbols[1]) {
+      numberOfClosedBrackets++
+    }
+  }
+  return numberOfOpenBrackets > numberOfClosedBrackets
+}
+
+/***
+ * Checks if inside e.g. "here"
+ * Does not check for escaped quotation marks.
+ */
+export function isInsideQuotationMark(currentLineUntrimmed: string, position: Position): boolean {
+  let insideQuotation = false
+  for (let i = 0; i < position.character; i++) {
+    if (currentLineUntrimmed[i] === '"') {
+      insideQuotation = !insideQuotation
+    }
+  }
+  return insideQuotation
+}
+
+// checks if e.g. inside 'fields' or 'references' attribute
+export function isInsideGivenProperty(
+  currentLineUntrimmed: string,
+  wordsBeforePosition: string[],
+  attributeName: string,
+  position: Position,
+): boolean {
+  if (!isInsideAttribute(currentLineUntrimmed, position, '[]')) {
+    return false
+  }
+
+  // We sort all attributes by their position
+  const sortedAttributes = [
+    {
+      name: 'fields',
+      position: wordsBeforePosition.findIndex((word) => word.includes('fields')),
+    },
+    {
+      name: 'references',
+      position: wordsBeforePosition.findIndex((word) => word.includes('references')),
+    },
+  ].sort((a, b) => (a.position < b.position ? 1 : -1))
+
+  // If the last attribute (higher position)
+  // is the one we are looking for we are in this attribute
+  if (sortedAttributes[0].name === attributeName) {
+    return true
+  } else {
+    return false
+  }
+}
+
+export function getFieldType(line: string): string | undefined {
+  const wordsInLine: string[] = line.split(/\s+/)
+  if (wordsInLine.length < 2) {
+    return undefined
+  }
+  // Field type is in second position
+  // myfield String
+  const fieldType = wordsInLine[1]
+  if (fieldType.length !== 0) {
+    return fieldType
+  }
+  return undefined
+}
+
+export function getSymbolBeforePosition(document: TextDocument, position: Position): string {
+  return document.getText({
+    start: {
+      line: position.line,
+      character: position.character - 1,
+    },
+    end: { line: position.line, character: position.character },
+  })
+}
+
+export function positionIsAfterFieldAndType(
+  position: Position,
+  document: TextDocument,
+  wordsBeforePosition: string[],
+): boolean {
+  const symbolBeforePosition = getSymbolBeforePosition(document, position)
+  const symbolBeforeIsWhiteSpace = symbolBeforePosition.search(/\s/)
+
+  const hasAtRelation = wordsBeforePosition.length === 2 && symbolBeforePosition === '@'
+  const hasWhiteSpaceBeforePosition = wordsBeforePosition.length === 2 && symbolBeforeIsWhiteSpace !== -1
+
+  return wordsBeforePosition.length > 2 || hasAtRelation || hasWhiteSpaceBeforePosition
+}
+
+export function getFirstDatasourceName(lines: string[]): string | undefined {
+  const datasourceBlockFirstLine = lines.find((l) => l.startsWith('datasource') && l.includes('{'))
+  if (!datasourceBlockFirstLine) {
+    return undefined
+  }
+  const indexOfBracket = datasourceBlockFirstLine.indexOf('{')
+  return datasourceBlockFirstLine.slice('datasource'.length, indexOfBracket).trim()
+}
+
+export function getFirstDatasourceProvider(lines: string[]): string | undefined {
+  // matches provider inside datasource in any position
+  // thanks to https://regex101.com for the online scratchpad
+  const result = /datasource.*\{(\n|\N)\s*(.*\n)?\n*\s*provider\s=\s(\"(.*)\")[^}]+}/.exec(lines.join('\n'))
+
+  if (!result || !result[4]) {
+    return undefined
+  }
+
+  const datasourceProvider = result[4]
+  if (typeof datasourceProvider === 'string' && datasourceProvider.length >= 1) {
+    return datasourceProvider
+  }
+}
+
+export function getAllPreviewFeaturesFromGenerators(lines: string[]): PreviewFeatures[] | undefined {
+  // matches any `previewFeatures = [x]` in any position
+  // thanks to https://regex101.com for the online scratchpad
+  const previewFeaturesRegex = /previewFeatures\s=\s(\[.*\])/g
+
+  // we could match against all the `previewFeatures = [x]` (could be that there is more than one?)
+  // var matchAll = text.matchAll(regexp)
+  // for (const match of matchAll) {
+  //   console.log(match);
+  // }
+  const result = previewFeaturesRegex.exec(lines.join('\n'))
+
+  if (!result || !result[1]) {
+    return undefined
+  }
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const previewFeatures = JSON.parse(result[1])
+    if (Array.isArray(previewFeatures) && previewFeatures.length > 0) {
+      return previewFeatures.map((it: string) => it.toLowerCase()) as PreviewFeatures[]
+    }
+  } catch (e) {}
+
+  return undefined
+}
+
+export function getFieldsFromCurrentBlock(lines: string[], block: Block, position?: Position): string[] {
+  const fieldNames: string[] = []
+  let reachedStartLine = false
+
+  for (const [lineIndex, line] of lines.entries()) {
+    if (lineIndex === block.start.line + 1) {
+      reachedStartLine = true
+    }
+    if (!reachedStartLine) {
+      continue
+    }
+    if (lineIndex === block.end.line) {
+      break
+    }
+    if (!position || lineIndex !== position.line) {
+      const fieldName = getFieldNameFromLine(line)
+      if (fieldName) {
+        fieldNames.push(fieldName)
+      }
+    }
+  }
+  return fieldNames
+}
+
+// TODO a regex for \w in first position would be better?
+function getFieldNameFromLine(line: string) {
+  if (line.startsWith('//') || line.startsWith('@@')) {
+    return undefined
+  }
+
+  const firstPartOfLine = line.replace(/ .*/, '')
+
+  return firstPartOfLine
+}
+
+export function getFieldTypesFromCurrentBlock(lines: string[], block: Block, position?: Position) {
+  const fieldTypes = new Map<string, { lineIndexes: number[]; fieldName: string | undefined }>()
+
+  let reachedStartLine = false
+  for (const [lineIndex, line] of lines.entries()) {
+    if (lineIndex === block.start.line + 1) {
+      reachedStartLine = true
+    }
+    if (!reachedStartLine) {
+      continue
+    }
+    if (lineIndex === block.end.line) {
+      break
+    }
+    if (!line.startsWith('@@') && (!position || lineIndex !== position.line)) {
+      const fieldType = getFieldType(line)
+
+      if (fieldType !== undefined) {
+        const existingFieldType = fieldTypes.get(fieldType)
+        if (!existingFieldType) {
+          fieldTypes.set(fieldType, { lineIndexes: [lineIndex], fieldName: getFieldNameFromLine(line) })
+        } else {
+          existingFieldType.lineIndexes.push(lineIndex)
+          fieldTypes.set(fieldType, existingFieldType)
+        }
+      }
+    }
+  }
+  return fieldTypes
 }

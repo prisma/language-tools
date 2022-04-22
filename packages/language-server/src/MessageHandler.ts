@@ -27,6 +27,9 @@ import {
   getModelOrTypeOrEnumBlock,
   getWordAtPosition,
   isFirstInsideBlock,
+  positionIsAfterFieldAndType,
+  isInsideAttribute,
+  getSymbolBeforePosition,
 } from './util'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import format from './prisma-fmt/format'
@@ -38,9 +41,6 @@ import {
   getSuggestionForFirstInsideBlock,
   getSuggestionForSupportedFields,
   getSuggestionsForInsideRoundBrackets,
-  positionIsAfterFieldAndType,
-  isInsideAttribute,
-  getSymbolBeforePosition,
   suggestEqualSymbol,
   getSuggestionForNativeTypes,
 } from './completion/completions'
