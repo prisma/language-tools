@@ -42,8 +42,8 @@ import {
   getAllPreviewFeaturesFromGenerators,
   getFieldsFromCurrentBlock,
   getFieldType,
-  getAllTypeNames,
   getFieldTypesFromCurrentBlock,
+  getValuesInsideSquareBrackets,
 } from '../util'
 
 function getSuggestionForModelBlockAttribute(block: Block, lines: string[]): CompletionItem[] {
@@ -557,6 +557,7 @@ function getSuggestionsForAttribute(
       }
     }
 
+    // TODO check fields with [] shortcut
     if (isInsideGivenProperty(untrimmedCurrentLine, wordsBeforePosition, 'fields', position)) {
       return {
         items: toCompletionItems(getFieldsFromCurrentBlock(lines, block, position), CompletionItemKind.Field),
@@ -622,12 +623,84 @@ function getSuggestionsForAttribute(
         }
       }
 
-      let items = getFieldsFromCurrentBlock(lines, block, position)
-      // get parameters inside block attribute
-      const parameterMatch = new RegExp(/(?<=\[).+?(?=\])/).exec(untrimmedCurrentLine)
-      if (parameterMatch) {
-        const existingParameters = parameterMatch[0].split(',').map((param) => param.trim())
-        items = items.filter((s) => !existingParameters.includes(s))
+      const fieldsFromLine = getValuesInsideSquareBrackets(untrimmedCurrentLine)
+
+      /*
+       * MongoDB composite type fields, see https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#composite-type-unique-constraints
+       * Examples
+       * @@unique([address.|]) or @@unique(fields: [address.|])
+       * @@index([address.||]) or @@index(fields: [address.|])
+       */
+      if (datasourceProvider === 'mongodb' && fieldsFromLine && firstWordBeforePosition.endsWith('.')) {
+        const getFieldName = (text: string): string => {
+          const [_, __, value] = new RegExp(/(.*\[)?(.+)/).exec(text) || []
+          if (value?.endsWith('.')) {
+            return value.slice(0, -1)
+          }
+          return value
+        }
+        const currentFieldName = getFieldName(firstWordBeforePosition)
+        if (!currentFieldName) {
+          return {
+            isIncomplete: false,
+            items: [],
+          }
+        }
+
+        const currentCompositeAsArray = currentFieldName.split('.')
+        const fieldTypesFromCurrentBlock = getFieldTypesFromCurrentBlock(lines, block)
+
+        function recursive(
+          compositeTypeFieldNames: string[],
+          fieldTypesFromBlock: {
+            fieldTypes: Map<
+              string,
+              {
+                lineIndexes: number[]
+                fieldName: string | undefined
+              }
+            >
+            fieldTypeNames: Record<string, string>
+          },
+        ): string[] {
+          const compositeTypeFieldName = compositeTypeFieldNames.shift()!
+
+          const fieldTypeNames = fieldTypesFromBlock.fieldTypeNames
+          const fieldTypeName = fieldTypeNames[compositeTypeFieldName]
+
+          if (!fieldTypeName) {
+            return []
+          }
+
+          const typeBlock = getModelOrTypeOrEnumBlock(fieldTypeName, lines)
+          if (!typeBlock || typeBlock.type !== 'type') {
+            return []
+          }
+
+          if (compositeTypeFieldNames.length) {
+            return recursive(compositeTypeFieldNames, getFieldTypesFromCurrentBlock(lines, typeBlock))
+          } else {
+            return getFieldsFromCurrentBlock(lines, typeBlock)
+          }
+        }
+
+        const result = recursive(currentCompositeAsArray, fieldTypesFromCurrentBlock)
+        return {
+          items: toCompletionItems(result, CompletionItemKind.Field),
+          isIncomplete: false,
+        }
+      }
+
+      let fieldsFromCurrentBlock = getFieldsFromCurrentBlock(lines, block, position)
+      if (fieldsFromLine) {
+        // If we are in a composite type, exit here, to not pollute results with first level fields
+        if (firstWordBeforePosition.includes('.')) {
+          return {
+            isIncomplete: false,
+            items: [],
+          }
+        }
+        fieldsFromCurrentBlock = fieldsFromCurrentBlock.filter((s) => !fieldsFromLine.includes(s))
       }
 
       return {

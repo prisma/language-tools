@@ -188,8 +188,23 @@ export function getValuesInsideSquareBrackets(line: string): string[] {
   if (!matches || !matches[1]) {
     return []
   }
-  const result = matches[1].split(',')
-  return result.map((v) => v.trim().replace('"', '').replace('"', ''))
+  const result = matches[1].split(',').map((name) => {
+    name = name
+      // trim whitespace
+      .trim()
+      // remove ""?
+      .replace('"', '')
+      .replace('"', '')
+
+    // Remove period at the end for composite types
+    if (name.endsWith('.')) {
+      return name.slice(0, -1)
+    }
+
+    return name
+  })
+
+  return result
 }
 
 export function declaredNativeTypes(document: TextDocument): boolean {
@@ -435,6 +450,7 @@ function getFieldNameFromLine(line: string) {
 
 export function getFieldTypesFromCurrentBlock(lines: string[], block: Block, position?: Position) {
   const fieldTypes = new Map<string, { lineIndexes: number[]; fieldName: string | undefined }>()
+  const fieldTypeNames: Record<string, string> = {}
 
   let reachedStartLine = false
   for (const [lineIndex, line] of lines.entries()) {
@@ -453,7 +469,9 @@ export function getFieldTypesFromCurrentBlock(lines: string[], block: Block, pos
       if (fieldType !== undefined) {
         const existingFieldType = fieldTypes.get(fieldType)
         if (!existingFieldType) {
-          fieldTypes.set(fieldType, { lineIndexes: [lineIndex], fieldName: getFieldNameFromLine(line) })
+          const fieldName = getFieldNameFromLine(line)!
+          fieldTypes.set(fieldType, { lineIndexes: [lineIndex], fieldName })
+          fieldTypeNames[fieldName] = fieldType
         } else {
           existingFieldType.lineIndexes.push(lineIndex)
           fieldTypes.set(fieldType, existingFieldType)
@@ -461,5 +479,5 @@ export function getFieldTypesFromCurrentBlock(lines: string[], block: Block, pos
       }
     }
   }
-  return fieldTypes
+  return { fieldTypes, fieldTypeNames }
 }

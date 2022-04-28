@@ -343,10 +343,10 @@ export function renameReferencesForModelName(
         searchedBlocks.push(block)
         // search for field types in current block
         const fieldTypes = getFieldTypesFromCurrentBlock(lines, block)
-        for (const fieldType of fieldTypes.keys()) {
+        for (const fieldType of fieldTypes.fieldTypes.keys()) {
           if (fieldType.replace('?', '').replace('[]', '') === currentName) {
             // replace here
-            const foundFieldTypes = fieldTypes.get(fieldType)
+            const foundFieldTypes = fieldTypes.fieldTypes.get(fieldType)
             if (!foundFieldTypes?.lineIndexes) {
               return edits
             }
