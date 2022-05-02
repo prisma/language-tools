@@ -44,6 +44,7 @@ jobs:
       - name: Build vsix
         run: cd packages/vscode && npm run package -- --out=prisma.vsix
 
+      # Upload to the current job run
       # This is very limited
       # Only 90 days rentention and cannot get a link easily
       - uses: actions/upload-artifact@v3
@@ -51,7 +52,11 @@ jobs:
           name: pr-artifact
           path: ./packages/vscode/*.vsix
 
+      # Upload again but this time as a commit on the `artifacts` branch
+      # And post message witht the link in the PR
       - name: Add artifact to PR
+        # Skip for Renovate (only build)
+        if: "!contains(github.actor, 'renovate')"
         uses: gavv/pull-request-artifacts@v1.0.0
         with:
           commit: ${{ github.event.pull_request.head.sha }}
