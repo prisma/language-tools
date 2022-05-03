@@ -72,6 +72,50 @@ When running the End-to-End tests in GitHub Actions before publishing, the scrip
 The End-to-End tests that are run after the publish of the extension are located in `scripts/e2eTestsOnVsix/test.sh`.
 In both cases the tests in `packages/vscode/src/__test__` with the schmeas located in `packages/vscode/fixtures` are used.
 
+## Pull Requests
+
+When a PR is opened, the "PR Build extension" GitHub Action will build and upload a `pr<PR_NUMBER>-prisma.vsix` file and link to it in a comment (which will be updated for each commit).
+
+### How to install and use this PR Build version:
+
+#### With the UI
+
+- In the extensions tab, filter the Prisma extenions with `@installed prisma`
+- Disable all the Prisma extensions (Prisma & Prisma Insider)
+- From the ... menu or the command palette, click "Install from VSIX..."
+
+#### With the command line
+
+```bash
+code --disable-extension Prisma.prisma && code --disable-extension Prisma.prisma-insider`
+
+# Replace with the correct PR number
+wget "https://github.com/prisma/language-tools/blob/artifacts/pull-request-artifacts/pr<PR_NUMBER>-prisma.vsix?raw=true"
+
+code --install-extension pr<PR_NUMBER>-prisma.vsix
+```
+
+Now the extension can be tested: open a `schema.prisma` file.
+
+### After testing you might want to clean up things a bit
+
+#### With the UI
+
+- In the extensions tab, filter the Prisma extenions with `@installed prisma`
+- Right click the `Prisma Insider - PR <PR_NUMBER> build` and click `Uninstall`
+- Enable the Prisma or Prisma Insider extension
+
+#### With the command line
+
+```bash
+rm pr<PR_NUMBER>-prisma.vsix
+code --uninstall-extension Prisma.prisma-insider-pr-build
+# For the latest public version
+code --install-extension Prisma.prisma
+# Or for Insider
+code --install-extension Prisma.prisma-insider
+```
+
 ## Publishing
 
 The extension is automatically published using a [Azure Devops Personal Access Token](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) via GitHub actions (see `.github/workflows/publish.yml`).
