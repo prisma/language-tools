@@ -8,7 +8,7 @@ if (require.main === module) {
 
   // Change name so VS Code doesn't try to auto-update it to the current Insider version
   content['name'] = 'prisma-insider-pr-build'
-  content['displayName'] = `Prisma - Insider - PR ${PR_NUMBER} Build`
+  content['displayName'] = `Prisma - Insider - PR ${process.env.PR_NUMBER} Build`
 
   writeJsonToPackageJson({ content: content, path: vscodePackageJsonPath })
 }
