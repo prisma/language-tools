@@ -44,6 +44,7 @@ import {
   getFieldType,
   getFieldTypesFromCurrentBlock,
   getValuesInsideSquareBrackets,
+  getCompositeTypeFieldsRecursively,
 } from '../util'
 
 function getSuggestionForModelBlockAttribute(block: Block, lines: string[]): CompletionItem[] {
@@ -629,7 +630,7 @@ function getSuggestionsForAttribute(
        * MongoDB composite type fields, see https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#composite-type-unique-constraints
        * Examples
        * @@unique([address.|]) or @@unique(fields: [address.|])
-       * @@index([address.||]) or @@index(fields: [address.|])
+       * @@index([address.|]) or @@index(fields: [address.|])
        */
       if (datasourceProvider === 'mongodb' && fieldsFromLine && firstWordBeforePosition.endsWith('.')) {
         const getFieldName = (text: string): string => {
@@ -650,43 +651,9 @@ function getSuggestionsForAttribute(
         const currentCompositeAsArray = currentFieldName.split('.')
         const fieldTypesFromCurrentBlock = getFieldTypesFromCurrentBlock(lines, block)
 
-        function recursive(
-          compositeTypeFieldNames: string[],
-          fieldTypesFromBlock: {
-            fieldTypes: Map<
-              string,
-              {
-                lineIndexes: number[]
-                fieldName: string | undefined
-              }
-            >
-            fieldTypeNames: Record<string, string>
-          },
-        ): string[] {
-          const compositeTypeFieldName = compositeTypeFieldNames.shift()!
-
-          const fieldTypeNames = fieldTypesFromBlock.fieldTypeNames
-          const fieldTypeName = fieldTypeNames[compositeTypeFieldName]
-
-          if (!fieldTypeName) {
-            return []
-          }
-
-          const typeBlock = getModelOrTypeOrEnumBlock(fieldTypeName, lines)
-          if (!typeBlock || typeBlock.type !== 'type') {
-            return []
-          }
-
-          if (compositeTypeFieldNames.length) {
-            return recursive(compositeTypeFieldNames, getFieldTypesFromCurrentBlock(lines, typeBlock))
-          } else {
-            return getFieldsFromCurrentBlock(lines, typeBlock)
-          }
-        }
-
-        const result = recursive(currentCompositeAsArray, fieldTypesFromCurrentBlock)
+        const fields = getCompositeTypeFieldsRecursively(lines, currentCompositeAsArray, fieldTypesFromCurrentBlock)
         return {
-          items: toCompletionItems(result, CompletionItemKind.Field),
+          items: toCompletionItems(fields, CompletionItemKind.Field),
           isIncomplete: false,
         }
       }

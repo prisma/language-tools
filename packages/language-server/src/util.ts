@@ -481,3 +481,42 @@ export function getFieldTypesFromCurrentBlock(lines: string[], block: Block, pos
   }
   return { fieldTypes, fieldTypeNames }
 }
+
+export function getCompositeTypeFieldsRecursively(
+  lines: string[],
+  compositeTypeFieldNames: string[],
+  fieldTypesFromBlock: {
+    fieldTypes: Map<
+      string,
+      {
+        lineIndexes: number[]
+        fieldName: string | undefined
+      }
+    >
+    fieldTypeNames: Record<string, string>
+  },
+): string[] {
+  const compositeTypeFieldName = compositeTypeFieldNames.shift()!
+  const fieldTypeNames = fieldTypesFromBlock.fieldTypeNames
+  const fieldTypeName = fieldTypeNames[compositeTypeFieldName]
+
+  if (!fieldTypeName) {
+    return []
+  }
+
+  const typeBlock = getModelOrTypeOrEnumBlock(fieldTypeName, lines)
+  if (!typeBlock || typeBlock.type !== 'type') {
+    return []
+  }
+
+  // if we are not at the end of the composite type, continue recursively
+  if (compositeTypeFieldNames.length) {
+    return getCompositeTypeFieldsRecursively(
+      lines,
+      compositeTypeFieldNames,
+      getFieldTypesFromCurrentBlock(lines, typeBlock),
+    )
+  } else {
+    return getFieldsFromCurrentBlock(lines, typeBlock)
+  }
+}
