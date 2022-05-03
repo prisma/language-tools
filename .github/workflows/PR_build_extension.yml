@@ -41,6 +41,11 @@ jobs:
         run: npm run compile
       - name: Replace Readme for marketplace
         run: node scripts/change_readme.js dev
+      - name: Update VS Code extension name
+        run: |
+          node scripts/update_package_json_file_PR_build.js
+        env:
+          PR_NUMBER: ${{ github.event.number }}
       - name: Build vsix
         run: cd packages/vscode && npm run package -- --out=prisma.vsix
 
