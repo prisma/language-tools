@@ -90,7 +90,7 @@ When a PR is opened, the "PR Build extension" GitHub Action will build and uploa
 code --disable-extension Prisma.prisma && code --disable-extension Prisma.prisma-insider`
 
 # Replace with the correct PR number
-wget "https://github.com/prisma/language-tools/blob/artifacts/pull-request-artifacts/pr<PR_NUMBER>-prisma.vsix?raw=true"
+wget --content-disposition "https://github.com/prisma/language-tools/blob/artifacts/pull-request-artifacts/pr<PR_NUMBER>-prisma.vsix?raw=true"
 
 code --install-extension pr<PR_NUMBER>-prisma.vsix
 ```
