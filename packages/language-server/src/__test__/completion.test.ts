@@ -1295,7 +1295,7 @@ suite('Completions', function () {
         },
       })
     })
-    test('MongoDB: @@index(ad[|])', () => {
+    test('MongoDB: @@index(a[|])', () => {
       assertCompletion({
         provider: 'mongodb',
         schema: /* Prisma */ `
@@ -1342,7 +1342,7 @@ suite('Completions', function () {
         },
       })
     })
-    test('MongoDB: @@index(address.[|]) first position, with only one type', () => {
+    test('MongoDB: @@index([address.|]) first position, with only one type', () => {
       assertCompletion({
         provider: 'mongodb',
         schema: /* Prisma */ `
@@ -1365,7 +1365,7 @@ suite('Completions', function () {
         },
       })
     })
-    test('MongoDB: @@index(address.[|]) with composite type suggestion 1', () => {
+    test('MongoDB: @@index([address.|]) with composite type suggestion 1', () => {
       assertCompletion({
         provider: 'mongodb',
         schema: /* Prisma */ `
@@ -1398,7 +1398,7 @@ suite('Completions', function () {
         },
       })
     })
-    test('MongoDB: @@index(address.a[|]) with composite type suggestion 1', () => {
+    test('MongoDB: @@index([address.a|]) with composite type suggestion 1', () => {
       assertCompletion({
         provider: 'mongodb',
         schema: /* Prisma */ `
