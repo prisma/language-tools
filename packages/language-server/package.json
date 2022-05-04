@@ -2,7 +2,7 @@
   "name": "@prisma/language-server",
   "description": "Prisma Language Server",
   "displayName": "Prisma Language Server",
-  "version": "31.0.864",
+  "version": "31.0.914",
   "author": "Prisma",
   "license": "Apache-2.0",
   "publisher": "Prisma",
@@ -10,8 +10,8 @@
     "node": ">=10"
   },
   "prisma": {
-    "enginesVersion": "07815b335736eb128666b4a5a86e94e19656f4ff",
-    "cliVersion": "3.13.0-dev.28"
+    "enginesVersion": "51eedf92d49b198f6699eacd692c99a77a3ca86a",
+    "cliVersion": "3.14.0-dev.28"
   },
   "bin": {
     "prisma-language-server": "dist/src/bin.js"
@@ -30,7 +30,7 @@
   "main": "./dist/index.js",
   "typings": "dist/src/index",
   "dependencies": {
-    "@prisma/prisma-fmt-wasm": "3.13.0-11.07815b335736eb128666b4a5a86e94e19656f4ff",
+    "@prisma/prisma-fmt-wasm": "3.14.0-16.51eedf92d49b198f6699eacd692c99a77a3ca86a",
     "@types/js-levenshtein": "1.1.1",
     "js-levenshtein": "1.1.6",
     "klona": "2.0.5",
@@ -38,11 +38,11 @@
     "vscode-languageserver-textdocument": "1.0.4"
   },
   "devDependencies": {
-    "@types/mocha": "9.1.0",
-    "@types/node": "14.18.12",
+    "@types/mocha": "9.1.1",
+    "@types/node": "14.18.16",
     "mocha": "9.2.2",
     "ts-dedent": "2.2.0",
-    "typescript": "4.6.3"
+    "typescript": "4.6.4"
   },
   "keywords": [
     "autocomplete",
