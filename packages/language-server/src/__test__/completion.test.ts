@@ -1173,7 +1173,7 @@ suite('Completions', function () {
             number Int
           }
           model User {
-            id      Int     @id
+            id      Int     @id @map("_id")
             email   String
             address Address
             @@unique([|])
@@ -1197,7 +1197,7 @@ suite('Completions', function () {
             number Int
           }
           model User {
-            id      Int     @id
+            id      Int     @id @map("_id")
             email   String
             address Address
             @@unique(fields: [|])
@@ -1280,7 +1280,7 @@ suite('Completions', function () {
             number Int
           }
           model User {
-            id      Int     @id
+            id      Int     @id @map("_id")
             email   String
             address Address
             @@index([|])
@@ -1295,7 +1295,7 @@ suite('Completions', function () {
         },
       })
     })
-    test('MongoDB: @@index(a[|])', () => {
+    test('MongoDB: @@index([a|])', () => {
       assertCompletion({
         provider: 'mongodb',
         schema: /* Prisma */ `
@@ -1304,22 +1304,79 @@ suite('Completions', function () {
             number Int
           }
           model User {
-            id      Int     @id
+            id      Int     @id @map("_id")
             email   String
             address Address
+            account Int
             @@index([a|])
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            // These are returned, but `onCompletionResolve` will only complete with the current match
+            // which means the completion will actually be
+            // address and account
+            // TODO create a test that shows that
+            { label: 'id', kind: CompletionItemKind.Field },
+            { label: 'email', kind: CompletionItemKind.Field },
+            { label: 'address', kind: CompletionItemKind.Field },
+            { label: 'account', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
+    test('MongoDB: @@index([address|])', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            account Int
+            @@index([address|])
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            // These are returned though the completion will actually be
+            // No suggestions
+            // TODO create a test that shows that
+            { label: 'id', kind: CompletionItemKind.Field },
+            { label: 'email', kind: CompletionItemKind.Field },
+            { label: 'account', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
+    test('MongoDB: @@index([address,|])', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([address,|])
           }`,
         expected: {
           isIncomplete: false,
           items: [
             { label: 'id', kind: CompletionItemKind.Field },
             { label: 'email', kind: CompletionItemKind.Field },
-            { label: 'address', kind: CompletionItemKind.Field },
           ],
         },
       })
     })
-    test('MongoDB: @@index(address[|])', () => {
+    test('MongoDB: @@index([address, |])', () => {
       assertCompletion({
         provider: 'mongodb',
         schema: /* Prisma */ `
@@ -1328,10 +1385,10 @@ suite('Completions', function () {
             number Int
           }
           model User {
-            id      Int     @id
+            id      Int     @id @map("_id")
             email   String
             address Address
-            @@index([address|])
+            @@index([address, |])
           }`,
         expected: {
           isIncomplete: false,
@@ -1351,7 +1408,7 @@ suite('Completions', function () {
             number Int
           }
           model User {
-            id      Int     @id
+            id      Int     @id @map("_id")
             email   String
             address Address
             @@index([address.|])
@@ -1383,7 +1440,7 @@ suite('Completions', function () {
             helloBravo Int
           }
           model User {
-            id      Int     @id
+            id      Int     @id @map("_id")
             email   String
             address Address
             @@index([address.|])
@@ -1416,7 +1473,7 @@ suite('Completions', function () {
             helloBravo Int
           }
           model User {
-            id      Int     @id
+            id      Int     @id @map("_id")
             email   String
             address Address
             @@index([address.a|])
@@ -1424,6 +1481,39 @@ suite('Completions', function () {
         expected: {
           isIncomplete: false,
           items: [],
+        },
+      })
+    })
+    test('MongoDB: @@index([email,address.|]) with composite type suggestion, depth 1', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+            alpha  Alpha
+          }
+          type Alpha {
+            bravo  Bravo
+            helloA Int
+          }
+          type Bravo {
+            something  String
+            helloBravo Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([email,address.|])
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'street', kind: CompletionItemKind.Field },
+            { label: 'number', kind: CompletionItemKind.Field },
+            { label: 'alpha', kind: CompletionItemKind.Field },
+          ],
         },
       })
     })
@@ -1445,7 +1535,7 @@ suite('Completions', function () {
             helloBravo Int
           }
           model User {
-            id      Int     @id
+            id      Int     @id @map("_id")
             email   String
             address Address
             @@index([email, address.|])
@@ -1478,7 +1568,7 @@ suite('Completions', function () {
             helloBravo Int
           }
           model User {
-            id      Int     @id
+            id      Int     @id @map("_id")
             email   String
             address Address
             @@index([email, address.alpha.|])
@@ -1510,7 +1600,7 @@ suite('Completions', function () {
             helloBravo Int
           }
           model User {
-            id      Int     @id
+            id      Int     @id @map("_id")
             email   String
             address Address
             @@index([email, address.alpha.bravo.|])
@@ -1533,7 +1623,7 @@ suite('Completions', function () {
             number Int
           }
           model User {
-            id      Int     @id
+            id      Int     @id @map("_id")
             email   String
             address Address
             @@index(fields: [|])
