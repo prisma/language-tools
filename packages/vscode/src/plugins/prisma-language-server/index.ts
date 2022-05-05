@@ -100,15 +100,20 @@ const plugin: PrismaVSCodePlugin = {
       console.debug('File Watcher was skipped, rootPath is falsy')
     }
 
-    if (isDebugMode() || isE2ETestOnPullRequest()) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (packageJson.name === 'prisma-insider-pr-build') {
+      console.log('Using local Language Server for prisma-insider-pr-build')
+      serverModule = context.asAbsolutePath(path.join('./language-server/dist/src/bin'))
+    } else if (isDebugMode() || isE2ETestOnPullRequest()) {
       // use Language Server from folder for debugging
-      console.log('Using local Language Server')
+      console.log('Using local Language Server from filesystem')
       serverModule = context.asAbsolutePath(path.join('../../packages/language-server/dist/src/bin'))
     } else {
-      console.log('Using published Language Server')
+      console.log('Using published Language Server (npm)')
       // use published npm package for production
       serverModule = require.resolve('@prisma/language-server/dist/src/bin')
     }
+    console.log(`serverModule: ${serverModule}`)
 
     // The debug options for the server
     // --inspect=6009: runs the server in Node's Inspector mode so VSCode can attach to the server for debugging
