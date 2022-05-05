@@ -86,35 +86,94 @@ When a PR is opened, the "PR Build extension" GitHub Action will build and uploa
 
 #### With the command line
 
-```bash
-code --disable-extension Prisma.prisma && code --disable-extension Prisma.prisma-insider`
+Note: when `<PR_NUMBER>`, you will need to replace it with the PR number, like `1234`.
 
-# Replace with the correct PR number
-wget --content-disposition "https://github.com/prisma/language-tools/blob/artifacts/pull-request-artifacts/pr<PR_NUMBER>-prisma.vsix?raw=true"
+<details>
+  <summary>For VS Code Stable version</summary>
+  
+    ```bash
+    # !! Important !! Close VS Code manually
+    # On macOS you can run the following command
+    osascript -e 'quit app "Visual Studio Code"'
 
-code --install-extension pr<PR_NUMBER>-prisma.vsix
-```
+    # Download the latest build artifact from GitHub
+    # Replace with the correct PR number
+    wget --content-disposition "https://github.com/prisma/language-tools/blob/artifacts/pull-request-artifacts/pr<PR_NUMBER>-prisma.vsix?raw=true"
 
-Now the extension can be tested: open a `schema.prisma` file.
+    # Install the PR Build extension
+    code --install-extension pr<PR_NUMBER>-prisma.vsix
+
+    # Launch VS Code with Prisma extensions disabled
+    # Note that VS Code needs to be closed or this will be a noop and won't do anything
+    code --disable-extension Prisma.prisma --disable-extension Prisma.prisma-insider
+    ```
+
+</details>
+
+<details>
+  <summary>For VS Code Insiders version</summary>
+
+    ```bash
+    # !! Important !! Close VS Code manually
+    # On macOS you can run the following command
+    osascript -e 'quit app "Visual Studio Code - Insiders"'
+
+    # Download the latest build artifact from GitHub
+    # Replace with the correct PR number
+    wget --content-disposition "https://github.com/prisma/language-tools/blob/artifacts/pull-request-artifacts/pr<PR_NUMBER>-prisma.vsix?raw=true"
+
+    # Install the PR Build extension
+    code-insiders --install-extension pr<PR_NUMBER>-prisma.vsix
+
+    # Launch VS Code with Prisma extensions disabled
+    # Note that VS Code needs to be closed or this will be a noop and won't do anything
+    code-insiders --disable-extension Prisma.prisma --disable-extension Prisma.prisma-insider
+    ```
+
+</details>
+
+Now the extension can be tested:
+
+- open a `schema.prisma` file.
+- For completions you can:
+  - Type in the schema
+  - Invoke suggestions with Ctrl + Space
 
 ### After testing you might want to clean up things a bit
 
 #### With the UI
 
 - In the extensions tab, filter the Prisma extenions with `@installed prisma`
-- Right click the `Prisma Insider - PR <PR_NUMBER> build` and click `Uninstall`
+- Right click the `Prisma - Insider - PR <PR_NUMBER> build` and click `Uninstall`
 - Enable the Prisma or Prisma Insider extension
 
 #### With the command line
 
-```bash
-rm pr<PR_NUMBER>-prisma.vsix
-code --uninstall-extension Prisma.prisma-insider-pr-build
-# For the latest public version
-code --install-extension Prisma.prisma
-# Or for Insider
-code --install-extension Prisma.prisma-insider
-```
+<details>
+  <summary>For VS Code Stable version</summary>
+
+    ```bash
+    # Delete the dowloaded artifact
+    rm pr<PR_NUMBER>-prisma.vsix
+
+    # Uninstall the PR build extension
+    code --uninstall-extension Prisma.prisma-insider-pr-build
+    ```
+
+</details>
+
+<details>
+  <summary>For VS Code Insiders version</summary>
+
+    ```bash
+    # Delete the dowloaded artifact
+    rm pr<PR_NUMBER>-prisma.vsix
+
+    # Uninstall the PR build extension
+    code-insiders --uninstall-extension Prisma.prisma-insider-pr-build
+    ```
+
+</details>
 
 ## Publishing
 
