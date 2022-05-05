@@ -250,7 +250,6 @@ function localCompletions(params: CompletionParams, document: TextDocument): Com
   const position = params.position
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
-
   const currentLineUntrimmed = getCurrentLine(document, position.line)
   const currentLineTillPosition = currentLineUntrimmed.slice(0, position.character - 1).trim()
   const wordsBeforePosition: string[] = currentLineTillPosition.split(/\s+/)
@@ -298,7 +297,13 @@ function localCompletions(params: CompletionParams, document: TextDocument): Com
           lines,
         )
       case '.':
-        return getSuggestionForNativeTypes(foundBlock, lines, wordsBeforePosition, document)
+        // check if inside attribute
+        // Useful to complete composite types
+        if (foundBlock.type === 'model' && isInsideAttribute(currentLineUntrimmed, position, '()')) {
+          return getSuggestionsForInsideRoundBrackets(currentLineUntrimmed, lines, document, position, foundBlock)
+        } else {
+          return getSuggestionForNativeTypes(foundBlock, lines, wordsBeforePosition, document)
+        }
     }
   }
 
