@@ -1480,6 +1480,7 @@ suite('Completions', function () {
           }`,
         expected: {
           isIncomplete: false,
+          // TODO, see if we can have better suggestions here, should suggest `alpha`
           items: [],
         },
       })
@@ -1611,6 +1612,36 @@ suite('Completions', function () {
             { label: 'something', kind: CompletionItemKind.Field },
             { label: 'helloBravo', kind: CompletionItemKind.Field },
           ],
+        },
+      })
+    })
+    test('MongoDB: @@index([email, address.alpha.bravo.hello|]) with composite type suggestion, depth 3', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+            alpha  Alpha
+          }
+          type Alpha {
+            bravo  Bravo
+            helloA Int
+          }
+          type Bravo {
+            something  String
+            helloBravo Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([email, address.alpha.bravo.hello||])
+          }`,
+        expected: {
+          isIncomplete: false,
+          // TODO, see if we can have better suggestions here, should suggest `helloBravo`
+          items: [],
         },
       })
     })
