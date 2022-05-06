@@ -941,8 +941,6 @@ suite('Completions', function () {
             lastName String
 
             @@index([firstName, |])
-            @@fulltext()
-            @@fulltext([])
           }`,
         expected: {
           isIncomplete: false,
@@ -1131,19 +1129,85 @@ suite('Completions', function () {
     test('@@unique([|])', () => {
       assertCompletion({
         schema: /* Prisma */ `
-              model SecondUser {
-                firstName String
-                lastName String
-                isAdmin Boolean @default(false)
-                
-                @@unique([|])
-            }`,
+          model SecondUser {
+            firstName String
+            lastName String
+            isAdmin Boolean @default(false)
+            @@unique([|])
+        }`,
         expected: {
           isIncomplete: false,
           items: [
             { label: 'firstName', kind: CompletionItemKind.Field },
             { label: 'lastName', kind: CompletionItemKind.Field },
             { label: 'isAdmin', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
+    test('@@unique(fields: [|])', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+          model SecondUser {
+            firstName String
+            lastName String
+            isAdmin Boolean @default(false)
+            @@unique(fields: [|])
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'firstName', kind: CompletionItemKind.Field },
+            { label: 'lastName', kind: CompletionItemKind.Field },
+            { label: 'isAdmin', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
+    test('MongoDB: @@unique([|])', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@unique([|])
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'id', kind: CompletionItemKind.Field },
+            { label: 'email', kind: CompletionItemKind.Field },
+            { label: 'address', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
+    test('MongoDB: @@unique(fields: [|])', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@unique(fields: [|])
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'id', kind: CompletionItemKind.Field },
+            { label: 'email', kind: CompletionItemKind.Field },
+            { label: 'address', kind: CompletionItemKind.Field },
           ],
         },
       })
@@ -1156,7 +1220,6 @@ suite('Completions', function () {
                   firstName String
                   lastName String
                   isAdmin Boolean @default(false)
-
                   @@id([|])
               }`,
         expected: {
@@ -1173,13 +1236,12 @@ suite('Completions', function () {
     test('@@index([|])', () => {
       assertCompletion({
         schema: /* Prisma */ `
-              model ThirdUser {
-                  firstName String
-                  lastName String
-                  isAdmin Boolean @default(false)
-
-                  @@index([|])
-              }`,
+          model ThirdUser {
+              firstName String
+              lastName String
+              isAdmin Boolean @default(false)
+              @@index([|])
+          }`,
         expected: {
           isIncomplete: false,
           items: [
@@ -1190,6 +1252,424 @@ suite('Completions', function () {
         },
       })
     })
+    test('@@index(fields: [|])', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+          model ThirdUser {
+              firstName String
+              lastName String
+              isAdmin Boolean @default(false)
+              @@index(field: [|])
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'firstName', kind: CompletionItemKind.Field },
+            { label: 'lastName', kind: CompletionItemKind.Field },
+            { label: 'isAdmin', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
+    test('MongoDB: @@index([|])', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([|])
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'id', kind: CompletionItemKind.Field },
+            { label: 'email', kind: CompletionItemKind.Field },
+            { label: 'address', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
+    test('MongoDB: @@index([a|])', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            account Int
+            @@index([a|])
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            // These are returned, but `onCompletionResolve` will only complete with the current match
+            // which means the completion will actually be
+            // address and account
+            // TODO create a test that shows that
+            { label: 'id', kind: CompletionItemKind.Field },
+            { label: 'email', kind: CompletionItemKind.Field },
+            { label: 'address', kind: CompletionItemKind.Field },
+            { label: 'account', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
+    test('MongoDB: @@index([address|])', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            account Int
+            @@index([address|])
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            // These are returned though the completion will actually be
+            // No suggestions
+            // TODO create a test that shows that
+            { label: 'id', kind: CompletionItemKind.Field },
+            { label: 'email', kind: CompletionItemKind.Field },
+            { label: 'account', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
+    test('MongoDB: @@index([address,|])', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([address,|])
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'id', kind: CompletionItemKind.Field },
+            { label: 'email', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
+    test('MongoDB: @@index([address, |])', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([address, |])
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'id', kind: CompletionItemKind.Field },
+            { label: 'email', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
+    test('MongoDB: @@index([address.|]) first position, with only one type', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([address.|])
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'street', kind: CompletionItemKind.Field },
+            { label: 'number', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
+    test('MongoDB: @@index([address.|]) with composite type suggestion 1', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+            alpha  Alpha
+          }
+          type Alpha {
+            bravo  Bravo
+            helloA Int
+          }
+          type Bravo {
+            something  String
+            helloBravo Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([address.|])
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'street', kind: CompletionItemKind.Field },
+            { label: 'number', kind: CompletionItemKind.Field },
+            { label: 'alpha', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
+    test('MongoDB: @@index([address.a|]) with composite type suggestion 1', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+            alpha  Alpha
+          }
+          type Alpha {
+            bravo  Bravo
+            helloA Int
+          }
+          type Bravo {
+            something  String
+            helloBravo Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([address.a|])
+          }`,
+        expected: {
+          isIncomplete: false,
+          // TODO, see if we can have better suggestions here, should suggest `alpha`
+          items: [],
+        },
+      })
+    })
+    test('MongoDB: @@index([email,address.|]) with composite type suggestion, depth 1', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+            alpha  Alpha
+          }
+          type Alpha {
+            bravo  Bravo
+            helloA Int
+          }
+          type Bravo {
+            something  String
+            helloBravo Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([email,address.|])
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'street', kind: CompletionItemKind.Field },
+            { label: 'number', kind: CompletionItemKind.Field },
+            { label: 'alpha', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
+    test('MongoDB: @@index([email, address.|]) with composite type suggestion, depth 1', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+            alpha  Alpha
+          }
+          type Alpha {
+            bravo  Bravo
+            helloA Int
+          }
+          type Bravo {
+            something  String
+            helloBravo Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([email, address.|])
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'street', kind: CompletionItemKind.Field },
+            { label: 'number', kind: CompletionItemKind.Field },
+            { label: 'alpha', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
+    test('MongoDB: @@index([email, address.alpha.|]) with composite type suggestion, depth 2', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+            alpha  Alpha
+          }
+          type Alpha {
+            bravo  Bravo
+            helloA Int
+          }
+          type Bravo {
+            something  String
+            helloBravo Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([email, address.alpha.|])
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'bravo', kind: CompletionItemKind.Field },
+            { label: 'helloA', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
+    test('MongoDB: @@index([email, address.alpha.bravo.|]) with composite type suggestion, depth 3', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+            alpha  Alpha
+          }
+          type Alpha {
+            bravo  Bravo
+            helloA Int
+          }
+          type Bravo {
+            something  String
+            helloBravo Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([email, address.alpha.bravo.|])
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'something', kind: CompletionItemKind.Field },
+            { label: 'helloBravo', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
+    test('MongoDB: @@index([email, address.alpha.bravo.hello|]) with composite type suggestion, depth 3', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+            alpha  Alpha
+          }
+          type Alpha {
+            bravo  Bravo
+            helloA Int
+          }
+          type Bravo {
+            something  String
+            helloBravo Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([email, address.alpha.bravo.hello||])
+          }`,
+        expected: {
+          isIncomplete: false,
+          // TODO, see if we can have better suggestions here, should suggest `helloBravo`
+          items: [],
+        },
+      })
+    })
+    test('MongoDB: @@index(fields: [|])', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index(fields: [|])
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'id', kind: CompletionItemKind.Field },
+            { label: 'email', kind: CompletionItemKind.Field },
+            { label: 'address', kind: CompletionItemKind.Field },
+          ],
+        },
+      })
+    })
+
     // previewFeatures = ["extendedIndexes"]
     // provider = "postgresql"
     test('extendedIndexes: @@index(|) - postgresql', () => {
@@ -1390,6 +1870,30 @@ suite('Completions', function () {
           },
         })
       })
+      // TODO fields shortcut fails
+      // test('@relation([|])', () => {
+      //   assertCompletion({
+      //     schema: /* Prisma */ `
+      //       model OrderItem {
+      //         id Int @id @default(autoincrement())
+      //         productName String
+      //         productPrice Int
+      //         quantity Int
+      //         orderId Int
+      //         order Order @relation([|])
+      //       }`,
+      //     expected: {
+      //       isIncomplete: false,
+      //       items: [
+      //         { label: 'id', kind: CompletionItemKind.Field },
+      //         { label: 'productName', kind: CompletionItemKind.Field },
+      //         { label: 'productPrice', kind: CompletionItemKind.Field },
+      //         { label: 'quantity', kind: CompletionItemKind.Field },
+      //         { label: 'orderId', kind: CompletionItemKind.Field },
+      //       ],
+      //     },
+      //   })
+      // })
       test('@relation(fields: [|])', () => {
         assertCompletion({
           schema: /* Prisma */ `
@@ -2031,7 +2535,6 @@ suite('Completions', function () {
           },
         })
       })
-
       test('@@fulltext(|)', () => {
         assertCompletion({
           schema: /* Prisma */ `

@@ -1,15 +1,15 @@
 import { Position } from 'vscode-languageserver'
 import { TextEdit, TextDocument } from 'vscode-languageserver-textdocument'
 import {
-  getFieldTypesFromCurrentBlock,
+  Block,
+  getCurrentLine,
+  getWordAtPosition,
+  getBlockAtPosition,
   getValuesInsideSquareBrackets,
   getAllRelationNames,
-} from '../completion/completions'
-import { Block, getCurrentLine, getWordAtPosition, getBlockAtPosition } from '../util'
-
-function extractFirstWord(line: string): string {
-  return line.replace(/ .*/, '')
-}
+  getFieldTypesFromCurrentBlock,
+  extractFirstWord,
+} from '../util'
 
 function getType(currentLine: string): string {
   const wordsInLine: string[] = currentLine.split(/\s+/)
@@ -17,11 +17,6 @@ function getType(currentLine: string): string {
     return ''
   }
   return wordsInLine[1].replace('?', '').replace('[]', '')
-}
-
-export function extractModelName(line: string): string {
-  const blockType = extractFirstWord(line)
-  return line.slice(blockType.length, line.length - 1).trim()
 }
 
 export function isRelationField(currentLine: string, lines: string[]): boolean {
@@ -343,21 +338,21 @@ export function renameReferencesForModelName(
     // check if inside model
     if (value.includes(currentName) && positionIsNotInsideSearchedBlocks(index, searchedBlocks)) {
       const block = getBlockAtPosition(index, lines)
-      // TODO type
+      // TODO type here
       if (block && block.type == 'model') {
         searchedBlocks.push(block)
-        // search block for references
-        const types: Map<string, number[]> = getFieldTypesFromCurrentBlock(lines, block)
-        for (const f of types.keys()) {
-          if (f.replace('?', '').replace('[]', '') === currentName) {
+        // search for field types in current block
+        const fieldTypes = getFieldTypesFromCurrentBlock(lines, block)
+        for (const fieldType of fieldTypes.fieldTypes.keys()) {
+          if (fieldType.replace('?', '').replace('[]', '') === currentName) {
             // replace here
-            const foundLines = types.get(f)
-            if (!foundLines) {
+            const foundFieldTypes = fieldTypes.fieldTypes.get(fieldType)
+            if (!foundFieldTypes?.lineIndexes) {
               return edits
             }
-            for (const line of foundLines) {
-              const currentLineUntrimmed = getCurrentLine(document, line)
-              const wordsInLine: string[] = lines[line].split(/\s+/)
+            for (const lineIndex of foundFieldTypes.lineIndexes) {
+              const currentLineUntrimmed = getCurrentLine(document, lineIndex)
+              const wordsInLine: string[] = lines[lineIndex].split(/\s+/)
               // get the index of the second word
               const indexOfFirstWord = currentLineUntrimmed.indexOf(wordsInLine[0])
               const indexOfCurrentName = currentLineUntrimmed.indexOf(
@@ -367,11 +362,11 @@ export function renameReferencesForModelName(
               edits.push({
                 range: {
                   start: {
-                    line: line,
+                    line: lineIndex,
                     character: indexOfCurrentName,
                   },
                   end: {
-                    line: line,
+                    line: lineIndex,
                     character: indexOfCurrentName + currentName.length,
                   },
                 },
