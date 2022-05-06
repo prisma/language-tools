@@ -566,7 +566,7 @@ suite('Completions', function () {
   })
 
   suite('TYPES', () => {
-    test('Diagnoses type suggestions in model block', () => {
+    test('Diagnoses type suggestions in model - No datasource', () => {
       assertCompletion({
         schema: /* Prisma */ `
         model User {
@@ -575,66 +575,54 @@ suite('Completions', function () {
             email String @unique
             isAdmin Boolean @default(false)
         }
-
         model Post {
             id Int @id @default()
             email String? @unique
             name String 
         }
-
         model Person {
             id String 
             name Post 
         }
-
         model Test {
           email    String  @unique
           isAdmin  Boolean @default()
         }
-
         model Cat {
             id String @id @default()
             name String
             createdAt  DateTime    @default()
         }
-
         model SecondUser {
             firstName String
             lastName String
             isAdmin Boolean @default(false)
-            
             @@unique([])
         }
-
         model ThirdUser {
             firstName String
             lastName String
             isAdmin Boolean @default(false)
-
             @@id([])
             @@index([])
         }
-
         model TypeCheck {
+          // Here!
             hi |
         }
-
         enum Hello {
             Hey
             Hallo
         }
-
         model DateTest {
             id Int @id @default(autoincrement())
             update DateTime  
             type UserType @default()
         }
-
         enum UserType {
             ADMIN
             NORMAL
         }
-
         model ForthUser {
             firstName String
             lastName String
@@ -642,9 +630,7 @@ suite('Completions', function () {
             @@index([firstName, ])
             @@fulltext()
             @@fulltext([])
-        }
-
-      `,
+        }`,
         expected: {
           isIncomplete: true,
           items: [
@@ -677,24 +663,21 @@ suite('Completions', function () {
         },
       })
     })
-
-    test('Diagnoses type suggestions in model block - MongoDB', () => {
+    // TODO should suggest `MyType`?
+    test('Diagnoses type suggestions in model - MongoDB', () => {
       assertCompletion({
         provider: 'mongodb',
         schema: /* Prisma */ `
         model Post {
           something |
         }
-
         enum PostType {
           ADMIN
           NORMAL
         }
-
         model Something {
           id Int @id @default() @map("_id") @db.ObjectId
         }
-
         type MyType {
           text String
         }
@@ -719,6 +702,209 @@ suite('Completions', function () {
             { label: 'Something', kind: CompletionItemKind.Reference },
           ],
         },
+      })
+    })
+    test('Diagnoses type suggestions in model - SQLite, PostgreSQL, MySQL, SQL Server, CockroachDB', () => {
+      for (const provider of ['sqlite', 'postgresql', 'mysql', 'sqlserver', 'cockroachdb']) {
+        console.info(`provider = ${provider}`)
+        assertCompletion({
+          provider: provider as DatasourceProvider,
+          schema: /* Prisma */ `
+            model Post {
+              something |
+            }
+            enum PostType {
+              ADMIN
+              NORMAL
+            }
+            model Something {
+              id Int @id
+            }
+          `,
+          expected: {
+            isIncomplete: true,
+            items: [
+              { label: 'String', kind: CompletionItemKind.TypeParameter },
+              { label: 'Boolean', kind: CompletionItemKind.TypeParameter },
+              { label: 'Int', kind: CompletionItemKind.TypeParameter },
+              { label: 'Float', kind: CompletionItemKind.TypeParameter },
+              { label: 'DateTime', kind: CompletionItemKind.TypeParameter },
+              { label: 'Json', kind: CompletionItemKind.TypeParameter },
+              { label: 'Bytes', kind: CompletionItemKind.TypeParameter },
+              { label: 'Decimal', kind: CompletionItemKind.TypeParameter },
+              { label: 'BigInt', kind: CompletionItemKind.TypeParameter },
+              {
+                label: 'Unsupported',
+                kind: CompletionItemKind.TypeParameter,
+              },
+              { label: 'Post', kind: CompletionItemKind.Reference },
+              { label: 'PostType', kind: CompletionItemKind.Reference },
+              { label: 'Something', kind: CompletionItemKind.Reference },
+            ],
+          },
+        })
+      }
+    })
+  })
+
+  suite('NATIVE TYPES', () => {
+    suite('CockroachDB', () => {
+      test('String', () => {
+        assertCompletion({
+          provider: 'cockroachdb',
+          previewFeatures: ['cockroachdb'],
+          schema: /* Prisma */ `
+        model Post {
+          something String @db.|
+        }
+      `,
+          expected: {
+            isIncomplete: false,
+            items: [
+              { label: 'Bit()', kind: CompletionItemKind.TypeParameter },
+              { label: 'Char()', kind: CompletionItemKind.TypeParameter },
+              { label: 'String()', kind: CompletionItemKind.TypeParameter },
+              { label: 'VarBit()', kind: CompletionItemKind.TypeParameter },
+              { label: 'VarChar()', kind: CompletionItemKind.TypeParameter },
+              { label: 'Inet', kind: CompletionItemKind.TypeParameter },
+              { label: 'CatalogSingleChar', kind: CompletionItemKind.TypeParameter },
+              { label: 'Uuid', kind: CompletionItemKind.TypeParameter },
+            ],
+          },
+        })
+      })
+      test('Boolean', () => {
+        assertCompletion({
+          provider: 'cockroachdb',
+          previewFeatures: ['cockroachdb'],
+          schema: /* Prisma */ `
+        model Post {
+          something Boolean @db.|
+        }
+      `,
+          expected: {
+            isIncomplete: false,
+            items: [{ label: 'Bool', kind: CompletionItemKind.TypeParameter }],
+          },
+        })
+      })
+      test('Int', () => {
+        assertCompletion({
+          provider: 'cockroachdb',
+          previewFeatures: ['cockroachdb'],
+          schema: /* Prisma */ `
+        model Post {
+          something Int @db.|
+        }
+      `,
+          expected: {
+            isIncomplete: false,
+            items: [
+              { label: 'Int2', kind: CompletionItemKind.TypeParameter },
+              { label: 'Int4', kind: CompletionItemKind.TypeParameter },
+              { label: 'Oid', kind: CompletionItemKind.TypeParameter },
+            ],
+          },
+        })
+      })
+      test('Float', () => {
+        assertCompletion({
+          provider: 'cockroachdb',
+          previewFeatures: ['cockroachdb'],
+          schema: /* Prisma */ `
+        model Post {
+          something Float @db.|
+        }
+      `,
+          expected: {
+            isIncomplete: false,
+            items: [
+              { label: 'Float4', kind: CompletionItemKind.TypeParameter },
+              { label: 'Float8', kind: CompletionItemKind.TypeParameter },
+            ],
+          },
+        })
+      })
+      test('DateTime', () => {
+        assertCompletion({
+          provider: 'cockroachdb',
+          previewFeatures: ['cockroachdb'],
+          schema: /* Prisma */ `
+        model Post {
+          something DateTime @db.|
+        }
+      `,
+          expected: {
+            isIncomplete: false,
+            items: [
+              { label: 'Timestamp()', kind: CompletionItemKind.TypeParameter },
+              { label: 'Timestamptz()', kind: CompletionItemKind.TypeParameter },
+              { label: 'Time()', kind: CompletionItemKind.TypeParameter },
+              { label: 'Timetz()', kind: CompletionItemKind.TypeParameter },
+              { label: 'Date', kind: CompletionItemKind.TypeParameter },
+            ],
+          },
+        })
+      })
+      test('Json', () => {
+        assertCompletion({
+          provider: 'cockroachdb',
+          previewFeatures: ['cockroachdb'],
+          schema: /* Prisma */ `
+        model Post {
+          something Json @db.|
+        }
+      `,
+          expected: {
+            isIncomplete: false,
+            items: [{ label: 'JsonB', kind: CompletionItemKind.TypeParameter }],
+          },
+        })
+      })
+      test('Diagnoses Native Types suggestions - CockroachDB - Bytes', () => {
+        assertCompletion({
+          provider: 'cockroachdb',
+          previewFeatures: ['cockroachdb'],
+          schema: /* Prisma */ `
+        model Post {
+          something Bytes @db.|
+        }
+      `,
+          expected: {
+            isIncomplete: false,
+            items: [{ label: 'Bytes', kind: CompletionItemKind.TypeParameter }],
+          },
+        })
+      })
+      test('Decimal', () => {
+        assertCompletion({
+          provider: 'cockroachdb',
+          previewFeatures: ['cockroachdb'],
+          schema: /* Prisma */ `
+        model Post {
+          something Decimal @db.|
+        }
+      `,
+          expected: {
+            isIncomplete: false,
+            items: [{ label: 'Decimal()', kind: CompletionItemKind.TypeParameter }],
+          },
+        })
+      })
+      test('BigInt', () => {
+        assertCompletion({
+          provider: 'cockroachdb',
+          previewFeatures: ['cockroachdb'],
+          schema: /* Prisma */ `
+        model Post {
+          something BigInt @db.|
+        }
+      `,
+          expected: {
+            isIncomplete: false,
+            items: [{ label: 'Int8', kind: CompletionItemKind.TypeParameter }],
+          },
+        })
       })
     })
   })
