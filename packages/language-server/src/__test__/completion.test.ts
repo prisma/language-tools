@@ -761,13 +761,13 @@ suite('Completions', function () {
           expected: {
             isIncomplete: false,
             items: [
-              { label: 'Inet', kind: CompletionItemKind.TypeParameter },
-              { label: 'Citext', kind: CompletionItemKind.TypeParameter },
-              { label: 'VarChar()', kind: CompletionItemKind.TypeParameter },
-              { label: 'Char()', kind: CompletionItemKind.TypeParameter },
-              { label: 'Text', kind: CompletionItemKind.TypeParameter },
               { label: 'Bit()', kind: CompletionItemKind.TypeParameter },
+              { label: 'Char()', kind: CompletionItemKind.TypeParameter },
+              { label: 'String()', kind: CompletionItemKind.TypeParameter },
               { label: 'VarBit()', kind: CompletionItemKind.TypeParameter },
+              { label: 'VarChar()', kind: CompletionItemKind.TypeParameter },
+              { label: 'Inet', kind: CompletionItemKind.TypeParameter },
+              { label: 'CatalogSingleChar', kind: CompletionItemKind.TypeParameter },
               { label: 'Uuid', kind: CompletionItemKind.TypeParameter },
             ],
           },
@@ -784,7 +784,7 @@ suite('Completions', function () {
       `,
           expected: {
             isIncomplete: false,
-            items: [{ label: 'Boolean', kind: CompletionItemKind.TypeParameter }],
+            items: [{ label: 'Bool', kind: CompletionItemKind.TypeParameter }],
           },
         })
       })
@@ -800,8 +800,8 @@ suite('Completions', function () {
           expected: {
             isIncomplete: false,
             items: [
-              { label: 'SmallInt', kind: CompletionItemKind.TypeParameter },
-              { label: 'Integer', kind: CompletionItemKind.TypeParameter },
+              { label: 'Int2', kind: CompletionItemKind.TypeParameter },
+              { label: 'Int4', kind: CompletionItemKind.TypeParameter },
               { label: 'Oid', kind: CompletionItemKind.TypeParameter },
             ],
           },
@@ -819,8 +819,8 @@ suite('Completions', function () {
           expected: {
             isIncomplete: false,
             items: [
-              { label: 'Real', kind: CompletionItemKind.TypeParameter },
-              { label: 'DoublePrecision', kind: CompletionItemKind.TypeParameter },
+              { label: 'Float4', kind: CompletionItemKind.TypeParameter },
+              { label: 'Float8', kind: CompletionItemKind.TypeParameter },
             ],
           },
         })
@@ -839,9 +839,9 @@ suite('Completions', function () {
             items: [
               { label: 'Timestamp()', kind: CompletionItemKind.TypeParameter },
               { label: 'Timestamptz()', kind: CompletionItemKind.TypeParameter },
-              { label: 'Date', kind: CompletionItemKind.TypeParameter },
               { label: 'Time()', kind: CompletionItemKind.TypeParameter },
               { label: 'Timetz()', kind: CompletionItemKind.TypeParameter },
+              { label: 'Date', kind: CompletionItemKind.TypeParameter },
             ],
           },
         })
@@ -872,7 +872,7 @@ suite('Completions', function () {
       `,
           expected: {
             isIncomplete: false,
-            items: [{ label: 'ByteA', kind: CompletionItemKind.TypeParameter }],
+            items: [{ label: 'Bytes', kind: CompletionItemKind.TypeParameter }],
           },
         })
       })
@@ -902,7 +902,7 @@ suite('Completions', function () {
       `,
           expected: {
             isIncomplete: false,
-            items: [{ label: 'BigInt', kind: CompletionItemKind.TypeParameter }],
+            items: [{ label: 'Int8', kind: CompletionItemKind.TypeParameter }],
           },
         })
       })
