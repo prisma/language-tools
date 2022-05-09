@@ -1812,10 +1812,6 @@ suite('Completions', function () {
       label: 'virtual',
       kind: CompletionItemKind.Property,
     }
-    const noCycleProperty = {
-      label: 'noCycle',
-      kind: CompletionItemKind.Property,
-    }
 
     const asc = {
       label: 'Asc',
@@ -2180,7 +2176,6 @@ suite('Completions', function () {
                 isIncomplete: false,
                 items: [
                   virtualProperty,
-                  noCycleProperty,
                   minValueProperty,
                   maxValueProperty,
                   cacheProperty,
@@ -2203,19 +2198,6 @@ suite('Completions', function () {
               },
             })
           })
-          test('@default(sequence(noCycle|))', () => {
-            assertCompletion({
-              provider: 'cockroachdb',
-              schema: /* Prisma */ `
-              model Post {
-                  id Int @id @default(sequence(noCycle(|))
-              }`,
-              expected: {
-                isIncomplete: false,
-                items: [],
-              },
-            })
-          })
           test('@default(sequence(min|))', () => {
             assertCompletion({
               provider: 'cockroachdb',
@@ -2229,7 +2211,6 @@ suite('Completions', function () {
                 // because of `onCompletionResolve`
                 items: [
                   virtualProperty,
-                  noCycleProperty,
                   minValueProperty,
                   maxValueProperty,
                   cacheProperty,
