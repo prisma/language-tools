@@ -77,8 +77,17 @@ jobs:
             ./packages/vscode/prisma.vsix
 
       # Additionally post a comment with a link to GitPod that can use built extension instantly
-      - name: Create comment
+      - name: Find existing comment
         if: "!contains(github.actor, 'renovate')"
+        uses: peter-evans/find-comment@v1
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: "via GitPod"
+
+      - name: Create comment
+        if: "!contains(github.actor, 'renovate') && steps.fc.outputs.comment-id == ''"
         uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{ github.event.pull_request.number }}
