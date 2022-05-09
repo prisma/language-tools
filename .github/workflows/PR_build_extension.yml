@@ -79,7 +79,7 @@ jobs:
       # Additionally post a comment with a link to GitPod that can use built extension instantly
       - name: Find existing comment
         if: "!contains(github.actor, 'renovate')"
-        uses: peter-evans/find-comment@v1
+        uses: peter-evans/find-comment@v2
         id: fc
         with:
           issue-number: ${{ github.event.pull_request.number }}
