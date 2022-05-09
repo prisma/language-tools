@@ -436,23 +436,61 @@ suite('Completions', function () {
       label: '@@ignore',
       kind: CompletionItemKind.Property,
     }
+    const fieldsProperty = {
+      label: 'fields',
+      kind: CompletionItemKind.Property,
+    }
+    const mapProperty = {
+      label: 'map',
+      kind: CompletionItemKind.Property,
+    }
+    const typeProperty = {
+      label: 'type',
+      kind: CompletionItemKind.Property,
+    }
 
-    test('Diagnoses block attribute suggestions first in a line', () => {
+    test('@@id([|])', () => {
       assertCompletion({
         schema: /* Prisma */ `
-          model user {
-            |
-          }`,
+              model ThirdUser {
+                  firstName String
+                  lastName String
+                  isAdmin Boolean @default(false)
+                  @@id([|])
+              }`,
         expected: {
           isIncomplete: false,
-          items: [blockAttributeMap, blockAttributeId, blockAttributeUnique, blockAttributeIndex, blockAttributeIgnore],
+          items: [
+            { label: 'firstName', kind: CompletionItemKind.Field },
+            { label: 'lastName', kind: CompletionItemKind.Field },
+            { label: 'isAdmin', kind: CompletionItemKind.Field },
+          ],
         },
       })
     })
 
-    test('Diagnoses block attribute suggestions with existing attributes first in a line', () => {
-      assertCompletion({
-        schema: /* Prisma */ `
+    suite('First in a line', () => {
+      test('Empty model', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+          model user {
+            |
+          }`,
+          expected: {
+            isIncomplete: false,
+            items: [
+              blockAttributeMap,
+              blockAttributeId,
+              blockAttributeUnique,
+              blockAttributeIndex,
+              blockAttributeIgnore,
+            ],
+          },
+        })
+      })
+      test('Model', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
           model User {
             firstName String
             lastName String
@@ -460,35 +498,38 @@ suite('Completions', function () {
             isAdmin Boolean @default(false)
             |
           }`,
-        expected: {
-          isIncomplete: false,
-          items: [blockAttributeMap, blockAttributeId, blockAttributeUnique, blockAttributeIndex, blockAttributeIgnore],
-        },
-      })
-      assertCompletion({
-        schema: /* Prisma */ `
+          expected: {
+            isIncomplete: false,
+            items: [
+              blockAttributeMap,
+              blockAttributeId,
+              blockAttributeUnique,
+              blockAttributeIndex,
+              blockAttributeIgnore,
+            ],
+          },
+        })
+        assertCompletion({
+          schema: /* Prisma */ `
           model Post {
             id Int @id @default()
             email String? @unique
             name String 
             |
           }`,
-        expected: {
-          isIncomplete: false,
-          items: [blockAttributeMap, blockAttributeUnique, blockAttributeIndex, blockAttributeIgnore],
-        },
+          expected: {
+            isIncomplete: false,
+            items: [blockAttributeMap, blockAttributeUnique, blockAttributeIndex, blockAttributeIgnore],
+          },
+        })
       })
-    })
 
-    //
-    // previewFeatures = ["fullTextIndex"]
-    // = tests which are feature preview / database dependent
-    //
-    test('fullTextIndex - Diagnoses block attribute suggestions first in a line - mysql', () => {
-      assertCompletion({
-        provider: 'mysql',
-        previewFeatures: ['fullTextIndex', 'extendedIndexes'],
-        schema: /* Prisma */ `
+      suite('fullTextIndex', () => {
+        test('MySQL', () => {
+          assertCompletion({
+            provider: 'mysql',
+            previewFeatures: ['fullTextIndex', 'extendedIndexes'],
+            schema: /* Prisma */ `
           model Fulltext {
             id      Int    @id
             title   String @db.VarChar(255)
@@ -498,25 +539,24 @@ suite('Completions', function () {
             @@fulltext([title, content], )
           }          
           `,
-        expected: {
-          isIncomplete: false,
-          items: [
-            blockAttributeMap,
-            // blockAttributeId,
-            blockAttributeUnique,
-            blockAttributeIndex,
-            blockAttributeFulltextIndex,
-            blockAttributeIgnore,
-          ],
-        },
-      })
-    })
-
-    test('fullTextIndex - Diagnoses block attribute suggestions first in a line - mongodb', () => {
-      assertCompletion({
-        provider: 'mongodb',
-        previewFeatures: ['fullTextIndex', 'extendedIndexes'],
-        schema: /* Prisma */ `
+            expected: {
+              isIncomplete: false,
+              items: [
+                blockAttributeMap,
+                // blockAttributeId,
+                blockAttributeUnique,
+                blockAttributeIndex,
+                blockAttributeFulltextIndex,
+                blockAttributeIgnore,
+              ],
+            },
+          })
+        })
+        test('MongoDB', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            previewFeatures: ['fullTextIndex', 'extendedIndexes'],
+            schema: /* Prisma */ `
           model Fulltext {
             id      String @id @map("_id") @db.ObjectId
             title   String
@@ -525,25 +565,24 @@ suite('Completions', function () {
             @@fulltext()
             @@fulltext([title, content], )
           }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            blockAttributeMap,
-            // blockAttributeId,
-            blockAttributeUnique,
-            blockAttributeIndex,
-            blockAttributeFulltextIndex,
-            blockAttributeIgnore,
-          ],
-        },
-      })
-    })
-
-    test('fullTextIndex - Diagnoses block attribute suggestions first in a line - postgresql', () => {
-      assertCompletion({
-        provider: 'postgresql',
-        previewFeatures: ['fullTextIndex', 'extendedIndexes'],
-        schema: /* Prisma */ `
+            expected: {
+              isIncomplete: false,
+              items: [
+                blockAttributeMap,
+                // blockAttributeId,
+                blockAttributeUnique,
+                blockAttributeIndex,
+                blockAttributeFulltextIndex,
+                blockAttributeIgnore,
+              ],
+            },
+          })
+        })
+        test('PostgreSQL', () => {
+          assertCompletion({
+            provider: 'postgresql',
+            previewFeatures: ['fullTextIndex', 'extendedIndexes'],
+            schema: /* Prisma */ `
             model Type {
               id    Int @id
               title   String
@@ -551,16 +590,743 @@ suite('Completions', function () {
               |
             }
           `,
-        expected: {
-          isIncomplete: false,
-          items: [
-            blockAttributeMap,
-            // blockAttributeId,
-            blockAttributeUnique,
-            blockAttributeIndex,
-            blockAttributeIgnore,
-          ],
-        },
+            expected: {
+              isIncomplete: false,
+              items: [
+                blockAttributeMap,
+                // blockAttributeId,
+                blockAttributeUnique,
+                blockAttributeIndex,
+                blockAttributeIgnore,
+              ],
+            },
+          })
+        })
+      })
+    })
+
+    suite('@@unique()', function () {
+      suite('No provider', function () {
+        test('@@unique([|])', () => {
+          assertCompletion({
+            schema: /* Prisma */ `
+          model SecondUser {
+            firstName String
+            lastName String
+            isAdmin Boolean @default(false)
+            @@unique([|])
+        }`,
+            expected: {
+              isIncomplete: false,
+              items: [
+                { label: 'firstName', kind: CompletionItemKind.Field },
+                { label: 'lastName', kind: CompletionItemKind.Field },
+                { label: 'isAdmin', kind: CompletionItemKind.Field },
+              ],
+            },
+          })
+        })
+        test('@@unique(fields: [|])', () => {
+          assertCompletion({
+            schema: /* Prisma */ `
+          model SecondUser {
+            firstName String
+            lastName String
+            isAdmin Boolean @default(false)
+            @@unique(fields: [|])
+        }`,
+            expected: {
+              isIncomplete: false,
+              items: [
+                { label: 'firstName', kind: CompletionItemKind.Field },
+                { label: 'lastName', kind: CompletionItemKind.Field },
+                { label: 'isAdmin', kind: CompletionItemKind.Field },
+              ],
+            },
+          })
+        })
+      })
+      suite('MongoDB', function () {
+        test('@@unique([|])', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@unique([|])
+          }`,
+            expected: {
+              isIncomplete: false,
+              items: [
+                { label: 'id', kind: CompletionItemKind.Field },
+                { label: 'email', kind: CompletionItemKind.Field },
+                { label: 'address', kind: CompletionItemKind.Field },
+              ],
+            },
+          })
+        })
+        test('@@unique(fields: [|])', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@unique(fields: [|])
+          }`,
+            expected: {
+              isIncomplete: false,
+              items: [
+                { label: 'id', kind: CompletionItemKind.Field },
+                { label: 'email', kind: CompletionItemKind.Field },
+                { label: 'address', kind: CompletionItemKind.Field },
+              ],
+            },
+          })
+        })
+      })
+    })
+
+    suite('@@index()', function () {
+      suite('No provider', function () {
+        test('@@index([|])', () => {
+          assertCompletion({
+            schema: /* Prisma */ `
+          model ThirdUser {
+              firstName String
+              lastName String
+              isAdmin Boolean @default(false)
+              @@index([|])
+          }`,
+            expected: {
+              isIncomplete: false,
+              items: [
+                { label: 'firstName', kind: CompletionItemKind.Field },
+                { label: 'lastName', kind: CompletionItemKind.Field },
+                { label: 'isAdmin', kind: CompletionItemKind.Field },
+              ],
+            },
+          })
+        })
+        test('@@index(fields: [|])', () => {
+          assertCompletion({
+            schema: /* Prisma */ `
+          model ThirdUser {
+              firstName String
+              lastName String
+              isAdmin Boolean @default(false)
+              @@index(field: [|])
+          }`,
+            expected: {
+              isIncomplete: false,
+              items: [
+                { label: 'firstName', kind: CompletionItemKind.Field },
+                { label: 'lastName', kind: CompletionItemKind.Field },
+                { label: 'isAdmin', kind: CompletionItemKind.Field },
+              ],
+            },
+          })
+        })
+      })
+      suite('MongoDB', function () {
+        test('@@index([|])', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([|])
+          }`,
+            expected: {
+              isIncomplete: false,
+              items: [
+                { label: 'id', kind: CompletionItemKind.Field },
+                { label: 'email', kind: CompletionItemKind.Field },
+                { label: 'address', kind: CompletionItemKind.Field },
+              ],
+            },
+          })
+        })
+        test('@@index([a|])', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            account Int
+            @@index([a|])
+          }`,
+            expected: {
+              isIncomplete: false,
+              items: [
+                // These are returned, but `onCompletionResolve` will only complete with the current match
+                // which means the completion will actually be
+                // address and account
+                // TODO create a test that shows that
+                { label: 'id', kind: CompletionItemKind.Field },
+                { label: 'email', kind: CompletionItemKind.Field },
+                { label: 'address', kind: CompletionItemKind.Field },
+                { label: 'account', kind: CompletionItemKind.Field },
+              ],
+            },
+          })
+        })
+        test('@@index([address|])', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            account Int
+            @@index([address|])
+          }`,
+            expected: {
+              isIncomplete: false,
+              items: [
+                // These are returned though the completion will actually be
+                // No suggestions
+                // TODO create a test that shows that
+                { label: 'id', kind: CompletionItemKind.Field },
+                { label: 'email', kind: CompletionItemKind.Field },
+                { label: 'account', kind: CompletionItemKind.Field },
+              ],
+            },
+          })
+        })
+        test('@@index([address,|])', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([address,|])
+          }`,
+            expected: {
+              isIncomplete: false,
+              items: [
+                { label: 'id', kind: CompletionItemKind.Field },
+                { label: 'email', kind: CompletionItemKind.Field },
+              ],
+            },
+          })
+        })
+        test('@@index([address, |])', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([address, |])
+          }`,
+            expected: {
+              isIncomplete: false,
+              items: [
+                { label: 'id', kind: CompletionItemKind.Field },
+                { label: 'email', kind: CompletionItemKind.Field },
+              ],
+            },
+          })
+        })
+        test('@@index([address.|]) first position, with only one type', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([address.|])
+          }`,
+            expected: {
+              isIncomplete: false,
+              items: [
+                { label: 'street', kind: CompletionItemKind.Field },
+                { label: 'number', kind: CompletionItemKind.Field },
+              ],
+            },
+          })
+        })
+        test('@@index([address.|]) with composite type suggestion 1', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+            alpha  Alpha
+          }
+          type Alpha {
+            bravo  Bravo
+            helloA Int
+          }
+          type Bravo {
+            something  String
+            helloBravo Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([address.|])
+          }`,
+            expected: {
+              isIncomplete: false,
+              items: [
+                { label: 'street', kind: CompletionItemKind.Field },
+                { label: 'number', kind: CompletionItemKind.Field },
+                { label: 'alpha', kind: CompletionItemKind.Field },
+              ],
+            },
+          })
+        })
+        test('@@index([address.a|]) with composite type suggestion 1', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+            alpha  Alpha
+          }
+          type Alpha {
+            bravo  Bravo
+            helloA Int
+          }
+          type Bravo {
+            something  String
+            helloBravo Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([address.a|])
+          }`,
+            expected: {
+              isIncomplete: false,
+              // TODO, see if we can have better suggestions here, should suggest `alpha`
+              items: [],
+            },
+          })
+        })
+        test('@@index([email,address.|]) with composite type suggestion, depth 1', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+            alpha  Alpha
+          }
+          type Alpha {
+            bravo  Bravo
+            helloA Int
+          }
+          type Bravo {
+            something  String
+            helloBravo Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([email,address.|])
+          }`,
+            expected: {
+              isIncomplete: false,
+              items: [
+                { label: 'street', kind: CompletionItemKind.Field },
+                { label: 'number', kind: CompletionItemKind.Field },
+                { label: 'alpha', kind: CompletionItemKind.Field },
+              ],
+            },
+          })
+        })
+        test('@@index([email, address.|]) with composite type suggestion, depth 1', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+            alpha  Alpha
+          }
+          type Alpha {
+            bravo  Bravo
+            helloA Int
+          }
+          type Bravo {
+            something  String
+            helloBravo Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([email, address.|])
+          }`,
+            expected: {
+              isIncomplete: false,
+              items: [
+                { label: 'street', kind: CompletionItemKind.Field },
+                { label: 'number', kind: CompletionItemKind.Field },
+                { label: 'alpha', kind: CompletionItemKind.Field },
+              ],
+            },
+          })
+        })
+        test('@@index([email, address.alpha.|]) with composite type suggestion, depth 2', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+            alpha  Alpha
+          }
+          type Alpha {
+            bravo  Bravo
+            helloA Int
+          }
+          type Bravo {
+            something  String
+            helloBravo Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([email, address.alpha.|])
+          }`,
+            expected: {
+              isIncomplete: false,
+              items: [
+                { label: 'bravo', kind: CompletionItemKind.Field },
+                { label: 'helloA', kind: CompletionItemKind.Field },
+              ],
+            },
+          })
+        })
+        test('@@index([email, address.alpha.bravo.|]) with composite type suggestion, depth 3', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+            alpha  Alpha
+          }
+          type Alpha {
+            bravo  Bravo
+            helloA Int
+          }
+          type Bravo {
+            something  String
+            helloBravo Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([email, address.alpha.bravo.|])
+          }`,
+            expected: {
+              isIncomplete: false,
+              items: [
+                { label: 'something', kind: CompletionItemKind.Field },
+                { label: 'helloBravo', kind: CompletionItemKind.Field },
+              ],
+            },
+          })
+        })
+        test('@@index([email, address.alpha.bravo.hello|]) with composite type suggestion, depth 3', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+            alpha  Alpha
+          }
+          type Alpha {
+            bravo  Bravo
+            helloA Int
+          }
+          type Bravo {
+            something  String
+            helloBravo Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index([email, address.alpha.bravo.hello||])
+          }`,
+            expected: {
+              isIncomplete: false,
+              // TODO, see if we can have better suggestions here, should suggest `helloBravo`
+              items: [],
+            },
+          })
+        })
+        test('@@index(fields: [|])', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
+          type Address {
+            street String
+            number Int
+          }
+          model User {
+            id      Int     @id @map("_id")
+            email   String
+            address Address
+            @@index(fields: [|])
+          }`,
+            expected: {
+              isIncomplete: false,
+              items: [
+                { label: 'id', kind: CompletionItemKind.Field },
+                { label: 'email', kind: CompletionItemKind.Field },
+                { label: 'address', kind: CompletionItemKind.Field },
+              ],
+            },
+          })
+        })
+      })
+
+      suite('extendedIndexes - PostgreSQL', function () {
+        test('@@index(|)', () => {
+          assertCompletion({
+            provider: 'postgresql',
+            previewFeatures: ['extendedIndexes'],
+            schema: /* Prisma */ `
+          model Type {
+            id    Int @id
+            title   String
+            content String
+            
+            @@index(|)
+          }
+        `,
+            expected: {
+              isIncomplete: false,
+              items: [fieldsProperty, mapProperty, typeProperty],
+            },
+          })
+        })
+        test('@@index([title], |) - postgresql', () => {
+          assertCompletion({
+            provider: 'postgresql',
+            previewFeatures: ['extendedIndexes'],
+            schema: /* Prisma */ `
+        model Type {
+          id    Int @id
+          title   String
+          content String
+          
+          @@index([title], |)
+        }
+      `,
+            expected: {
+              isIncomplete: false,
+              items: [fieldsProperty, mapProperty, typeProperty],
+            },
+          })
+        })
+        test('@@index([title], type: |) - postgresql', () => {
+          assertCompletion({
+            provider: 'postgresql',
+            previewFeatures: ['extendedIndexes'],
+            schema: /* Prisma */ `
+        model Type {
+          id    Int @id
+          title   String
+          content String
+          
+          @@index([title], type: |)
+        }
+      `,
+            expected: {
+              isIncomplete: false,
+              items: [
+                { label: 'Hash', kind: CompletionItemKind.Enum },
+                { label: 'BTree', kind: CompletionItemKind.Enum },
+              ],
+            },
+          })
+        })
+        test('@@index([title], type: Hash, |) - postgresql', () => {
+          assertCompletion({
+            provider: 'postgresql',
+            previewFeatures: ['extendedIndexes'],
+            schema: /* Prisma */ `
+        model Type {
+          id    Int @id
+          title   String
+          content String
+          
+          @@index([title], type: Hash, |)
+        }
+      `,
+            expected: {
+              isIncomplete: false,
+              items: [fieldsProperty, mapProperty],
+            },
+          })
+        })
+      })
+    })
+
+    suite('@@fulltext()', function () {
+      test('@@fulltext(|) - mysql', () => {
+        assertCompletion({
+          provider: 'mysql',
+          previewFeatures: ['fullTextIndex', 'extendedIndexes'],
+          schema: /* Prisma */ `
+          model Fulltext {
+            id      Int    @id
+            title   String @db.VarChar(255)
+            content String @db.Text
+            
+            @@fulltext(|)
+            @@fulltext([title, content], )
+          }          
+          `,
+          expected: {
+            isIncomplete: false,
+            items: [fieldsProperty, mapProperty],
+          },
+        })
+      })
+      test('@@fulltext([title, content], |) - mysql', () => {
+        assertCompletion({
+          provider: 'mysql',
+          previewFeatures: ['fullTextIndex', 'extendedIndexes'],
+          schema: /* Prisma */ `
+          model Fulltext {
+            id      Int    @id
+            title   String @db.VarChar(255)
+            content String @db.Text
+            
+            @@fulltext()
+            @@fulltext([title, content], |)
+          }          
+          `,
+          expected: {
+            isIncomplete: false,
+            items: [fieldsProperty, mapProperty],
+          },
+        })
+      })
+
+      test('@@fulltext(|) - mongodb', () => {
+        assertCompletion({
+          provider: 'mongodb',
+          previewFeatures: ['fullTextIndex', 'extendedIndexes'],
+          schema: /* Prisma */ `
+          model Fulltext {
+            id      String @id @map("_id") @db.ObjectId
+            title   String
+            content String
+            
+            @@fulltext(|)
+            @@fulltext([title, content], )
+          }
+
+          // https://www.prisma.io/docs/concepts/components/prisma-schema/indexes#examples
+          // On MongoDB, the fullTextIndex and extendedIndexes preview features can be combined
+          // to add fields in ascending or descending order to your full-text index:
+          model Post {
+            id      String @id @map("_id") @db.ObjectId
+            title   String
+            content String
+
+            @@fulltext([title(sort: Desc), content])
+          }
+          `,
+          expected: {
+            isIncomplete: false,
+            items: [fieldsProperty, mapProperty],
+          },
+        })
+      })
+      test('@@fulltext([title, content], |) - mongodb', () => {
+        assertCompletion({
+          provider: 'mongodb',
+          previewFeatures: ['fullTextIndex', 'extendedIndexes'],
+          schema: /* Prisma */ `
+
+          model Fulltext {
+            id      String @id @map("_id") @db.ObjectId
+            title   String
+            content String
+            
+            @@fulltext()
+            @@fulltext([title, content], |)
+          }
+
+          // https://www.prisma.io/docs/concepts/components/prisma-schema/indexes#examples
+          // On MongoDB, the fullTextIndex and extendedIndexes preview features can be combined
+          // to add fields in ascending or descending order to your full-text index:
+          model Post {
+            id      String @id @map("_id") @db.ObjectId
+            title   String
+            content String
+
+            @@fulltext([title(sort: Desc), content])
+          }
+          `,
+          expected: {
+            isIncomplete: false,
+            items: [fieldsProperty, mapProperty],
+          },
+        })
       })
     })
   })
@@ -951,6 +1717,10 @@ suite('Completions', function () {
       label: 'auto()',
       kind: CompletionItemKind.Function,
     }
+    const functionSequence = {
+      label: 'sequence()',
+      kind: CompletionItemKind.Function,
+    }
     const functionAutoincrement = {
       label: 'autoincrement()',
       kind: CompletionItemKind.Function,
@@ -1008,16 +1778,42 @@ suite('Completions', function () {
       label: 'map',
       kind: CompletionItemKind.Property,
     }
-    const typeProperty = {
-      label: 'type',
-      kind: CompletionItemKind.Property,
-    }
     const sortProperty = {
       label: 'sort',
       kind: CompletionItemKind.Property,
     }
     const lengthProperty = {
       label: 'length',
+      kind: CompletionItemKind.Property,
+    }
+
+    // sequence()
+    const minValueProperty = {
+      label: 'minValue',
+      kind: CompletionItemKind.Property,
+    }
+    const maxValueProperty = {
+      label: 'maxValue',
+      kind: CompletionItemKind.Property,
+    }
+    const cacheProperty = {
+      label: 'cache',
+      kind: CompletionItemKind.Property,
+    }
+    const incrementProperty = {
+      label: 'increment',
+      kind: CompletionItemKind.Property,
+    }
+    const startProperty = {
+      label: 'start',
+      kind: CompletionItemKind.Property,
+    }
+    const virtualProperty = {
+      label: 'virtual',
+      kind: CompletionItemKind.Property,
+    }
+    const noCycleProperty = {
+      label: 'noCycle',
       kind: CompletionItemKind.Property,
     }
 
@@ -1135,65 +1931,80 @@ suite('Completions', function () {
       })
     })
 
-    suite('No provider', function () {
-      test('Int @id @default(|)', () => {
-        assertCompletion({
-          schema: /* Prisma */ `
+    suite('@default()', function () {
+      suite('No provider', function () {
+        test('Int @id @default(|)', () => {
+          assertCompletion({
+            schema: /* Prisma */ `
                     model Post {
                         id Int @id @default(|)
                         email String? @unique
                         name String 
                     }`,
-          expected: {
-            isIncomplete: false,
-            items: [functionDbGenerated, functionAutoincrement],
-          },
+            expected: {
+              isIncomplete: false,
+              items: [functionDbGenerated, functionAutoincrement],
+            },
+          })
         })
-      })
-      test('String @id @default(|)', () => {
-        assertCompletion({
-          schema: /* Prisma */ `
+        test('BigInt @id @default(|)', () => {
+          assertCompletion({
+            schema: /* Prisma */ `
+                    model Post {
+                        id BigInt @id @default(|)
+                        email String? @unique
+                        name String 
+                    }`,
+            expected: {
+              isIncomplete: false,
+              items: [functionDbGenerated, functionAutoincrement],
+            },
+          })
+        })
+        test('String @id @default(|)', () => {
+          assertCompletion({
+            schema: /* Prisma */ `
                   model Cat {
                     id String @id @default(|)
                     name String
                     createdAt  DateTime @default()
                 }`,
-          expected: {
-            isIncomplete: false,
-            items: [functionDbGenerated, functionUuid, functionCuid],
-          },
+            expected: {
+              isIncomplete: false,
+              items: [functionDbGenerated, functionUuid, functionCuid],
+            },
+          })
         })
-      })
-      test('DateTime @default(|)', () => {
-        assertCompletion({
-          schema: /* Prisma */ `
+        test('DateTime @default(|)', () => {
+          assertCompletion({
+            schema: /* Prisma */ `
                   model Cat {
                     id String @id @default()
                     name String
                     createdAt  DateTime @default(|)
                 }`,
-          expected: {
-            isIncomplete: false,
-            items: [functionDbGenerated, functionNow],
-          },
+            expected: {
+              isIncomplete: false,
+              items: [functionDbGenerated, functionNow],
+            },
+          })
         })
-      })
-      test('Boolean @default(|)', () => {
-        assertCompletion({
-          schema: /* Prisma */ `
+        test('Boolean @default(|)', () => {
+          assertCompletion({
+            schema: /* Prisma */ `
                   model Test {
                     email    String  @unique
                     isAdmin  Boolean @default(|)
                   }`,
-          expected: {
-            isIncomplete: false,
-            items: [functionDbGenerated, staticValueTrue, staticValueFalse],
-          },
+            expected: {
+              isIncomplete: false,
+              items: [functionDbGenerated, staticValueTrue, staticValueFalse],
+            },
+          })
         })
-      })
-      test('Enum @default(|)', () => {
-        assertCompletion({
-          schema: /* Prisma */ `
+        test('Enum @default(|)', () => {
+          assertCompletion({
+            schema: /* Prisma */ `
                   model DateTest {
                     id Int @id @default(autoincrement())
                     update DateTime  
@@ -1203,15 +2014,15 @@ suite('Completions', function () {
                     ADMIN
                     NORMAL
                   }`,
-          expected: {
-            isIncomplete: false,
-            items: [functionDbGenerated, enumValueOne, enumValueTwo],
-          },
+            expected: {
+              isIncomplete: false,
+              items: [functionDbGenerated, enumValueOne, enumValueTwo],
+            },
+          })
         })
-      })
-      test('Enum @default(|) (enum with comments)', () => {
-        assertCompletion({
-          schema: /* Prisma */ `
+        test('Enum @default(|) (enum with comments)', () => {
+          assertCompletion({
+            schema: /* Prisma */ `
               model Test {
                 id Int @id
                 enum CommentEnum @default(|)
@@ -1220,83 +2031,97 @@ suite('Completions', function () {
                 ADMIN
                 NORMAL
               }`,
-          expected: {
-            isIncomplete: false,
-            items: [functionDbGenerated, enumValueOne, enumValueTwo],
-          },
+            expected: {
+              isIncomplete: false,
+              items: [functionDbGenerated, enumValueOne, enumValueTwo],
+            },
+          })
         })
       })
-    })
-    suite('MongoDB', function () {
-      test('String @id @default(|)', () => {
-        assertCompletion({
-          provider: 'mongodb',
-          schema: /* Prisma */ `
+      suite('MongoDB', function () {
+        test('String @id @default(|)', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
             model Post {
               id       String   @id @default(|) @map("_id") @db.ObjectId
             }`,
-          expected: {
-            isIncomplete: false,
-            items: [functionAuto, functionUuid, functionCuid],
-          },
+            expected: {
+              isIncomplete: false,
+              items: [functionAuto, functionUuid, functionCuid],
+            },
+          })
         })
-      })
-      test('Int @id @default(|)', () => {
-        assertCompletion({
-          provider: 'mongodb',
-          schema: /* Prisma */ `
+        test('Int @id @default(|)', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
             model Something {
               id Int @id @default(|) @map("_id") @db.ObjectId
             }`,
-          expected: {
-            isIncomplete: false,
-            items: [functionAuto, functionAutoincrement],
-          },
+            expected: {
+              isIncomplete: false,
+              items: [functionAuto, functionAutoincrement],
+            },
+          })
         })
-      })
-      test('String @default(|)', () => {
-        assertCompletion({
-          provider: 'mongodb',
-          schema: /* Prisma */ `
+        test('BigInt @id @default(|)', () => {
+          assertCompletion({
+            schema: /* Prisma */ `
+                    model Post {
+                        id BigInt @id @default(|)
+                        email String? @unique
+                        name String 
+                    }`,
+            expected: {
+              isIncomplete: false,
+              items: [functionDbGenerated, functionAutoincrement],
+            },
+          })
+        })
+        test('String @default(|)', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
             model Post {
               string   String   @default(|)
             }`,
-          expected: {
-            isIncomplete: false,
-            items: [functionAuto, functionUuid, functionCuid],
-          },
+            expected: {
+              isIncomplete: false,
+              items: [functionAuto, functionUuid, functionCuid],
+            },
+          })
         })
-      })
-      test('Boolean @default(|)', () => {
-        assertCompletion({
-          provider: 'mongodb',
-          schema: /* Prisma */ `
+        test('Boolean @default(|)', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
             model Post {
               boolean  Boolean  @default(|)
             }`,
-          expected: {
-            isIncomplete: false,
-            items: [functionAuto, staticValueTrue, staticValueFalse],
-          },
+            expected: {
+              isIncomplete: false,
+              items: [functionAuto, staticValueTrue, staticValueFalse],
+            },
+          })
         })
-      })
-      test('DateTime @default(|)', () => {
-        assertCompletion({
-          provider: 'mongodb',
-          schema: /* Prisma */ `
+        test('DateTime @default(|)', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
             model Post {
               datetime DateTime @default(|)
             }`,
-          expected: {
-            isIncomplete: false,
-            items: [functionAuto, functionNow],
-          },
+            expected: {
+              isIncomplete: false,
+              items: [functionAuto, functionNow],
+            },
+          })
         })
-      })
-      test('Enum @default(|)', () => {
-        assertCompletion({
-          provider: 'mongodb',
-          schema: /* Prisma */ `
+        test('Enum @default(|)', () => {
+          assertCompletion({
+            provider: 'mongodb',
+            schema: /* Prisma */ `
             model Post {
               enum     PostType @default(|)
             }
@@ -1304,642 +2129,160 @@ suite('Completions', function () {
               ADMIN
               NORMAL
             }`,
-          expected: {
-            isIncomplete: false,
-            items: [functionAuto, enumValueOne, enumValueTwo],
-          },
+            expected: {
+              isIncomplete: false,
+              items: [functionAuto, enumValueOne, enumValueTwo],
+            },
+          })
+        })
+      })
+      suite('CockroachDB', function () {
+        test('Int @id @default(|)', () => {
+          assertCompletion({
+            provider: 'cockroachdb',
+            schema: /* Prisma */ `
+                  model Post {
+                      id Int @id @default(|)
+                      email String? @unique
+                      name String 
+                  }`,
+            expected: {
+              isIncomplete: false,
+              items: [functionDbGenerated, functionSequence],
+            },
+          })
+        })
+        test('BigInt @id @default(|)', () => {
+          assertCompletion({
+            provider: 'cockroachdb',
+            schema: /* Prisma */ `
+                  model Post {
+                      id BigInt @id @default(|)
+                      email String? @unique
+                      name String 
+                  }`,
+            expected: {
+              isIncomplete: false,
+              items: [functionDbGenerated, functionSequence, functionAutoincrement],
+            },
+          })
+        })
+
+        suite('@default(sequence())', function () {
+          test('@default(sequence(|))', () => {
+            assertCompletion({
+              provider: 'cockroachdb',
+              schema: /* Prisma */ `
+              model Post {
+                  id Int @id @default(sequence(|))
+              }`,
+              expected: {
+                isIncomplete: false,
+                items: [
+                  virtualProperty,
+                  noCycleProperty,
+                  minValueProperty,
+                  maxValueProperty,
+                  cacheProperty,
+                  incrementProperty,
+                  startProperty,
+                ],
+              },
+            })
+          })
+          test('@default(sequence(virtual|))', () => {
+            assertCompletion({
+              provider: 'cockroachdb',
+              schema: /* Prisma */ `
+              model Post {
+                  id Int @id @default(sequence(virtual|))
+              }`,
+              expected: {
+                isIncomplete: false,
+                items: [],
+              },
+            })
+          })
+          test('@default(sequence(noCycle|))', () => {
+            assertCompletion({
+              provider: 'cockroachdb',
+              schema: /* Prisma */ `
+              model Post {
+                  id Int @id @default(sequence(noCycle(|))
+              }`,
+              expected: {
+                isIncomplete: false,
+                items: [],
+              },
+            })
+          })
+          test('@default(sequence(min|))', () => {
+            assertCompletion({
+              provider: 'cockroachdb',
+              schema: /* Prisma */ `
+              model Post {
+                  id Int @id @default(sequence(min|))
+              }`,
+              expected: {
+                isIncomplete: false,
+                // TODO create a test that shows that the completion is actually `minValue`
+                // because of `onCompletionResolve`
+                items: [
+                  virtualProperty,
+                  noCycleProperty,
+                  minValueProperty,
+                  maxValueProperty,
+                  cacheProperty,
+                  incrementProperty,
+                  startProperty,
+                ],
+              },
+            })
+          })
+          test('@default(sequence(minValue: 10,|))', () => {
+            assertCompletion({
+              provider: 'cockroachdb',
+              schema: /* Prisma */ `
+              model Post {
+                  id Int @id @default(sequence(minValue: 10,|))
+              }`,
+              expected: {
+                isIncomplete: false,
+                items: [maxValueProperty, cacheProperty, incrementProperty, startProperty],
+              },
+            })
+          })
+          test('@default(sequence(minValue: 10, |))', () => {
+            assertCompletion({
+              provider: 'cockroachdb',
+              schema: /* Prisma */ `
+              model Post {
+                  id Int @id @default(sequence(minValue: 10, |))
+              }`,
+              expected: {
+                isIncomplete: false,
+                items: [maxValueProperty, cacheProperty, incrementProperty, startProperty],
+              },
+            })
+          })
+          test('@default(sequence(minValue: 10, maxValue: 39, |))', () => {
+            assertCompletion({
+              provider: 'cockroachdb',
+              schema: /* Prisma */ `
+              model Post {
+                  id Int @id @default(sequence(minValue: 10, maxValue: 39, |))
+              }`,
+              expected: {
+                isIncomplete: false,
+                items: [cacheProperty, incrementProperty, startProperty],
+              },
+            })
+          })
         })
       })
     })
 
-    test('@@unique([|])', () => {
-      assertCompletion({
-        schema: /* Prisma */ `
-          model SecondUser {
-            firstName String
-            lastName String
-            isAdmin Boolean @default(false)
-            @@unique([|])
-        }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            { label: 'firstName', kind: CompletionItemKind.Field },
-            { label: 'lastName', kind: CompletionItemKind.Field },
-            { label: 'isAdmin', kind: CompletionItemKind.Field },
-          ],
-        },
-      })
-    })
-    test('@@unique(fields: [|])', () => {
-      assertCompletion({
-        schema: /* Prisma */ `
-          model SecondUser {
-            firstName String
-            lastName String
-            isAdmin Boolean @default(false)
-            @@unique(fields: [|])
-        }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            { label: 'firstName', kind: CompletionItemKind.Field },
-            { label: 'lastName', kind: CompletionItemKind.Field },
-            { label: 'isAdmin', kind: CompletionItemKind.Field },
-          ],
-        },
-      })
-    })
-    test('MongoDB: @@unique([|])', () => {
-      assertCompletion({
-        provider: 'mongodb',
-        schema: /* Prisma */ `
-          type Address {
-            street String
-            number Int
-          }
-          model User {
-            id      Int     @id @map("_id")
-            email   String
-            address Address
-            @@unique([|])
-          }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            { label: 'id', kind: CompletionItemKind.Field },
-            { label: 'email', kind: CompletionItemKind.Field },
-            { label: 'address', kind: CompletionItemKind.Field },
-          ],
-        },
-      })
-    })
-    test('MongoDB: @@unique(fields: [|])', () => {
-      assertCompletion({
-        provider: 'mongodb',
-        schema: /* Prisma */ `
-          type Address {
-            street String
-            number Int
-          }
-          model User {
-            id      Int     @id @map("_id")
-            email   String
-            address Address
-            @@unique(fields: [|])
-          }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            { label: 'id', kind: CompletionItemKind.Field },
-            { label: 'email', kind: CompletionItemKind.Field },
-            { label: 'address', kind: CompletionItemKind.Field },
-          ],
-        },
-      })
-    })
-
-    test('@@id([|])', () => {
-      assertCompletion({
-        schema: /* Prisma */ `
-              model ThirdUser {
-                  firstName String
-                  lastName String
-                  isAdmin Boolean @default(false)
-                  @@id([|])
-              }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            { label: 'firstName', kind: CompletionItemKind.Field },
-            { label: 'lastName', kind: CompletionItemKind.Field },
-            { label: 'isAdmin', kind: CompletionItemKind.Field },
-          ],
-        },
-      })
-    })
-
-    test('@@index([|])', () => {
-      assertCompletion({
-        schema: /* Prisma */ `
-          model ThirdUser {
-              firstName String
-              lastName String
-              isAdmin Boolean @default(false)
-              @@index([|])
-          }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            { label: 'firstName', kind: CompletionItemKind.Field },
-            { label: 'lastName', kind: CompletionItemKind.Field },
-            { label: 'isAdmin', kind: CompletionItemKind.Field },
-          ],
-        },
-      })
-    })
-    test('@@index(fields: [|])', () => {
-      assertCompletion({
-        schema: /* Prisma */ `
-          model ThirdUser {
-              firstName String
-              lastName String
-              isAdmin Boolean @default(false)
-              @@index(field: [|])
-          }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            { label: 'firstName', kind: CompletionItemKind.Field },
-            { label: 'lastName', kind: CompletionItemKind.Field },
-            { label: 'isAdmin', kind: CompletionItemKind.Field },
-          ],
-        },
-      })
-    })
-    test('MongoDB: @@index([|])', () => {
-      assertCompletion({
-        provider: 'mongodb',
-        schema: /* Prisma */ `
-          type Address {
-            street String
-            number Int
-          }
-          model User {
-            id      Int     @id @map("_id")
-            email   String
-            address Address
-            @@index([|])
-          }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            { label: 'id', kind: CompletionItemKind.Field },
-            { label: 'email', kind: CompletionItemKind.Field },
-            { label: 'address', kind: CompletionItemKind.Field },
-          ],
-        },
-      })
-    })
-    test('MongoDB: @@index([a|])', () => {
-      assertCompletion({
-        provider: 'mongodb',
-        schema: /* Prisma */ `
-          type Address {
-            street String
-            number Int
-          }
-          model User {
-            id      Int     @id @map("_id")
-            email   String
-            address Address
-            account Int
-            @@index([a|])
-          }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            // These are returned, but `onCompletionResolve` will only complete with the current match
-            // which means the completion will actually be
-            // address and account
-            // TODO create a test that shows that
-            { label: 'id', kind: CompletionItemKind.Field },
-            { label: 'email', kind: CompletionItemKind.Field },
-            { label: 'address', kind: CompletionItemKind.Field },
-            { label: 'account', kind: CompletionItemKind.Field },
-          ],
-        },
-      })
-    })
-    test('MongoDB: @@index([address|])', () => {
-      assertCompletion({
-        provider: 'mongodb',
-        schema: /* Prisma */ `
-          type Address {
-            street String
-            number Int
-          }
-          model User {
-            id      Int     @id @map("_id")
-            email   String
-            address Address
-            account Int
-            @@index([address|])
-          }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            // These are returned though the completion will actually be
-            // No suggestions
-            // TODO create a test that shows that
-            { label: 'id', kind: CompletionItemKind.Field },
-            { label: 'email', kind: CompletionItemKind.Field },
-            { label: 'account', kind: CompletionItemKind.Field },
-          ],
-        },
-      })
-    })
-    test('MongoDB: @@index([address,|])', () => {
-      assertCompletion({
-        provider: 'mongodb',
-        schema: /* Prisma */ `
-          type Address {
-            street String
-            number Int
-          }
-          model User {
-            id      Int     @id @map("_id")
-            email   String
-            address Address
-            @@index([address,|])
-          }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            { label: 'id', kind: CompletionItemKind.Field },
-            { label: 'email', kind: CompletionItemKind.Field },
-          ],
-        },
-      })
-    })
-    test('MongoDB: @@index([address, |])', () => {
-      assertCompletion({
-        provider: 'mongodb',
-        schema: /* Prisma */ `
-          type Address {
-            street String
-            number Int
-          }
-          model User {
-            id      Int     @id @map("_id")
-            email   String
-            address Address
-            @@index([address, |])
-          }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            { label: 'id', kind: CompletionItemKind.Field },
-            { label: 'email', kind: CompletionItemKind.Field },
-          ],
-        },
-      })
-    })
-    test('MongoDB: @@index([address.|]) first position, with only one type', () => {
-      assertCompletion({
-        provider: 'mongodb',
-        schema: /* Prisma */ `
-          type Address {
-            street String
-            number Int
-          }
-          model User {
-            id      Int     @id @map("_id")
-            email   String
-            address Address
-            @@index([address.|])
-          }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            { label: 'street', kind: CompletionItemKind.Field },
-            { label: 'number', kind: CompletionItemKind.Field },
-          ],
-        },
-      })
-    })
-    test('MongoDB: @@index([address.|]) with composite type suggestion 1', () => {
-      assertCompletion({
-        provider: 'mongodb',
-        schema: /* Prisma */ `
-          type Address {
-            street String
-            number Int
-            alpha  Alpha
-          }
-          type Alpha {
-            bravo  Bravo
-            helloA Int
-          }
-          type Bravo {
-            something  String
-            helloBravo Int
-          }
-          model User {
-            id      Int     @id @map("_id")
-            email   String
-            address Address
-            @@index([address.|])
-          }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            { label: 'street', kind: CompletionItemKind.Field },
-            { label: 'number', kind: CompletionItemKind.Field },
-            { label: 'alpha', kind: CompletionItemKind.Field },
-          ],
-        },
-      })
-    })
-    test('MongoDB: @@index([address.a|]) with composite type suggestion 1', () => {
-      assertCompletion({
-        provider: 'mongodb',
-        schema: /* Prisma */ `
-          type Address {
-            street String
-            number Int
-            alpha  Alpha
-          }
-          type Alpha {
-            bravo  Bravo
-            helloA Int
-          }
-          type Bravo {
-            something  String
-            helloBravo Int
-          }
-          model User {
-            id      Int     @id @map("_id")
-            email   String
-            address Address
-            @@index([address.a|])
-          }`,
-        expected: {
-          isIncomplete: false,
-          // TODO, see if we can have better suggestions here, should suggest `alpha`
-          items: [],
-        },
-      })
-    })
-    test('MongoDB: @@index([email,address.|]) with composite type suggestion, depth 1', () => {
-      assertCompletion({
-        provider: 'mongodb',
-        schema: /* Prisma */ `
-          type Address {
-            street String
-            number Int
-            alpha  Alpha
-          }
-          type Alpha {
-            bravo  Bravo
-            helloA Int
-          }
-          type Bravo {
-            something  String
-            helloBravo Int
-          }
-          model User {
-            id      Int     @id @map("_id")
-            email   String
-            address Address
-            @@index([email,address.|])
-          }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            { label: 'street', kind: CompletionItemKind.Field },
-            { label: 'number', kind: CompletionItemKind.Field },
-            { label: 'alpha', kind: CompletionItemKind.Field },
-          ],
-        },
-      })
-    })
-    test('MongoDB: @@index([email, address.|]) with composite type suggestion, depth 1', () => {
-      assertCompletion({
-        provider: 'mongodb',
-        schema: /* Prisma */ `
-          type Address {
-            street String
-            number Int
-            alpha  Alpha
-          }
-          type Alpha {
-            bravo  Bravo
-            helloA Int
-          }
-          type Bravo {
-            something  String
-            helloBravo Int
-          }
-          model User {
-            id      Int     @id @map("_id")
-            email   String
-            address Address
-            @@index([email, address.|])
-          }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            { label: 'street', kind: CompletionItemKind.Field },
-            { label: 'number', kind: CompletionItemKind.Field },
-            { label: 'alpha', kind: CompletionItemKind.Field },
-          ],
-        },
-      })
-    })
-    test('MongoDB: @@index([email, address.alpha.|]) with composite type suggestion, depth 2', () => {
-      assertCompletion({
-        provider: 'mongodb',
-        schema: /* Prisma */ `
-          type Address {
-            street String
-            number Int
-            alpha  Alpha
-          }
-          type Alpha {
-            bravo  Bravo
-            helloA Int
-          }
-          type Bravo {
-            something  String
-            helloBravo Int
-          }
-          model User {
-            id      Int     @id @map("_id")
-            email   String
-            address Address
-            @@index([email, address.alpha.|])
-          }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            { label: 'bravo', kind: CompletionItemKind.Field },
-            { label: 'helloA', kind: CompletionItemKind.Field },
-          ],
-        },
-      })
-    })
-    test('MongoDB: @@index([email, address.alpha.bravo.|]) with composite type suggestion, depth 3', () => {
-      assertCompletion({
-        provider: 'mongodb',
-        schema: /* Prisma */ `
-          type Address {
-            street String
-            number Int
-            alpha  Alpha
-          }
-          type Alpha {
-            bravo  Bravo
-            helloA Int
-          }
-          type Bravo {
-            something  String
-            helloBravo Int
-          }
-          model User {
-            id      Int     @id @map("_id")
-            email   String
-            address Address
-            @@index([email, address.alpha.bravo.|])
-          }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            { label: 'something', kind: CompletionItemKind.Field },
-            { label: 'helloBravo', kind: CompletionItemKind.Field },
-          ],
-        },
-      })
-    })
-    test('MongoDB: @@index([email, address.alpha.bravo.hello|]) with composite type suggestion, depth 3', () => {
-      assertCompletion({
-        provider: 'mongodb',
-        schema: /* Prisma */ `
-          type Address {
-            street String
-            number Int
-            alpha  Alpha
-          }
-          type Alpha {
-            bravo  Bravo
-            helloA Int
-          }
-          type Bravo {
-            something  String
-            helloBravo Int
-          }
-          model User {
-            id      Int     @id @map("_id")
-            email   String
-            address Address
-            @@index([email, address.alpha.bravo.hello||])
-          }`,
-        expected: {
-          isIncomplete: false,
-          // TODO, see if we can have better suggestions here, should suggest `helloBravo`
-          items: [],
-        },
-      })
-    })
-    test('MongoDB: @@index(fields: [|])', () => {
-      assertCompletion({
-        provider: 'mongodb',
-        schema: /* Prisma */ `
-          type Address {
-            street String
-            number Int
-          }
-          model User {
-            id      Int     @id @map("_id")
-            email   String
-            address Address
-            @@index(fields: [|])
-          }`,
-        expected: {
-          isIncomplete: false,
-          items: [
-            { label: 'id', kind: CompletionItemKind.Field },
-            { label: 'email', kind: CompletionItemKind.Field },
-            { label: 'address', kind: CompletionItemKind.Field },
-          ],
-        },
-      })
-    })
-
-    // previewFeatures = ["extendedIndexes"]
-    // provider = "postgresql"
-    test('extendedIndexes: @@index(|) - postgresql', () => {
-      assertCompletion({
-        provider: 'postgresql',
-        previewFeatures: ['extendedIndexes'],
-        schema: /* Prisma */ `
-          model Type {
-            id    Int @id
-            title   String
-            content String
-            
-            @@index(|)
-          }
-        `,
-        expected: {
-          isIncomplete: false,
-          items: [fieldsProperty, mapProperty, typeProperty],
-        },
-      })
-    })
-    test('extendedIndexes: @@index([title], |) - postgresql', () => {
-      assertCompletion({
-        provider: 'postgresql',
-        previewFeatures: ['extendedIndexes'],
-        schema: /* Prisma */ `
-        model Type {
-          id    Int @id
-          title   String
-          content String
-          
-          @@index([title], |)
-        }
-      `,
-        expected: {
-          isIncomplete: false,
-          items: [fieldsProperty, mapProperty, typeProperty],
-        },
-      })
-    })
-    test('extendedIndexes: @@index([title], type: |) - postgresql', () => {
-      assertCompletion({
-        provider: 'postgresql',
-        previewFeatures: ['extendedIndexes'],
-        schema: /* Prisma */ `
-        model Type {
-          id    Int @id
-          title   String
-          content String
-          
-          @@index([title], type: |)
-        }
-      `,
-        expected: {
-          isIncomplete: false,
-          items: [
-            { label: 'Hash', kind: CompletionItemKind.Enum },
-            { label: 'BTree', kind: CompletionItemKind.Enum },
-          ],
-        },
-      })
-    })
-
-    test('extendedIndexes: @@index([title], type: Hash, |) - postgresql', () => {
-      assertCompletion({
-        provider: 'postgresql',
-        previewFeatures: ['extendedIndexes'],
-        schema: /* Prisma */ `
-        model Type {
-          id    Int @id
-          title   String
-          content String
-          
-          @@index([title], type: Hash, |)
-        }
-      `,
-        expected: {
-          isIncomplete: false,
-          items: [fieldsProperty, mapProperty],
-        },
-      })
-    })
-
-    suite('Diagnoses arguments of @relation directive', function () {
+    suite('@relation()', function () {
       test('@relation(|)', () => {
         assertCompletion({
           schema: /* Prisma */ `
@@ -2257,115 +2600,6 @@ suite('Completions', function () {
               { label: 'SetNull', kind: CompletionItemKind.Enum },
               { label: 'SetDefault', kind: CompletionItemKind.Enum },
             ],
-          },
-        })
-      })
-
-      //
-      // previewFeatures = ["fullTextIndex"]
-      // = tests which are feature preview / database dependent
-      //
-      test('@@fulltext(|) - mysql', () => {
-        assertCompletion({
-          provider: 'mysql',
-          previewFeatures: ['fullTextIndex', 'extendedIndexes'],
-          schema: /* Prisma */ `
-          model Fulltext {
-            id      Int    @id
-            title   String @db.VarChar(255)
-            content String @db.Text
-            
-            @@fulltext(|)
-            @@fulltext([title, content], )
-          }          
-          `,
-          expected: {
-            isIncomplete: false,
-            items: [fieldsProperty, mapProperty],
-          },
-        })
-      })
-      test('@@fulltext([title, content], |) - mysql', () => {
-        assertCompletion({
-          provider: 'mysql',
-          previewFeatures: ['fullTextIndex', 'extendedIndexes'],
-          schema: /* Prisma */ `
-          model Fulltext {
-            id      Int    @id
-            title   String @db.VarChar(255)
-            content String @db.Text
-            
-            @@fulltext()
-            @@fulltext([title, content], |)
-          }          
-          `,
-          expected: {
-            isIncomplete: false,
-            items: [fieldsProperty, mapProperty],
-          },
-        })
-      })
-
-      test('@@fulltext(|) - mongodb', () => {
-        assertCompletion({
-          provider: 'mongodb',
-          previewFeatures: ['fullTextIndex', 'extendedIndexes'],
-          schema: /* Prisma */ `
-          model Fulltext {
-            id      String @id @map("_id") @db.ObjectId
-            title   String
-            content String
-            
-            @@fulltext(|)
-            @@fulltext([title, content], )
-          }
-
-          // https://www.prisma.io/docs/concepts/components/prisma-schema/indexes#examples
-          // On MongoDB, the fullTextIndex and extendedIndexes preview features can be combined
-          // to add fields in ascending or descending order to your full-text index:
-          model Post {
-            id      String @id @map("_id") @db.ObjectId
-            title   String
-            content String
-
-            @@fulltext([title(sort: Desc), content])
-          }
-          `,
-          expected: {
-            isIncomplete: false,
-            items: [fieldsProperty, mapProperty],
-          },
-        })
-      })
-      test('@@fulltext([title, content], |) - mongodb', () => {
-        assertCompletion({
-          provider: 'mongodb',
-          previewFeatures: ['fullTextIndex', 'extendedIndexes'],
-          schema: /* Prisma */ `
-
-          model Fulltext {
-            id      String @id @map("_id") @db.ObjectId
-            title   String
-            content String
-            
-            @@fulltext()
-            @@fulltext([title, content], |)
-          }
-
-          // https://www.prisma.io/docs/concepts/components/prisma-schema/indexes#examples
-          // On MongoDB, the fullTextIndex and extendedIndexes preview features can be combined
-          // to add fields in ascending or descending order to your full-text index:
-          model Post {
-            id      String @id @map("_id") @db.ObjectId
-            title   String
-            content String
-
-            @@fulltext([title(sort: Desc), content])
-          }
-          `,
-          expected: {
-            isIncomplete: false,
-            items: [fieldsProperty, mapProperty],
           },
         })
       })
