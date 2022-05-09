@@ -92,17 +92,17 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: 'github-actions[bot]'
-          body-includes: via GitPod
+          body-includes: "via GitPod"
 
       - name: Create comment
-        if: !contains(github.actor, 'renovate') && steps.fc.outputs.comment-id == ''
+        if: "!contains(github.actor, 'renovate') && steps.fc.outputs.comment-id == ''"
         uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: ${{ steps.comment.outputs.body }}
 
       - name: Update comment
-        if: !contains(github.actor, 'renovate') && steps.fc.outputs.comment-id != ''
+        if: "!contains(github.actor, 'renovate') && steps.fc.outputs.comment-id != ''"
         uses: peter-evans/create-or-update-comment@v1
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
