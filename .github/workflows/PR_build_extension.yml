@@ -88,7 +88,7 @@ jobs:
 
       - name: Create comment
         if: "!contains(github.actor, 'renovate') && steps.fc.outputs.comment-id == ''"
-        uses: peter-evans/create-or-update-comment@v1
+        uses: peter-evans/create-or-update-comment@v2
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: "[Try this extension build via GitPod](https://gitpod.io/#vsix=https%3A%2F%2Fgithub.com%2Fprisma%2Flanguage-tools%2Fblob%2Fartifacts%2Fpull-request-artifacts%2Fpr${{ github.event.pull_request.number }}-prisma.vsix%3Fraw%3Dtrue/https://github.com/prisma/language-tools-gitpod)"
