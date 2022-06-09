@@ -16,7 +16,7 @@
     "@prisma/language-server": "31.0.1026",
     "checkpoint-client": "1.1.21",
     "chokidar": "3.5.3",
-    "vscode-languageclient": "7.0.0"
+    "vscode-languageclient": "8.0.1"
   },
   "optionalDependencies": {
     "fsevents": "2.3.2"
