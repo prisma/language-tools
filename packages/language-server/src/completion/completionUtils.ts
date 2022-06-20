@@ -109,26 +109,20 @@ export function givenBlockAttributeParams(
     CompletionItemKind.Property,
   )
 
-  if (blockAttribute === '@@index') {
+  if (blockAttribute === '@@index' && datasourceProvider && ['postgresql', 'postgres'].includes(datasourceProvider)) {
     // TODO figure out if we need to add cockroachdb provider here
-    if (
-      previewFeatures?.includes('extendedindexes') &&
-      datasourceProvider &&
-      ['postgresql', 'postgres'].includes(datasourceProvider)
-    ) {
-      // The type argument is only available for PostgreSQL on @@index
-      items.push({
-        label: 'type',
-        kind: 10,
-        insertText: 'type: $0',
-        insertTextFormat: 2,
-        insertTextMode: 2,
-        documentation: {
-          kind: 'markdown',
-          value: 'Defines the access type of indexes: BTree (default) or Hash.',
-        },
-      })
-    }
+    // The type argument is only available for PostgreSQL on @@index
+    items.push({
+      label: 'type',
+      kind: 10,
+      insertText: 'type: $0',
+      insertTextFormat: 2,
+      insertTextMode: 2,
+      documentation: {
+        kind: 'markdown',
+        value: 'Defines the access type of indexes: BTree (default) or Hash.',
+      },
+    })
   }
 
   return items
@@ -142,7 +136,7 @@ export const blockAttributes: CompletionItem[] = convertAttributesToCompletionIt
 export const sortAutoCompletionItems: CompletionItem[] = [
   {
     label: 'Asc',
-    kind: 13,
+    kind: CompletionItemKind.Enum,
     insertTextFormat: 1,
     documentation: {
       kind: 'markdown',
@@ -151,7 +145,7 @@ export const sortAutoCompletionItems: CompletionItem[] = [
   },
   {
     label: 'Desc',
-    kind: 13,
+    kind: CompletionItemKind.Enum,
     insertTextFormat: 1,
     documentation: {
       kind: 'markdown',
@@ -182,48 +176,55 @@ export function filterSortLengthBasedOnInput(
   wordBeforePosition: string,
   items: CompletionItem[],
 ): CompletionItem[] {
-  if (previewFeatures?.includes('extendedindexes')) {
-    // Auto completion for Desc | Asc
-    // includes because `@unique(sort: |)` means wordBeforePosition = '@unique(sort:'
-    if (wordBeforePosition.includes('sort:')) {
-      return sortAutoCompletionItems
-    }
+  // Auto completion for Desc | Asc
+  // includes because `@unique(sort: |)` means wordBeforePosition = '@unique(sort:'
+  if (wordBeforePosition.includes('sort:')) {
+    return sortAutoCompletionItems
+  }
 
-    // The length argument is available on MySQL only on the
-    // @id, @@id, @unique, @@unique and @@index fields.
+  // The length argument is available on MySQL only on the
+  // @id, @@id, @unique, @@unique and @@index fields.
 
-    // The sort argument is available for all databases on the
-    // @unique, @@unique and @@index fields.
-    // Additionally, SQL Server also allows it on @id and @@id.
+  // The sort argument is available for all databases on the
+  // @unique, @@unique and @@index fields.
+  // Additionally, SQL Server also allows it on @id and @@id.
 
-    // Which translates too
-    // - `length` argument for `@id`, `@@id`, `@unique`, `@@unique` and `@@index` (MySQL only)
-    // - Note that on the `@@` the argument is on available a field - not on the top level attribute
-    // - `sort` argument for `@unique`, `@@unique` and `@@index` (Additionally `@id` and `@@id` for SQL Server)
+  // Which translates too
+  // - `length` argument for `@id`, `@@id`, `@unique`, `@@unique` and `@@index` (MySQL only)
+  // - Note that on the `@@` the argument is on available a field - not on the top level attribute
+  // - `sort` argument for `@unique`, `@@unique` and `@@index` (Additionally `@id` and `@@id` for SQL Server)
 
-    if (datasourceProvider === 'mysql') {
-      if (['@unique', '@@unique', '@@index'].includes(attribute)) {
-        return items
-      } else {
-        // filter sort out
-        return items.filter((arg) => arg.label !== 'sort')
-      }
-    } else if (datasourceProvider === 'sqlserver') {
-      if (['@unique', '@@unique', '@@index', '@id', '@@id'].includes(attribute)) {
-        // only filter length out
-        return items.filter((arg) => arg.label !== 'length')
-      } else {
-        // filter length and sort out
-        return items.filter((arg) => arg.label !== 'length' && arg.label !== 'sort')
-      }
+  if (datasourceProvider === 'mysql') {
+    if (['@unique', '@@unique', '@@index'].includes(attribute)) {
+      return items
     } else {
-      if (['@unique', '@@unique', '@@index'].includes(attribute)) {
-        // only filter length out
-        return items.filter((arg) => arg.label !== 'length')
-      } else {
-        // filter length and sort out
-        return items.filter((arg) => arg.label !== 'length' && arg.label !== 'sort')
-      }
+      // filter sort out
+      return items.filter((arg) => arg.label !== 'sort')
+    }
+  } else if (datasourceProvider === 'sqlserver') {
+    // push clustered
+    items.push({
+      label: 'clustered',
+      insertText: 'clustered: $0',
+      kind: CompletionItemKind.Property,
+      documentation:
+        'An index, unique constraint or primary key can be created as clustered or non-clustered; altering the storage and retrieve behavior of the index.',
+    })
+
+    if (['@unique', '@@unique', '@@index', '@id', '@@id'].includes(attribute)) {
+      // only filter length out
+      return items.filter((arg) => arg.label !== 'length')
+    } else {
+      // filter length and sort out
+      return items.filter((arg) => arg.label !== 'length' && arg.label !== 'sort')
+    }
+  } else {
+    if (['@unique', '@@unique', '@@index'].includes(attribute)) {
+      // only filter length out
+      return items.filter((arg) => arg.label !== 'length')
+    } else {
+      // filter length and sort out
+      return items.filter((arg) => arg.label !== 'length' && arg.label !== 'sort')
     }
   }
 

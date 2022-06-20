@@ -365,20 +365,9 @@ export function getSuggestionForSupportedFields(
       if (currentLine.startsWith('engineType')) {
         const engineTypesCompletion: CompletionItem[] = engineTypes
         if (isInsideQuotation) {
-          // We can filter on the previewFeatures enabled
-          const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
-
-          if (previewFeatures?.includes('dataproxy')) {
-            return {
-              items: engineTypesCompletion,
-              isIncomplete: true,
-            }
-          } else {
-            // filter out dataproxy engineType
-            return {
-              items: engineTypesCompletion.filter((arg) => arg.label !== 'dataproxy'),
-              isIncomplete: true,
-            }
+          return {
+            items: engineTypesCompletion,
+            isIncomplete: true,
           }
         } else {
           return {
@@ -695,32 +684,30 @@ function getSuggestionsForAttribute(
     if (isInsideAttribute(untrimmedCurrentLine, position, '[]')) {
       if (isInsideFieldArgument(untrimmedCurrentLine, position)) {
         // extendedIndexes
-        if (previewFeatures?.includes('extendedindexes')) {
-          let attribute: '@@unique' | '@unique' | '@@id' | '@id' | '@@index' | undefined = undefined
+        let attribute: '@@unique' | '@unique' | '@@id' | '@id' | '@@index' | undefined = undefined
 
-          if (wordsBeforePosition.some((a) => a.includes('@@id'))) {
-            attribute = '@@id'
-          } else if (wordsBeforePosition.some((a) => a.includes('@id'))) {
-            attribute = '@id'
-          } else if (wordsBeforePosition.some((a) => a.includes('@@unique'))) {
-            attribute = '@@unique'
-          } else if (wordsBeforePosition.some((a) => a.includes('@unique'))) {
-            attribute = '@unique'
-          } else if (wordsBeforePosition.some((a) => a.includes('@@index'))) {
-            attribute = '@@index'
-          }
+        if (wordsBeforePosition.some((a) => a.includes('@@id'))) {
+          attribute = '@@id'
+        } else if (wordsBeforePosition.some((a) => a.includes('@id'))) {
+          attribute = '@id'
+        } else if (wordsBeforePosition.some((a) => a.includes('@@unique'))) {
+          attribute = '@@unique'
+        } else if (wordsBeforePosition.some((a) => a.includes('@unique'))) {
+          attribute = '@unique'
+        } else if (wordsBeforePosition.some((a) => a.includes('@@index'))) {
+          attribute = '@@index'
+        }
 
-          if (attribute) {
-            return {
-              items: filterSortLengthBasedOnInput(
-                attribute,
-                previewFeatures,
-                datasourceProvider,
-                wordBeforePosition,
-                sortLengthProperties,
-              ),
-              isIncomplete: false,
-            }
+        if (attribute) {
+          return {
+            items: filterSortLengthBasedOnInput(
+              attribute,
+              previewFeatures,
+              datasourceProvider,
+              wordBeforePosition,
+              sortLengthProperties,
+            ),
+            isIncomplete: false,
           }
         }
       }
