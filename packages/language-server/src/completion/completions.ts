@@ -596,6 +596,7 @@ function getDefaultValues({
     suggestions.unshift({
       label: '[]',
       insertText: '[$0]',
+      insertTextFormat: InsertTextFormat.Snippet,
       documentation: 'Set a default value on the list field',
       kind: CompletionItemKind.Value,
     })
