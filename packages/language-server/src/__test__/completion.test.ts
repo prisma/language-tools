@@ -2871,13 +2871,12 @@ suite('Completions', function () {
             model Post {
               title      String   @db.VarChar(300)
               abstract   String   @db.VarChar(3000)
-              slug       String   @unique(sort: , length: 42) @db.VarChar(3000)
+              slug       String   @unique(length: 42) @db.VarChar(3000)
               slug2      String   @unique() @db.VarChar(3000)
               author     String
               created_at DateTime
 
               @@index([author, |])
-              @@index([])
             }`,
           expected: {
             isIncomplete: false,
@@ -2899,7 +2898,7 @@ suite('Completions', function () {
             model Post {
               title      String   @db.VarChar(300)
               abstract   String   @db.VarChar(3000)
-              slug       String   @unique(sort: , length: 42) @db.VarChar(3000)
+              slug       String   @unique(length: 42) @db.VarChar(3000)
               slug2      String   @unique() @db.VarChar(3000)
               author     String
               created_at DateTime

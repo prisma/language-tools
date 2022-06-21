@@ -892,13 +892,6 @@ function getSuggestionsForAttribute(
           datasourceProvider,
           wordBeforePosition,
         )
-      } else if (attribute === '@@index') {
-        fieldAtrributeArguments = givenFieldAttributeParams(
-          '@@index',
-          previewFeatures,
-          datasourceProvider,
-          wordBeforePosition,
-        )
       }
       suggestions = fieldAtrributeArguments
     }
