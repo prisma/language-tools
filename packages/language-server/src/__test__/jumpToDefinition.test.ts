@@ -78,16 +78,16 @@ suite('Jump-to-Definition', () => {
   test('MongoDB: from attribute to type', () => {
     assertJumpToDefinition(
       {
-        line: 13,
+        line: 12,
         character: 11,
       },
       {
         start: {
-          line: 16,
+          line: 15,
           character: 0,
         },
         end: {
-          line: 20,
+          line: 19,
           character: 1,
         },
       },
