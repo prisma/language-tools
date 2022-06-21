@@ -231,6 +231,7 @@ export function givenFieldAttributeParams(
     completionItems.push({
       label: 'clustered',
       insertText: 'clustered: $0',
+      insertTextFormat: InsertTextFormat.Snippet,
       kind: CompletionItemKind.Property,
       documentation:
         'An index, unique constraint or primary key can be created as clustered or non-clustered; altering the storage and retrieve behavior of the index.',
