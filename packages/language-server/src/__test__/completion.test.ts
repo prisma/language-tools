@@ -1,6 +1,12 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { handleCompletionRequest } from '../MessageHandler'
-import { CompletionList, CompletionParams, Position, CompletionItemKind } from 'vscode-languageserver'
+import {
+  CompletionList,
+  CompletionParams,
+  Position,
+  CompletionItemKind,
+  CompletionTriggerKind,
+} from 'vscode-languageserver'
 import assert from 'assert'
 import dedent from 'ts-dedent'
 
@@ -82,7 +88,7 @@ function assertCompletion({
     textDocument: document,
     position,
     context: {
-      triggerKind: 1,
+      triggerKind: CompletionTriggerKind.Invoked,
     },
   }
 

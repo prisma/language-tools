@@ -100,14 +100,14 @@ export const supportedGeneratorFields: CompletionItem[] = convertToCompletionIte
 
 export function givenBlockAttributeParams({
   blockAttribute,
-  previewFeatures,
-  datasourceProvider,
   wordBeforePosition,
+  datasourceProvider,
+  previewFeatures,
 }: {
   blockAttribute: '@@unique' | '@@id' | '@@index' | '@@fulltext'
   wordBeforePosition: string
-  previewFeatures?: PreviewFeatures[] | undefined
   datasourceProvider: string | undefined
+  previewFeatures: PreviewFeatures[] | undefined
 }): CompletionItem[] {
   const items = convertToCompletionItems(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -141,10 +141,10 @@ export function givenBlockAttributeParams({
     // The type argument is only available for PostgreSQL on @@index
     items.push({
       label: 'type',
-      kind: 10,
+      kind: CompletionItemKind.Property,
       insertText: 'type: $0',
-      insertTextFormat: 2,
-      insertTextMode: 2,
+      insertTextFormat: InsertTextFormat.Snippet,
+      insertTextMode: InsertTextMode.adjustIndentation,
       documentation: {
         kind: 'markdown',
         value: 'Defines the access type of indexes: BTree (default) or Hash.',
@@ -164,7 +164,7 @@ export const sortValuesCompletionItems: CompletionItem[] = [
   {
     label: 'Asc',
     kind: CompletionItemKind.Enum,
-    insertTextFormat: 1,
+    insertTextFormat: InsertTextFormat.PlainText,
     documentation: {
       kind: 'markdown',
       value: 'Ascending',
@@ -173,7 +173,7 @@ export const sortValuesCompletionItems: CompletionItem[] = [
   {
     label: 'Desc',
     kind: CompletionItemKind.Enum,
-    insertTextFormat: 1,
+    insertTextFormat: InsertTextFormat.PlainText,
     documentation: {
       kind: 'markdown',
       value: 'Descending',
@@ -185,7 +185,7 @@ export const sqlServerClusteredValuesCompletionItems: CompletionItem[] = [
   {
     label: 'true',
     kind: CompletionItemKind.Value,
-    insertTextFormat: 1,
+    insertTextFormat: InsertTextFormat.PlainText,
     documentation: {
       kind: 'markdown',
       value: 'CLUSTERED',
@@ -194,7 +194,7 @@ export const sqlServerClusteredValuesCompletionItems: CompletionItem[] = [
   {
     label: 'false',
     kind: CompletionItemKind.Value,
-    insertTextFormat: 1,
+    insertTextFormat: InsertTextFormat.PlainText,
     documentation: {
       kind: 'markdown',
       value: 'NONCLUSTERED',
@@ -478,7 +478,7 @@ export function getNativeTypes(document: TextDocument, prismaType: string): Comp
         kind: CompletionItemKind.TypeParameter,
         insertText: `${element.name}($0)`,
         documentation: { kind: MarkupKind.Markdown, value: documentation },
-        insertTextFormat: 2,
+        insertTextFormat: InsertTextFormat.Snippet,
       })
     } else {
       suggestions.push({

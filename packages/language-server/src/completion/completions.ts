@@ -800,12 +800,14 @@ function getSuggestionsForAttribute(
         blockAttribute: '@@unique',
         wordBeforePosition,
         datasourceProvider,
+        previewFeatures,
       })
     } else if (attribute === '@@id') {
       blockAtrributeArguments = givenBlockAttributeParams({
         blockAttribute: '@@id',
         wordBeforePosition,
         datasourceProvider,
+        previewFeatures,
       })
     } else if (attribute === '@@index') {
       // Auto completion for Hash and BTree for PostgreSQL
@@ -848,14 +850,15 @@ function getSuggestionsForAttribute(
       blockAtrributeArguments = givenBlockAttributeParams({
         blockAttribute: '@@index',
         wordBeforePosition,
-        previewFeatures,
         datasourceProvider,
+        previewFeatures,
       })
     } else if (attribute === '@@fulltext') {
       blockAtrributeArguments = givenBlockAttributeParams({
         blockAttribute: '@@fulltext',
         wordBeforePosition,
         datasourceProvider,
+        previewFeatures,
       })
     }
 
