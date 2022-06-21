@@ -131,10 +131,34 @@ items.length`,
 }
 
 suite('Completions', function () {
-  // used both in generator and datasource
+  // used in more than 1 suite
   const fieldProvider = {
     label: 'provider',
     kind: CompletionItemKind.Field,
+  }
+  const staticValueTrue = {
+    label: 'true',
+    kind: CompletionItemKind.Value,
+  }
+  const staticValueFalse = {
+    label: 'false',
+    kind: CompletionItemKind.Value,
+  }
+  const fieldsProperty = {
+    label: 'fields',
+    kind: CompletionItemKind.Property,
+  }
+  const mapProperty = {
+    label: 'map',
+    kind: CompletionItemKind.Property,
+  }
+  const sortProperty = {
+    label: 'sort',
+    kind: CompletionItemKind.Property,
+  }
+  const nameProperty = {
+    label: 'name',
+    kind: CompletionItemKind.Property,
   }
 
   suite('BASE BLOCKS', () => {
@@ -411,14 +435,6 @@ suite('Completions', function () {
     }
     const blockAttributeIgnore = {
       label: '@@ignore',
-      kind: CompletionItemKind.Property,
-    }
-    const fieldsProperty = {
-      label: 'fields',
-      kind: CompletionItemKind.Property,
-    }
-    const mapProperty = {
-      label: 'map',
       kind: CompletionItemKind.Property,
     }
     const typeProperty = {
@@ -1697,14 +1713,6 @@ suite('Completions', function () {
       label: 'dbgenerated("")',
       kind: CompletionItemKind.Function,
     }
-    const staticValueTrue = {
-      label: 'true',
-      kind: CompletionItemKind.Value,
-    }
-    const staticValueFalse = {
-      label: 'false',
-      kind: CompletionItemKind.Value,
-    }
     const enumValueOne = {
       label: 'ADMIN',
       kind: CompletionItemKind.Value,
@@ -1714,10 +1722,6 @@ suite('Completions', function () {
       kind: CompletionItemKind.Value,
     }
 
-    const fieldsProperty = {
-      label: 'fields',
-      kind: CompletionItemKind.Property,
-    }
     const referencesProperty = {
       label: 'references',
       kind: CompletionItemKind.Property,
@@ -1732,18 +1736,6 @@ suite('Completions', function () {
     }
     const nameQuotesProperty = {
       label: '""',
-      kind: CompletionItemKind.Property,
-    }
-    const nameProperty = {
-      label: 'name',
-      kind: CompletionItemKind.Property,
-    }
-    const mapProperty = {
-      label: 'map',
-      kind: CompletionItemKind.Property,
-    }
-    const sortProperty = {
-      label: 'sort',
       kind: CompletionItemKind.Property,
     }
     const lengthProperty = {
@@ -2920,6 +2912,161 @@ suite('Completions', function () {
             items: [fieldsProperty, mapProperty],
           },
         })
+      })
+    })
+  })
+
+  suite('SQL Server: clustered', () => {
+    const clusteredProperty = {
+      label: 'clustered',
+      kind: CompletionItemKind.Property,
+    }
+
+    /*
+     * Block attributes
+     */
+    test('@@index([slug], |)', () => {
+      assertCompletion({
+        provider: 'sqlserver',
+        schema: /* Prisma */ `
+        model Post {
+          slug      String   @unique() @db.VarChar(3000)
+          @@index([slug], |)
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [fieldsProperty, mapProperty, clusteredProperty],
+        },
+      })
+    })
+    test('@@id([slug], |)', () => {
+      assertCompletion({
+        provider: 'sqlserver',
+        schema: /* Prisma */ `
+        model Post {
+          slug      String   @unique() @db.VarChar(3000)
+          @@id([slug], |)
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [fieldsProperty, nameProperty, mapProperty, clusteredProperty],
+        },
+      })
+    })
+    test('@@unique([slug], |)', () => {
+      assertCompletion({
+        provider: 'sqlserver',
+        schema: /* Prisma */ `
+        model Post {
+          slug      String   @unique() @db.VarChar(3000)
+          @@unique([slug], |)
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [fieldsProperty, nameProperty, mapProperty, clusteredProperty],
+        },
+      })
+    })
+
+    /*
+     * Field attributes
+     */
+    test('@id(|)', () => {
+      assertCompletion({
+        provider: 'sqlserver',
+        schema: /* Prisma */ `
+        model Post {
+          unique Int @id(|)
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [mapProperty, sortProperty, clusteredProperty],
+        },
+      })
+    })
+    test('@unique(|)', () => {
+      assertCompletion({
+        provider: 'sqlserver',
+        schema: /* Prisma */ `
+        model Post {
+          slug      String @unique(|) @db.VarChar(3000)
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [mapProperty, sortProperty, clusteredProperty],
+        },
+      })
+    })
+
+    /*
+     * Values
+     */
+    test('@id(clustered: |)', () => {
+      assertCompletion({
+        provider: 'sqlserver',
+        schema: /* Prisma */ `
+        model Post {
+          unique Int @id(clustered: |)
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [staticValueTrue, staticValueFalse],
+        },
+      })
+    })
+    test('@unique(clustered: |)', () => {
+      assertCompletion({
+        provider: 'sqlserver',
+        schema: /* Prisma */ `
+        model Post {
+          slug      String  @unique(clustered: |) @db.VarChar(3000)
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [staticValueTrue, staticValueFalse],
+        },
+      })
+    })
+    test('@@index([slug], clustered: |)', () => {
+      assertCompletion({
+        provider: 'sqlserver',
+        schema: /* Prisma */ `
+        model Post {
+          slug      String   @unique() @db.VarChar(3000)
+          @@index([slug], clustered: |)
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [staticValueTrue, staticValueFalse],
+        },
+      })
+    })
+    test('@@id([slug], clustered: |)', () => {
+      assertCompletion({
+        provider: 'sqlserver',
+        schema: /* Prisma */ `
+        model Post {
+          slug      String   @unique() @db.VarChar(3000)
+          @@id([slug], clustered: |)
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [staticValueTrue, staticValueFalse],
+        },
+      })
+    })
+    test('@@unique([slug], clustered: |)', () => {
+      assertCompletion({
+        provider: 'sqlserver',
+        schema: /* Prisma */ `
+        model Post {
+          slug      String   @unique() @db.VarChar(3000)
+          @@unique([slug], clustered: |)
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [staticValueTrue, staticValueFalse],
+        },
       })
     })
   })
