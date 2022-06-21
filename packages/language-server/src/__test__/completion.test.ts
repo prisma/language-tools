@@ -137,6 +137,36 @@ suite('Completions', function () {
     kind: CompletionItemKind.Field,
   }
 
+  suite('SCALAR LISTS', () => {
+    const fieldsPropertyEmptyList = {
+      label: '[]',
+      kind: CompletionItemKind.Value,
+    }
+
+    const functionDbGenerated = {
+      label: 'dbgenerated()',
+      kind: CompletionItemKind.Function,
+    }
+
+    test('@default', () => {
+      const scalarTypes = ['String', 'color', 'Int', 'Float', 'Boolean', 'DateTime'] as const
+
+      for (const scalarType of scalarTypes) {
+        assertCompletion({
+          schema: /* Prisma */ `
+            model Test {
+              id    Int             @id
+              lists ${scalarType}[] @default(|)
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [fieldsPropertyEmptyList, functionDbGenerated],
+          },
+        })
+      }
+    })
+  })
+
   suite('BASE BLOCKS', () => {
     test('Diagnoses block type suggestions for empty file', () => {
       assertCompletion({

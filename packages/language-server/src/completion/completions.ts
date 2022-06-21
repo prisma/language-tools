@@ -602,6 +602,14 @@ function getDefaultValues({
       break
   }
 
+  const isScalarList = fieldType.endsWith('[]')
+  if (isScalarList) {
+    return [
+      { label: '[]', kind: CompletionItemKind.Value },
+      { label: 'dbgenerated()', kind: CompletionItemKind.Function },
+    ]
+  }
+
   const modelOrEnum = getModelOrTypeOrEnumBlock(fieldType, lines)
   if (modelOrEnum && modelOrEnum.type === 'enum') {
     // get fields from enum block for suggestions
