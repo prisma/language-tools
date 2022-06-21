@@ -203,7 +203,7 @@ export const sqlServerClusteredValuesCompletionItems: CompletionItem[] = [
 ]
 
 export function givenFieldAttributeParams(
-  fieldAttribute: '@unique' | '@id' | '@@index',
+  fieldAttribute: '@unique' | '@id',
   previewFeatures: PreviewFeatures[] | undefined,
   datasourceProvider: string | undefined,
   wordBeforePosition: string,
