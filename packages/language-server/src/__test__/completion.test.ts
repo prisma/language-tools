@@ -1697,6 +1697,10 @@ suite('Completions', function () {
       label: 'dbgenerated("")',
       kind: CompletionItemKind.Function,
     }
+    const staticValueEmptyList = {
+      label: '[]',
+      kind: CompletionItemKind.Value,
+    }
     const staticValueTrue = {
       label: 'true',
       kind: CompletionItemKind.Value,
@@ -1892,6 +1896,31 @@ suite('Completions', function () {
     })
 
     suite('@default()', function () {
+      test('Scalar lists', () => {
+        const scalarTypes = ['String', 'color', 'Int', 'Float', 'Boolean', 'DateTime'] as const
+
+        for (const scalarType of scalarTypes) {
+          assertCompletion({
+            schema: /* Prisma */ `
+              model Test {
+                id    Int             @id
+                lists ${scalarType}[] @default(|)
+              }
+              
+              enum color {
+                RED
+                GREEN
+                BLUE
+              }
+              `,
+            expected: {
+              isIncomplete: false,
+              items: [staticValueEmptyList, functionDbGenerated],
+            },
+          })
+        }
+      })
+
       suite('No provider', function () {
         test('Int @id @default(|)', () => {
           assertCompletion({
