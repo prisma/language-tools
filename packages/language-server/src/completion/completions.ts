@@ -590,6 +590,17 @@ function getDefaultValues({
       break
   }
 
+  const isScalarList = fieldType.endsWith('[]')
+  if (isScalarList) {
+    suggestions.unshift({
+      label: '[]',
+      insertText: '[$0]',
+      insertTextFormat: InsertTextFormat.Snippet,
+      documentation: 'Set a default value on the list field',
+      kind: CompletionItemKind.Value,
+    })
+  }
+
   const modelOrEnum = getModelOrTypeOrEnumBlock(fieldType, lines)
   if (modelOrEnum && modelOrEnum.type === 'enum') {
     // get fields from enum block for suggestions
