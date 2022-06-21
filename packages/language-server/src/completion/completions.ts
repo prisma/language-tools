@@ -604,10 +604,12 @@ function getDefaultValues({
 
   const isScalarList = fieldType.endsWith('[]')
   if (isScalarList) {
-    return [
-      { label: '[]', kind: CompletionItemKind.Value },
-      { label: 'dbgenerated()', kind: CompletionItemKind.Function },
-    ]
+    suggestions.unshift({
+      label: '[]',
+      insertText: '[$0]',
+      documentation: 'Set a default value on the list field',
+      kind: CompletionItemKind.Value,
+    })
   }
 
   const modelOrEnum = getModelOrTypeOrEnumBlock(fieldType, lines)
