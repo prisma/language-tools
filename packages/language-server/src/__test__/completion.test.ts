@@ -378,29 +378,6 @@ suite('Completions', function () {
               label: 'binary',
               kind: CompletionItemKind.Constant,
             },
-          ],
-        },
-      })
-    })
-    // With Preview Feature Flag
-    test('dataProxy: engineType = ""', () => {
-      assertCompletion({
-        schema: /* Prisma */ `
-          generator engineTypeQuotes {
-            previewFeatures = ["dataProxy"]
-            engineType      = "|"
-          }`,
-        expected: {
-          isIncomplete: true,
-          items: [
-            {
-              label: 'library',
-              kind: CompletionItemKind.Constant,
-            },
-            {
-              label: 'binary',
-              kind: CompletionItemKind.Constant,
-            },
             {
               label: 'dataproxy',
               kind: CompletionItemKind.Constant,
@@ -528,7 +505,7 @@ suite('Completions', function () {
         test('MySQL', () => {
           assertCompletion({
             provider: 'mysql',
-            previewFeatures: ['fullTextIndex', 'extendedIndexes'],
+            previewFeatures: ['fullTextIndex'],
             schema: /* Prisma */ `
           model Fulltext {
             id      Int    @id
@@ -555,7 +532,7 @@ suite('Completions', function () {
         test('MongoDB', () => {
           assertCompletion({
             provider: 'mongodb',
-            previewFeatures: ['fullTextIndex', 'extendedIndexes'],
+            previewFeatures: ['fullTextIndex'],
             schema: /* Prisma */ `
           model Fulltext {
             id      String @id @map("_id") @db.ObjectId
@@ -581,7 +558,7 @@ suite('Completions', function () {
         test('PostgreSQL', () => {
           assertCompletion({
             provider: 'postgresql',
-            previewFeatures: ['fullTextIndex', 'extendedIndexes'],
+            previewFeatures: ['fullTextIndex'],
             schema: /* Prisma */ `
             model Type {
               id    Int @id
@@ -1144,7 +1121,6 @@ suite('Completions', function () {
         test('@@index(|)', () => {
           assertCompletion({
             provider: 'postgresql',
-            previewFeatures: ['extendedIndexes'],
             schema: /* Prisma */ `
           model Type {
             id    Int @id
@@ -1163,7 +1139,6 @@ suite('Completions', function () {
         test('@@index([title], |) - postgresql', () => {
           assertCompletion({
             provider: 'postgresql',
-            previewFeatures: ['extendedIndexes'],
             schema: /* Prisma */ `
         model Type {
           id    Int @id
@@ -1182,7 +1157,6 @@ suite('Completions', function () {
         test('@@index([title], type: |) - postgresql', () => {
           assertCompletion({
             provider: 'postgresql',
-            previewFeatures: ['extendedIndexes'],
             schema: /* Prisma */ `
         model Type {
           id    Int @id
@@ -1204,7 +1178,6 @@ suite('Completions', function () {
         test('@@index([title], type: Hash, |) - postgresql', () => {
           assertCompletion({
             provider: 'postgresql',
-            previewFeatures: ['extendedIndexes'],
             schema: /* Prisma */ `
         model Type {
           id    Int @id
@@ -1227,7 +1200,7 @@ suite('Completions', function () {
       test('@@fulltext(|) - mysql', () => {
         assertCompletion({
           provider: 'mysql',
-          previewFeatures: ['fullTextIndex', 'extendedIndexes'],
+          previewFeatures: ['fullTextIndex'],
           schema: /* Prisma */ `
           model Fulltext {
             id      Int    @id
@@ -1247,7 +1220,7 @@ suite('Completions', function () {
       test('@@fulltext([title, content], |) - mysql', () => {
         assertCompletion({
           provider: 'mysql',
-          previewFeatures: ['fullTextIndex', 'extendedIndexes'],
+          previewFeatures: ['fullTextIndex'],
           schema: /* Prisma */ `
           model Fulltext {
             id      Int    @id
@@ -1268,7 +1241,7 @@ suite('Completions', function () {
       test('@@fulltext(|) - mongodb', () => {
         assertCompletion({
           provider: 'mongodb',
-          previewFeatures: ['fullTextIndex', 'extendedIndexes'],
+          previewFeatures: ['fullTextIndex'],
           schema: /* Prisma */ `
           model Fulltext {
             id      String @id @map("_id") @db.ObjectId
@@ -1299,7 +1272,7 @@ suite('Completions', function () {
       test('@@fulltext([title, content], |) - mongodb', () => {
         assertCompletion({
           provider: 'mongodb',
-          previewFeatures: ['fullTextIndex', 'extendedIndexes'],
+          previewFeatures: ['fullTextIndex'],
           schema: /* Prisma */ `
 
           model Fulltext {
@@ -1518,7 +1491,6 @@ suite('Completions', function () {
       test('String', () => {
         assertCompletion({
           provider: 'cockroachdb',
-          previewFeatures: ['cockroachdb'],
           schema: /* Prisma */ `
         model Post {
           something String @db.|
@@ -1542,7 +1514,6 @@ suite('Completions', function () {
       test('Boolean', () => {
         assertCompletion({
           provider: 'cockroachdb',
-          previewFeatures: ['cockroachdb'],
           schema: /* Prisma */ `
         model Post {
           something Boolean @db.|
@@ -1557,7 +1528,6 @@ suite('Completions', function () {
       test('Int', () => {
         assertCompletion({
           provider: 'cockroachdb',
-          previewFeatures: ['cockroachdb'],
           schema: /* Prisma */ `
         model Post {
           something Int @db.|
@@ -1576,7 +1546,6 @@ suite('Completions', function () {
       test('Float', () => {
         assertCompletion({
           provider: 'cockroachdb',
-          previewFeatures: ['cockroachdb'],
           schema: /* Prisma */ `
         model Post {
           something Float @db.|
@@ -1594,7 +1563,6 @@ suite('Completions', function () {
       test('DateTime', () => {
         assertCompletion({
           provider: 'cockroachdb',
-          previewFeatures: ['cockroachdb'],
           schema: /* Prisma */ `
         model Post {
           something DateTime @db.|
@@ -1615,7 +1583,6 @@ suite('Completions', function () {
       test('Json', () => {
         assertCompletion({
           provider: 'cockroachdb',
-          previewFeatures: ['cockroachdb'],
           schema: /* Prisma */ `
         model Post {
           something Json @db.|
@@ -1630,7 +1597,6 @@ suite('Completions', function () {
       test('Diagnoses Native Types suggestions - CockroachDB - Bytes', () => {
         assertCompletion({
           provider: 'cockroachdb',
-          previewFeatures: ['cockroachdb'],
           schema: /* Prisma */ `
         model Post {
           something Bytes @db.|
@@ -1645,7 +1611,6 @@ suite('Completions', function () {
       test('Decimal', () => {
         assertCompletion({
           provider: 'cockroachdb',
-          previewFeatures: ['cockroachdb'],
           schema: /* Prisma */ `
         model Post {
           something Decimal @db.|
@@ -1660,7 +1625,6 @@ suite('Completions', function () {
       test('BigInt', () => {
         assertCompletion({
           provider: 'cockroachdb',
-          previewFeatures: ['cockroachdb'],
           schema: /* Prisma */ `
         model Post {
           something BigInt @db.|
@@ -2627,11 +2591,10 @@ suite('Completions', function () {
           },
         })
       })
-      // previewFeatures = ["extendedIndexes"]
       test('extendedIndexes: @id(|)', () => {
         assertCompletion({
           provider: 'mysql',
-          previewFeatures: ['fullTextIndex', 'extendedIndexes'],
+          previewFeatures: ['fullTextIndex'],
           schema: /* Prisma */ `
           model Id {
             id String @id(|) @db.VarChar(3000)
@@ -2646,7 +2609,7 @@ suite('Completions', function () {
       test('extendedIndexes: @@id([title(length: 100, |), abstract()])', () => {
         assertCompletion({
           provider: 'mysql',
-          previewFeatures: ['fullTextIndex', 'extendedIndexes'],
+          previewFeatures: ['fullTextIndex'],
           schema: /* Prisma */ `
           
           model Fulltext {
@@ -2708,7 +2671,7 @@ suite('Completions', function () {
       test('extendedIndexes: @@id([title(length: 100, ), abstract(|)])', () => {
         assertCompletion({
           provider: 'mysql',
-          previewFeatures: ['fullTextIndex', 'extendedIndexes'],
+          previewFeatures: ['fullTextIndex'],
           schema: /* Prisma */ `
           model Fulltext {
             id      Int    @id
@@ -2772,7 +2735,7 @@ suite('Completions', function () {
             }`,
           expected: {
             isIncomplete: false,
-            items: [mapProperty],
+            items: [mapProperty, sortProperty],
           },
         })
       })
@@ -2804,11 +2767,9 @@ suite('Completions', function () {
           },
         })
       })
-      // previewFeatures = ["extendedIndexes"]
       test('extendedIndexes: @unique(|)', () => {
         assertCompletion({
           provider: 'mysql',
-          previewFeatures: ['extendedIndexes'],
           schema: /* Prisma */ `
             model Unique {
               unique Int @unique(|)
@@ -2822,7 +2783,6 @@ suite('Completions', function () {
       test('extendedIndexes: @unique(sort: |)', () => {
         assertCompletion({
           provider: 'mysql',
-          previewFeatures: ['extendedIndexes'],
           schema: /* Prisma */ `
             model Post {
               slug String @unique(sort: |, length: 42) @db.VarChar(3000)
@@ -2863,11 +2823,9 @@ suite('Completions', function () {
           },
         })
       })
-      // previewFeatures = ["extendedIndexes"]
       test('extendedIndexes: @@index([author, created_at(sort: |)])', () => {
         assertCompletion({
           provider: 'mysql',
-          previewFeatures: ['extendedIndexes'],
           schema: /* Prisma */ `
             model Post {
               title      String   @db.VarChar(300)
@@ -2882,7 +2840,6 @@ suite('Completions', function () {
       test('extendedIndexes: @@index([author, |])', () => {
         assertCompletion({
           provider: 'mysql',
-          previewFeatures: ['extendedIndexes'],
           schema: /* Prisma */ `
             model Post {
               title      String   @db.VarChar(300)
@@ -2911,7 +2868,6 @@ suite('Completions', function () {
       test('extendedIndexes: @@index([|])', () => {
         assertCompletion({
           provider: 'mysql',
-          previewFeatures: ['extendedIndexes'],
           schema: /* Prisma */ `
             model Post {
               title      String   @db.VarChar(300)
