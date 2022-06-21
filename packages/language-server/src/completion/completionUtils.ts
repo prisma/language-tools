@@ -98,26 +98,53 @@ export const supportedGeneratorFields: CompletionItem[] = convertToCompletionIte
   CompletionItemKind.Field,
 )
 
-export function givenBlockAttributeParams(
-  blockAttribute: '@@unique' | '@@id' | '@@index' | '@@fulltext',
-  previewFeatures?: PreviewFeatures[] | undefined,
-  datasourceProvider?: string | undefined,
-): CompletionItem[] {
+export function givenBlockAttributeParams({
+  blockAttribute,
+  wordBeforePosition,
+  datasourceProvider,
+  previewFeatures,
+}: {
+  blockAttribute: '@@unique' | '@@id' | '@@index' | '@@fulltext'
+  wordBeforePosition: string
+  datasourceProvider: string | undefined
+  previewFeatures: PreviewFeatures[] | undefined
+}): CompletionItem[] {
   const items = convertToCompletionItems(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     completions.blockAttributes.find((item) => item.label.includes(blockAttribute))!.params,
     CompletionItemKind.Property,
   )
 
-  if (blockAttribute === '@@index' && datasourceProvider && ['postgresql', 'postgres'].includes(datasourceProvider)) {
+  // SQL Server only, suggest clustered
+  if (datasourceProvider === 'sqlserver' && blockAttribute !== '@@fulltext') {
+    // Auto completion for SQL Server only, clustered: true | false
+    if (wordBeforePosition.includes('clustered:')) {
+      return sqlServerClusteredValuesCompletionItems
+    } else {
+      // add clustered to suggestions
+      items.push({
+        label: 'clustered',
+        insertText: 'clustered: $0',
+        kind: CompletionItemKind.Property,
+        documentation:
+          'An index, unique constraint or primary key can be created as clustered or non-clustered; altering the storage and retrieve behavior of the index.',
+      })
+    }
+  }
+  // PostgreSQL only, suggest type
+  else if (
+    blockAttribute === '@@index' &&
+    datasourceProvider &&
+    ['postgresql', 'postgres'].includes(datasourceProvider)
+  ) {
     // TODO figure out if we need to add cockroachdb provider here
     // The type argument is only available for PostgreSQL on @@index
     items.push({
       label: 'type',
-      kind: 10,
+      kind: CompletionItemKind.Property,
       insertText: 'type: $0',
-      insertTextFormat: 2,
-      insertTextMode: 2,
+      insertTextFormat: InsertTextFormat.Snippet,
+      insertTextMode: InsertTextMode.adjustIndentation,
       documentation: {
         kind: 'markdown',
         value: 'Defines the access type of indexes: BTree (default) or Hash.',
@@ -133,11 +160,11 @@ export const blockAttributes: CompletionItem[] = convertAttributesToCompletionIt
   CompletionItemKind.Property,
 )
 
-export const sortAutoCompletionItems: CompletionItem[] = [
+export const sortValuesCompletionItems: CompletionItem[] = [
   {
     label: 'Asc',
     kind: CompletionItemKind.Enum,
-    insertTextFormat: 1,
+    insertTextFormat: InsertTextFormat.PlainText,
     documentation: {
       kind: 'markdown',
       value: 'Ascending',
@@ -146,10 +173,31 @@ export const sortAutoCompletionItems: CompletionItem[] = [
   {
     label: 'Desc',
     kind: CompletionItemKind.Enum,
-    insertTextFormat: 1,
+    insertTextFormat: InsertTextFormat.PlainText,
     documentation: {
       kind: 'markdown',
       value: 'Descending',
+    },
+  },
+]
+
+export const sqlServerClusteredValuesCompletionItems: CompletionItem[] = [
+  {
+    label: 'true',
+    kind: CompletionItemKind.Value,
+    insertTextFormat: InsertTextFormat.PlainText,
+    documentation: {
+      kind: 'markdown',
+      value: 'CLUSTERED',
+    },
+  },
+  {
+    label: 'false',
+    kind: CompletionItemKind.Value,
+    insertTextFormat: InsertTextFormat.PlainText,
+    documentation: {
+      kind: 'markdown',
+      value: 'NONCLUSTERED',
     },
   },
 ]
@@ -166,7 +214,31 @@ export function givenFieldAttributeParams(
     CompletionItemKind.Property,
   )
 
-  return filterSortLengthBasedOnInput(fieldAttribute, previewFeatures, datasourceProvider, wordBeforePosition, items)
+  const completionItems = filterSortLengthBasedOnInput(
+    fieldAttribute,
+    previewFeatures,
+    datasourceProvider,
+    wordBeforePosition,
+    items,
+  )
+
+  if (datasourceProvider === 'sqlserver') {
+    // Auto completion for SQL Server only, clustered: true | false
+    if (wordBeforePosition.includes('clustered:')) {
+      return sqlServerClusteredValuesCompletionItems
+    }
+    // add clustered propery to completion items
+    completionItems.push({
+      label: 'clustered',
+      insertText: 'clustered: $0',
+      insertTextFormat: InsertTextFormat.Snippet,
+      kind: CompletionItemKind.Property,
+      documentation:
+        'An index, unique constraint or primary key can be created as clustered or non-clustered; altering the storage and retrieve behavior of the index.',
+    })
+  }
+
+  return completionItems
 }
 
 export function filterSortLengthBasedOnInput(
@@ -176,60 +248,55 @@ export function filterSortLengthBasedOnInput(
   wordBeforePosition: string,
   items: CompletionItem[],
 ): CompletionItem[] {
-  // Auto completion for Desc | Asc
+  /*
+   * 1 - Autocomplete values
+   */
+  // Auto completion for sort: Desc | Asc
   // includes because `@unique(sort: |)` means wordBeforePosition = '@unique(sort:'
   if (wordBeforePosition.includes('sort:')) {
-    return sortAutoCompletionItems
-  }
-
-  // The length argument is available on MySQL only on the
-  // @id, @@id, @unique, @@unique and @@index fields.
-
-  // The sort argument is available for all databases on the
-  // @unique, @@unique and @@index fields.
-  // Additionally, SQL Server also allows it on @id and @@id.
-
-  // Which translates too
-  // - `length` argument for `@id`, `@@id`, `@unique`, `@@unique` and `@@index` (MySQL only)
-  // - Note that on the `@@` the argument is on available a field - not on the top level attribute
-  // - `sort` argument for `@unique`, `@@unique` and `@@index` (Additionally `@id` and `@@id` for SQL Server)
-
-  if (datasourceProvider === 'mysql') {
-    if (['@unique', '@@unique', '@@index'].includes(attribute)) {
-      return items
-    } else {
-      // filter sort out
-      return items.filter((arg) => arg.label !== 'sort')
-    }
-  } else if (datasourceProvider === 'sqlserver') {
-    // push clustered
-    items.push({
-      label: 'clustered',
-      insertText: 'clustered: $0',
-      kind: CompletionItemKind.Property,
-      documentation:
-        'An index, unique constraint or primary key can be created as clustered or non-clustered; altering the storage and retrieve behavior of the index.',
-    })
-
-    if (['@unique', '@@unique', '@@index', '@id', '@@id'].includes(attribute)) {
-      // only filter length out
-      return items.filter((arg) => arg.label !== 'length')
-    } else {
-      // filter length and sort out
-      return items.filter((arg) => arg.label !== 'length' && arg.label !== 'sort')
-    }
+    return sortValuesCompletionItems
   } else {
-    if (['@unique', '@@unique', '@@index'].includes(attribute)) {
-      // only filter length out
-      return items.filter((arg) => arg.label !== 'length')
+    /*
+     * 2 - Autocomplete properties
+     */
+
+    // The length argument is available on MySQL only on the
+    // @id, @@id, @unique, @@unique and @@index fields.
+
+    // The sort argument is available for all databases on the
+    // @unique, @@unique and @@index fields.
+    // Additionally, SQL Server also allows it on @id and @@id.
+
+    // Which translates too
+    // - `length` argument for `@id`, `@@id`, `@unique`, `@@unique` and `@@index` (MySQL only)
+    // - Note that on the `@@` the argument is on available a field - not on the top level attribute
+    // - `sort` argument for `@unique`, `@@unique` and `@@index` (Additionally `@id` and `@@id` for SQL Server)
+
+    if (datasourceProvider === 'mysql') {
+      if (['@unique', '@@unique', '@@index'].includes(attribute)) {
+        return items
+      } else {
+        // filter sort out
+        return items.filter((arg) => arg.label !== 'sort')
+      }
+    } else if (datasourceProvider === 'sqlserver') {
+      if (['@unique', '@@unique', '@@index', '@id', '@@id'].includes(attribute)) {
+        // only filter length out
+        return items.filter((arg) => arg.label !== 'length')
+      } else {
+        // filter length and sort out
+        return items.filter((arg) => arg.label !== 'length' && arg.label !== 'sort')
+      }
     } else {
-      // filter length and sort out
-      return items.filter((arg) => arg.label !== 'length' && arg.label !== 'sort')
+      if (['@unique', '@@unique', '@@index'].includes(attribute)) {
+        // only filter length out
+        return items.filter((arg) => arg.label !== 'length')
+      } else {
+        // filter length and sort out
+        return items.filter((arg) => arg.label !== 'length' && arg.label !== 'sort')
+      }
     }
   }
-
-  // filter length and sort out
-  return items.filter((arg) => arg.label !== 'length' && arg.label !== 'sort')
 }
 
 export const fieldAttributes: CompletionItem[] = convertAttributesToCompletionItems(
@@ -412,7 +479,7 @@ export function getNativeTypes(document: TextDocument, prismaType: string): Comp
         kind: CompletionItemKind.TypeParameter,
         insertText: `${element.name}($0)`,
         documentation: { kind: MarkupKind.Markdown, value: documentation },
-        insertTextFormat: 2,
+        insertTextFormat: InsertTextFormat.Snippet,
       })
     } else {
       suggestions.push({

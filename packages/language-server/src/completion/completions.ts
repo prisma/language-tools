@@ -435,7 +435,6 @@ function getDefaultValues({
   // Completions for sequence(|)
   if (datasourceProvider === 'cockroachdb') {
     if (wordsBeforePosition.some((a) => a.includes('sequence('))) {
-      console.log('inside sequence')
       const sequenceProperties = ['virtual', 'minValue', 'maxValue', 'cache', 'increment', 'start']
 
       // No suggestions if virtual is present
@@ -620,15 +619,13 @@ function getSuggestionsForAttribute(
     lines,
     block,
     position,
-  }: // document,
-  {
+  }: {
     attribute?: '@relation'
     wordsBeforePosition: string[]
     untrimmedCurrentLine: string
     lines: string[]
     block: Block
     position: Position
-    // document: TextDocument
   }, // eslint-disable-line @typescript-eslint/no-unused-vars
 ): CompletionList | undefined {
   const firstWordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
@@ -636,7 +633,7 @@ function getSuggestionsForAttribute(
   const wordBeforePosition = firstWordBeforePosition === '' ? secondWordBeforePosition : firstWordBeforePosition
 
   let suggestions: CompletionItem[] = []
-  // create deep copy with klona
+
   // We can filter on the datasource
   const datasourceProvider = getFirstDatasourceProvider(lines)
   // We can filter on the previewFeatures enabled
@@ -692,34 +689,42 @@ function getSuggestionsForAttribute(
     // @unique, @@unique and @@index fields.
     // Additionally, SQL Server also allows it on @id and @@id.
 
-    if (isInsideAttribute(untrimmedCurrentLine, position, '[]')) {
+    let attribute: '@@unique' | '@unique' | '@@id' | '@id' | '@@index' | '@@fulltext' | undefined = undefined
+    if (wordsBeforePosition.some((a) => a.includes('@@id'))) {
+      attribute = '@@id'
+    } else if (wordsBeforePosition.some((a) => a.includes('@id'))) {
+      attribute = '@id'
+    } else if (wordsBeforePosition.some((a) => a.includes('@@unique'))) {
+      attribute = '@@unique'
+    } else if (wordsBeforePosition.some((a) => a.includes('@unique'))) {
+      attribute = '@unique'
+    } else if (wordsBeforePosition.some((a) => a.includes('@@index'))) {
+      attribute = '@@index'
+    } else if (wordsBeforePosition.some((a) => a.includes('@@fulltext'))) {
+      attribute = '@@fulltext'
+    }
+
+    /**
+     * inside []
+     * suggest composite types for MongoDB
+     * suggest fields and extendedIndexes arguments (sort / length)
+     *
+     * Examples
+     * field attribute: slug String @unique(sort: Desc, length: 42) @db.VarChar(3000)
+     * block attribute: @@id([title(length: 100, sort: Desc), abstract(length: 10)])
+     */
+    if (attribute && attribute !== '@@fulltext' && isInsideAttribute(untrimmedCurrentLine, position, '[]')) {
       if (isInsideFieldArgument(untrimmedCurrentLine, position)) {
         // extendedIndexes
-        let attribute: '@@unique' | '@unique' | '@@id' | '@id' | '@@index' | undefined = undefined
-
-        if (wordsBeforePosition.some((a) => a.includes('@@id'))) {
-          attribute = '@@id'
-        } else if (wordsBeforePosition.some((a) => a.includes('@id'))) {
-          attribute = '@id'
-        } else if (wordsBeforePosition.some((a) => a.includes('@@unique'))) {
-          attribute = '@@unique'
-        } else if (wordsBeforePosition.some((a) => a.includes('@unique'))) {
-          attribute = '@unique'
-        } else if (wordsBeforePosition.some((a) => a.includes('@@index'))) {
-          attribute = '@@index'
-        }
-
-        if (attribute) {
-          return {
-            items: filterSortLengthBasedOnInput(
-              attribute,
-              previewFeatures,
-              datasourceProvider,
-              wordBeforePosition,
-              sortLengthProperties,
-            ),
-            isIncomplete: false,
-          }
+        return {
+          items: filterSortLengthBasedOnInput(
+            attribute,
+            previewFeatures,
+            datasourceProvider,
+            wordBeforePosition,
+            sortLengthProperties,
+          ),
+          isIncomplete: false,
         }
       }
 
@@ -801,11 +806,21 @@ function getSuggestionsForAttribute(
 
     // "@@" block attributes
     let blockAtrributeArguments: CompletionItem[] = []
-    if (wordsBeforePosition.some((a) => a.includes('@@unique'))) {
-      blockAtrributeArguments = givenBlockAttributeParams('@@unique')
-    } else if (wordsBeforePosition.some((a) => a.includes('@@id'))) {
-      blockAtrributeArguments = givenBlockAttributeParams('@@id')
-    } else if (wordsBeforePosition.some((a) => a.includes('@@index'))) {
+    if (attribute === '@@unique') {
+      blockAtrributeArguments = givenBlockAttributeParams({
+        blockAttribute: '@@unique',
+        wordBeforePosition,
+        datasourceProvider,
+        previewFeatures,
+      })
+    } else if (attribute === '@@id') {
+      blockAtrributeArguments = givenBlockAttributeParams({
+        blockAttribute: '@@id',
+        wordBeforePosition,
+        datasourceProvider,
+        previewFeatures,
+      })
+    } else if (attribute === '@@index') {
       // Auto completion for Hash and BTree for PostgreSQL
       // includes because `@@index(type: |)` means wordBeforePosition = '@@index(type:'
       // TODO figure out if we need to add cockroachdb provider here
@@ -843,9 +858,19 @@ function getSuggestionsForAttribute(
         }
       }
 
-      blockAtrributeArguments = givenBlockAttributeParams('@@index', previewFeatures, datasourceProvider)
-    } else if (wordsBeforePosition.some((a) => a.includes('@@fulltext'))) {
-      blockAtrributeArguments = givenBlockAttributeParams('@@fulltext')
+      blockAtrributeArguments = givenBlockAttributeParams({
+        blockAttribute: '@@index',
+        wordBeforePosition,
+        datasourceProvider,
+        previewFeatures,
+      })
+    } else if (attribute === '@@fulltext') {
+      blockAtrributeArguments = givenBlockAttributeParams({
+        blockAttribute: '@@fulltext',
+        wordBeforePosition,
+        datasourceProvider,
+        previewFeatures,
+      })
     }
 
     if (blockAtrributeArguments.length) {
@@ -853,21 +878,21 @@ function getSuggestionsForAttribute(
     } else {
       // "@" field attributes
       let fieldAtrributeArguments: CompletionItem[] = []
-      if (wordsBeforePosition.some((a) => a.includes('@unique'))) {
+      if (attribute === '@unique') {
         fieldAtrributeArguments = givenFieldAttributeParams(
           '@unique',
           previewFeatures,
           datasourceProvider,
           wordBeforePosition,
         )
-      } else if (wordsBeforePosition.some((a) => a.includes('@id'))) {
+      } else if (attribute === '@id') {
         fieldAtrributeArguments = givenFieldAttributeParams(
           '@id',
           previewFeatures,
           datasourceProvider,
           wordBeforePosition,
         )
-      } else if (wordsBeforePosition.some((a) => a.includes('@@index'))) {
+      } else if (attribute === '@@index') {
         fieldAtrributeArguments = givenFieldAttributeParams(
           '@@index',
           previewFeatures,
