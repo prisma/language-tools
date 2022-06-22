@@ -1219,6 +1219,66 @@ suite('Completions', function () {
             },
           })
         })
+        test('@@index([title(|)]) - postgresql', () => {
+          assertCompletion({
+            provider: 'postgresql',
+            schema: /* Prisma */ `
+        model Type {
+          id    Int @id
+          title   String
+          content String
+          
+          @@index([title(|)])
+        }
+      `,
+            expected: {
+              isIncomplete: false,
+              items: [
+                { label: 'ops', kind: CompletionItemKind.Property },
+                { label: 'sort', kind: CompletionItemKind.Property },
+              ],
+            },
+          })
+        })
+        test('@@index([title(ops: |)]) - postgresql', () => {
+          assertCompletion({
+            provider: 'postgresql',
+            schema: /* Prisma */ `
+        model Type {
+          id    Int @id
+          title   String @db.Inet
+          content String
+          
+          @@index([title(ops: |)])
+        }
+      `,
+            expected: {
+              isIncomplete: false,
+              items: [{ label: 'raw', kind: CompletionItemKind.Function }],
+            },
+          })
+        })
+        test('@@index([title(ops: |)], type: Gist) - postgresql', () => {
+          assertCompletion({
+            provider: 'postgresql',
+            schema: /* Prisma */ `
+        model Type {
+          id    Int @id
+          title   String @db.Inet
+          content String
+          
+          @@index([title(ops: |)], type: Gist)
+        }
+      `,
+            expected: {
+              isIncomplete: false,
+              items: [
+                { label: 'InetOps', kind: CompletionItemKind.Enum },
+                { label: 'raw', kind: CompletionItemKind.Function },
+              ],
+            },
+          })
+        })
       })
     })
 
@@ -2642,7 +2702,6 @@ suite('Completions', function () {
           provider: 'mysql',
           previewFeatures: ['fullTextIndex'],
           schema: /* Prisma */ `
-          
           model Fulltext {
             id      Int    @id
             title   String @db.VarChar(255)
@@ -2651,34 +2710,27 @@ suite('Completions', function () {
             @@fulltext()
             @@fulltext([title, content], )
           }
-          
           model Id {
-            
             id String @id() @db.VarChar(3000)
           }
-          
           model IdWithLength {
             id String @id(length: 100) @db.VarChar(3000)
           }
-          
           model Unique {
             unique Int @unique()
           }
-          
           model CompoundId {
             id_1 String @db.VarChar(3000)
             id_2 String @db.VarChar(3000)
           
             @@id([id_1(length: 100), id_2(length: 10)])
           }
-          
           model CompoundUnique {
             unique_1 Int
             unique_2 Int
           
             @@unique([unique_1(sort: Desc), unique_2])
           }
-          
           model Post {
             title      String   @db.VarChar(300)
             abstract   String   @db.VarChar(3000)
@@ -2712,34 +2764,27 @@ suite('Completions', function () {
             @@fulltext()
             @@fulltext([title, content], )
           }
-          
           model Id {
-            
             id String @id() @db.VarChar(3000)
           }
-          
           model IdWithLength {
             id String @id(length: 100) @db.VarChar(3000)
           }
-          
           model Unique {
             unique Int @unique()
           }
-          
           model CompoundId {
             id_1 String @db.VarChar(3000)
             id_2 String @db.VarChar(3000)
           
             @@id([id_1(length: 100), id_2(length: 10)])
           }
-          
           model CompoundUnique {
             unique_1 Int
             unique_2 Int
           
             @@unique([unique_1(sort: Desc), unique_2])
           }
-          
           model Post {
             title      String   @db.VarChar(300)
             abstract   String   @db.VarChar(3000)
