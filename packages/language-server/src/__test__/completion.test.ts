@@ -1191,8 +1191,12 @@ suite('Completions', function () {
             expected: {
               isIncomplete: false,
               items: [
-                { label: 'Hash', kind: CompletionItemKind.Enum },
                 { label: 'BTree', kind: CompletionItemKind.Enum },
+                { label: 'Hash', kind: CompletionItemKind.Enum },
+                { label: 'Gist', kind: CompletionItemKind.Enum },
+                { label: 'Gin', kind: CompletionItemKind.Enum },
+                { label: 'SpGist', kind: CompletionItemKind.Enum },
+                { label: 'Brin', kind: CompletionItemKind.Enum },
               ],
             },
           })

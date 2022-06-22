@@ -821,43 +821,6 @@ function getSuggestionsForAttribute(
         previewFeatures,
       })
     } else if (attribute === '@@index') {
-      // Auto completion for Hash and BTree for PostgreSQL
-      // includes because `@@index(type: |)` means wordBeforePosition = '@@index(type:'
-      // TODO figure out if we need to add cockroachdb provider here
-      if (
-        datasourceProvider &&
-        ['postgresql', 'postgres'].includes(datasourceProvider) &&
-        wordBeforePosition.includes('type:')
-      ) {
-        // TODO move away
-        const indexTypeCompletionItems: CompletionItem[] = [
-          {
-            label: 'Hash',
-            kind: CompletionItemKind.Enum,
-            insertTextFormat: InsertTextFormat.PlainText,
-            documentation: {
-              kind: 'markdown',
-              value:
-                'The Hash index can perform a faster lookup than a B-Tree index. However, the key downside of the Hash index is that its use is limited to equality operators that will perform matching operations.',
-            },
-          },
-          {
-            label: 'BTree',
-            kind: CompletionItemKind.Enum,
-            insertTextFormat: InsertTextFormat.PlainText,
-            documentation: {
-              kind: 'markdown',
-              value:
-                "The B-tree index is the default, it creates a self-balanced tree, in other words, it sorts itself. It will maintain its balance throughout operations such as insertions, deletions and searches. Using a B-tree index speeds up scan operations because it doesn't have to scan pages or records sequentially in a linear fashion.",
-            },
-          },
-        ]
-        return {
-          items: indexTypeCompletionItems,
-          isIncomplete: false,
-        }
-      }
-
       blockAtrributeArguments = givenBlockAttributeParams({
         blockAttribute: '@@index',
         wordBeforePosition,
