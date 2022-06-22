@@ -717,7 +717,6 @@ function getSuggestionsForAttribute(
       if (isInsideFieldArgument(untrimmedCurrentLine, position)) {
         // extendedIndexes
         const items: CompletionItem[] = []
-        // https://github.com/prisma/language-tools/issues/1139
         // https://www.notion.so/prismaio/Proposal-More-PostgreSQL-index-types-GiST-GIN-SP-GiST-and-BRIN-e27ef762ee4846a9a282eec1a5129270
         if (datasourceProvider === 'postgresql' && attribute === '@@index') {
           items.push({
