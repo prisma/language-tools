@@ -722,6 +722,7 @@ function getSuggestionsForAttribute(
           items.push({
             label: 'ops',
             insertText: 'ops: $0',
+            insertTextFormat: InsertTextFormat.Snippet,
             kind: CompletionItemKind.Property,
             documentation: 'Specify the operator class for an indexed field.',
           })
