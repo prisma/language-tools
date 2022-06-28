@@ -9,6 +9,7 @@ import {
 } from 'vscode-languageserver'
 import levenshtein from 'js-levenshtein'
 import { convertDocumentTextToTrimmedLineArray, getAllRelationNames } from './util'
+import prismaFmt from '@prisma/prisma-fmt-wasm'
 
 function getInsertRange(document: TextDocument): Range {
   // to insert text into a document create a range where start === end.
@@ -88,7 +89,8 @@ export function quickFix(textDocument: TextDocument, params: CodeActionParams): 
     return []
   }
 
-  const codeActions: CodeAction[] = []
+  const actionData: string = prismaFmt.code_actions(textDocument.getText(), JSON.stringify(params))
+  const codeActions: CodeAction[] = JSON.parse(actionData)
 
   for (const diag of diagnostics) {
     if (
