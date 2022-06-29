@@ -15,7 +15,10 @@ function assertQuickFix(expected: CodeAction[], fixturePath: string, range: Rang
   const document: TextDocument = getTextDocument(fixturePath)
 
   const params: CodeActionParams = {
-    textDocument: document,
+    textDocument: {
+      // prisma-fmt expects a URI starting with file:///, if not it will return nothing ([])
+      uri: `file:///${document.uri.substring(2)}`,
+    },
     context: {
       diagnostics,
     },
@@ -40,6 +43,7 @@ function createDiagnosticErrorUnknownType(unknownType: string, range: Range): Di
 suite('Quick Fixes', () => {
   suite('from TS', () => {
     const fixturePath = './codeActions/quickFixes.prisma'
+    const expectedPath = `file:///${fixturePath.substring(2)}`
 
     const rangeNewModel: Range = {
       start: { line: 16, character: 9 },
@@ -71,7 +75,7 @@ suite('Quick Fixes', () => {
             diagnostics: diagnosticsNewModel,
             edit: {
               changes: {
-                [fixturePath]: [
+                [expectedPath]: [
                   {
                     range: rangeEdit,
                     newText: '\nmodel NewModel {\n\n}\n',
@@ -86,7 +90,7 @@ suite('Quick Fixes', () => {
             diagnostics: diagnosticsNewModel,
             edit: {
               changes: {
-                [fixturePath]: [
+                [expectedPath]: [
                   {
                     range: rangeEdit,
                     newText: '\nenum NewModel {\n\n}\n',
@@ -108,7 +112,7 @@ suite('Quick Fixes', () => {
               diagnostics: diagnosticsNewEnum,
               edit: {
                 changes: {
-                  [fixturePath]: [
+                  [expectedPath]: [
                     {
                       range: rangeEdit,
                       newText: '\nmodel NewEnum {\n\n}\n',
@@ -123,7 +127,7 @@ suite('Quick Fixes', () => {
               diagnostics: diagnosticsNewEnum,
               edit: {
                 changes: {
-                  [fixturePath]: [
+                  [expectedPath]: [
                     {
                       range: rangeEdit,
                       newText: '\nenum NewEnum {\n\n}\n',
@@ -148,7 +152,7 @@ suite('Quick Fixes', () => {
             diagnostics: diagnosticsPorst,
             edit: {
               changes: {
-                [fixturePath]: [
+                [expectedPath]: [
                   {
                     range: rangePorst,
                     newText: 'Post?',
@@ -163,7 +167,7 @@ suite('Quick Fixes', () => {
             diagnostics: diagnosticsPorst,
             edit: {
               changes: {
-                [fixturePath]: [
+                [expectedPath]: [
                   {
                     range: rangeEdit,
                     newText: '\nmodel Porst {\n\n}\n',
@@ -178,7 +182,7 @@ suite('Quick Fixes', () => {
             diagnostics: diagnosticsPorst,
             edit: {
               changes: {
-                [fixturePath]: [
+                [expectedPath]: [
                   {
                     range: rangeEdit,
                     newText: '\nenum Porst {\n\n}\n',
@@ -197,6 +201,7 @@ suite('Quick Fixes', () => {
 
   suite('from prisma-fmt', () => {
     const fixturePath = './codeActions/one_to_many_referenced_side_misses_unique_single_field.prisma'
+    const expectedPath = `file:///${fixturePath.substring(2)}`
 
     test('@relation referenced side missing @unique', () => {
       const diagnostics: Diagnostic[] = [
@@ -225,7 +230,7 @@ suite('Quick Fixes', () => {
                   },
                   end: {
                     line: 14,
-                    character: 55,
+                    character: 54,
                   },
                 },
                 severity: 1,
@@ -234,7 +239,7 @@ suite('Quick Fixes', () => {
             ],
             edit: {
               changes: {
-                [fixturePath]: [
+                [expectedPath]: [
                   {
                     range: {
                       start: { line: 7, character: 11 },
@@ -249,9 +254,10 @@ suite('Quick Fixes', () => {
         ],
         fixturePath,
         {
-          start: { line: 14, character: 55 },
-          end: { line: 14, character: 55 },
+          start: { line: 14, character: 48 },
+          end: { line: 14, character: 48 },
         },
+
         diagnostics,
       )
     })
