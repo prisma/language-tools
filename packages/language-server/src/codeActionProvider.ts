@@ -82,16 +82,20 @@ function addTypeModifiers(hasTypeModifierArray: boolean, hasTypeModifierOptional
 }
 
 export function quickFix(textDocument: TextDocument, params: CodeActionParams): CodeAction[] {
-  const lines: string[] = convertDocumentTextToTrimmedLineArray(textDocument)
   const diagnostics: Diagnostic[] = params.context.diagnostics
 
   if (!diagnostics || diagnostics.length === 0) {
     return []
   }
 
-  const actionData: string = prismaFmt.code_actions(textDocument.getText(), JSON.stringify(params))
-  const codeActions: CodeAction[] = JSON.parse(actionData)
+  // get code actions from prisma-fmt
+  const actionDataFromPrismaFmt: string = prismaFmt.code_actions(textDocument.getText(), JSON.stringify(params))
+  // For debugging
+  console.log({ actionDataFromPrismaFmt })
 
+  const codeActions: CodeAction[] = JSON.parse(actionDataFromPrismaFmt) as CodeAction[]
+
+  // Add code actions from typescript side
   for (const diag of diagnostics) {
     if (
       diag.severity === DiagnosticSeverity.Error &&
@@ -102,6 +106,7 @@ export function quickFix(textDocument: TextDocument, params: CodeActionParams): 
       const hasTypeModifierArray: boolean = diagText.endsWith('[]')
       const hasTypeModifierOptional: boolean = diagText.endsWith('?')
       diagText = removeTypeModifiers(hasTypeModifierArray, hasTypeModifierOptional, diagText)
+      const lines: string[] = convertDocumentTextToTrimmedLineArray(textDocument)
       const spellingSuggestion = getSpellingSuggestions(diagText, getAllRelationNames(lines))
       if (spellingSuggestion) {
         codeActions.push({
@@ -150,8 +155,7 @@ export function quickFix(textDocument: TextDocument, params: CodeActionParams): 
           },
         },
       })
-    }
-    if (
+    } else if (
       diag.severity === DiagnosticSeverity.Warning &&
       diag.message.includes("property has been renamed to 'previewFeatures'")
     ) {
@@ -170,8 +174,7 @@ export function quickFix(textDocument: TextDocument, params: CodeActionParams): 
           },
         },
       })
-    }
-    if (
+    } else if (
       diag.severity === DiagnosticSeverity.Error &&
       diag.message.includes('It does not start with any known Prisma schema keyword.')
     ) {

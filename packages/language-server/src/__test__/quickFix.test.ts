@@ -17,14 +17,14 @@ function assertQuickFix(expected: CodeAction[], fixturePath: string, range: Rang
   const params: CodeActionParams = {
     textDocument: document,
     context: {
-      diagnostics: diagnostics,
+      diagnostics,
     },
-    range: range,
+    range,
   }
 
   const quickFixResult: CodeAction[] = quickFix(document, params)
 
-  assert.ok(quickFixResult.length !== 0)
+  assert.ok(quickFixResult.length !== 0, "Expected a quick fix, but didn't get one")
   assert.deepStrictEqual(quickFixResult, expected)
 }
 
@@ -37,95 +37,59 @@ function createDiagnosticErrorUnknownType(unknownType: string, range: Range): Di
   }
 }
 
-suite('Quick Fix', () => {
-  const fixturePath = './codeActions/quickFixes.prisma'
+suite('Quick Fixes', () => {
+  suite('from TS', () => {
+    const fixturePath = './codeActions/quickFixes.prisma'
 
-  const rangeNewModel: Range = {
-    start: { line: 16, character: 9 },
-    end: { line: 16, character: 17 },
-  }
-  const rangeNewEnum: Range = {
-    start: { line: 24, character: 6 },
-    end: { line: 24, character: 13 },
-  }
-  const rangePorst: Range = {
-    start: { line: 31, character: 15 },
-    end: { line: 31, character: 9 },
-  }
-  const rangeEdit: Range = {
-    start: { line: 35, character: 0 },
-    end: { line: 35, character: 0 },
-  }
+    const rangeNewModel: Range = {
+      start: { line: 16, character: 9 },
+      end: { line: 16, character: 17 },
+    }
+    const rangeNewEnum: Range = {
+      start: { line: 24, character: 6 },
+      end: { line: 24, character: 13 },
+    }
+    const rangePorst: Range = {
+      start: { line: 31, character: 15 },
+      end: { line: 31, character: 9 },
+    }
+    const rangeEdit: Range = {
+      start: { line: 35, character: 0 },
+      end: { line: 35, character: 0 },
+    }
 
-  const diagnosticsNewModel: Diagnostic[] = [createDiagnosticErrorUnknownType('NewModel', rangeNewModel)]
-  const diagnosticsNewEnum: Diagnostic[] = [createDiagnosticErrorUnknownType('NewEnum', rangeNewEnum)]
-  const diagnosticsPorst: Diagnostic[] = [createDiagnosticErrorUnknownType('Porst', rangePorst)]
+    const diagnosticsNewModel: Diagnostic[] = [createDiagnosticErrorUnknownType('NewModel', rangeNewModel)]
+    const diagnosticsNewEnum: Diagnostic[] = [createDiagnosticErrorUnknownType('NewEnum', rangeNewEnum)]
+    const diagnosticsPorst: Diagnostic[] = [createDiagnosticErrorUnknownType('Porst', rangePorst)]
 
-  test('Model/enum creations', () => {
-    assertQuickFix(
-      [
-        {
-          title: "Create new model 'NewModel'",
-          kind: CodeActionKind.QuickFix,
-          diagnostics: diagnosticsNewModel,
-          edit: {
-            changes: {
-              [fixturePath]: [
-                {
-                  range: rangeEdit,
-                  newText: '\nmodel NewModel {\n\n}\n',
-                },
-              ],
-            },
-          },
-        },
-        {
-          title: "Create new enum 'NewModel'",
-          kind: CodeActionKind.QuickFix,
-          diagnostics: diagnosticsNewModel,
-          edit: {
-            changes: {
-              [fixturePath]: [
-                {
-                  range: rangeEdit,
-                  newText: '\nenum NewModel {\n\n}\n',
-                },
-              ],
-            },
-          },
-        },
-      ],
-      fixturePath,
-      rangeNewModel,
-      diagnosticsNewModel,
-    ),
+    test('Model/enum creations', () => {
       assertQuickFix(
         [
           {
-            title: "Create new model 'NewEnum'",
+            title: "Create new model 'NewModel'",
             kind: CodeActionKind.QuickFix,
-            diagnostics: diagnosticsNewEnum,
+            diagnostics: diagnosticsNewModel,
             edit: {
               changes: {
                 [fixturePath]: [
                   {
                     range: rangeEdit,
-                    newText: '\nmodel NewEnum {\n\n}\n',
+                    newText: '\nmodel NewModel {\n\n}\n',
                   },
                 ],
               },
             },
           },
           {
-            title: "Create new enum 'NewEnum'",
+            title: "Create new enum 'NewModel'",
             kind: CodeActionKind.QuickFix,
-            diagnostics: diagnosticsNewEnum,
+            diagnostics: diagnosticsNewModel,
             edit: {
               changes: {
                 [fixturePath]: [
                   {
                     range: rangeEdit,
-                    newText: '\nenum NewEnum {\n\n}\n',
+                    newText: '\nenum NewModel {\n\n}\n',
                   },
                 ],
               },
@@ -133,62 +97,163 @@ suite('Quick Fix', () => {
           },
         ],
         fixturePath,
-        rangeNewEnum,
-        diagnosticsNewEnum,
+        rangeNewModel,
+        diagnosticsNewModel,
+      ),
+        assertQuickFix(
+          [
+            {
+              title: "Create new model 'NewEnum'",
+              kind: CodeActionKind.QuickFix,
+              diagnostics: diagnosticsNewEnum,
+              edit: {
+                changes: {
+                  [fixturePath]: [
+                    {
+                      range: rangeEdit,
+                      newText: '\nmodel NewEnum {\n\n}\n',
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              title: "Create new enum 'NewEnum'",
+              kind: CodeActionKind.QuickFix,
+              diagnostics: diagnosticsNewEnum,
+              edit: {
+                changes: {
+                  [fixturePath]: [
+                    {
+                      range: rangeEdit,
+                      newText: '\nenum NewEnum {\n\n}\n',
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+          fixturePath,
+          rangeNewEnum,
+          diagnosticsNewEnum,
+        )
+    })
+
+    test('Spelling suggestions and model/enum creations', () => {
+      assertQuickFix(
+        [
+          {
+            title: "Change spelling to 'Post'",
+            kind: CodeActionKind.QuickFix,
+            diagnostics: diagnosticsPorst,
+            edit: {
+              changes: {
+                [fixturePath]: [
+                  {
+                    range: rangePorst,
+                    newText: 'Post?',
+                  },
+                ],
+              },
+            },
+          },
+          {
+            title: "Create new model 'Porst'",
+            kind: CodeActionKind.QuickFix,
+            diagnostics: diagnosticsPorst,
+            edit: {
+              changes: {
+                [fixturePath]: [
+                  {
+                    range: rangeEdit,
+                    newText: '\nmodel Porst {\n\n}\n',
+                  },
+                ],
+              },
+            },
+          },
+          {
+            title: "Create new enum 'Porst'",
+            kind: CodeActionKind.QuickFix,
+            diagnostics: diagnosticsPorst,
+            edit: {
+              changes: {
+                [fixturePath]: [
+                  {
+                    range: rangeEdit,
+                    newText: '\nenum Porst {\n\n}\n',
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        fixturePath,
+        rangePorst,
+        diagnosticsPorst,
       )
+    })
   })
-  test('Spelling suggestions and model/enum creations', () => {
-    assertQuickFix(
-      [
+
+  suite('from prisma-fmt', () => {
+    const fixturePath = './codeActions/one_to_many_referenced_side_misses_unique_single_field.prisma'
+
+    test('@relation referenced side missing @unique', () => {
+      const diagnostics: Diagnostic[] = [
         {
-          title: "Change spelling to 'Post'",
-          kind: CodeActionKind.QuickFix,
-          diagnostics: diagnosticsPorst,
-          edit: {
-            changes: {
-              [fixturePath]: [
-                {
-                  range: rangePorst,
-                  newText: 'Post?',
+          range: {
+            start: { line: 14, character: 2 },
+            end: { line: 15, character: 0 },
+          },
+          message:
+            'Error parsing attribute "@relation": The argument `references` must refer to a unique criteria in the related model. Consider adding an `@unique` attribute to the field `field` in the model `A`.',
+          severity: DiagnosticSeverity.Error,
+        },
+      ]
+
+      assertQuickFix(
+        [
+          {
+            title: 'Make referenced field(s) unique',
+            kind: CodeActionKind.QuickFix,
+            diagnostics: [
+              {
+                range: {
+                  start: {
+                    line: 14,
+                    character: 2,
+                  },
+                  end: {
+                    line: 14,
+                    character: 55,
+                  },
                 },
-              ],
+                severity: 1,
+                message: 'The field has to be unique due to a relation',
+              },
+            ],
+            edit: {
+              changes: {
+                [fixturePath]: [
+                  {
+                    range: {
+                      start: { line: 7, character: 11 },
+                      end: { line: 7, character: 11 },
+                    },
+                    newText: ' @unique',
+                  },
+                ],
+              },
             },
           },
-        },
+        ],
+        fixturePath,
         {
-          title: "Create new model 'Porst'",
-          kind: CodeActionKind.QuickFix,
-          diagnostics: diagnosticsPorst,
-          edit: {
-            changes: {
-              [fixturePath]: [
-                {
-                  range: rangeEdit,
-                  newText: '\nmodel Porst {\n\n}\n',
-                },
-              ],
-            },
-          },
+          start: { line: 14, character: 55 },
+          end: { line: 14, character: 55 },
         },
-        {
-          title: "Create new enum 'Porst'",
-          kind: CodeActionKind.QuickFix,
-          diagnostics: diagnosticsPorst,
-          edit: {
-            changes: {
-              [fixturePath]: [
-                {
-                  range: rangeEdit,
-                  newText: '\nenum Porst {\n\n}\n',
-                },
-              ],
-            },
-          },
-        },
-      ],
-      fixturePath,
-      rangePorst,
-      diagnosticsPorst,
-    )
+        diagnostics,
+      )
+    })
   })
 })
