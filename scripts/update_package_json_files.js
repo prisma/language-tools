@@ -46,12 +46,12 @@ function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersion = '
     })
   }
 
-  // update versions in packages/language-server/package.json
+  // update dependency and engines versions in packages/language-server/package.json
   if (newPrismaVersion !== '') {
     ;(async () => {
       // Find the version needed for `@prisma/prisma-fmt-wasm`
       // Let's look into the `package.json` of the `@prisma/engines` package
-      // and take it from `@prisma/engines-version`
+      // and get the version of `@prisma/engines-version` it uses
       const { stdout } = await execa('npm', ['show', `@prisma/engines@${newPrismaVersion}`, 'dependencies'])
       const cleaned = stdout.replace(/'/g, '"')
       let npmInfoOutput = JSON.parse(cleaned)
