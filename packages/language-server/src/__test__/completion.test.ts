@@ -1956,6 +1956,31 @@ suite('Completions', function () {
         },
       })
     })
+    test('enum UserType |', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+        model DateTest {
+          // id Int @id @default()
+          enum UserType |
+        }
+
+        enum UserType {
+          ADMIN
+          NORMAL
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            fieldAttributeId,
+            fieldAttributeUnique,
+            fieldAttributeMap,
+            fieldAttributeDefault,
+            fieldAttributeRelation,
+            fieldAttributeIgnore,
+          ],
+        },
+      })
+    })
 
     suite('@default()', function () {
       test('Scalar lists', () => {

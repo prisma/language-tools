@@ -389,9 +389,12 @@ export function removeInvalidAttributeSuggestions(
       break
     }
 
-    // TODO we should also remove the other suggestions if used (default()...)
-    if (item.includes('@id')) {
-      supportedAttributes = supportedAttributes.filter((attribute) => !attribute.label.includes('id'))
+    // Ingore commented lines
+    if (!item.startsWith('//')) {
+      // TODO we should also remove the other suggestions if used (default()...)
+      if (item.includes('@id')) {
+        supportedAttributes = supportedAttributes.filter((attribute) => !attribute.label.includes('id'))
+      }
     }
   }
   return supportedAttributes

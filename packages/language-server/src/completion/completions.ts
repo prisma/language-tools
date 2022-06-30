@@ -161,11 +161,20 @@ export function getSuggestionForFieldAttribute(
 
   suggestions.push(...fieldAttributes)
 
-  if (!(currentLine.includes('Int') || currentLine.includes('String'))) {
+  const fieldType = getFieldType(currentLine)
+  if (!fieldType) {
+    return
+  }
+
+  const modelOrEnum = getModelOrTypeOrEnumBlock(fieldType, lines)
+  const isAtIdAllowed = fieldType === 'Int' || fieldType === 'String' || modelOrEnum?.type === 'enum'
+  if (!isAtIdAllowed) {
     // id not allowed
     suggestions = suggestions.filter((sugg) => sugg.label !== '@id')
   }
-  if (!currentLine.includes('DateTime')) {
+
+  const isUpdatedAtAllowed = fieldType === 'DateTime'
+  if (!isUpdatedAtAllowed) {
     // updatedAt not allowed
     suggestions = suggestions.filter((sugg) => sugg.label !== '@updatedAt')
   }
