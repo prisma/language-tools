@@ -91,7 +91,7 @@ export function quickFix(textDocument: TextDocument, params: CodeActionParams): 
   // get code actions from prisma-fmt
   const actionDataFromPrismaFmt: string = prismaFmt.code_actions(textDocument.getText(), JSON.stringify(params))
   // For debugging
-  console.log({ actionDataFromPrismaFmt })
+  // console.log({ actionDataFromPrismaFmt })
 
   const codeActions: CodeAction[] = JSON.parse(actionDataFromPrismaFmt) as CodeAction[]
 
