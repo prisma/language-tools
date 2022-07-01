@@ -2,17 +2,8 @@ const execa = require('execa')
 const path = require('path')
 const { writeJsonToPackageJson, getPackageJsonContent } = require('./util')
 
-function bumpVersionInVSCodeRepo({
-  version,
-  name,
-  displayName,
-  description,
-  preview,
-}) {
-  const vscodePackageJsonPath = path.join(
-    __dirname,
-    '../packages/vscode/package.json',
-  )
+function bumpVersionInVSCodeRepo({ version, name, displayName, description, preview }) {
+  const vscodePackageJsonPath = path.join(__dirname, '../packages/vscode/package.json')
   let content = getPackageJsonContent({ path: vscodePackageJsonPath })
   content['version'] = version
   content['name'] = name
@@ -23,24 +14,14 @@ function bumpVersionInVSCodeRepo({
 }
 
 function bumpLSVersionInExtension({ version }) {
-  const vscodePackageJsonPath = path.join(
-    __dirname,
-    '../packages/vscode/package.json',
-  )
+  const vscodePackageJsonPath = path.join(__dirname, '../packages/vscode/package.json')
   let content = getPackageJsonContent({ path: vscodePackageJsonPath })
   content['dependencies']['@prisma/language-server'] = version
   writeJsonToPackageJson({ content: content, path: vscodePackageJsonPath })
 }
 
-function bumpVersionsInRepo({
-  channel,
-  newExtensionVersion,
-  newPrismaVersion = '',
-}) {
-  const languageServerPackageJsonPath = path.join(
-    __dirname,
-    '../packages/language-server/package.json',
-  )
+function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersion = '' }) {
+  const languageServerPackageJsonPath = path.join(__dirname, '../packages/language-server/package.json')
   const rootPackageJsonPath = path.join(__dirname, '../package.json')
 
   // update version in packages/vscode folder
@@ -65,33 +46,27 @@ function bumpVersionsInRepo({
     })
   }
 
-  // update Prisma CLI version in packages/language-server folder
+  // update dependency and engines versions in packages/language-server/package.json
   if (newPrismaVersion !== '') {
     ;(async () => {
-      // CLI deps
-      const { stdout } = await execa('npm', [
-        'show',
-        `prisma@${newPrismaVersion}`,
-        'dependencies',
-      ])
+      // Find the version needed for `@prisma/prisma-fmt-wasm`
+      // Let's look into the `package.json` of the `@prisma/engines` package
+      // and get the version of `@prisma/engines-version` it uses
+      const { stdout } = await execa('npm', ['show', `@prisma/engines@${newPrismaVersion}`, 'dependencies'])
       const cleaned = stdout.replace(/'/g, '"')
-      let prismaCLIDeps = JSON.parse(cleaned)
+      let npmInfoOutput = JSON.parse(cleaned)
+      const engineVersion = npmInfoOutput['@prisma/engines-version'] // 2.26.0-23.9b816b3aa13cc270074f172f30d6eda8a8ce867d
+      const engineSha = engineVersion.split('.')[3]
 
-      // engines hash
-      const engineVersion = prismaCLIDeps['@prisma/engines'] // 2.26.0-23.9b816b3aa13cc270074f172f30d6eda8a8ce867d
-      const sha = engineVersion.split('.')[3]
       let languageServerPackageJson = getPackageJsonContent({
         path: languageServerPackageJsonPath,
       })
-      languageServerPackageJson['prisma']['enginesVersion'] = sha
-
-      // engines version
-      languageServerPackageJson['dependencies']['@prisma/prisma-fmt-wasm'] =
-        engineVersion
-
-      // CLI version
+      // update engines sha
+      languageServerPackageJson['prisma']['enginesVersion'] = engineSha
+      // update engines version
+      languageServerPackageJson['dependencies']['@prisma/prisma-fmt-wasm'] = engineVersion
+      // update CLI version
       languageServerPackageJson['prisma']['cliVersion'] = newPrismaVersion
-
       writeJsonToPackageJson({
         content: languageServerPackageJson,
         path: languageServerPackageJsonPath,
@@ -108,10 +83,7 @@ function bumpVersionsInRepo({
   })
 
   // update version in Language Server
-  const lsPackageJsonPath = path.join(
-    __dirname,
-    '../packages/language-server/package.json',
-  )
+  const lsPackageJsonPath = path.join(__dirname, '../packages/language-server/package.json')
   let lspPackageJson = getPackageJsonContent({ path: lsPackageJsonPath })
   lspPackageJson['version'] = newExtensionVersion
   writeJsonToPackageJson({ content: lspPackageJson, path: lsPackageJsonPath })
@@ -122,9 +94,7 @@ module.exports = { bumpVersionsInRepo }
 if (require.main === module) {
   const args = process.argv.slice(2)
   if (args.length === 3) {
-    console.log(
-      'Bumping Prisma CLI version, extension and Language Server version in repo.',
-    )
+    console.log('Bumping Prisma CLI version, extension and Language Server version in repo.')
     bumpVersionsInRepo({
       channel: args[0],
       newExtensionVersion: args[1],
@@ -143,8 +113,6 @@ if (require.main === module) {
       version: args[0],
     })
   } else {
-    throw new Error(
-      `Expected 1, 2 or 3 arguments, but received ${args.length}.`,
-    )
+    throw new Error(`Expected 1, 2 or 3 arguments, but received ${args.length}.`)
   }
 }
