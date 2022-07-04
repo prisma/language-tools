@@ -229,12 +229,12 @@ suite('Quick Fixes', () => {
                     character: 2,
                   },
                   end: {
-                    line: 14,
-                    character: 54,
+                    line: 15,
+                    character: 0,
                   },
                 },
                 severity: 1,
-                message: 'The field has to be unique due to a relation',
+                message: 'Error parsing attribute "@relation": The argument `references` must refer to a unique criteria in the related model. Consider adding an `@unique` attribute to the field `field` in the model `A`.',
               },
             ],
             edit: {
