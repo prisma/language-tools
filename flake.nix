@@ -15,7 +15,7 @@
           '';
         in
         {
-          apps = {
+          packages = {
             # Build the vscode extension with pinned dependencies and the local
             # language server build. It will not package the vscode extension
             # into a .vsix you can install directly, because this is proving
@@ -70,7 +70,7 @@
           };
 
           devShell = pkgs.mkShell {
-            packages = [ formatProject pkgs.nodejs self.apps."${system}".buildVscodeExtension self.apps."${system}".deleteNodeModules ];
+            packages = [ formatProject pkgs.nodejs self.packages."${system}".buildVscodeExtension self.packages."${system}".deleteNodeModules self.packages."${system}".code ];
           };
         }
       );
