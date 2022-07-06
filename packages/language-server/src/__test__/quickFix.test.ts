@@ -216,6 +216,12 @@ suite('Quick Fixes', () => {
         },
       ]
 
+      let character = 11
+
+      if (process.platform === "win32") {
+        character = 12
+      }
+
       assertQuickFix(
         [
           {
@@ -242,8 +248,8 @@ suite('Quick Fixes', () => {
                 [expectedPath]: [
                   {
                     range: {
-                      start: { line: 7, character: 11 },
-                      end: { line: 7, character: 11 },
+                      start: { line: 7, character: character },
+                      end: { line: 7, character: character },
                     },
                     newText: ' @unique',
                   },
