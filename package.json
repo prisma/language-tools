@@ -49,9 +49,8 @@
     "access": "public"
   },
   "lint-staged": {
-    "*.{js,ts,css,json,md,yml}": [
-      "prettier --write",
-      "git add"
+    "*.{js,ts,css,md,yml}|**/syntaxes/*.json|completions.json": [
+      "prettier --write"
     ],
     "*.{js,ts}": [
       "eslint --fix"
