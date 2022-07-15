@@ -1589,7 +1589,6 @@ suite('Completions', function () {
               { label: 'Char()', kind: CompletionItemKind.TypeParameter },
               { label: 'String()', kind: CompletionItemKind.TypeParameter },
               { label: 'VarBit()', kind: CompletionItemKind.TypeParameter },
-              { label: 'VarChar()', kind: CompletionItemKind.TypeParameter },
               { label: 'Inet', kind: CompletionItemKind.TypeParameter },
               { label: 'CatalogSingleChar', kind: CompletionItemKind.TypeParameter },
               { label: 'Uuid', kind: CompletionItemKind.TypeParameter },
