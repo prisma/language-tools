@@ -161,11 +161,25 @@ export function getSuggestionForFieldAttribute(
 
   suggestions.push(...fieldAttributes)
 
-  if (!(currentLine.includes('Int') || currentLine.includes('String'))) {
+  const fieldType = getFieldType(currentLine)
+  // If we don't find a field type (e.g. String, Int...), return no suggestion
+  if (!fieldType) {
+    return
+  }
+
+  const modelOrEnum = getModelOrTypeOrEnumBlock(fieldType, lines)
+  // Tom: I think we allow ids on basically everything except relation fields
+  // so it doesn't need to be restricted to Int and String.
+  // These are terrible, terrible ideas of course, but you can have id DateTime @id or id Float @id.
+  // TODO: decide if we want to only suggest things that make most sense or everything that is technically possible.
+  const isAtIdAllowed = fieldType === 'Int' || fieldType === 'String' || modelOrEnum?.type === 'enum'
+  if (!isAtIdAllowed) {
     // id not allowed
     suggestions = suggestions.filter((sugg) => sugg.label !== '@id')
   }
-  if (!currentLine.includes('DateTime')) {
+
+  const isUpdatedAtAllowed = fieldType === 'DateTime'
+  if (!isUpdatedAtAllowed) {
     // updatedAt not allowed
     suggestions = suggestions.filter((sugg) => sugg.label !== '@updatedAt')
   }
@@ -522,6 +536,7 @@ function getDefaultValues({
   }
 
   const fieldType = getFieldType(currentLine)
+  // If we don't find a field type (e.g. String, Int...), return no suggestion
   if (!fieldType) {
     return []
   }

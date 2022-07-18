@@ -1956,6 +1956,48 @@ suite('Completions', function () {
       })
     })
 
+    const enumUserTypeExpectedItems = [
+      fieldAttributeId,
+      fieldAttributeUnique,
+      fieldAttributeMap,
+      fieldAttributeDefault,
+      fieldAttributeRelation,
+      fieldAttributeIgnore,
+    ]
+    test('enum UserType |', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+        model DateTest {
+          enum UserType |
+        }
+        enum UserType {
+          ADMIN
+          NORMAL
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: enumUserTypeExpectedItems,
+        },
+      })
+    })
+    test('enum UserType | with 1 commented field', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+        model DateTest {
+          // id Int @id @default()
+          enum UserType |
+        }
+        enum UserType {
+          ADMIN
+          NORMAL
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: enumUserTypeExpectedItems,
+        },
+      })
+    })
+
     suite('@default()', function () {
       test('Scalar lists', () => {
         const scalarTypes = ['String', 'color', 'Int', 'Float', 'Boolean', 'DateTime'] as const
