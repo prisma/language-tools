@@ -15,11 +15,12 @@ jobs:
     name: Check for Prisma CLI update
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Use Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16'
+          cache: 'npm'
       - name: Install Dependencies
         run: npm install
 
@@ -50,6 +51,10 @@ jobs:
           workflow: 2. Bump versions
           token: ${{ secrets.GH_TOKEN }}
           inputs: '{ "npm_channel": "patch-dev", "version": "${{ steps.check_update.outputs.patch-dev_version }}" }'
+
+      - name: 'Set current job url in SLACK_FOOTER env var'
+        if: ${{ failure() }}
+        run: echo "SLACK_FOOTER=<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|Click here to go to the job logs>" >> $GITHUB_ENV
 
       - name: Slack Notification on Failure
         if: ${{ failure() }}

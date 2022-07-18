@@ -30,7 +30,7 @@
       "outFiles": ["${workspaceFolder}/packages/language-server/dist/**/*.js"]
     },
     {
-      "name": "Run LSP Tests",
+      "name": "Run Language Server Tests",
       "type": "node",
       "request": "launch",
       "program": "${workspaceRoot}/packages/language-server/node_modules/mocha/bin/_mocha",
@@ -43,14 +43,14 @@
         "tdd",
         "--useColors",
         "true",
-        "./dist/src/test/**/*.test.js"
+        "./dist/src/__test__/**/*.test.js"
       ],
       "cwd": "${workspaceRoot}/packages/language-server",
       "runtimeExecutable": null,
       "runtimeArgs": [],
       "env": {},
       "outFiles": [
-        "${workspaceRoot}/packages/language-server/dist/src/test/**/*.js"
+        "${workspaceRoot}/packages/language-server/dist/src/__test__/**/*.js"
       ],
       "preLaunchTask": "npm: watch"
     },
@@ -61,15 +61,17 @@
       "runtimeExecutable": "${execPath}",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode",
-        "--extensionTestsPath=${workspaceFolder}/packages/vscode/dist/src/test/index",
-        "${workspaceFolder}/packages/vscode/testFixture"
+        "--extensionTestsPath=${workspaceFolder}/packages/vscode/dist/src/__test__/index",
+        "${workspaceFolder}/packages/vscode/fixtures"
       ],
-      "outFiles": ["${workspaceFolder}/packages/vscode/dist/src/test/**/*.js"]
+      "outFiles": [
+        "${workspaceFolder}/packages/vscode/dist/src/__test__/**/*.js"
+      ]
     }
   ],
   "compounds": [
     {
-      "name": "VSCode + LSP",
+      "name": "VSCode + Language Server",
       "configurations": ["Launch VSCode extension", "Attach to Server"]
     }
   ]

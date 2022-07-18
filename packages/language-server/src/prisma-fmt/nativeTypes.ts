@@ -11,13 +11,15 @@ export default function nativeTypeConstructors(
   text: string,
   onError?: (errorMessage: string) => void,
 ): NativeTypeConstructors[] {
-  console.log('running native_types() from prisma-fmt')
   try {
     const result = prismaFmt.native_types(text)
     return JSON.parse(result) as NativeTypeConstructors[]
-  } catch (err) {
+  } catch (err: any) {
     if (onError) {
-      onError(`prisma-fmt error'd during getting available native types. ${err}`)
+      onError(
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        `prisma-fmt error'd during getting available native types. ${err}`,
+      )
     }
 
     return []

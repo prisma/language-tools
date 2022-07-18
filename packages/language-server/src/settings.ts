@@ -1,6 +1,6 @@
 import { Connection } from 'vscode-languageserver'
 
-export interface LSPOptions {
+export interface LSOptions {
   /**
    * If you have a connection already that the ls should use, pass it in.
    * Else the connection will be created from `process`.
@@ -8,4 +8,5 @@ export interface LSPOptions {
   connection?: Connection
 }
 
-export interface LSPSettings {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface LSSettings {}

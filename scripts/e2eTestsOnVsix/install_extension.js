@@ -1,5 +1,5 @@
-const vscodeTest = require('vscode-test')
-const chileProcess = require('child_process')
+const vscodeTest = require('@vscode/test-electron')
+const childProcess = require('child_process')
 
 async function installExtension({ extensionType, extensionVersion }) {
   try {
@@ -10,21 +10,20 @@ async function installExtension({ extensionType, extensionVersion }) {
     const extensionName = `Prisma.prisma${vsceArgument}`
 
     // Install VSCode
-    const vscodeExecutablePath = await vscodeTest.downloadAndUnzipVSCode(
-      'stable',
-    )
+    const vscodeExecutablePath = await vscodeTest.downloadAndUnzipVSCode('stable')
+
+    console.debug({ vscodeExecutablePath })
 
     // Install VSCode extension
-    const cliPath =
-      vscodeTest.resolveCliPathFromVSCodeExecutablePath(vscodeExecutablePath)
-    const result = chileProcess.spawnSync(
-      cliPath,
-      ['--install-extension', extensionName + '@' + extensionVersion],
-      {
-        encoding: 'utf-8',
-        stdio: 'pipe',
-      },
-    )
+    const [cli, ...args] = vscodeTest.resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath)
+
+    console.debug({ cli })
+    console.debug({ args })
+
+    const result = childProcess.spawnSync(cli, ['--install-extension', `${extensionName}@${extensionVersion}`], {
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    })
     console.log(result)
     if (result.stderr.includes('Failed')) {
       console.log("It's not ready to be installed yet.")

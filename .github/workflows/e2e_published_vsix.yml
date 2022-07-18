@@ -27,13 +27,14 @@ jobs:
     outputs:
       installed-extension: ${{ steps.install.outputs.installed-extension }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Use Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16'
+          cache: 'npm'
       - name: Install Dependencies
-        run: npm install
+        run: npm install && npm run bootstrap
       - name: Install extension via CLI
         id: install
         run: |
@@ -50,12 +51,16 @@ jobs:
     needs: [test]
     if: always()
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: echo new version
         run: echo ${{ needs.test.outputs.installed-extension }}
       - name: Bump version
         if: ${{needs.test.result == 'success' && needs.test.outputs.installed-extension }}
         run: npm run test:bump ${{ github.event.inputs.extension_type }} ${{ github.event.inputs.extension_version }}
+
+      - name: 'Set current job url in SLACK_FOOTER env var'
+        if: ${{ always() }}
+        run: echo "SLACK_FOOTER=<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|Click here to go to the job logs>" >> $GITHUB_ENV
 
       - name: Slack Notification on Failure
         if: ${{ needs.test.result == 'failure' && needs.test.outputs.installed-extension }}

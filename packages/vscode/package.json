@@ -2,7 +2,7 @@
   "name": "prisma-insider",
   "displayName": "Prisma - Insider",
   "description": "This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the dev version of the CLI).",
-  "version": "31.0.378",
+  "version": "31.0.1209",
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
@@ -13,23 +13,24 @@
     "Programming Languages"
   ],
   "dependencies": {
-    "checkpoint-client": "1.1.20",
-    "chokidar": "3.5.2",
-    "@prisma/language-server": "31.0.378",
+    "@prisma/language-server": "31.0.1209",
+    "checkpoint-client": "1.1.21",
+    "chokidar": "3.5.3",
     "vscode-languageclient": "7.0.0"
   },
   "optionalDependencies": {
     "fsevents": "2.3.2"
   },
   "repository": {
-    "type": "github",
-    "url": "https://github.com/prisma/language-tools"
+    "type": "git",
+    "url": "https://github.com/prisma/language-tools.git",
+    "directory": "packages/vscode"
   },
   "scripts": {
     "build": "tsc -p ./",
     "watch": "npm run build -- -w",
-    "test": "npm run build && node dist/src/test/runTest true",
-    "vscode:prepublish": "cd .. && cd .. && tsc --build --clean && npm run compile",
+    "test": "rm -rf ./dist && npm run build && node dist/src/__test__/runTest true",
+    "vscode:prepublish": "npm run build",
     "package": "vsce package"
   },
   "main": "./dist/src/extension.js",
@@ -85,12 +86,28 @@
         "embeddedLanguages": {
           "meta.embedded.block.sql": "sql"
         }
+      },
+      {
+        "scopeName": "markdown.prisma.codeblock",
+        "path": "./syntaxes/prisma.markdown.json",
+        "injectTo": [
+          "text.html.markdown"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.block.prisma": "prisma"
+        }
       }
     ],
     "configuration": {
       "type": "object",
-      "title": "Language server configuration",
+      "title": "Prisma",
       "properties": {
+        "prisma.fileWatcher": {
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "description": "Enable/disable the File Watcher functionality for Prisma Client."
+        },
         "prisma.trace.server": {
           "scope": "window",
           "type": "string",
@@ -100,7 +117,7 @@
             "verbose"
           ],
           "default": "off",
-          "description": "Traces the communication between VS Code and the language server."
+          "description": "Setting for logging between the VS Code extension and the language server."
         }
       }
     },
@@ -109,18 +126,29 @@
         "command": "prisma.restartLanguageServer",
         "title": "Restart Language Server",
         "category": "Prisma"
+      },
+      {
+        "command": "prisma.filewatcherEnable",
+        "title": "Enable the File Watcher functionality for Prisma Client.",
+        "category": "Prisma"
+      },
+      {
+        "command": "prisma.filewatcherDisable",
+        "title": "Disable the File Watcher functionality for Prisma Client.",
+        "category": "Prisma"
       }
     ]
   },
   "devDependencies": {
     "@types/glob": "7.2.0",
-    "@types/mocha": "9.0.0",
+    "@types/mocha": "9.1.1",
     "@types/vscode": "1.52.0",
-    "mocha": "9.1.3",
-    "ovsx": "0.2.1",
-    "typescript": "4.5.2",
-    "vsce": "2.5.1",
-    "vscode-test": "1.6.1"
+    "@vscode/test-electron": "2.1.5",
+    "is-ci": "3.0.1",
+    "mocha": "10.0.0",
+    "ovsx": "0.5.1",
+    "typescript": "4.7.4",
+    "vsce": "2.9.3"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
   "publishConfig": {

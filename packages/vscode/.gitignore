@@ -3,3 +3,4 @@
 .envrc
 *.vsix
 *.exe
+language-server

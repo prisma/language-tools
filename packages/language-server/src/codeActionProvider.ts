@@ -7,9 +7,9 @@ import {
   CodeActionKind,
   Range,
 } from 'vscode-languageserver'
-import { getAllRelationNames } from './completion/completions'
 import levenshtein from 'js-levenshtein'
-import { convertDocumentTextToTrimmedLineArray } from './util'
+import { convertDocumentTextToTrimmedLineArray, getAllRelationNames } from './util'
+import prismaFmt from '@prisma/prisma-fmt-wasm'
 
 function getInsertRange(document: TextDocument): Range {
   // to insert text into a document create a range where start === end.
@@ -32,22 +32,14 @@ function getInsertRange(document: TextDocument): Range {
  *        (0.4 allows 1 substitution/transposition for every 5 characters,
  *         and 1 insertion/deletion at 3 characters)
  */
-function getSpellingSuggestions(
-  name: string,
-  possibleSuggestions: string[],
-): string | undefined {
+function getSpellingSuggestions(name: string, possibleSuggestions: string[]): string | undefined {
   const maximumLengthDifference = Math.min(2, Math.floor(name.length * 0.34))
   let bestDistance = Math.floor(name.length * 0.4) + 1 // If the best result isn't better than this, don't bother.
   let bestCandidate: string | undefined
   let justCheckExactMatches = false
   const nameLowerCase = name.toLowerCase()
   for (const candidate of possibleSuggestions) {
-    if (
-      !(
-        Math.abs(candidate.length - nameLowerCase.length) <=
-        maximumLengthDifference
-      )
-    ) {
+    if (!(Math.abs(candidate.length - nameLowerCase.length) <= maximumLengthDifference)) {
       continue
     }
     const candidateNameLowerCase = candidate.toLowerCase()
@@ -77,59 +69,45 @@ function getSpellingSuggestions(
   return bestCandidate
 }
 
-function removeTypeModifiers(
-  hasTypeModifierArray: boolean,
-  hasTypeModifierOptional: boolean,
-  input: string,
-): string {
+function removeTypeModifiers(hasTypeModifierArray: boolean, hasTypeModifierOptional: boolean, input: string): string {
   if (hasTypeModifierArray) return input.replace('[]', '')
   if (hasTypeModifierOptional) return input.replace('?', '')
   return input
 }
 
-function addTypeModifiers(
-  hasTypeModifierArray: boolean,
-  hasTypeModifierOptional: boolean,
-  suggestion: string,
-): string {
+function addTypeModifiers(hasTypeModifierArray: boolean, hasTypeModifierOptional: boolean, suggestion: string): string {
   if (hasTypeModifierArray) return `${suggestion}[]`
   if (hasTypeModifierOptional) return `${suggestion}?`
   return suggestion
 }
 
-export function quickFix(
-  textDocument: TextDocument,
-  params: CodeActionParams,
-): CodeAction[] {
-  const lines: string[] = convertDocumentTextToTrimmedLineArray(textDocument)
+export function quickFix(textDocument: TextDocument, params: CodeActionParams): CodeAction[] {
   const diagnostics: Diagnostic[] = params.context.diagnostics
 
   if (!diagnostics || diagnostics.length === 0) {
     return []
   }
 
-  const codeActions: CodeAction[] = []
+  // get code actions from prisma-fmt
+  const actionDataFromPrismaFmt: string = prismaFmt.code_actions(textDocument.getText(), JSON.stringify(params))
+  // For debugging
+  // console.log({ actionDataFromPrismaFmt })
 
+  const codeActions: CodeAction[] = JSON.parse(actionDataFromPrismaFmt) as CodeAction[]
+
+  // Add code actions from typescript side
   for (const diag of diagnostics) {
     if (
       diag.severity === DiagnosticSeverity.Error &&
       diag.message.startsWith('Type') &&
-      diag.message.includes(
-        'is neither a built-in type, nor refers to another model, custom type, or enum.',
-      )
+      diag.message.includes('is neither a built-in type, nor refers to another model, custom type, or enum.')
     ) {
       let diagText = textDocument.getText(diag.range)
       const hasTypeModifierArray: boolean = diagText.endsWith('[]')
       const hasTypeModifierOptional: boolean = diagText.endsWith('?')
-      diagText = removeTypeModifiers(
-        hasTypeModifierArray,
-        hasTypeModifierOptional,
-        diagText,
-      )
-      const spellingSuggestion = getSpellingSuggestions(
-        diagText,
-        getAllRelationNames(lines),
-      )
+      diagText = removeTypeModifiers(hasTypeModifierArray, hasTypeModifierOptional, diagText)
+      const lines: string[] = convertDocumentTextToTrimmedLineArray(textDocument)
+      const spellingSuggestion = getSpellingSuggestions(diagText, getAllRelationNames(lines))
       if (spellingSuggestion) {
         codeActions.push({
           title: `Change spelling to '${spellingSuggestion}'`,
@@ -140,11 +118,7 @@ export function quickFix(
               [params.textDocument.uri]: [
                 {
                   range: diag.range,
-                  newText: addTypeModifiers(
-                    hasTypeModifierArray,
-                    hasTypeModifierOptional,
-                    spellingSuggestion,
-                  ),
+                  newText: addTypeModifiers(hasTypeModifierArray, hasTypeModifierOptional, spellingSuggestion),
                 },
               ],
             },
@@ -181,8 +155,7 @@ export function quickFix(
           },
         },
       })
-    }
-    if (
+    } else if (
       diag.severity === DiagnosticSeverity.Warning &&
       diag.message.includes("property has been renamed to 'previewFeatures'")
     ) {
@@ -201,21 +174,13 @@ export function quickFix(
           },
         },
       })
-    }
-    if (
+    } else if (
       diag.severity === DiagnosticSeverity.Error &&
-      diag.message.includes(
-        'It does not start with any known Prisma schema keyword.',
-      )
+      diag.message.includes('It does not start with any known Prisma schema keyword.')
     ) {
       const diagText = textDocument.getText(diag.range).split(/\s/)
       if (diagText.length !== 0) {
-        const spellingSuggestion = getSpellingSuggestions(diagText[0], [
-          'model',
-          'enum',
-          'datasource',
-          'generator',
-        ])
+        const spellingSuggestion = getSpellingSuggestions(diagText[0], ['model', 'enum', 'datasource', 'generator'])
         if (spellingSuggestion) {
           codeActions.push({
             title: `Change spelling to '${spellingSuggestion}'`,

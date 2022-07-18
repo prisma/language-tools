@@ -27,17 +27,18 @@ env:
 jobs:
   build:
     name: Build extension
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     outputs:
       tag_name: ${{ steps.names.outputs.tag_name }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.branch }}
       - name: Use Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16'
+          cache: 'npm'
       - name: Print inputs
         run: |
           echo ${{github.event.inputs.npm_channel}}
@@ -47,15 +48,15 @@ jobs:
 
       # Build the extension
       - name: Install Dependencies
-        run: npm install
-      - name: Compile
+        run: npm install && npm run bootstrap
+      - name: Build all packages
         run: npm run compile
       - name: Replace Readme for marketplace
         run: node scripts/change_readme.js ${{ github.event.inputs.npm_channel }}
       - name: Build vsix
-        run: cd packages/vscode && npm run package
+        run: cd packages/vscode && npm run package --
 
-      # Create Github Release and upload built result as asset
+      # Create GitHub Release and upload built result as asset
       - name: Get git tag and asset name
         id: names
         run: node scripts/get_tag_name.js ${{ github.event.inputs.npm_channel }} ${{ github.event.inputs.extension_version }}
@@ -97,9 +98,14 @@ jobs:
     env:
       SLACK_MESSAGE: '${{ needs.build.outputs.tag_name }} - ${{github.event.inputs.trigger_reason}} '
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.branch }}
+
+      - name: 'Set current job url in SLACK_FOOTER env var'
+        if: ${{ always() }}
+        run: echo "SLACK_FOOTER=<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|Click here to go to the job logs>" >> $GITHUB_ENV
+
       - name: Slack Notification on Failure
         if: ${{ failure() || needs.build.result == 'failure' }}
         uses: rtCamp/action-slack-notify@v2.2.0

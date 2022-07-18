@@ -20,33 +20,22 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Use Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16'
-      - name: Cache node modules
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-node-modules
-        with:
-          # npm cache files are stored in `~/.npm` on Linux/macOS
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+          cache: 'npm'
       - name: Install Dependencies
-        run: npm install
-      - name: Compile
+        run: npm install && npm run bootstrap
+      - name: Build all packages
         run: npm run compile
-      - name: Unit tests
-        run: cd packages/language-server && npm test
-      - name: Run headless test
+      - name: Run Language Server tests
+        run: npx lerna run test --scope @prisma/language-server
+      - name: Run VS Code extension tests in headless mode
         uses: GabrielBB/xvfb-action@v1.6
         with:
-          run: npm test "useLocalLSP"
+          run: npm test "useLocalLS"
       - name: Catch shell script issues
         if: matrix.os == 'ubuntu-latest'
         run: npm run shell:lint

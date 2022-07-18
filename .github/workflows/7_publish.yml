@@ -30,18 +30,19 @@ jobs:
     env:
       SLACK_MESSAGE: '${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Use Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16'
+          cache: 'npm'
       - name: Print inputs
         run: |
           echo ${{github.event.inputs.asset_name}}
           echo ${{github.event.inputs.tag_name}}
           echo ${{github.event.inputs.trigger_reason}}
       - name: Install Dependencies
-        run: npm install
+        run: npm install && npm run bootstrap
 
       # Download Asset from GH release and publish to VSCode marketplace
       - uses: dsaltares/fetch-gh-release-asset@master
@@ -50,8 +51,13 @@ jobs:
           version: 'tags/${{ github.event.inputs.tag_name }}'
           file: ${{ github.event.inputs.asset_name }}
           token: ${{ secrets.GH_TOKEN }}
+
       - name: publish vsix to marketplace
-        run: cd packages/vscode && ./node_modules/.bin/vsce publish --pat ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN}} --packagePath ${{github.workspace}}/${{ github.event.inputs.asset_name }}
+        run: cd packages/vscode && npx vsce publish --pat ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN}} --packagePath ${{github.workspace}}/${{ github.event.inputs.asset_name }}
+
+      - name: 'Set current job url in SLACK_FOOTER env var'
+        if: ${{ always() }}
+        run: echo "SLACK_FOOTER=<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|Click here to go to the job logs>" >> $GITHUB_ENV
 
       - name: Slack Notification on Failure
         if: ${{ failure() }}
@@ -77,16 +83,17 @@ jobs:
     env:
       SLACK_MESSAGE: '${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Use Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16'
+          cache: 'npm'
       - name: Print inputs
         run: |
           echo ${{github.event.inputs.trigger_reason}}
       - name: Install Dependencies
-        run: npm install
+        run: npm install && npm run bootstrap
 
       # Download Asset from GH release and publish to open-vsx
       - uses: dsaltares/fetch-gh-release-asset@master
@@ -95,8 +102,13 @@ jobs:
           version: 'tags/${{ github.event.inputs.tag_name }}'
           file: ${{ github.event.inputs.asset_name }}
           token: ${{ secrets.GH_TOKEN }}
+
       - name: Publish vsix to open-vsx.org
-        run: cd packages/vscode && ./node_modules/.bin/ovsx publish ${{github.workspace}}/${{ github.event.inputs.asset_name }} --pat  ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
+        run: cd packages/vscode && npx ovsx publish ${{github.workspace}}/${{ github.event.inputs.asset_name }} --pat  ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
+
+      - name: 'Set current job url in SLACK_FOOTER env var'
+        if: ${{ always() }}
+        run: echo "SLACK_FOOTER=<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|Click here to go to the job logs>" >> $GITHUB_ENV
 
       - name: Slack Notification on Failure
         if: ${{ failure() }}

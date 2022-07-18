@@ -5,18 +5,18 @@
 Beforehand:
 
 - disable prisma vscode plugin
-- install `prisma-lsp-0.0.31.vsix`
+- install `prisma-ls-0.0.31.vsix`
 
 Syntax highlighting
 
-- open `testDb.prisma` from the `src/test` folder
+- open `testDb.prisma` from the `src/__test__` folder
 - all fields should now be syntax-highlighted
 - remove `datasource`
 - first block should not be syntax-highlighted anymore
 
 Linting
 
-- open `testDb.prisma` from the `src/test` folder
+- open `testDb.prisma` from the `src/__test__` folder
 - remove `provider` from datasource `db`
 - `db` should now have red squiggles
 - a warning should be shown that argument `provider` is missing
@@ -27,7 +27,7 @@ Linting
 
 Auto-formatting
 
-- open `testDb.prisma` from the `src/test` folder
+- open `testDb.prisma` from the `src/__test__` folder
 - add whitespaces between any two words or before any word
 - press <kbd>shift</kbd> + <kbd>alt</kbd> + <kbd>f</kbd>
 - whitespaces should be undone
@@ -37,10 +37,10 @@ Auto-formatting
 Beforehand:
 
 - disable prisma vscode plugin
-- install `prisma-lsp-jump-to-def-0.0.31.vsix`
+- install `prisma-ls-jump-to-def-0.0.31.vsix`
 
 Jump-to-definition
 
-- open `testDb.prisma` from the `src/test` folder
+- open `testDb.prisma` from the `src/__test__` folder
 - click on relation `User` in model `Post`
 - focus should now move to the term `User` in model `User`

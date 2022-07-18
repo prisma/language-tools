@@ -1,4 +1,9 @@
-.vscode
-src
+.vscode/**
+.vscode-test/**
+.gitignore
 **/tsconfig.json
-resources/*.gif
+src
+.eslintignore
+.eslintrc.js
+.prettierignore
+*.vsix

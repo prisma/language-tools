@@ -4,8 +4,10 @@ import {
   CompletionItemKind,
   Position,
   MarkupKind,
+  InsertTextFormat,
 } from 'vscode-languageserver'
-import { TextDocument } from 'vscode-languageserver-textdocument'
+import type { TextDocument } from 'vscode-languageserver-textdocument'
+import { klona } from 'klona'
 import {
   blockAttributes,
   fieldAttributes,
@@ -14,158 +16,81 @@ import {
   supportedDataSourceFields,
   supportedGeneratorFields,
   relationArguments,
-  relationOnDeleteArguments,
-  relationOnUpdateArguments,
   dataSourceUrlArguments,
   dataSourceProviders,
   dataSourceProviderArguments,
   generatorProviders,
   generatorProviderArguments,
-  previewFeaturesArguments,
   engineTypes,
   engineTypeArguments,
   givenBlockAttributeParams,
   givenFieldAttributeParams,
-} from './completionUtil'
-import { klona } from 'klona'
-import { extractModelName } from '../rename/renameUtil'
+  sortLengthProperties,
+  filterSortLengthBasedOnInput,
+  toCompletionItems,
+  removeInvalidAttributeSuggestions,
+  removeInvalidFieldSuggestions,
+  getNativeTypes,
+  handlePreviewFeatures,
+} from './completionUtils'
 import previewFeatures from '../prisma-fmt/previewFeatures'
-// import referentialActions from '../prisma-fmt/referentialActions'
-import nativeTypeConstructors, {
-  NativeTypeConstructors,
-} from '../prisma-fmt/nativeTypes'
-import { Block, BlockType, getModelOrEnumBlock } from '../util'
+import {
+  Block,
+  BlockType,
+  getModelOrTypeOrEnumBlock,
+  declaredNativeTypes,
+  getAllRelationNames,
+  isInsideAttribute,
+  isInsideQuotationMark,
+  isInsideFieldArgument,
+  isInsideGivenProperty,
+  getFirstDatasourceName,
+  getFirstDatasourceProvider,
+  getAllPreviewFeaturesFromGenerators,
+  getFieldsFromCurrentBlock,
+  getFieldType,
+  getFieldTypesFromCurrentBlock,
+  getValuesInsideSquareBrackets,
+  getCompositeTypeFieldsRecursively,
+} from '../util'
 
-function toCompletionItems(
-  allowedTypes: string[],
-  kind: CompletionItemKind,
-): CompletionItem[] {
-  return allowedTypes.map((label) => ({ label, kind }))
-}
-
-/***
- * @param symbols expects e.g. '()', '[]' or '""'
- */
-export function isInsideAttribute(
-  currentLineUntrimmed: string,
-  position: Position,
-  symbols: string,
-): boolean {
-  let numberOfOpenBrackets = 0
-  let numberOfClosedBrackets = 0
-  for (let i = 0; i < position.character; i++) {
-    if (currentLineUntrimmed[i] === symbols[0]) {
-      numberOfOpenBrackets++
-    } else if (currentLineUntrimmed[i] === symbols[1]) {
-      numberOfClosedBrackets++
-    }
-  }
-  return numberOfOpenBrackets > numberOfClosedBrackets
-}
-
-/***
- * Checks if inside e.g. "here"
- * Does not check for escaped quotation marks.
- */
-export function isInsideQuotationMark(
-  currentLineUntrimmed: string,
-  position: Position,
-): boolean {
-  let insideQuotation = false
-  for (let i = 0; i < position.character; i++) {
-    if (currentLineUntrimmed[i] === '"') {
-      insideQuotation = !insideQuotation
-    }
-  }
-  return insideQuotation
-}
-
-export function getSymbolBeforePosition(
-  document: TextDocument,
-  position: Position,
-): string {
-  return document.getText({
-    start: {
-      line: position.line,
-      character: position.character - 1,
-    },
-    end: { line: position.line, character: position.character },
-  })
-}
-
-export function positionIsAfterFieldAndType(
-  position: Position,
-  document: TextDocument,
-  wordsBeforePosition: string[],
-): boolean {
-  const symbolBeforePosition = getSymbolBeforePosition(document, position)
-  const symbolBeforeIsWhiteSpace = symbolBeforePosition.search(/\s/)
-
-  const hasAtRelation =
-    wordsBeforePosition.length === 2 && symbolBeforePosition === '@'
-  const hasWhiteSpaceBeforePosition =
-    wordsBeforePosition.length === 2 && symbolBeforeIsWhiteSpace !== -1
-
-  return (
-    wordsBeforePosition.length > 2 ||
-    hasAtRelation ||
-    hasWhiteSpaceBeforePosition
-  )
-}
-
-/**
- * Removes all block attribute suggestions that are invalid in this context.
- * E.g. `@@id()` when already used should not be in the suggestions.
- */
-function removeInvalidAttributeSuggestions(
-  supportedAttributes: CompletionItem[],
-  block: Block,
-  lines: string[],
-): CompletionItem[] {
-  let reachedStartLine = false
-  for (const [key, item] of lines.entries()) {
-    if (key === block.start.line + 1) {
-      reachedStartLine = true
-    }
-    if (!reachedStartLine) {
-      continue
-    }
-    if (key === block.end.line) {
-      break
-    }
-
-    // TODO we should also remove the other suggestions if used (default()...)
-
-    if (item.includes('@id')) {
-      supportedAttributes = supportedAttributes.filter(
-        (attribute) => !attribute.label.includes('id'),
-      )
-    }
-  }
-  return supportedAttributes
-}
-
-function getSuggestionForModelBlockAttribute(
-  block: Block,
-  lines: string[],
-): CompletionItem[] {
+function getSuggestionForModelBlockAttribute(block: Block, lines: string[]): CompletionItem[] {
   if (block.type !== 'model') {
     return []
   }
   // create deep copy
-  let suggestions: CompletionItem[] = klona(blockAttributes)
-  suggestions = removeInvalidAttributeSuggestions(suggestions, block, lines)
+  const suggestions: CompletionItem[] = removeInvalidAttributeSuggestions(klona(blockAttributes), block, lines)
+
+  // We can filter on the datasource
+  const datasourceProvider = getFirstDatasourceProvider(lines)
+  // We can filter on the previewFeatures enabled
+  const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
+
+  // Full text indexes (MySQL and MongoDB)
+  // https://www.prisma.io/docs/concepts/components/prisma-schema/indexes#full-text-indexes-mysql-and-mongodb
+  const isFullTextAvailable = Boolean(
+    datasourceProvider &&
+      ['mysql', 'mongodb'].includes(datasourceProvider) &&
+      previewFeatures?.includes('fulltextindex'),
+  )
+
+  if (isFullTextAvailable === false) {
+    // fullTextIndex is not available, we need to filter it out
+    return suggestions.filter((arg) => arg.label !== '@@fulltext')
+  }
+
   return suggestions
 }
 
 export function getSuggestionForNativeTypes(
   foundBlock: Block,
+  lines: string[],
   wordsBeforePosition: string[],
   document: TextDocument,
-  lines: string[],
 ): CompletionList | undefined {
   const activeFeatureFlag = declaredNativeTypes(document)
   if (
+    // TODO type? native "@db." types?
     foundBlock.type !== 'model' ||
     !activeFeatureFlag ||
     wordsBeforePosition.length < 2
@@ -174,13 +99,11 @@ export function getSuggestionForNativeTypes(
   }
 
   const datasourceName = getFirstDatasourceName(lines)
-  if (
-    !datasourceName ||
-    wordsBeforePosition[wordsBeforePosition.length - 1] !== `@${datasourceName}`
-  ) {
+  if (!datasourceName || wordsBeforePosition[wordsBeforePosition.length - 1] !== `@${datasourceName}`) {
     return undefined
   }
 
+  // line
   const prismaType = wordsBeforePosition[1].replace('?', '').replace('[]', '')
   const suggestions = getNativeTypes(document, prismaType)
 
@@ -197,25 +120,14 @@ export function getSuggestionForFieldAttribute(
   wordsBeforePosition: string[],
   document: TextDocument,
 ): CompletionList | undefined {
+  // TODO type? suggestions for "@..." for type?
   if (block.type !== 'model') {
     return
   }
-  // create deep copy
-  let suggestions: CompletionItem[] = klona(fieldAttributes)
+  let suggestions: CompletionItem[] = []
 
   const enabledNativeTypes = declaredNativeTypes(document)
-
-  if (!(currentLine.includes('Int') || currentLine.includes('String'))) {
-    // id not allowed
-    suggestions = suggestions.filter((sugg) => sugg.label !== '@id')
-  }
-  if (!currentLine.includes('DateTime')) {
-    // updatedAt not allowed
-    suggestions = suggestions.filter((sugg) => sugg.label !== '@updatedAt')
-  }
-
-  suggestions = removeInvalidAttributeSuggestions(suggestions, block, lines)
-
+  // Because @.?
   if (enabledNativeTypes && wordsBeforePosition.length >= 2) {
     const datasourceName = getFirstDatasourceName(lines)
     const prismaType = wordsBeforePosition[1]
@@ -228,17 +140,51 @@ export function getSuggestionForFieldAttribute(
           kind: CompletionItemKind.Property,
           label: '@' + datasourceName,
           documentation:
-            'Defines a custom type that should be used for this field.',
+            'Defines a native database type that should be used for this field. See https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#native-types-mapping',
+          insertText: '@db.$0',
+          insertTextFormat: InsertTextFormat.Snippet,
         })
-      } else {
+      } else if (
+        // Check that we are not separated by a space like `@db. |`
+        wordsBeforePosition[wordsBeforePosition.length - 1] === `@${datasourceName}`
+      ) {
         suggestions.push(...nativeTypeSuggestions)
+        return {
+          items: suggestions,
+          isIncomplete: false,
+        }
       }
     } else {
-      console.log(
-        'Did not receive any native type suggestions from prisma-fmt call.',
-      )
+      console.log('Did not receive any native type suggestions from prisma-fmt call.')
     }
   }
+
+  suggestions.push(...fieldAttributes)
+
+  const fieldType = getFieldType(currentLine)
+  // If we don't find a field type (e.g. String, Int...), return no suggestion
+  if (!fieldType) {
+    return
+  }
+
+  const modelOrEnum = getModelOrTypeOrEnumBlock(fieldType, lines)
+  // Tom: I think we allow ids on basically everything except relation fields
+  // so it doesn't need to be restricted to Int and String.
+  // These are terrible, terrible ideas of course, but you can have id DateTime @id or id Float @id.
+  // TODO: decide if we want to only suggest things that make most sense or everything that is technically possible.
+  const isAtIdAllowed = fieldType === 'Int' || fieldType === 'String' || modelOrEnum?.type === 'enum'
+  if (!isAtIdAllowed) {
+    // id not allowed
+    suggestions = suggestions.filter((sugg) => sugg.label !== '@id')
+  }
+
+  const isUpdatedAtAllowed = fieldType === 'DateTime'
+  if (!isUpdatedAtAllowed) {
+    // updatedAt not allowed
+    suggestions = suggestions.filter((sugg) => sugg.label !== '@updatedAt')
+  }
+
+  suggestions = removeInvalidAttributeSuggestions(suggestions, block, lines)
 
   return {
     items: suggestions,
@@ -246,80 +192,31 @@ export function getSuggestionForFieldAttribute(
   }
 }
 
-function getFirstDatasourceName(lines: string[]): string | undefined {
-  const datasourceBlockFirstLine = lines.find(
-    (l) => l.startsWith('datasource') && l.includes('{'),
-  )
-  if (!datasourceBlockFirstLine) {
-    return undefined
-  }
-  const indexOfBracket = datasourceBlockFirstLine.indexOf('{')
-  return datasourceBlockFirstLine
-    .slice('datasource'.length, indexOfBracket)
-    .trim()
-}
-
-function getFirstDatasourceProvider(lines: string[]): string | undefined {
-  // matches provider inside datasource in any position
-  // thanks to https://regex101.com for the online scratchpad
-  const result =
-    /datasource.*\{(\n|\N)\s*(.*\n)?\n*\s*provider\s=\s(\"(.*)\")[^}]+}/.exec(
-      lines.join('\n'),
-    )
-
-  if (!result || !result[4]) {
-    return undefined
-  }
-
-  const datasourceProvider = result[4]
-  if (
-    typeof datasourceProvider === 'string' &&
-    datasourceProvider.length >= 1
-  ) {
-    return datasourceProvider
-  }
-}
-
-export function getAllRelationNames(lines: Array<string>): Array<string> {
-  const modelNames: Array<string> = []
-  for (const item of lines) {
-    if (
-      (item.includes('model') || item.includes('enum')) &&
-      item.includes('{')
-    ) {
-      // found a block
-      const blockName = extractModelName(item)
-
-      modelNames.push(blockName)
-      // block is at least 2 lines long
-    }
-  }
-  return modelNames
-}
-
-export function getSuggestionsForTypes(
+export function getSuggestionsForFieldTypes(
   foundBlock: Block,
-  lines: Array<string>,
+  lines: string[],
   position: Position,
   currentLineUntrimmed: string,
 ): CompletionList {
-  // create deep copy
-  const suggestions: CompletionItem[] = klona(corePrimitiveTypes)
-  if (foundBlock instanceof Block) {
-    // get all model names
-    const modelNames: Array<string> = getAllRelationNames(lines)
-    suggestions.push(
-      ...toCompletionItems(modelNames, CompletionItemKind.Reference),
-    )
+  const suggestions: CompletionItem[] = []
+
+  const datasourceProvider = getFirstDatasourceProvider(lines)
+  // MongoDB doesn't support Decimal
+  if (datasourceProvider === 'mongodb') {
+    suggestions.push(...corePrimitiveTypes.filter((s) => s.label !== 'Decimal'))
+  } else {
+    suggestions.push(...corePrimitiveTypes)
   }
 
-  const wordsBeforePosition = currentLineUntrimmed
-    .slice(0, position.character)
-    .split(' ')
+  if (foundBlock instanceof Block) {
+    // get all model names
+    const modelNames: string[] = getAllRelationNames(lines)
+    suggestions.push(...toCompletionItems(modelNames, CompletionItemKind.Reference))
+  }
+
+  const wordsBeforePosition = currentLineUntrimmed.slice(0, position.character).split(' ')
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
-  const completeSuggestions = suggestions.filter(
-    (s) => s.label.length === wordBeforePosition.length,
-  )
+  const completeSuggestions = suggestions.filter((s) => s.label.length === wordBeforePosition.length)
   if (completeSuggestions.length !== 0) {
     for (const sugg of completeSuggestions) {
       suggestions.push(
@@ -343,46 +240,11 @@ export function getSuggestionsForTypes(
   }
 }
 
-/**
- * Removes all field suggestion that are invalid in this context. E.g. fields that are used already in a block will not be suggested again.
- * This function removes all field suggestion that are invalid in a certain context. E.g. in a generator block `provider, output, platforms, pinnedPlatForm`
- * are possible fields. But those fields are only valid suggestions if they haven't been used in this block yet. So in case `provider` has already been used, only
- * `output, platforms, pinnedPlatform` will be suggested.
- */
-function removeInvalidFieldSuggestions(
-  supportedFields: Array<string>,
-  block: Block,
-  lines: Array<string>,
-  position: Position,
-): Array<string> {
-  let reachedStartLine = false
-  for (const [key, item] of lines.entries()) {
-    if (key === block.start.line + 1) {
-      reachedStartLine = true
-    }
-    if (!reachedStartLine || key === position.line) {
-      continue
-    }
-    if (key === block.end.line) {
-      break
-    }
-    const fieldName = item.replace(/ .*/, '')
-    if (supportedFields.includes(fieldName)) {
-      supportedFields = supportedFields.filter((field) => field !== fieldName)
-    }
-  }
-  return supportedFields
-}
-
-function getSuggestionForDataSourceField(
-  block: Block,
-  lines: Array<string>,
-  position: Position,
-): CompletionItem[] {
+function getSuggestionForDataSourceField(block: Block, lines: string[], position: Position): CompletionItem[] {
   // create deep copy
   const suggestions: CompletionItem[] = klona(supportedDataSourceFields)
 
-  const labels: Array<string> = removeInvalidFieldSuggestions(
+  const labels: string[] = removeInvalidFieldSuggestions(
     suggestions.map((item) => item.label),
     block,
     lines,
@@ -392,11 +254,7 @@ function getSuggestionForDataSourceField(
   return suggestions.filter((item) => labels.includes(item.label))
 }
 
-function getSuggestionForGeneratorField(
-  block: Block,
-  lines: Array<string>,
-  position: Position,
-): CompletionItem[] {
+function getSuggestionForGeneratorField(block: Block, lines: string[], position: Position): CompletionItem[] {
   // create deep copy
   const suggestions: CompletionItem[] = klona(supportedGeneratorFields)
 
@@ -415,7 +273,7 @@ function getSuggestionForGeneratorField(
  */
 export function getSuggestionForFirstInsideBlock(
   blockType: BlockType,
-  lines: Array<string>,
+  lines: string[],
   position: Position,
   block: Block,
 ): CompletionList {
@@ -430,6 +288,9 @@ export function getSuggestionForFirstInsideBlock(
     case 'model':
       suggestions = getSuggestionForModelBlockAttribute(block, lines)
       break
+    case 'type':
+      // No suggestions
+      break
   }
 
   return {
@@ -438,9 +299,7 @@ export function getSuggestionForFirstInsideBlock(
   }
 }
 
-export function getSuggestionForBlockTypes(
-  lines: Array<string>,
-): CompletionList {
+export function getSuggestionForBlockTypes(lines: string[]): CompletionList {
   // create deep copy
   const suggestions: CompletionItem[] = klona(allowedBlockTypes)
 
@@ -470,9 +329,7 @@ export function getSuggestionForBlockTypes(
   }
 }
 
-export function suggestEqualSymbol(
-  blockType: BlockType,
-): CompletionList | undefined {
+export function suggestEqualSymbol(blockType: BlockType): CompletionList | undefined {
   if (!(blockType == 'datasource' || blockType == 'generator')) {
     return
   }
@@ -483,114 +340,16 @@ export function suggestEqualSymbol(
   }
 }
 
-export function getValuesInsideSquareBrackets(line: string): string[] {
-  const regexp = /\[([^\]]+)\]/
-  const matches = regexp.exec(line)
-  if (!matches || !matches[1]) {
-    return []
-  }
-  const result = matches[1].split(',')
-  return result.map((v) => v.trim().replace('"', '').replace('"', ''))
-}
-
-function declaredNativeTypes(document: TextDocument): boolean {
-  const nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(
-    document.getText(),
-  )
-  if (nativeTypes.length === 0) {
-    return false
-  }
-  return true
-}
-
-function handlePreviewFeatures(
-  previewFeaturesArray: string[],
-  position: Position,
-  currentLineUntrimmed: string,
-  isInsideQuotation: boolean,
-): CompletionList {
-  let previewFeatures: CompletionItem[] = previewFeaturesArray.map((pf) =>
-    CompletionItem.create(pf),
-  )
-  if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
-    if (isInsideQuotation) {
-      const usedValues = getValuesInsideSquareBrackets(currentLineUntrimmed)
-      previewFeatures = previewFeatures.filter(
-        (t) => !usedValues.includes(t.label),
-      )
-      return {
-        items: previewFeatures,
-        isIncomplete: true,
-      }
-    } else {
-      return {
-        items: previewFeaturesArguments.filter(
-          (arg) => !arg.label.includes('['),
-        ),
-        isIncomplete: true,
-      }
-    }
-  } else {
-    return {
-      items: previewFeaturesArguments.filter((arg) => !arg.label.includes('"')),
-      isIncomplete: true,
-    }
-  }
-}
-
-function getNativeTypes(
-  document: TextDocument,
-  prismaType: string,
-): CompletionItem[] {
-  let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(
-    document.getText(),
-  )
-
-  if (nativeTypes.length === 0) {
-    return []
-  }
-
-  const suggestions: CompletionItem[] = []
-  nativeTypes = nativeTypes.filter((n) => n.prisma_types.includes(prismaType))
-  nativeTypes.forEach((element) => {
-    if (element._number_of_args + element._number_of_optional_args !== 0) {
-      let documentation = ''
-      if (element._number_of_optional_args !== 0) {
-        documentation = `${documentation}Number of optional arguments: ${element._number_of_optional_args}.\n'`
-      }
-      if (element._number_of_args !== 0) {
-        documentation = `${documentation}Number of required arguments: ${element._number_of_args}.\n`
-      }
-      suggestions.push({
-        label: `${element.name}()`,
-        kind: CompletionItemKind.TypeParameter,
-        insertText: `${element.name}($0)`,
-        documentation: { kind: MarkupKind.Markdown, value: documentation },
-        insertTextFormat: 2,
-      })
-    } else {
-      suggestions.push({
-        label: element.name,
-        kind: CompletionItemKind.TypeParameter,
-      })
-    }
-  })
-
-  return suggestions
-}
-
 // Suggest fields for a BlockType
 export function getSuggestionForSupportedFields(
   blockType: BlockType,
   currentLine: string,
   currentLineUntrimmed: string,
   position: Position,
+  lines: string[],
 ): CompletionList | undefined {
-  let suggestions: Array<string> = []
-  const isInsideQuotation: boolean = isInsideQuotationMark(
-    currentLineUntrimmed,
-    position,
-  )
+  let suggestions: string[] = []
+  const isInsideQuotation: boolean = isInsideQuotationMark(currentLineUntrimmed, position)
 
   switch (blockType) {
     case 'generator':
@@ -613,12 +372,7 @@ export function getSuggestionForSupportedFields(
       if (currentLine.startsWith('previewFeatures')) {
         const generatorPreviewFeatures: string[] = previewFeatures()
         if (generatorPreviewFeatures.length > 0) {
-          return handlePreviewFeatures(
-            generatorPreviewFeatures,
-            position,
-            currentLineUntrimmed,
-            isInsideQuotation,
-          )
+          return handlePreviewFeatures(generatorPreviewFeatures, position, currentLineUntrimmed, isInsideQuotation)
         }
       }
       // engineType
@@ -640,27 +394,9 @@ export function getSuggestionForSupportedFields(
     case 'datasource':
       // provider
       if (currentLine.startsWith('provider')) {
-        let providers: CompletionItem[] = klona(dataSourceProviders)
+        const providers: CompletionItem[] = dataSourceProviders
 
-        if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
-          // return providers that haven't been used yet
-          if (isInsideQuotation) {
-            const usedValues =
-              getValuesInsideSquareBrackets(currentLineUntrimmed)
-            providers = providers.filter((t) => !usedValues.includes(t.label))
-            return {
-              items: providers,
-              isIncomplete: true,
-            }
-          } else {
-            return {
-              items: dataSourceProviderArguments.filter(
-                (arg) => !arg.label.includes('['),
-              ),
-              isIncomplete: true,
-            }
-          }
-        } else if (isInsideQuotation) {
+        if (isInsideQuotation) {
           return {
             items: providers,
             isIncomplete: true,
@@ -679,9 +415,7 @@ export function getSuggestionForSupportedFields(
         } else {
           if (currentLine.includes('env')) {
             return {
-              items: dataSourceUrlArguments.filter(
-                (a) => !a.label.includes('env'),
-              ),
+              items: dataSourceUrlArguments.filter((a) => !a.label.includes('env')),
               isIncomplete: true,
             }
           }
@@ -700,27 +434,130 @@ export function getSuggestionForSupportedFields(
   }
 }
 
-function getDefaultValues(
-  currentLine: string,
-  lines: string[],
-): CompletionItem[] {
-  const suggestions: CompletionItem[] = [
-    {
+function getDefaultValues({
+  currentLine,
+  lines,
+  wordsBeforePosition,
+}: {
+  currentLine: string
+  lines: string[]
+  wordsBeforePosition: string[]
+}): CompletionItem[] {
+  const suggestions: CompletionItem[] = []
+  const datasourceProvider = getFirstDatasourceProvider(lines)
+
+  // Completions for sequence(|)
+  if (datasourceProvider === 'cockroachdb') {
+    if (wordsBeforePosition.some((a) => a.includes('sequence('))) {
+      const sequenceProperties = ['virtual', 'minValue', 'maxValue', 'cache', 'increment', 'start']
+
+      // No suggestions if virtual is present
+      if (currentLine.includes('virtual')) {
+        return suggestions
+      }
+
+      // Only suggests if empty
+      if (!sequenceProperties.some((it) => currentLine.includes(it))) {
+        suggestions.push({
+          label: 'virtual',
+          insertText: 'virtual',
+          kind: CompletionItemKind.Property,
+          documentation:
+            'Virtual sequences are sequences that do not generate monotonically increasing values and instead produce values like those generated by the built-in function unique_rowid(). They are intended for use in combination with SERIAL-typed columns.',
+        })
+      }
+
+      if (!currentLine.includes('minValue')) {
+        suggestions.push({
+          label: 'minValue',
+          insertText: 'minValue: $0',
+          kind: CompletionItemKind.Property,
+          documentation: 'The new minimum value of the sequence.',
+        })
+      }
+      if (!currentLine.includes('maxValue')) {
+        suggestions.push({
+          label: 'maxValue',
+          insertText: 'maxValue: $0',
+          kind: CompletionItemKind.Property,
+          documentation: 'The new maximum value of the sequence.',
+        })
+      }
+      if (!currentLine.includes('cache')) {
+        suggestions.push({
+          label: 'cache',
+          insertText: 'cache: $0',
+          kind: CompletionItemKind.Property,
+          documentation:
+            'The number of sequence values to cache in memory for reuse in the session. A cache size of 1 means that there is no cache, and cache sizes of less than 1 are not valid.',
+        })
+      }
+      if (!currentLine.includes('increment')) {
+        suggestions.push({
+          label: 'increment',
+          insertText: 'increment: $0',
+          kind: CompletionItemKind.Property,
+          documentation:
+            'The new value by which the sequence is incremented. A negative number creates a descending sequence. A positive number creates an ascending sequence.',
+        })
+      }
+      if (!currentLine.includes('start')) {
+        suggestions.push({
+          label: 'start',
+          insertText: 'start: $0',
+          kind: CompletionItemKind.Property,
+          documentation:
+            'The value the sequence starts at if you RESTART or if the sequence hits the MAXVALUE and CYCLE is set.',
+        })
+      }
+
+      return suggestions
+    }
+  }
+
+  // MongoDB only
+  if (datasourceProvider === 'mongodb') {
+    suggestions.push({
+      label: 'auto()',
+      kind: CompletionItemKind.Function,
+      documentation: 'Represents default values that are automatically generated by the database.',
+      insertText: 'auto()',
+      insertTextFormat: InsertTextFormat.Snippet,
+    })
+  } else {
+    suggestions.push({
       label: 'dbgenerated("")',
       kind: CompletionItemKind.Function,
       documentation:
         'The SQL definition of the default value which is generated by the database. This is not validated by Prisma.',
       insertText: 'dbgenerated("$0")',
-      insertTextFormat: 2,
-    },
-  ]
+      insertTextFormat: InsertTextFormat.Snippet,
+    })
+  }
+
   const fieldType = getFieldType(currentLine)
+  // If we don't find a field type (e.g. String, Int...), return no suggestion
   if (!fieldType) {
     return []
   }
 
   switch (fieldType) {
+    case 'BigInt':
     case 'Int':
+      if (datasourceProvider === 'cockroachdb') {
+        suggestions.push({
+          label: 'sequence()',
+          kind: CompletionItemKind.Function,
+          documentation:
+            'Create a sequence of integers in the underlying database and assign the incremented values to the ID values of the created records based on the sequence.',
+        })
+
+        if (fieldType === 'Int') {
+          // @default(autoincrement()) is only supported on BigInt fields for cockroachdb.
+          break
+        }
+      }
+
       suggestions.push({
         label: 'autoincrement()',
         kind: CompletionItemKind.Function,
@@ -767,140 +604,27 @@ function getDefaultValues(
       )
       break
   }
-  const modelOrEnum = getModelOrEnumBlock(fieldType, lines)
+
+  const isScalarList = fieldType.endsWith('[]')
+  if (isScalarList) {
+    suggestions.unshift({
+      label: '[]',
+      insertText: '[$0]',
+      insertTextFormat: InsertTextFormat.Snippet,
+      documentation: 'Set a default value on the list field',
+      kind: CompletionItemKind.Value,
+    })
+  }
+
+  const modelOrEnum = getModelOrTypeOrEnumBlock(fieldType, lines)
   if (modelOrEnum && modelOrEnum.type === 'enum') {
     // get fields from enum block for suggestions
     const values: string[] = getFieldsFromCurrentBlock(lines, modelOrEnum)
-    values.forEach((v) =>
-      suggestions.push({ label: v, kind: CompletionItemKind.Value }),
-    )
+    values.forEach((v) => suggestions.push({ label: v, kind: CompletionItemKind.Value }))
   }
 
   return suggestions
 }
-
-// checks if e.g. inside 'fields' or 'references' attribute
-function isInsideGivenProperty(
-  currentLineUntrimmed: string,
-  wordsBeforePosition: Array<string>,
-  attributeName: string,
-  position: Position,
-): boolean {
-  if (!isInsideAttribute(currentLineUntrimmed, position, '[]')) {
-    return false
-  }
-
-  // We sort all attributes by their position
-  const sortedAttributes = [
-    {
-      name: 'fields',
-      position: wordsBeforePosition.findIndex((word) =>
-        word.includes('fields'),
-      ),
-    },
-    {
-      name: 'references',
-      position: wordsBeforePosition.findIndex((word) =>
-        word.includes('references'),
-      ),
-    },
-  ].sort((a, b) => (a.position < b.position ? 1 : -1))
-
-  // If the last attribute (higher position)
-  // is the one we are looking for we are in this attribute
-  if (sortedAttributes[0].name === attributeName) {
-    return true
-  } else {
-    return false
-  }
-}
-
-function getFieldsFromCurrentBlock(
-  lines: Array<string>,
-  block: Block,
-  position?: Position,
-): Array<string> {
-  const suggestions: Array<string> = []
-
-  let reachedStartLine = false
-  let field = ''
-  for (const [key, item] of lines.entries()) {
-    if (key === block.start.line + 1) {
-      reachedStartLine = true
-    }
-    if (!reachedStartLine) {
-      continue
-    }
-    if (key === block.end.line) {
-      break
-    }
-    if (!item.startsWith('@@') && (!position || key !== position.line)) {
-      field = item.replace(/ .*/, '')
-      if (field !== '' && !field.startsWith('//')) {
-        suggestions.push(field)
-      }
-    }
-  }
-  return suggestions
-}
-
-export function getTypesFromCurrentBlock(
-  lines: Array<string>,
-  block: Block,
-  position?: Position,
-): Map<string, number[]> {
-  const suggestions: Map<string, number[]> = new Map<string, number[]>()
-
-  let reachedStartLine = false
-  for (const [key, item] of lines.entries()) {
-    if (key === block.start.line + 1) {
-      reachedStartLine = true
-    }
-    if (!reachedStartLine) {
-      continue
-    }
-    if (key === block.end.line) {
-      break
-    }
-    if (!item.startsWith('@@') && (!position || key !== position.line)) {
-      const type = getFieldType(item)
-      if (type !== undefined) {
-        /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-        const existingSuggestion = suggestions.get(type)
-        if (!existingSuggestion) {
-          suggestions.set(type, [key])
-        } else {
-          existingSuggestion.push(key)
-          suggestions.set(type, existingSuggestion)
-        }
-        /* eslint-enable @typescript-eslint/no-unsafe-assignment */
-      }
-    }
-  }
-  return suggestions
-}
-
-function getFieldType(line: string): string | undefined {
-  const wordsInLine: string[] = line.split(/\s+/)
-  if (wordsInLine.length < 2) {
-    return undefined
-  }
-  const type = wordsInLine[1]
-  if (type.length !== 0) {
-    return type
-  }
-  return undefined
-}
-
-// function definingReferentialAction(
-//   wordsBeforePosition: Array<string>,
-// ): boolean {
-//   const lastWord = wordsBeforePosition[wordsBeforePosition.length - 2]
-//   return (
-//     lastWord != undefined &&
-//     (lastWord.includes('onDelete') || lastWord.includes('onUpdate'))
-//   )
-// }
 
 function getSuggestionsForAttribute(
   {
@@ -910,7 +634,6 @@ function getSuggestionsForAttribute(
     lines,
     block,
     position,
-    document,
   }: {
     attribute?: '@relation'
     wordsBeforePosition: string[]
@@ -918,55 +641,26 @@ function getSuggestionsForAttribute(
     lines: string[]
     block: Block
     position: Position
-    document: TextDocument
   }, // eslint-disable-line @typescript-eslint/no-unused-vars
 ): CompletionList | undefined {
-  const firstWordBeforePosition =
-    wordsBeforePosition[wordsBeforePosition.length - 1]
-  const secondWordBeforePosition =
-    wordsBeforePosition[wordsBeforePosition.length - 2]
-  const wordBeforePosition =
-    firstWordBeforePosition === ''
-      ? secondWordBeforePosition
-      : firstWordBeforePosition
-  const stringTilPosition = untrimmedCurrentLine
-    .slice(0, position.character)
-    .trim()
+  const firstWordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
+  const secondWordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 2]
+  const wordBeforePosition = firstWordBeforePosition === '' ? secondWordBeforePosition : firstWordBeforePosition
 
   let suggestions: CompletionItem[] = []
-  // create deep copy with klona
-  if (attribute === '@relation') {
-    suggestions = klona(relationArguments)
-    // This is basically hardcoding the suggestions
-    // because prisma-format referential-actions returns an empty array [] most of the time
-    // because schema is considered invalid when it's sent to the subcommand because typing in progress.
-    // Main issue is that "Restrict" should be excluded if on SQL Server
-    // We can filter on the datasource using `getFirstDatasourceProvider`
-    const datasourceProvider = getFirstDatasourceProvider(lines)
 
-    // Note: needs to be before @relation condition because
-    // `@relation(onUpdate: |)` means wordBeforePosition = '@relation(onUpdate:'
-    if (wordBeforePosition.includes('onDelete:')) {
-      return {
-        items:
-          datasourceProvider === 'sqlserver'
-            ? relationOnDeleteArguments.filter(
-                (arg) => arg.label !== 'Restrict',
-              )
-            : relationOnDeleteArguments,
-        isIncomplete: false,
-      }
-    }
-    if (wordBeforePosition.includes('onUpdate:')) {
-      return {
-        items:
-          datasourceProvider === 'sqlserver'
-            ? relationOnUpdateArguments.filter(
-                (arg) => arg.label !== 'Restrict',
-              )
-            : relationOnUpdateArguments,
-        isIncomplete: false,
-      }
+  // We can filter on the datasource
+  const datasourceProvider = getFirstDatasourceProvider(lines)
+  // We can filter on the previewFeatures enabled
+  const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
+
+  if (attribute === '@relation') {
+    if (datasourceProvider === 'mongodb') {
+      suggestions = relationArguments.filter(
+        (arg) => arg.label !== 'map' && arg.label !== 'onDelete' && arg.label !== 'onUpdate',
+      )
+    } else {
+      suggestions = relationArguments
     }
 
     // If we are right after @relation(
@@ -977,192 +671,301 @@ function getSuggestionsForAttribute(
       }
     }
 
-    // Doesn't really work because prisma-fmt returns nothing when the schema is "invalid"
-    // but that also means that the schema is considered invalid when trying to autocomplete...
-    //
-    // if lastWord = onUpdate or onDelete
-    // then get suggestions by passing `referential-actions` arg to `prisma-fmt`
-    // if (definingReferentialAction(wordsBeforePosition)) {
-    //   const suggestionsForReferentialActions: CompletionItem[] = referentialActions(
-    //     binPath,
-    //     document.getText(),
-    //   ).map((action) => {
-    //     return CompletionItem.create(action)
-    //   })
-
-    //   return {
-    //     items: suggestionsForReferentialActions,
-    //     isIncomplete: false,
-    //   }
-    // }
-
-    if (
-      isInsideGivenProperty(
-        untrimmedCurrentLine,
-        wordsBeforePosition,
-        'fields',
-        position,
-      )
-    ) {
+    // TODO check fields with [] shortcut
+    if (isInsideGivenProperty(untrimmedCurrentLine, wordsBeforePosition, 'fields', position)) {
       return {
-        items: toCompletionItems(
-          getFieldsFromCurrentBlock(lines, block, position),
-          CompletionItemKind.Field,
-        ),
+        items: toCompletionItems(getFieldsFromCurrentBlock(lines, block, position), CompletionItemKind.Field),
         isIncomplete: false,
       }
     }
 
-    if (
-      isInsideGivenProperty(
-        untrimmedCurrentLine,
-        wordsBeforePosition,
-        'references',
-        position,
-      )
-    ) {
-      const referencedModelName = wordsBeforePosition[1].replace('?', '')
-      const referencedBlock = getModelOrEnumBlock(referencedModelName, lines)
+    if (isInsideGivenProperty(untrimmedCurrentLine, wordsBeforePosition, 'references', position)) {
+      // Get the name by potentially removing ? and [] from Foo? or Foo[]
+      const referencedModelName = wordsBeforePosition[1].replace('?', '').replace('[]', '')
+      const referencedBlock = getModelOrTypeOrEnumBlock(referencedModelName, lines)
       // referenced model does not exist
+      // TODO type?
       if (!referencedBlock || referencedBlock.type !== 'model') {
         return
       }
       return {
-        items: toCompletionItems(
-          getFieldsFromCurrentBlock(lines, referencedBlock),
-          CompletionItemKind.Field,
-        ),
+        items: toCompletionItems(getFieldsFromCurrentBlock(lines, referencedBlock), CompletionItemKind.Field),
         isIncomplete: false,
       }
     }
   } else {
-    // @id, @unique, @index
-    // @@id, @@unique, @@index
+    // @id, @unique
+    // @@id, @@unique, @@index, @@fulltext
 
-    if (isInsideAttribute(untrimmedCurrentLine, position, '[]')) {
-      let items = getFieldsFromCurrentBlock(lines, block, position)
-      // get parameters inside block attribute
-      const parameterMatch = new RegExp(/(?<=\[).+?(?=\])/).exec(
-        untrimmedCurrentLine,
-      )
-      if (parameterMatch) {
-        const existingParameters = parameterMatch[0]
-          .split(',')
-          .map((param) => param.trim())
-        items = items.filter((s) => !existingParameters.includes(s))
+    // The length argument is available on MySQL only on the
+    // @id, @@id, @unique, @@unique and @@index fields.
+
+    // The sort argument is available for all databases on the
+    // @unique, @@unique and @@index fields.
+    // Additionally, SQL Server also allows it on @id and @@id.
+
+    let attribute: '@@unique' | '@unique' | '@@id' | '@id' | '@@index' | '@@fulltext' | undefined = undefined
+    if (wordsBeforePosition.some((a) => a.includes('@@id'))) {
+      attribute = '@@id'
+    } else if (wordsBeforePosition.some((a) => a.includes('@id'))) {
+      attribute = '@id'
+    } else if (wordsBeforePosition.some((a) => a.includes('@@unique'))) {
+      attribute = '@@unique'
+    } else if (wordsBeforePosition.some((a) => a.includes('@unique'))) {
+      attribute = '@unique'
+    } else if (wordsBeforePosition.some((a) => a.includes('@@index'))) {
+      attribute = '@@index'
+    } else if (wordsBeforePosition.some((a) => a.includes('@@fulltext'))) {
+      attribute = '@@fulltext'
+    }
+
+    /**
+     * inside []
+     * suggest composite types for MongoDB
+     * suggest fields and extendedIndexes arguments (sort / length)
+     *
+     * Examples
+     * field attribute: slug String @unique(sort: Desc, length: 42) @db.VarChar(3000)
+     * block attribute: @@id([title(length: 100, sort: Desc), abstract(length: 10)])
+     */
+    if (attribute && attribute !== '@@fulltext' && isInsideAttribute(untrimmedCurrentLine, position, '[]')) {
+      if (isInsideFieldArgument(untrimmedCurrentLine, position)) {
+        // extendedIndexes
+        const items: CompletionItem[] = []
+        // https://www.notion.so/prismaio/Proposal-More-PostgreSQL-index-types-GiST-GIN-SP-GiST-and-BRIN-e27ef762ee4846a9a282eec1a5129270
+        if (datasourceProvider === 'postgresql' && attribute === '@@index') {
+          items.push({
+            label: 'ops',
+            insertText: 'ops: $0',
+            insertTextFormat: InsertTextFormat.Snippet,
+            kind: CompletionItemKind.Property,
+            documentation: 'Specify the operator class for an indexed field.',
+          })
+        }
+
+        items.push(
+          ...filterSortLengthBasedOnInput(
+            attribute,
+            previewFeatures,
+            datasourceProvider,
+            wordBeforePosition,
+            sortLengthProperties,
+          ),
+        )
+
+        return {
+          items,
+          isIncomplete: false,
+        }
+      }
+
+      const fieldsFromLine = getValuesInsideSquareBrackets(untrimmedCurrentLine)
+
+      /*
+       * MongoDB composite type fields, see https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#composite-type-unique-constraints
+       * Examples
+       * @@unique([address.|]) or @@unique(fields: [address.|])
+       * @@index([address.|]) or @@index(fields: [address.|])
+       */
+      if (datasourceProvider === 'mongodb' && fieldsFromLine && firstWordBeforePosition.endsWith('.')) {
+        const getFieldName = (text: string): string => {
+          const [_, __, value] = new RegExp(/(.*\[)?(.+)/).exec(text) || []
+          let name = value
+          // Example for `@@index([email,address.|])` when there is no space between fields
+          if (name?.includes(',')) {
+            name = name.split(',').pop()!
+          }
+          // Remove . to only get the name
+          if (name?.endsWith('.')) {
+            name = name.slice(0, -1)
+          }
+          return name
+        }
+
+        const currentFieldName = getFieldName(firstWordBeforePosition)
+
+        if (!currentFieldName) {
+          return {
+            isIncomplete: false,
+            items: [],
+          }
+        }
+
+        const currentCompositeAsArray = currentFieldName.split('.')
+        const fieldTypesFromCurrentBlock = getFieldTypesFromCurrentBlock(lines, block)
+
+        const fields = getCompositeTypeFieldsRecursively(lines, currentCompositeAsArray, fieldTypesFromCurrentBlock)
+        return {
+          items: toCompletionItems(fields, CompletionItemKind.Field),
+          isIncomplete: false,
+        }
+      }
+
+      let fieldsFromCurrentBlock = getFieldsFromCurrentBlock(lines, block, position)
+
+      if (fieldsFromLine.length > 0) {
+        // If we are in a composite type, exit here, to not pollute results with first level fields
+        if (firstWordBeforePosition.includes('.')) {
+          return {
+            isIncomplete: false,
+            items: [],
+          }
+        }
+
+        // Remove items already used
+        fieldsFromCurrentBlock = fieldsFromCurrentBlock.filter((s) => !fieldsFromLine.includes(s))
+
+        // Return fields
+        // `onCompletionResolve` will take care of filtering the partial matches
+        if (
+          firstWordBeforePosition !== '' &&
+          !firstWordBeforePosition.endsWith(',') &&
+          !firstWordBeforePosition.endsWith(', ')
+        ) {
+          return {
+            items: toCompletionItems(fieldsFromCurrentBlock, CompletionItemKind.Field),
+            isIncomplete: false,
+          }
+        }
       }
 
       return {
-        items: toCompletionItems(items, CompletionItemKind.Field),
+        items: toCompletionItems(fieldsFromCurrentBlock, CompletionItemKind.Field),
         isIncomplete: false,
       }
     }
 
+    // "@@" block attributes
     let blockAtrributeArguments: CompletionItem[] = []
-    if (wordsBeforePosition.some((a) => a.includes('@@unique'))) {
-      blockAtrributeArguments = givenBlockAttributeParams('@@unique')
-    } else if (wordsBeforePosition.some((a) => a.includes('@@id'))) {
-      blockAtrributeArguments = givenBlockAttributeParams('@@id')
-    } else if (wordsBeforePosition.some((a) => a.includes('@@index'))) {
-      blockAtrributeArguments = givenBlockAttributeParams('@@index')
+    if (attribute === '@@unique') {
+      blockAtrributeArguments = givenBlockAttributeParams({
+        blockAttribute: '@@unique',
+        wordBeforePosition,
+        datasourceProvider,
+        previewFeatures,
+      })
+    } else if (attribute === '@@id') {
+      blockAtrributeArguments = givenBlockAttributeParams({
+        blockAttribute: '@@id',
+        wordBeforePosition,
+        datasourceProvider,
+        previewFeatures,
+      })
+    } else if (attribute === '@@index') {
+      blockAtrributeArguments = givenBlockAttributeParams({
+        blockAttribute: '@@index',
+        wordBeforePosition,
+        datasourceProvider,
+        previewFeatures,
+      })
+    } else if (attribute === '@@fulltext') {
+      blockAtrributeArguments = givenBlockAttributeParams({
+        blockAttribute: '@@fulltext',
+        wordBeforePosition,
+        datasourceProvider,
+        previewFeatures,
+      })
     }
 
     if (blockAtrributeArguments.length) {
       suggestions = blockAtrributeArguments
     } else {
+      // "@" field attributes
       let fieldAtrributeArguments: CompletionItem[] = []
-      if (wordsBeforePosition.some((a) => a.includes('@unique'))) {
-        fieldAtrributeArguments = givenFieldAttributeParams('@unique')
-      } else if (wordsBeforePosition.some((a) => a.includes('@id'))) {
-        fieldAtrributeArguments = givenFieldAttributeParams('@id')
-      } else if (wordsBeforePosition.some((a) => a.includes('@index'))) {
-        fieldAtrributeArguments = givenFieldAttributeParams('@index')
+      if (attribute === '@unique') {
+        fieldAtrributeArguments = givenFieldAttributeParams(
+          '@unique',
+          previewFeatures,
+          datasourceProvider,
+          wordBeforePosition,
+        )
+      } else if (attribute === '@id') {
+        fieldAtrributeArguments = givenFieldAttributeParams(
+          '@id',
+          previewFeatures,
+          datasourceProvider,
+          wordBeforePosition,
+        )
       }
       suggestions = fieldAtrributeArguments
     }
+  }
 
-    return {
-      items: suggestions,
-      isIncomplete: false,
+  // Check which attributes are already present
+  // so we can filter them out from the suggestions
+  const attributesFound: Set<string> = new Set()
+
+  for (const word of wordsBeforePosition) {
+    if (word.includes('references')) {
+      attributesFound.add('references')
+    }
+    if (word.includes('fields')) {
+      attributesFound.add('fields')
+    }
+    if (word.includes('onUpdate')) {
+      attributesFound.add('onUpdate')
+    }
+    if (word.includes('onDelete')) {
+      attributesFound.add('onDelete')
+    }
+    if (word.includes('map')) {
+      attributesFound.add('map')
+    }
+    if (word.includes('name') || /".*"/.exec(word)) {
+      attributesFound.add('name')
+      attributesFound.add('""')
+    }
+    if (word.includes('type')) {
+      attributesFound.add('type')
     }
   }
 
-  // Example: @relation(fields: [authorId], references: [id], |)
-  if (stringTilPosition.endsWith(',')) {
-    // Check which attributes are already present
-    // so we can filter them out from the suggestions
-    const attributesFound: Set<string> = new Set()
-
-    for (const word of wordsBeforePosition) {
-      if (word.includes('references')) {
-        attributesFound.add('references')
-      }
-      if (word.includes('fields')) {
-        attributesFound.add('fields')
-      }
-      if (word.includes('onUpdate')) {
-        attributesFound.add('onUpdate')
-      }
-      if (word.includes('onDelete')) {
-        attributesFound.add('onDelete')
-      }
-      if (word.includes('map')) {
-        attributesFound.add('map')
-      }
-      if (word.includes('name') || /".*"/.exec(word)) {
-        attributesFound.add('name')
-        attributesFound.add('""')
-      }
-    }
-
-    // now filter them out of the suggestions as they are already present
-    const filteredSuggestions: CompletionItem[] = suggestions.reduce(
-      (accumulator: CompletionItem[] & unknown[], sugg) => {
-        let suggestionMatch = false
-        for (const attribute of attributesFound) {
-          if (sugg.label.includes(attribute)) {
-            suggestionMatch = true
-          }
+  // now filter them out of the suggestions as they are already present
+  const filteredSuggestions: CompletionItem[] = suggestions.reduce(
+    (accumulator: CompletionItem[] & unknown[], sugg) => {
+      let suggestionMatch = false
+      for (const attribute of attributesFound) {
+        if (sugg.label.includes(attribute)) {
+          suggestionMatch = true
         }
+      }
 
-        if (!suggestionMatch) {
-          accumulator.push(sugg)
-        }
+      if (!suggestionMatch) {
+        accumulator.push(sugg)
+      }
 
-        return accumulator
-      },
-      [],
-    )
+      return accumulator
+    },
+    [],
+  )
 
-    // nothing to present any more, return
-    if (filteredSuggestions.length === 0) {
-      return
-    }
+  // nothing to present any more, return
+  if (filteredSuggestions.length === 0) {
+    return
+  }
 
-    return {
-      items: filteredSuggestions,
-      isIncomplete: false,
-    }
+  return {
+    items: filteredSuggestions,
+    isIncomplete: false,
   }
 }
 
 export function getSuggestionsForInsideRoundBrackets(
   untrimmedCurrentLine: string,
-  lines: Array<string>,
+  lines: string[],
   document: TextDocument,
   position: Position,
   block: Block,
 ): CompletionList | undefined {
-  const wordsBeforePosition = untrimmedCurrentLine
-    .slice(0, position.character)
-    .trimLeft()
-    .split(/\s+/)
+  const wordsBeforePosition = untrimmedCurrentLine.slice(0, position.character).trimLeft().split(/\s+/)
 
-  const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
-
-  if (wordBeforePosition.includes('@default')) {
+  if (wordsBeforePosition.some((a) => a.includes('@default'))) {
     return {
-      items: getDefaultValues(lines[position.line], lines),
+      items: getDefaultValues({
+        currentLine: lines[position.line],
+        lines,
+        wordsBeforePosition,
+      }),
       isIncomplete: false,
     }
   } else if (wordsBeforePosition.some((a) => a.includes('@relation'))) {
@@ -1171,23 +974,23 @@ export function getSuggestionsForInsideRoundBrackets(
       wordsBeforePosition,
       untrimmedCurrentLine,
       lines,
-      document,
+      // document,
       block,
       position,
     })
   } else if (
+    // matches
+    // @id, @unique
+    // @@id, @@unique, @@index, @@fulltext
     wordsBeforePosition.some(
-      (a) => a.includes('@unique') || a.includes('@id') || a.includes('@index'),
+      (a) => a.includes('@unique') || a.includes('@id') || a.includes('@@index') || a.includes('@@fulltext'),
     )
   ) {
-    // matches
-    // @id, @unique, @index
-    // @@id, @@unique, @@index
     return getSuggestionsForAttribute({
       wordsBeforePosition,
       untrimmedCurrentLine,
       lines,
-      document,
+      // document,
       block,
       position,
     })
