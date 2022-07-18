@@ -1956,28 +1956,45 @@ suite('Completions', function () {
         },
       })
     })
+
+    const enumUserTypeExpectedItems = [
+      fieldAttributeId,
+      fieldAttributeUnique,
+      fieldAttributeMap,
+      fieldAttributeDefault,
+      fieldAttributeRelation,
+      fieldAttributeIgnore,
+    ]
     test('enum UserType |', () => {
       assertCompletion({
         schema: /* Prisma */ `
         model DateTest {
-          // id Int @id @default()
           enum UserType |
         }
-
         enum UserType {
           ADMIN
           NORMAL
         }`,
         expected: {
           isIncomplete: false,
-          items: [
-            fieldAttributeId,
-            fieldAttributeUnique,
-            fieldAttributeMap,
-            fieldAttributeDefault,
-            fieldAttributeRelation,
-            fieldAttributeIgnore,
-          ],
+          items: enumUserTypeExpectedItems,
+        },
+      })
+    })
+    test('enum UserType | with 1 commented field', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+        model DateTest {
+          // id Int @id @default()
+          enum UserType |
+        }
+        enum UserType {
+          ADMIN
+          NORMAL
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: enumUserTypeExpectedItems,
         },
       })
     })
