@@ -389,7 +389,7 @@ export function removeInvalidAttributeSuggestions(
       break
     }
 
-    // Ingore commented lines
+    // Ignore commented lines
     if (!item.startsWith('//')) {
       // TODO we should also remove the other suggestions if used (default()...)
       if (item.includes('@id')) {
