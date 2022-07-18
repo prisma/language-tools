@@ -40,7 +40,7 @@
       "label": "Unsupported",
       "insertText": "Unsupported(\"$0\")",
       "documentation": "An arbitrary database column type, for which Prisma has no syntax. Fields of type `Unsupported` work with Prisma Migrate and introspection, but are not exposed in Prisma Client.",
-      "fullSignature": "Unsupported(_ name: String)",
+      "fullSignature": "Unsupported(name?: String)",
       "params": [
         {
           "label": "name",
@@ -108,7 +108,7 @@
       "label": "@@map",
       "insertText": "@@map(\"$0\")",
       "documentation": "Maps a model name from the Prisma schema to a different table name.",
-      "fullSignature": "@@map(_ name: String)",
+      "fullSignature": "@@map(name?: String)",
       "params": [
         {
           "label": "name",
@@ -121,7 +121,7 @@
       "label": "@@id",
       "insertText": "@@id([$0])",
       "documentation": "Defines a multi-field ID on the model.",
-      "fullSignature": "@@id(_ fields: FieldReference[], name: String?, map: String?)",
+      "fullSignature": "@@id(fields: Field[], name?: String, map?: String)",
       "params": [
         {
           "label": "fields",
@@ -144,7 +144,7 @@
       "label": "@@unique",
       "insertText": "@@unique([$0])",
       "documentation": "Defines a compound unique constraint for the specified fields.",
-      "fullSignature": "@@unique(_ fields: FieldReference[], name: String?, map: String?)",
+      "fullSignature": "@@unique(fields?: Field[], name?: String, map?: String)",
       "params": [
         {
           "label": "fields",
@@ -167,7 +167,7 @@
       "label": "@@index",
       "insertText": "@@index([$0])",
       "documentation": "Defines an index on the model.",
-      "fullSignature": "@@index(_ fields: FieldReference[], map: String?)",
+      "fullSignature": "@@index(fields?: Field[], map?: String)",
       "params": [
         {
           "label": "fields",
@@ -185,7 +185,7 @@
       "label": "@@fulltext",
       "insertText": "@@fulltext([$0])",
       "documentation": "Defines a full-text index on the model.",
-      "fullSignature": "@@fulltext(_ fields: FieldReference[], map: String?)",
+      "fullSignature": "@@fulltext(fields?: Field[], map?: String)",
       "params": [
         {
           "label": "fields",
@@ -209,7 +209,7 @@
   "fieldAttributes": [
     {
       "label": "@id",
-      "fullSignature": "@id",
+      "fullSignature": "@id(map?: String, length?: number, sort?: String, clustered?: Boolean)",
       "documentation": "Defines a single-field ID on the model.",
       "params": [
         {
@@ -231,7 +231,7 @@
     },
     {
       "label": "@unique",
-      "fullSignature": "@unique",
+      "fullSignature": "@unique(map?: String, length?: number, sort?: String, ops?: PostgreSQLOperator)",
       "documentation": "Defines a unique constraint for this field.",
       "params": [
         {
@@ -255,7 +255,7 @@
       "label": "@map",
       "insertText": "@map(\"$0\")",
       "documentation": "Maps a field name from the Prisma schema to a different column name.",
-      "fullSignature": "@map(_ name: String)",
+      "fullSignature": "@map(name: String)",
       "params": [
         {
           "label": "name",
@@ -267,7 +267,7 @@
       "label": "@default",
       "insertText": "@default($0)",
       "documentation": "Defines a default value for this field. `@default` takes an expression as an argument.",
-      "fullSignature": "@default(_ expression: Expression)",
+      "fullSignature": "@default(Expression)",
       "params": [
         {
           "label": "expression",
@@ -279,7 +279,7 @@
       "label": "@relation",
       "insertText": "@relation($0)",
       "documentation": "Defines a connection between two models. [Learn more](https://pris.ly/d/relation-attribute).",
-      "fullSignature": "@relation(_ name: String?, map: String?, fields: FieldReference[]?, references: FieldReference[]?)",
+      "fullSignature": "@relation(name?: String, map?: String, fields?: Field[], references?: Field[])",
       "params": [
         {
           "label": "name",
@@ -324,14 +324,14 @@
     {
       "label": "references",
       "insertText": "references: [$0]",
-      "fullSignature": "references: []",
+      "fullSignature": "references: Fields[]",
       "documentation": "A list of field references of the model on *the other side of the relation*.",
       "params": []
     },
     {
       "label": "fields",
       "insertText": "fields: [$0]",
-      "fullSignature": "fields: []",
+      "fullSignature": "fields: Fields[]",
       "documentation": "A list of field references of the *current* model.",
       "params": []
     },
@@ -382,7 +382,7 @@
     {
       "label": "env()",
       "insertText": "env(\"$0\")",
-      "fullSignature": "env(_ environmentVariable: string)",
+      "fullSignature": "env(\"String\")",
       "documentation": "Specifies a datasource via an environment variable. When running a Prisma CLI command that needs the database connection URL (e.g. `prisma generate`), you need to make sure that the `DATABASE_URL` environment variable is set. One way to do so is by creating a `.env` file. Note that the file must be in the same directory as your schema.prisma file to automatically be picked up by the Prisma CLI.",
       "params": [
         {
