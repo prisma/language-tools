@@ -24,7 +24,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "npm run build -- -w",
-    "test": "mocha --ui tdd --useColors true  ./dist/src/__test__/**/*.test.js",
+    "test": "nyc --reporter=clover --reporter=text-summary mocha --ui tdd --useColors true  ./dist/src/__test__/**/*.test.js",
     "pretest": "tsc"
   },
   "main": "./dist/index.js",
@@ -34,6 +34,7 @@
     "@types/js-levenshtein": "1.1.1",
     "js-levenshtein": "1.1.6",
     "klona": "2.0.5",
+    "nyc": "15.1.0",
     "vscode-languageserver": "8.0.2",
     "vscode-languageserver-textdocument": "1.0.5"
   },

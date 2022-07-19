@@ -1,0 +1,17 @@
+comment: true
+
+# About `carryforward: true`
+# https://docs.codecov.com/docs/carryforward-flags
+flags:
+  scripts:
+    carryforward: true
+    paths:
+      - scripts/
+  language-server:
+    carryforward: true
+    paths:
+      - packages/language-server/
+  # vscode:
+  #   carryforward: true
+  #   paths:
+  #     - packages/vscode/
