@@ -81,8 +81,8 @@
           "source.tsx",
           "source.vue"
         ],
-        "scopeName": "client.rawsql.prisma",
-        "path": "./syntaxes/prisma-client-rawsql.json",
+        "scopeName": "source.ts.prismaClientRawSQL",
+        "path": "./syntaxes/prismaClientRawSQL.json",
         "embeddedLanguages": {
           "meta.embedded.block.sql": "sql"
         }
