@@ -1,13 +1,27 @@
 name: CI tests
 on:
-  pull_request:
+  push:
+    branches:
+      - main
     paths-ignore:
       - 'LICENSE'
-      - 'README.md'
-      - 'SECURITY.md'
+      - '**.md'
       - '.vscode/**'
       - '.github/ISSUE_TEMPLATE/**'
       - '.github/CODEOWNERS'
+      - 'flake.nix'
+      - 'flake.lock'
+      - 'renovate.json'
+  pull_request:
+    paths-ignore:
+      - 'LICENSE'
+      - '**.md'
+      - '.vscode/**'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/CODEOWNERS'
+      - 'flake.nix'
+      - 'flake.lock'
+      - 'renovate.json'
 
 env:
   PRISMA_TELEMETRY_INFORMATION: 'language-tools continuous-integration.yml'
