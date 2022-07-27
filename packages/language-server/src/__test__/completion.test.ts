@@ -1998,6 +1998,23 @@ suite('Completions', function () {
       })
     })
 
+    test('field CompositeType |', () => {
+      assertCompletion({
+        provider: 'mongodb',
+        schema: /* Prisma */ `
+        model A {
+          field CompositeType |
+        }
+        type CompositeType {
+          someting String
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [fieldAttributeDefault, fieldAttributeIgnore],
+        },
+      })
+    })
+
     suite('@default()', function () {
       test('Scalar lists', () => {
         const scalarTypes = ['String', 'color', 'Int', 'Float', 'Boolean', 'DateTime'] as const
