@@ -2010,7 +2010,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldAttributeDefault, fieldAttributeIgnore],
+          items: [fieldAttributeMap, fieldAttributeDefault],
         },
       })
     })
