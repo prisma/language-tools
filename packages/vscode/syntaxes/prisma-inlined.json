@@ -1,4 +1,7 @@
 {
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Prisma schema language: inline highlighting",
+  "scopeName": "inline.prisma",
   "fileTypes": ["js", "jsx", "ts", "tsx", "vue"],
   "injectionSelector": "L:source -string -comment",
   "patterns": [
@@ -44,6 +47,5 @@
       },
       "patterns": [{ "include": "source.prisma" }]
     }
-  ],
-  "scopeName": "inline.prisma"
+  ]
 }

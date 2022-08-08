@@ -62,13 +62,29 @@
           "source.js",
           "source.ts",
           "source.js.jsx",
+          "source.jsx",
           "source.tsx",
           "source.vue"
         ],
         "scopeName": "inline.prisma",
-        "path": "./syntaxes/prisma.js.json",
+        "path": "./syntaxes/prisma-inlined.json",
         "embeddedLanguages": {
           "meta.embedded.block.prisma": "prisma"
+        }
+      },
+      {
+        "injectTo": [
+          "source.js",
+          "source.ts",
+          "source.js.jsx",
+          "source.jsx",
+          "source.tsx",
+          "source.vue"
+        ],
+        "scopeName": "source.ts.prismaClientRawSQL",
+        "path": "./syntaxes/prismaClientRawSQL.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.sql": "sql"
         }
       },
       {

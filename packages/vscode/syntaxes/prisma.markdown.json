@@ -1,4 +1,6 @@
 {
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "scopeName": "markdown.prisma.codeblock",
   "fileTypes": [],
   "injectionSelector": "L:text.html.markdown",
   "patterns": [
@@ -40,6 +42,5 @@
         }
       ]
     }
-  },
-  "scopeName": "markdown.prisma.codeblock"
+  }
 }
