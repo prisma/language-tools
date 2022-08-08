@@ -167,12 +167,18 @@ export function getSuggestionForFieldAttribute(
     return
   }
 
-  const modelOrEnum = getModelOrTypeOrEnumBlock(fieldType, lines)
+  const modelOrTypeOrEnum = getModelOrTypeOrEnumBlock(fieldType, lines)
+  if (modelOrTypeOrEnum?.type === 'type') {
+    // @default & @relation are invalid on field referencing a composite type
+    // we filter them out
+    suggestions = suggestions.filter((sugg) => sugg.label !== '@default' && sugg.label !== '@relation')
+  }
+
   // Tom: I think we allow ids on basically everything except relation fields
   // so it doesn't need to be restricted to Int and String.
   // These are terrible, terrible ideas of course, but you can have id DateTime @id or id Float @id.
   // TODO: decide if we want to only suggest things that make most sense or everything that is technically possible.
-  const isAtIdAllowed = fieldType === 'Int' || fieldType === 'String' || modelOrEnum?.type === 'enum'
+  const isAtIdAllowed = fieldType === 'Int' || fieldType === 'String' || modelOrTypeOrEnum?.type === 'enum'
   if (!isAtIdAllowed) {
     // id not allowed
     suggestions = suggestions.filter((sugg) => sugg.label !== '@id')
