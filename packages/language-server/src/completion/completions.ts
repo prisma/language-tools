@@ -169,8 +169,9 @@ export function getSuggestionForFieldAttribute(
 
   const modelOrTypeOrEnum = getModelOrTypeOrEnumBlock(fieldType, lines)
   if (modelOrTypeOrEnum?.type === 'type') {
-    // only @map and @default are valid on a composite type
-    suggestions = suggestions.filter((sugg) => sugg.label === '@map' || sugg.label === '@default')
+    // @default & @relation are invalid on field referencing a composite type
+    // we filter them out
+    suggestions = suggestions.filter((sugg) => sugg.label !== '@default' && sugg.label !== '@relation')
   }
 
   // Tom: I think we allow ids on basically everything except relation fields

@@ -582,7 +582,7 @@ suite('Completions', function () {
             provider: 'postgresql',
             previewFeatures: ['fullTextIndex'],
             schema: /* Prisma */ `
-            model Type {
+            model A {
               id    Int @id
               title   String
               content String
@@ -1144,7 +1144,7 @@ suite('Completions', function () {
           assertCompletion({
             provider: 'postgresql',
             schema: /* Prisma */ `
-          model Type {
+          model A {
             id    Int @id
             title   String
             content String
@@ -1162,7 +1162,7 @@ suite('Completions', function () {
           assertCompletion({
             provider: 'postgresql',
             schema: /* Prisma */ `
-        model Type {
+        model A {
           id    Int @id
           title   String
           content String
@@ -1180,7 +1180,7 @@ suite('Completions', function () {
           assertCompletion({
             provider: 'postgresql',
             schema: /* Prisma */ `
-        model Type {
+        model A {
           id    Int @id
           title   String
           content String
@@ -1205,7 +1205,7 @@ suite('Completions', function () {
           assertCompletion({
             provider: 'postgresql',
             schema: /* Prisma */ `
-        model Type {
+        model A {
           id    Int @id
           title   String
           content String
@@ -1223,7 +1223,7 @@ suite('Completions', function () {
           assertCompletion({
             provider: 'postgresql',
             schema: /* Prisma */ `
-        model Type {
+        model A {
           id    Int @id
           title   String
           content String
@@ -1244,7 +1244,7 @@ suite('Completions', function () {
           assertCompletion({
             provider: 'postgresql',
             schema: /* Prisma */ `
-        model Type {
+        model A {
           id    Int @id
           title   String @db.Inet
           content String
@@ -1262,7 +1262,7 @@ suite('Completions', function () {
           assertCompletion({
             provider: 'postgresql',
             schema: /* Prisma */ `
-        model Type {
+        model A {
           id    Int @id
           title   String @db.Inet
           content String
@@ -2010,7 +2010,13 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldAttributeMap, fieldAttributeDefault],
+          items: [
+            fieldAttributeUnique,
+            fieldAttributeMap,
+            // fieldAttributeDefault, is invalid
+            // fieldAttributeRelation, is invalid
+            fieldAttributeIgnore,
+          ],
         },
       })
     })
@@ -2117,7 +2123,7 @@ suite('Completions', function () {
                   model DateTest {
                     id Int @id @default(autoincrement())
                     update DateTime  
-                    type UserType @default(|)
+                    enum UserType @default(|)
                   }
                   enum UserType {
                     ADMIN
