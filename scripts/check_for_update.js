@@ -1,5 +1,12 @@
 const { readVersionFile } = require('./util')
 const execa = require('execa')
+const pRetry = require('p-retry')
+
+async function getVersionFromNpm({ channel }) {
+  const { stdout } = await execa('npm', ['show', `prisma@${channel}`, 'version'])
+
+  return stdout
+}
 
 function checkForUpdate({ channel }) {
   ;(async () => {
@@ -7,13 +14,16 @@ function checkForUpdate({ channel }) {
       fileName: `prisma_${channel}`,
     })
     console.log(`current '${channel}': ${currentPrismaVersion}`)
-    const { stdout } = await execa('npm', [
-      'show',
-      `prisma@${channel}`,
-      'version',
-    ])
-    const npmPrismaVersion = stdout
+
+    const npmPrismaVersion = await pRetry(() => getVersionFromNpm({ channel }), {
+      retries: 3,
+      onFailedAttempt: (error) => {
+        console.error(error)
+        console.error(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left.`)
+      },
+    })
     console.log(`npm '${channel}': ${npmPrismaVersion}`)
+
     if (npmPrismaVersion === undefined) {
       throw Error('Could not get current Prisma CLI version.')
     }
