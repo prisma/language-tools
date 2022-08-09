@@ -5,13 +5,20 @@
     "noUnusedLocals": true,
     "target": "es6",
     "outDir": "dist",
-    "lib": ["es6"],
+    "lib": [
+      "es6"
+    ],
     "sourceMap": true,
     "esModuleInterop": true,
     "strict": true,
     "composite": true,
-    "declaration": true
+    "declaration": true,
   },
-  "include": ["src"],
-  "exclude": ["node_modules", ".vscode-test"]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    ".vscode-test"
+  ]
 }
