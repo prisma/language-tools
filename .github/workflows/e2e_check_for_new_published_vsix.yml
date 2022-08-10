@@ -17,10 +17,10 @@ jobs:
           cache: 'npm'
       - name: Install Dependencies
         run: npm install
-      - name: Get version of published extensions
+      - name: Get version of published extensions on the VS Code marketplace
         id: versions
         run: |
-          sh scripts/e2eTestsOnVsix/extension_version.sh
+          node scripts/e2eTestsOnVsix/check_marketplace_version.js
       - name: Check new release of stable and Insider
         id: check_published_version
         run: |
