@@ -379,13 +379,13 @@ export function removeInvalidAttributeSuggestions(
 ): CompletionItem[] {
   let reachedStartLine = false
   for (const [key, item] of lines.entries()) {
-    if (key === block.start.line + 1) {
+    if (key === block.range.start.line + 1) {
       reachedStartLine = true
     }
     if (!reachedStartLine) {
       continue
     }
-    if (key === block.end.line) {
+    if (key === block.range.end.line) {
       break
     }
 
@@ -414,13 +414,13 @@ export function removeInvalidFieldSuggestions(
 ): string[] {
   let reachedStartLine = false
   for (const [key, item] of lines.entries()) {
-    if (key === block.start.line + 1) {
+    if (key === block.range.start.line + 1) {
       reachedStartLine = true
     }
     if (!reachedStartLine || key === position.line) {
       continue
     }
-    if (key === block.end.line) {
+    if (key === block.range.end.line) {
       break
     }
     const fieldName = item.replace(/ .*/, '')

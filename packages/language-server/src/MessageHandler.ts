@@ -2,7 +2,6 @@ import {
   DocumentFormattingParams,
   TextEdit,
   Range,
-  Location,
   DeclarationParams,
   CompletionParams,
   CompletionList,
@@ -16,6 +15,10 @@ import {
   RenameParams,
   WorkspaceEdit,
   CompletionTriggerKind,
+  DocumentSymbolParams,
+  DocumentSymbol,
+  SymbolKind,
+  LocationLink,
 } from 'vscode-languageserver'
 import {
   Block,
@@ -30,6 +33,7 @@ import {
   positionIsAfterFieldAndType,
   isInsideAttribute,
   getSymbolBeforePosition,
+  getBlocks,
 } from './util'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import format from './prisma-fmt/format'
@@ -126,7 +130,7 @@ export function handleDiagnosticsRequest(
 /**
  * @todo Use official schema.prisma parser. This is a workaround!
  */
-export function handleDefinitionRequest(document: TextDocument, params: DeclarationParams): Location | undefined {
+export function handleDefinitionRequest(document: TextDocument, params: DeclarationParams): LocationLink[] | undefined {
   const textDocument = params.textDocument
   const position = params.position
 
@@ -171,19 +175,13 @@ export function handleDefinitionRequest(document: TextDocument, params: Declarat
     return
   }
 
-  const startPosition = {
-    line: foundBlocks[0].start.line,
-    character: foundBlocks[0].start.character,
-  }
-  const endPosition = {
-    line: foundBlocks[0].end.line,
-    character: foundBlocks[0].end.character,
-  }
-
-  return {
-    uri: textDocument.uri,
-    range: Range.create(startPosition, endPosition),
-  }
+  return [
+    {
+      targetUri: textDocument.uri,
+      targetRange: foundBlocks[0].range,
+      targetSelectionRange: foundBlocks[0].nameRange,
+    },
+  ]
 }
 
 /**
@@ -213,7 +211,7 @@ export function handleHoverRequest(document: TextDocument, params: HoverParams):
     return
   }
 
-  const commentLine = foundBlock.start.line - 1
+  const commentLine = foundBlock.range.start.line - 1
   const docComments = document.getText({
     start: { line: commentLine, character: 0 },
     end: { line: commentLine, character: Number.MAX_SAFE_INTEGER },
@@ -451,4 +449,20 @@ export function handleCodeActions(params: CodeActionParams, document: TextDocume
   }
 
   return quickFix(document, params)
+}
+
+export function handleDocumentSymbol(params: DocumentSymbolParams, document: TextDocument): DocumentSymbol[] {
+  const lines: string[] = convertDocumentTextToTrimmedLineArray(document)
+  return Array.from(getBlocks(lines), (block) => ({
+    kind: {
+      model: SymbolKind.Class,
+      enum: SymbolKind.Enum,
+      type: SymbolKind.Interface,
+      datasource: SymbolKind.Struct,
+      generator: SymbolKind.Function,
+    }[block.type],
+    name: block.name,
+    range: block.range,
+    selectionRange: block.nameRange,
+  }))
 }

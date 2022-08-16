@@ -1,5 +1,5 @@
-import type { TextDocument, Range } from 'vscode-languageserver-textdocument'
-import { Position } from 'vscode-languageserver'
+import type { TextDocument } from 'vscode-languageserver-textdocument'
+import { Position, Range } from 'vscode-languageserver'
 import nativeTypeConstructors, { NativeTypeConstructors } from './prisma-fmt/nativeTypes'
 import { PreviewFeatures } from './previewFeatures'
 
@@ -7,14 +7,14 @@ export type BlockType = 'generator' | 'datasource' | 'model' | 'type' | 'enum'
 
 export class Block {
   type: BlockType
-  start: Position
-  end: Position
+  range: Range
+  nameRange: Range
   name: string
 
-  constructor(type: BlockType, start: Position, end: Position, name: string) {
+  constructor(type: BlockType, range: Range, nameRange: Range, name: string) {
     this.type = type
-    this.start = start
-    this.end = end
+    this.range = range
+    this.nameRange = nameRange
     this.name = name
   }
 }
@@ -70,49 +70,58 @@ export function getWordAtPosition(document: TextDocument, position: Position): s
   return currentLine.slice(beginning, end + position.character)
 }
 
-export function getBlockAtPosition(line: number, lines: string[]): Block | void {
-  let blockType = ''
+export function* getBlocks(lines: string[]): Generator<Block, void, void> {
   let blockName = ''
+  let blockType = ''
+  let blockNameRange: Range | undefined
   let blockStart: Position = Position.create(0, 0)
-  let blockEnd: Position = Position.create(0, 0)
   const allowedBlockIdentifiers: BlockType[] = ['model', 'type', 'enum', 'datasource', 'generator']
 
-  // get block beginning
-  let reachedLine = false
-  for (const [key, item] of lines.reverse().entries()) {
-    const actualIndex = lines.length - 1 - key
-    if (actualIndex === line) {
-      reachedLine = true
-    }
-    if (!reachedLine) {
-      continue
-    }
+  for (const [key, item] of lines.entries()) {
     if (allowedBlockIdentifiers.some((identifier) => item.startsWith(identifier)) && item.includes('{')) {
+      if (blockType && blockNameRange) {
+        // Recover from missing block end
+        yield new Block(
+          blockType as BlockType,
+          Range.create(blockStart, Position.create(key - 1, 0)),
+          blockNameRange,
+          blockName,
+        )
+        blockType = ''
+        blockNameRange = undefined
+      }
+
       const index = item.search(/\s+/)
       blockType = ~index ? (item.slice(0, index) as BlockType) : (item as BlockType)
-      blockName = item.slice(blockType.length, item.length - 2).trim()
-      blockStart = Position.create(actualIndex, 0)
-      break
-    }
-    // not inside a block
-    if (item.includes('}')) {
-      lines.reverse()
-      return
-    }
-  }
-  reachedLine = false
-  // get block ending
-  for (const [key, item] of lines.reverse().entries()) {
-    if (key === line) {
-      reachedLine = true
-    }
-    if (!reachedLine) {
+      blockName = item.slice(blockType.length, item.length - 2).trimStart()
+      const startCharacter = item.length - 2 - blockName.length
+      blockName = blockName.trimEnd()
+      blockNameRange = Range.create(key, startCharacter, key, startCharacter + blockName.length)
+      blockStart = Position.create(key, 0)
       continue
     }
-    // check if block ends here
-    if (item.startsWith('}') && blockType) {
-      blockEnd = Position.create(key, 1)
-      return new Block(blockType as BlockType, blockStart, blockEnd, blockName)
+
+    if (item.startsWith('}') && blockType && blockNameRange) {
+      yield new Block(
+        blockType as BlockType,
+        Range.create(blockStart, Position.create(key, 1)),
+        blockNameRange,
+        blockName,
+      )
+      blockType = ''
+      blockNameRange = undefined
+    }
+  }
+}
+
+export function getBlockAtPosition(line: number, lines: string[]): Block | void {
+  for (const block of getBlocks(lines)) {
+    if (block.range.start.line > line) {
+      return
+    }
+
+    if (line <= block.range.end.line) {
+      return block
     }
   }
   return
@@ -415,25 +424,17 @@ export function getAllPreviewFeaturesFromGenerators(lines: string[]): PreviewFea
 
 export function getFieldsFromCurrentBlock(lines: string[], block: Block, position?: Position): string[] {
   const fieldNames: string[] = []
-  let reachedStartLine = false
 
-  for (const [lineIndex, line] of lines.entries()) {
-    if (lineIndex === block.start.line + 1) {
-      reachedStartLine = true
-    }
-    if (!reachedStartLine) {
-      continue
-    }
-    if (lineIndex === block.end.line) {
-      break
-    }
+  for (let lineIndex = block.range.start.line + 1; lineIndex < block.range.end.line; lineIndex++) {
     if (!position || lineIndex !== position.line) {
+      const line = lines[lineIndex]
       const fieldName = getFieldNameFromLine(line)
       if (fieldName) {
         fieldNames.push(fieldName)
       }
     }
   }
+
   return fieldNames
 }
 
@@ -454,13 +455,13 @@ export function getFieldTypesFromCurrentBlock(lines: string[], block: Block, pos
 
   let reachedStartLine = false
   for (const [lineIndex, line] of lines.entries()) {
-    if (lineIndex === block.start.line + 1) {
+    if (lineIndex === block.range.start.line + 1) {
       reachedStartLine = true
     }
     if (!reachedStartLine) {
       continue
     }
-    if (lineIndex === block.end.line) {
+    if (lineIndex === block.range.end.line) {
       break
     }
     if (!line.startsWith('@@') && (!position || lineIndex !== position.line)) {
