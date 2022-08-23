@@ -11,7 +11,7 @@
   },
   "prisma": {
     "enginesVersion": "6be410e82fb9c9de89d9348ecd3d2d2359cc8aad",
-    "cliVersion": "4.3.0-dev.54"
+    "cliVersion": "4.3.0-dev.55"
   },
   "bin": {
     "prisma-language-server": "dist/src/bin.js"
