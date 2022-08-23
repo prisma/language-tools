@@ -70,6 +70,8 @@ export function getWordAtPosition(document: TextDocument, position: Position): s
   return currentLine.slice(beginning, end + position.character)
 }
 
+// Note: this is a generator function, which returns a Generator object.
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*
 export function* getBlocks(lines: string[]): Generator<Block, void, void> {
   let blockName = ''
   let blockType = ''
@@ -78,6 +80,7 @@ export function* getBlocks(lines: string[]): Generator<Block, void, void> {
   const allowedBlockIdentifiers: BlockType[] = ['model', 'type', 'enum', 'datasource', 'generator']
 
   for (const [key, item] of lines.entries()) {
+    // if start of block: `BlockType name {`
     if (allowedBlockIdentifiers.some((identifier) => item.startsWith(identifier)) && item.includes('{')) {
       if (blockType && blockNameRange) {
         // Recover from missing block end
@@ -101,6 +104,7 @@ export function* getBlocks(lines: string[]): Generator<Block, void, void> {
       continue
     }
 
+    // if end of block: `}`
     if (item.startsWith('}') && blockType && blockNameRange) {
       yield new Block(
         blockType as BlockType,
