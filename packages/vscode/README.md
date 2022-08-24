@@ -20,6 +20,8 @@ You can find both the [stable](https://open-vsx.org/extension/Prisma/prisma) and
 ## Features
 
 - Syntax highlighting of `schema.prisma`
+- Symbols for schema blocks `datasource`, `generator`, `model`, `enum` and `type`
+  - They are listed in the `OUTLINE` view of VS Code and clicking them will go to their definition.
 - Linting
   - Diagnostic tools are used to surface errors and warnings in your schema file as you type.
 - Code Completion
@@ -28,9 +30,10 @@ You can find both the [stable](https://open-vsx.org/extension/Prisma/prisma) and
 - Documentation help
   - Documentation of a completion result pops up as completion results are provided.
 - Quick info on hover
-  - Documentation Comments (`///`) of models and enums appear anywhere you hover over their usages.
+  - Documentation Comments (`///`) of `model`, `enum` or `type` appear anywhere you hover over their usages.
+  - CMD + hover on a field whose type is a `model`, `enum` or `type` will show the corresponding block in a popup.
 - Go to Definition
-  - Jump to or peek a model or enum's declaration.
+  - Jump to or peek a `model`, `enum` or `type` definition. (CMD + left click)
 - Formatting
   - Format code either manually or on save (if configured).
     - _To automatically format on save, add the following to your `settings.json` file:_
@@ -52,6 +55,7 @@ You can find both the [stable](https://open-vsx.org/extension/Prisma/prisma) and
 - Quick-fixes
   - Quickly fix typos in model and enum names
   - Create new models and enums with a single click
+  - For the "Error parsing attribute "@relation": The argument `references` must refer to a unique criteria in the related model. Consider adding an `@unique` attribute to the field `field` in the model `A`." it will add an `@unique` atribute where it's needed.
 
 ## Preview
 
