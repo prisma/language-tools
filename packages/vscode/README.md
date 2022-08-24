@@ -31,7 +31,7 @@ You can find both the [stable](https://open-vsx.org/extension/Prisma/prisma) and
   - Documentation of a completion result pops up as completion results are provided.
 - Quick info on hover
   - Documentation Comments (`///`) of `model`, `enum` or `type` appear anywhere you hover over their usages.
-  - CMD + hover on a field whose type is a `model`, `enum` or `type` will show the corresponding block in a popup.
+  - <kbd>CMD</kbd> + hover on a field whose type is a `model`, `enum` or `type` will show the corresponding block in a popup.
 - Go to Definition
   - Jump to or peek a `model`, `enum` or `type` definition. (<kbd>CMD</kbd> + left click)
 - Formatting
