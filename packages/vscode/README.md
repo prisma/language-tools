@@ -20,13 +20,13 @@ You can find both the [stable](https://open-vsx.org/extension/Prisma/prisma) and
 ## Features
 
 - Syntax highlighting of `schema.prisma`
-- Symbols for schema blocks `datasource`, `generator`, `model`, `enum` and `type`
-  - They are listed in the `OUTLINE` view of VS Code and clicking them will go to their definition.
 - Linting
   - Diagnostic tools are used to surface errors and warnings in your schema file as you type.
 - Code Completion
   - Completion results appear for symbols as you type.
-  - You can trigger this manually with the `Ctrl+Space` shortcut.
+  - You can trigger this manually with the <kbd>Ctrl</kbd>+<kbd>Space</kbd> shortcut.
+- Symbols for schema blocks `datasource`, `generator`, `model`, `enum` and `type`
+  - They are listed in the `OUTLINE` view of VS Code and clicking them will go to their definition.  
 - Documentation help
   - Documentation of a completion result pops up as completion results are provided.
 - Quick info on hover
@@ -49,7 +49,7 @@ You can find both the [stable](https://open-vsx.org/extension/Prisma/prisma) and
       or use the [Prettier plugin for Prisma](https://github.com/umidbekk/prettier-plugin-prisma)
 - Rename
   - Rename models, enums, fields and enum values
-    - Click into the model or enum, press `F2` and then type the new desired name and press `Enter`
+    - Click into the model or enum, press <kbd>F2</kbd> and then type the new desired name and press <kbd>Enter</kbd>
     - All usages will be renamed
     - Automatically applies `@map` or `@@map` on the schema
 - Quick-fixes
