@@ -24,13 +24,16 @@ You can find both the [stable](https://open-vsx.org/extension/Prisma/prisma) and
   - Diagnostic tools are used to surface errors and warnings in your schema file as you type.
 - Code Completion
   - Completion results appear for symbols as you type.
-  - You can trigger this manually with the `Ctrl+Space` shortcut.
+  - You can trigger this manually with the <kbd>Ctrl</kbd>+<kbd>Space</kbd> shortcut.
+- Symbols for schema blocks `datasource`, `generator`, `model`, `enum` and `type`
+  - They are listed in the [Outline view of VS Code](https://code.visualstudio.com/docs/getstarted/userinterface#_outline-view) and clicking them will go to their definition.  
 - Documentation help
   - Documentation of a completion result pops up as completion results are provided.
 - Quick info on hover
-  - Documentation Comments (`///`) of models and enums appear anywhere you hover over their usages.
+  - Documentation Comments (`///`) of `model`, `enum` or `type` appear anywhere you hover over their usages.
+  - <kbd>CMD</kbd> + hover on a field whose type is a `model`, `enum` or `type` will show the corresponding block in a popup.
 - Go to Definition
-  - Jump to or peek a model or enum's declaration.
+  - Jump to or peek a `model`, `enum` or `type` definition. (<kbd>CMD</kbd> + left click)
 - Formatting
   - Format code either manually or on save (if configured).
     - _To automatically format on save, add the following to your `settings.json` file:_
@@ -46,12 +49,13 @@ You can find both the [stable](https://open-vsx.org/extension/Prisma/prisma) and
       or use the [Prettier plugin for Prisma](https://github.com/umidbekk/prettier-plugin-prisma)
 - Rename
   - Rename models, enums, fields and enum values
-    - Click into the model or enum, press `F2` and then type the new desired name and press `Enter`
+    - Click into the model or enum, press <kbd>F2</kbd> and then type the new desired name and press <kbd>Enter</kbd>
     - All usages will be renamed
     - Automatically applies `@map` or `@@map` on the schema
 - Quick-fixes
   - Quickly fix typos in model and enum names
   - Create new models and enums with a single click
+  - Add `@unique` on model fields for a `@relation` where the `references` value is pointing to a field missing it.
 
 ## Preview
 
