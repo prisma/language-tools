@@ -55,7 +55,7 @@ You can find both the [stable](https://open-vsx.org/extension/Prisma/prisma) and
 - Quick-fixes
   - Quickly fix typos in model and enum names
   - Create new models and enums with a single click
-  - For the "Error parsing attribute "@relation": The argument `references` must refer to a unique criteria in the related model. Consider adding an `@unique` attribute to the field `field` in the model `A`." it will add an `@unique` atribute where it's needed.
+  - Add `@unique` on model fields for a `@relation` where the `references` value is pointing to a field missing it.
 
 ## Preview
 
