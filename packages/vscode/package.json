@@ -140,7 +140,7 @@
     ]
   },
   "devDependencies": {
-    "@types/glob": "7.2.0",
+    "@types/glob": "8.0.0",
     "@types/mocha": "9.1.1",
     "@types/vscode": "1.56.0",
     "@vscode/test-electron": "2.1.5",
