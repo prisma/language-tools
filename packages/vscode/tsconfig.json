@@ -13,6 +13,7 @@
     "strict": true,
     "composite": true,
     "declaration": true,
+    "skipLibCheck": true,
   },
   "include": [
     "src"
