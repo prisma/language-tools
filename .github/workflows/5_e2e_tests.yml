@@ -24,6 +24,7 @@ jobs:
   tests:
     name: Integration tests in VSCode folder with published LS
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -48,6 +49,7 @@ jobs:
     name: Trigger next workflow
     needs: [tests]
     runs-on: ubuntu-latest
+    timeout-minutes: 7
     if: always()
     steps:
       - uses: actions/checkout@v3
