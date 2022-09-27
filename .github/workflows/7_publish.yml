@@ -27,6 +27,7 @@ jobs:
   marketplace:
     name: Publish to marketplace
     runs-on: ubuntu-latest
+    timeout-minutes: 7
     env:
       SLACK_MESSAGE: '${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}'
     steps:
@@ -80,6 +81,7 @@ jobs:
   open-vsx:
     name: Publish to open-vsx
     runs-on: ubuntu-latest
+    timeout-minutes: 7
     env:
       SLACK_MESSAGE: '${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}'
     steps:

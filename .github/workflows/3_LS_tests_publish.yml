@@ -23,6 +23,7 @@ jobs:
   tests:
     name: Run tests
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -46,6 +47,7 @@ jobs:
     name: Bump Language Server version
     needs: [tests]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
         with:
@@ -82,6 +84,7 @@ jobs:
   slack:
     name: Send slack notification
     runs-on: ubuntu-latest
+    timeout-minutes: 7
     needs: [tests, bump]
     if: always()
     env:

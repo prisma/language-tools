@@ -28,6 +28,7 @@ jobs:
   build:
     name: Build extension
     runs-on: ubuntu-latest
+    timeout-minutes: 7
     outputs:
       tag_name: ${{ steps.names.outputs.tag_name }}
     steps:
@@ -93,6 +94,7 @@ jobs:
   slack:
     name: Send slack notification
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [build]
     if: always()
     env:
