@@ -1,5 +1,8 @@
-import chokidar from 'chokidar'
 import path from 'path'
+import FileWatcher from 'watcher'
+import type { type as FileWatcherType } from 'watcher'
+import minimatch from 'minimatch'
+
 import {
   CancellationToken,
   CodeAction,
@@ -37,7 +40,7 @@ const packageJson = require('../../../../package.json') // eslint-disable-line
 let client: LanguageClient
 let serverModule: string
 let telemetry: TelemetryReporter
-let watcher: chokidar.FSWatcher
+let watcherInstance: FileWatcherType
 
 const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
 const isE2ETestOnPullRequest = () => process.env.PRISMA_USE_LOCAL_LS === 'true'
@@ -56,11 +59,11 @@ const activateClient = (
   context.subscriptions.push(disposable)
 }
 
-const startFileWatcher = (rootPath: string): chokidar.FSWatcher => {
+const startFileWatcher = (rootPath: string) => {
   console.debug('Starting File Watcher')
-  return chokidar.watch(path.join(rootPath, '**/node_modules/.prisma/client/index.d.ts'), {
-    // ignore dotfiles (except .prisma) adjusted from chokidar README example
-    ignored: /(^|[\/\\])\.(?!prisma)./,
+  // https://github.com/fabiospampinato/watcher
+  return new FileWatcher(rootPath, {
+    debounce: 500,
     // limits how many levels of subdirectories will be traversed.
     // Note that `node_modules/.prisma/client/` counts for 3 already
     // Example
@@ -68,14 +71,28 @@ const startFileWatcher = (rootPath: string): chokidar.FSWatcher => {
     // ./server/database/node_modules/.prisma/client/index.d.ts
     // then the depth is equal to 2 + 3 = 5
     depth: 9,
-    // When false, only the symlinks themselves will be watched for changes
-    // instead of following the link references and bubbling events through the link's path.
-    followSymlinks: false,
+    recursive: true,
+    ignoreInitial: true,
+    ignore: (targetPath) => {
+      if (targetPath === rootPath) {
+        return false
+      }
+      return !minimatch(targetPath, '**/node_modules/.prisma/client/index.d.ts')
+    },
+    //   // ignore dotfiles (except .prisma) adjusted from chokidar README example
+    //   ignored: /(^|[\/\\])\.(?!prisma)./,
+
+    // native?: boolean,
+    // persistent?: boolean,
+    // pollingInterval?: number,
+    // pollingTimeout?: number,
+    // renameDetection?: boolean,
+    // renameTimeout?: number
   })
 }
 
-const onFileChange = (path: string) => {
-  console.log(`File ${path} has been changed. Restarting TS Server.`)
+const onFileChange = (filepath: string) => {
+  console.debug(`File ${filepath} has been changed. Restarting TS Server.`)
   commands.executeCommand('typescript.restartTsServer') // eslint-disable-line
 }
 
@@ -91,7 +108,7 @@ const plugin: PrismaVSCodePlugin = {
       const isFileWatcherEnabled = workspace.getConfiguration('prisma').get('fileWatcher')
 
       if (isFileWatcherEnabled) {
-        watcher = startFileWatcher(rootPath)
+        watcherInstance = startFileWatcher(rootPath)
         console.debug('File Watcher is enabled and started.')
       } else {
         console.debug('File Watcher is disabled.')
@@ -193,23 +210,27 @@ const plugin: PrismaVSCodePlugin = {
 
         if (fileWatcherConfigChanged) {
           const isFileWatcherEnabled = workspace.getConfiguration('prisma').get('fileWatcher')
-
           const rootPath = workspace.workspaceFolders?.[0].uri.path
-
           // This setting defaults to true (see package.json of vscode extension)
           if (isFileWatcherEnabled) {
-            // if watcher.closed === true, the watcher was closed previously and can be safely restarted
-            // if watcher.closed === false, it is already running
-            // but if the JSON settings are empty like {} and the user enables the file watcher
-            // we need to catch that case to avoid starting another extra file watcher
+            // if watcherInstance.closed === true, the watcherInstance was closed previously and can be safely restarted
+            // if watcherInstance.closed === false, it is already running
+            // but if the JSON settings are empty like {} and the user enables the file watcherInstance
+            // we need to catch that case to avoid starting another extra file watcherInstance
             // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-            if (watcher && (watcher as any).closed === false) {
-              console.debug("onDidChangeConfiguration: watcher.closed === false so it's already running. Do nothing.")
+
+            if (watcherInstance && watcherInstance.isClosed() === false) {
+              console.debug(
+                "onDidChangeConfiguration: watcherInstance.isClosed() === false so it's already running. Do nothing.",
+              )
             } else {
               // Let's start it
               if (rootPath) {
-                watcher = startFileWatcher(rootPath)
-                watcher.on('change', onFileChange)
+                watcherInstance = startFileWatcher(rootPath)
+                // If the file was just created
+                watcherInstance.on('add', onFileChange)
+                // If the file was modified
+                watcherInstance.on('change', onFileChange)
                 console.debug('onDidChangeConfiguration: File Watcher is now enabled and started.')
               } else {
                 console.debug('onDidChangeConfiguration: rootPath is falsy')
@@ -217,9 +238,9 @@ const plugin: PrismaVSCodePlugin = {
             }
           } else {
             // Let's stop it
-            if (watcher) {
-              await watcher.close()
-              console.log('onDidChangeConfiguration: File Watcher stopped.')
+            if (watcherInstance) {
+              await watcherInstance.close()
+              console.debug('onDidChangeConfiguration: File Watcher stopped.')
             } else {
               console.debug('onDidChangeConfiguration: No File Watcher found')
             }
@@ -275,8 +296,9 @@ const plugin: PrismaVSCodePlugin = {
 
     checkForMinimalColorTheme()
 
-    if (watcher) {
-      watcher.on('change', onFileChange)
+    if (watcherInstance) {
+      watcherInstance.on('add', onFileChange)
+      watcherInstance.on('change', onFileChange)
     }
   },
   deactivate: async () => {

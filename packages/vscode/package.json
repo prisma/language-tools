@@ -15,11 +15,9 @@
   "dependencies": {
     "@prisma/language-server": "31.0.1456",
     "checkpoint-client": "1.1.21",
-    "chokidar": "3.5.3",
-    "vscode-languageclient": "7.0.0"
-  },
-  "optionalDependencies": {
-    "fsevents": "2.3.2"
+    "minimatch": "5.1.0",
+    "vscode-languageclient": "7.0.0",
+    "watcher": "^1.2.0"
   },
   "repository": {
     "type": "git",
