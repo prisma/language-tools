@@ -92,7 +92,7 @@ const startFileWatcher = (rootPath: string) => {
 }
 
 const onFileChange = (filepath: string) => {
-  console.log(`File ${filepath} has been changed. Restarting TS Server.`)
+  console.debug(`File ${filepath} has been changed. Restarting TS Server.`)
   commands.executeCommand('typescript.restartTsServer') // eslint-disable-line
 }
 
@@ -244,7 +244,7 @@ const plugin: PrismaVSCodePlugin = {
             // Let's stop it
             if (watcherInstance) {
               await watcherInstance.close()
-              console.log('onDidChangeConfiguration: File Watcher stopped.')
+              console.debug('onDidChangeConfiguration: File Watcher stopped.')
             } else {
               console.debug('onDidChangeConfiguration: No File Watcher found')
             }
