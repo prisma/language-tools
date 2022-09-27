@@ -227,13 +227,9 @@ const plugin: PrismaVSCodePlugin = {
               // Let's start it
               if (rootPath) {
                 watcherInstance = startFileWatcher(rootPath)
-                watcherInstance.on('all', (event, targetPath, targetPathNext) => {
-                  console.log(event) // => could be any target event: 'add', 'addDir', 'change', 'rename', 'renameDir', 'unlink' or 'unlinkDir'
-                  console.log(targetPath) // => the file system path where the event took place, this is always provided
-                  console.log(targetPathNext) // => the file system path "targetPath" got renamed to, this is only provided on 'rename'/'renameDir' events
-                })
-                // watcherInstance.on('all', onFileChange)
+                // If the file was just created
                 watcherInstance.on('add', onFileChange)
+                // If the file was modified
                 watcherInstance.on('change', onFileChange)
                 console.debug('onDidChangeConfiguration: File Watcher is now enabled and started.')
               } else {
