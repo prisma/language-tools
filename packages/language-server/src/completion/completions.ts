@@ -32,6 +32,7 @@ import {
   removeInvalidFieldSuggestions,
   getNativeTypes,
   handlePreviewFeatures,
+  relationModeValues,
 } from './completionUtils'
 import previewFeatures from '../prisma-fmt/previewFeatures'
 import {
@@ -356,6 +357,7 @@ export function getSuggestionForSupportedFields(
 ): CompletionList | undefined {
   let suggestions: string[] = []
   const isInsideQuotation: boolean = isInsideQuotationMark(currentLineUntrimmed, position)
+  const datasourceProvider = getFirstDatasourceProvider(lines)
 
   switch (blockType) {
     case 'generator':
@@ -375,14 +377,14 @@ export function getSuggestionForSupportedFields(
         }
       }
       // previewFeatures
-      if (currentLine.startsWith('previewFeatures')) {
+      else if (currentLine.startsWith('previewFeatures')) {
         const generatorPreviewFeatures: string[] = previewFeatures()
         if (generatorPreviewFeatures.length > 0) {
           return handlePreviewFeatures(generatorPreviewFeatures, position, currentLineUntrimmed, isInsideQuotation)
         }
       }
       // engineType
-      if (currentLine.startsWith('engineType')) {
+      else if (currentLine.startsWith('engineType')) {
         const engineTypesCompletion: CompletionItem[] = engineTypes
         if (isInsideQuotation) {
           return {
@@ -427,6 +429,33 @@ export function getSuggestionForSupportedFields(
           }
           return {
             items: dataSourceUrlArguments,
+            isIncomplete: true,
+          }
+        }
+      }
+      // `relationMode` can only be set for SQL databases
+      else if (currentLine.startsWith('relationMode') && datasourceProvider !== 'mongodb') {
+        const relationModeValuesSuggestion: CompletionItem[] = relationModeValues
+        // values inside quotes `"value"`
+        const relationModeValuesSuggestionWithQuotes: CompletionItem[] = klona(relationModeValuesSuggestion).map(
+          (suggestion) => {
+            suggestion.label = `"${suggestion.label}"`
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            suggestion.insertText = `"${suggestion.insertText!}"`
+            return suggestion
+          },
+        )
+
+        if (isInsideQuotation) {
+          return {
+            items: relationModeValuesSuggestion,
+            isIncomplete: true,
+          }
+        }
+        // If line ends with `"`, a value is already set.
+        else if (!currentLine.endsWith('"')) {
+          return {
+            items: relationModeValuesSuggestionWithQuotes,
             isIncomplete: true,
           }
         }

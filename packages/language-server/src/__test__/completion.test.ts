@@ -209,6 +209,10 @@ suite('Completions', function () {
       label: 'shadowDatabaseUrl',
       kind: CompletionItemKind.Field,
     }
+    const fieldRelationMode = {
+      label: 'relationMode',
+      kind: CompletionItemKind.Field,
+    }
     const sqlite = { label: 'sqlite', kind: CompletionItemKind.Constant }
     const mysql = { label: 'mysql', kind: CompletionItemKind.Constant }
     const postgresql = {
@@ -223,6 +227,23 @@ suite('Completions', function () {
     const cockroachdb = {
       label: 'cockroachdb',
       kind: CompletionItemKind.Constant,
+    }
+
+    const relationModeForeignKeys = {
+      label: 'foreignKeys',
+      kind: CompletionItemKind.Field,
+    }
+    const relationModePrisma = {
+      label: 'prisma',
+      kind: CompletionItemKind.Field,
+    }
+    const relationModeForeignKeysWithQuotes = {
+      label: '"foreignKeys"',
+      kind: CompletionItemKind.Field,
+    }
+    const relationModePrismaWithQuotes = {
+      label: '"prisma"',
+      kind: CompletionItemKind.Field,
     }
 
     const quotationMarks = {
@@ -243,7 +264,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldUrl, fieldShadowDatabaseUrl],
+          items: [fieldProvider, fieldUrl, fieldShadowDatabaseUrl, fieldRelationMode],
         },
       })
     })
@@ -257,7 +278,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldUrl, fieldShadowDatabaseUrl],
+          items: [fieldUrl, fieldShadowDatabaseUrl, fieldRelationMode],
         },
       })
       assertCompletion({
@@ -268,7 +289,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldShadowDatabaseUrl],
+          items: [fieldProvider, fieldShadowDatabaseUrl, fieldRelationMode],
         },
       })
     })
@@ -296,7 +317,7 @@ suite('Completions', function () {
       })
     })
 
-    test('Diagnoses single provider suggestions for datasource block', () => {
+    test('provider = "|"', () => {
       assertCompletion({
         schema: /* Prisma */ `
         datasource db {
@@ -307,6 +328,8 @@ suite('Completions', function () {
           items: [mysql, postgresql, sqlite, sqlserver, mongodb, cockroachdb],
         },
       })
+    })
+    test('provider = |', () => {
       assertCompletion({
         schema: /* Prisma */ `
         datasource db {
@@ -315,6 +338,32 @@ suite('Completions', function () {
         expected: {
           isIncomplete: true,
           items: [quotationMarks],
+        },
+      })
+    })
+
+    test.only('relationMode = "|"', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+        datasource db {
+          provider = "sqlite"
+          relationMode = "|"
+        }`,
+        expected: {
+          isIncomplete: true,
+          items: [relationModeForeignKeys, relationModePrisma],
+        },
+      })
+    })
+    test.only('relationMode = |', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+        datasource db {
+          relationMode = |
+        }`,
+        expected: {
+          isIncomplete: true,
+          items: [relationModeForeignKeysWithQuotes, relationModePrismaWithQuotes],
         },
       })
     })
