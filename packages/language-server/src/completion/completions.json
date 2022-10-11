@@ -79,6 +79,12 @@
     {
       "label": "shadowDatabaseUrl",
       "documentation": "Connection URL including authentication info to use for Migrate's [shadow database](https://pris.ly/d/migrate-shadow). Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database."
+    },
+    {
+      "label": "relationMode",
+      "insertText": "relationMode = $0",
+      "documentation": "Set the global relation mode for all relations. Values can be either `\"foreignKeys\"` (Default), or `\"prisma\"`. [learn more](https://pris.ly/d/relationMode)",
+      "fullSignature": "relationMode = \"foreignKeys\" | \"prisma\")"
     }
   ],
   "generatorFields": [
@@ -469,6 +475,18 @@
       "label": "\"\"",
       "insertText": "\"$0\"",
       "documentation": "Enables a preview feature flag."
+    }
+  ],
+  "relationModeValues": [
+    {
+      "label": "foreignKeys",
+      "insertText": "foreignKeys",
+      "documentation": "Default value. The relation will use the Foreign Keys from the database."
+    },
+    {
+      "label": "prisma",
+      "insertText": "prisma",
+      "documentation": "The relation will not use Foreign Keys from the databse. Prisma Client will emulate their behavior for update and delete queries. [learn more](https://pris.ly/d/relationMode)"
     }
   ]
 }

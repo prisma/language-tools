@@ -93,6 +93,11 @@ export const supportedDataSourceFields: CompletionItem[] = convertToCompletionIt
   CompletionItemKind.Field,
 )
 
+export const relationModeValues: CompletionItem[] = convertToCompletionItems(
+  completions.relationModeValues,
+  CompletionItemKind.Field,
+)
+
 export const supportedGeneratorFields: CompletionItem[] = convertToCompletionItems(
   completions.generatorFields,
   CompletionItemKind.Field,
