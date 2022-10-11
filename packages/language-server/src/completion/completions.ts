@@ -34,7 +34,7 @@ import {
   handlePreviewFeatures,
   relationModeValues,
 } from './completionUtils'
-import previewFeatures from '../prisma-fmt/previewFeatures'
+import listAllAvailablePreviewFeatures from '../prisma-fmt/listAllAvailablePreviewFeatures'
 import {
   Block,
   BlockType,
@@ -357,7 +357,10 @@ export function getSuggestionForSupportedFields(
 ): CompletionList | undefined {
   let suggestions: string[] = []
   const isInsideQuotation: boolean = isInsideQuotationMark(currentLineUntrimmed, position)
+  // We can filter on the datasource
   const datasourceProvider = getFirstDatasourceProvider(lines)
+  // We can filter on the previewFeatures enabled
+  const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
 
   switch (blockType) {
     case 'generator':
@@ -378,7 +381,7 @@ export function getSuggestionForSupportedFields(
       }
       // previewFeatures
       else if (currentLine.startsWith('previewFeatures')) {
-        const generatorPreviewFeatures: string[] = previewFeatures()
+        const generatorPreviewFeatures: string[] = listAllAvailablePreviewFeatures()
         if (generatorPreviewFeatures.length > 0) {
           return handlePreviewFeatures(generatorPreviewFeatures, position, currentLineUntrimmed, isInsideQuotation)
         }
@@ -434,7 +437,12 @@ export function getSuggestionForSupportedFields(
         }
       }
       // `relationMode` can only be set for SQL databases
-      else if (currentLine.startsWith('relationMode') && datasourceProvider !== 'mongodb') {
+      // TODO remove conditional on preview feature flag when going GA
+      else if (
+        previewFeatures?.includes('referentialintegrity') &&
+        currentLine.startsWith('relationMode') &&
+        datasourceProvider !== 'mongodb'
+      ) {
         const relationModeValuesSuggestion: CompletionItem[] = relationModeValues
         // values inside quotes `"value"`
         const relationModeValuesSuggestionWithQuotes: CompletionItem[] = klona(relationModeValuesSuggestion).map(

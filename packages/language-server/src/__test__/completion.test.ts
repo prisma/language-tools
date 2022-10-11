@@ -14,14 +14,21 @@ import dedent from 'ts-dedent'
 
 type DatasourceProvider = 'sqlite' | 'postgresql' | 'mysql' | 'mongodb' | 'sqlserver' | 'cockroachdb'
 
-const baseSchema = (provider: DatasourceProvider, previewFeatures: string[]) => {
-  let base = /* Prisma */ `
+const baseSchema = (provider?: DatasourceProvider, previewFeatures?: string[]) => {
+  if (!provider && previewFeatures?.length === 0) {
+    throw new Error(`provider and/or previewFeatures is required.`)
+  }
+
+  let base = ''
+  if (provider) {
+    base = /* Prisma */ `
   datasource db {
     provider = "${provider}"
     url      = env("DATABASE_URL")
+  }`
   }
-  `
-  if (previewFeatures.length) {
+
+  if (previewFeatures?.length) {
     base += /* Prisma */ `
   generator js {
     provider        = "prisma-client-js"
@@ -48,9 +55,9 @@ function assertCompletion({
   // Remove indentation
   schema = dedent(schema)
 
-  if (provider) {
+  if (provider || previewFeatures) {
     schema = `
-    ${baseSchema(provider, previewFeatures || [])}
+    ${baseSchema(provider, previewFeatures)}
     ${schema}
     `
   }
@@ -342,8 +349,9 @@ suite('Completions', function () {
       })
     })
 
-    test.only('relationMode = "|"', () => {
+    test('relationMode = "|"', () => {
       assertCompletion({
+        previewFeatures: ['referentialIntegrity'],
         schema: /* Prisma */ `
         datasource db {
           provider = "sqlite"
@@ -355,8 +363,9 @@ suite('Completions', function () {
         },
       })
     })
-    test.only('relationMode = |', () => {
+    test('relationMode = |', () => {
       assertCompletion({
+        previewFeatures: ['referentialIntegrity'],
         schema: /* Prisma */ `
         datasource db {
           relationMode = |
@@ -364,6 +373,18 @@ suite('Completions', function () {
         expected: {
           isIncomplete: true,
           items: [relationModeForeignKeysWithQuotes, relationModePrismaWithQuotes],
+        },
+      })
+    })
+    test('relationMode = | (without previewFeature)', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+        datasource db {
+          relationMode = |
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [],
         },
       })
     })
