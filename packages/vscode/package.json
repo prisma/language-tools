@@ -43,6 +43,10 @@
           "Prisma",
           "prisma"
         ],
+        "icon": {
+          "light": "./logo_white.png",
+          "dark": "./logo_white.png"
+        },
         "extensions": [
           ".prisma"
         ],
