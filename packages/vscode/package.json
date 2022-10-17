@@ -44,8 +44,8 @@
           "prisma"
         ],
         "icon": {
-          "light": "./logo_white.png",
-          "dark": "./logo_white.png"
+          "light": "./prisma_icon.svg",
+          "dark": "./prisma_icon.svg"
         },
         "extensions": [
           ".prisma"
