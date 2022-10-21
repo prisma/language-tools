@@ -1657,11 +1657,11 @@ suite('Completions', function () {
             items: [
               { label: 'Bit()', kind: CompletionItemKind.TypeParameter },
               { label: 'Char()', kind: CompletionItemKind.TypeParameter },
-              { label: 'String()', kind: CompletionItemKind.TypeParameter },
-              { label: 'VarBit()', kind: CompletionItemKind.TypeParameter },
               { label: 'Inet', kind: CompletionItemKind.TypeParameter },
               { label: 'CatalogSingleChar', kind: CompletionItemKind.TypeParameter },
+              { label: 'String()', kind: CompletionItemKind.TypeParameter },
               { label: 'Uuid', kind: CompletionItemKind.TypeParameter },
+              { label: 'VarBit()', kind: CompletionItemKind.TypeParameter },
             ],
           },
         })
@@ -1726,11 +1726,11 @@ suite('Completions', function () {
           expected: {
             isIncomplete: false,
             items: [
+              { label: 'Date', kind: CompletionItemKind.TypeParameter },
+              { label: 'Time()', kind: CompletionItemKind.TypeParameter },
               { label: 'Timestamp()', kind: CompletionItemKind.TypeParameter },
               { label: 'Timestamptz()', kind: CompletionItemKind.TypeParameter },
-              { label: 'Time()', kind: CompletionItemKind.TypeParameter },
               { label: 'Timetz()', kind: CompletionItemKind.TypeParameter },
-              { label: 'Date', kind: CompletionItemKind.TypeParameter },
             ],
           },
         })
