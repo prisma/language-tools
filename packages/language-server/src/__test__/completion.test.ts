@@ -1823,6 +1823,10 @@ suite('Completions', function () {
       label: '@ignore',
       kind: CompletionItemKind.Property,
     }
+    const fieldAttributeDatasourceName = {
+      label: '@db',
+      kind: CompletionItemKind.Property,
+    }
 
     const functionCuid = {
       label: 'cuid()',
@@ -1852,6 +1856,7 @@ suite('Completions', function () {
       label: 'dbgenerated("")',
       kind: CompletionItemKind.Function,
     }
+
     const staticValueEmptyList = {
       label: '[]',
       kind: CompletionItemKind.Value,
@@ -1943,6 +1948,7 @@ suite('Completions', function () {
             fieldAttributeDefault,
             fieldAttributeRelation,
             fieldAttributeIgnore,
+            fieldAttributeDatasourceName,
           ],
         },
       })
@@ -2022,6 +2028,17 @@ suite('Completions', function () {
         expected: {
           isIncomplete: false,
           items: [{ label: 'lastName', kind: CompletionItemKind.Field }],
+        },
+      })
+
+      assertCompletion({
+        schema: /* Prisma */ `
+          model User {
+            firstName String
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [],
         },
       })
     })
