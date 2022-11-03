@@ -142,7 +142,7 @@ export function getSuggestionForFieldAttribute(
           label: '@' + datasourceName,
           documentation:
             'Defines a native database type that should be used for this field. See https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#native-types-mapping',
-          insertText: '@db.$0',
+          insertText: `@${datasourceName}$0`,
           insertTextFormat: InsertTextFormat.Snippet,
         })
       } else if (
