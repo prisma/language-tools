@@ -469,6 +469,7 @@ export function getNativeTypes(document: TextDocument, prismaType: string): Comp
   let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(document.getText())
 
   if (nativeTypes.length === 0) {
+    console.log('Did not receive any native type suggestions from prisma-fmt call.')
     return []
   }
 

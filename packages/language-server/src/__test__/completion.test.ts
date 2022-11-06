@@ -1948,7 +1948,6 @@ suite('Completions', function () {
             fieldAttributeDefault,
             fieldAttributeRelation,
             fieldAttributeIgnore,
-            fieldAttributeDatasourceName,
           ],
         },
       })
@@ -2030,15 +2029,24 @@ suite('Completions', function () {
           items: [{ label: 'lastName', kind: CompletionItemKind.Field }],
         },
       })
-
       assertCompletion({
+        provider: 'postgresql',
         schema: /* Prisma */ `
-          model User {
-            firstName String
+          model Post {
+            id Int @id @default()
+            email String? @unique
+            name String |
           }`,
         expected: {
           isIncomplete: false,
-          items: [],
+          items: [
+            fieldAttributeDatasourceName,
+            fieldAttributeUnique,
+            fieldAttributeMap,
+            fieldAttributeDefault,
+            fieldAttributeRelation,
+            fieldAttributeIgnore,
+          ],
         },
       })
     })
@@ -2098,6 +2106,7 @@ suite('Completions', function () {
         expected: {
           isIncomplete: false,
           items: [
+            fieldAttributeDatasourceName,
             fieldAttributeUnique,
             fieldAttributeMap,
             // fieldAttributeDefault, is invalid
