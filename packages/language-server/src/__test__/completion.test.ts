@@ -1823,6 +1823,10 @@ suite('Completions', function () {
       label: '@ignore',
       kind: CompletionItemKind.Property,
     }
+    const fieldAttributeDatasourceName = {
+      label: '@db',
+      kind: CompletionItemKind.Property,
+    }
 
     const functionCuid = {
       label: 'cuid()',
@@ -1852,6 +1856,7 @@ suite('Completions', function () {
       label: 'dbgenerated("")',
       kind: CompletionItemKind.Function,
     }
+
     const staticValueEmptyList = {
       label: '[]',
       kind: CompletionItemKind.Value,
@@ -2024,6 +2029,26 @@ suite('Completions', function () {
           items: [{ label: 'lastName', kind: CompletionItemKind.Field }],
         },
       })
+      assertCompletion({
+        provider: 'postgresql',
+        schema: /* Prisma */ `
+          model Post {
+            id Int @id @default()
+            email String? @unique
+            name String |
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            fieldAttributeDatasourceName,
+            fieldAttributeUnique,
+            fieldAttributeMap,
+            fieldAttributeDefault,
+            fieldAttributeRelation,
+            fieldAttributeIgnore,
+          ],
+        },
+      })
     })
 
     const enumUserTypeExpectedItems = [
@@ -2081,6 +2106,7 @@ suite('Completions', function () {
         expected: {
           isIncomplete: false,
           items: [
+            fieldAttributeDatasourceName,
             fieldAttributeUnique,
             fieldAttributeMap,
             // fieldAttributeDefault, is invalid
