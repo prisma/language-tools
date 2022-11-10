@@ -2,7 +2,7 @@
   "name": "@prisma/language-server",
   "description": "Prisma Language Server",
   "displayName": "Prisma Language Server",
-  "version": "31.0.1596",
+  "version": "31.0.1597",
   "author": "Prisma",
   "license": "Apache-2.0",
   "publisher": "Prisma",
@@ -11,7 +11,7 @@
   },
   "prisma": {
     "enginesVersion": "379f9d33a885f66fbe10a30a7b6c14bc56f3de3b",
-    "cliVersion": "4.7.0-dev.14"
+    "cliVersion": "4.7.0-dev.15"
   },
   "bin": {
     "prisma-language-server": "dist/src/bin.js"
