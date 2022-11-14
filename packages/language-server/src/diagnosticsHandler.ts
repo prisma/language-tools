@@ -23,7 +23,7 @@ export function greyOutIgnoredParts(lines: string[]): Diagnostic[] {
           end: { line: index, character: Number.MAX_VALUE },
         },
         message:
-          '@ignore: this field will be kept in sync with the database schema, however, it won’t be exposed to the Prisma client.',
+          '`@ignore`: When using Prisma Migrate, this field will be kept in sync with the database schema, however, it will not be exposed in Prisma Client.',
         tags: [DiagnosticTag.Unnecessary],
         severity: DiagnosticSeverity.Hint,
       })
