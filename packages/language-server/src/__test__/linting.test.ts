@@ -15,6 +15,7 @@ function assertLinting(expected: Diagnostic[], fixturePath: string): void {
     assert.strictEqual(actualDiagnostic.message, expectedDiagnostic.message)
     assert.deepStrictEqual(actualDiagnostic.range, expectedDiagnostic.range)
     assert.strictEqual(actualDiagnostic.severity, expectedDiagnostic.severity)
+    assert.deepStrictEqual(actualDiagnostic.tags, expectedDiagnostic.tags)
   })
 }
 

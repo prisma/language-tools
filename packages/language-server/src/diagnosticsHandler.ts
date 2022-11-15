@@ -11,9 +11,13 @@ export function createDiagnosticsForIgnore(lines: string[]): Diagnostic[] {
         diagnostics.push({
           range: { start: block.range.start, end: block.range.end },
           message:
-            '`@@ignore`: When using Prisma Migrate, this model will be kept in sync with the database schema, however, it will not be exposed in Prisma Client.',
+            '@@ignore: When using Prisma Migrate, this model will be kept in sync with the database schema, however, it will not be exposed in Prisma Client.',
           tags: [DiagnosticTag.Unnecessary],
           severity: DiagnosticSeverity.Hint,
+          code: '@@ignore documentation',
+          codeDescription: {
+            href: 'pris.ly/d/schema-reference#ignore-1',
+          },
         })
       }
     } else if (currElement.includes('@ignore')) {
@@ -23,9 +27,13 @@ export function createDiagnosticsForIgnore(lines: string[]): Diagnostic[] {
           end: { line: index, character: Number.MAX_VALUE },
         },
         message:
-          '`@ignore`: When using Prisma Migrate, this field will be kept in sync with the database schema, however, it will not be exposed in Prisma Client.',
+          '@ignore: When using Prisma Migrate, this field will be kept in sync with the database schema, however, it will not be exposed in Prisma Client.',
         tags: [DiagnosticTag.Unnecessary],
         severity: DiagnosticSeverity.Hint,
+        code: '@ignore documentation',
+        codeDescription: {
+          href: 'pris.ly/d/schema-reference#ignore',
+        },
       })
     }
   })
