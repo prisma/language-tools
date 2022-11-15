@@ -1,6 +1,6 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { handleDiagnosticsRequest } from '../MessageHandler'
-import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver'
+import { Diagnostic, DiagnosticSeverity, DiagnosticTag } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
 
@@ -21,6 +21,8 @@ function assertLinting(expected: Diagnostic[], fixturePath: string): void {
 suite('Linting', () => {
   const fixturePathMissingArgument = './linting/missingArgument.prisma'
   const fixturePathWrongType = './linting/wrongType.prisma'
+  const fixturePathFieldIgnore = './linting/@ignore.prisma'
+  const fixturePathModelIgnore = './linting/@@ignore.prisma'
 
   test('Missing argument', () => {
     assertLinting(
@@ -37,6 +39,7 @@ suite('Linting', () => {
       fixturePathMissingArgument,
     )
   })
+
   test('Wrong type', () => {
     assertLinting(
       [
@@ -50,6 +53,42 @@ suite('Linting', () => {
         },
       ],
       fixturePathWrongType,
+    )
+  })
+
+  test('@ignore : Field', () => {
+    assertLinting(
+      [
+        {
+          range: {
+            start: { line: 12, character: 0 },
+            end: { line: 12, character: Number.MAX_VALUE },
+          },
+          message:
+            '`@ignore`: When using Prisma Migrate, this field will be kept in sync with the database schema, however, it will not be exposed in Prisma Client.',
+          tags: [DiagnosticTag.Unnecessary],
+          severity: DiagnosticSeverity.Hint,
+        },
+      ],
+      fixturePathFieldIgnore,
+    )
+  })
+
+  test('@@ignore : Model', () => {
+    assertLinting(
+      [
+        {
+          range: {
+            start: { line: 9, character: 0 },
+            end: { line: 17, character: 1 },
+          },
+          message:
+            '`@@ignore`: When using Prisma Migrate, this model will be kept in sync with the database schema, however, it will not be exposed in Prisma Client.',
+          tags: [DiagnosticTag.Unnecessary],
+          severity: DiagnosticSeverity.Hint,
+        },
+      ],
+      fixturePathModelIgnore,
     )
   })
 })

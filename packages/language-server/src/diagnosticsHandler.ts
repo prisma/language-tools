@@ -11,7 +11,7 @@ export function createDiagnosticsForIgnore(lines: string[]): Diagnostic[] {
         diagnostics.push({
           range: { start: block.range.start, end: block.range.end },
           message:
-            '@@ignore: this model will be kept in sync with the database schema, however, it won’t be exposed to the Prisma client.',
+            '`@@ignore`: When using Prisma Migrate, this model will be kept in sync with the database schema, however, it will not be exposed in Prisma Client.',
           tags: [DiagnosticTag.Unnecessary],
           severity: DiagnosticSeverity.Hint,
         })
