@@ -373,7 +373,7 @@ export function getSuggestionForSupportedFields(
   // We can filter on the datasource
   const datasourceProvider = getFirstDatasourceProvider(lines)
   // We can filter on the previewFeatures enabled
-  const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
+  // const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
 
   switch (blockType) {
     case 'generator':
