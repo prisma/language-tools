@@ -1,7 +1,7 @@
 import { Diagnostic, DiagnosticSeverity, DiagnosticTag } from 'vscode-languageserver/node'
 import { getBlockAtPosition } from './util'
 
-export function greyOutIgnoredParts(lines: string[]): Diagnostic[] {
+export function createDiagnosticsForIgnore(lines: string[]): Diagnostic[] {
   const diagnostics: Diagnostic[] = []
 
   lines.map((currElement, index) => {

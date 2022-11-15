@@ -65,7 +65,7 @@ import {
   printLogMessage,
   isRelationField,
 } from './rename/renameUtil'
-import { greyOutIgnoredParts } from './diagnosticsHandler'
+import { createDiagnosticsForIgnore } from './diagnosticsHandler'
 
 export function handleDiagnosticsRequest(
   document: TextDocument,
@@ -126,8 +126,8 @@ export function handleDiagnosticsRequest(
   }
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
-  const test = greyOutIgnoredParts(lines)
-  diagnostics.push(...test)
+  const diagnosticsForIgnore = createDiagnosticsForIgnore(lines)
+  diagnostics.push(...diagnosticsForIgnore)
 
   return diagnostics
 }
