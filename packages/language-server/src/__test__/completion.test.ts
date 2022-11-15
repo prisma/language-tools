@@ -374,18 +374,6 @@ suite('Completions', function () {
         },
       })
     })
-    test('relationMode = | (without previewFeature)', () => {
-      assertCompletion({
-        schema: /* Prisma */ `
-        datasource db {
-          relationMode = |
-        }`,
-        expected: {
-          isIncomplete: false,
-          items: [],
-        },
-      })
-    })
   })
 
   suite('GENERATOR BLOCK', () => {
