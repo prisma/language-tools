@@ -450,12 +450,7 @@ export function getSuggestionForSupportedFields(
         }
       }
       // `relationMode` can only be set for SQL databases
-      // TODO remove conditional on preview feature flag when going GA
-      else if (
-        previewFeatures?.includes('referentialintegrity') &&
-        currentLine.startsWith('relationMode') &&
-        datasourceProvider !== 'mongodb'
-      ) {
+      else if (currentLine.startsWith('relationMode') && datasourceProvider !== 'mongodb') {
         const relationModeValuesSuggestion: CompletionItem[] = relationModeValues
         // values inside quotes `"value"`
         const relationModeValuesSuggestionWithQuotes: CompletionItem[] = klona(relationModeValuesSuggestion).map(

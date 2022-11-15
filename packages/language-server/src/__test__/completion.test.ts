@@ -351,7 +351,6 @@ suite('Completions', function () {
 
     test('relationMode = "|"', () => {
       assertCompletion({
-        previewFeatures: ['referentialIntegrity'],
         schema: /* Prisma */ `
         datasource db {
           provider = "sqlite"
@@ -365,7 +364,6 @@ suite('Completions', function () {
     })
     test('relationMode = |', () => {
       assertCompletion({
-        previewFeatures: ['referentialIntegrity'],
         schema: /* Prisma */ `
         datasource db {
           relationMode = |
