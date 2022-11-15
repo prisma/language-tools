@@ -66,7 +66,7 @@ suite('Linting', () => {
             end: { line: 12, character: Number.MAX_VALUE },
           },
           message:
-            '`@ignore`: When using Prisma Migrate, this field will be kept in sync with the database schema, however, it will not be exposed in Prisma Client.',
+            '@ignore: When using Prisma Migrate, this field will be kept in sync with the database schema, however, it will not be exposed in Prisma Client.',
           tags: [DiagnosticTag.Unnecessary],
           severity: DiagnosticSeverity.Hint,
         },
@@ -84,7 +84,7 @@ suite('Linting', () => {
             end: { line: 17, character: 1 },
           },
           message:
-            '`@@ignore`: When using Prisma Migrate, this model will be kept in sync with the database schema, however, it will not be exposed in Prisma Client.',
+            '@@ignore: When using Prisma Migrate, this model will be kept in sync with the database schema, however, it will not be exposed in Prisma Client.',
           tags: [DiagnosticTag.Unnecessary],
           severity: DiagnosticSeverity.Hint,
         },
