@@ -16,7 +16,7 @@ export function createDiagnosticsForIgnore(lines: string[]): Diagnostic[] {
           severity: DiagnosticSeverity.Hint,
           code: '@@ignore documentation',
           codeDescription: {
-            href: 'pris.ly/d/schema-reference#ignore-1',
+            href: 'https://pris.ly/d/schema-reference#ignore-1',
           },
         })
       }
@@ -32,7 +32,7 @@ export function createDiagnosticsForIgnore(lines: string[]): Diagnostic[] {
         severity: DiagnosticSeverity.Hint,
         code: '@ignore documentation',
         codeDescription: {
-          href: 'pris.ly/d/schema-reference#ignore',
+          href: 'https://pris.ly/d/schema-reference#ignore',
         },
       })
     }
