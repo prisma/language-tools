@@ -220,6 +220,11 @@ suite('Completions', function () {
       label: 'relationMode',
       kind: CompletionItemKind.Field,
     }
+    const fieldPostgresqlExtensions = {
+      label: 'extensions',
+      kind: CompletionItemKind.Field,
+    }
+
     const sqlite = { label: 'sqlite', kind: CompletionItemKind.Constant }
     const mysql = { label: 'mysql', kind: CompletionItemKind.Constant }
     const postgresql = {
@@ -320,6 +325,25 @@ suite('Completions', function () {
         expected: {
           isIncomplete: false,
           items: [envArgument],
+        },
+      })
+    })
+
+    test('Diagnoses field extension availability', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+          generator client {
+            previewFeatures = ["postgresqlExtensions"]
+          }
+
+          datasource db {
+            provider = "postgresql"
+            |
+          }
+        `,
+        expected: {
+          isIncomplete: false,
+          items: [fieldUrl, fieldShadowDatabaseUrl, fieldRelationMode, fieldPostgresqlExtensions],
         },
       })
     })

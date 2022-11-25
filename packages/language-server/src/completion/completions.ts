@@ -262,7 +262,14 @@ export function getSuggestionsForFieldTypes(
 
 function getSuggestionForDataSourceField(block: Block, lines: string[], position: Position): CompletionItem[] {
   // create deep copy
-  const suggestions: CompletionItem[] = klona(supportedDataSourceFields)
+  let suggestions: CompletionItem[] = klona(supportedDataSourceFields)
+
+  const postgresExtensionsEnabled = getAllPreviewFeaturesFromGenerators(lines)?.includes('postgresqlextensions')
+  const isPostgres = getFirstDatasourceProvider(lines)?.includes('postgres')
+
+  if (!(postgresExtensionsEnabled && isPostgres)) {
+    suggestions = suggestions.filter((item) => item.label !== 'extensions')
+  }
 
   const labels: string[] = removeInvalidFieldSuggestions(
     suggestions.map((item) => item.label),
@@ -476,7 +483,6 @@ export function getSuggestionForSupportedFields(
           }
         }
       }
-      break
   }
 
   return {
