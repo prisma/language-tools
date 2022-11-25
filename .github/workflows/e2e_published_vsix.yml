@@ -57,6 +57,8 @@ jobs:
       - name: Bump version
         if: ${{needs.test.result == 'success' && needs.test.outputs.installed-extension }}
         run: npm run test:bump ${{ github.event.inputs.extension_type }} ${{ github.event.inputs.extension_version }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }} # Needed and used in the shell script behind test:bump
 
       - name: 'Set current job url in SLACK_FOOTER env var'
         if: ${{ always() }}
