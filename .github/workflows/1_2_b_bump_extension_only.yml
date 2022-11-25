@@ -13,7 +13,6 @@ on:
   workflow_dispatch:
 
 env:
-  GH_TOKEN: ${{ secrets.GH_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
   PRISMA_TELEMETRY_INFORMATION: 'language-tools 1_2_b_bump_extension_only.yml'
 
