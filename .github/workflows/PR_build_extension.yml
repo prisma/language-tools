@@ -11,7 +11,6 @@ on:
       - '.github/CODEOWNERS'
 
 env:
-  GH_TOKEN: ${{ secrets.GH_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
   PRISMA_TELEMETRY_INFORMATION: 'language-tools PR_build_extension.yml'
   SLACK_USERNAME: Prismo
