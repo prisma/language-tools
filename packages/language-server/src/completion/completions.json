@@ -85,6 +85,11 @@
       "insertText": "relationMode = $0",
       "documentation": "Set the global relation mode for all relations. Values can be either `\"foreignKeys\"` (Default), or `\"prisma\"`. [learn more](https://pris.ly/d/relationMode)",
       "fullSignature": "relationMode = \"foreignKeys\" | \"prisma\")"
+    },
+    {
+      "label": "extensions",
+      "insertText": "extensions = [$0]",
+      "documentation": "Enable PostgreSQL extensions. [Learn More](https://pris.ly/d/postgresql-extensions)"
     }
   ],
   "generatorFields": [
