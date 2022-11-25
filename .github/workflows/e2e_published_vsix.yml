@@ -11,7 +11,6 @@ on:
         required: true
 
 env:
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   SLACK-USERNAME: Prismo
   SLACK_ICON_EMOJI: ':robot_face:'
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
