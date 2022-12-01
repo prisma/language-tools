@@ -1,4 +1,5 @@
 name: 6. Build extension # and upload as release to GitHub
+run-name: 6. Build extension + upload - ${{ inputs.trigger_reason }}
 
 on:
   workflow_dispatch:

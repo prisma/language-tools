@@ -1,4 +1,5 @@
 name: 5. Integration tests in VSCode folder with published LS
+run-name: 5. Integration tests in VSCode folder with published LS - ${{ inputs.trigger_reason }}
 
 on:
   workflow_dispatch:

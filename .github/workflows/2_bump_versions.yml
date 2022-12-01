@@ -1,4 +1,5 @@
 name: 2. Bump versions
+run-name: 2. Bump versions - CLI ${{ inputs.version }} from ${{ inputs.npm_channel }}
 
 on:
   workflow_dispatch:
@@ -72,7 +73,7 @@ jobs:
         with:
           workflow: 3. Test Language Server and publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}", "trigger_reason": "On new Prisma CLI version ${{github.event.inputs.version}}" }'
+          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}", "trigger_reason": "Prisma CLI version ${{github.event.inputs.version}}" }'
 
       - name: 'Set current job url in SLACK_FOOTER env var'
         if: ${{ failure() }}

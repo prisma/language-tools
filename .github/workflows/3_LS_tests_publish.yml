@@ -1,4 +1,5 @@
 name: 3. Test Language Server and publish
+run-name: 3. Test Language Server and publish - ${{ inputs.trigger_reason }}
 
 on:
   workflow_dispatch:

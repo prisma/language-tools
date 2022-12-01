@@ -1,4 +1,5 @@
 name: E2E tests after release on VSIX
+run-name: E2E tests after release on VSIX - ${{ inputs.extension_type }} ${{ inputs.extension_version }}
 
 on:
   workflow_dispatch:

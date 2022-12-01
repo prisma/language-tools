@@ -1,4 +1,5 @@
 name: 4. Bump LS in VSCode extension
+run-name: 4. Bump LS in VSCode extension - ${{ inputs.trigger_reason }}
 
 on:
   workflow_dispatch:
