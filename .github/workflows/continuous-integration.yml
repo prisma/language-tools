@@ -1,5 +1,4 @@
 name: CI tests
-run-name: 'CI tests - PR #${{ github.event.number }}'
 
 on:
   push:
