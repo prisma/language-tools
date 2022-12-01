@@ -1,4 +1,5 @@
 name: 2. Bump versions
+run-name: 2. Bump versions - CLI ${{ inputs.version }} from ${{ inputs.npm_channel }}
 
 on:
   workflow_dispatch:

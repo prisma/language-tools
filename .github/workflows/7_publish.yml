@@ -1,4 +1,5 @@
 name: 7. Publish
+run-name: 7. Publish - ${{ inputs.trigger_reason }}
 
 on:
   workflow_dispatch:
