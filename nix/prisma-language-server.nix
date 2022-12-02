@@ -35,9 +35,10 @@ in
         '';
 
         installPhase = ''
+          EXPAND_ARGS='$@'
           mkdir $out/bin
           echo '#!/bin/bash' >> $out/bin/prisma-language-server
-          echo "${nodejs}/bin/node $out/lib/dist/src/bin.js" >> $out/bin/prisma-language-server
+          echo "${nodejs}/bin/node $out/lib/dist/src/bin.js $EXPAND_ARGS" >> $out/bin/prisma-language-server
           chmod +x $out/bin/prisma-language-server
         '';
       };
