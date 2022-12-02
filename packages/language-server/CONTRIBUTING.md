@@ -25,3 +25,13 @@ Unit tests:
 ## Publishing
 
 The extension is automatically published to npm via GitHub actions (see `.github/workflows`).
+
+## Nix users
+
+The flake in this repository has a language server package.
+
+Run `nix build .#prisma-language-server` to build it. The compiled output and a
+wrapper script will be in the `result/` directory.
+
+Run `nix run .#prisma-language-server -- --stdio` to run the language server, listening
+over stdio.
