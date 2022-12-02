@@ -10,6 +10,9 @@ coverage
 # Dependency directory
 **/node_modules/**
 
+# Nix
+/result
+
 # Others
 /.direnv
 dist/
