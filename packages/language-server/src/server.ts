@@ -13,6 +13,7 @@ import {
   DocumentFormattingParams,
   DidChangeConfigurationNotification,
   Connection,
+  DocumentSymbolParams,
 } from 'vscode-languageserver'
 import { createConnection, IPCMessageReader, IPCMessageWriter } from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
@@ -77,6 +78,7 @@ export function startServer(options?: LSOptions): void {
         },
         hoverProvider: true,
         renameProvider: true,
+        documentSymbolProvider: true,
       },
     }
 
@@ -213,6 +215,13 @@ export function startServer(options?: LSOptions): void {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
       return MessageHandler.handleRenameRequest(params, doc)
+    }
+  })
+
+  connection.onDocumentSymbol((params: DocumentSymbolParams) => {
+    const doc = getDocument(params.textDocument.uri)
+    if (doc) {
+      return MessageHandler.handleDocumentSymbol(params, doc)
     }
   })
 

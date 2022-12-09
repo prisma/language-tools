@@ -39,8 +39,8 @@ export function isValidFieldName(
   if (
     currentBlock.type !== 'model' ||
     // TODO type
-    position.line == currentBlock.start.line ||
-    position.line == currentBlock.end.line
+    position.line == currentBlock.range.start.line ||
+    position.line == currentBlock.range.end.line
   ) {
     return false
   }
@@ -70,7 +70,7 @@ export function isModelName(position: Position, block: Block, lines: string[], d
     return false
   }
 
-  if (position.line === block.start.line) {
+  if (position.line === block.range.start.line) {
     return position.character > 5
   }
 
@@ -78,7 +78,7 @@ export function isModelName(position: Position, block: Block, lines: string[], d
 }
 
 export function isEnumName(position: Position, block: Block, lines: string[], document: TextDocument): boolean {
-  if (block.type === 'enum' && position.line === block.start.line) {
+  if (block.type === 'enum' && position.line === block.range.start.line) {
     return position.character > 4
   }
 
@@ -115,7 +115,7 @@ export function isEnumValue(
 ): boolean {
   return (
     currentBlock.type === 'enum' &&
-    position.line !== currentBlock.start.line &&
+    position.line !== currentBlock.range.start.line &&
     !currentLine.startsWith('@@') &&
     !getWordAtPosition(document, position).startsWith('@')
   )
@@ -163,10 +163,10 @@ function insertMapBlockAttribute(oldName: string, block: Block): TextEdit {
   return {
     range: {
       start: {
-        line: block.end.line,
+        line: block.range.end.line,
         character: 0,
       },
-      end: block.end,
+      end: block.range.end,
     },
     newText: `\t@@map("${oldName}")\n}`,
   }
@@ -176,7 +176,7 @@ function positionIsNotInsideSearchedBlocks(line: number, searchedBlocks: Block[]
   if (searchedBlocks.length === 0) {
     return true
   }
-  return !searchedBlocks.some((block) => line >= block.start.line && line <= block.end.line)
+  return !searchedBlocks.some((block) => line >= block.range.start.line && line <= block.range.end.line)
 }
 
 /**
@@ -198,13 +198,13 @@ export function renameReferencesForFieldValue(
   // search in same model first
   let reachedStartLine = false
   for (const [key, item] of lines.entries()) {
-    if (key === block.start.line + 1) {
+    if (key === block.range.start.line + 1) {
       reachedStartLine = true
     }
     if (!reachedStartLine) {
       continue
     }
-    if (key === block.end.line) {
+    if (key === block.range.end.line) {
       break
     }
     if (item.includes(relationAttribute) && item.includes(currentValue) && !isRelationFieldRename) {
@@ -388,13 +388,13 @@ function mapFieldAttributeExistsAlready(line: string): boolean {
 function mapBlockAttributeExistsAlready(block: Block, lines: string[]): boolean {
   let reachedStartLine = false
   for (const [key, item] of lines.entries()) {
-    if (key === block.start.line + 1) {
+    if (key === block.range.start.line + 1) {
       reachedStartLine = true
     }
     if (!reachedStartLine) {
       continue
     }
-    if (key === block.end.line) {
+    if (key === block.range.end.line) {
       break
     }
     if (item.startsWith('@@map(')) {

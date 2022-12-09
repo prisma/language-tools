@@ -32,8 +32,9 @@ import {
   removeInvalidFieldSuggestions,
   getNativeTypes,
   handlePreviewFeatures,
+  relationModeValues,
 } from './completionUtils'
-import previewFeatures from '../prisma-fmt/previewFeatures'
+import listAllAvailablePreviewFeatures from '../prisma-fmt/listAllAvailablePreviewFeatures'
 import {
   Block,
   BlockType,
@@ -113,6 +114,18 @@ export function getSuggestionForNativeTypes(
   }
 }
 
+/**
+ * Should suggest all field attributes for a given field
+ * EX: id Int |> @id, @default, @datasourceName, ...etc
+ *
+ * If `@datasourceName.` |> suggests nativeTypes
+ * @param block
+ * @param currentLine
+ * @param lines
+ * @param wordsBeforePosition
+ * @param document
+ * @returns
+ */
 export function getSuggestionForFieldAttribute(
   block: Block,
   currentLine: string,
@@ -126,36 +139,37 @@ export function getSuggestionForFieldAttribute(
   }
   let suggestions: CompletionItem[] = []
 
-  const enabledNativeTypes = declaredNativeTypes(document)
   // Because @.?
-  if (enabledNativeTypes && wordsBeforePosition.length >= 2) {
+  if (wordsBeforePosition.length >= 2) {
     const datasourceName = getFirstDatasourceName(lines)
     const prismaType = wordsBeforePosition[1]
     const nativeTypeSuggestions = getNativeTypes(document, prismaType)
 
-    if (datasourceName && nativeTypeSuggestions.length !== 0) {
-      if (!currentLine.includes('@' + datasourceName)) {
+    if (datasourceName) {
+      if (!currentLine.includes(`@${datasourceName}`)) {
         suggestions.push({
           // https://code.visualstudio.com/docs/editor/intellisense#_types-of-completions
           kind: CompletionItemKind.Property,
           label: '@' + datasourceName,
           documentation:
             'Defines a native database type that should be used for this field. See https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#native-types-mapping',
-          insertText: '@db.$0',
+          insertText: `@${datasourceName}$0`,
           insertTextFormat: InsertTextFormat.Snippet,
         })
-      } else if (
-        // Check that we are not separated by a space like `@db. |`
-        wordsBeforePosition[wordsBeforePosition.length - 1] === `@${datasourceName}`
-      ) {
-        suggestions.push(...nativeTypeSuggestions)
-        return {
-          items: suggestions,
-          isIncomplete: false,
+      }
+
+      if (nativeTypeSuggestions.length !== 0) {
+        if (
+          // Check that we are not separated by a space like `@db. |`
+          wordsBeforePosition[wordsBeforePosition.length - 1] === `@${datasourceName}`
+        ) {
+          suggestions.push(...nativeTypeSuggestions)
+          return {
+            items: suggestions,
+            isIncomplete: false,
+          }
         }
       }
-    } else {
-      console.log('Did not receive any native type suggestions from prisma-fmt call.')
     }
   }
 
@@ -248,7 +262,14 @@ export function getSuggestionsForFieldTypes(
 
 function getSuggestionForDataSourceField(block: Block, lines: string[], position: Position): CompletionItem[] {
   // create deep copy
-  const suggestions: CompletionItem[] = klona(supportedDataSourceFields)
+  let suggestions: CompletionItem[] = klona(supportedDataSourceFields)
+
+  const postgresExtensionsEnabled = getAllPreviewFeaturesFromGenerators(lines)?.includes('postgresqlextensions')
+  const isPostgres = getFirstDatasourceProvider(lines)?.includes('postgres')
+
+  if (!(postgresExtensionsEnabled && isPostgres)) {
+    suggestions = suggestions.filter((item) => item.label !== 'extensions')
+  }
 
   const labels: string[] = removeInvalidFieldSuggestions(
     suggestions.map((item) => item.label),
@@ -356,6 +377,10 @@ export function getSuggestionForSupportedFields(
 ): CompletionList | undefined {
   let suggestions: string[] = []
   const isInsideQuotation: boolean = isInsideQuotationMark(currentLineUntrimmed, position)
+  // We can filter on the datasource
+  const datasourceProvider = getFirstDatasourceProvider(lines)
+  // We can filter on the previewFeatures enabled
+  // const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
 
   switch (blockType) {
     case 'generator':
@@ -375,14 +400,14 @@ export function getSuggestionForSupportedFields(
         }
       }
       // previewFeatures
-      if (currentLine.startsWith('previewFeatures')) {
-        const generatorPreviewFeatures: string[] = previewFeatures()
+      else if (currentLine.startsWith('previewFeatures')) {
+        const generatorPreviewFeatures: string[] = listAllAvailablePreviewFeatures()
         if (generatorPreviewFeatures.length > 0) {
           return handlePreviewFeatures(generatorPreviewFeatures, position, currentLineUntrimmed, isInsideQuotation)
         }
       }
       // engineType
-      if (currentLine.startsWith('engineType')) {
+      else if (currentLine.startsWith('engineType')) {
         const engineTypesCompletion: CompletionItem[] = engineTypes
         if (isInsideQuotation) {
           return {
@@ -431,7 +456,33 @@ export function getSuggestionForSupportedFields(
           }
         }
       }
-      break
+      // `relationMode` can only be set for SQL databases
+      else if (currentLine.startsWith('relationMode') && datasourceProvider !== 'mongodb') {
+        const relationModeValuesSuggestion: CompletionItem[] = relationModeValues
+        // values inside quotes `"value"`
+        const relationModeValuesSuggestionWithQuotes: CompletionItem[] = klona(relationModeValuesSuggestion).map(
+          (suggestion) => {
+            suggestion.label = `"${suggestion.label}"`
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            suggestion.insertText = `"${suggestion.insertText!}"`
+            return suggestion
+          },
+        )
+
+        if (isInsideQuotation) {
+          return {
+            items: relationModeValuesSuggestion,
+            isIncomplete: true,
+          }
+        }
+        // If line ends with `"`, a value is already set.
+        else if (!currentLine.endsWith('"')) {
+          return {
+            items: relationModeValuesSuggestionWithQuotes,
+            isIncomplete: true,
+          }
+        }
+      }
   }
 
   return {

@@ -1,4 +1,5 @@
 name: 7. Publish
+run-name: 7. Publish - ${{ inputs.trigger_reason }}
 
 on:
   workflow_dispatch:
@@ -14,9 +15,6 @@ on:
         required: true
 
 env:
-  AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
-  OPEN_VSX_ACCESS_TOKEN: ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
-  GH_TOKEN: ${{ secrets.GH_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
   PRISMA_TELEMETRY_INFORMATION: 'language-tools 7_publish.yml'
   SLACK_USERNAME: Prismo
@@ -27,6 +25,7 @@ jobs:
   marketplace:
     name: Publish to marketplace
     runs-on: ubuntu-latest
+    timeout-minutes: 7
     env:
       SLACK_MESSAGE: '${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}'
     steps:
@@ -80,6 +79,7 @@ jobs:
   open-vsx:
     name: Publish to open-vsx
     runs-on: ubuntu-latest
+    timeout-minutes: 7
     env:
       SLACK_MESSAGE: '${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}'
     steps:

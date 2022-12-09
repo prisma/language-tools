@@ -2,7 +2,7 @@
   "name": "prisma-insider",
   "displayName": "Prisma - Insider",
   "description": "This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the dev version of the CLI).",
-  "version": "31.0.1295",
+  "version": "31.0.1708",
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
@@ -13,13 +13,11 @@
     "Programming Languages"
   ],
   "dependencies": {
-    "@prisma/language-server": "31.0.1295",
+    "@prisma/language-server": "31.0.1708",
     "checkpoint-client": "1.1.21",
-    "chokidar": "3.5.3",
-    "vscode-languageclient": "7.0.0"
-  },
-  "optionalDependencies": {
-    "fsevents": "2.3.2"
+    "minimatch": "5.1.1",
+    "vscode-languageclient": "7.0.0",
+    "watcher": "^1.2.0"
   },
   "repository": {
     "type": "git",
@@ -45,6 +43,10 @@
           "Prisma",
           "prisma"
         ],
+        "icon": {
+          "light": "./prisma_icon.svg",
+          "dark": "./prisma_icon.svg"
+        },
         "extensions": [
           ".prisma"
         ],
@@ -140,15 +142,15 @@
     ]
   },
   "devDependencies": {
-    "@types/glob": "7.2.0",
-    "@types/mocha": "9.1.1",
+    "@types/glob": "8.0.0",
+    "@types/mocha": "10.0.1",
     "@types/vscode": "1.56.0",
-    "@vscode/test-electron": "2.1.5",
+    "@vscode/test-electron": "2.2.0",
     "is-ci": "3.0.1",
-    "mocha": "10.0.0",
-    "ovsx": "0.5.1",
-    "typescript": "4.7.4",
-    "vsce": "2.10.0"
+    "mocha": "10.1.0",
+    "ovsx": "0.5.2",
+    "typescript": "4.9.3",
+    "vsce": "2.14.0"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
   "publishConfig": {

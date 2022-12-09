@@ -8,6 +8,7 @@ jobs:
   check-version:
     name: Check for new version
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js

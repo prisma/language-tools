@@ -14,14 +14,21 @@ import dedent from 'ts-dedent'
 
 type DatasourceProvider = 'sqlite' | 'postgresql' | 'mysql' | 'mongodb' | 'sqlserver' | 'cockroachdb'
 
-const baseSchema = (provider: DatasourceProvider, previewFeatures: string[]) => {
-  let base = /* Prisma */ `
+const baseSchema = (provider?: DatasourceProvider, previewFeatures?: string[]) => {
+  if (!provider && previewFeatures?.length === 0) {
+    throw new Error(`provider and/or previewFeatures is required.`)
+  }
+
+  let base = ''
+  if (provider) {
+    base = /* Prisma */ `
   datasource db {
     provider = "${provider}"
     url      = env("DATABASE_URL")
+  }`
   }
-  `
-  if (previewFeatures.length) {
+
+  if (previewFeatures?.length) {
     base += /* Prisma */ `
   generator js {
     provider        = "prisma-client-js"
@@ -48,9 +55,9 @@ function assertCompletion({
   // Remove indentation
   schema = dedent(schema)
 
-  if (provider) {
+  if (provider || previewFeatures) {
     schema = `
-    ${baseSchema(provider, previewFeatures || [])}
+    ${baseSchema(provider, previewFeatures)}
     ${schema}
     `
   }
@@ -209,6 +216,15 @@ suite('Completions', function () {
       label: 'shadowDatabaseUrl',
       kind: CompletionItemKind.Field,
     }
+    const fieldRelationMode = {
+      label: 'relationMode',
+      kind: CompletionItemKind.Field,
+    }
+    const fieldPostgresqlExtensions = {
+      label: 'extensions',
+      kind: CompletionItemKind.Field,
+    }
+
     const sqlite = { label: 'sqlite', kind: CompletionItemKind.Constant }
     const mysql = { label: 'mysql', kind: CompletionItemKind.Constant }
     const postgresql = {
@@ -223,6 +239,23 @@ suite('Completions', function () {
     const cockroachdb = {
       label: 'cockroachdb',
       kind: CompletionItemKind.Constant,
+    }
+
+    const relationModeForeignKeys = {
+      label: 'foreignKeys',
+      kind: CompletionItemKind.Field,
+    }
+    const relationModePrisma = {
+      label: 'prisma',
+      kind: CompletionItemKind.Field,
+    }
+    const relationModeForeignKeysWithQuotes = {
+      label: '"foreignKeys"',
+      kind: CompletionItemKind.Field,
+    }
+    const relationModePrismaWithQuotes = {
+      label: '"prisma"',
+      kind: CompletionItemKind.Field,
     }
 
     const quotationMarks = {
@@ -243,7 +276,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldUrl, fieldShadowDatabaseUrl],
+          items: [fieldProvider, fieldUrl, fieldShadowDatabaseUrl, fieldRelationMode],
         },
       })
     })
@@ -257,7 +290,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldUrl, fieldShadowDatabaseUrl],
+          items: [fieldUrl, fieldShadowDatabaseUrl, fieldRelationMode],
         },
       })
       assertCompletion({
@@ -268,7 +301,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldShadowDatabaseUrl],
+          items: [fieldProvider, fieldShadowDatabaseUrl, fieldRelationMode],
         },
       })
     })
@@ -296,7 +329,26 @@ suite('Completions', function () {
       })
     })
 
-    test('Diagnoses single provider suggestions for datasource block', () => {
+    test('Diagnoses field extension availability', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+          generator client {
+            previewFeatures = ["postgresqlExtensions"]
+          }
+
+          datasource db {
+            provider = "postgresql"
+            |
+          }
+        `,
+        expected: {
+          isIncomplete: false,
+          items: [fieldUrl, fieldShadowDatabaseUrl, fieldRelationMode, fieldPostgresqlExtensions],
+        },
+      })
+    })
+
+    test('provider = "|"', () => {
       assertCompletion({
         schema: /* Prisma */ `
         datasource db {
@@ -307,6 +359,8 @@ suite('Completions', function () {
           items: [mysql, postgresql, sqlite, sqlserver, mongodb, cockroachdb],
         },
       })
+    })
+    test('provider = |', () => {
       assertCompletion({
         schema: /* Prisma */ `
         datasource db {
@@ -315,6 +369,32 @@ suite('Completions', function () {
         expected: {
           isIncomplete: true,
           items: [quotationMarks],
+        },
+      })
+    })
+
+    test('relationMode = "|"', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+        datasource db {
+          provider = "sqlite"
+          relationMode = "|"
+        }`,
+        expected: {
+          isIncomplete: true,
+          items: [relationModeForeignKeys, relationModePrisma],
+        },
+      })
+    })
+    test('relationMode = |', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+        datasource db {
+          relationMode = |
+        }`,
+        expected: {
+          isIncomplete: true,
+          items: [relationModeForeignKeysWithQuotes, relationModePrismaWithQuotes],
         },
       })
     })
@@ -1587,11 +1667,11 @@ suite('Completions', function () {
             items: [
               { label: 'Bit()', kind: CompletionItemKind.TypeParameter },
               { label: 'Char()', kind: CompletionItemKind.TypeParameter },
-              { label: 'String()', kind: CompletionItemKind.TypeParameter },
-              { label: 'VarBit()', kind: CompletionItemKind.TypeParameter },
               { label: 'Inet', kind: CompletionItemKind.TypeParameter },
               { label: 'CatalogSingleChar', kind: CompletionItemKind.TypeParameter },
+              { label: 'String()', kind: CompletionItemKind.TypeParameter },
               { label: 'Uuid', kind: CompletionItemKind.TypeParameter },
+              { label: 'VarBit()', kind: CompletionItemKind.TypeParameter },
             ],
           },
         })
@@ -1656,11 +1736,11 @@ suite('Completions', function () {
           expected: {
             isIncomplete: false,
             items: [
+              { label: 'Date', kind: CompletionItemKind.TypeParameter },
+              { label: 'Time()', kind: CompletionItemKind.TypeParameter },
               { label: 'Timestamp()', kind: CompletionItemKind.TypeParameter },
               { label: 'Timestamptz()', kind: CompletionItemKind.TypeParameter },
-              { label: 'Time()', kind: CompletionItemKind.TypeParameter },
               { label: 'Timetz()', kind: CompletionItemKind.TypeParameter },
-              { label: 'Date', kind: CompletionItemKind.TypeParameter },
             ],
           },
         })
@@ -1753,6 +1833,10 @@ suite('Completions', function () {
       label: '@ignore',
       kind: CompletionItemKind.Property,
     }
+    const fieldAttributeDatasourceName = {
+      label: '@db',
+      kind: CompletionItemKind.Property,
+    }
 
     const functionCuid = {
       label: 'cuid()',
@@ -1782,6 +1866,7 @@ suite('Completions', function () {
       label: 'dbgenerated("")',
       kind: CompletionItemKind.Function,
     }
+
     const staticValueEmptyList = {
       label: '[]',
       kind: CompletionItemKind.Value,
@@ -1954,6 +2039,26 @@ suite('Completions', function () {
           items: [{ label: 'lastName', kind: CompletionItemKind.Field }],
         },
       })
+      assertCompletion({
+        provider: 'postgresql',
+        schema: /* Prisma */ `
+          model Post {
+            id Int @id @default()
+            email String? @unique
+            name String |
+          }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            fieldAttributeDatasourceName,
+            fieldAttributeUnique,
+            fieldAttributeMap,
+            fieldAttributeDefault,
+            fieldAttributeRelation,
+            fieldAttributeIgnore,
+          ],
+        },
+      })
     })
 
     const enumUserTypeExpectedItems = [
@@ -2011,6 +2116,7 @@ suite('Completions', function () {
         expected: {
           isIncomplete: false,
           items: [
+            fieldAttributeDatasourceName,
             fieldAttributeUnique,
             fieldAttributeMap,
             // fieldAttributeDefault, is invalid

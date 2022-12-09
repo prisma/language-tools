@@ -1,4 +1,5 @@
 name: 6. Build extension # and upload as release to GitHub
+run-name: 6. Build extension + upload - ${{ inputs.trigger_reason }}
 
 on:
   workflow_dispatch:
@@ -17,7 +18,6 @@ on:
         required: true
 
 env:
-  GH_TOKEN: ${{ secrets.GH_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
   PRISMA_TELEMETRY_INFORMATION: 'language-tools 6_build.yml'
   SLACK_USERNAME: Prismo
@@ -28,6 +28,7 @@ jobs:
   build:
     name: Build extension
     runs-on: ubuntu-latest
+    timeout-minutes: 7
     outputs:
       tag_name: ${{ steps.names.outputs.tag_name }}
     steps:
@@ -93,6 +94,7 @@ jobs:
   slack:
     name: Send slack notification
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [build]
     if: always()
     env:

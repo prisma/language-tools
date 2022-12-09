@@ -13,13 +13,13 @@ on:
   workflow_dispatch:
 
 env:
-  GH_TOKEN: ${{ secrets.GH_TOKEN }}
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
   PRISMA_TELEMETRY_INFORMATION: 'language-tools 1_2_b_bump_extension_only.yml'
 
 jobs:
   bump:
     runs-on: ubuntu-latest
+    timeout-minutes: 7
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js
@@ -64,14 +64,14 @@ jobs:
         with:
           workflow: 3. Test Language Server and publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "main", "trigger_reason": "On push to ${{ steps.extract_branch.outputs.branch }}." }'
+          inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "main", "trigger_reason": "Commit from ${{ steps.extract_branch.outputs.branch }}" }'
       - name: Trigger next workflow for Language Server tests
         if: endsWith(github.ref, '/main') == false
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: 3. Test Language Server and publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "patch-dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.extract_branch.outputs.branch}}", "trigger_reason": "On push to ${{ steps.extract_branch.outputs.branch }}." }'
+          inputs: '{ "npm_channel": "patch-dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.extract_branch.outputs.branch}}", "trigger_reason": "Commit from ${{ steps.extract_branch.outputs.branch }}" }'
 
       - name: 'Set current job url in SLACK_FOOTER env var'
         if: ${{ failure() }}
