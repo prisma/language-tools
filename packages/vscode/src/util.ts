@@ -25,9 +25,9 @@ export function checkForOtherPrismaExtension(): void {
   if (files.length !== 0) {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     window.showInformationMessage(
-      `You have both the Insider and stable Prisma VSCode extension installed. Please uninstall or disable one of them for a better experience.`,
+      `You have both both versions (Insider and Stable) of the Prisma VSCode extension enabled in your workspace. Please uninstall or disable one of them for a better experience.`,
     )
-    console.log('Both the insider and stable Prisma VSCode extension are being used.')
+    console.log('Both versions (Insider and Stable) of the Prisma VSCode extension are enabled.')
   }
 }
 
