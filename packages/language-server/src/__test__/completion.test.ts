@@ -2043,7 +2043,7 @@ suite('Completions', function () {
         provider: 'postgresql',
         schema: /* Prisma */ `
           model Post {
-            id Int @id @default() @map("_id")
+            id Int @id @default() @map("foobar")
             email String? @unique
             name String |
           }`,
