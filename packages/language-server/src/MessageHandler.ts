@@ -34,6 +34,7 @@ import {
   isInsideAttribute,
   getSymbolBeforePosition,
   getBlocks,
+  getMaxSafeValue,
 } from './util'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import format from './prisma-fmt/format'
@@ -219,7 +220,7 @@ export function handleHoverRequest(document: TextDocument, params: HoverParams):
   const commentLine = foundBlock.range.start.line - 1
   const docComments = document.getText({
     start: { line: commentLine, character: 0 },
-    end: { line: commentLine, character: Number.MAX_SAFE_INTEGER },
+    end: { line: commentLine, character: getMaxSafeValue() },
   })
   if (docComments.startsWith('///')) {
     return {

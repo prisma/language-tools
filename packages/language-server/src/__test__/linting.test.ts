@@ -3,6 +3,7 @@ import { handleDiagnosticsRequest } from '../MessageHandler'
 import { Diagnostic, DiagnosticSeverity, DiagnosticTag } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
+import { getMaxSafeValue } from '../util'
 
 function assertLinting(expected: Diagnostic[], fixturePath: string): void {
   const document: TextDocument = getTextDocument(fixturePath)
@@ -63,7 +64,7 @@ suite('Linting', () => {
         {
           range: {
             start: { line: 12, character: 0 },
-            end: { line: 12, character: Number.MAX_VALUE },
+            end: { line: 12, character: getMaxSafeValue() },
           },
           message:
             '@ignore: When using Prisma Migrate, this field will be kept in sync with the database schema, however, it will not be exposed in Prisma Client.',
