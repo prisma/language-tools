@@ -352,7 +352,25 @@ function localCompletions(params: CompletionParams, document: TextDocument): Com
  * This handler provides the initial list of the completion items.
  */
 export function handleCompletionRequest(params: CompletionParams, document: TextDocument): CompletionList | undefined {
-  return prismaFmtCompletions(params, document) || localCompletions(params, document)
+  const prismaFmt = prismaFmtCompletions(params, document)
+  const local = localCompletions(params, document)
+
+  if (prismaFmt === undefined && local === undefined) {
+    return undefined
+  }
+
+  if (prismaFmt !== undefined && local === undefined) {
+    return prismaFmt
+  }
+
+  if (prismaFmt === undefined && local !== undefined) {
+    return local
+  }
+
+  return {
+    isIncomplete: false,
+    items: prismaFmt!.items.concat(local!.items),
+  }
 }
 
 export function handleRenameRequest(params: RenameParams, document: TextDocument): WorkspaceEdit | undefined {
