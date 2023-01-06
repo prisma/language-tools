@@ -9,7 +9,7 @@ import {
   getAllRelationNames,
   getFieldTypesFromCurrentBlock,
   extractFirstWord,
-  getMaxSafeValue,
+  MAX_SAFE_VALUE_i32,
 } from '../util'
 
 function getType(currentLine: string): string {
@@ -149,11 +149,11 @@ function insertInlineRename(currentName: string, line: number): TextEdit {
     range: {
       start: {
         line: line,
-        character: getMaxSafeValue(),
+        character: MAX_SAFE_VALUE_i32,
       },
       end: {
         line: line,
-        character: getMaxSafeValue(),
+        character: MAX_SAFE_VALUE_i32,
       },
     },
     newText: ` @map("${currentName}")`,

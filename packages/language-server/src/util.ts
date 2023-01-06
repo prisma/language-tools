@@ -23,14 +23,14 @@ export function fullDocumentRange(document: TextDocument): Range {
   const lastLineId = document.lineCount - 1
   return {
     start: { line: 0, character: 0 },
-    end: { line: lastLineId, character: getMaxSafeValue() },
+    end: { line: lastLineId, character: MAX_SAFE_VALUE_i32 },
   }
 }
 
 export function getCurrentLine(document: TextDocument, line: number): string {
   return document.getText({
     start: { line: line, character: 0 },
-    end: { line: line, character: getMaxSafeValue() },
+    end: { line: line, character: MAX_SAFE_VALUE_i32 },
   })
 }
 
@@ -526,5 +526,4 @@ export function getCompositeTypeFieldsRecursively(
   }
 }
 
-// max value for i32
-export const getMaxSafeValue = (): number => Math.pow(2, 31) - 1
+export const MAX_SAFE_VALUE_i32 = 2147483647
