@@ -255,7 +255,9 @@ function getSuggestionForDataSourceField(block: Block, lines: string[], position
 
   const isMultiSchemaAvailable = Boolean(
     datasourceProvider &&
-      (datasourceProvider.includes('postgres') || datasourceProvider.includes('cockroach')) &&
+      (datasourceProvider.includes('postgres') ||
+        datasourceProvider.includes('cockroach') ||
+        datasourceProvider.includes('sqlserver')) &&
       previewFeatures?.includes('multischema'),
   )
 
