@@ -220,6 +220,13 @@
       "documentation": "A model with an `@@ignore` attribute can be kept in sync with the database schema using Prisma Migrate and Introspection, but won't be exposed in Prisma Client.",
       "fullSignature": "@@ignore",
       "params": []
+    },
+    {
+      "label": "@@schema",
+      "insertText": "@@schema($0)",
+      "documentation": "Designate which schema this belongs to. [Learn More](https://pris.ly/d/multi-schema-configuration)",
+      "fullSignature": "@@schema(_: String)",
+      "params": []
     }
   ],
   "fieldAttributes": [

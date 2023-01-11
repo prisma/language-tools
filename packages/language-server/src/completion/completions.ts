@@ -61,7 +61,7 @@ function getSuggestionForModelBlockAttribute(block: Block, lines: string[]): Com
     return []
   }
   // create deep copy
-  const suggestions: CompletionItem[] = filterSuggestionsForBlock(klona(blockAttributes), block, lines)
+  let suggestions: CompletionItem[] = filterSuggestionsForBlock(klona(blockAttributes), block, lines)
 
   // We can filter on the datasource
   const datasourceProvider = getFirstDatasourceProvider(lines)
@@ -76,9 +76,21 @@ function getSuggestionForModelBlockAttribute(block: Block, lines: string[]): Com
       previewFeatures?.includes('fulltextindex'),
   )
 
+  const isMultiSchemaAvailable = Boolean(
+    datasourceProvider &&
+      (datasourceProvider.includes('postgres') ||
+        datasourceProvider.includes('cockroachdb') ||
+        datasourceProvider.includes('sqlserver')) &&
+      previewFeatures?.includes('multischema'),
+  )
+
   if (isFullTextAvailable === false) {
     // fullTextIndex is not available, we need to filter it out
-    return suggestions.filter((arg) => arg.label !== '@@fulltext')
+    suggestions = suggestions.filter((arg) => arg.label !== '@@fulltext')
+  }
+
+  if (!isMultiSchemaAvailable) {
+    suggestions = suggestions.filter((item) => item.label !== '@@schema')
   }
 
   return suggestions

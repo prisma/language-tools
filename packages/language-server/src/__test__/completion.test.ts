@@ -548,8 +548,20 @@ suite('Completions', function () {
       label: '@@ignore',
       kind: CompletionItemKind.Property,
     }
+    const blockAttributeSchema = {
+      label: '@@schema',
+      kind: CompletionItemKind.Property,
+    }
     const typeProperty = {
       label: 'type',
+      kind: CompletionItemKind.Property,
+    }
+    const namespaceOne = {
+      label: 'one',
+      kind: CompletionItemKind.Property,
+    }
+    const namespaceTwo = {
+      label: 'two',
       kind: CompletionItemKind.Property,
     }
 
@@ -1489,6 +1501,55 @@ suite('Completions', function () {
           expected: {
             isIncomplete: false,
             items: [fieldsProperty, mapProperty],
+          },
+        })
+      })
+    })
+
+    suite('@@schema()', () => {
+      test('@@schema - postgres', () => {
+        assertCompletion({
+          provider: 'postgresql',
+          previewFeatures: ['multiSchema'],
+          schema: /* prisma */ `
+            model Schema {
+              id Int @id
+              |
+            }
+          `,
+          expected: {
+            isIncomplete: false,
+            items: [
+              blockAttributeMap,
+              blockAttributeUnique,
+              blockAttributeIndex,
+              blockAttributeIgnore,
+              blockAttributeSchema,
+            ],
+          },
+        })
+      })
+      test('@@schema(|) - postgres', () => {
+        assertCompletion({
+          schema: /* prisma */ `
+            generator client {
+              provider = "prisma-client-js"
+              previewFeatures = ["multiSchema"]
+            }
+            datasource db {
+              provider = "postgresql"
+              url = env("DATABASE_URL")
+              schemas = ["one", "two"]
+            }
+
+            model Schema {
+              id Int @id
+              @@schema(|)
+            }
+          `,
+          expected: {
+            isIncomplete: false,
+            items: [namespaceOne, namespaceTwo],
           },
         })
       })
