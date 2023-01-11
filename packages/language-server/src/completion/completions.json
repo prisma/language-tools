@@ -90,6 +90,11 @@
       "label": "extensions",
       "insertText": "extensions = [$0]",
       "documentation": "Enable PostgreSQL extensions. [Learn More](https://pris.ly/d/postgresql-extensions)"
+    },
+    {
+      "label": "schemas",
+      "insertText": "schemas = [$0]",
+      "documentation": "The list of database schemas. [Learn More](https://pris.ly/d/multi-schema-configuration)"
     }
   ],
   "generatorFields": [

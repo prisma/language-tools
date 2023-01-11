@@ -224,6 +224,10 @@ suite('Completions', function () {
       label: 'extensions',
       kind: CompletionItemKind.Field,
     }
+    const fieldSchemas = {
+      label: 'schemas',
+      kind: CompletionItemKind.Field,
+    }
 
     const sqlite = { label: 'sqlite', kind: CompletionItemKind.Constant }
     const mysql = { label: 'mysql', kind: CompletionItemKind.Constant }
@@ -344,6 +348,27 @@ suite('Completions', function () {
         expected: {
           isIncomplete: false,
           items: [fieldUrl, fieldShadowDatabaseUrl, fieldRelationMode, fieldPostgresqlExtensions],
+        },
+      })
+    })
+
+    test('Diagnoses field schemas', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+          generator client {
+            provider = "prisma-client-js"
+            previewFeatures = ["multiSchema"]
+          }
+
+          datasource db {
+            provider = "cockroachdb"
+            url = env("DATABASE_URL")
+            |
+          }
+        `,
+        expected: {
+          isIncomplete: false,
+          items: [fieldShadowDatabaseUrl, fieldRelationMode, fieldSchemas],
         },
       })
     })
