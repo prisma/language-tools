@@ -3,7 +3,7 @@ import { Position, Range } from 'vscode-languageserver'
 import nativeTypeConstructors, { NativeTypeConstructors } from './prisma-fmt/nativeTypes'
 import { PreviewFeatures } from './previewFeatures'
 
-export type BlockType = 'generator' | 'datasource' | 'model' | 'type' | 'enum'
+export type BlockType = 'generator' | 'datasource' | 'model' | 'type' | 'enum' | 'view'
 
 export class Block {
   type: BlockType
@@ -77,7 +77,7 @@ export function* getBlocks(lines: string[]): Generator<Block, void, void> {
   let blockType = ''
   let blockNameRange: Range | undefined
   let blockStart: Position = Position.create(0, 0)
-  const allowedBlockIdentifiers: BlockType[] = ['model', 'type', 'enum', 'datasource', 'generator']
+  const allowedBlockIdentifiers: BlockType[] = ['model', 'type', 'enum', 'datasource', 'generator', 'view']
 
   for (const [key, item] of lines.entries()) {
     // if start of block: `BlockType name {`
@@ -131,14 +131,15 @@ export function getBlockAtPosition(line: number, lines: string[]): Block | void 
   return
 }
 
-export function getModelOrTypeOrEnumBlock(blockName: string, lines: string[]): Block | void {
+export function getModelOrTypeOrEnumOrViewBlock(blockName: string, lines: string[]): Block | void {
   // get start position of block
   const results: number[] = lines
     .map((line, index) => {
       if (
         (line.includes('model') && line.includes(blockName)) ||
         (line.includes('type') && line.includes(blockName)) ||
-        (line.includes('enum') && line.includes(blockName))
+        (line.includes('enum') && line.includes(blockName)) ||
+        (line.includes('view') && line.includes(blockName))
       ) {
         return index
       }
@@ -240,7 +241,7 @@ export function extractBlockName(line: string): string {
 export function getAllRelationNames(lines: string[]): string[] {
   const modelNames: string[] = []
   for (const line of lines) {
-    const modelOrEnumRegex = /^(model|enum)\s+(\w+)\s+{/gm
+    const modelOrEnumRegex = /^(model|enum|view)\s+(\w+)\s+{/gm
     const result = modelOrEnumRegex.exec(line)
     if (result && result[2]) {
       modelNames.push(result[2])
@@ -509,7 +510,7 @@ export function getCompositeTypeFieldsRecursively(
     return []
   }
 
-  const typeBlock = getModelOrTypeOrEnumBlock(fieldTypeName, lines)
+  const typeBlock = getModelOrTypeOrEnumOrViewBlock(fieldTypeName, lines)
   if (!typeBlock || typeBlock.type !== 'type') {
     return []
   }

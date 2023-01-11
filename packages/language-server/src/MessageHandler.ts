@@ -27,7 +27,7 @@ import {
   getBlockAtPosition,
   getCurrentLine,
   getExperimentalFeaturesRange,
-  getModelOrTypeOrEnumBlock,
+  getModelOrTypeOrEnumOrViewBlock,
   getWordAtPosition,
   isFirstInsideBlock,
   positionIsAfterFieldAndType,
@@ -212,7 +212,7 @@ export function handleHoverRequest(document: TextDocument, params: HoverParams):
     return
   }
 
-  const foundBlock = getModelOrTypeOrEnumBlock(word, lines)
+  const foundBlock = getModelOrTypeOrEnumOrViewBlock(word, lines)
   if (!foundBlock) {
     return
   }
@@ -313,6 +313,7 @@ function localCompletions(params: CompletionParams, document: TextDocument): Com
 
   switch (foundBlock.type) {
     case 'model':
+    case 'view':
     case 'type':
       // check if inside attribute
       if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
@@ -464,6 +465,7 @@ export function handleDocumentSymbol(params: DocumentSymbolParams, document: Tex
       model: SymbolKind.Class,
       enum: SymbolKind.Enum,
       type: SymbolKind.Interface,
+      view: SymbolKind.Class,
       datasource: SymbolKind.Struct,
       generator: SymbolKind.Function,
     }[block.type],
