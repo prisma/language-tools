@@ -246,12 +246,25 @@ export function getSuggestionsForFieldTypes(
 function getSuggestionForDataSourceField(block: Block, lines: string[], position: Position): CompletionItem[] {
   // create deep copy
   let suggestions: CompletionItem[] = klona(supportedDataSourceFields)
+  const datasourceProvider = getFirstDatasourceProvider(lines)
+  const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
 
-  const postgresExtensionsEnabled = getAllPreviewFeaturesFromGenerators(lines)?.includes('postgresqlextensions')
-  const isPostgres = getFirstDatasourceProvider(lines)?.includes('postgres')
+  const isPostgresExtensionsAvailable = Boolean(
+    datasourceProvider && datasourceProvider.includes('postgres') && previewFeatures?.includes('postgresqlextensions'),
+  )
 
-  if (!(postgresExtensionsEnabled && isPostgres)) {
+  const isMultiSchemaAvailable = Boolean(
+    datasourceProvider &&
+      (datasourceProvider.includes('postgres') || datasourceProvider.includes('cockroach')) &&
+      previewFeatures?.includes('multischema'),
+  )
+
+  if (!isPostgresExtensionsAvailable) {
     suggestions = suggestions.filter((item) => item.label !== 'extensions')
+  }
+
+  if (!isMultiSchemaAvailable) {
+    suggestions = suggestions.filter((item) => item.label !== 'schemas')
   }
 
   const labels: string[] = removeInvalidFieldSuggestions(
