@@ -304,7 +304,7 @@ function localCompletions(params: CompletionParams, document: TextDocument): Com
         // check if inside attribute
         // Useful to complete composite types
         if (
-          (foundBlock.type === 'model' || foundBlock.type === 'view') &&
+          ['model', 'view'].includes(foundBlock.type) &&
           isInsideAttribute(currentLineUntrimmed, position, '()')
         ) {
           return getSuggestionsForInsideRoundBrackets(currentLineUntrimmed, lines, document, position, foundBlock)
