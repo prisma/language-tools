@@ -303,7 +303,10 @@ function localCompletions(params: CompletionParams, document: TextDocument): Com
       case '.':
         // check if inside attribute
         // Useful to complete composite types
-        if (foundBlock.type === 'model' && isInsideAttribute(currentLineUntrimmed, position, '()')) {
+        if (
+          (foundBlock.type === 'model' || foundBlock.type === 'view') &&
+          isInsideAttribute(currentLineUntrimmed, position, '()')
+        ) {
           return getSuggestionsForInsideRoundBrackets(currentLineUntrimmed, lines, document, position, foundBlock)
         } else {
           return getSuggestionForNativeTypes(foundBlock, lines, wordsBeforePosition, document)

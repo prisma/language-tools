@@ -352,28 +352,29 @@ export function getSuggestionForFirstInsideBlock(
   }
 }
 
+/**
+ * Returns the currently available _blocks_ for completion.
+ * Currently available: Generator, Datasource, Model, Enum, View
+ * @param lines
+ * @returns the list of block suggestions
+ */
 export function getSuggestionForBlockTypes(lines: string[]): CompletionList {
   // create deep copy
-  const suggestions: CompletionItem[] = klona(allowedBlockTypes)
+  let suggestions: CompletionItem[] = klona(allowedBlockTypes)
 
-  // enum is not supported in sqlite
-  let foundDataSourceBlock = false
-  for (const item of lines) {
-    if (item.includes('datasource')) {
-      foundDataSourceBlock = true
-      continue
-    }
-    if (foundDataSourceBlock) {
-      if (item.includes('}')) {
-        break
-      }
-      if (item.startsWith('provider') && item.includes('sqlite')) {
-        suggestions.pop()
-      }
-    }
-    if (!suggestions.map((sugg) => sugg.label).includes('enum')) {
-      break
-    }
+  const datasourceProvider = getFirstDatasourceProvider(lines)
+  const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
+
+  const isEnumAvailable = Boolean(datasourceProvider && !datasourceProvider.includes('sqlite'))
+
+  const isViewAvailable = Boolean(previewFeatures?.includes('views'))
+
+  if (!isEnumAvailable) {
+    suggestions = suggestions.filter((item) => item.label !== 'enum')
+  }
+
+  if (!isViewAvailable) {
+    suggestions = suggestions.filter((item) => item.label !== 'view')
   }
 
   return {
