@@ -70,16 +70,16 @@ const getSuggestionForBlockAttribute = (
   // https://www.prisma.io/docs/concepts/components/prisma-schema/indexes#full-text-indexes-mysql-and-mongodb
   const isFullTextAvailable = Boolean(
     datasourceProvider &&
-    ['mysql', 'mongodb'].includes(datasourceProvider) &&
-    previewFeatures?.includes('fulltextindex'),
+      ['mysql', 'mongodb'].includes(datasourceProvider) &&
+      previewFeatures?.includes('fulltextindex'),
   )
 
   const isMultiSchemaAvailable = Boolean(
     datasourceProvider &&
-    (datasourceProvider.includes('postgres') ||
-      datasourceProvider.includes('cockroachdb') ||
-      datasourceProvider.includes('sqlserver')) &&
-    previewFeatures?.includes('multischema'),
+      (datasourceProvider.includes('postgres') ||
+        datasourceProvider.includes('cockroachdb') ||
+        datasourceProvider.includes('sqlserver')) &&
+      previewFeatures?.includes('multischema'),
   )
 
   if (isFullTextAvailable === false) {
@@ -280,10 +280,10 @@ function getSuggestionForDataSourceField(block: Block, lines: string[], position
 
   const isMultiSchemaAvailable = Boolean(
     datasourceProvider &&
-    (datasourceProvider.includes('postgres') ||
-      datasourceProvider.includes('cockroach') ||
-      datasourceProvider.includes('sqlserver')) &&
-    previewFeatures?.includes('multischema'),
+      (datasourceProvider.includes('postgres') ||
+        datasourceProvider.includes('cockroach') ||
+        datasourceProvider.includes('sqlserver')) &&
+      previewFeatures?.includes('multischema'),
   )
 
   if (!isPostgresExtensionsAvailable) {
@@ -365,7 +365,7 @@ export function getSuggestionForBlockTypes(lines: string[]): CompletionList {
   const datasourceProvider = getFirstDatasourceProvider(lines)
   const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
 
-  const isEnumAvailable = Boolean(datasourceProvider && !datasourceProvider.includes('sqlite'))
+  const isEnumAvailable = Boolean(!datasourceProvider?.includes('sqlite'))
 
   const isViewAvailable = Boolean(previewFeatures?.includes('views'))
 

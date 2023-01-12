@@ -184,6 +184,7 @@ suite('Completions', function () {
             { label: 'datasource', kind: CompletionItemKind.Class },
             { label: 'generator', kind: CompletionItemKind.Class },
             { label: 'model', kind: CompletionItemKind.Class },
+            { label: 'enum', kind: CompletionItemKind.Class },
           ],
         },
       })
