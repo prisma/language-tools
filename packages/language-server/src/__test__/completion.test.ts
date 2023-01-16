@@ -1606,11 +1606,6 @@ suite('Completions', function () {
       test('Field Types', () => {
         assertCompletion({
           schema: /* Prisma */ `
-          generator client {
-            provider        = "prisma-client-js"
-            previewFeatures = ["views"]
-          }
-
           view A {
             name |
           }
