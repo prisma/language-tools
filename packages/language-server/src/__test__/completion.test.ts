@@ -1634,17 +1634,8 @@ suite('Completions', function () {
 
       test('Field Attributes', () => {
         assertCompletion({
+          provider: 'postgresql',
           schema: /* Prisma */ `
-          generator client {
-            provider        = "prisma-client-js"
-            previewFeatures = ["views"]
-          }
-
-          datasource db {
-            provider = "postgresql"
-            url      = env("DATABASE_URL")
-          }
-
           view A {
             name String |
           }
@@ -2001,15 +1992,8 @@ suite('Completions', function () {
       })
       test('View - String', () => {
         assertCompletion({
+          provider: 'cockroachdb',
           schema: /* Prisma */ `
-            generator client {
-              provider        = "prisma-client-js"
-              previewFeatures = ["views"]
-            }
-            datasource db {
-              provider = "cockroachdb"
-              url      = env("DATABASE_URL")
-            }
             view Post {
               something String @db.|
             }
