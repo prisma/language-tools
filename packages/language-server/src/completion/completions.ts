@@ -39,7 +39,7 @@ import listAllAvailablePreviewFeatures from '../prisma-fmt/listAllAvailablePrevi
 import {
   Block,
   BlockType,
-  getModelOrTypeOrEnumBlock,
+  getModelOrTypeOrEnumOrViewBlock,
   declaredNativeTypes,
   getAllRelationNames,
   isInsideAttribute,
@@ -56,13 +56,11 @@ import {
   getCompositeTypeFieldsRecursively,
 } from '../util'
 
-function getSuggestionForModelBlockAttribute(block: Block, lines: string[]): CompletionItem[] {
-  if (block.type !== 'model') {
-    return []
-  }
-  // create deep copy
-  let suggestions: CompletionItem[] = filterSuggestionsForBlock(klona(blockAttributes), block, lines)
-
+const getSuggestionForBlockAttribute = (
+  block: Block,
+  lines: string[],
+  suggestions: CompletionItem[],
+): CompletionItem[] => {
   // We can filter on the datasource
   const datasourceProvider = getFirstDatasourceProvider(lines)
   // We can filter on the previewFeatures enabled
@@ -94,6 +92,26 @@ function getSuggestionForModelBlockAttribute(block: Block, lines: string[]): Com
   }
 
   return suggestions
+}
+
+function getSuggestionForModelBlockAttribute(block: Block, lines: string[]): CompletionItem[] {
+  if (block.type !== 'model') {
+    return []
+  }
+
+  const suggestions: CompletionItem[] = filterSuggestionsForBlock(klona(blockAttributes), block, lines)
+
+  return getSuggestionForBlockAttribute(block, lines, suggestions)
+}
+
+const getSuggestionForViewBlockAttribute = (block: Block, lines: string[]): CompletionItem[] => {
+  if (block.type !== 'view') {
+    return []
+  }
+
+  const suggestions: CompletionItem[] = filterSuggestionsForBlock(klona(blockAttributes), block, lines)
+
+  return getSuggestionForBlockAttribute(block, lines, suggestions)
 }
 
 export function getSuggestionForNativeTypes(
@@ -146,11 +164,6 @@ export function getSuggestionForFieldAttribute(
   wordsBeforePosition: string[],
   document: TextDocument,
 ): CompletionList | undefined {
-  // TODO type? suggestions for "@..." for type?
-  if (block.type !== 'model') {
-    return
-  }
-
   const fieldType = getFieldType(currentLine)
   // If we don't find a field type (e.g. String, Int...), return no suggestion
   if (!fieldType) {
@@ -195,7 +208,7 @@ export function getSuggestionForFieldAttribute(
 
   suggestions.push(...fieldAttributes)
 
-  const modelOrTypeOrEnum = getModelOrTypeOrEnumBlock(fieldType, lines)
+  const modelOrTypeOrEnum = getModelOrTypeOrEnumOrViewBlock(fieldType, lines)
 
   suggestions = filterSuggestionsForLine(suggestions, currentLine, fieldType, modelOrTypeOrEnum?.type)
 
@@ -325,6 +338,9 @@ export function getSuggestionForFirstInsideBlock(
     case 'model':
       suggestions = getSuggestionForModelBlockAttribute(block, lines)
       break
+    case 'view':
+      suggestions = getSuggestionForViewBlockAttribute(block, lines)
+      break
     case 'type':
       // No suggestions
       break
@@ -336,28 +352,29 @@ export function getSuggestionForFirstInsideBlock(
   }
 }
 
+/**
+ * Returns the currently available _blocks_ for completion.
+ * Currently available: Generator, Datasource, Model, Enum, View
+ * @param lines
+ * @returns the list of block suggestions
+ */
 export function getSuggestionForBlockTypes(lines: string[]): CompletionList {
   // create deep copy
-  const suggestions: CompletionItem[] = klona(allowedBlockTypes)
+  let suggestions: CompletionItem[] = klona(allowedBlockTypes)
 
-  // enum is not supported in sqlite
-  let foundDataSourceBlock = false
-  for (const item of lines) {
-    if (item.includes('datasource')) {
-      foundDataSourceBlock = true
-      continue
-    }
-    if (foundDataSourceBlock) {
-      if (item.includes('}')) {
-        break
-      }
-      if (item.startsWith('provider') && item.includes('sqlite')) {
-        suggestions.pop()
-      }
-    }
-    if (!suggestions.map((sugg) => sugg.label).includes('enum')) {
-      break
-    }
+  const datasourceProvider = getFirstDatasourceProvider(lines)
+  const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
+
+  const isEnumAvailable = Boolean(!datasourceProvider?.includes('sqlite'))
+
+  const isViewAvailable = Boolean(previewFeatures?.includes('views'))
+
+  if (!isEnumAvailable) {
+    suggestions = suggestions.filter((item) => item.label !== 'enum')
+  }
+
+  if (!isViewAvailable) {
+    suggestions = suggestions.filter((item) => item.label !== 'view')
   }
 
   return {
@@ -683,7 +700,7 @@ function getDefaultValues({
     })
   }
 
-  const modelOrEnum = getModelOrTypeOrEnumBlock(fieldType, lines)
+  const modelOrEnum = getModelOrTypeOrEnumOrViewBlock(fieldType, lines)
   if (modelOrEnum && modelOrEnum.type === 'enum') {
     // get fields from enum block for suggestions
     const values: string[] = getFieldsFromCurrentBlock(lines, modelOrEnum)
@@ -749,7 +766,7 @@ function getSuggestionsForAttribute(
     if (isInsideGivenProperty(untrimmedCurrentLine, wordsBeforePosition, 'references', position)) {
       // Get the name by potentially removing ? and [] from Foo? or Foo[]
       const referencedModelName = wordsBeforePosition[1].replace('?', '').replace('[]', '')
-      const referencedBlock = getModelOrTypeOrEnumBlock(referencedModelName, lines)
+      const referencedBlock = getModelOrTypeOrEnumOrViewBlock(referencedModelName, lines)
       // referenced model does not exist
       // TODO type?
       if (!referencedBlock || referencedBlock.type !== 'model') {
