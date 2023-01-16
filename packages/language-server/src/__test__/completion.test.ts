@@ -208,6 +208,28 @@ suite('Completions', function () {
         },
       })
     })
+
+    test('Diagnoses block type suggestions for view preview', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+        generator client {
+          provider        = "prisma-client-js"
+          previewFeatures = ["views"]
+        }
+        |
+        `,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'datasource', kind: CompletionItemKind.Class },
+            { label: 'generator', kind: CompletionItemKind.Class },
+            { label: 'model', kind: CompletionItemKind.Class },
+            { label: 'enum', kind: CompletionItemKind.Class },
+            { label: 'view', kind: CompletionItemKind.Class },
+          ],
+        },
+      })
+    })
   })
 
   suite('DATABASE BLOCK', () => {
@@ -636,6 +658,29 @@ suite('Completions', function () {
           expected: {
             isIncomplete: false,
             items: [blockAttributeMap, blockAttributeUnique, blockAttributeIndex, blockAttributeIgnore],
+          },
+        })
+      })
+      test('View', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+          view User {
+            firstName String
+            lastName String
+            email String @unique
+            isAdmin Boolean @default(false)
+            |
+          }
+          `,
+          expected: {
+            isIncomplete: false,
+            items: [
+              blockAttributeMap,
+              blockAttributeId,
+              blockAttributeUnique,
+              blockAttributeIndex,
+              blockAttributeIgnore,
+            ],
           },
         })
       })
@@ -1557,6 +1602,73 @@ suite('Completions', function () {
   })
 
   suite('TYPES', () => {
+    suite('Views', () => {
+      test('Field Types', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+          generator client {
+            provider        = "prisma-client-js"
+            previewFeatures = ["views"]
+          }
+
+          view A {
+            name |
+          }
+          `,
+          expected: {
+            isIncomplete: true,
+            items: [
+              { label: 'String', kind: CompletionItemKind.TypeParameter },
+              { label: 'Boolean', kind: CompletionItemKind.TypeParameter },
+              { label: 'Int', kind: CompletionItemKind.TypeParameter },
+              { label: 'Float', kind: CompletionItemKind.TypeParameter },
+              { label: 'DateTime', kind: CompletionItemKind.TypeParameter },
+              { label: 'Json', kind: CompletionItemKind.TypeParameter },
+              { label: 'Bytes', kind: CompletionItemKind.TypeParameter },
+              { label: 'Decimal', kind: CompletionItemKind.TypeParameter },
+              { label: 'BigInt', kind: CompletionItemKind.TypeParameter },
+              {
+                label: 'Unsupported',
+                kind: CompletionItemKind.TypeParameter,
+              },
+              { label: 'A', kind: CompletionItemKind.Reference },
+            ],
+          },
+        })
+      })
+
+      test('Field Attributes', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+          generator client {
+            provider        = "prisma-client-js"
+            previewFeatures = ["views"]
+          }
+
+          datasource db {
+            provider = "postgresql"
+            url      = env("DATABASE_URL")
+          }
+
+          view A {
+            name String |
+          }
+          `,
+          expected: {
+            isIncomplete: false,
+            items: [
+              { label: '@db', kind: CompletionItemKind.Property },
+              { label: '@id', kind: CompletionItemKind.Property },
+              { label: '@unique', kind: CompletionItemKind.Property },
+              { label: '@map', kind: CompletionItemKind.Property },
+              { label: '@default', kind: CompletionItemKind.Property },
+              { label: '@relation', kind: CompletionItemKind.Property },
+              { label: '@ignore', kind: CompletionItemKind.Property },
+            ],
+          },
+        })
+      })
+    })
     test('Diagnoses type suggestions in model - No datasource', () => {
       assertCompletion({
         schema: /* Prisma */ `
@@ -1621,7 +1733,11 @@ suite('Completions', function () {
             @@index([firstName, ])
             @@fulltext()
             @@fulltext([])
-        }`,
+        }
+        view FifthUser {
+            firstName String @unique
+        }
+        `,
         expected: {
           isIncomplete: true,
           items: [
@@ -1650,6 +1766,7 @@ suite('Completions', function () {
             { label: 'DateTest', kind: CompletionItemKind.Reference },
             { label: 'UserType', kind: CompletionItemKind.Reference },
             { label: 'ForthUser', kind: CompletionItemKind.Reference },
+            { label: 'FifthUser', kind: CompletionItemKind.Reference },
           ],
         },
       })
@@ -1884,6 +2001,35 @@ suite('Completions', function () {
           expected: {
             isIncomplete: false,
             items: [{ label: 'Int8', kind: CompletionItemKind.TypeParameter }],
+          },
+        })
+      })
+      test('View - String', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            generator client {
+              provider        = "prisma-client-js"
+              previewFeatures = ["views"]
+            }
+            datasource db {
+              provider = "cockroachdb"
+              url      = env("DATABASE_URL")
+            }
+            view Post {
+              something String @db.|
+            }
+          `,
+          expected: {
+            isIncomplete: false,
+            items: [
+              { label: 'Bit()', kind: CompletionItemKind.TypeParameter },
+              { label: 'Char()', kind: CompletionItemKind.TypeParameter },
+              { label: 'Inet', kind: CompletionItemKind.TypeParameter },
+              { label: 'CatalogSingleChar', kind: CompletionItemKind.TypeParameter },
+              { label: 'String()', kind: CompletionItemKind.TypeParameter },
+              { label: 'Uuid', kind: CompletionItemKind.TypeParameter },
+              { label: 'VarBit()', kind: CompletionItemKind.TypeParameter },
+            ],
           },
         })
       })
