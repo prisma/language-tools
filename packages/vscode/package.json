@@ -15,7 +15,7 @@
   "dependencies": {
     "@prisma/language-server": "31.0.1832",
     "checkpoint-client": "1.1.21",
-    "minimatch": "5.1.4",
+    "minimatch": "5.1.6",
     "vscode-languageclient": "7.0.0",
     "watcher": "^1.2.0"
   },
