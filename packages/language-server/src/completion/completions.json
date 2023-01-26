@@ -81,6 +81,10 @@
       "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database [learn more](https://pris.ly/d/connection-strings)."
     },
     {
+      "label": "directUrl",
+      "documentation": "Connection URL for direct connection to the database. [learn more](https://pris.ly/d/data-proxy-cli)."
+    },
+    {
       "label": "shadowDatabaseUrl",
       "documentation": "Connection URL including authentication info to use for Migrate's [shadow database](https://pris.ly/d/migrate-shadow). Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database."
     },

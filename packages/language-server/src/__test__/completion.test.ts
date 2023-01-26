@@ -234,6 +234,7 @@ suite('Completions', function () {
 
   suite('DATABASE BLOCK', () => {
     const fieldUrl = { label: 'url', kind: CompletionItemKind.Field }
+    const fieldDirectUrl = { label: 'directUrl', kind: CompletionItemKind.Field }
     const fieldShadowDatabaseUrl = {
       label: 'shadowDatabaseUrl',
       kind: CompletionItemKind.Field,
@@ -302,7 +303,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldUrl, fieldShadowDatabaseUrl, fieldRelationMode],
+          items: [fieldProvider, fieldUrl, fieldDirectUrl, fieldShadowDatabaseUrl, fieldRelationMode],
         },
       })
     })
@@ -316,7 +317,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldUrl, fieldShadowDatabaseUrl, fieldRelationMode],
+          items: [fieldUrl, fieldDirectUrl, fieldShadowDatabaseUrl, fieldRelationMode],
         },
       })
       assertCompletion({
@@ -327,7 +328,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldShadowDatabaseUrl, fieldRelationMode],
+          items: [fieldProvider, fieldDirectUrl, fieldShadowDatabaseUrl, fieldRelationMode],
         },
       })
     })
@@ -369,7 +370,7 @@ suite('Completions', function () {
         `,
         expected: {
           isIncomplete: false,
-          items: [fieldUrl, fieldShadowDatabaseUrl, fieldRelationMode, fieldPostgresqlExtensions],
+          items: [fieldUrl, fieldDirectUrl, fieldShadowDatabaseUrl, fieldRelationMode, fieldPostgresqlExtensions],
         },
       })
     })
@@ -390,7 +391,7 @@ suite('Completions', function () {
         `,
         expected: {
           isIncomplete: false,
-          items: [fieldShadowDatabaseUrl, fieldRelationMode, fieldSchemas],
+          items: [fieldDirectUrl, fieldShadowDatabaseUrl, fieldRelationMode, fieldSchemas],
         },
       })
     })
