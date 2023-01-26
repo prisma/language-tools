@@ -82,7 +82,7 @@
     },
     {
       "label": "directUrl",
-      "documentation": "Connection URL for direct connection to the database. [learn more](https://pris.ly/d/data-proxy-cli)."
+      "documentation": "Connection URL for direct connection to the database. [Learn more](https://pris.ly/d/data-proxy-cli)."
     },
     {
       "label": "shadowDatabaseUrl",
