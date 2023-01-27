@@ -81,7 +81,7 @@
     {
       "label": "url",
       "insertText": "url = $0",
-      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database [learn more](https://pris.ly/d/connection-strings).",
+      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database. [Learn more](https://pris.ly/d/connection-strings).",
       "fullSignature": "url = \"String\" | env(\"ENVIRONMENT_VARIABLE\")"
     },
     {
@@ -99,19 +99,19 @@
     {
       "label": "relationMode",
       "insertText": "relationMode = $0",
-      "documentation": "Set the global relation mode for all relations. Values can be either `\"foreignKeys\"` (Default), or `\"prisma\"`. [learn more](https://pris.ly/d/relationMode)",
+      "documentation": "Set the global relation mode for all relations. Values can be either `\"foreignKeys\"` (Default), or `\"prisma\"`. [Learn more](https://pris.ly/d/relation-mode)",
       "fullSignature": "relationMode = \"foreignKeys\" | \"prisma\")"
     },
     {
       "label": "extensions",
       "insertText": "extensions = [$0]",
-      "documentation": "Enable PostgreSQL extensions. [Learn More](https://pris.ly/d/postgresql-extensions)",
+      "documentation": "Enable PostgreSQL extensions. [Learn more](https://pris.ly/d/postgresql-extensions)",
       "fullSignature": "extensions = extension[]"
     },
     {
       "label": "schemas",
       "insertText": "schemas = [$0]",
-      "documentation": "The list of database schemas. [Learn More](https://pris.ly/d/multi-schema-configuration)",
+      "documentation": "The list of database schemas. [Learn more](https://pris.ly/d/multi-schema-configuration)",
       "fullSignature": "schemas = String[])"
     }
   ],
@@ -252,7 +252,7 @@
     {
       "label": "@@schema",
       "insertText": "@@schema($0)",
-      "documentation": "Designate which schema this belongs to. [Learn More](https://pris.ly/d/multi-schema-configuration)",
+      "documentation": "Designate which schema this belongs to. [Learn more](https://pris.ly/d/multi-schema-configuration)",
       "fullSignature": "@@schema(_: String)",
       "params": []
     }
@@ -390,14 +390,14 @@
       "label": "onDelete",
       "insertText": "onDelete: $0",
       "fullSignature": "onDelete: Cascade | Restrict | NoAction | SetNull | SetDefault",
-      "documentation": "Specifies the action to perform when a referenced entry in the referenced model is being deleted [learn more](https://pris.ly/d/referential-actions).",
+      "documentation": "Specifies the action to perform when a referenced entry in the referenced model is being deleted. [Learn more](https://pris.ly/d/referential-actions).",
       "params": []
     },
     {
       "label": "onUpdate",
       "insertText": "onUpdate: $0",
       "fullSignature": "onUpdate: Cascade | Restrict | NoAction | SetNull | SetDefault",
-      "documentation": "Specifies the action to perform when a referenced field in the referenced model is being updated to a new value [learn more](https://pris.ly/d/referential-actions).",
+      "documentation": "Specifies the action to perform when a referenced field in the referenced model is being updated to a new value. [Learn more](https://pris.ly/d/referential-actions).",
       "params": []
     },
     {
@@ -427,7 +427,7 @@
       "label": "\"\"",
       "insertText": "\"$0\"",
       "fullSignature": "\"\"",
-      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database [learn more](https://pris.ly/d/prisma-schema).",
+      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database. [Learn more](https://pris.ly/d/prisma-schema).",
       "params": []
     },
     {
@@ -531,7 +531,7 @@
     {
       "label": "prisma",
       "insertText": "prisma",
-      "documentation": "The relation will not use Foreign Keys from the databse. Prisma Client will emulate their behavior for update and delete queries. [learn more](https://pris.ly/d/relationMode)"
+      "documentation": "The relation will not use Foreign Keys from the databse. Prisma Client will emulate their behavior for update and delete queries. [Learn more](https://pris.ly/d/relationMode)"
     }
   ]
 }
