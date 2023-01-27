@@ -676,7 +676,16 @@ function getDefaultValues({
           documentation: {
             kind: MarkupKind.Markdown,
             value:
-              'Generate a globally unique identifier based on the [cuid](https://github.com/ericelliott/cuid) spec.',
+              'Generate a globally unique identifier based on the [cuid]https://github.com/paralleldrive/cuid) spec.',
+          },
+        },
+        {
+          label: 'nanoid()',
+          kind: CompletionItemKind.Function,
+          documentation: {
+            kind: MarkupKind.Markdown,
+            value:
+              'Generate a tiny, secure, URL-friendly, unique identifier based on the [nanoid](https://github.com/ai/nanoid) spec.',
           },
         },
       )
