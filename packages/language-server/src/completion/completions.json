@@ -118,23 +118,33 @@
   "generatorFields": [
     {
       "label": "provider",
-      "documentation": "Describes which generator to use. This can point to a file that implements a generator or specify a built-in generator directly."
-    },
-    {
-      "label": "output",
-      "documentation": "Determines the location for the generated client [learn more](https://pris.ly/d/prisma-schema)"
-    },
-    {
-      "label": "binaryTargets",
-      "documentation": "Specifies the OS on which the Prisma Client will run to ensure binary compatibility of the query engine."
+      "insertText": "provider = \"$0\"",
+      "documentation": "Describes which generator to use. This can point to a file that implements a generator or specify a built-in generator directly. [Learn more](https://pris.ly/d/generator-fields).",
+      "fullSignature": "provider = \"String\""
     },
     {
       "label": "previewFeatures",
-      "documentation": "Enables preview feature flags."
+      "insertText": "previewFeatures = [\"$0\"]",
+      "documentation": "Enables Preview Feature flags. [Learn more](https://pris.ly/d/preview-features).",
+      "fullSignature": "previewFeatures = PreviewFeature[]"
+    },
+    {
+      "label": "output",
+      "insertText": "output = \"$0\"",
+      "documentation": "Determines the location for the generated client. Default: `node_modules/.prisma/client`. [Learn more](https://pris.ly/d/generator-fields).",
+      "fullSignature": "output = \"String\""
     },
     {
       "label": "engineType",
-      "documentation": "Defines the query engine type for Prisma Client."
+      "insertText": "engineType = \"$0\"",
+      "documentation": "Defines the query engine type for Prisma Client. Default: `library`. [Learn more](https://pris.ly/d/client-engine-type).",
+      "fullSignature": "engineType = \"library\" | \"binary\""
+    },
+    {
+      "label": "binaryTargets",
+      "insertText": "binaryTargets = \"$0\"",
+      "documentation": "Specifies the OS on which the Prisma Client will run to ensure compatibility of the query engine. [Learn more](https://pris.ly/d/generator-fields).",
+      "fullSignature": "binaryTargets = BinaryTargets[] | env(\"ENVIRONMENT_VARIABLE\")"
     }
   ],
   "blockAttributes": [

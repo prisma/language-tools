@@ -530,7 +530,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldOutput, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
+          items: [fieldProvider, fieldPreviewFeatures, fieldOutput, fieldEngineType, fieldBinaryTargets],
         },
       })
     })
@@ -544,7 +544,7 @@ suite('Completions', function () {
           }`,
         expected: {
           isIncomplete: false,
-          items: [fieldOutput, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
+          items: [fieldPreviewFeatures, fieldOutput, fieldEngineType, fieldBinaryTargets],
         },
       })
       assertCompletion({
@@ -555,7 +555,7 @@ suite('Completions', function () {
           }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
+          items: [fieldProvider, fieldPreviewFeatures, fieldEngineType, fieldBinaryTargets],
         },
       })
     })
