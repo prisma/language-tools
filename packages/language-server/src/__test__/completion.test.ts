@@ -358,6 +358,34 @@ suite('Completions', function () {
       })
     })
 
+    test('shadowDatabaseUrl = env("|")', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+        datasource db {
+            url = |
+        }`,
+        expected: {
+          isIncomplete: true,
+          items: [quotationMarks, env],
+        },
+      })
+      assertCompletion({
+        schema: /* Prisma */ `
+        datasource db {
+          shadowDatabaseUrl = env("|")
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            {
+              label: 'SHADOW_DATABASE_URL',
+              kind: CompletionItemKind.Constant,
+            },
+          ],
+        },
+      })
+    })
+
     test('directUrl = env("|")', () => {
       assertCompletion({
         schema: /* Prisma */ `
