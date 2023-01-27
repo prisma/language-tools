@@ -74,7 +74,7 @@
   "dataSourceFields": [
     {
       "label": "provider",
-      "insertText": "provider = $0",
+      "insertText": "provider = \"$0\"",
       "documentation": "Describes which datasource connector to use. Can be one of the following datasource providers: `postgresql`, `mysql`, `sqlserver`, `sqlite`, `mongodb` or `cockroachdb`.",
       "fullSignature": "provider = \"String\""
     },
