@@ -74,19 +74,27 @@
   "dataSourceFields": [
     {
       "label": "provider",
-      "documentation": "Describes which datasource connector to use. Can be one of the following datasource providers: `postgresql`, `mysql`, `sqlserver`, `sqlite`, `mongodb` or `cockroachdb`."
+      "insertText": "provider = $0",
+      "documentation": "Describes which datasource connector to use. Can be one of the following datasource providers: `postgresql`, `mysql`, `sqlserver`, `sqlite`, `mongodb` or `cockroachdb`.",
+      "fullSignature": "provider = \"String\""
     },
     {
       "label": "url",
-      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database [learn more](https://pris.ly/d/connection-strings)."
+      "insertText": "url = $0",
+      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database [learn more](https://pris.ly/d/connection-strings).",
+      "fullSignature": "url = \"String\" | env(\"ENVIRONMENT_VARIABLE\")"
     },
     {
       "label": "directUrl",
-      "documentation": "Connection URL for direct connection to the database. [Learn more](https://pris.ly/d/data-proxy-cli)."
+      "insertText": "directUrl = $0",
+      "documentation": "Connection URL for direct connection to the database. [Learn more](https://pris.ly/d/data-proxy-cli).",
+      "fullSignature": "directUrl = \"String\" | env(\"ENVIRONMENT_VARIABLE\")"
     },
     {
       "label": "shadowDatabaseUrl",
-      "documentation": "Connection URL including authentication info to use for Migrate's [shadow database](https://pris.ly/d/migrate-shadow). Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database."
+      "insertText": "shadowDatabaseUrl = $0",
+      "documentation": "Connection URL including authentication info to use for Migrate's [shadow database](https://pris.ly/d/migrate-shadow).",
+      "fullSignature": "shadowDatabaseUrl = \"String\" | env(\"ENVIRONMENT_VARIABLE\")"
     },
     {
       "label": "relationMode",
@@ -97,12 +105,14 @@
     {
       "label": "extensions",
       "insertText": "extensions = [$0]",
-      "documentation": "Enable PostgreSQL extensions. [Learn More](https://pris.ly/d/postgresql-extensions)"
+      "documentation": "Enable PostgreSQL extensions. [Learn More](https://pris.ly/d/postgresql-extensions)",
+      "fullSignature": "extensions = extension[]"
     },
     {
       "label": "schemas",
       "insertText": "schemas = [$0]",
-      "documentation": "The list of database schemas. [Learn More](https://pris.ly/d/multi-schema-configuration)"
+      "documentation": "The list of database schemas. [Learn More](https://pris.ly/d/multi-schema-configuration)",
+      "fullSignature": "schemas = String[])"
     }
   ],
   "generatorFields": [
