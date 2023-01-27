@@ -234,6 +234,7 @@ suite('Completions', function () {
 
   suite('DATABASE BLOCK', () => {
     const fieldUrl = { label: 'url', kind: CompletionItemKind.Field }
+    const fieldDirectUrl = { label: 'directUrl', kind: CompletionItemKind.Field }
     const fieldShadowDatabaseUrl = {
       label: 'shadowDatabaseUrl',
       kind: CompletionItemKind.Field,
@@ -288,10 +289,7 @@ suite('Completions', function () {
       label: '""',
       kind: CompletionItemKind.Property,
     }
-    const envArgument = {
-      label: 'DATABASE_URL',
-      kind: CompletionItemKind.Constant,
-    }
+
     const env = { label: 'env()', kind: CompletionItemKind.Property }
 
     test('Diagnoses datasource field suggestions in empty block', () => {
@@ -302,7 +300,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldUrl, fieldShadowDatabaseUrl, fieldRelationMode],
+          items: [fieldProvider, fieldUrl, fieldDirectUrl, fieldShadowDatabaseUrl, fieldRelationMode],
         },
       })
     })
@@ -316,7 +314,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldUrl, fieldShadowDatabaseUrl, fieldRelationMode],
+          items: [fieldUrl, fieldDirectUrl, fieldShadowDatabaseUrl, fieldRelationMode],
         },
       })
       assertCompletion({
@@ -327,12 +325,12 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldShadowDatabaseUrl, fieldRelationMode],
+          items: [fieldProvider, fieldDirectUrl, fieldShadowDatabaseUrl, fieldRelationMode],
         },
       })
     })
 
-    test('Diagnoses url argument suggestions for datasource block', () => {
+    test('url = env("|")', () => {
       assertCompletion({
         schema: /* Prisma */ `
         datasource db {
@@ -350,12 +348,73 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [envArgument],
+          items: [
+            {
+              label: 'DATABASE_URL',
+              kind: CompletionItemKind.Constant,
+            },
+          ],
         },
       })
     })
 
-    test('Diagnoses field extension availability', () => {
+    test('shadowDatabaseUrl = env("|")', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+        datasource db {
+            url = |
+        }`,
+        expected: {
+          isIncomplete: true,
+          items: [quotationMarks, env],
+        },
+      })
+      assertCompletion({
+        schema: /* Prisma */ `
+        datasource db {
+          shadowDatabaseUrl = env("|")
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            {
+              label: 'SHADOW_DATABASE_URL',
+              kind: CompletionItemKind.Constant,
+            },
+          ],
+        },
+      })
+    })
+
+    test('directUrl = env("|")', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+        datasource db {
+            url = |
+        }`,
+        expected: {
+          isIncomplete: true,
+          items: [quotationMarks, env],
+        },
+      })
+      assertCompletion({
+        schema: /* Prisma */ `
+        datasource db {
+            directUrl = env("|")
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            {
+              label: 'DIRECT_URL',
+              kind: CompletionItemKind.Constant,
+            },
+          ],
+        },
+      })
+    })
+
+    test('Diagnoses field extensions availability', () => {
       assertCompletion({
         schema: /* Prisma */ `
           generator client {
@@ -369,7 +428,7 @@ suite('Completions', function () {
         `,
         expected: {
           isIncomplete: false,
-          items: [fieldUrl, fieldShadowDatabaseUrl, fieldRelationMode, fieldPostgresqlExtensions],
+          items: [fieldUrl, fieldDirectUrl, fieldShadowDatabaseUrl, fieldRelationMode, fieldPostgresqlExtensions],
         },
       })
     })
@@ -390,7 +449,7 @@ suite('Completions', function () {
         `,
         expected: {
           isIncomplete: false,
-          items: [fieldShadowDatabaseUrl, fieldRelationMode, fieldSchemas],
+          items: [fieldDirectUrl, fieldShadowDatabaseUrl, fieldRelationMode, fieldSchemas],
         },
       })
     })
@@ -471,7 +530,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldOutput, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
+          items: [fieldProvider, fieldPreviewFeatures, fieldOutput, fieldEngineType, fieldBinaryTargets],
         },
       })
     })
@@ -485,7 +544,7 @@ suite('Completions', function () {
           }`,
         expected: {
           isIncomplete: false,
-          items: [fieldOutput, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
+          items: [fieldPreviewFeatures, fieldOutput, fieldEngineType, fieldBinaryTargets],
         },
       })
       assertCompletion({
@@ -496,7 +555,7 @@ suite('Completions', function () {
           }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
+          items: [fieldProvider, fieldPreviewFeatures, fieldEngineType, fieldBinaryTargets],
         },
       })
     })

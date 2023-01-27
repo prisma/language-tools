@@ -17,7 +17,11 @@ type JSONSimpleCompletionItems = {
   label: string
   insertText?: string // optional text to use as completion instead of label
   documentation?: string
+  fullSignature?: string // custom signature to show
 }[]
+
+// Docs about CompletionItem
+// https://code.visualstudio.com/api/references/vscode-api#CompletionItem
 
 /**
  * Converts a json object containing labels and documentations to CompletionItems.
@@ -27,14 +31,28 @@ function convertToCompletionItems(
   itemKind: CompletionItemKind,
 ): CompletionItem[] {
   const result: CompletionItem[] = []
+
   for (const item of completionItems) {
+    let documentationString: string | undefined = undefined
+
+    if (item.documentation) {
+      // If a "fullSignature" is provided, we want to show it in the completion item
+      const documentationWithSignature =
+        item.fullSignature && item.documentation
+          ? ['```prisma', item.fullSignature, '```', '___', item.documentation].join('\n')
+          : undefined
+
+      // If not we only show the documentation
+      documentationString = documentationWithSignature ? documentationWithSignature : item.documentation
+    }
+
     result.push({
       label: item.label,
       kind: itemKind,
       insertText: item.insertText,
       insertTextFormat: item.insertText ? InsertTextFormat.Snippet : InsertTextFormat.PlainText,
       insertTextMode: item.insertText ? InsertTextMode.adjustIndentation : undefined,
-      documentation: item.documentation ? { kind: MarkupKind.Markdown, value: item.documentation } : undefined,
+      documentation: documentationString ? { kind: MarkupKind.Markdown, value: documentationString } : undefined,
     })
   }
   return result
@@ -55,14 +73,15 @@ function convertAttributesToCompletionItems(
   completionItems: JSONFullCompletionItems,
   itemKind: CompletionItemKind,
 ): CompletionItem[] {
-  // https://code.visualstudio.com/api/references/vscode-api#CompletionItem
   const result: CompletionItem[] = []
 
   for (const item of completionItems) {
     const docComment = ['```prisma', item.fullSignature, '```', '___', item.documentation]
+
     for (const param of item.params) {
       docComment.push('', '_@param_ ' + param.label + ' ' + param.documentation)
     }
+
     result.push({
       label: item.label,
       kind: itemKind,

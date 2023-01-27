@@ -465,11 +465,22 @@ export function getSuggestionForSupportedFields(
             isIncomplete: true,
           }
         }
-        // url
-      } else if (currentLine.startsWith('url')) {
+      }
+      // url or shadowDatabaseUrl or directUrl
+      else if (
+        currentLine.startsWith('url') ||
+        currentLine.startsWith('shadowDatabaseUrl') ||
+        currentLine.startsWith('directUrl')
+      ) {
         // check if inside env
         if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
-          suggestions = ['DATABASE_URL']
+          if (currentLine.startsWith('url')) {
+            suggestions = ['DATABASE_URL']
+          } else if (currentLine.startsWith('shadowDatabaseUrl')) {
+            suggestions = ['SHADOW_DATABASE_URL']
+          } else if (currentLine.startsWith('directUrl')) {
+            suggestions = ['DIRECT_URL']
+          }
         } else {
           if (currentLine.includes('env')) {
             return {
