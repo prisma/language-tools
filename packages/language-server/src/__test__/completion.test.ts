@@ -289,10 +289,7 @@ suite('Completions', function () {
       label: '""',
       kind: CompletionItemKind.Property,
     }
-    const envArgument = {
-      label: 'DATABASE_URL',
-      kind: CompletionItemKind.Constant,
-    }
+
     const env = { label: 'env()', kind: CompletionItemKind.Property }
 
     test('Diagnoses datasource field suggestions in empty block', () => {
@@ -333,7 +330,7 @@ suite('Completions', function () {
       })
     })
 
-    test('Diagnoses url argument suggestions for datasource block', () => {
+    test('url = env("|")', () => {
       assertCompletion({
         schema: /* Prisma */ `
         datasource db {
@@ -351,12 +348,45 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [envArgument],
+          items: [
+            {
+              label: 'DATABASE_URL',
+              kind: CompletionItemKind.Constant,
+            },
+          ],
         },
       })
     })
 
-    test('Diagnoses field extension availability', () => {
+    test('directUrl = env("|")', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+        datasource db {
+            url = |
+        }`,
+        expected: {
+          isIncomplete: true,
+          items: [quotationMarks, env],
+        },
+      })
+      assertCompletion({
+        schema: /* Prisma */ `
+        datasource db {
+            directUrl = env("|")
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            {
+              label: 'DIRECT_URL',
+              kind: CompletionItemKind.Constant,
+            },
+          ],
+        },
+      })
+    })
+
+    test('Diagnoses field extensions availability', () => {
       assertCompletion({
         schema: /* Prisma */ `
           generator client {

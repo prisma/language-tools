@@ -466,10 +466,14 @@ export function getSuggestionForSupportedFields(
           }
         }
         // url
-      } else if (currentLine.startsWith('url')) {
+      } else if (currentLine.startsWith('url') || currentLine.startsWith('directUrl')) {
         // check if inside env
         if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
-          suggestions = ['DATABASE_URL']
+          if (currentLine.startsWith('url')) {
+            suggestions = ['DATABASE_URL']
+          } else {
+            suggestions = ['DIRECT_URL']
+          }
         } else {
           if (currentLine.includes('env')) {
             return {
