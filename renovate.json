@@ -3,7 +3,7 @@
   "semanticCommits": true,
   "ignoreDeps": ["@prisma/language-server", "@prisma/prisma-fmt-wasm"],
   "masterIssue": true,
-  "reviewers": ["@Jolg42"],
+  "reviewers": ["@Jolg42", "@Druue"],
   "rebaseWhen": "conflicted",
   "packageRules": [
     {
