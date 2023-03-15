@@ -69,6 +69,10 @@
     {
       "label": "view",
       "documentation": "Views are defined via the view block."
+    },
+    {
+      "label": "type",
+      "documentation": "Composite types (known as [embedded documents](https://www.mongodb.com/docs/manual/core/data-model-design/#std-label-data-modeling-embedding) in MongoDB) provide support for embedding records inside other records. [Learn more](https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#defining-composite-types)"
     }
   ],
   "dataSourceFields": [
