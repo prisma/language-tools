@@ -321,7 +321,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldUrl, fieldDirectUrl, fieldShadowDatabaseUrl, fieldRelationMode],
+          items: [fieldProvider, fieldUrl, fieldShadowDatabaseUrl, fieldDirectUrl, fieldRelationMode],
         },
       })
     })
@@ -335,7 +335,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldUrl, fieldDirectUrl, fieldShadowDatabaseUrl, fieldRelationMode],
+          items: [fieldProvider, fieldUrl, fieldShadowDatabaseUrl, fieldDirectUrl, fieldRelationMode],
         },
       })
       assertCompletion({
@@ -346,7 +346,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldDirectUrl, fieldShadowDatabaseUrl, fieldRelationMode],
+          items: [fieldProvider, fieldUrl, fieldShadowDatabaseUrl, fieldDirectUrl, fieldRelationMode],
         },
       })
     })
@@ -358,8 +358,8 @@ suite('Completions', function () {
             url = |
         }`,
         expected: {
-          isIncomplete: true,
-          items: [quotationMarks, env],
+          isIncomplete: false,
+          items: [env, quotationMarks],
         },
       })
       assertCompletion({
@@ -386,8 +386,8 @@ suite('Completions', function () {
             url = |
         }`,
         expected: {
-          isIncomplete: true,
-          items: [quotationMarks, env],
+          isIncomplete: false,
+          items: [env, quotationMarks],
         },
       })
       assertCompletion({
@@ -414,8 +414,8 @@ suite('Completions', function () {
             url = |
         }`,
         expected: {
-          isIncomplete: true,
-          items: [quotationMarks, env],
+          isIncomplete: false,
+          items: [env, quotationMarks],
         },
       })
       assertCompletion({
@@ -439,17 +439,19 @@ suite('Completions', function () {
       assertCompletion({
         schema: /* Prisma */ `
           generator client {
+            provider        = "prisma-client-js"
             previewFeatures = ["postgresqlExtensions"]
           }
 
           datasource db {
             provider = "postgresql"
+            url = env("DATABASE_URL")
             |
           }
         `,
         expected: {
           isIncomplete: false,
-          items: [fieldUrl, fieldDirectUrl, fieldShadowDatabaseUrl, fieldRelationMode, fieldPostgresqlExtensions],
+          items: [fieldShadowDatabaseUrl, fieldDirectUrl, fieldRelationMode, fieldPostgresqlExtensions],
         },
       })
     })
@@ -470,7 +472,7 @@ suite('Completions', function () {
         `,
         expected: {
           isIncomplete: false,
-          items: [fieldDirectUrl, fieldShadowDatabaseUrl, fieldRelationMode, fieldSchemas],
+          items: [fieldShadowDatabaseUrl, fieldDirectUrl, fieldRelationMode, fieldSchemas],
         },
       })
     })
@@ -508,7 +510,7 @@ suite('Completions', function () {
           relationMode = "|"
         }`,
         expected: {
-          isIncomplete: true,
+          isIncomplete: false,
           items: [relationModeForeignKeys, relationModePrisma],
         },
       })
@@ -520,7 +522,7 @@ suite('Completions', function () {
           relationMode = |
         }`,
         expected: {
-          isIncomplete: true,
+          isIncomplete: false,
           items: [relationModeForeignKeysWithQuotes, relationModePrismaWithQuotes],
         },
       })

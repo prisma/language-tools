@@ -13,10 +13,8 @@ import {
   fieldAttributes,
   allowedBlockTypes,
   corePrimitiveTypes,
-  supportedDataSourceFields,
   supportedGeneratorFields,
   relationArguments,
-  dataSourceUrlArguments,
   dataSourceProviders,
   dataSourceProviderArguments,
   generatorProviders,
@@ -268,42 +266,6 @@ export function getSuggestionsForFieldTypes(
   }
 }
 
-function getSuggestionForDataSourceField(block: Block, lines: string[], position: Position): CompletionItem[] {
-  // create deep copy
-  let suggestions: CompletionItem[] = klona(supportedDataSourceFields)
-  const datasourceProvider = getFirstDatasourceProvider(lines)
-  const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
-
-  const isPostgresExtensionsAvailable = Boolean(
-    datasourceProvider && datasourceProvider.includes('postgres') && previewFeatures?.includes('postgresqlextensions'),
-  )
-
-  const isMultiSchemaAvailable = Boolean(
-    datasourceProvider &&
-      (datasourceProvider.includes('postgres') ||
-        datasourceProvider.includes('cockroach') ||
-        datasourceProvider.includes('sqlserver')) &&
-      previewFeatures?.includes('multischema'),
-  )
-
-  if (!isPostgresExtensionsAvailable) {
-    suggestions = suggestions.filter((item) => item.label !== 'extensions')
-  }
-
-  if (!isMultiSchemaAvailable) {
-    suggestions = suggestions.filter((item) => item.label !== 'schemas')
-  }
-
-  const labels: string[] = removeInvalidFieldSuggestions(
-    suggestions.map((item) => item.label),
-    block,
-    lines,
-    position,
-  )
-
-  return suggestions.filter((item) => labels.includes(item.label))
-}
-
 function getSuggestionForGeneratorField(block: Block, lines: string[], position: Position): CompletionItem[] {
   // create deep copy
   const suggestions: CompletionItem[] = klona(supportedGeneratorFields)
@@ -329,9 +291,6 @@ export function getSuggestionForFirstInsideBlock(
 ): CompletionList {
   let suggestions: CompletionItem[] = []
   switch (blockType) {
-    case 'datasource':
-      suggestions = getSuggestionForDataSourceField(block, lines, position)
-      break
     case 'generator':
       suggestions = getSuggestionForGeneratorField(block, lines, position)
       break
@@ -487,17 +446,6 @@ export function getSuggestionForSupportedFields(
           } else if (currentLine.startsWith('directUrl')) {
             suggestions = ['DIRECT_URL']
           }
-        } else {
-          if (currentLine.includes('env')) {
-            return {
-              items: dataSourceUrlArguments.filter((a) => !a.label.includes('env')),
-              isIncomplete: true,
-            }
-          }
-          return {
-            items: dataSourceUrlArguments,
-            isIncomplete: true,
-          }
         }
       }
       // `relationMode` can only be set for SQL databases
@@ -516,14 +464,14 @@ export function getSuggestionForSupportedFields(
         if (isInsideQuotation) {
           return {
             items: relationModeValuesSuggestion,
-            isIncomplete: true,
+            isIncomplete: false,
           }
         }
         // If line ends with `"`, a value is already set.
         else if (!currentLine.endsWith('"')) {
           return {
             items: relationModeValuesSuggestionWithQuotes,
-            isIncomplete: true,
+            isIncomplete: false,
           }
         }
       }

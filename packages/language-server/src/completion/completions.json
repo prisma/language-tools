@@ -75,50 +75,6 @@
       "documentation": "Composite types (known as [embedded documents](https://www.mongodb.com/docs/manual/core/data-model-design/#std-label-data-modeling-embedding) in MongoDB) provide support for embedding records inside other records. [Learn more](https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#defining-composite-types)"
     }
   ],
-  "dataSourceFields": [
-    {
-      "label": "provider",
-      "insertText": "provider = \"$0\"",
-      "documentation": "Describes which datasource connector to use. Can be one of the following datasource providers: `postgresql`, `mysql`, `sqlserver`, `sqlite`, `mongodb` or `cockroachdb`.",
-      "fullSignature": "provider = \"String\""
-    },
-    {
-      "label": "url",
-      "insertText": "url = $0",
-      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database. [Learn more](https://pris.ly/d/connection-strings).",
-      "fullSignature": "url = \"String\" | env(\"ENVIRONMENT_VARIABLE\")"
-    },
-    {
-      "label": "directUrl",
-      "insertText": "directUrl = $0",
-      "documentation": "Connection URL for direct connection to the database. [Learn more](https://pris.ly/d/data-proxy-cli).",
-      "fullSignature": "directUrl = \"String\" | env(\"ENVIRONMENT_VARIABLE\")"
-    },
-    {
-      "label": "shadowDatabaseUrl",
-      "insertText": "shadowDatabaseUrl = $0",
-      "documentation": "Connection URL including authentication info to use for Migrate's [shadow database](https://pris.ly/d/migrate-shadow).",
-      "fullSignature": "shadowDatabaseUrl = \"String\" | env(\"ENVIRONMENT_VARIABLE\")"
-    },
-    {
-      "label": "relationMode",
-      "insertText": "relationMode = $0",
-      "documentation": "Set the global relation mode for all relations. Values can be either `\"foreignKeys\"` (Default), or `\"prisma\"`. [Learn more](https://pris.ly/d/relation-mode)",
-      "fullSignature": "relationMode = \"foreignKeys\" | \"prisma\")"
-    },
-    {
-      "label": "extensions",
-      "insertText": "extensions = [$0]",
-      "documentation": "Enable PostgreSQL extensions. [Learn more](https://pris.ly/d/postgresql-extensions)",
-      "fullSignature": "extensions = extension[]"
-    },
-    {
-      "label": "schemas",
-      "insertText": "schemas = [$0]",
-      "documentation": "The list of database schemas. [Learn more](https://pris.ly/d/multi-schema-configuration)",
-      "fullSignature": "schemas = String[])"
-    }
-  ],
   "generatorFields": [
     {
       "label": "provider",
@@ -424,27 +380,6 @@
       "fullSignature": "map: String",
       "documentation": "Defines a custom name for the foreign key in the database.",
       "params": []
-    }
-  ],
-  "datasourceUrlArguments": [
-    {
-      "label": "\"\"",
-      "insertText": "\"$0\"",
-      "fullSignature": "\"\"",
-      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database. [Learn more](https://pris.ly/d/prisma-schema).",
-      "params": []
-    },
-    {
-      "label": "env()",
-      "insertText": "env(\"$0\")",
-      "fullSignature": "env(_ environmentVariable: string)",
-      "documentation": "Specifies a datasource via an environment variable. When running a Prisma CLI command that needs the database connection URL (e.g. `prisma generate`), you need to make sure that the `DATABASE_URL` environment variable is set. One way to do so is by creating a `.env` file. Note that the file must be in the same directory as your schema.prisma file to automatically be picked up by the Prisma CLI.",
-      "params": [
-        {
-          "label": "environmentVariable",
-          "documentation": "The environment variable in which the database connection URL is stored."
-        }
-      ]
     }
   ],
   "generatorProviders": [
