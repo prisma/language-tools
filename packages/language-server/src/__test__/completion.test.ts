@@ -209,6 +209,27 @@ suite('Completions', function () {
       })
     })
 
+    test('Diagnoses block type suggestions with mongodb as provider', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+        datasource db {
+          provider = "mongodb"
+        }
+        |
+        `,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'datasource', kind: CompletionItemKind.Class },
+            { label: 'generator', kind: CompletionItemKind.Class },
+            { label: 'model', kind: CompletionItemKind.Class },
+            { label: 'enum', kind: CompletionItemKind.Class },
+            { label: 'type', kind: CompletionItemKind.Class },
+          ],
+        },
+      })
+    })
+
     test('Diagnoses block type suggestions for view preview', () => {
       assertCompletion({
         schema: /* Prisma */ `

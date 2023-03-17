@@ -369,12 +369,18 @@ export function getSuggestionForBlockTypes(lines: string[]): CompletionList {
 
   const isViewAvailable = Boolean(previewFeatures?.includes('views'))
 
+  const isTypeAvailable = Boolean(datasourceProvider?.includes('mongodb'))
+
   if (!isEnumAvailable) {
     suggestions = suggestions.filter((item) => item.label !== 'enum')
   }
 
   if (!isViewAvailable) {
     suggestions = suggestions.filter((item) => item.label !== 'view')
+  }
+
+  if (!isTypeAvailable) {
+    suggestions = suggestions.filter((item) => item.label !== 'type')
   }
 
   return {
