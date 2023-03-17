@@ -107,11 +107,6 @@ export const allowedBlockTypes: CompletionItem[] = convertToCompletionItems(
   CompletionItemKind.Class,
 )
 
-export const supportedDataSourceFields: CompletionItem[] = convertToCompletionItems(
-  completions.dataSourceFields,
-  CompletionItemKind.Field,
-)
-
 export const relationModeValues: CompletionItem[] = convertToCompletionItems(
   completions.relationModeValues,
   CompletionItemKind.Field,
@@ -340,11 +335,6 @@ export const sortLengthProperties: CompletionItem[] =
 
 export const relationArguments: CompletionItem[] = convertAttributesToCompletionItems(
   completions.relationArguments,
-  CompletionItemKind.Property,
-)
-
-export const dataSourceUrlArguments: CompletionItem[] = convertAttributesToCompletionItems(
-  completions.datasourceUrlArguments,
   CompletionItemKind.Property,
 )
 
