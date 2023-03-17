@@ -70,12 +70,12 @@ import { createDiagnosticsForIgnore } from './diagnosticsHandler'
 
 export function handleDiagnosticsRequest(
   document: TextDocument,
-  onError?: (errorMessage: string) => void,
+  showErrorToast?: (errorMessage: string) => void,
 ): Diagnostic[] {
   const text = document.getText(fullDocumentRange(document))
   const res = lint(text, (errorMessage: string) => {
-    if (onError) {
-      onError(errorMessage)
+    if (showErrorToast) {
+      showErrorToast(errorMessage)
     }
   })
 
@@ -87,8 +87,8 @@ export function handleDiagnosticsRequest(
         diagnostic.text === 'Model declarations have to be indicated with the `model` keyword.',
     )
   ) {
-    if (onError) {
-      onError(
+    if (showErrorToast) {
+      showErrorToast(
         "You might currently be viewing a Prisma 1 datamodel which is based on the GraphQL syntax. The current Prisma Language Server doesn't support this syntax. If you are handling a Prisma 1 datamodel, please change the file extension to `.graphql` so the new Prisma Language Server does not get triggered anymore.",
       )
     }
@@ -237,10 +237,18 @@ export function handleHoverRequest(document: TextDocument, params: HoverParams):
   return
 }
 
-function prismaFmtCompletions(params: CompletionParams, document: TextDocument): CompletionList | undefined {
+function prismaFmtCompletions(
+  params: CompletionParams,
+  document: TextDocument,
+  showErrorToast?: (errorMessage: string) => void,
+): CompletionList | undefined {
   const text = document.getText(fullDocumentRange(document))
 
-  const completionList = textDocumentCompletion(text, params)
+  const completionList = textDocumentCompletion(text, params, (errorMessage: string) => {
+    if (showErrorToast) {
+      showErrorToast(errorMessage)
+    }
+  })
 
   if (completionList.items.length === 0) {
     return undefined
@@ -249,7 +257,11 @@ function prismaFmtCompletions(params: CompletionParams, document: TextDocument):
   }
 }
 
-function localCompletions(params: CompletionParams, document: TextDocument): CompletionList | undefined {
+function localCompletions(
+  params: CompletionParams,
+  document: TextDocument,
+  showErrorToast?: (errorMessage: string) => void,
+): CompletionList | undefined {
   const context = params.context
   const position = params.position
 
@@ -291,6 +303,7 @@ function localCompletions(params: CompletionParams, document: TextDocument): Com
           lines,
           wordsBeforePosition,
           document,
+          showErrorToast,
         )
       case '"':
         return getSuggestionForSupportedFields(
@@ -303,13 +316,10 @@ function localCompletions(params: CompletionParams, document: TextDocument): Com
       case '.':
         // check if inside attribute
         // Useful to complete composite types
-        if (
-          ['model', 'view'].includes(foundBlock.type) &&
-          isInsideAttribute(currentLineUntrimmed, position, '()')
-        ) {
+        if (['model', 'view'].includes(foundBlock.type) && isInsideAttribute(currentLineUntrimmed, position, '()')) {
           return getSuggestionsForInsideRoundBrackets(currentLineUntrimmed, lines, document, position, foundBlock)
         } else {
-          return getSuggestionForNativeTypes(foundBlock, lines, wordsBeforePosition, document)
+          return getSuggestionForNativeTypes(foundBlock, lines, wordsBeforePosition, document, showErrorToast)
         }
     }
   }
@@ -326,7 +336,14 @@ function localCompletions(params: CompletionParams, document: TextDocument): Com
       if (!positionIsAfterFieldAndType(position, document, wordsBeforePosition)) {
         return getSuggestionsForFieldTypes(foundBlock, lines, position, currentLineUntrimmed)
       }
-      return getSuggestionForFieldAttribute(foundBlock, lines[position.line], lines, wordsBeforePosition, document)
+      return getSuggestionForFieldAttribute(
+        foundBlock,
+        lines[position.line],
+        lines,
+        wordsBeforePosition,
+        document,
+        showErrorToast,
+      )
     case 'datasource':
     case 'generator':
       if (wordsBeforePosition.length === 1 && symbolBeforePositionIsWhiteSpace) {
@@ -356,8 +373,12 @@ function localCompletions(params: CompletionParams, document: TextDocument): Com
  *
  * This handler provides the initial list of the completion items.
  */
-export function handleCompletionRequest(params: CompletionParams, document: TextDocument): CompletionList | undefined {
-  return prismaFmtCompletions(params, document) || localCompletions(params, document)
+export function handleCompletionRequest(
+  params: CompletionParams,
+  document: TextDocument,
+  showErrorToast?: (errorMessage: string) => void,
+): CompletionList | undefined {
+  return prismaFmtCompletions(params, document, showErrorToast) || localCompletions(params, document, showErrorToast)
 }
 
 export function handleRenameRequest(params: RenameParams, document: TextDocument): WorkspaceEdit | undefined {
@@ -453,12 +474,16 @@ export function handleCompletionResolveRequest(item: CompletionItem): Completion
   return item
 }
 
-export function handleCodeActions(params: CodeActionParams, document: TextDocument): CodeAction[] {
+export function handleCodeActions(
+  params: CodeActionParams,
+  document: TextDocument,
+  showErrorToast?: (errorMessage: string) => void,
+): CodeAction[] {
   if (!params.context.diagnostics.length) {
     return []
   }
 
-  return quickFix(document, params)
+  return quickFix(document, params, showErrorToast)
 }
 
 export function handleDocumentSymbol(params: DocumentSymbolParams, document: TextDocument): DocumentSymbol[] {

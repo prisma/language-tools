@@ -221,8 +221,13 @@ export function getValuesInsideSquareBrackets(line: string): string[] {
   return result
 }
 
-export function declaredNativeTypes(document: TextDocument): boolean {
-  const nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(document.getText())
+export function declaredNativeTypes(document: TextDocument, showErrorToast?: (errorMessage: string) => void): boolean {
+  const nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(document.getText(), (errorMessage: string) => {
+    if (showErrorToast) {
+      showErrorToast(errorMessage)
+    }
+  })
+
   if (nativeTypes.length === 0) {
     return false
   }
@@ -475,6 +480,7 @@ export function getFieldTypesFromCurrentBlock(lines: string[], block: Block, pos
       if (fieldType !== undefined) {
         const existingFieldType = fieldTypes.get(fieldType)
         if (!existingFieldType) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const fieldName = getFieldNameFromLine(line)!
           fieldTypes.set(fieldType, { lineIndexes: [lineIndex], fieldName })
           fieldTypeNames[fieldName] = fieldType
@@ -502,6 +508,7 @@ export function getCompositeTypeFieldsRecursively(
     fieldTypeNames: Record<string, string>
   },
 ): string[] {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const compositeTypeFieldName = compositeTypeFieldNames.shift()!
   const fieldTypeNames = fieldTypesFromBlock.fieldTypeNames
   const fieldTypeName = fieldTypeNames[compositeTypeFieldName]

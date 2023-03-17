@@ -117,8 +117,10 @@ export function getSuggestionForNativeTypes(
   lines: string[],
   wordsBeforePosition: string[],
   document: TextDocument,
+  showErrorToast?: (errorMessage: string) => void,
 ): CompletionList | undefined {
-  const activeFeatureFlag = declaredNativeTypes(document)
+  const activeFeatureFlag = declaredNativeTypes(document, showErrorToast)
+
   if (
     // TODO type? native "@db." types?
     foundBlock.type !== 'model' ||
@@ -135,7 +137,7 @@ export function getSuggestionForNativeTypes(
 
   // line
   const prismaType = wordsBeforePosition[1].replace('?', '').replace('[]', '')
-  const suggestions = getNativeTypes(document, prismaType)
+  const suggestions = getNativeTypes(document, prismaType, showErrorToast)
 
   return {
     items: suggestions,
@@ -161,6 +163,7 @@ export function getSuggestionForFieldAttribute(
   lines: string[],
   wordsBeforePosition: string[],
   document: TextDocument,
+  showErrorToast?: (errorMessage: string) => void,
 ): CompletionList | undefined {
   const fieldType = getFieldType(currentLine)
   // If we don't find a field type (e.g. String, Int...), return no suggestion
@@ -174,7 +177,7 @@ export function getSuggestionForFieldAttribute(
   if (wordsBeforePosition.length >= 2) {
     const datasourceName = getFirstDatasourceName(lines)
     const prismaType = wordsBeforePosition[1]
-    const nativeTypeSuggestions = getNativeTypes(document, prismaType)
+    const nativeTypeSuggestions = getNativeTypes(document, prismaType, showErrorToast)
 
     if (datasourceName) {
       if (!currentLine.includes(`@${datasourceName}`)) {
@@ -822,6 +825,7 @@ function getSuggestionsForAttribute(
           let name = value
           // Example for `@@index([email,address.|])` when there is no space between fields
           if (name?.includes(',')) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             name = name.split(',').pop()!
           }
           // Remove . to only get the name
