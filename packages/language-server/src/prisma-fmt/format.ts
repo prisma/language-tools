@@ -1,5 +1,6 @@
-import prismaFmt from '@prisma/prisma-fmt-wasm'
+import { prismaFmt } from '../wasm'
 import { DocumentFormattingParams } from 'vscode-languageserver'
+import { handleWasmError } from './util'
 
 export default function format(
   schema: string,
@@ -9,16 +10,14 @@ export default function format(
   console.log('running format() from prisma-fmt')
   try {
     return prismaFmt.format(schema, JSON.stringify(options))
-  } catch (errors) {
-    if (onError) {
-      onError(
-        "prisma-fmt error'd during formatting. To get a more detailed output please see Prisma Language Server output. To see the output, go to View > Output from the toolbar, then select 'Prisma Language Server' in the Output panel.",
-      )
-    }
+  } catch (e) {
+    const err = e as Error
+
     console.warn(
-      "\nprisma-fmt error'd during formatting. Please report this issue on [Prisma Language Tools](https://github.com/prisma/language-tools/issues). \nLinter output:\n",
+      '\nprisma-fmt errored during formatting. Please report this issue on [Prisma Language Tools](https://github.com/prisma/language-tools/issues). \nLinter output:\n',
     )
-    console.warn(errors)
+
+    handleWasmError(err, 'format', onError)
 
     return schema
   }

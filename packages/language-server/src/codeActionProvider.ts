@@ -9,7 +9,7 @@ import {
 } from 'vscode-languageserver'
 import levenshtein from 'js-levenshtein'
 import { convertDocumentTextToTrimmedLineArray, getAllRelationNames } from './util'
-import prismaFmt from '@prisma/prisma-fmt-wasm'
+import { prismaFmt } from './wasm'
 
 function getInsertRange(document: TextDocument): Range {
   // to insert text into a document create a range where start === end.
