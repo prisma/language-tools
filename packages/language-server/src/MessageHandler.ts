@@ -70,12 +70,12 @@ import { createDiagnosticsForIgnore } from './diagnosticsHandler'
 
 export function handleDiagnosticsRequest(
   document: TextDocument,
-  showErrorToast?: (errorMessage: string) => void,
+  onError?: (errorMessage: string) => void,
 ): Diagnostic[] {
   const text = document.getText(fullDocumentRange(document))
   const res = lint(text, (errorMessage: string) => {
-    if (showErrorToast) {
-      showErrorToast(errorMessage)
+    if (onError) {
+      onError(errorMessage)
     }
   })
 
@@ -87,8 +87,8 @@ export function handleDiagnosticsRequest(
         diagnostic.text === 'Model declarations have to be indicated with the `model` keyword.',
     )
   ) {
-    if (showErrorToast) {
-      showErrorToast(
+    if (onError) {
+      onError(
         "You might currently be viewing a Prisma 1 datamodel which is based on the GraphQL syntax. The current Prisma Language Server doesn't support this syntax. If you are handling a Prisma 1 datamodel, please change the file extension to `.graphql` so the new Prisma Language Server does not get triggered anymore.",
       )
     }
@@ -240,13 +240,13 @@ export function handleHoverRequest(document: TextDocument, params: HoverParams):
 function prismaFmtCompletions(
   params: CompletionParams,
   document: TextDocument,
-  showErrorToast?: (errorMessage: string) => void,
+  onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
   const text = document.getText(fullDocumentRange(document))
 
   const completionList = textDocumentCompletion(text, params, (errorMessage: string) => {
-    if (showErrorToast) {
-      showErrorToast(errorMessage)
+    if (onError) {
+      onError(errorMessage)
     }
   })
 
@@ -260,7 +260,7 @@ function prismaFmtCompletions(
 function localCompletions(
   params: CompletionParams,
   document: TextDocument,
-  showErrorToast?: (errorMessage: string) => void,
+  onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
   const context = params.context
   const position = params.position
@@ -303,7 +303,7 @@ function localCompletions(
           lines,
           wordsBeforePosition,
           document,
-          showErrorToast,
+          onError,
         )
       case '"':
         return getSuggestionForSupportedFields(
@@ -319,7 +319,7 @@ function localCompletions(
         if (['model', 'view'].includes(foundBlock.type) && isInsideAttribute(currentLineUntrimmed, position, '()')) {
           return getSuggestionsForInsideRoundBrackets(currentLineUntrimmed, lines, document, position, foundBlock)
         } else {
-          return getSuggestionForNativeTypes(foundBlock, lines, wordsBeforePosition, document, showErrorToast)
+          return getSuggestionForNativeTypes(foundBlock, lines, wordsBeforePosition, document, onError)
         }
     }
   }
@@ -342,7 +342,7 @@ function localCompletions(
         lines,
         wordsBeforePosition,
         document,
-        showErrorToast,
+        onError,
       )
     case 'datasource':
     case 'generator':
@@ -376,9 +376,9 @@ function localCompletions(
 export function handleCompletionRequest(
   params: CompletionParams,
   document: TextDocument,
-  showErrorToast?: (errorMessage: string) => void,
+  onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
-  return prismaFmtCompletions(params, document, showErrorToast) || localCompletions(params, document, showErrorToast)
+  return prismaFmtCompletions(params, document, onError) || localCompletions(params, document, onError)
 }
 
 export function handleRenameRequest(params: RenameParams, document: TextDocument): WorkspaceEdit | undefined {
@@ -477,13 +477,13 @@ export function handleCompletionResolveRequest(item: CompletionItem): Completion
 export function handleCodeActions(
   params: CodeActionParams,
   document: TextDocument,
-  showErrorToast?: (errorMessage: string) => void,
+  onError?: (errorMessage: string) => void,
 ): CodeAction[] {
   if (!params.context.diagnostics.length) {
     return []
   }
 
-  return quickFix(document, params, showErrorToast)
+  return quickFix(document, params, onError)
 }
 
 export function handleDocumentSymbol(params: DocumentSymbolParams, document: TextDocument): DocumentSymbol[] {

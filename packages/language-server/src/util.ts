@@ -221,10 +221,10 @@ export function getValuesInsideSquareBrackets(line: string): string[] {
   return result
 }
 
-export function declaredNativeTypes(document: TextDocument, showErrorToast?: (errorMessage: string) => void): boolean {
+export function declaredNativeTypes(document: TextDocument, onError?: (errorMessage: string) => void): boolean {
   const nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(document.getText(), (errorMessage: string) => {
-    if (showErrorToast) {
-      showErrorToast(errorMessage)
+    if (onError) {
+      onError(errorMessage)
     }
   })
 

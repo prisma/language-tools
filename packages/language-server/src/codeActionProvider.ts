@@ -84,7 +84,7 @@ function addTypeModifiers(hasTypeModifierArray: boolean, hasTypeModifierOptional
 export function quickFix(
   textDocument: TextDocument,
   params: CodeActionParams,
-  showErrorToast?: (errorMessage: string) => void,
+  onError?: (errorMessage: string) => void,
 ): CodeAction[] {
   const diagnostics: Diagnostic[] = params.context.diagnostics
 
@@ -93,8 +93,8 @@ export function quickFix(
   }
 
   const codeActionList = codeActions(textDocument.getText(), JSON.stringify(params), (errorMessage: string) => {
-    if (showErrorToast) {
-      showErrorToast(errorMessage)
+    if (onError) {
+      onError(errorMessage)
     }
   })
 

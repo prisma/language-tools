@@ -117,9 +117,9 @@ export function getSuggestionForNativeTypes(
   lines: string[],
   wordsBeforePosition: string[],
   document: TextDocument,
-  showErrorToast?: (errorMessage: string) => void,
+  onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
-  const activeFeatureFlag = declaredNativeTypes(document, showErrorToast)
+  const activeFeatureFlag = declaredNativeTypes(document, onError)
 
   if (
     // TODO type? native "@db." types?
@@ -137,7 +137,7 @@ export function getSuggestionForNativeTypes(
 
   // line
   const prismaType = wordsBeforePosition[1].replace('?', '').replace('[]', '')
-  const suggestions = getNativeTypes(document, prismaType, showErrorToast)
+  const suggestions = getNativeTypes(document, prismaType, onError)
 
   return {
     items: suggestions,
@@ -163,7 +163,7 @@ export function getSuggestionForFieldAttribute(
   lines: string[],
   wordsBeforePosition: string[],
   document: TextDocument,
-  showErrorToast?: (errorMessage: string) => void,
+  onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
   const fieldType = getFieldType(currentLine)
   // If we don't find a field type (e.g. String, Int...), return no suggestion
@@ -177,7 +177,7 @@ export function getSuggestionForFieldAttribute(
   if (wordsBeforePosition.length >= 2) {
     const datasourceName = getFirstDatasourceName(lines)
     const prismaType = wordsBeforePosition[1]
-    const nativeTypeSuggestions = getNativeTypes(document, prismaType, showErrorToast)
+    const nativeTypeSuggestions = getNativeTypes(document, prismaType, onError)
 
     if (datasourceName) {
       if (!currentLine.includes(`@${datasourceName}`)) {

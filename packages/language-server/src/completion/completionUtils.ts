@@ -516,11 +516,11 @@ export function handlePreviewFeatures(
 export function getNativeTypes(
   document: TextDocument,
   prismaType: string,
-  showErrorToast?: (errorMessage: string) => void,
+  onError?: (errorMessage: string) => void,
 ): CompletionItem[] {
   let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(document.getText(), (errorMessage: string) => {
-    if (showErrorToast) {
-      showErrorToast(errorMessage)
+    if (onError) {
+      onError(errorMessage)
     }
   })
 
