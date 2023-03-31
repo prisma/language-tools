@@ -325,15 +325,13 @@ export const fieldAttributes: CompletionItem[] = convertAttributesToCompletionIt
   CompletionItemKind.Property,
 )
 
-export const sortLengthProperties: CompletionItem[] =
+export const sortLengthProperties: CompletionItem[] = convertToCompletionItems(
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  convertToCompletionItems(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    completions.fieldAttributes
-      .find((item) => item.label === '@unique')!
-      .params.filter((item) => item.label === 'length' || item.label === 'sort'),
-    CompletionItemKind.Property,
-  )
+  completions.fieldAttributes
+    .find((item) => item.label === '@unique')!
+    .params.filter((item) => item.label === 'length' || item.label === 'sort'),
+  CompletionItemKind.Property,
+)
 
 export const relationArguments: CompletionItem[] = convertAttributesToCompletionItems(
   completions.relationArguments,

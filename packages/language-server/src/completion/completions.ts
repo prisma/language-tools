@@ -678,23 +678,21 @@ function getDefaultValues({
   return suggestions
 }
 
-function getSuggestionsForAttribute(
-  {
-    attribute,
-    wordsBeforePosition,
-    untrimmedCurrentLine,
-    lines,
-    block,
-    position,
-  }: {
-    attribute?: '@relation'
-    wordsBeforePosition: string[]
-    untrimmedCurrentLine: string
-    lines: string[]
-    block: Block
-    position: Position
-  }, // eslint-disable-line @typescript-eslint/no-unused-vars
-): CompletionList | undefined {
+function getSuggestionsForAttribute({
+  attribute,
+  wordsBeforePosition,
+  untrimmedCurrentLine,
+  lines,
+  block,
+  position,
+}: {
+  attribute?: '@relation'
+  wordsBeforePosition: string[]
+  untrimmedCurrentLine: string
+  lines: string[]
+  block: Block
+  position: Position
+}): CompletionList | undefined {
   const firstWordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
   const secondWordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 2]
   const wordBeforePosition = firstWordBeforePosition === '' ? secondWordBeforePosition : firstWordBeforePosition

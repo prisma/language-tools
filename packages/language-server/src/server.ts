@@ -107,7 +107,6 @@ export function startServer(options?: LSOptions): void {
   // Cache the settings of all open documents
   const documentSettings: Map<string, Thenable<LSSettings>> = new Map<string, Thenable<LSSettings>>()
 
-  // eslint-disable-line @typescript-eslint/no-unused-vars
   connection.onDidChangeConfiguration((_change) => {
     connection.console.info('Configuration changed.')
     if (hasConfigurationCapability) {
