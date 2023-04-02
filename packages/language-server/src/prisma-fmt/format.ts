@@ -1,6 +1,6 @@
 import { prismaFmt } from '../wasm'
 import { DocumentFormattingParams } from 'vscode-languageserver'
-import { handleWasmError } from './util'
+import { handleFormatPanic, handleWasmError } from './util'
 
 export default function format(
   schema: string,
@@ -8,7 +8,15 @@ export default function format(
   onError?: (errorMessage: string) => void,
 ): string {
   console.log('running format() from prisma-fmt')
+
   try {
+    if (process.env.FORCE_PANIC_PRISMA_FMT) {
+      handleFormatPanic(() => {
+        console.debug('Triggering a Rust panic...')
+        prismaFmt.debug_panic()
+      })
+    }
+
     return prismaFmt.format(schema, JSON.stringify(options))
   } catch (e) {
     const err = e as Error

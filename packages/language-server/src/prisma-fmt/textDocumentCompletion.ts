@@ -1,6 +1,6 @@
 import { prismaFmt } from '../wasm'
 import { CompletionParams, CompletionList } from 'vscode-languageserver'
-import { handleWasmError } from './util'
+import { handleFormatPanic, handleWasmError } from './util'
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return */
 
@@ -21,6 +21,13 @@ export default function textDocumentCompletion(
   correctParams['textDocument'] = { uri: 'file:/dev/null' }
   const stringifiedParams = JSON.stringify(correctParams)
   try {
+    if (process.env.FORCE_PANIC_PRISMA_FMT) {
+      handleFormatPanic(() => {
+        console.debug('Triggering a Rust panic...')
+        prismaFmt.debug_panic()
+      })
+    }
+
     const response = prismaFmt.text_document_completion(schema, stringifiedParams)
     return JSON.parse(response)
   } catch (e) {

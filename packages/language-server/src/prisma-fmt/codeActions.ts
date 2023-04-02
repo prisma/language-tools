@@ -1,6 +1,6 @@
 import { CodeAction } from 'vscode-languageserver'
 import { prismaFmt } from '../wasm'
-import { handleWasmError } from './util'
+import { handleFormatPanic, handleWasmError } from './util'
 
 export default function codeActions(
   schema: string,
@@ -8,6 +8,13 @@ export default function codeActions(
   onError?: (errorMessage: string) => void,
 ): CodeAction[] {
   try {
+    if (process.env.FORCE_PANIC_PRISMA_FMT) {
+      handleFormatPanic(() => {
+        console.debug('Triggering a Rust panic...')
+        prismaFmt.debug_panic()
+      })
+    }
+
     const result = prismaFmt.code_actions(schema, params)
 
     return JSON.parse(result) as CodeAction[]
