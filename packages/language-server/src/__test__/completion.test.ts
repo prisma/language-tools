@@ -1,14 +1,9 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { handleCompletionRequest } from '../MessageHandler'
-import {
-  CompletionList,
-  CompletionParams,
-  Position,
-  CompletionItemKind,
-  CompletionTriggerKind,
-} from 'vscode-languageserver'
+import { CompletionList, CompletionParams, CompletionItemKind, CompletionTriggerKind } from 'vscode-languageserver'
 import assert from 'assert'
 import dedent from 'ts-dedent'
+import { CURSOR_CHARACTER, findCursorPosition } from './helper'
 
 /* eslint-disable @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-misused-promises */
 
@@ -50,8 +45,6 @@ function assertCompletion({
   schema: string
   expected: CompletionList
 }): void {
-  const CURSOR_CHARACTER = '|'
-
   // Remove indentation
   schema = dedent(schema)
 
@@ -60,27 +53,6 @@ function assertCompletion({
     ${baseSchema(provider, previewFeatures)}
     ${schema}
     `
-  }
-
-  const findCursorPosition = (input: string): Position => {
-    const lines = input.split('\n')
-
-    let foundCursorCharacter = -1
-    const foundLinePosition = lines.findIndex((line) => {
-      const cursorPosition = line.indexOf(CURSOR_CHARACTER)
-      if (cursorPosition !== -1) {
-        foundCursorCharacter = cursorPosition
-        return true
-      }
-    })
-
-    if (foundLinePosition >= 0 && foundCursorCharacter >= 0) {
-      return { line: foundLinePosition, character: foundCursorCharacter }
-    }
-
-    throw new Error(
-      'Each test must include the `|` pipe character to signal where the cursor should be when executing the test.',
-    )
   }
 
   const position = findCursorPosition(schema)

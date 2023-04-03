@@ -369,6 +369,7 @@ export function getSuggestionForSupportedFields(
   currentLineUntrimmed: string,
   position: Position,
   lines: string[],
+  onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
   let suggestions: string[] = []
   const isInsideQuotation: boolean = isInsideQuotationMark(currentLineUntrimmed, position)
@@ -396,7 +397,7 @@ export function getSuggestionForSupportedFields(
       }
       // previewFeatures
       else if (currentLine.startsWith('previewFeatures')) {
-        const generatorPreviewFeatures: string[] = listAllAvailablePreviewFeatures()
+        const generatorPreviewFeatures: string[] = listAllAvailablePreviewFeatures(onError)
         if (generatorPreviewFeatures.length > 0) {
           return handlePreviewFeatures(generatorPreviewFeatures, position, currentLineUntrimmed, isInsideQuotation)
         }

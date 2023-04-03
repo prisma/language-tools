@@ -312,6 +312,7 @@ function localCompletions(
           currentLineUntrimmed,
           position,
           lines,
+          onError,
         )
       case '.':
         // check if inside attribute
@@ -361,6 +362,7 @@ function localCompletions(
           currentLineUntrimmed,
           position,
           lines,
+          onError,
         )
       }
       break

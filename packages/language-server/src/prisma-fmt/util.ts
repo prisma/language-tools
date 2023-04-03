@@ -1,4 +1,4 @@
-import { getWasmError, isWasmPanic } from '../panic'
+import { getWasmError, isWasmPanic, WasmPanic } from '../panic'
 
 /**
  * Imports
@@ -58,5 +58,13 @@ export function handleWasmError(e: Error, cmd: string, onError?: (errorMessage: 
     onError(
       "prisma-fmt errored. To get a more detailed output please see Prisma Language Server output. You can do this by going to View, then Output from the toolbar, and then select 'Prisma Language Server' in the drop-down menu.",
     )
+  }
+}
+
+export function handleFormatPanic(tryCb: () => void) {
+  try {
+    return tryCb()
+  } catch (e: unknown) {
+    throw getWasmError(e as WasmPanic)
   }
 }

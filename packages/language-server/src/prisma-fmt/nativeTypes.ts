@@ -13,7 +13,7 @@ export default function nativeTypeConstructors(
   onError?: (errorMessage: string) => void,
 ): NativeTypeConstructors[] {
   try {
-    if (process.env.FORCE_PANIC_PRISMA_FMT) {
+    if (process.env.FORCE_PANIC_PRISMA_FMT_LOCAL) {
       handleFormatPanic(() => {
         console.debug('Triggering a Rust panic...')
         prismaFmt.debug_panic()
