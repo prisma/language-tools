@@ -39,9 +39,13 @@ suite('Artificial Panics', () => {
     process.env.FORCE_PANIC_PRISMA_FMT = '1'
 
     let calledCount = 0
+    let calledArg: undefined | unknown = undefined
 
-    const onError = () => {
+    // No official mock implementation in mocha
+    // -> DIY mock for onError
+    const onError = (arg: unknown) => {
       calledCount += 1
+      calledArg = arg
     }
 
     try {
@@ -49,6 +53,7 @@ suite('Artificial Panics', () => {
 
       assert.fail("This shouldn't happen!")
     } catch (e) {
+      assert.ok(calledArg)
       assert.ok(calledCount == 1)
     } finally {
       process.env = { ...OLD_ENV }
@@ -70,9 +75,11 @@ suite('Artificial Panics', () => {
     process.env.FORCE_PANIC_PRISMA_FMT = '1'
 
     let calledCount = 0
+    let calledArg: undefined | unknown = undefined
 
-    const onError = () => {
+    const onError = (arg: unknown) => {
       calledCount += 1
+      calledArg = arg
     }
 
     try {
@@ -80,6 +87,7 @@ suite('Artificial Panics', () => {
 
       assert.fail("This shouldn't happen!")
     } catch (e) {
+      assert.ok(calledArg)
       assert.ok(calledCount == 1)
     } finally {
       process.env = { ...OLD_ENV }
@@ -93,9 +101,11 @@ suite('Artificial Panics', () => {
     process.env.FORCE_PANIC_PRISMA_FMT = '1'
 
     let calledCount = 0
+    let calledArg: undefined | unknown = undefined
 
-    const onError = () => {
+    const onError = (arg: unknown) => {
       calledCount += 1
+      calledArg = arg
     }
 
     try {
@@ -103,6 +113,7 @@ suite('Artificial Panics', () => {
 
       assert.fail("This shouldn't happen!")
     } catch (e) {
+      assert.ok(calledArg)
       assert.ok(calledCount == 1)
     } finally {
       process.env = { ...OLD_ENV }
@@ -132,9 +143,11 @@ suite('Artificial Panics', () => {
     process.env.FORCE_PANIC_PRISMA_FMT_LOCAL = '1'
 
     let calledCount = 0
+    let calledArg: undefined | unknown = undefined
 
-    const onError = () => {
+    const onError = (arg: unknown) => {
       calledCount += 1
+      calledArg = arg
     }
 
     try {
@@ -142,6 +155,7 @@ suite('Artificial Panics', () => {
 
       assert.fail("This shouldn't happen!")
     } catch (e) {
+      assert.ok(calledArg)
       assert.ok(calledCount == 1)
     } finally {
       process.env = { ...OLD_ENV }
@@ -171,9 +185,11 @@ suite('Artificial Panics', () => {
     process.env.FORCE_PANIC_PRISMA_FMT_LOCAL = '1'
 
     let calledCount = 0
+    let calledArg: undefined | unknown = undefined
 
-    const onError = () => {
+    const onError = (arg: unknown) => {
       calledCount += 1
+      calledArg = arg
     }
 
     try {
@@ -181,6 +197,7 @@ suite('Artificial Panics', () => {
 
       assert.fail("This shouldn't happen!")
     } catch (e) {
+      assert.ok(calledArg)
       assert.ok(calledCount == 1)
     } finally {
       process.env = { ...OLD_ENV }
@@ -199,9 +216,11 @@ suite('Artificial Panics', () => {
     process.env.FORCE_PANIC_PRISMA_FMT = '1'
 
     let calledCount = 0
+    let calledArg: undefined | unknown = undefined
 
-    const onError = () => {
+    const onError = (arg: unknown) => {
       calledCount += 1
+      calledArg = arg
     }
 
     try {
@@ -209,6 +228,7 @@ suite('Artificial Panics', () => {
 
       assert.fail("This shouldn't happen!")
     } catch (e) {
+      assert.ok(calledArg)
       assert.ok(calledCount == 1)
     } finally {
       process.env = { ...OLD_ENV }
