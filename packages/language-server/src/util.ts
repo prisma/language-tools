@@ -508,8 +508,12 @@ export function getCompositeTypeFieldsRecursively(
     fieldTypeNames: Record<string, string>
   },
 ): string[] {
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const compositeTypeFieldName = compositeTypeFieldNames.shift()!
+  const compositeTypeFieldName = compositeTypeFieldNames.shift()
+
+  if (!compositeTypeFieldName) {
+    return []
+  }
+
   const fieldTypeNames = fieldTypesFromBlock.fieldTypeNames
   const fieldTypeName = fieldTypeNames[compositeTypeFieldName]
 
