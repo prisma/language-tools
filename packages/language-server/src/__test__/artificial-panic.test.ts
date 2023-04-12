@@ -54,7 +54,7 @@ suite('Artificial Panics', () => {
       assert.fail("This shouldn't happen!")
     } catch (e) {
       assert.ok(calledArg)
-      assert.ok(calledCount == 1)
+      assert.strictEqual(calledCount, 1)
     } finally {
       process.env = { ...OLD_ENV }
     }
@@ -88,7 +88,7 @@ suite('Artificial Panics', () => {
       assert.fail("This shouldn't happen!")
     } catch (e) {
       assert.ok(calledArg)
-      assert.ok(calledCount == 1)
+      assert.strictEqual(calledCount, 1)
     } finally {
       process.env = { ...OLD_ENV }
     }
@@ -114,7 +114,7 @@ suite('Artificial Panics', () => {
       assert.fail("This shouldn't happen!")
     } catch (e) {
       assert.ok(calledArg)
-      assert.ok(calledCount == 1)
+      assert.strictEqual(calledCount, 1)
     } finally {
       process.env = { ...OLD_ENV }
     }
@@ -156,7 +156,7 @@ suite('Artificial Panics', () => {
       assert.fail("This shouldn't happen!")
     } catch (e) {
       assert.ok(calledArg)
-      assert.ok(calledCount == 1)
+      assert.strictEqual(calledCount, 1)
     } finally {
       process.env = { ...OLD_ENV }
     }
@@ -198,7 +198,7 @@ suite('Artificial Panics', () => {
       assert.fail("This shouldn't happen!")
     } catch (e) {
       assert.ok(calledArg)
-      assert.ok(calledCount == 1)
+      assert.strictEqual(calledCount, 1)
     } finally {
       process.env = { ...OLD_ENV }
     }
@@ -229,7 +229,7 @@ suite('Artificial Panics', () => {
       assert.fail("This shouldn't happen!")
     } catch (e) {
       assert.ok(calledArg)
-      assert.ok(calledCount == 1)
+      assert.strictEqual(calledCount, 1)
     } finally {
       process.env = { ...OLD_ENV }
     }
