@@ -237,10 +237,18 @@ export function handleHoverRequest(document: TextDocument, params: HoverParams):
   return
 }
 
-function prismaFmtCompletions(params: CompletionParams, document: TextDocument): CompletionList | undefined {
+function prismaFmtCompletions(
+  params: CompletionParams,
+  document: TextDocument,
+  onError?: (errorMessage: string) => void,
+): CompletionList | undefined {
   const text = document.getText(fullDocumentRange(document))
 
-  const completionList = textDocumentCompletion(text, params)
+  const completionList = textDocumentCompletion(text, params, (errorMessage: string) => {
+    if (onError) {
+      onError(errorMessage)
+    }
+  })
 
   if (completionList.items.length === 0) {
     return undefined
@@ -249,7 +257,11 @@ function prismaFmtCompletions(params: CompletionParams, document: TextDocument):
   }
 }
 
-function localCompletions(params: CompletionParams, document: TextDocument): CompletionList | undefined {
+function localCompletions(
+  params: CompletionParams,
+  document: TextDocument,
+  onError?: (errorMessage: string) => void,
+): CompletionList | undefined {
   const context = params.context
   const position = params.position
 
@@ -291,6 +303,7 @@ function localCompletions(params: CompletionParams, document: TextDocument): Com
           lines,
           wordsBeforePosition,
           document,
+          onError,
         )
       case '"':
         return getSuggestionForSupportedFields(
@@ -299,17 +312,15 @@ function localCompletions(params: CompletionParams, document: TextDocument): Com
           currentLineUntrimmed,
           position,
           lines,
+          onError,
         )
       case '.':
         // check if inside attribute
         // Useful to complete composite types
-        if (
-          ['model', 'view'].includes(foundBlock.type) &&
-          isInsideAttribute(currentLineUntrimmed, position, '()')
-        ) {
+        if (['model', 'view'].includes(foundBlock.type) && isInsideAttribute(currentLineUntrimmed, position, '()')) {
           return getSuggestionsForInsideRoundBrackets(currentLineUntrimmed, lines, document, position, foundBlock)
         } else {
-          return getSuggestionForNativeTypes(foundBlock, lines, wordsBeforePosition, document)
+          return getSuggestionForNativeTypes(foundBlock, lines, wordsBeforePosition, document, onError)
         }
     }
   }
@@ -326,7 +337,14 @@ function localCompletions(params: CompletionParams, document: TextDocument): Com
       if (!positionIsAfterFieldAndType(position, document, wordsBeforePosition)) {
         return getSuggestionsForFieldTypes(foundBlock, lines, position, currentLineUntrimmed)
       }
-      return getSuggestionForFieldAttribute(foundBlock, lines[position.line], lines, wordsBeforePosition, document)
+      return getSuggestionForFieldAttribute(
+        foundBlock,
+        lines[position.line],
+        lines,
+        wordsBeforePosition,
+        document,
+        onError,
+      )
     case 'datasource':
     case 'generator':
       if (wordsBeforePosition.length === 1 && symbolBeforePositionIsWhiteSpace) {
@@ -344,6 +362,7 @@ function localCompletions(params: CompletionParams, document: TextDocument): Com
           currentLineUntrimmed,
           position,
           lines,
+          onError,
         )
       }
       break
@@ -356,8 +375,12 @@ function localCompletions(params: CompletionParams, document: TextDocument): Com
  *
  * This handler provides the initial list of the completion items.
  */
-export function handleCompletionRequest(params: CompletionParams, document: TextDocument): CompletionList | undefined {
-  return prismaFmtCompletions(params, document) || localCompletions(params, document)
+export function handleCompletionRequest(
+  params: CompletionParams,
+  document: TextDocument,
+  onError?: (errorMessage: string) => void,
+): CompletionList | undefined {
+  return prismaFmtCompletions(params, document, onError) || localCompletions(params, document, onError)
 }
 
 export function handleRenameRequest(params: RenameParams, document: TextDocument): WorkspaceEdit | undefined {
@@ -453,12 +476,16 @@ export function handleCompletionResolveRequest(item: CompletionItem): Completion
   return item
 }
 
-export function handleCodeActions(params: CodeActionParams, document: TextDocument): CodeAction[] {
+export function handleCodeActions(
+  params: CodeActionParams,
+  document: TextDocument,
+  onError?: (errorMessage: string) => void,
+): CodeAction[] {
   if (!params.context.diagnostics.length) {
     return []
   }
 
-  return quickFix(document, params)
+  return quickFix(document, params, onError)
 }
 
 export function handleDocumentSymbol(params: DocumentSymbolParams, document: TextDocument): DocumentSymbol[] {

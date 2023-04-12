@@ -163,7 +163,7 @@ const plugin: PrismaVSCodePlugin = {
           range: Range,
           context: CodeActionContext,
           token: CancellationToken,
-          _: ProvideCodeActionsSignature, // eslint-disable-line @typescript-eslint/no-unused-vars
+          _: ProvideCodeActionsSignature,
         ) {
           const params: CodeActionParams = {
             textDocument: client.code2ProtocolConverter.asTextDocumentIdentifier(document),
@@ -197,7 +197,7 @@ const plugin: PrismaVSCodePlugin = {
               }
               return result
             },
-            (_) => undefined, // eslint-disable-line @typescript-eslint/no-unused-vars
+            (_) => undefined,
           )
         },
       } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -205,7 +205,7 @@ const plugin: PrismaVSCodePlugin = {
     // const config = workspace.getConfiguration('prisma')
 
     workspace.onDidChangeConfiguration(
-      async (event) => {
+      (event) => {
         const fileWatcherConfigChanged = event.affectsConfiguration('prisma.fileWatcher')
 
         if (fileWatcherConfigChanged) {
@@ -239,14 +239,14 @@ const plugin: PrismaVSCodePlugin = {
           } else {
             // Let's stop it
             if (watcherInstance) {
-              await watcherInstance.close()
+              watcherInstance.close()
               console.debug('onDidChangeConfiguration: File Watcher stopped.')
             } else {
               console.debug('onDidChangeConfiguration: No File Watcher found')
             }
           }
         }
-      }, // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+      },
       null,
       context.subscriptions,
     )

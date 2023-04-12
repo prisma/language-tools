@@ -117,8 +117,10 @@ export function getSuggestionForNativeTypes(
   lines: string[],
   wordsBeforePosition: string[],
   document: TextDocument,
+  onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
-  const activeFeatureFlag = declaredNativeTypes(document)
+  const activeFeatureFlag = declaredNativeTypes(document, onError)
+
   if (
     // TODO type? native "@db." types?
     foundBlock.type !== 'model' ||
@@ -135,7 +137,7 @@ export function getSuggestionForNativeTypes(
 
   // line
   const prismaType = wordsBeforePosition[1].replace('?', '').replace('[]', '')
-  const suggestions = getNativeTypes(document, prismaType)
+  const suggestions = getNativeTypes(document, prismaType, onError)
 
   return {
     items: suggestions,
@@ -161,6 +163,7 @@ export function getSuggestionForFieldAttribute(
   lines: string[],
   wordsBeforePosition: string[],
   document: TextDocument,
+  onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
   const fieldType = getFieldType(currentLine)
   // If we don't find a field type (e.g. String, Int...), return no suggestion
@@ -174,7 +177,7 @@ export function getSuggestionForFieldAttribute(
   if (wordsBeforePosition.length >= 2) {
     const datasourceName = getFirstDatasourceName(lines)
     const prismaType = wordsBeforePosition[1]
-    const nativeTypeSuggestions = getNativeTypes(document, prismaType)
+    const nativeTypeSuggestions = getNativeTypes(document, prismaType, onError)
 
     if (datasourceName) {
       if (!currentLine.includes(`@${datasourceName}`)) {
@@ -366,6 +369,7 @@ export function getSuggestionForSupportedFields(
   currentLineUntrimmed: string,
   position: Position,
   lines: string[],
+  onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
   let suggestions: string[] = []
   const isInsideQuotation: boolean = isInsideQuotationMark(currentLineUntrimmed, position)
@@ -393,7 +397,7 @@ export function getSuggestionForSupportedFields(
       }
       // previewFeatures
       else if (currentLine.startsWith('previewFeatures')) {
-        const generatorPreviewFeatures: string[] = listAllAvailablePreviewFeatures()
+        const generatorPreviewFeatures: string[] = listAllAvailablePreviewFeatures(onError)
         if (generatorPreviewFeatures.length > 0) {
           return handlePreviewFeatures(generatorPreviewFeatures, position, currentLineUntrimmed, isInsideQuotation)
         }
@@ -675,23 +679,21 @@ function getDefaultValues({
   return suggestions
 }
 
-function getSuggestionsForAttribute(
-  {
-    attribute,
-    wordsBeforePosition,
-    untrimmedCurrentLine,
-    lines,
-    block,
-    position,
-  }: {
-    attribute?: '@relation'
-    wordsBeforePosition: string[]
-    untrimmedCurrentLine: string
-    lines: string[]
-    block: Block
-    position: Position
-  }, // eslint-disable-line @typescript-eslint/no-unused-vars
-): CompletionList | undefined {
+function getSuggestionsForAttribute({
+  attribute,
+  wordsBeforePosition,
+  untrimmedCurrentLine,
+  lines,
+  block,
+  position,
+}: {
+  attribute?: '@relation'
+  wordsBeforePosition: string[]
+  untrimmedCurrentLine: string
+  lines: string[]
+  block: Block
+  position: Position
+}): CompletionList | undefined {
   const firstWordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
   const secondWordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 2]
   const wordBeforePosition = firstWordBeforePosition === '' ? secondWordBeforePosition : firstWordBeforePosition
@@ -822,6 +824,7 @@ function getSuggestionsForAttribute(
           let name = value
           // Example for `@@index([email,address.|])` when there is no space between fields
           if (name?.includes(',')) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             name = name.split(',').pop()!
           }
           // Remove . to only get the name

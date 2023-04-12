@@ -121,6 +121,7 @@ export function givenBlockAttributeParams({
   blockAttribute,
   wordBeforePosition,
   datasourceProvider,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   previewFeatures,
 }: {
   blockAttribute: '@@unique' | '@@id' | '@@index' | '@@fulltext'
@@ -324,14 +325,13 @@ export const fieldAttributes: CompletionItem[] = convertAttributesToCompletionIt
   CompletionItemKind.Property,
 )
 
-export const sortLengthProperties: CompletionItem[] =
+export const sortLengthProperties: CompletionItem[] = convertToCompletionItems(
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  convertToCompletionItems(
-    completions.fieldAttributes
-      .find((item) => item.label === '@unique')!
-      .params.filter((item) => item.label === 'length' || item.label === 'sort'),
-    CompletionItemKind.Property,
-  )
+  completions.fieldAttributes
+    .find((item) => item.label === '@unique')!
+    .params.filter((item) => item.label === 'length' || item.label === 'sort'),
+  CompletionItemKind.Property,
+)
 
 export const relationArguments: CompletionItem[] = convertAttributesToCompletionItems(
   completions.relationArguments,
@@ -513,8 +513,16 @@ export function handlePreviewFeatures(
   }
 }
 
-export function getNativeTypes(document: TextDocument, prismaType: string): CompletionItem[] {
-  let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(document.getText())
+export function getNativeTypes(
+  document: TextDocument,
+  prismaType: string,
+  onError?: (errorMessage: string) => void,
+): CompletionItem[] {
+  let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(document.getText(), (errorMessage: string) => {
+    if (onError) {
+      onError(errorMessage)
+    }
+  })
 
   if (nativeTypes.length === 0) {
     console.log('Did not receive any native type suggestions from prisma-fmt call.')
