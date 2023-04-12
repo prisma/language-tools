@@ -1,5 +1,5 @@
 import { CodeActionParams, CompletionParams, DocumentFormattingParams } from 'vscode-languageserver'
-import { TextDocument, TextEdit } from 'vscode-languageserver-textdocument'
+import { TextDocument } from 'vscode-languageserver-textdocument'
 import {
   handleCodeActions,
   handleCompletionRequest,
@@ -15,7 +15,7 @@ suite('Artificial Panics', () => {
 
   test('code actions', () => {
     const fixturePath = './artificial-panic/schema.prisma'
-    const document: TextDocument = getTextDocument(fixturePath)
+    const document = getTextDocument(fixturePath)
 
     const params: CodeActionParams = {
       textDocument: document,
@@ -62,7 +62,7 @@ suite('Artificial Panics', () => {
 
   test('formatter', () => {
     const fixturePath = './artificial-panic/schema.prisma'
-    const document: TextDocument = getTextDocument(fixturePath)
+    const document = getTextDocument(fixturePath)
 
     const params: DocumentFormattingParams = {
       textDocument: document,
@@ -83,7 +83,7 @@ suite('Artificial Panics', () => {
     }
 
     try {
-      const _formatResult: TextEdit[] = handleDocumentFormatting(params, document, onError)
+      const _formatResult = handleDocumentFormatting(params, document, onError)
 
       assert.fail("This shouldn't happen!")
     } catch (e) {
@@ -96,7 +96,7 @@ suite('Artificial Panics', () => {
 
   test('linting', () => {
     const fixturePath = './artificial-panic/schema.prisma'
-    const document: TextDocument = getTextDocument(fixturePath)
+    const document = getTextDocument(fixturePath)
 
     process.env.FORCE_PANIC_PRISMA_FMT = '1'
 
@@ -122,7 +122,7 @@ suite('Artificial Panics', () => {
 
   test('preview features', () => {
     const fixturePath = './artificial-panic/schema.prisma'
-    let document: TextDocument = getTextDocument(fixturePath)
+    let document = getTextDocument(fixturePath)
 
     const schema = document.getText()
 
@@ -164,7 +164,7 @@ suite('Artificial Panics', () => {
 
   test('native types', () => {
     const fixturePath = './artificial-panic/native-types.prisma'
-    let document: TextDocument = getTextDocument(fixturePath)
+    let document = getTextDocument(fixturePath)
 
     const schema = document.getText()
 
@@ -206,7 +206,7 @@ suite('Artificial Panics', () => {
 
   test('completions', () => {
     const fixturePath = './artificial-panic/schema.prisma'
-    const document: TextDocument = getTextDocument(fixturePath)
+    const document = getTextDocument(fixturePath)
 
     const params: CompletionParams = {
       textDocument: document,
