@@ -1,7 +1,7 @@
 {
   "extends": ["config:base"],
   "semanticCommits": true,
-  "ignoreDeps": ["@prisma/language-server", "@prisma/prisma-fmt-wasm"],
+  "ignoreDeps": ["@prisma/language-server", "@prisma/prisma-fmt-wasm", "execa"],
   "masterIssue": true,
   "reviewers": ["@Jolg42", "@Druue"],
   "rebaseWhen": "conflicted",
