@@ -1,3 +1,4 @@
+const core = require('@actions/core')
 const { readVersionFile } = require('./../util')
 
 function checkForNewRelease({ type, version }) {
@@ -11,7 +12,7 @@ function checkForNewRelease({ type, version }) {
   console.log(`Published ${type} version: ${version}`)
   if (lastTestedVersion != version) {
     console.log(`New published version for ${type} available.`)
-    console.log(`::set-output name=new_${type}_version::${version}`)
+    core.setOutput(`new_${type}_version`, version)
   }
 }
 

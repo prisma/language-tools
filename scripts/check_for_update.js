@@ -1,4 +1,5 @@
 const { readVersionFile } = require('./util')
+const core = require('@actions/core')
 const execa = require('execa')
 const pRetry = require('p-retry')
 
@@ -29,7 +30,7 @@ function checkForUpdate({ channel }) {
     }
     if (currentPrismaVersion != npmPrismaVersion) {
       console.log(`New Prisma CLI version for ${channel} available.`)
-      console.log(`::set-output name=${channel}_version::${npmPrismaVersion}`)
+      core.setOutput(`${channel}_version`, `${npmPrismaVersion}`)
     }
   })()
 }

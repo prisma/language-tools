@@ -1,3 +1,4 @@
+const core = require('@actions/core')
 const execa = require('execa')
 const pRetry = require('p-retry')
 
@@ -29,7 +30,7 @@ function main() {
       },
     })
     console.debug(`Currently published insider extension version: ${insiderVersion}`)
-    console.log(`::set-output name=insider_version::${insiderVersion}`)
+    core.setOutput('insider_version', insiderVersion)
 
     const stableVersion = await pRetry(() => getVersionFromMarketplace({ extensionId: 'Prisma.prisma' }), {
       retries: 3,
@@ -39,7 +40,7 @@ function main() {
       },
     })
     console.debug(`Currently published stable extension version:: ${stableVersion}`)
-    console.log(`::set-output name=stable_version::${stableVersion}`)
+    core.setOutput('stable_version', stableVersion)
   })()
 }
 
