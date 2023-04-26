@@ -30,7 +30,7 @@ function checkForUpdate({ channel }) {
     }
     if (currentPrismaVersion != npmPrismaVersion) {
       console.log(`New Prisma CLI version for ${channel} available.`)
-      core.setOutput(`${channel}_version`, `${npmPrismaVersion}`)
+      core.setOutput(`${channel}_version`, npmPrismaVersion)
     }
   })()
 }

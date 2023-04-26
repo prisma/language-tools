@@ -6,7 +6,7 @@ if (require.main === module) {
   const vscodeVersion = args[1]
 
   if (releaseChannel === 'latest') {
-    core.setOutput('tag_name', `${vscodeVersion}`)
+    core.setOutput('tag_name', vscodeVersion)
     core.setOutput('asset_name', 'prisma')
   } else {
     core.setOutput('tag_name', `insider/${vscodeVersion}`)
