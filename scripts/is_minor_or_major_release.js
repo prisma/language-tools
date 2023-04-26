@@ -1,3 +1,4 @@
+const core = require('@actions/core')
 const { isMinorOrMajorRelease } = require('./bump_extension_version')
 const { readVersionFile } = require('./util')
 
@@ -7,8 +8,6 @@ if (require.main === module) {
   if (releaseChannel === 'latest') {
     const prisma_latest = readVersionFile({ fileName: 'prisma_latest' })
     const isMinorOrMajor = isMinorOrMajorRelease(prisma_latest)
-    console.log(
-      `::set-output name=is_minor_or_major_release::${isMinorOrMajor}`,
-    )
+    core.setOutput('is_minor_or_major_release', isMinorOrMajor)
   }
 }

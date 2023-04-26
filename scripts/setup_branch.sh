@@ -15,13 +15,13 @@ NPM_CHANNEL=$1
 
 if [ "$NPM_CHANNEL" = "dev" ]; then
     echo "Not switching branch because we are on NPM_CHANNEL dev."
-    echo "::set-output name=branch::main"
+    echo "branch=main" >> "$GITHUB_OUTPUT"
 elif [ "$NPM_CHANNEL" = "promote_patch-dev" ]; then
     PATCH_BRANCH=$(node scripts/setup_branch.js "patch-dev")
     git checkout stable
     git reset --hard "$PATCH_BRANCH" # Reset stable to patch-dev branch
     git push -f # do not merge, only use state of PATCH_BRANCH
-    echo "::set-output name=branch::main"
+    echo "branch=main" >> "$GITHUB_OUTPUT"
 else 
     BRANCH=$(node scripts/setup_branch.js "$NPM_CHANNEL")
     echo "BRANCH: $BRANCH"
@@ -33,8 +33,8 @@ else
 
     if [ "${EXISTS_ALREADY}" = "" ]; then
         echo "Branch $BRANCH does not exist yet."
-        echo "::set-output name=new_branch::true"
-        echo "::set-output name=branch::$BRANCH"
+        echo "new_branch=true" >> "$GITHUB_OUTPUT"
+        echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
         if [ "$ENVIRONMENT" = "PRODUCTION" ]; then
             git config --global user.email "prismabots@gmail.com"
@@ -55,6 +55,6 @@ else
     else 
         git checkout "$BRANCH"
         echo "$BRANCH exists already."
-        echo "::set-output name=branch::$BRANCH"
+        echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
     fi
 fi
