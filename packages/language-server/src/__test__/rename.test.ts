@@ -22,6 +22,7 @@ suite('Rename', () => {
   const renameModelPath = './rename/renameModel.prisma'
   const renameFieldPath = './rename/renameFields.prisma'
   const renameEnumPath = './rename/renameEnum.prisma'
+  const renameViewPath = './rename/renameView.prisma'
   const renameFieldLargeSchemaPath = './rename/renameFieldLargeSchema.prisma'
   const renameModelWithJsonDefaultPath = './rename/renameModelWithJsonDefault.prisma'
   const renameMultipleModelsPath = './rename/renameMultipleModels.prisma'
@@ -30,6 +31,7 @@ suite('Rename', () => {
   const renameModel: TextDocument = getTextDocument(renameModelPath)
   const renameField: TextDocument = getTextDocument(renameFieldPath)
   const renameEnum: TextDocument = getTextDocument(renameEnumPath)
+  const renameView: TextDocument = getTextDocument(renameViewPath)
   const renameModelWithJsonDefault: TextDocument = getTextDocument(renameModelWithJsonDefaultPath)
   const renameFieldLargeSchema: TextDocument = getTextDocument(renameFieldLargeSchemaPath)
   const renameMultipleModels: TextDocument = getTextDocument(renameMultipleModelsPath)
@@ -46,6 +48,8 @@ suite('Rename', () => {
 
   const newEnumName = 'Function'
   const newEnumValue = 'A_VARIANT_WITHOUT_UNDERSCORES'
+
+  const newViewName = 'Pane'
 
   test('Model', () => {
     assertRename(
@@ -571,6 +575,40 @@ suite('Rename', () => {
       renameEnum,
       newEnumValue,
       { line: 8, character: 28 },
+    )
+  })
+  test('Views', () => {
+    assertRename(
+      {
+        changes: {
+          [renameView.uri]: [
+            {
+              newText: newViewName,
+              range: {
+                start: { line: 10, character: 5 },
+                end: { line: 10, character: 11 },
+              },
+            },
+            {
+              newText: '\t@@map("Window")\n}',
+              range: {
+                start: { line: 13, character: 0 },
+                end: { line: 13, character: 1 },
+              },
+            },
+            {
+              newText: newViewName,
+              range: {
+                start: { line: 17, character: 13 },
+                end: { line: 17, character: 19 },
+              },
+            },
+          ],
+        },
+      },
+      renameView,
+      newViewName,
+      { line: 10, character: 9 },
     )
   })
 })
