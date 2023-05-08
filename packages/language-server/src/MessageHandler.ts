@@ -52,7 +52,6 @@ import {
 import { quickFix } from './codeActionProvider'
 import lint from './prisma-fmt/lint'
 import {
-  isModelName,
   insertBasicRename,
   renameReferencesForModelName,
   isEnumValue,
@@ -62,9 +61,9 @@ import {
   mapExistsAlready,
   insertMapAttribute,
   renameReferencesForFieldValue,
-  isEnumName,
   printLogMessage,
   isRelationField,
+  isBlockName,
 } from './rename/renameUtil'
 import { createDiagnosticsForIgnore } from './diagnosticsHandler'
 
@@ -388,21 +387,24 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
   const position = params.position
   const currentLine: string = lines[position.line]
   const currentBlock = getBlockAtPosition(position.line, lines)
-  const edits: TextEdit[] = []
   if (!currentBlock) {
     return
   }
 
-  const isModelRename: boolean = isModelName(params.position, currentBlock, lines, document)
-  const isEnumRename: boolean = isEnumName(params.position, currentBlock, lines, document)
+  const isBlockRename =
+    isBlockName(position, currentBlock, lines, document, 'model') ||
+    isBlockName(position, currentBlock, lines, document, 'enum') ||
+    isBlockName(position, currentBlock, lines, document, 'view')
+
   const isEnumValueRename: boolean = isEnumValue(currentLine, params.position, currentBlock, document)
   const isValidFieldRename: boolean = isValidFieldName(currentLine, params.position, currentBlock, document)
   const isRelationFieldRename: boolean = isValidFieldRename && isRelationField(currentLine, lines)
 
-  if (isModelRename || isEnumRename || isEnumValueRename || isValidFieldRename) {
+  if (isBlockRename || isEnumValueRename || isValidFieldRename) {
+    const edits: TextEdit[] = []
     const currentName = extractCurrentName(
       currentLine,
-      isModelRename || isEnumRename,
+      isBlockRename,
       isEnumValueRename,
       isValidFieldRename,
       document,
@@ -412,10 +414,10 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
     let lineNumberOfDefinition = position.line
     let blockOfDefinition = currentBlock
     let lineOfDefinition = currentLine
-    if (isModelRename || isEnumRename) {
+    if (isBlockRename) {
       // get definition of model or enum
-      const matchModelOrEnumBlockBeginning = new RegExp(`\\s*(model|enum)\\s+(${currentName})\\s*({)`, 'g')
-      lineNumberOfDefinition = lines.findIndex((l) => matchModelOrEnumBlockBeginning.test(l))
+      const matchBlockBeginning = new RegExp(`\\s*(${currentBlock.type})\\s+(${currentName})\\s*({)`, 'g')
+      lineNumberOfDefinition = lines.findIndex((l) => matchBlockBeginning.test(l))
       if (lineNumberOfDefinition === -1) {
         return
       }
@@ -431,16 +433,13 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
     edits.push(insertBasicRename(params.newName, currentName, document, lineNumberOfDefinition))
 
     // check if map exists already
-    if (
-      !isRelationFieldRename &&
-      !mapExistsAlready(lineOfDefinition, lines, blockOfDefinition, isModelRename || isEnumRename)
-    ) {
+    if (!isRelationFieldRename && !mapExistsAlready(lineOfDefinition, lines, blockOfDefinition, isBlockRename)) {
       // add map attribute
-      edits.push(insertMapAttribute(currentName, position, blockOfDefinition, isModelRename || isEnumRename))
+      edits.push(insertMapAttribute(currentName, position, blockOfDefinition, isBlockRename))
     }
 
     // rename references
-    if (isModelRename || isEnumRename) {
+    if (isBlockRename) {
       edits.push(...renameReferencesForModelName(currentName, params.newName, document, lines))
     } else if (isEnumValueRename) {
       edits.push(...renameReferencesForEnumValue(currentName, params.newName, document, lines, blockOfDefinition.name))
@@ -457,7 +456,14 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
       )
     }
 
-    printLogMessage(currentName, params.newName, isEnumRename, isModelRename, isValidFieldRename, isEnumValueRename)
+    printLogMessage(
+      currentName,
+      params.newName,
+      isBlockRename,
+      isValidFieldRename,
+      isEnumValueRename,
+      currentBlock.type,
+    )
     return {
       changes: {
         [document.uri]: edits,
