@@ -23,6 +23,7 @@ suite('Rename', () => {
   const renameFieldPath = './rename/renameFields.prisma'
   const renameEnumPath = './rename/renameEnum.prisma'
   const renameViewPath = './rename/renameView.prisma'
+  const renameTypePath = './rename/renameType.prisma'
   const renameFieldLargeSchemaPath = './rename/renameFieldLargeSchema.prisma'
   const renameModelWithJsonDefaultPath = './rename/renameModelWithJsonDefault.prisma'
   const renameMultipleModelsPath = './rename/renameMultipleModels.prisma'
@@ -32,6 +33,7 @@ suite('Rename', () => {
   const renameField: TextDocument = getTextDocument(renameFieldPath)
   const renameEnum: TextDocument = getTextDocument(renameEnumPath)
   const renameView: TextDocument = getTextDocument(renameViewPath)
+  const renameType: TextDocument = getTextDocument(renameTypePath)
   const renameModelWithJsonDefault: TextDocument = getTextDocument(renameModelWithJsonDefaultPath)
   const renameFieldLargeSchema: TextDocument = getTextDocument(renameFieldLargeSchemaPath)
   const renameMultipleModels: TextDocument = getTextDocument(renameMultipleModelsPath)
@@ -50,6 +52,7 @@ suite('Rename', () => {
   const newEnumValue = 'A_VARIANT_WITHOUT_UNDERSCORES'
 
   const newViewName = 'Pane'
+  const newTypeName = 'Pane'
 
   test('Model', () => {
     assertRename(
@@ -608,6 +611,33 @@ suite('Rename', () => {
       },
       renameView,
       newViewName,
+      { line: 10, character: 9 },
+    )
+  })
+  test('Types', () => {
+    assertRename(
+      {
+        changes: {
+          [renameType.uri]: [
+            {
+              newText: newTypeName,
+              range: {
+                start: { line: 10, character: 5 },
+                end: { line: 10, character: 11 },
+              },
+            },
+            {
+              newText: newTypeName,
+              range: {
+                start: { line: 17, character: 10 },
+                end: { line: 17, character: 16 },
+              },
+            },
+          ],
+        },
+      },
+      renameType,
+      newTypeName,
       { line: 10, character: 9 },
     )
   })

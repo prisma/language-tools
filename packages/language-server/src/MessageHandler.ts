@@ -394,7 +394,10 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
   const isBlockRename =
     isBlockName(position, currentBlock, lines, document, 'model') ||
     isBlockName(position, currentBlock, lines, document, 'enum') ||
-    isBlockName(position, currentBlock, lines, document, 'view')
+    isBlockName(position, currentBlock, lines, document, 'view') ||
+    isBlockName(position, currentBlock, lines, document, 'type')
+
+  const isMappable = currentBlock.type === 'model' || currentBlock.type === 'enum' || currentBlock.type === 'view'
 
   const isEnumValueRename: boolean = isEnumValue(currentLine, params.position, currentBlock, document)
   const isValidFieldRename: boolean = isValidFieldName(currentLine, params.position, currentBlock, document)
@@ -433,7 +436,11 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
     edits.push(insertBasicRename(params.newName, currentName, document, lineNumberOfDefinition))
 
     // check if map exists already
-    if (!isRelationFieldRename && !mapExistsAlready(lineOfDefinition, lines, blockOfDefinition, isBlockRename)) {
+    if (
+      !isRelationFieldRename &&
+      !mapExistsAlready(lineOfDefinition, lines, blockOfDefinition, isBlockRename) &&
+      isMappable
+    ) {
       // add map attribute
       edits.push(insertMapAttribute(currentName, position, blockOfDefinition, isBlockRename))
     }

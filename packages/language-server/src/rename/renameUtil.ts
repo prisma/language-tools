@@ -88,6 +88,7 @@ export const isBlockName = (
 
     case 'enum':
     case 'view':
+    case 'type':
       return position.character > 4
 
     default:
