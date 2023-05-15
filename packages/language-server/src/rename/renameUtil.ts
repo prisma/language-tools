@@ -39,8 +39,9 @@ export function isValidFieldName(
   document: TextDocument,
 ): boolean {
   if (
-    currentBlock.type !== 'model' ||
-    // TODO type
+    currentBlock.type === 'datasource' ||
+    currentBlock.type === 'generator' ||
+    currentBlock.type === 'enum' ||
     position.line == currentBlock.range.start.line ||
     position.line == currentBlock.range.end.line
   ) {
