@@ -1,5 +1,5 @@
 import { Position } from 'vscode-languageserver'
-import { TextEdit, TextDocument } from 'vscode-languageserver-textdocument'
+import type { TextEdit, TextDocument } from 'vscode-languageserver-textdocument'
 import {
   Block,
   getCurrentLine,

@@ -1,12 +1,12 @@
 import { DocumentSymbol, SymbolKind } from 'vscode-languageserver'
-import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as assert from 'assert'
 import { handleDocumentSymbol } from '../MessageHandler'
 import { getTextDocument } from './helper'
 
 function assertSymbols(fixturePath: string, expected: DocumentSymbol[]) {
-  const document: TextDocument = getTextDocument(fixturePath)
-  const actual = handleDocumentSymbol({ textDocument: document }, document)
+  const textDocument = getTextDocument(fixturePath)
+  const actual = handleDocumentSymbol({ textDocument }, textDocument)
+
   assert.deepStrictEqual(actual, expected)
 }
 
