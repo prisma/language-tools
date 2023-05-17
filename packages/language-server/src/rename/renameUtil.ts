@@ -10,6 +10,7 @@ import {
   getFieldTypesFromCurrentBlock,
   extractFirstWord,
   MAX_SAFE_VALUE_i32,
+  BlockType,
 } from '../util'
 
 function getType(currentLine: string): string {
@@ -38,8 +39,9 @@ export function isValidFieldName(
   document: TextDocument,
 ): boolean {
   if (
-    currentBlock.type !== 'model' ||
-    // TODO type
+    currentBlock.type === 'datasource' ||
+    currentBlock.type === 'generator' ||
+    currentBlock.type === 'enum' ||
     position.line == currentBlock.range.start.line ||
     position.line == currentBlock.range.end.line
   ) {
@@ -66,24 +68,33 @@ export function isValidFieldName(
   return type !== '' && type !== undefined
 }
 
-export function isModelName(position: Position, block: Block, lines: string[], document: TextDocument): boolean {
-  if (block.type !== 'model') {
+export const isBlockName = (
+  position: Position,
+  block: Block,
+  lines: string[],
+  document: TextDocument,
+  blockType: BlockType,
+): boolean => {
+  if (block.type !== blockType) {
     return false
   }
 
-  if (position.line === block.range.start.line) {
-    return position.character > 5
+  if (position.line !== block.range.start.line) {
+    return renameModelOrEnumWhereUsedAsType(block, lines, document, position, blockType)
   }
 
-  return renameModelOrEnumWhereUsedAsType(block, lines, document, position, 'model')
-}
+  switch (blockType) {
+    case 'model':
+      return position.character > 5
 
-export function isEnumName(position: Position, block: Block, lines: string[], document: TextDocument): boolean {
-  if (block.type === 'enum' && position.line === block.range.start.line) {
-    return position.character > 4
+    case 'enum':
+    case 'view':
+    case 'type':
+      return position.character > 4
+
+    default:
+      return false
   }
-
-  return renameModelOrEnumWhereUsedAsType(block, lines, document, position, 'enum')
 }
 
 function renameModelOrEnumWhereUsedAsType(
@@ -125,19 +136,17 @@ export function isEnumValue(
 export function printLogMessage(
   currentName: string,
   newName: string,
-  isEnumRename: boolean,
-  isModelRename: boolean,
+  isBlockRename: boolean,
   isFieldRename: boolean,
   isEnumValueRename: boolean,
+  blockType: BlockType,
 ): void {
   const message = `'${currentName}' was renamed to '${newName}'`
   let typeOfRename = ''
-  if (isEnumRename) {
-    typeOfRename = 'Enum '
+  if (isBlockRename) {
+    typeOfRename = `${blockType} `
   } else if (isFieldRename) {
     typeOfRename = 'Field '
-  } else if (isModelRename) {
-    typeOfRename = 'Model '
   } else if (isEnumValueRename) {
     typeOfRename = 'Enum value '
   }
@@ -457,13 +466,13 @@ export function insertMapAttribute(
 
 export function extractCurrentName(
   line: string,
-  isModelOrEnumRename: boolean,
+  isBlockRename: boolean,
   isEnumValueRename: boolean,
   isFieldRename: boolean,
   document: TextDocument,
   position: Position,
 ): string {
-  if (isModelOrEnumRename) {
+  if (isBlockRename) {
     const currentLineUntrimmed = getCurrentLine(document, position.line)
     const currentLineTillPosition = currentLineUntrimmed
       .slice(0, position.character + currentLineUntrimmed.slice(position.character).search(/\W/))
