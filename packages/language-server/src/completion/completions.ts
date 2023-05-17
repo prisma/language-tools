@@ -1005,7 +1005,6 @@ function getSuggestionsForAttribute({
 export function getSuggestionsForInsideRoundBrackets(
   untrimmedCurrentLine: string,
   lines: string[],
-  document: TextDocument,
   position: Position,
   block: Block,
 ): CompletionList | undefined {

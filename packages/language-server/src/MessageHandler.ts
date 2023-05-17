@@ -36,7 +36,7 @@ import {
   getBlocks,
   MAX_SAFE_VALUE_i32,
 } from './util'
-import { TextDocument } from 'vscode-languageserver-textdocument'
+import type { TextDocument } from 'vscode-languageserver-textdocument'
 import format from './prisma-fmt/format'
 import textDocumentCompletion from './prisma-fmt/textDocumentCompletion'
 import {
@@ -317,7 +317,7 @@ function localCompletions(
         // check if inside attribute
         // Useful to complete composite types
         if (['model', 'view'].includes(foundBlock.type) && isInsideAttribute(currentLineUntrimmed, position, '()')) {
-          return getSuggestionsForInsideRoundBrackets(currentLineUntrimmed, lines, document, position, foundBlock)
+          return getSuggestionsForInsideRoundBrackets(currentLineUntrimmed, lines, position, foundBlock)
         } else {
           return getSuggestionForNativeTypes(foundBlock, lines, wordsBeforePosition, document, onError)
         }
@@ -330,7 +330,7 @@ function localCompletions(
     case 'type':
       // check if inside attribute
       if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
-        return getSuggestionsForInsideRoundBrackets(currentLineUntrimmed, lines, document, position, foundBlock)
+        return getSuggestionsForInsideRoundBrackets(currentLineUntrimmed, lines, position, foundBlock)
       }
       // check if field type
       if (!positionIsAfterFieldAndType(position, document, wordsBeforePosition)) {

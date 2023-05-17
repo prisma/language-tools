@@ -1,17 +1,17 @@
-import { TextDocument, Position } from 'vscode-languageserver-textdocument'
+import type { Position } from 'vscode-languageserver-textdocument'
 import { handleHoverRequest } from '../MessageHandler'
 import { Hover } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
 
 function assertHover(position: Position, expected: Hover, fixturePath: string): void {
-  const document: TextDocument = getTextDocument(fixturePath)
+  const textDocument = getTextDocument(fixturePath)
 
   const params = {
-    textDocument: document,
+    textDocument,
     position: position,
   }
-  const hoverResult: Hover | undefined = handleHoverRequest(document, params)
+  const hoverResult: Hover | undefined = handleHoverRequest(textDocument, params)
 
   assert.ok(hoverResult !== undefined)
   assert.deepStrictEqual(hoverResult.contents, expected.contents)
