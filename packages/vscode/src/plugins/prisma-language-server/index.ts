@@ -1,7 +1,6 @@
 import path from 'path'
 import FileWatcher from 'watcher'
 import type { type as FileWatcherType } from 'watcher'
-import minimatch from 'minimatch'
 
 import {
   CancellationToken,
@@ -59,6 +58,19 @@ const activateClient = (
   context.subscriptions.push(disposable)
 }
 
+/**
+ * These are the paths that are watched by the file watcher. We have to specify
+ * the full paths that we will watch, otherwise we will get a lot of events.
+ * All these paths are necessary for the file watcher to work properly. Read
+ * > ignore: https://github.com/fabiospampinato/watcher#options
+ */
+const watchedPaths = [
+  /node_modules$/,
+  /node_modules[\\/]\.prisma$/,
+  /node_modules[\\/]\.prisma[\\/]client$/,
+  /node_modules[\\/]\.prisma[\\/]client[\\/]index\.d\.ts$/,
+]
+
 const startFileWatcher = (rootPath: string) => {
   console.debug('Starting File Watcher')
   // https://github.com/fabiospampinato/watcher
@@ -74,10 +86,18 @@ const startFileWatcher = (rootPath: string) => {
     recursive: true,
     ignoreInitial: true,
     ignore: (targetPath) => {
-      if (targetPath === rootPath) {
-        return false
+      if (targetPath === rootPath) return false
+
+      // we ignore all files that are not a match
+      const isIgnored = watchedPaths.reduce((acc, regex) => {
+        return acc && targetPath.match(regex) === null
+      }, true)
+
+      if (isIgnored === false) {
+        console.log(`File Watcher: Watching ${targetPath}`)
       }
-      return !minimatch(targetPath, '**/node_modules/.prisma/client/index.d.ts')
+
+      return isIgnored
     },
     //   // ignore dotfiles (except .prisma) adjusted from chokidar README example
     //   ignored: /(^|[\/\\])\.(?!prisma)./,
