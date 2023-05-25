@@ -105,12 +105,6 @@
       "type": "object",
       "title": "Prisma",
       "properties": {
-        "prisma.fileWatcher": {
-          "scope": "window",
-          "type": "boolean",
-          "default": true,
-          "description": "Enable/disable the File Watcher functionality for Prisma Client."
-        },
         "prisma.trace.server": {
           "scope": "window",
           "type": "string",
@@ -128,16 +122,6 @@
       {
         "command": "prisma.restartLanguageServer",
         "title": "Restart Language Server",
-        "category": "Prisma"
-      },
-      {
-        "command": "prisma.filewatcherEnable",
-        "title": "Enable the File Watcher functionality for Prisma Client.",
-        "category": "Prisma"
-      },
-      {
-        "command": "prisma.filewatcherDisable",
-        "title": "Disable the File Watcher functionality for Prisma Client.",
         "category": "Prisma"
       }
     ]
