@@ -1,4 +1,5 @@
 import path from 'path'
+import fs from 'fs'
 import FileWatcher from 'watcher'
 import type { type as FileWatcherType } from 'watcher'
 
@@ -58,19 +59,22 @@ const activateClient = (
   context.subscriptions.push(disposable)
 }
 
+// periodically clean up the allowedWatcherPaths
+setInterval(() => {
+  for (const path in allowedWatcherPaths) {
+    if (!fs.existsSync(path)) {
+      delete allowedWatcherPaths[path]
+    }
+  }
+}, 10000)
+
 /**
  * These are the paths that are watched by the file watcher. We have to specify
  * the full paths that we will watch, otherwise we will get a lot of events.
  * All these paths are necessary for the file watcher to work properly. Read
  * > ignore: https://github.com/fabiospampinato/watcher#options
  */
-const watchedPaths = [
-  /node_modules$/,
-  /node_modules[\\/]\.prisma$/,
-  /node_modules[\\/]\.prisma[\\/]client$/,
-  /node_modules[\\/]\.prisma[\\/]client[\\/]index\.d\.ts$/,
-]
-
+const allowedWatcherPaths: Record<string, boolean> = {}
 const startFileWatcher = (rootPath: string) => {
   console.debug('Starting File Watcher')
   // https://github.com/fabiospampinato/watcher
@@ -85,29 +89,48 @@ const startFileWatcher = (rootPath: string) => {
     depth: 9,
     recursive: true,
     ignoreInitial: true,
-    ignore: (targetPath) => {
-      if (targetPath === rootPath) return false
+    ignore(targetPath) {
+      if (!targetPath.startsWith(rootPath)) return true
+      if (targetPath.endsWith('.git')) return true
 
-      // we ignore all files that are not a match
-      const isIgnored = watchedPaths.reduce((acc, regex) => {
-        return acc && targetPath.match(regex) === null
-      }, true)
-
-      if (isIgnored === false) {
-        console.log(`File Watcher: Watching ${targetPath}`)
+      // for all the sub-directories of the project, allow recursion into node_modules
+      if (fs.statSync(targetPath).isDirectory() && !targetPath.includes('node_modules')) {
+        allowedWatcherPaths[path.join(targetPath, 'node_modules')] = true
+        return false
       }
 
-      return isIgnored
-    },
-    //   // ignore dotfiles (except .prisma) adjusted from chokidar README example
-    //   ignored: /(^|[\/\\])\.(?!prisma)./,
+      // but every time we hit a node_module path, ensure some sub-paths are whitelisted
+      if (fs.statSync(targetPath).isDirectory() && targetPath.endsWith('node_modules')) {
+        try {
+          // we get the location of installation of the @prisma/client package
+          const clientPath = path.dirname(require.resolve('@prisma/client', { paths: [targetPath] }))
+          const dotClientPath = path.resolve(clientPath, '..', '..', '.prisma', 'client', 'index.d.ts')
 
-    // native?: boolean,
-    // persistent?: boolean,
-    // pollingInterval?: number,
-    // pollingTimeout?: number,
-    // renameDetection?: boolean,
-    // renameTimeout?: number
+          // if we have seen this path already, we don't need to save it again
+          if (allowedWatcherPaths[dotClientPath] !== undefined) return false
+          const dotClientArrayPath = dotClientPath.split(path.sep)
+
+          // decompose the path into an all the possible steps of its sub-paths
+          // eg. "a/b/c/d"" will become [ "a", "a/b", "a/b/c", "a/b/c/d" ]
+          dotClientArrayPath
+            .map((_, index) => dotClientArrayPath.slice(0, index + 1).join(path.sep))
+            .filter((path) => path.includes(rootPath))
+            .forEach((path) => (allowedWatcherPaths[path] = true))
+
+          // display the paths that will be watched for the given @prisma/client
+          console.log(`Watched paths ${JSON.stringify(Object.keys(allowedWatcherPaths), null, 2)}`)
+        } catch {
+          // if we couldn't find the @prisma/client package, nothing got whitelisted
+        }
+      }
+
+      // if the path is in the allowed paths then we don't ignore it
+      if (targetPath in allowedWatcherPaths) {
+        return false
+      }
+
+      return true
+    },
   })
 }
 
