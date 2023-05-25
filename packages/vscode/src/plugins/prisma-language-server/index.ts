@@ -93,14 +93,8 @@ const startFileWatcher = (rootPath: string) => {
       if (!targetPath.startsWith(rootPath)) return true
       if (targetPath.endsWith('.git')) return true
 
-      // for all the sub-directories of the project, allow recursion into node_modules
-      if (fs.statSync(targetPath).isDirectory() && !targetPath.includes('node_modules')) {
-        allowedWatcherPaths[path.join(targetPath, 'node_modules')] = true
-        return false
-      }
-
-      // but every time we hit a project path, we ensure some sub-paths are whitelisted
-      if (fs.statSync(targetPath).isDirectory()) {
+      // every time we hit a project path, ensure some sub-paths are whitelisted
+      if (!(targetPath in allowedWatcherPaths) && fs.statSync(targetPath).isDirectory()) {
         try {
           // we get the location of installation of the @prisma/client package
           const clientPath = path.dirname(require.resolve('@prisma/client', { paths: [targetPath] }))
