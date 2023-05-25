@@ -82,6 +82,8 @@ function stopGenerateWatcher() {
 
   fileWatcher.close()
   fileWatcher = undefined
+
+  console.log('Stopped watching for changes.')
 }
 
 function setGenerateWatcher(enabled: boolean) {
