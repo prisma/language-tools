@@ -10,7 +10,6 @@ import {
   Range,
   TextDocument,
   window,
-  workspace,
 } from 'vscode'
 import {
   CodeAction as lsCodeAction,
