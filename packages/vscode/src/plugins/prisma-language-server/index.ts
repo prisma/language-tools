@@ -99,8 +99,8 @@ const startFileWatcher = (rootPath: string) => {
         return false
       }
 
-      // but every time we hit a node_module path, ensure some sub-paths are whitelisted
-      if (fs.statSync(targetPath).isDirectory() && targetPath.endsWith('node_modules')) {
+      // but every time we hit a project path, we ensure some sub-paths are whitelisted
+      if (fs.statSync(targetPath).isDirectory()) {
         try {
           // we get the location of installation of the @prisma/client package
           const clientPath = path.dirname(require.resolve('@prisma/client', { paths: [targetPath] }))
@@ -124,10 +124,7 @@ const startFileWatcher = (rootPath: string) => {
         }
       }
 
-      // if the path is in the allowed paths then we don't ignore it
-      if (targetPath in allowedWatcherPaths) {
-        return false
-      }
+      if (targetPath in allowedWatcherPaths) return false
 
       return true
     },
