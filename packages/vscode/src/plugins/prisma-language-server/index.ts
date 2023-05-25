@@ -195,9 +195,7 @@ const plugin: PrismaVSCodePlugin = {
           setGenerateWatcher(!!workspace.getConfiguration('prisma').get('fileWatcher'))
         }
       }),
-    )
 
-    context.subscriptions.push(
       commands.registerCommand('prisma.restartLanguageServer', async () => {
         client = await restartClient(context, client, serverOptions, clientOptions)
         window.showInformationMessage('Prisma language server restarted.') // eslint-disable-line @typescript-eslint/no-floating-promises
