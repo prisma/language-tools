@@ -62,7 +62,7 @@ const onFileChange = (filepath: string) => {
 }
 
 const startGenerateWatcher = () => {
-  const prismaCache = paths('prisma', { suffix: '' }).cache
+  const prismaCache = paths('checkpoint').cache
   const signalsPath = path.join(prismaCache, 'last-generate')
   const fwOptions = { debounce: 500, ignoreInitial: true }
   const fw = new FileWatcher(signalsPath, fwOptions)
