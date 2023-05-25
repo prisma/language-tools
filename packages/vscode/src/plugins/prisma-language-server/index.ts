@@ -188,6 +188,13 @@ const plugin: PrismaVSCodePlugin = {
       } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
     }
 
+    // when the file watcher settings change, we need to ensure they are applied
+    workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration('prisma.fileWatcher')) {
+        setGenerateWatcher(!!workspace.getConfiguration('prisma').get('fileWatcher'))
+      }
+    })
+
     context.subscriptions.push(
       commands.registerCommand('prisma.restartLanguageServer', async () => {
         client = await restartClient(context, client, serverOptions, clientOptions)
@@ -207,12 +214,6 @@ const plugin: PrismaVSCodePlugin = {
         await prismaConfig.update('fileWatcher', false /* value */, false /* workspace */)
       }),
     )
-
-    workspace.onDidChangeConfiguration((event) => {
-      if (event.affectsConfiguration('prisma.fileWatcher')) {
-        setGenerateWatcher(!!workspace.getConfiguration('prisma').get('fileWatcher'))
-      }
-    })
 
     activateClient(context, serverOptions, clientOptions)
 
