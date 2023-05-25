@@ -10,6 +10,7 @@ import {
   Range,
   TextDocument,
   window,
+  workspace,
 } from 'vscode'
 import {
   CodeAction as lsCodeAction,
@@ -38,6 +39,7 @@ const packageJson = require('../../../../package.json') // eslint-disable-line
 let client: LanguageClient
 let serverModule: string
 let telemetry: TelemetryReporter
+let fileWatcher: FileWatcher.type | undefined
 
 const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
 const isE2ETestOnPullRequest = () => process.env.PRISMA_USE_LOCAL_LS === 'true'
@@ -61,16 +63,33 @@ const onFileChange = (filepath: string) => {
   void commands.executeCommand('typescript.restartTsServer')
 }
 
-const startGenerateWatcher = () => {
-  const prismaCache = paths('checkpoint').cache
+function startGenerateWatcher() {
+  if (fileWatcher !== undefined) return
+
+  const prismaCache = paths('prisma').cache
   const signalsPath = path.join(prismaCache, 'last-generate')
   const fwOptions = { debounce: 500, ignoreInitial: true }
-  const fw = new FileWatcher(signalsPath, fwOptions)
+
+  fileWatcher = new FileWatcher(signalsPath, fwOptions)
+  fileWatcher.on('change', onFileChange)
+  fileWatcher.on('add', onFileChange)
 
   console.log(`Watching ${signalsPath} for changes.`)
+}
 
-  fw.on('change', onFileChange)
-  fw.on('add', onFileChange)
+function stopGenerateWatcher() {
+  if (fileWatcher === undefined) return
+
+  fileWatcher.close()
+  fileWatcher = undefined
+}
+
+function setGenerateWatcher(enabled: boolean) {
+  if (enabled) {
+    startGenerateWatcher()
+  } else {
+    stopGenerateWatcher()
+  }
 }
 
 const plugin: PrismaVSCodePlugin = {
@@ -79,7 +98,7 @@ const plugin: PrismaVSCodePlugin = {
   activate: async (context) => {
     const isDebugOrTest = isDebugOrTestSession()
 
-    startGenerateWatcher()
+    setGenerateWatcher(!!workspace.getConfiguration('prisma').get('fileWatcher'))
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (packageJson.name === 'prisma-insider-pr-build') {
@@ -175,7 +194,23 @@ const plugin: PrismaVSCodePlugin = {
 
       /* This command is part of the workaround for https://github.com/prisma/language-tools/issues/311 */
       commands.registerCommand('prisma.applySnippetWorkspaceEdit', applySnippetWorkspaceEdit()),
+
+      commands.registerCommand('prisma.filewatcherEnable', async () => {
+        const prismaConfig = workspace.getConfiguration('prisma')
+        await prismaConfig.update('fileWatcher', true /* value */, false /* workspace */)
+      }),
+
+      commands.registerCommand('prisma.filewatcherDisable', async () => {
+        const prismaConfig = workspace.getConfiguration('prisma')
+        await prismaConfig.update('fileWatcher', false /* value */, false /* workspace */)
+      }),
     )
+
+    workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration('prisma.fileWatcher')) {
+        setGenerateWatcher(!!workspace.getConfiguration('prisma').get('fileWatcher'))
+      }
+    })
 
     activateClient(context, serverOptions, clientOptions)
 
