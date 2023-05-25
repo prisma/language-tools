@@ -176,20 +176,6 @@ const plugin: PrismaVSCodePlugin = {
 
       /* This command is part of the workaround for https://github.com/prisma/language-tools/issues/311 */
       commands.registerCommand('prisma.applySnippetWorkspaceEdit', applySnippetWorkspaceEdit()),
-
-      commands.registerCommand('prisma.filewatcherEnable', async () => {
-        const prismaConfig = workspace.getConfiguration('prisma')
-        // First, is set to true value
-        // Second, is set it on Workspace level settings
-        await prismaConfig.update('fileWatcher', true, false)
-      }),
-
-      commands.registerCommand('prisma.filewatcherDisable', async () => {
-        const prismaConfig = workspace.getConfiguration('prisma')
-        // First, is set to false value
-        // Second, is set it on Workspace level settings
-        await prismaConfig.update('fileWatcher', false, false)
-      }),
     )
 
     activateClient(context, serverOptions, clientOptions)
