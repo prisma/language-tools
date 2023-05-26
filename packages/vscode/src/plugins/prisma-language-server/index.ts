@@ -1,4 +1,6 @@
 import path from 'path'
+import os from 'os'
+import minimatch from 'minimatch'
 
 import {
   CancellationToken,
@@ -66,15 +68,30 @@ const onFileChange = (filepath: string) => {
 function startGenerateWatcher() {
   if (fileWatcher !== undefined) return
 
-  const prismaCache = paths('prisma').cache
-  const signalsPath = path.join(prismaCache, 'last-generate')
-  const fwOptions = { debounce: 500, ignoreInitial: true }
+  // macOS watcher to be removed in future releases
+  const rootPath = workspace.workspaceFolders?.[0].uri.path
+  if (os.platform() === 'darwin' && rootPath !== undefined) {
+    fileWatcher = new FileWatcher(rootPath, {
+      depth: 9,
+      debounce: 500,
+      recursive: true,
+      ignoreInitial: true,
+      ignore: (targetPath) => {
+        if (targetPath === rootPath) return false
+        return !minimatch(targetPath, '**/node_modules/.prisma/client/index.d.ts')
+      },
+    })
+    console.log(`Watching ${rootPath} for changes (old watcher).`)
+  } else {
+    const prismaCache = paths('prisma').cache
+    const signalsPath = path.join(prismaCache, 'last-generate')
+    const fwOptions = { debounce: 500, ignoreInitial: true }
+    fileWatcher = new FileWatcher(signalsPath, fwOptions)
+    console.log(`Watching ${signalsPath} for changes (new watcher).`)
+  }
 
-  fileWatcher = new FileWatcher(signalsPath, fwOptions)
   fileWatcher.on('change', onFileChange)
   fileWatcher.on('add', onFileChange)
-
-  console.log(`Watching ${signalsPath} for changes.`)
 }
 
 function stopGenerateWatcher() {
