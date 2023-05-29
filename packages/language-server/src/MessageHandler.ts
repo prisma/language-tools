@@ -166,7 +166,7 @@ export function handleDefinitionRequest(document: TextDocument, params: Declarat
   const foundBlocks: Block[] = results
     .map((result) => {
       const block = getBlockAtPosition(result, lines)
-      if (block && block.name === word) {
+      if (block && block.name === word && block.range.start.line === result) {
         return block
       }
     })
