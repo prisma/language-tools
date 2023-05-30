@@ -1,4 +1,3 @@
-import { TextDocument } from 'vscode-languageserver-textdocument'
 import { quickFix } from '../codeActionProvider'
 import {
   CodeAction,
@@ -12,12 +11,12 @@ import * as assert from 'assert'
 import { getTextDocument } from './helper'
 
 function assertQuickFix(expected: CodeAction[], fixturePath: string, range: Range, diagnostics: Diagnostic[]): void {
-  const document: TextDocument = getTextDocument(fixturePath)
+  const textDocument = getTextDocument(fixturePath)
 
   const params: CodeActionParams = {
     textDocument: {
       // prisma-fmt expects a URI starting with file:///, if not it will return nothing ([])
-      uri: `file:///${document.uri.substring(2)}`,
+      uri: `file:///${textDocument.uri.substring(2)}`,
     },
     context: {
       diagnostics,
@@ -25,7 +24,7 @@ function assertQuickFix(expected: CodeAction[], fixturePath: string, range: Rang
     range,
   }
 
-  const quickFixResult: CodeAction[] = quickFix(document, params)
+  const quickFixResult: CodeAction[] = quickFix(textDocument, params)
 
   assert.ok(quickFixResult.length !== 0, "Expected a quick fix, but didn't get one")
   assert.deepStrictEqual(quickFixResult, expected)

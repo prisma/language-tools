@@ -1,4 +1,3 @@
-import { TextDocument } from 'vscode-languageserver-textdocument'
 import { handleDiagnosticsRequest } from '../MessageHandler'
 import { Diagnostic, DiagnosticSeverity, DiagnosticTag } from 'vscode-languageserver'
 import * as assert from 'assert'
@@ -6,7 +5,7 @@ import { getTextDocument } from './helper'
 import { MAX_SAFE_VALUE_i32 } from '../util'
 
 function assertLinting(expected: Diagnostic[], fixturePath: string): void {
-  const document: TextDocument = getTextDocument(fixturePath)
+  const document = getTextDocument(fixturePath)
 
   const diagnosticsResults: Diagnostic[] = handleDiagnosticsRequest(document)
 

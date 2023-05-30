@@ -1,0 +1,20 @@
+generator client {
+    provider        = "prisma-client-js"
+    previewFeatures = ["views"]
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+view Window {
+    id   Int    @id
+    Prop Prop[]
+}
+
+model Prop {
+    id       Int    @id
+    item     Window @relation(fields: [windowId], references: [id])
+    windowId Int
+}

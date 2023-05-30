@@ -1,3 +1,4 @@
+const core = require('@actions/core')
 const vscodeTest = require('@vscode/test-electron')
 const childProcess = require('child_process')
 
@@ -29,7 +30,7 @@ async function installExtension({ extensionType, extensionVersion }) {
       console.log("It's not ready to be installed yet.")
       return 'FAIL'
     } else {
-      console.log('::set-output name=installed-extension::true')
+      core.setOutput('installed-extension', true)
       return 'SUCCESS'
     }
   } catch (err) {

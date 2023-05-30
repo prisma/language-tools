@@ -2,7 +2,7 @@
   "name": "@prisma/language-server",
   "description": "Prisma Language Server",
   "displayName": "Prisma Language Server",
-  "version": "31.0.2091",
+  "version": "31.0.2256",
   "author": "Prisma",
   "license": "Apache-2.0",
   "publisher": "Prisma",
@@ -10,8 +10,8 @@
     "node": ">=14"
   },
   "prisma": {
-    "enginesVersion": "0145f3f905a104fabe142ed6b861cb8f0f56f5e7",
-    "cliVersion": "4.14.0-dev.21"
+    "enginesVersion": "8fbc245156db7124f997f4cecdd8d1219e360944",
+    "cliVersion": "4.15.0-dev.88"
   },
   "bin": {
     "prisma-language-server": "dist/src/bin.js"
@@ -24,13 +24,13 @@
   "scripts": {
     "build": "tsc",
     "watch": "npm run build -- -w",
-    "test": "nyc --reporter=clover --reporter=text-summary mocha --ui tdd --useColors true  ./dist/src/__test__/**/*.test.js",
+    "test": "nyc --reporter=clover --reporter=text-summary mocha --ui tdd --useColors true ./dist/src/__test__/**/*.test.js",
     "pretest": "tsc"
   },
   "main": "./dist/index.js",
   "typings": "dist/src/index",
   "dependencies": {
-    "@prisma/prisma-fmt-wasm": "4.14.0-32.0145f3f905a104fabe142ed6b861cb8f0f56f5e7",
+    "@prisma/prisma-fmt-wasm": "4.15.0-28.8fbc245156db7124f997f4cecdd8d1219e360944",
     "@types/js-levenshtein": "1.1.1",
     "js-levenshtein": "1.1.6",
     "klona": "2.0.6",
@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "@types/mocha": "10.0.1",
-    "@types/node": "14.18.42",
+    "@types/node": "14.18.48",
     "mocha": "10.2.0",
     "ts-dedent": "2.2.0",
     "typescript": "5.0.4"

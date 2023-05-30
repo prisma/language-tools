@@ -2,7 +2,7 @@
   "name": "prisma-insider",
   "displayName": "Prisma - Insider",
   "description": "This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the dev version of the CLI).",
-  "version": "31.0.2091",
+  "version": "31.0.2256",
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
@@ -13,11 +13,12 @@
     "Programming Languages"
   ],
   "dependencies": {
-    "@prisma/language-server": "31.0.2091",
+    "@prisma/language-server": "31.0.2256",
     "checkpoint-client": "1.1.23",
+    "env-paths": "2.2.1",
     "minimatch": "6.2.0",
     "vscode-languageclient": "7.0.0",
-    "watcher": "^1.2.0"
+    "watcher": "1.2.0"
   },
   "repository": {
     "type": "git",
@@ -108,7 +109,7 @@
           "scope": "window",
           "type": "boolean",
           "default": true,
-          "description": "Enable/disable the File Watcher functionality for Prisma Client."
+          "description": "Enable, when checked, the File Watcher functionality for Prisma Client."
         },
         "prisma.trace.server": {
           "scope": "window",
@@ -145,12 +146,12 @@
     "@types/glob": "8.1.0",
     "@types/mocha": "10.0.1",
     "@types/vscode": "1.56.0",
-    "@vscode/test-electron": "2.3.0",
+    "@vscode/test-electron": "2.3.2",
     "is-ci": "3.0.1",
     "mocha": "10.2.0",
-    "ovsx": "0.8.0",
+    "ovsx": "0.8.1",
     "typescript": "5.0.4",
-    "vsce": "2.15.0"
+    "@vscode/vsce": "2.19.0"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
   "publishConfig": {
