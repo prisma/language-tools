@@ -20,6 +20,8 @@ env:
 jobs:
   build:
     name: Build extension
+    # Only runs for Prisma repo, as this will fail on a PR from a fork
+    if: github.repository == 'prisma/language-tools'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
@@ -84,20 +86,20 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: 'github-actions[bot]'
-          body-includes: "via GitPod"
+          body-includes: 'via GitPod'
 
       - name: Create comment
         if: "!contains(github.actor, 'renovate') && steps.fc.outputs.comment-id == ''"
         uses: peter-evans/create-or-update-comment@v3
         with:
           issue-number: ${{ github.event.pull_request.number }}
-          body: "[Try this extension build via GitPod](https://gitpod.io/#vsix=https%3A%2F%2Fgithub.com%2Fprisma%2Flanguage-tools%2Fblob%2Fartifacts%2Fpull-request-artifacts%2Fpr${{ github.event.pull_request.number }}-prisma.vsix%3Fraw%3Dtrue/https://github.com/prisma/language-tools-gitpod)"
-      
+          body: '[Try this extension build via GitPod](https://gitpod.io/#vsix=https%3A%2F%2Fgithub.com%2Fprisma%2Flanguage-tools%2Fblob%2Fartifacts%2Fpull-request-artifacts%2Fpr${{ github.event.pull_request.number }}-prisma.vsix%3Fraw%3Dtrue/https://github.com/prisma/language-tools-gitpod)'
+
   slack:
     name: Send slack notification
     runs-on: ubuntu-latest
     needs: [build]
-    if: always()
+    if: always() && github.repository == 'prisma/language-tools'
     steps:
       - uses: actions/checkout@v3
         with:
