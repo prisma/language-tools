@@ -21,7 +21,7 @@ jobs:
   build:
     name: Build extension
     # Only runs for Prisma repo, as this will fail on a PR from a fork
-    if: github.repository == 'prisma/prisma'
+    if: github.repository == 'prisma/language-tools'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
