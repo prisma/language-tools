@@ -158,10 +158,7 @@ export function quickFix(
           },
         },
       })
-    } else if (
-      diag.severity === DiagnosticSeverity.Warning &&
-      diag.message.includes("property has been renamed to 'previewFeatures'")
-    ) {
+    } else if (diag.severity === DiagnosticSeverity.Error && diag.message.includes('`experimentalFeatures`')) {
       codeActionList.push({
         title: "Rename property to 'previewFeatures'",
         kind: CodeActionKind.QuickFix,
