@@ -117,10 +117,12 @@ export function handleDiagnosticsRequest(
     const experimentalFeaturesRange: Range | undefined = getExperimentalFeaturesRange(document)
     if (experimentalFeaturesRange) {
       diagnostics.push({
-        severity: DiagnosticSeverity.Warning,
+        severity: DiagnosticSeverity.Error,
         range: experimentalFeaturesRange,
-        message: "This property has been renamed to 'previewFeatures' to better communicate what they are.",
-        source: '',
+        message:
+          "The `experimentalFeatures` property is obsolete and has been renamed to 'previewFeatures' to better communicate what it is.",
+        code: 'Prisma 5',
+        tags: [2],
       })
     }
   }
