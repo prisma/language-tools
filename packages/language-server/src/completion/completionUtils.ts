@@ -10,7 +10,7 @@ import {
 } from 'vscode-languageserver'
 import * as completions from './completions.json'
 import type { PreviewFeatures } from '../previewFeatures'
-import nativeTypeConstructors, { NativeTypeConstructors } from '../prisma-fmt/nativeTypes'
+import nativeTypeConstructors, { NativeTypeConstructors } from '../prisma-schema-wasm/nativeTypes'
 import { Block, BlockType, getValuesInsideSquareBrackets, isInsideAttribute } from '../util'
 
 type JSONSimpleCompletionItems = {
@@ -525,7 +525,7 @@ export function getNativeTypes(
   })
 
   if (nativeTypes.length === 0) {
-    console.log('Did not receive any native type suggestions from prisma-fmt call.')
+    console.log('Did not receive any native type suggestions from prisma-schema-wasm call.')
     return []
   }
 

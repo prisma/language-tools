@@ -37,8 +37,8 @@ import {
   MAX_SAFE_VALUE_i32,
 } from './util'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
-import format from './prisma-fmt/format'
-import textDocumentCompletion from './prisma-fmt/textDocumentCompletion'
+import format from './prisma-schema-wasm/format'
+import textDocumentCompletion from './prisma-schema-wasm/textDocumentCompletion'
 import {
   getSuggestionForFieldAttribute,
   getSuggestionsForFieldTypes,
@@ -50,7 +50,7 @@ import {
   getSuggestionForNativeTypes,
 } from './completion/completions'
 import { quickFix } from './codeActionProvider'
-import lint from './prisma-fmt/lint'
+import lint from './prisma-schema-wasm/lint'
 import {
   insertBasicRename,
   renameReferencesForModelName,
@@ -238,7 +238,7 @@ export function handleHoverRequest(document: TextDocument, params: HoverParams):
   return
 }
 
-function prismaFmtCompletions(
+function prismaSchemaWasmCompletions(
   params: CompletionParams,
   document: TextDocument,
   onError?: (errorMessage: string) => void,
@@ -381,7 +381,7 @@ export function handleCompletionRequest(
   document: TextDocument,
   onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
-  return prismaFmtCompletions(params, document, onError) || localCompletions(params, document, onError)
+  return prismaSchemaWasmCompletions(params, document, onError) || localCompletions(params, document, onError)
 }
 
 export function handleRenameRequest(params: RenameParams, document: TextDocument): WorkspaceEdit | undefined {

@@ -15,7 +15,7 @@ function assertQuickFix(expected: CodeAction[], fixturePath: string, range: Rang
 
   const params: CodeActionParams = {
     textDocument: {
-      // prisma-fmt expects a URI starting with file:///, if not it will return nothing ([])
+      // prisma-schema-wasm expects a URI starting with file:///, if not it will return nothing ([])
       uri: `file:///${textDocument.uri.substring(2)}`,
     },
     context: {
@@ -198,7 +198,7 @@ suite('Quick Fixes', () => {
     })
   })
 
-  suite('from prisma-fmt', () => {
+  suite('from prisma-schema-wasm', () => {
     const fixturePath = './codeActions/one_to_many_referenced_side_misses_unique_single_field.prisma'
     const expectedPath = `file:///${fixturePath.substring(2)}`
 
