@@ -1,6 +1,6 @@
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import { Position, Range } from 'vscode-languageserver'
-import nativeTypeConstructors, { NativeTypeConstructors } from './prisma-fmt/nativeTypes'
+import nativeTypeConstructors, { NativeTypeConstructors } from './prisma-schema-wasm/nativeTypes'
 import { PreviewFeatures } from './previewFeatures'
 
 export type BlockType = 'generator' | 'datasource' | 'model' | 'type' | 'enum' | 'view'

@@ -36,7 +36,7 @@ suite('Artificial Panics', () => {
       },
     }
 
-    process.env.FORCE_PANIC_PRISMA_FMT = '1'
+    process.env.FORCE_PANIC_PRISMA_SCHEMA = '1'
 
     let calledCount = 0
     let calledArg: undefined | unknown = undefined
@@ -72,7 +72,7 @@ suite('Artificial Panics', () => {
       },
     }
 
-    process.env.FORCE_PANIC_PRISMA_FMT = '1'
+    process.env.FORCE_PANIC_PRISMA_SCHEMA = '1'
 
     let calledCount = 0
     let calledArg: undefined | unknown = undefined
@@ -98,7 +98,7 @@ suite('Artificial Panics', () => {
     const fixturePath = './artificial-panic/schema.prisma'
     const document = getTextDocument(fixturePath)
 
-    process.env.FORCE_PANIC_PRISMA_FMT = '1'
+    process.env.FORCE_PANIC_PRISMA_SCHEMA = '1'
 
     let calledCount = 0
     let calledArg: undefined | unknown = undefined
@@ -140,7 +140,7 @@ suite('Artificial Panics', () => {
       position,
     }
 
-    process.env.FORCE_PANIC_PRISMA_FMT_LOCAL = '1'
+    process.env.FORCE_PANIC_PRISMA_SCHEMA_LOCAL = '1'
 
     let calledCount = 0
     let calledArg: undefined | unknown = undefined
@@ -182,7 +182,7 @@ suite('Artificial Panics', () => {
       position,
     }
 
-    process.env.FORCE_PANIC_PRISMA_FMT_LOCAL = '1'
+    process.env.FORCE_PANIC_PRISMA_SCHEMA_LOCAL = '1'
 
     let calledCount = 0
     let calledArg: undefined | unknown = undefined
@@ -213,7 +213,7 @@ suite('Artificial Panics', () => {
       position: { character: 0, line: 0 },
     }
 
-    process.env.FORCE_PANIC_PRISMA_FMT = '1'
+    process.env.FORCE_PANIC_PRISMA_SCHEMA = '1'
 
     let calledCount = 0
     let calledArg: undefined | unknown = undefined
