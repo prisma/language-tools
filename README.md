@@ -4,8 +4,8 @@ Using the Language Server Protocol to improve Prisma's developer experience.
 
 - [Prisma VS Code Extension](packages/vscode)
   - Install stable version (recommended) [Prisma](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma): 
-    ![Prisma](https://vsmarketplacebadges.dev/version-short/Prisma.prisma.svg)
-  - or install the insider version (for Prisma developers) [Prisma Insider](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider): ![Prisma Insider](https://vsmarketplacebadges.dev/version-short/Prisma.prisma-insider.svg)
+    ![Prisma](https://img.shields.io/visual-studio-marketplace/v/Prisma.prisma)
+  - or install the insider version (for Prisma developers) [Prisma Insider](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider): ![Prisma Insider](https://img.shields.io/visual-studio-marketplace/v/Prisma.prisma-insider)
 
 - [Language Server implementation](packages/language-server)
 
