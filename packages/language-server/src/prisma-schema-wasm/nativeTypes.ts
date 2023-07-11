@@ -1,4 +1,4 @@
-import { prismaFmt } from '../wasm'
+import { prismaSchemaWasm } from '../wasm'
 import { handleFormatPanic, handleWasmError } from './util'
 
 export interface NativeTypeConstructors {
@@ -13,14 +13,14 @@ export default function nativeTypeConstructors(
   onError?: (errorMessage: string) => void,
 ): NativeTypeConstructors[] {
   try {
-    if (process.env.FORCE_PANIC_PRISMA_FMT_LOCAL) {
+    if (process.env.FORCE_PANIC_PRISMA_SCHEMA_LOCAL) {
       handleFormatPanic(() => {
         console.debug('Triggering a Rust panic...')
-        prismaFmt.debug_panic()
+        prismaSchemaWasm.debug_panic()
       })
     }
 
-    const result = prismaFmt.native_types(text)
+    const result = prismaSchemaWasm.native_types(text)
 
     return JSON.parse(result) as NativeTypeConstructors[]
   } catch (e) {

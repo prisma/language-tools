@@ -18,7 +18,7 @@ import {
 import { createConnection, IPCMessageReader, IPCMessageWriter } from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
-import * as util from './prisma-fmt/util'
+import * as util from './prisma-schema-wasm/util'
 import { LSOptions, LSSettings } from './settings'
 const packageJson = require('../../package.json') // eslint-disable-line
 
@@ -51,7 +51,7 @@ export function startServer(options?: LSOptions): void {
 
   connection.onInitialize((params: InitializeParams) => {
     // Logging first...
-    connection.console.info(`Default version of Prisma 'prisma-fmt': ${util.getVersion()}`)
+    connection.console.info(`Default version of Prisma 'prisma-schema-wasm': ${util.getVersion()}`)
 
     connection.console.info(
       // eslint-disable-next-line
