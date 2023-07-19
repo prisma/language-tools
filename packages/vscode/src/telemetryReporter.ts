@@ -41,8 +41,13 @@ export default class TelemetryReporter {
     // It is replaced by `telemetryLevel`, only available since v1.61 (default = 'all')
     // https://code.visualstudio.com/docs/getstarted/telemetry
     // To enable Telemetry:
-    // We check that `enableTelemetry` is true and if `telemetryLevel` is defined we check if it is set to 'all'
-    if (isTelemetryEnabled || (isTelemetryEnabled && telemetryLevel && telemetryLevel === 'all')) {
+    // We check that
+    // `enableTelemetry` is true and `telemetryLevel` falsy -> enabled
+    // `enableTelemetry` is true and `telemetryLevel` set to 'all'
+    // anything else falls back to disabled.
+    const isTelemetryEnabledWithOldSetting = isTelemetryEnabled && !telemetryLevel
+    const isTelemetryEnabledWithNewSetting = isTelemetryEnabled && telemetryLevel && telemetryLevel === 'all'
+    if (isTelemetryEnabledWithOldSetting || isTelemetryEnabledWithNewSetting) {
       this.userOptIn = true
       console.info('Telemetry is enabled for Prisma extension')
     } else {
