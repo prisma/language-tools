@@ -43,7 +43,7 @@ export default class TelemetryReporter {
     // To enable Telemetry:
     // We check that
     // `enableTelemetry` is true and `telemetryLevel` falsy -> enabled
-    // `enableTelemetry` is true and `telemetryLevel` set to 'all'
+    // `enableTelemetry` is true and `telemetryLevel` set to 'all' -> enabled
     // anything else falls back to disabled.
     const isTelemetryEnabledWithOldSetting = isTelemetryEnabled && !telemetryLevel
     const isTelemetryEnabledWithNewSetting = isTelemetryEnabled && telemetryLevel && telemetryLevel === 'all'
