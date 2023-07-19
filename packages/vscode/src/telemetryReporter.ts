@@ -2,16 +2,16 @@ import { check } from 'checkpoint-client'
 import { Disposable, workspace } from 'vscode'
 import { getProjectHash } from './hashes'
 
+type TelemetryLevel = 'off' | 'crash' | 'error' | 'all' | undefined
+
 export default class TelemetryReporter {
   private userOptIn = false
   private readonly configListener: Disposable
 
-  private static TELEMETRY_CONFIG_ID = 'telemetry'
+  private static TELEMETRY_SECTION_ID = 'telemetry'
+  private static TELEMETRY_SETTING_ID = 'telemetry.telemetryLevel'
   // Deprecated since https://code.visualstudio.com/updates/v1_61#_telemetry-settings
-  private static TELEMETRY_CONFIG_ENABLED_ID_DEPRECATED = 'enableTelemetry'
-  // It is replaced by `telemetryLevel`
-  // https://code.visualstudio.com/docs/getstarted/telemetry
-  private static TELEMETRY_CONFIG_LEVEL_ID = 'telemetryLevel'
+  private static TELEMETRY_OLD_SETTING_ID = 'telemetry.enableTelemetry'
 
   constructor(
     private extensionId: string,
@@ -32,12 +32,17 @@ export default class TelemetryReporter {
   }
 
   private updateUserOptIn() {
-    const telemetryConfig = workspace.getConfiguration(TelemetryReporter.TELEMETRY_CONFIG_ID)
-    // Deprecated since https://code.visualstudio.com/updates/v1_61#_telemetry-settings
-    const isTelemetryEnabled = telemetryConfig.get<boolean>(TelemetryReporter.TELEMETRY_CONFIG_ENABLED_ID_DEPRECATED)
-    const telemetryLevel = telemetryConfig.get<string>(TelemetryReporter.TELEMETRY_CONFIG_LEVEL_ID)
+    const telemetrySettings = workspace.getConfiguration(TelemetryReporter.TELEMETRY_SECTION_ID)
+    const isTelemetryEnabled = telemetrySettings.get<boolean>(TelemetryReporter.TELEMETRY_OLD_SETTING_ID)
+    // Only available since https://code.visualstudio.com/updates/v1_61#_telemetry-settings
+    const telemetryLevel = telemetrySettings.get<string>(TelemetryReporter.TELEMETRY_SETTING_ID) as TelemetryLevel
 
-    if (isTelemetryEnabled && telemetryLevel === 'all') {
+    // `enableTelemetry` is either true or false (default = true). Deprecated since https://code.visualstudio.com/updates/v1_61#_telemetry-settings
+    // It is replaced by `telemetryLevel`, only available since v1.61 (default = 'all')
+    // https://code.visualstudio.com/docs/getstarted/telemetry
+    // To enable Telemetry:
+    // We check that `enableTelemetry` is true and if `telemetryLevel` is defined we check if it is set to 'all'
+    if (isTelemetryEnabled || (isTelemetryEnabled && telemetryLevel && telemetryLevel === 'all')) {
       this.userOptIn = true
       console.info('Telemetry is enabled for Prisma extension')
     } else {
