@@ -80,11 +80,20 @@ Easily navigate definitions, i.e. models in the Prisma schema.
 
 ## Contributing
 
-Read more about [how to contribute to the Prisma VSCode extension](./packages/vscode/CONTRIBUTING.md)
+Read more about [how to contribute to the Prisma VS Code extension](./packages/vscode/CONTRIBUTING.md)
 
 ## Telemetry
 
-This extension collects telemetry data to help us better the usage of the extension. You can read more about that [in Prisma's documentation ](https://www.prisma.io/docs/reference/more/telemetry). The extension respects the `telemetry.enableTelemetry` setting in VSCode. If you want to opt out of telemetry, set `"telemetry.enableTelemetry": false` in your VSCode settings.
+This extension collects telemetry data to help us better the usage of the extension. You can read more about that [in Prisma's documentation ](https://www.prisma.io/docs/reference/more/telemetry).
+The extension respects:
+
+- the `telemetry.enableTelemetry` setting in VS Code ([deprecated since v1.61](https://code.visualstudio.com/updates/v1_61#_telemetry-settings)).
+- the `telemetry.telemetryLevel` setting in VS Code (see [docs](https://code.visualstudio.com/docs/getstarted/telemetry))
+
+If you want to opt out of telemetry you can either, in your VS Code settings:
+
+- set `"telemetry.enableTelemetry": false`
+- set `"telemetry.telemetryLevel": "off"` (or "crash" or "error")
 
 ## Build information
 
