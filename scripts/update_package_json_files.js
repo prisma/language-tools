@@ -32,7 +32,7 @@ function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersion = '
       name: 'prisma-insider',
       displayName: 'Prisma - Insider',
       description:
-        'This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the dev version of the CLI).',
+        'This is the Insider Build of the Prisma VS Code extension (only use it if you are also using the dev version of the CLI).',
       preview: true,
     })
   } else {
