@@ -9,9 +9,9 @@ export default class TelemetryReporter {
   private readonly configListener: Disposable
 
   private static TELEMETRY_SECTION_ID = 'telemetry'
-  private static TELEMETRY_SETTING_ID = 'telemetry.telemetryLevel'
+  private static TELEMETRY_SETTING_ID = 'telemetryLevel'
   // Deprecated since https://code.visualstudio.com/updates/v1_61#_telemetry-settings
-  private static TELEMETRY_OLD_SETTING_ID = 'telemetry.enableTelemetry'
+  private static TELEMETRY_OLD_SETTING_ID = 'enableTelemetry'
 
   constructor(
     private extensionId: string,
