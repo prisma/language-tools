@@ -49,7 +49,7 @@ jobs:
       - name: Run Language Server tests
         run: npx lerna run test --scope @prisma/language-server
       - name: Run VS Code extension tests in headless mode
-        uses: GabrielBB/xvfb-action@v1.6
+        uses: coactions/setup-xvfb@v1
         with:
           run: npm test "useLocalLS"
       - name: Catch shell script issues
