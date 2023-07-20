@@ -100,7 +100,7 @@ export function startServer(options?: LSOptions): void {
   })
 
   // The global settings, used when the `workspace/configuration` request is not supported by the client or is not set by the user.
-  // This does not apply to VSCode, as this client supports this setting.
+  // This does not apply to VS Code, as this client supports this setting.
   // const defaultSettings: LSSettings = {}
   // let globalSettings: LSSettings = defaultSettings // eslint-disable-line
 

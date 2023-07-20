@@ -7,7 +7,7 @@
   "rebaseWhen": "conflicted",
   "packageRules": [
     {
-      "groupName": "VSCode",
+      "groupName": "VS Code",
       "packageNames": ["vscode", "@types/vscode"],
       "updateTypes": ["patch", "minor"]
     },
@@ -38,11 +38,7 @@
     {
       "groupName": "dependencies (non-major)",
       "depTypeList": ["dependencies"],
-      "excludePackageNames": [
-        "@prisma/language-server",
-        "@types/vscode",
-        "@prisma/prisma-schema-wasm"
-      ],
+      "excludePackageNames": ["@prisma/language-server", "@types/vscode", "@prisma/prisma-schema-wasm"],
       "updateTypes": ["patch", "minor"]
     }
   ]

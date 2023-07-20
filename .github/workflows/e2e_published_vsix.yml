@@ -8,7 +8,7 @@ on:
         description: 'Insider or stable extension'
         required: true
       extension_version:
-        description: 'VSCode extension version'
+        description: 'VS Code extension version'
         required: true
 
 env:

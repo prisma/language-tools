@@ -59,7 +59,7 @@ jobs:
         run: |
           git reset --hard main
           git push --force origin stable
-      - name: Update Prisma CLI version and VSCode extension version
+      - name: Update Prisma CLI version and VS Code extension version
         run: |
           node scripts/update_package_json_files.js ${{ github.event.inputs.npm_channel }} ${{ steps.update.outputs.next_extension_version }} ${{ github.event.inputs.version }}
       - name: Install Dependencies to update lock file

@@ -4,7 +4,7 @@
 
 The `main` branch of this repository contains the VS Code extension for Prisma schema files. Prisma package dependencies are kept up to date with [a GitHub Action workflow](/.github/workflows/1_check_for_updates.yml), that updates them every time a new version of them is released.
 
-There is a stable version `prisma` and an unstable version `prisma-insider`. The stable one is published as ["Prisma" in the VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma), the unstable one as ["Prisma - Insider"](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider). An automated publish runs every 5 minutes calling the `check-update.sh` script.
+There is a stable version `prisma` and an unstable version `prisma-insider`. The stable one is published as ["Prisma" in the VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma), the unstable one as ["Prisma - Insider"](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider). An automated publish runs every 5 minutes calling the `check-update.sh` script.
 In the beginning of this run, the CI job checks for Prisma stable version and `scripts/prisma_version_stable` contents to be the same. If the Prisma stable version is a new minor release, it makes the required version changes and proceeds further in the job. `scripts/prisma_version_stable` is a file that is committed by the stable CI job. That enables the future runs to know if an extension version is already published for a specific Prisma CLI version.
 
 If there is a new Prisma Patch, a new patch branch from the last stable release tag is created if it does not exist yet. It then makes the required version changes and releases a new Insider extension. This script also triggers the release of a new Stable extension, incrementing the version number each time.
@@ -38,13 +38,13 @@ On push to the `main` branch, a new Insider extension is released, with an incre
 - Run `npm run watch`.
 - Open VS Code on this folder.
 - Switch to the debug viewlet.
-- Select `Launch VSCode extension` from the drop down.
+- Select `Launch VS Code extension` from the drop down.
 - Run the launch config. (This will always use the local Language Server, not the published one.)
 - If you want to debug the server as well use the launch configuration `Attach to Server` afterwards.
-- A new file should open in the [Extension Development Host] instance of VSCode.
+- A new file should open in the [Extension Development Host] instance of VS Code.
 - Change the language to Prisma.
 - Make a change to the syntax
-- To reload, press the reload button in VSCode (**Developer: Inspect TM Scopes** is helpful for debugging syntax issues)
+- To reload, press the reload button in VS Code (**Developer: Inspect TM Scopes** is helpful for debugging syntax issues)
 
 ### Dependencies
 
@@ -52,7 +52,7 @@ On push to the `main` branch, a new Insider extension is released, with an incre
 
 ## Debugging
 
-- Set `prisma.trace.server` to `messages` or `verbose` to trace the communication between VSCode and the language server.
+- Set `prisma.trace.server` to `messages` or `verbose` to trace the communication between VS Code and the language server.
 - There is a tool to visualize and filter the communication between Language Client / Server. All logs from the channel can be saved into a file, and loaded with the Language Server Protocol Inspector at https://microsoft.github.io/language-server-protocol/inspector
 
 ## Testing

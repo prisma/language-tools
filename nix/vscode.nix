@@ -26,7 +26,7 @@
       npm prune --production
       popd
 
-      echo 'Building VSCode extension...'
+      echo 'Building VS Code extension...'
       pushd ./packages/vscode
       npm install
       npm run build
@@ -34,9 +34,9 @@
 
       echo 'ok'
     '';
-    # Start a VSCode instance with completely default configuration.
+    # Start a VS Code instance with completely default configuration.
     # Follow the instructions from CONTRIBUTING.md to manually start
-    # another instance of VSCode with the local build of the extension
+    # another instance of VS Code with the local build of the extension
     # (unpackaged) locally.
     code = pkgs.writeShellScriptBin "code" ''
       TMPDIR=`mktemp -d`

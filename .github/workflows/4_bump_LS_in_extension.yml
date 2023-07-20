@@ -1,5 +1,5 @@
 name: 4. Bump LS in VSCode extension
-run-name: 4. Bump LS in VSCode extension - ${{ inputs.trigger_reason }}
+run-name: 4. Bump LS in VS Code extension - ${{ inputs.trigger_reason }}
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ on:
         description: 'Prisma CLI NPM Channel'
         required: true
       extension_version:
-        description: 'VSCode extension version'
+        description: 'VS Code extension version'
         required: true
       branch:
         description: 'Branch to run run this workflow on'
@@ -23,7 +23,7 @@ env:
 
 jobs:
   bump:
-    name: Bump LS in VSCode extension
+    name: Bump LS in VS Code extension
     runs-on: ubuntu-latest
     timeout-minutes: 7
     steps:
@@ -61,9 +61,9 @@ jobs:
 
       - name: Commit and push to branch
         run: |
-          sh scripts/commit_and_push.sh "Bump LS to ${{ github.event.inputs.extension_version }} in VSCode. Engines: ${{ steps.packagejson.outputs.engines }}"
+          sh scripts/commit_and_push.sh "Bump LS to ${{ github.event.inputs.extension_version }} in VS Code. Engines: ${{ steps.packagejson.outputs.engines }}"
 
-      - name: Trigger next workflow for VSCode e2e tests
+      - name: Trigger next workflow for VS Code e2e tests
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: 5. Integration tests in VSCode folder with published LS

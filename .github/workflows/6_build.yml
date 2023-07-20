@@ -8,7 +8,7 @@ on:
         description: 'Prisma CLI NPM Channel'
         required: true
       extension_version:
-        description: 'VSCode extension version'
+        description: 'VS Code extension version'
         required: true
       branch:
         description: 'Branch to run run this workflow on'
