@@ -62,8 +62,12 @@ function nextVersion({ currentVersion, branch_channel, prisma_latest, prisma_dev
       }
       return semVer.inc(currentVersion, 'patch')
     case 'latest':
+      if (prisma_latest === '5.0.0') {
+        // Because @prisma/language-server 5.0.1 is already published
+        return '5.0.2'
+      }
       // Prisma CLI new latest version
-      if (isMinorOrMajorRelease(prisma_latest) && currentVersion != prisma_latest) {
+      else if (isMinorOrMajorRelease(prisma_latest) && currentVersion != prisma_latest) {
         // just adopt the version number from npm for extension as well
         return prisma_latest
       } else {
