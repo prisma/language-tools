@@ -10,12 +10,12 @@ async function installExtension({ extensionType, extensionVersion }) {
     }
     const extensionName = `Prisma.prisma${vsceArgument}`
 
-    // Install VSCode
+    // Install VS Code
     const vscodeExecutablePath = await vscodeTest.downloadAndUnzipVSCode('stable')
 
     console.debug({ vscodeExecutablePath })
 
-    // Install VSCode extension
+    // Install VS Code extension
     const [cli, ...args] = vscodeTest.resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath)
 
     console.debug({ cli })

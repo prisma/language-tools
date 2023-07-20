@@ -46,7 +46,7 @@ jobs:
       - name: Checkout previous branch
         if: endsWith(github.ref, '/main') == false
         run: git checkout ${{ github.ref_name }}
-      - name: Update VSCode extension version
+      - name: Update VS Code extension version
         run: |
           node scripts/update_package_json_files.js dev ${{ steps.update.outputs.next_extension_version }} ""
       - name: Install Dependencies
