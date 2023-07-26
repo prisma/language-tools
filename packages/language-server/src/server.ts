@@ -144,7 +144,8 @@ export function startServer(options?: LSOptions): void {
   //   return result
   // }
 
-  function showErrorToast(errorMessage: string) {
+  // Note: VS Code strips newline characters from the message
+  function showErrorToast(errorMessage: string): void {
     connection.window.showErrorMessage(errorMessage)
   }
 
