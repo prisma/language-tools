@@ -34,7 +34,11 @@
   },
   "main": "./dist/src/extension.js",
   "activationEvents": [
-    "onLanguage:prisma"
+    "onLanguage:prisma",
+    "onLanguage:javascript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact"
   ],
   "contributes": {
     "languages": [
