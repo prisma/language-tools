@@ -36,27 +36,27 @@ export function getCliVersion(): string {
 export function handleWasmError(e: Error, cmd: string, onError?: (errorMessage: string) => void) {
   const getErrorMessage = () => {
     if (isWasmPanic(e)) {
-      const { message } = getWasmError(e)
+      const { message, stack } = getWasmError(e)
       const msg = `prisma-schema-wasm errored when invoking ${cmd}. It resulted in a Wasm panic.\n${message}`
-
-      return { message: msg, isPanic: true }
+      return { message: msg, isPanic: true, stack }
     }
 
     const msg = `prisma-schema-wasm errored when invoking ${cmd}.\n${e.message}`
-    return { message: msg, isPanic: false }
+    return { message: msg, isPanic: false, stack: e.stack }
   }
 
-  const { message, isPanic } = getErrorMessage()
+  const { message, isPanic, stack } = getErrorMessage()
 
   if (isPanic) {
-    console.error(message)
+    console.warn(`prisma-schema-wasm errored (panic) with: ${message}\n\n${stack}`)
   } else {
-    console.warn(message)
+    console.warn(`prisma-schema-wasm errored with: ${message}\n\n${stack}`)
   }
 
   if (onError) {
     onError(
-      "prisma-schema-wasm errored. To get a more detailed output please see Prisma Language Server output. You can do this by going to View, then Output from the toolbar, and then select 'Prisma Language Server' in the drop-down menu.",
+      // Note: VS Code strips newline characters from the message
+      `prisma-schema-wasm errored with: -- ${message} -- For the full output check the "Prisma Language Server" output. In the menu, click "View", then Output and select "Prisma Language Server" in the drop-down menu.`,
     )
   }
 }
