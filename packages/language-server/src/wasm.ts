@@ -1,6 +1,6 @@
-import prismaFmt from '@prisma/prisma-fmt-wasm'
+import prismaSchemaWasm from '@prisma/prisma-schema-wasm'
 import { WasmPanicRegistry } from './WasmPanicRegistry'
-export { prismaFmt }
+export { prismaSchemaWasm }
 
 /**
  * Set up a global registry for Wasm panics.

@@ -33,7 +33,7 @@ import {
   relationModeValues,
   filterSuggestionsForLine,
 } from './completionUtils'
-import listAllAvailablePreviewFeatures from '../prisma-fmt/listAllAvailablePreviewFeatures'
+import listAllAvailablePreviewFeatures from '../prisma-schema-wasm/listAllAvailablePreviewFeatures'
 import {
   Block,
   BlockType,
@@ -1005,7 +1005,6 @@ function getSuggestionsForAttribute({
 export function getSuggestionsForInsideRoundBrackets(
   untrimmedCurrentLine: string,
   lines: string[],
-  document: TextDocument,
   position: Position,
   block: Block,
 ): CompletionList | undefined {

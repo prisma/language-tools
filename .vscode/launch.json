@@ -6,7 +6,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch VSCode extension",
+      "name": "Launch VS Code extension",
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
@@ -15,7 +15,9 @@
         "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode",
         "--disable-extensions"
       ],
-      "outFiles": ["${workspaceFolder}/packages/vscode/dist/**/*.js"],
+      "outFiles": [
+        "${workspaceFolder}/packages/vscode/dist/**/*.js"
+      ],
       "env": {
         "VSCODE_DEBUG_MODE": "true"
       }
@@ -27,7 +29,9 @@
       "port": 6009,
       "restart": true,
       "timeout": 50000,
-      "outFiles": ["${workspaceFolder}/packages/language-server/dist/**/*.js"]
+      "outFiles": [
+        "${workspaceFolder}/packages/language-server/dist/**/*.js"
+      ]
     },
     {
       "name": "Run Language Server Tests",
@@ -71,8 +75,11 @@
   ],
   "compounds": [
     {
-      "name": "VSCode + Language Server",
-      "configurations": ["Launch VSCode extension", "Attach to Server"]
+      "name": "VS Code + Language Server",
+      "configurations": [
+        "Launch VS Code extension",
+        "Attach to Server"
+      ]
     }
   ]
 }

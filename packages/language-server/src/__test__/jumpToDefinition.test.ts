@@ -1,17 +1,14 @@
-import { TextDocument, Position } from 'vscode-languageserver-textdocument'
+import { Position } from 'vscode-languageserver-textdocument'
 import { handleDefinitionRequest } from '../MessageHandler'
 import { LocationLink, Range } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
 
 function assertJumpToDefinition(position: Position, expectedRange: Range, fixturePath: string): void {
-  const document: TextDocument = getTextDocument(fixturePath)
+  const textDocument = getTextDocument(fixturePath)
 
-  const params = {
-    textDocument: document,
-    position: position,
-  }
-  const defResult: LocationLink[] | undefined = handleDefinitionRequest(document, params)
+  const params = { textDocument, position }
+  const defResult: LocationLink[] | undefined = handleDefinitionRequest(textDocument, params)
 
   assert.ok(defResult !== undefined)
   assert.deepStrictEqual(defResult[0].targetRange, expectedRange)

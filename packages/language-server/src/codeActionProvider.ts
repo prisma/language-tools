@@ -1,4 +1,4 @@
-import { TextDocument } from 'vscode-languageserver-textdocument'
+import type { TextDocument } from 'vscode-languageserver-textdocument'
 import {
   CodeActionParams,
   CodeAction,
@@ -9,7 +9,7 @@ import {
 } from 'vscode-languageserver'
 import levenshtein from 'js-levenshtein'
 import { convertDocumentTextToTrimmedLineArray, getAllRelationNames } from './util'
-import codeActions from './prisma-fmt/codeActions'
+import codeActions from './prisma-schema-wasm/codeActions'
 
 function getInsertRange(document: TextDocument): Range {
   // to insert text into a document create a range where start === end.
@@ -158,10 +158,7 @@ export function quickFix(
           },
         },
       })
-    } else if (
-      diag.severity === DiagnosticSeverity.Warning &&
-      diag.message.includes("property has been renamed to 'previewFeatures'")
-    ) {
+    } else if (diag.severity === DiagnosticSeverity.Error && diag.message.includes('`experimentalFeatures`')) {
       codeActionList.push({
         title: "Rename property to 'previewFeatures'",
         kind: CodeActionKind.QuickFix,
