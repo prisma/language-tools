@@ -20,7 +20,7 @@
     "@vscode/test-electron": "2.3.4",
     "@vscode/vsce": "2.20.0",
     "eslint": "8.46.0",
-    "eslint-config-prettier": "8.9.0",
+    "eslint-config-prettier": "8.10.0",
     "eslint-plugin-prettier": "5.0.0",
     "execa": "5.1.1",
     "husky": "8.0.3",
@@ -29,7 +29,7 @@
     "lerna": "6.6.2",
     "lint-staged": "13.2.3",
     "p-retry": "4.6.2",
-    "prettier": "3.0.0",
+    "prettier": "3.0.1",
     "semver": "7.5.4",
     "typescript": "5.1.6"
   },
