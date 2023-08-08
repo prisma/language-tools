@@ -153,7 +153,7 @@
     "@vscode/test-electron": "2.3.4",
     "is-ci": "3.0.1",
     "mocha": "10.2.0",
-    "ovsx": "0.8.2",
+    "ovsx": "0.8.3",
     "typescript": "5.1.6",
     "@vscode/vsce": "2.20.1"
   },
