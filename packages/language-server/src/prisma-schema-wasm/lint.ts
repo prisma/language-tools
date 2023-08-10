@@ -19,8 +19,17 @@ export default function lint(text: string, onError?: (errorMessage: string) => v
     }
 
     const result = prismaSchemaWasm.lint(text)
-
-    return JSON.parse(result) as LinterError[]
+    const errors = JSON.parse(result) as LinterError[]
+    return errors.filter((error) => {
+      try {
+        const lastNewLine = text.substring(0, error.start).lastIndexOf('\n')
+        const nextNewLine = error.end + text.substring(error.end).indexOf('\n')
+        const lineOfCode = text.substring(lastNewLine, nextNewLine)
+        return !/\/\/\s*@pls-ignore/.test(lineOfCode)
+      } catch (_e) {
+        return true
+      }
+    })
   } catch (e) {
     const err = e as Error
 
