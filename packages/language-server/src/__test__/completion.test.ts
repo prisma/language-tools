@@ -612,10 +612,6 @@ suite('Completions', function () {
               label: 'binary',
               kind: CompletionItemKind.Constant,
             },
-            {
-              label: 'dataproxy',
-              kind: CompletionItemKind.Constant,
-            },
           ],
         },
       })
