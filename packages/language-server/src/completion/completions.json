@@ -69,58 +69,42 @@
     {
       "label": "view",
       "documentation": "Views are defined via the view block."
-    }
-  ],
-  "dataSourceFields": [
-    {
-      "label": "provider",
-      "documentation": "Describes which datasource connector to use. Can be one of the following datasource providers: `postgresql`, `mysql`, `sqlserver`, `sqlite`, `mongodb` or `cockroachdb`."
     },
     {
-      "label": "url",
-      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database [learn more](https://pris.ly/d/connection-strings)."
-    },
-    {
-      "label": "shadowDatabaseUrl",
-      "documentation": "Connection URL including authentication info to use for Migrate's [shadow database](https://pris.ly/d/migrate-shadow). Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database."
-    },
-    {
-      "label": "relationMode",
-      "insertText": "relationMode = $0",
-      "documentation": "Set the global relation mode for all relations. Values can be either `\"foreignKeys\"` (Default), or `\"prisma\"`. [learn more](https://pris.ly/d/relationMode)",
-      "fullSignature": "relationMode = \"foreignKeys\" | \"prisma\")"
-    },
-    {
-      "label": "extensions",
-      "insertText": "extensions = [$0]",
-      "documentation": "Enable PostgreSQL extensions. [Learn More](https://pris.ly/d/postgresql-extensions)"
-    },
-    {
-      "label": "schemas",
-      "insertText": "schemas = [$0]",
-      "documentation": "The list of database schemas. [Learn More](https://pris.ly/d/multi-schema-configuration)"
+      "label": "type",
+      "documentation": "Composite types (known as [embedded documents](https://www.mongodb.com/docs/manual/core/data-model-design/#std-label-data-modeling-embedding) in MongoDB) provide support for embedding records inside other records. [Learn more](https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#defining-composite-types)"
     }
   ],
   "generatorFields": [
     {
       "label": "provider",
-      "documentation": "Describes which generator to use. This can point to a file that implements a generator or specify a built-in generator directly."
-    },
-    {
-      "label": "output",
-      "documentation": "Determines the location for the generated client [learn more](https://pris.ly/d/prisma-schema)"
-    },
-    {
-      "label": "binaryTargets",
-      "documentation": "Specifies the OS on which the Prisma Client will run to ensure binary compatibility of the query engine."
+      "insertText": "provider = \"$0\"",
+      "documentation": "Describes which generator to use. This can point to a file that implements a generator or specify a built-in generator directly. [Learn more](https://pris.ly/d/generator-fields).",
+      "fullSignature": "provider = \"String\""
     },
     {
       "label": "previewFeatures",
-      "documentation": "Enables preview feature flags."
+      "insertText": "previewFeatures = [\"$0\"]",
+      "documentation": "Enables Preview Feature flags. [Learn more](https://pris.ly/d/preview-features).",
+      "fullSignature": "previewFeatures = PreviewFeature[]"
+    },
+    {
+      "label": "output",
+      "insertText": "output = \"$0\"",
+      "documentation": "Determines the location for the generated client. Default: `node_modules/.prisma/client`. [Learn more](https://pris.ly/d/generator-fields).",
+      "fullSignature": "output = \"String\""
     },
     {
       "label": "engineType",
-      "documentation": "Defines the query engine type for Prisma Client."
+      "insertText": "engineType = \"$0\"",
+      "documentation": "Defines the query engine type for Prisma Client. Default: `library`. [Learn more](https://pris.ly/d/client-engine-type).",
+      "fullSignature": "engineType = \"library\" | \"binary\""
+    },
+    {
+      "label": "binaryTargets",
+      "insertText": "binaryTargets = \"$0\"",
+      "documentation": "Specifies the OS on which the Prisma Client will run to ensure compatibility of the query engine. [Learn more](https://pris.ly/d/generator-fields).",
+      "fullSignature": "binaryTargets = BinaryTargets[] | env(\"ENVIRONMENT_VARIABLE\")"
     }
   ],
   "blockAttributes": [
@@ -228,7 +212,7 @@
     {
       "label": "@@schema",
       "insertText": "@@schema($0)",
-      "documentation": "Designate which schema this belongs to. [Learn More](https://pris.ly/d/multi-schema-configuration)",
+      "documentation": "Designate which schema this belongs to. [Learn more](https://pris.ly/d/multi-schema-configuration)",
       "fullSignature": "@@schema(_: String)",
       "params": []
     }
@@ -366,14 +350,14 @@
       "label": "onDelete",
       "insertText": "onDelete: $0",
       "fullSignature": "onDelete: Cascade | Restrict | NoAction | SetNull | SetDefault",
-      "documentation": "Specifies the action to perform when a referenced entry in the referenced model is being deleted [learn more](https://pris.ly/d/referential-actions).",
+      "documentation": "Specifies the action to perform when a referenced entry in the referenced model is being deleted. [Learn more](https://pris.ly/d/referential-actions).",
       "params": []
     },
     {
       "label": "onUpdate",
       "insertText": "onUpdate: $0",
       "fullSignature": "onUpdate: Cascade | Restrict | NoAction | SetNull | SetDefault",
-      "documentation": "Specifies the action to perform when a referenced field in the referenced model is being updated to a new value [learn more](https://pris.ly/d/referential-actions).",
+      "documentation": "Specifies the action to perform when a referenced field in the referenced model is being updated to a new value. [Learn more](https://pris.ly/d/referential-actions).",
       "params": []
     },
     {
@@ -398,27 +382,6 @@
       "params": []
     }
   ],
-  "datasourceUrlArguments": [
-    {
-      "label": "\"\"",
-      "insertText": "\"$0\"",
-      "fullSignature": "\"\"",
-      "documentation": "Connection URL including authentication info. Each datasource provider documents the URL syntax. Most providers use the syntax provided by the database [learn more](https://pris.ly/d/prisma-schema).",
-      "params": []
-    },
-    {
-      "label": "env()",
-      "insertText": "env(\"$0\")",
-      "fullSignature": "env(_ environmentVariable: string)",
-      "documentation": "Specifies a datasource via an environment variable. When running a Prisma CLI command that needs the database connection URL (e.g. `prisma generate`), you need to make sure that the `DATABASE_URL` environment variable is set. One way to do so is by creating a `.env` file. Note that the file must be in the same directory as your schema.prisma file to automatically be picked up by the Prisma CLI.",
-      "params": [
-        {
-          "label": "environmentVariable",
-          "documentation": "The environment variable in which the database connection URL is stored."
-        }
-      ]
-    }
-  ],
   "generatorProviders": [
     {
       "label": "prisma-client-js",
@@ -440,10 +403,6 @@
     {
       "label": "binary",
       "documentation": "Executable binary."
-    },
-    {
-      "label": "dataproxy",
-      "documentation": "Prisma Data Proxy."
     }
   ],
   "engineTypeArguments": [
@@ -507,7 +466,7 @@
     {
       "label": "prisma",
       "insertText": "prisma",
-      "documentation": "The relation will not use Foreign Keys from the databse. Prisma Client will emulate their behavior for update and delete queries. [learn more](https://pris.ly/d/relationMode)"
+      "documentation": "The relation will not use Foreign Keys from the databse. Prisma Client will emulate their behavior for update and delete queries. [Learn more](https://pris.ly/d/relationMode)"
     }
   ]
 }

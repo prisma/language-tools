@@ -7,7 +7,7 @@ assignees: ''
 ---
 
 <!--
-Thanks for helping us improve Prisma! 🙏 Please follow the sections in the template and provide as much information as possible about your problem, e.g. by setting `prisma.trace.server` to `verbose` or `messages` in your VSCode settings. The output will be visible in the `Prisma Language Server` output.
+Thanks for helping us improve Prisma! 🙏 Please follow the sections in the template and provide as much information as possible about your problem, e.g. by setting `prisma.trace.server` to `verbose` or `messages` in your VS Code settings. The output will be visible in the `Prisma Language Server` output.
 
 Learn more about writing proper bug reports here: https://pris.ly/d/bug-reports
 -->
@@ -39,10 +39,10 @@ Do not include your database credentials when sharing your Prisma schema! -->
 
 <!-- In which environment does the problem occur -->
 
-- OS: <!--[e.g. Mac OS, Windows, Debian, CentOS, ...]-->
-- Editor: <!--[VSCode, Vim, ...]-->
-- Editor version: <!--[..., 1.51.0, 1.51.1, ...]-->
-- Extension version: <!--[Go to the extension marketplace to see your installed extensions.]-->
+- OS: <!--[e.g. macOS, Windows, Debian, CentOS, ...]-->
+- Editor: <!--[VS Code, Vim, ...]-->
+- Editor version: <!--[..., 1.78.0, 1.51.1, ...]-->
+- Extension version: <!--[Go to the VS Code extensions tab to see your installed extensions.]-->
 
 ```
 

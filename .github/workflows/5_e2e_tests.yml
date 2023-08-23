@@ -1,5 +1,5 @@
 name: 5. Integration tests in VSCode folder with published LS
-run-name: 5. Integration tests in VSCode folder with published LS - ${{ inputs.trigger_reason }}
+run-name: 5. Integration tests in VS Code folder with published LS - ${{ inputs.trigger_reason }}
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ on:
         description: 'Prisma CLI NPM Channel'
         required: true
       extension_version:
-        description: 'VSCode extension version'
+        description: 'VS Code extension version'
         required: true
       branch:
         description: 'Branch to run run this workflow on'
@@ -22,7 +22,7 @@ env:
 
 jobs:
   tests:
-    name: Integration tests in VSCode folder with published LS
+    name: Integration tests in VS Code folder with published LS
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
@@ -41,7 +41,7 @@ jobs:
       - name: Compile
         run: npm run compile
       - name: Headless e2e tests
-        uses: GabrielBB/xvfb-action@v1.6
+        uses: coactions/setup-xvfb@v1
         with:
           run: npm run test
 

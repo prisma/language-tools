@@ -32,7 +32,7 @@ function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersion = '
       name: 'prisma-insider',
       displayName: 'Prisma - Insider',
       description:
-        'This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the dev version of the CLI).',
+        'This is the Insider Build of the Prisma VS Code extension (only use it if you are also using the dev version of the CLI).',
       preview: true,
     })
   } else {
@@ -49,7 +49,7 @@ function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersion = '
   // update dependency and engines versions in packages/language-server/package.json
   if (newPrismaVersion !== '') {
     ;(async () => {
-      // Find the version needed for `@prisma/prisma-fmt-wasm`
+      // Find the version needed for `@prisma/prisma-schema-wasm`
       // Let's look into the `package.json` of the `@prisma/engines` package
       // and get the version of `@prisma/engines-version` it uses
       const { stdout } = await execa('npm', [
@@ -71,7 +71,7 @@ function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersion = '
       // update engines sha
       languageServerPackageJson['prisma']['enginesVersion'] = engineSha
       // update engines version
-      languageServerPackageJson['dependencies']['@prisma/prisma-fmt-wasm'] = engineVersion
+      languageServerPackageJson['dependencies']['@prisma/prisma-schema-wasm'] = engineVersion
       // update CLI version
       languageServerPackageJson['prisma']['cliVersion'] = newPrismaVersion
       writeJsonToPackageJson({

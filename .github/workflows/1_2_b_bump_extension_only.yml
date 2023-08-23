@@ -29,10 +29,7 @@ jobs:
           cache: 'npm'
       - name: Install Dependencies
         run: npm install && npm run bootstrap
-      - name: Extract branch name # needed because github.ref will contain sth like refs/heads/2.6.x, so pushing to that will fail
         shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
       - name: checkout main if necessary
         if: endsWith(github.ref, '/main') == false
         run: git fetch && git checkout main
@@ -48,8 +45,8 @@ jobs:
 
       - name: Checkout previous branch
         if: endsWith(github.ref, '/main') == false
-        run: git checkout ${{ steps.extract_branch.outputs.branch }}
-      - name: Update VSCode extension version
+        run: git checkout ${{ github.ref_name }}
+      - name: Update VS Code extension version
         run: |
           node scripts/update_package_json_files.js dev ${{ steps.update.outputs.next_extension_version }} ""
       - name: Install Dependencies
@@ -64,14 +61,14 @@ jobs:
         with:
           workflow: 3. Test Language Server and publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "main", "trigger_reason": "Commit from ${{ steps.extract_branch.outputs.branch }}" }'
+          inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "main", "trigger_reason": "Commit from ${{ github.ref_name }}" }'
       - name: Trigger next workflow for Language Server tests
         if: endsWith(github.ref, '/main') == false
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: 3. Test Language Server and publish
           token: ${{ secrets.GH_TOKEN }}
-          inputs: '{ "npm_channel": "patch-dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.extract_branch.outputs.branch}}", "trigger_reason": "Commit from ${{ steps.extract_branch.outputs.branch }}" }'
+          inputs: '{ "npm_channel": "patch-dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{ github.ref_name }}", "trigger_reason": "Commit from ${{ github.ref_name }}" }'
 
       - name: 'Set current job url in SLACK_FOOTER env var'
         if: ${{ failure() }}
@@ -83,7 +80,7 @@ jobs:
         env:
           SLACK_TITLE: "1/2b. - Bumping versions for 'extension only' failed :x:"
           SLACK_COLOR: '#FF0000'
-          SLACK_MESSAGE: '${{ steps.update.outputs.next_extension_version  }} - On push to ${{ steps.extract_branch.outputs.branch }}.'
+          SLACK_MESSAGE: '${{ steps.update.outputs.next_extension_version  }} - On push to ${{ github.ref_name }}.'
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_FAILURES }}
           SLACK_CHANNEL: feed-language-tools-failures
           SLACK_USERNAME: Prismo

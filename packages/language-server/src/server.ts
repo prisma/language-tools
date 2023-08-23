@@ -18,7 +18,7 @@ import {
 import { createConnection, IPCMessageReader, IPCMessageWriter } from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import * as MessageHandler from './MessageHandler'
-import * as util from './prisma-fmt/util'
+import * as util from './prisma-schema-wasm/util'
 import { LSOptions, LSSettings } from './settings'
 const packageJson = require('../../package.json') // eslint-disable-line
 
@@ -51,7 +51,7 @@ export function startServer(options?: LSOptions): void {
 
   connection.onInitialize((params: InitializeParams) => {
     // Logging first...
-    connection.console.info(`Default version of Prisma 'prisma-fmt': ${util.getVersion()}`)
+    connection.console.info(`Default version of Prisma 'prisma-schema-wasm': ${util.getVersion()}`)
 
     connection.console.info(
       // eslint-disable-next-line
@@ -100,15 +100,14 @@ export function startServer(options?: LSOptions): void {
   })
 
   // The global settings, used when the `workspace/configuration` request is not supported by the client or is not set by the user.
-  // This does not apply to VSCode, as this client supports this setting.
+  // This does not apply to VS Code, as this client supports this setting.
   // const defaultSettings: LSSettings = {}
   // let globalSettings: LSSettings = defaultSettings // eslint-disable-line
 
   // Cache the settings of all open documents
   const documentSettings: Map<string, Thenable<LSSettings>> = new Map<string, Thenable<LSSettings>>()
 
-  // eslint-disable-line @typescript-eslint/no-unused-vars
-  connection.onDidChangeConfiguration((change) => {
+  connection.onDidChangeConfiguration((_change) => {
     connection.console.info('Configuration changed.')
     if (hasConfigurationCapability) {
       // Reset all cached document settings
@@ -145,11 +144,14 @@ export function startServer(options?: LSOptions): void {
   //   return result
   // }
 
+  // Note: VS Code strips newline characters from the message
+  function showErrorToast(errorMessage: string): void {
+    connection.window.showErrorMessage(errorMessage)
+  }
+
   function validateTextDocument(textDocument: TextDocument) {
-    const diagnostics: Diagnostic[] = MessageHandler.handleDiagnosticsRequest(textDocument, (errorMessage: string) => {
-      connection.window.showErrorMessage(errorMessage)
-    })
-    connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
+    const diagnostics: Diagnostic[] = MessageHandler.handleDiagnosticsRequest(textDocument, showErrorToast)
+    void connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
   }
 
   documents.onDidChangeContent((change: { document: TextDocument }) => {
@@ -170,7 +172,7 @@ export function startServer(options?: LSOptions): void {
   connection.onCompletion((params: CompletionParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      return MessageHandler.handleCompletionRequest(params, doc)
+      return MessageHandler.handleCompletionRequest(params, doc, showErrorToast)
     }
   })
 
@@ -185,7 +187,7 @@ export function startServer(options?: LSOptions): void {
     // Monitored files have changed in VS Code
     connection.console.log(`Types have changed. Sending request to restart TS Language Server.`)
     // Restart TS Language Server
-    connection.sendNotification('prisma/didChangeWatchedFiles', {})
+    void connection.sendNotification('prisma/didChangeWatchedFiles', {})
   })
 
   connection.onHover((params: HoverParams) => {
@@ -198,16 +200,14 @@ export function startServer(options?: LSOptions): void {
   connection.onDocumentFormatting((params: DocumentFormattingParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      return MessageHandler.handleDocumentFormatting(params, doc, (errorMessage: string) => {
-        connection.window.showErrorMessage(errorMessage)
-      })
+      return MessageHandler.handleDocumentFormatting(params, doc, showErrorToast)
     }
   })
 
   connection.onCodeAction((params: CodeActionParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      return MessageHandler.handleCodeActions(params, doc)
+      return MessageHandler.handleCodeActions(params, doc, showErrorToast)
     }
   })
 

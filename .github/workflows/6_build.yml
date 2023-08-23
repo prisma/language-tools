@@ -8,7 +8,7 @@ on:
         description: 'Prisma CLI NPM Channel'
         required: true
       extension_version:
-        description: 'VSCode extension version'
+        description: 'VS Code extension version'
         required: true
       branch:
         description: 'Branch to run run this workflow on'
@@ -63,6 +63,8 @@ jobs:
         run: node scripts/get_tag_name.js ${{ github.event.inputs.npm_channel }} ${{ github.event.inputs.extension_version }}
       - name: create a GitHub release
         id: create_release
+        # This action is not maintained since 3+ years!
+        # see https://github.com/actions/create-release/issues/119
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -72,9 +74,12 @@ jobs:
       - name: Get asset name for release asset
         id: get_asset_name
         run: |
-          echo "::set-output name=asset_name::${{ steps.names.outputs.asset_name }}-${{ github.event.inputs.extension_version }}.vsix"
+          echo "asset_name=${{ steps.names.outputs.asset_name }}-${{ github.event.inputs.extension_version }}.vsix" >> "$GITHUB_OUTPUT"
+
       - name: Upload Release Asset
         id: upload-release-asset
+        # This action is not maintained since 3+ years!
+        # see https://github.com/actions/upload-release-asset/issues/78
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

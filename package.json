@@ -1,7 +1,7 @@
 {
   "name": "language-tools",
   "private": true,
-  "version": "31.0.1872",
+  "version": "31.0.2638",
   "author": "Prisma",
   "license": "Apache-2.0",
   "engines": {
@@ -9,28 +9,29 @@
     "npm": ">=7"
   },
   "devDependencies": {
+    "@actions/core": "1.10.0",
     "@actions/github": "5.1.1",
-    "@commitlint/cli": "17.4.2",
-    "@commitlint/config-conventional": "17.4.2",
-    "@commitlint/config-lerna-scopes": "17.4.2",
-    "@types/node": "14.18.36",
-    "@typescript-eslint/eslint-plugin": "5.49.0",
-    "@typescript-eslint/parser": "5.49.0",
-    "@vscode/test-electron": "2.2.2",
-    "eslint": "8.32.0",
-    "eslint-config-prettier": "8.6.0",
-    "eslint-plugin-prettier": "4.2.1",
+    "@commitlint/cli": "17.7.1",
+    "@commitlint/config-conventional": "17.7.0",
+    "@commitlint/config-lerna-scopes": "17.7.0",
+    "@types/node": "14.18.55",
+    "@typescript-eslint/eslint-plugin": "6.4.1",
+    "@typescript-eslint/parser": "6.4.1",
+    "@vscode/test-electron": "2.3.4",
+    "@vscode/vsce": "2.20.1",
+    "eslint": "8.47.0",
+    "eslint-config-prettier": "9.0.0",
+    "eslint-plugin-prettier": "5.0.0",
     "execa": "5.1.1",
     "husky": "8.0.3",
     "is-ci": "3.0.1",
-    "jest": "29.4.0",
-    "lerna": "5.6.2",
-    "lint-staged": "13.1.0",
+    "jest": "29.6.3",
+    "lerna": "6.6.2",
+    "lint-staged": "14.0.1",
     "p-retry": "4.6.2",
-    "prettier": "2.8.3",
-    "semver": "7.3.8",
-    "typescript": "4.9.4",
-    "vsce": "2.15.0"
+    "prettier": "3.0.2",
+    "semver": "7.5.4",
+    "typescript": "5.1.6"
   },
   "scripts": {
     "bootstrap": "lerna exec -- npm install",
@@ -52,9 +53,6 @@
   "lint-staged": {
     "*.{js,ts,css,md,yml}|**/syntaxes/*.json|completions.json": [
       "prettier --write"
-    ],
-    "*.{js,ts}": [
-      "eslint --fix"
     ]
   }
 }

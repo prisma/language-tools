@@ -1,0 +1,20 @@
+generator client {
+    provider        = "prisma-client-js"
+    previewFeatures = ["views"]
+}
+
+datasource db {
+    provider = "mongodb"
+    url      = env("DATABASE_URL")
+}
+
+type Window {
+    id    Int
+    field String
+}
+
+model Prop {
+    id    Int    @id @map("_id")
+    item  Window
+    field String
+}

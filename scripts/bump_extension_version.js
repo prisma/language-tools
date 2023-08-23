@@ -1,12 +1,11 @@
 const semVer = require('semver')
+const core = require('@actions/core')
 const { readVersionFile, writeToVersionFile } = require('./util')
 
 function isMinorOrMajorRelease(prismaVersion) {
   const tokens = prismaVersion.split('.')
   if (tokens.length !== 3) {
-    throw new Error(
-      `Version ${prismaVersion} must have 3 tokens separated by "." character.`,
-    )
+    throw new Error(`Version ${prismaVersion} must have 3 tokens separated by "." character.`)
   }
   return tokens[2] === '0' || prismaVersion === '3.0.1' // <== special case for 3.x that will start with 3.0.1 instead :(
   //                ^= e.g. 2.29.0
@@ -42,18 +41,10 @@ function getDerivedExtensionVersion(version) {
   if (tokens.length === 3) {
     return tokens.join('.')
   }
-  throw new Error(
-    `Version ${version} must have 3 or 4 tokens separated by "." character`,
-  )
+  throw new Error(`Version ${version} must have 3 or 4 tokens separated by "." character`)
 }
 
-function nextVersion({
-  currentVersion,
-  branch_channel,
-  prisma_latest,
-  prisma_dev,
-  prisma_patch,
-}) {
+function nextVersion({ currentVersion, branch_channel, prisma_latest, prisma_dev, prisma_patch }) {
   const currentVersionTokens = currentVersion.split('.')
   const prisma_dev_tokens = stripPreReleaseText(prisma_dev).split('.')
   const prisma_latest_tokens = prisma_latest.split('.')
@@ -72,10 +63,7 @@ function nextVersion({
       return semVer.inc(currentVersion, 'patch')
     case 'latest':
       // Prisma CLI new latest version
-      if (
-        isMinorOrMajorRelease(prisma_latest) &&
-        currentVersion != prisma_latest
-      ) {
+      if (isMinorOrMajorRelease(prisma_latest) && currentVersion != prisma_latest) {
         // just adopt the version number from npm for extension as well
         return prisma_latest
       } else {
@@ -83,9 +71,7 @@ function nextVersion({
         return semVer.inc(currentVersion, 'patch')
       }
     case 'patch-dev':
-      const derivedVersion = getDerivedExtensionVersion(
-        stripPreReleaseText(prisma_patch),
-      )
+      const derivedVersion = getDerivedExtensionVersion(stripPreReleaseText(prisma_patch))
       if (prisma_patch_tokens[0] !== currentVersion[0]) {
         return derivedVersion
       }
@@ -106,10 +92,7 @@ function nextVersion({
   }
 }
 
-function bumpExtensionVersionInScriptFiles({
-  nextVersion = '',
-  branch_channel = '',
-}) {
+function bumpExtensionVersionInScriptFiles({ nextVersion = '', branch_channel = '' }) {
   let insiderName = 'extension_insider'
   let stableName = 'extension_stable'
   let patchName = 'extension_patch'
@@ -157,7 +140,7 @@ if (require.main === module) {
     prisma_patch: readVersionFile({ fileName: 'prisma_patch-dev' }),
   })
   console.log(`Next extension version ${version}.`)
-  console.log(`::set-output name=next_extension_version::${version}`)
+  core.setOutput('next_extension_version', version)
 
   // Bump in file
   bumpExtensionVersionInScriptFiles({

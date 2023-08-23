@@ -1,8 +1,8 @@
 {
   "name": "prisma-insider",
   "displayName": "Prisma - Insider",
-  "description": "This is the Insider Build of the Prisma VSCode extension (only use it if you are also using the dev version of the CLI).",
-  "version": "31.0.1872",
+  "description": "This is the Insider Build of the Prisma VS Code extension (only use it if you are also using the dev version of the CLI).",
+  "version": "31.0.2638",
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
@@ -13,11 +13,12 @@
     "Programming Languages"
   ],
   "dependencies": {
-    "@prisma/language-server": "31.0.1872",
-    "checkpoint-client": "1.1.21",
-    "minimatch": "6.1.6",
+    "@prisma/language-server": "31.0.2638",
+    "checkpoint-client": "1.1.27",
+    "env-paths": "2.2.1",
+    "minimatch": "6.2.0",
     "vscode-languageclient": "7.0.0",
-    "watcher": "^1.2.0"
+    "watcher": "1.2.0"
   },
   "repository": {
     "type": "git",
@@ -33,7 +34,11 @@
   },
   "main": "./dist/src/extension.js",
   "activationEvents": [
-    "onLanguage:prisma"
+    "onLanguage:prisma",
+    "onLanguage:javascript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact"
   ],
   "contributes": {
     "languages": [
@@ -108,7 +113,7 @@
           "scope": "window",
           "type": "boolean",
           "default": true,
-          "description": "Enable/disable the File Watcher functionality for Prisma Client."
+          "description": "Enable, when checked, the File Watcher functionality for Prisma Client."
         },
         "prisma.trace.server": {
           "scope": "window",
@@ -142,15 +147,15 @@
     ]
   },
   "devDependencies": {
-    "@types/glob": "8.0.1",
+    "@types/glob": "8.1.0",
     "@types/mocha": "10.0.1",
     "@types/vscode": "1.56.0",
-    "@vscode/test-electron": "2.2.2",
+    "@vscode/test-electron": "2.3.4",
     "is-ci": "3.0.1",
     "mocha": "10.2.0",
-    "ovsx": "0.8.0",
-    "typescript": "4.9.4",
-    "vsce": "2.15.0"
+    "ovsx": "0.8.3",
+    "typescript": "5.1.6",
+    "@vscode/vsce": "2.20.1"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
   "publishConfig": {

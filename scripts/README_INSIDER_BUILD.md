@@ -2,7 +2,7 @@
 
 ## Insider Build
 
-This is the Insider Build of the [Prisma VSCode extension](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma). Most users should not use this version, but instead install
+This is the Insider Build of the [Prisma VS Code extension](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma). Most users should not use this version, but instead install
 the regular version of the extension.This version of the extension may contain unstable prerelease code and is directly built from the main branch.
 
 **Only use this extension if you are also using the dev version of the CLI.**
@@ -55,12 +55,20 @@ Easily navigate definitions, i.e. models in the Prisma schema.
 
 ## Contributing
 
-Read more about [how to contribute to the Prisma VSCode extension](./packages/vscode/CONTRIBUTING.md)
+Read more about [how to contribute to the Prisma VS Code extension](./packages/vscode/CONTRIBUTING.md)
 
 ## Telemetry
 
-This extension collects telemetry data to help us better the usage of the extension. You can read more about that [here](https://www.prisma.io/docs/reference/more/telemetry).\
-The extension respects the `telemetry.enableTelemetry` setting in VSCode. If you want to opt out of telemetry, set `"telemetry.enableTelemetry": false` in your VSCode settings.
+This extension collects telemetry data to help us better the usage of the extension. You can read more about that [here](https://www.prisma.io/docs/reference/more/telemetry).
+The extension respects:
+
+- the `telemetry.enableTelemetry` setting in VS Code ([deprecated since v1.61](https://code.visualstudio.com/updates/v1_61#_telemetry-settings)).
+- the `telemetry.telemetryLevel` setting in VS Code (see [docs](https://code.visualstudio.com/docs/getstarted/telemetry))
+
+If you want to opt out of telemetry you can either, in your VS Code settings:
+
+- set `"telemetry.enableTelemetry": false`
+- set `"telemetry.telemetryLevel": "off"` (or "crash" or "error")
 
 ## Security
 

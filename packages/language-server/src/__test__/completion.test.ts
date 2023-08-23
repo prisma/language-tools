@@ -1,14 +1,9 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { handleCompletionRequest } from '../MessageHandler'
-import {
-  CompletionList,
-  CompletionParams,
-  Position,
-  CompletionItemKind,
-  CompletionTriggerKind,
-} from 'vscode-languageserver'
+import { CompletionList, CompletionParams, CompletionItemKind, CompletionTriggerKind } from 'vscode-languageserver'
 import assert from 'assert'
 import dedent from 'ts-dedent'
+import { CURSOR_CHARACTER, findCursorPosition } from './helper'
 
 /* eslint-disable @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-misused-promises */
 
@@ -50,8 +45,6 @@ function assertCompletion({
   schema: string
   expected: CompletionList
 }): void {
-  const CURSOR_CHARACTER = '|'
-
   // Remove indentation
   schema = dedent(schema)
 
@@ -60,27 +53,6 @@ function assertCompletion({
     ${baseSchema(provider, previewFeatures)}
     ${schema}
     `
-  }
-
-  const findCursorPosition = (input: string): Position => {
-    const lines = input.split('\n')
-
-    let foundCursorCharacter = -1
-    const foundLinePosition = lines.findIndex((line) => {
-      const cursorPosition = line.indexOf(CURSOR_CHARACTER)
-      if (cursorPosition !== -1) {
-        foundCursorCharacter = cursorPosition
-        return true
-      }
-    })
-
-    if (foundLinePosition >= 0 && foundCursorCharacter >= 0) {
-      return { line: foundLinePosition, character: foundCursorCharacter }
-    }
-
-    throw new Error(
-      'Each test must include the `|` pipe character to signal where the cursor should be when executing the test.',
-    )
   }
 
   const position = findCursorPosition(schema)
@@ -209,6 +181,27 @@ suite('Completions', function () {
       })
     })
 
+    test('Diagnoses block type suggestions with mongodb as provider', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+        datasource db {
+          provider = "mongodb"
+        }
+        |
+        `,
+        expected: {
+          isIncomplete: false,
+          items: [
+            { label: 'datasource', kind: CompletionItemKind.Class },
+            { label: 'generator', kind: CompletionItemKind.Class },
+            { label: 'model', kind: CompletionItemKind.Class },
+            { label: 'enum', kind: CompletionItemKind.Class },
+            { label: 'type', kind: CompletionItemKind.Class },
+          ],
+        },
+      })
+    })
+
     test('Diagnoses block type suggestions for view preview', () => {
       assertCompletion({
         schema: /* Prisma */ `
@@ -234,6 +227,7 @@ suite('Completions', function () {
 
   suite('DATABASE BLOCK', () => {
     const fieldUrl = { label: 'url', kind: CompletionItemKind.Field }
+    const fieldDirectUrl = { label: 'directUrl', kind: CompletionItemKind.Field }
     const fieldShadowDatabaseUrl = {
       label: 'shadowDatabaseUrl',
       kind: CompletionItemKind.Field,
@@ -288,10 +282,7 @@ suite('Completions', function () {
       label: '""',
       kind: CompletionItemKind.Property,
     }
-    const envArgument = {
-      label: 'DATABASE_URL',
-      kind: CompletionItemKind.Constant,
-    }
+
     const env = { label: 'env()', kind: CompletionItemKind.Property }
 
     test('Diagnoses datasource field suggestions in empty block', () => {
@@ -302,7 +293,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldUrl, fieldShadowDatabaseUrl, fieldRelationMode],
+          items: [fieldProvider, fieldUrl, fieldShadowDatabaseUrl, fieldDirectUrl, fieldRelationMode],
         },
       })
     })
@@ -316,7 +307,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldUrl, fieldShadowDatabaseUrl, fieldRelationMode],
+          items: [fieldProvider, fieldUrl, fieldShadowDatabaseUrl, fieldDirectUrl, fieldRelationMode],
         },
       })
       assertCompletion({
@@ -327,20 +318,20 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldShadowDatabaseUrl, fieldRelationMode],
+          items: [fieldProvider, fieldUrl, fieldShadowDatabaseUrl, fieldDirectUrl, fieldRelationMode],
         },
       })
     })
 
-    test('Diagnoses url argument suggestions for datasource block', () => {
+    test('url = env("|")', () => {
       assertCompletion({
         schema: /* Prisma */ `
         datasource db {
             url = |
         }`,
         expected: {
-          isIncomplete: true,
-          items: [quotationMarks, env],
+          isIncomplete: false,
+          items: [env, quotationMarks],
         },
       })
       assertCompletion({
@@ -350,26 +341,89 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [envArgument],
+          items: [
+            {
+              label: 'DATABASE_URL',
+              kind: CompletionItemKind.Constant,
+            },
+          ],
         },
       })
     })
 
-    test('Diagnoses field extension availability', () => {
+    test('shadowDatabaseUrl = env("|")', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+        datasource db {
+            url = |
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [env, quotationMarks],
+        },
+      })
+      assertCompletion({
+        schema: /* Prisma */ `
+        datasource db {
+          shadowDatabaseUrl = env("|")
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            {
+              label: 'SHADOW_DATABASE_URL',
+              kind: CompletionItemKind.Constant,
+            },
+          ],
+        },
+      })
+    })
+
+    test('directUrl = env("|")', () => {
+      assertCompletion({
+        schema: /* Prisma */ `
+        datasource db {
+            url = |
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [env, quotationMarks],
+        },
+      })
+      assertCompletion({
+        schema: /* Prisma */ `
+        datasource db {
+            directUrl = env("|")
+        }`,
+        expected: {
+          isIncomplete: false,
+          items: [
+            {
+              label: 'DIRECT_URL',
+              kind: CompletionItemKind.Constant,
+            },
+          ],
+        },
+      })
+    })
+
+    test('Diagnoses field extensions availability', () => {
       assertCompletion({
         schema: /* Prisma */ `
           generator client {
+            provider        = "prisma-client-js"
             previewFeatures = ["postgresqlExtensions"]
           }
 
           datasource db {
             provider = "postgresql"
+            url = env("DATABASE_URL")
             |
           }
         `,
         expected: {
           isIncomplete: false,
-          items: [fieldUrl, fieldShadowDatabaseUrl, fieldRelationMode, fieldPostgresqlExtensions],
+          items: [fieldShadowDatabaseUrl, fieldDirectUrl, fieldRelationMode, fieldPostgresqlExtensions],
         },
       })
     })
@@ -390,7 +444,7 @@ suite('Completions', function () {
         `,
         expected: {
           isIncomplete: false,
-          items: [fieldShadowDatabaseUrl, fieldRelationMode, fieldSchemas],
+          items: [fieldShadowDatabaseUrl, fieldDirectUrl, fieldRelationMode, fieldSchemas],
         },
       })
     })
@@ -428,7 +482,7 @@ suite('Completions', function () {
           relationMode = "|"
         }`,
         expected: {
-          isIncomplete: true,
+          isIncomplete: false,
           items: [relationModeForeignKeys, relationModePrisma],
         },
       })
@@ -440,7 +494,7 @@ suite('Completions', function () {
           relationMode = |
         }`,
         expected: {
-          isIncomplete: true,
+          isIncomplete: false,
           items: [relationModeForeignKeysWithQuotes, relationModePrismaWithQuotes],
         },
       })
@@ -471,7 +525,7 @@ suite('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldOutput, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
+          items: [fieldProvider, fieldPreviewFeatures, fieldOutput, fieldEngineType, fieldBinaryTargets],
         },
       })
     })
@@ -485,7 +539,7 @@ suite('Completions', function () {
           }`,
         expected: {
           isIncomplete: false,
-          items: [fieldOutput, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
+          items: [fieldPreviewFeatures, fieldOutput, fieldEngineType, fieldBinaryTargets],
         },
       })
       assertCompletion({
@@ -496,7 +550,7 @@ suite('Completions', function () {
           }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldBinaryTargets, fieldPreviewFeatures, fieldEngineType],
+          items: [fieldProvider, fieldPreviewFeatures, fieldEngineType, fieldBinaryTargets],
         },
       })
     })
@@ -533,10 +587,6 @@ suite('Completions', function () {
             },
             {
               label: 'binary',
-              kind: CompletionItemKind.Constant,
-            },
-            {
-              label: 'dataproxy',
               kind: CompletionItemKind.Constant,
             },
           ],

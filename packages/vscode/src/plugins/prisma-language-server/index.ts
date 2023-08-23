@@ -1,6 +1,5 @@
 import path from 'path'
-import FileWatcher from 'watcher'
-import type { type as FileWatcherType } from 'watcher'
+import os from 'os'
 import minimatch from 'minimatch'
 
 import {
@@ -34,13 +33,15 @@ import {
   createLanguageServer,
 } from '../../util'
 import { PrismaVSCodePlugin } from '../types'
+import paths from 'env-paths'
+import FileWatcher from 'watcher'
 
 const packageJson = require('../../../../package.json') // eslint-disable-line
 
 let client: LanguageClient
 let serverModule: string
 let telemetry: TelemetryReporter
-let watcherInstance: FileWatcherType
+let fileWatcher: FileWatcher.type | undefined
 
 const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
 const isE2ETestOnPullRequest = () => process.env.PRISMA_USE_LOCAL_LS === 'true'
@@ -59,41 +60,55 @@ const activateClient = (
   context.subscriptions.push(disposable)
 }
 
-const startFileWatcher = (rootPath: string) => {
-  console.debug('Starting File Watcher')
-  // https://github.com/fabiospampinato/watcher
-  return new FileWatcher(rootPath, {
-    debounce: 500,
-    // limits how many levels of subdirectories will be traversed.
-    // Note that `node_modules/.prisma/client/` counts for 3 already
-    // Example
-    // If vs code extension is open in root folder of a project and the path to index.d.ts is
-    // ./server/database/node_modules/.prisma/client/index.d.ts
-    // then the depth is equal to 2 + 3 = 5
-    depth: 9,
-    recursive: true,
-    ignoreInitial: true,
-    ignore: (targetPath) => {
-      if (targetPath === rootPath) {
-        return false
-      }
-      return !minimatch(targetPath, '**/node_modules/.prisma/client/index.d.ts')
-    },
-    //   // ignore dotfiles (except .prisma) adjusted from chokidar README example
-    //   ignored: /(^|[\/\\])\.(?!prisma)./,
-
-    // native?: boolean,
-    // persistent?: boolean,
-    // pollingInterval?: number,
-    // pollingTimeout?: number,
-    // renameDetection?: boolean,
-    // renameTimeout?: number
-  })
+const onFileChange = (filepath: string) => {
+  console.debug(`File ${filepath} has changed, restarting TS Server.`)
+  void commands.executeCommand('typescript.restartTsServer')
 }
 
-const onFileChange = (filepath: string) => {
-  console.debug(`File ${filepath} has been changed. Restarting TS Server.`)
-  commands.executeCommand('typescript.restartTsServer') // eslint-disable-line
+function startGenerateWatcher() {
+  if (fileWatcher !== undefined) return
+
+  // macOS watcher to be removed in future releases
+  const rootPath = workspace.workspaceFolders?.[0].uri.path
+  if (os.platform() === 'darwin' && rootPath !== undefined) {
+    fileWatcher = new FileWatcher(rootPath, {
+      depth: 9,
+      debounce: 500,
+      recursive: true,
+      ignoreInitial: true,
+      ignore: (targetPath) => {
+        if (targetPath === rootPath) return false
+        return !minimatch(targetPath, '**/node_modules/.prisma/client/index.d.ts')
+      },
+    })
+    console.log(`Watching ${rootPath} for changes (old watcher).`)
+  } else {
+    const prismaCache = paths('prisma').cache
+    const signalsPath = path.join(prismaCache, 'last-generate')
+    const fwOptions = { debounce: 500, ignoreInitial: true }
+    fileWatcher = new FileWatcher(signalsPath, fwOptions)
+    console.log(`Watching ${signalsPath} for changes (new watcher).`)
+  }
+
+  fileWatcher.on('change', onFileChange)
+  fileWatcher.on('add', onFileChange)
+}
+
+function stopGenerateWatcher() {
+  if (fileWatcher === undefined) return
+
+  fileWatcher.close()
+  fileWatcher = undefined
+
+  console.log('Stopped watching for changes.')
+}
+
+function setGenerateWatcher(enabled: boolean) {
+  if (enabled) {
+    startGenerateWatcher()
+  } else {
+    stopGenerateWatcher()
+  }
 }
 
 const plugin: PrismaVSCodePlugin = {
@@ -102,20 +117,7 @@ const plugin: PrismaVSCodePlugin = {
   activate: async (context) => {
     const isDebugOrTest = isDebugOrTestSession()
 
-    const rootPath = workspace.workspaceFolders?.[0].uri.path
-    if (rootPath) {
-      // This setting defaults to true (see package.json of vscode extension)
-      const isFileWatcherEnabled = workspace.getConfiguration('prisma').get('fileWatcher')
-
-      if (isFileWatcherEnabled) {
-        watcherInstance = startFileWatcher(rootPath)
-        console.debug('File Watcher is enabled and started.')
-      } else {
-        console.debug('File Watcher is disabled.')
-      }
-    } else {
-      console.debug('File Watcher was skipped, rootPath is falsy')
-    }
+    setGenerateWatcher(!!workspace.getConfiguration('prisma').get('fileWatcher'))
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (packageJson.name === 'prisma-insider-pr-build') {
@@ -133,7 +135,7 @@ const plugin: PrismaVSCodePlugin = {
     console.log(`serverModule: ${serverModule}`)
 
     // The debug options for the server
-    // --inspect=6009: runs the server in Node's Inspector mode so VSCode can attach to the server for debugging
+    // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
     const debugOptions = {
       execArgv: ['--nolazy', '--inspect=6009'],
       env: { DEBUG: true },
@@ -163,7 +165,7 @@ const plugin: PrismaVSCodePlugin = {
           range: Range,
           context: CodeActionContext,
           token: CancellationToken,
-          _: ProvideCodeActionsSignature, // eslint-disable-line @typescript-eslint/no-unused-vars
+          _: ProvideCodeActionsSignature,
         ) {
           const params: CodeActionParams = {
             textDocument: client.code2ProtocolConverter.asTextDocumentIdentifier(document),
@@ -197,61 +199,20 @@ const plugin: PrismaVSCodePlugin = {
               }
               return result
             },
-            (_) => undefined, // eslint-disable-line @typescript-eslint/no-unused-vars
+            (_) => undefined,
           )
         },
       } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
     }
-    // const config = workspace.getConfiguration('prisma')
-
-    workspace.onDidChangeConfiguration(
-      async (event) => {
-        const fileWatcherConfigChanged = event.affectsConfiguration('prisma.fileWatcher')
-
-        if (fileWatcherConfigChanged) {
-          const isFileWatcherEnabled = workspace.getConfiguration('prisma').get('fileWatcher')
-          const rootPath = workspace.workspaceFolders?.[0].uri.path
-          // This setting defaults to true (see package.json of vscode extension)
-          if (isFileWatcherEnabled) {
-            // if watcherInstance.closed === true, the watcherInstance was closed previously and can be safely restarted
-            // if watcherInstance.closed === false, it is already running
-            // but if the JSON settings are empty like {} and the user enables the file watcherInstance
-            // we need to catch that case to avoid starting another extra file watcherInstance
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-
-            if (watcherInstance && watcherInstance.isClosed() === false) {
-              console.debug(
-                "onDidChangeConfiguration: watcherInstance.isClosed() === false so it's already running. Do nothing.",
-              )
-            } else {
-              // Let's start it
-              if (rootPath) {
-                watcherInstance = startFileWatcher(rootPath)
-                // If the file was just created
-                watcherInstance.on('add', onFileChange)
-                // If the file was modified
-                watcherInstance.on('change', onFileChange)
-                console.debug('onDidChangeConfiguration: File Watcher is now enabled and started.')
-              } else {
-                console.debug('onDidChangeConfiguration: rootPath is falsy')
-              }
-            }
-          } else {
-            // Let's stop it
-            if (watcherInstance) {
-              await watcherInstance.close()
-              console.debug('onDidChangeConfiguration: File Watcher stopped.')
-            } else {
-              console.debug('onDidChangeConfiguration: No File Watcher found')
-            }
-          }
-        }
-      }, // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-      null,
-      context.subscriptions,
-    )
 
     context.subscriptions.push(
+      // when the file watcher settings change, we need to ensure they are applied
+      workspace.onDidChangeConfiguration((event) => {
+        if (event.affectsConfiguration('prisma.fileWatcher')) {
+          setGenerateWatcher(!!workspace.getConfiguration('prisma').get('fileWatcher'))
+        }
+      }),
+
       commands.registerCommand('prisma.restartLanguageServer', async () => {
         client = await restartClient(context, client, serverOptions, clientOptions)
         window.showInformationMessage('Prisma language server restarted.') // eslint-disable-line @typescript-eslint/no-floating-promises
@@ -262,16 +223,12 @@ const plugin: PrismaVSCodePlugin = {
 
       commands.registerCommand('prisma.filewatcherEnable', async () => {
         const prismaConfig = workspace.getConfiguration('prisma')
-        // First, is set to true value
-        // Second, is set it on Workspace level settings
-        await prismaConfig.update('fileWatcher', true, false)
+        await prismaConfig.update('fileWatcher', true /* value */, false /* workspace */)
       }),
 
       commands.registerCommand('prisma.filewatcherDisable', async () => {
         const prismaConfig = workspace.getConfiguration('prisma')
-        // First, is set to false value
-        // Second, is set it on Workspace level settings
-        await prismaConfig.update('fileWatcher', false, false)
+        await prismaConfig.update('fileWatcher', false /* value */, false /* workspace */)
       }),
     )
 
@@ -295,11 +252,6 @@ const plugin: PrismaVSCodePlugin = {
     }
 
     checkForMinimalColorTheme()
-
-    if (watcherInstance) {
-      watcherInstance.on('add', onFileChange)
-      watcherInstance.on('change', onFileChange)
-    }
   },
   deactivate: async () => {
     if (!client) {

@@ -1,13 +1,13 @@
 {
   "extends": ["config:base"],
   "semanticCommits": true,
-  "ignoreDeps": ["@prisma/language-server", "@prisma/prisma-fmt-wasm"],
+  "ignoreDeps": ["@prisma/language-server", "@prisma/prisma-schema-wasm", "execa"],
   "masterIssue": true,
-  "reviewers": ["@Jolg42"],
+  "reviewers": ["@Jolg42", "@Druue"],
   "rebaseWhen": "conflicted",
   "packageRules": [
     {
-      "groupName": "VSCode",
+      "groupName": "VS Code",
       "packageNames": ["vscode", "@types/vscode"],
       "updateTypes": ["patch", "minor"]
     },
@@ -38,11 +38,7 @@
     {
       "groupName": "dependencies (non-major)",
       "depTypeList": ["dependencies"],
-      "excludePackageNames": [
-        "@prisma/language-server",
-        "@types/vscode",
-        "@prisma/prisma-fmt-wasm"
-      ],
+      "excludePackageNames": ["@prisma/language-server", "@types/vscode", "@prisma/prisma-schema-wasm"],
       "updateTypes": ["patch", "minor"]
     }
   ]

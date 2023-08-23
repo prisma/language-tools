@@ -13,10 +13,8 @@ import {
   fieldAttributes,
   allowedBlockTypes,
   corePrimitiveTypes,
-  supportedDataSourceFields,
   supportedGeneratorFields,
   relationArguments,
-  dataSourceUrlArguments,
   dataSourceProviders,
   dataSourceProviderArguments,
   generatorProviders,
@@ -35,7 +33,7 @@ import {
   relationModeValues,
   filterSuggestionsForLine,
 } from './completionUtils'
-import listAllAvailablePreviewFeatures from '../prisma-fmt/listAllAvailablePreviewFeatures'
+import listAllAvailablePreviewFeatures from '../prisma-schema-wasm/listAllAvailablePreviewFeatures'
 import {
   Block,
   BlockType,
@@ -119,8 +117,10 @@ export function getSuggestionForNativeTypes(
   lines: string[],
   wordsBeforePosition: string[],
   document: TextDocument,
+  onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
-  const activeFeatureFlag = declaredNativeTypes(document)
+  const activeFeatureFlag = declaredNativeTypes(document, onError)
+
   if (
     // TODO type? native "@db." types?
     foundBlock.type !== 'model' ||
@@ -137,7 +137,7 @@ export function getSuggestionForNativeTypes(
 
   // line
   const prismaType = wordsBeforePosition[1].replace('?', '').replace('[]', '')
-  const suggestions = getNativeTypes(document, prismaType)
+  const suggestions = getNativeTypes(document, prismaType, onError)
 
   return {
     items: suggestions,
@@ -163,6 +163,7 @@ export function getSuggestionForFieldAttribute(
   lines: string[],
   wordsBeforePosition: string[],
   document: TextDocument,
+  onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
   const fieldType = getFieldType(currentLine)
   // If we don't find a field type (e.g. String, Int...), return no suggestion
@@ -176,7 +177,7 @@ export function getSuggestionForFieldAttribute(
   if (wordsBeforePosition.length >= 2) {
     const datasourceName = getFirstDatasourceName(lines)
     const prismaType = wordsBeforePosition[1]
-    const nativeTypeSuggestions = getNativeTypes(document, prismaType)
+    const nativeTypeSuggestions = getNativeTypes(document, prismaType, onError)
 
     if (datasourceName) {
       if (!currentLine.includes(`@${datasourceName}`)) {
@@ -268,42 +269,6 @@ export function getSuggestionsForFieldTypes(
   }
 }
 
-function getSuggestionForDataSourceField(block: Block, lines: string[], position: Position): CompletionItem[] {
-  // create deep copy
-  let suggestions: CompletionItem[] = klona(supportedDataSourceFields)
-  const datasourceProvider = getFirstDatasourceProvider(lines)
-  const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
-
-  const isPostgresExtensionsAvailable = Boolean(
-    datasourceProvider && datasourceProvider.includes('postgres') && previewFeatures?.includes('postgresqlextensions'),
-  )
-
-  const isMultiSchemaAvailable = Boolean(
-    datasourceProvider &&
-      (datasourceProvider.includes('postgres') ||
-        datasourceProvider.includes('cockroach') ||
-        datasourceProvider.includes('sqlserver')) &&
-      previewFeatures?.includes('multischema'),
-  )
-
-  if (!isPostgresExtensionsAvailable) {
-    suggestions = suggestions.filter((item) => item.label !== 'extensions')
-  }
-
-  if (!isMultiSchemaAvailable) {
-    suggestions = suggestions.filter((item) => item.label !== 'schemas')
-  }
-
-  const labels: string[] = removeInvalidFieldSuggestions(
-    suggestions.map((item) => item.label),
-    block,
-    lines,
-    position,
-  )
-
-  return suggestions.filter((item) => labels.includes(item.label))
-}
-
 function getSuggestionForGeneratorField(block: Block, lines: string[], position: Position): CompletionItem[] {
   // create deep copy
   const suggestions: CompletionItem[] = klona(supportedGeneratorFields)
@@ -329,9 +294,6 @@ export function getSuggestionForFirstInsideBlock(
 ): CompletionList {
   let suggestions: CompletionItem[] = []
   switch (blockType) {
-    case 'datasource':
-      suggestions = getSuggestionForDataSourceField(block, lines, position)
-      break
     case 'generator':
       suggestions = getSuggestionForGeneratorField(block, lines, position)
       break
@@ -369,12 +331,18 @@ export function getSuggestionForBlockTypes(lines: string[]): CompletionList {
 
   const isViewAvailable = Boolean(previewFeatures?.includes('views'))
 
+  const isTypeAvailable = Boolean(datasourceProvider?.includes('mongodb'))
+
   if (!isEnumAvailable) {
     suggestions = suggestions.filter((item) => item.label !== 'enum')
   }
 
   if (!isViewAvailable) {
     suggestions = suggestions.filter((item) => item.label !== 'view')
+  }
+
+  if (!isTypeAvailable) {
+    suggestions = suggestions.filter((item) => item.label !== 'type')
   }
 
   return {
@@ -401,6 +369,7 @@ export function getSuggestionForSupportedFields(
   currentLineUntrimmed: string,
   position: Position,
   lines: string[],
+  onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
   let suggestions: string[] = []
   const isInsideQuotation: boolean = isInsideQuotationMark(currentLineUntrimmed, position)
@@ -428,7 +397,7 @@ export function getSuggestionForSupportedFields(
       }
       // previewFeatures
       else if (currentLine.startsWith('previewFeatures')) {
-        const generatorPreviewFeatures: string[] = listAllAvailablePreviewFeatures()
+        const generatorPreviewFeatures: string[] = listAllAvailablePreviewFeatures(onError)
         if (generatorPreviewFeatures.length > 0) {
           return handlePreviewFeatures(generatorPreviewFeatures, position, currentLineUntrimmed, isInsideQuotation)
         }
@@ -465,21 +434,21 @@ export function getSuggestionForSupportedFields(
             isIncomplete: true,
           }
         }
-        // url
-      } else if (currentLine.startsWith('url')) {
+      }
+      // url or shadowDatabaseUrl or directUrl
+      else if (
+        currentLine.startsWith('url') ||
+        currentLine.startsWith('shadowDatabaseUrl') ||
+        currentLine.startsWith('directUrl')
+      ) {
         // check if inside env
         if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
-          suggestions = ['DATABASE_URL']
-        } else {
-          if (currentLine.includes('env')) {
-            return {
-              items: dataSourceUrlArguments.filter((a) => !a.label.includes('env')),
-              isIncomplete: true,
-            }
-          }
-          return {
-            items: dataSourceUrlArguments,
-            isIncomplete: true,
+          if (currentLine.startsWith('url')) {
+            suggestions = ['DATABASE_URL']
+          } else if (currentLine.startsWith('shadowDatabaseUrl')) {
+            suggestions = ['SHADOW_DATABASE_URL']
+          } else if (currentLine.startsWith('directUrl')) {
+            suggestions = ['DIRECT_URL']
           }
         }
       }
@@ -499,14 +468,14 @@ export function getSuggestionForSupportedFields(
         if (isInsideQuotation) {
           return {
             items: relationModeValuesSuggestion,
-            isIncomplete: true,
+            isIncomplete: false,
           }
         }
         // If line ends with `"`, a value is already set.
         else if (!currentLine.endsWith('"')) {
           return {
             items: relationModeValuesSuggestionWithQuotes,
-            isIncomplete: true,
+            isIncomplete: false,
           }
         }
       }
@@ -719,23 +688,21 @@ function getDefaultValues({
   return suggestions
 }
 
-function getSuggestionsForAttribute(
-  {
-    attribute,
-    wordsBeforePosition,
-    untrimmedCurrentLine,
-    lines,
-    block,
-    position,
-  }: {
-    attribute?: '@relation'
-    wordsBeforePosition: string[]
-    untrimmedCurrentLine: string
-    lines: string[]
-    block: Block
-    position: Position
-  }, // eslint-disable-line @typescript-eslint/no-unused-vars
-): CompletionList | undefined {
+function getSuggestionsForAttribute({
+  attribute,
+  wordsBeforePosition,
+  untrimmedCurrentLine,
+  lines,
+  block,
+  position,
+}: {
+  attribute?: '@relation'
+  wordsBeforePosition: string[]
+  untrimmedCurrentLine: string
+  lines: string[]
+  block: Block
+  position: Position
+}): CompletionList | undefined {
   const firstWordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
   const secondWordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 2]
   const wordBeforePosition = firstWordBeforePosition === '' ? secondWordBeforePosition : firstWordBeforePosition
@@ -866,6 +833,7 @@ function getSuggestionsForAttribute(
           let name = value
           // Example for `@@index([email,address.|])` when there is no space between fields
           if (name?.includes(',')) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             name = name.split(',').pop()!
           }
           // Remove . to only get the name
@@ -1046,7 +1014,6 @@ function getSuggestionsForAttribute(
 export function getSuggestionsForInsideRoundBrackets(
   untrimmedCurrentLine: string,
   lines: string[],
-  document: TextDocument,
   position: Position,
   block: Block,
 ): CompletionList | undefined {
