@@ -11,6 +11,7 @@ import {
   extractFirstWord,
   MAX_SAFE_VALUE_i32,
   BlockType,
+  relationNamesRegexFilter,
 } from '../util'
 
 function getType(currentLine: string): string {
@@ -22,7 +23,7 @@ function getType(currentLine: string): string {
 }
 
 export function isRelationField(currentLine: string, lines: string[]): boolean {
-  const relationNames = getAllRelationNames(lines)
+  const relationNames = getAllRelationNames(lines, relationNamesRegexFilter)
   const type = getType(currentLine)
 
   if (type == '') {
@@ -109,7 +110,7 @@ function renameModelOrEnumWhereUsedAsType(
     return false
   }
 
-  const allRelationNames: string[] = getAllRelationNames(lines)
+  const allRelationNames: string[] = getAllRelationNames(lines, relationNamesRegexFilter)
   const currentName = getWordAtPosition(document, position)
   const isRelation = allRelationNames.includes(currentName)
   if (!isRelation) {

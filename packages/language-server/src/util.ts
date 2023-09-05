@@ -3,6 +3,10 @@ import { Position, Range } from 'vscode-languageserver'
 import nativeTypeConstructors, { NativeTypeConstructors } from './prisma-schema-wasm/nativeTypes'
 import { PreviewFeatures } from './previewFeatures'
 
+export const relationNamesRegexFilter = /^(model|enum|view)\s+(\w+)\s+{/gm
+
+export const relationNamesMongoDBRegexFilter = /^(model|enum|view|type)\s+(\w+)\s+{/gm
+
 export type BlockType = 'generator' | 'datasource' | 'model' | 'type' | 'enum' | 'view'
 
 export class Block {
@@ -243,11 +247,10 @@ export function extractBlockName(line: string): string {
   return line.slice(blockType.length, line.length - 1).trim()
 }
 
-export function getAllRelationNames(lines: string[]): string[] {
+export function getAllRelationNames(lines: string[], regexFilter: RegExp): string[] {
   const modelNames: string[] = []
   for (const line of lines) {
-    const modelOrEnumRegex = /^(model|enum|view)\s+(\w+)\s+{/gm
-    const result = modelOrEnumRegex.exec(line)
+    const result = regexFilter.exec(line)
     if (result && result[2]) {
       modelNames.push(result[2])
     }

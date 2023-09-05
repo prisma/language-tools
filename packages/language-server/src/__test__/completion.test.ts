@@ -1807,7 +1807,7 @@ suite('Completions', function () {
         },
       })
     })
-    // TODO should suggest `MyType`?
+
     test('Diagnoses type suggestions in model - MongoDB', () => {
       assertCompletion({
         provider: 'mongodb',
@@ -1844,6 +1844,7 @@ suite('Completions', function () {
             { label: 'Post', kind: CompletionItemKind.Reference },
             { label: 'PostType', kind: CompletionItemKind.Reference },
             { label: 'Something', kind: CompletionItemKind.Reference },
+            { label: 'MyType', kind: CompletionItemKind.Reference },
           ],
         },
       })
