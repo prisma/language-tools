@@ -24,11 +24,11 @@ suite('Hover of /// documentation comments', () => {
   test('Model', () => {
     assertHover(
       {
-        character: 10,
-        line: 23,
+        character: 15,
+        line: 24,
       },
       {
-        contents: 'Post including an author and content.',
+        contents: "Post including an author, it's content\n\nand whether it was published",
       },
       fixturePath,
     )
@@ -36,8 +36,8 @@ suite('Hover of /// documentation comments', () => {
   test('Enum', () => {
     assertHover(
       {
-        character: 17,
-        line: 24,
+        character: 15,
+        line: 25,
       },
       {
         contents: 'This is an enum specifying the UserName.',

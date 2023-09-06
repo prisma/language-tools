@@ -7,29 +7,30 @@ generator client {
   provider = "prisma-client-js"
 }
 
-/// Post including an author and content.
+/// Post including an author, it's content
+/// and whether it was published
 model Post {
-  id        Int         @default(autoincrement()) @id
+  id        Int     @id @default(autoincrement())
   content   String?
-  published Boolean     @default(false)
-  author    User?       @relation(fields: [authorId], references: [id])
+  published Boolean @default(false)
+  author    User?   @relation(fields: [authorId], references: [id])
   authorId  Int?
 }
 
 // Documentation for this model.
 model User {
-  id    Int     @default(autoincrement()) @id
-  email String  @unique
-  name  String?
-  posts Post[]
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  name        String?
+  posts       Post[]
   specialName UserName
-  test Test
+  test        Test
 }
 
 /// This is an enum specifying the UserName.
 enum UserName {
-    Fred
-    Eric
+  Fred
+  Eric
 }
 
 // This is a test enum.

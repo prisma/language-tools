@@ -34,7 +34,7 @@ import {
   isInsideAttribute,
   getSymbolBeforePosition,
   getBlocks,
-  MAX_SAFE_VALUE_i32,
+  getDocumentationForBlock,
 } from './util'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import format from './prisma-schema-wasm/format'
@@ -213,21 +213,19 @@ export function handleHoverRequest(document: TextDocument, params: HoverParams):
     return
   }
 
-  const foundBlock = getModelOrTypeOrEnumOrViewBlock(word, lines)
-  if (!foundBlock) {
+  const block = getModelOrTypeOrEnumOrViewBlock(word, lines)
+  if (!block) {
     return
   }
 
-  const commentLine = foundBlock.range.start.line - 1
-  const docComments = document.getText({
-    start: { line: commentLine, character: 0 },
-    end: { line: commentLine, character: MAX_SAFE_VALUE_i32 },
-  })
-  if (docComments.startsWith('///')) {
+  const blockDocumentation = getDocumentationForBlock(document, block)
+
+  if (blockDocumentation.length !== 0) {
     return {
-      contents: docComments.slice(4).trim(),
+      contents: blockDocumentation.join('\n\n'),
     }
   }
+
   // TODO uncomment once https://github.com/prisma/prisma/issues/2546 is resolved!
   /*if (docComments.startsWith('//')) {
     return {
