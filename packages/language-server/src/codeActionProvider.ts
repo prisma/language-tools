@@ -8,7 +8,7 @@ import {
   Range,
 } from 'vscode-languageserver'
 import levenshtein from 'js-levenshtein'
-import { convertDocumentTextToTrimmedLineArray, getAllRelationNames } from './util'
+import { convertDocumentTextToTrimmedLineArray, getAllRelationNames, relationNamesRegexFilter } from './util'
 import codeActions from './prisma-schema-wasm/codeActions'
 
 function getInsertRange(document: TextDocument): Range {
@@ -110,7 +110,7 @@ export function quickFix(
       const hasTypeModifierOptional: boolean = diagText.endsWith('?')
       diagText = removeTypeModifiers(hasTypeModifierArray, hasTypeModifierOptional, diagText)
       const lines: string[] = convertDocumentTextToTrimmedLineArray(textDocument)
-      const spellingSuggestion = getSpellingSuggestions(diagText, getAllRelationNames(lines))
+      const spellingSuggestion = getSpellingSuggestions(diagText, getAllRelationNames(lines, relationNamesRegexFilter))
       if (spellingSuggestion) {
         codeActionList.push({
           title: `Change spelling to '${spellingSuggestion}'`,

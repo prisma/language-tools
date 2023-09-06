@@ -52,6 +52,8 @@ import {
   getFieldTypesFromCurrentBlock,
   getValuesInsideSquareBrackets,
   getCompositeTypeFieldsRecursively,
+  relationNamesRegexFilter,
+  relationNamesMongoDBRegexFilter,
 } from '../util'
 
 const getSuggestionForBlockAttribute = (
@@ -239,7 +241,10 @@ export function getSuggestionsForFieldTypes(
 
   if (foundBlock instanceof Block) {
     // get all model names
-    const modelNames: string[] = getAllRelationNames(lines)
+    const modelNames: string[] =
+      datasourceProvider === 'mongodb'
+        ? getAllRelationNames(lines, relationNamesMongoDBRegexFilter)
+        : getAllRelationNames(lines, relationNamesRegexFilter)
     suggestions.push(...toCompletionItems(modelNames, CompletionItemKind.Reference))
   }
 
