@@ -541,4 +541,22 @@ export function getCompositeTypeFieldsRecursively(
   }
 }
 
+export const getDocumentationForBlock = (document: TextDocument, block: Block): string[] => {
+  return getDocumentation(document, block.range.start.line, [])
+}
+
+const getDocumentation = (document: TextDocument, line: number, comments: string[]): string[] => {
+  const comment = document.getText({
+    start: { line: line - 1, character: 0 },
+    end: { line: line - 1, character: MAX_SAFE_VALUE_i32 },
+  })
+
+  if (comment.startsWith('///')) {
+    comments.unshift(comment.slice(4).trim())
+
+    return getDocumentation(document, line - 1, comments)
+  }
+  return comments
+}
+
 export const MAX_SAFE_VALUE_i32 = 2147483647

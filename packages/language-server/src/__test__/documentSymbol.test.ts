@@ -67,21 +67,21 @@ suite('DocumentSymbol', () => {
         range: {
           end: {
             character: 1,
-            line: 16,
+            line: 17,
           },
           start: {
             character: 0,
-            line: 10,
+            line: 11,
           },
         },
         selectionRange: {
           end: {
             character: 10,
-            line: 10,
+            line: 11,
           },
           start: {
             character: 6,
-            line: 10,
+            line: 11,
           },
         },
       },
@@ -91,21 +91,21 @@ suite('DocumentSymbol', () => {
         range: {
           end: {
             character: 1,
-            line: 26,
+            line: 27,
           },
           start: {
             character: 0,
-            line: 19,
+            line: 20,
           },
         },
         selectionRange: {
           end: {
             character: 10,
-            line: 19,
+            line: 20,
           },
           start: {
             character: 6,
-            line: 19,
+            line: 20,
           },
         },
       },
@@ -115,21 +115,21 @@ suite('DocumentSymbol', () => {
         range: {
           end: {
             character: 1,
-            line: 32,
+            line: 33,
           },
           start: {
             character: 0,
-            line: 29,
+            line: 30,
           },
         },
         selectionRange: {
           end: {
             character: 13,
-            line: 29,
+            line: 30,
           },
           start: {
             character: 5,
-            line: 29,
+            line: 30,
           },
         },
       },
@@ -139,21 +139,21 @@ suite('DocumentSymbol', () => {
         range: {
           end: {
             character: 1,
-            line: 38,
+            line: 39,
           },
           start: {
             character: 0,
-            line: 35,
+            line: 36,
           },
         },
         selectionRange: {
           end: {
             character: 9,
-            line: 35,
+            line: 36,
           },
           start: {
             character: 5,
-            line: 35,
+            line: 36,
           },
         },
       },
