@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "@types/mocha": "10.0.1",
-    "@types/node": "14.18.61",
+    "@types/node": "14.18.62",
     "mocha": "10.2.0",
     "ts-dedent": "2.2.0",
     "typescript": "5.2.2"
