@@ -5,7 +5,7 @@ import {
   handleCompletionRequest,
   handleDiagnosticsRequest,
   handleDocumentFormatting,
-} from '../MessageHandler'
+} from '../lib/MessageHandler'
 import { CURSOR_CHARACTER, findCursorPosition, getTextDocument } from './helper'
 
 import * as assert from 'assert'

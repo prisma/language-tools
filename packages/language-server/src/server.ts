@@ -17,9 +17,9 @@ import {
 } from 'vscode-languageserver'
 import { createConnection, IPCMessageReader, IPCMessageWriter } from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import * as MessageHandler from './MessageHandler'
-import * as util from './prisma-schema-wasm/util'
-import { LSOptions, LSSettings } from './settings'
+import * as MessageHandler from './lib/MessageHandler'
+import * as util from './lib/prisma-schema-wasm/util'
+import { LSOptions, LSSettings } from './lib/settings'
 const packageJson = require('../../package.json') // eslint-disable-line
 
 function getConnection(options?: LSOptions): Connection {

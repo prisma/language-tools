@@ -1,5 +1,5 @@
 import type { Position } from 'vscode-languageserver-textdocument'
-import { handleHoverRequest } from '../MessageHandler'
+import { handleHoverRequest } from '../lib/MessageHandler'
 import { Hover } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'

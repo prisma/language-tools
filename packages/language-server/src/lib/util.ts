@@ -1,7 +1,8 @@
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import { Position, Range } from 'vscode-languageserver'
-import nativeTypeConstructors, { NativeTypeConstructors } from './prisma-schema-wasm/nativeTypes'
+
 import { PreviewFeatures } from './previewFeatures'
+import nativeTypeConstructors, { NativeTypeConstructors } from './prisma-schema-wasm/nativeTypes'
 
 export const relationNamesRegexFilter = /^(model|enum|view)\s+(\w+)\s+{/gm
 

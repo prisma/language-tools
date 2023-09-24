@@ -1,5 +1,5 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { handleCompletionRequest } from '../MessageHandler'
+import { handleCompletionRequest } from '../lib/MessageHandler'
 import { CompletionList, CompletionParams, CompletionItemKind, CompletionTriggerKind } from 'vscode-languageserver'
 import assert from 'assert'
 import dedent from 'ts-dedent'

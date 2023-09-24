@@ -3,7 +3,7 @@ import { getWasmError, isWasmPanic, WasmPanic } from '../panic'
 /**
  * Imports
  */
-const packageJson = require('../../../package.json') // eslint-disable-line
+const packageJson = require('../../../../package.json') // eslint-disable-line
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return */
 
