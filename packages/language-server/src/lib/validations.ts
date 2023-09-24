@@ -1,9 +1,27 @@
-import { Diagnostic, DiagnosticSeverity, DiagnosticTag } from 'vscode-languageserver/node'
-import { getBlockAtPosition, MAX_SAFE_VALUE_i32 } from './util'
+import { Diagnostic, DiagnosticSeverity, Range, DiagnosticTag } from 'vscode-languageserver'
+import { TextDocument } from 'vscode-languageserver-textdocument'
+import { getExperimentalFeaturesRange, getBlockAtPosition, MAX_SAFE_VALUE_i32 } from './util'
 
-export function createDiagnosticsForIgnore(lines: string[]): Diagnostic[] {
-  const diagnostics: Diagnostic[] = []
+// TODO (Joël) can be removed? Since it was renamed to `previewFeatures`
+// check for experimentalFeatures inside generator block
+// Related code in codeActionProvider.ts, around lines 185-204
+export const validateExperimentalFeatures = (document: TextDocument, diagnostics: Diagnostic[]) => {
+  if (document.getText().includes('experimentalFeatures')) {
+    const experimentalFeaturesRange: Range | undefined = getExperimentalFeaturesRange(document)
+    if (experimentalFeaturesRange) {
+      diagnostics.push({
+        severity: DiagnosticSeverity.Error,
+        range: experimentalFeaturesRange,
+        message:
+          "The `experimentalFeatures` property is obsolete and has been renamed to 'previewFeatures' to better communicate what it is.",
+        code: 'Prisma 5',
+        tags: [2],
+      })
+    }
+  }
+}
 
+export const validateIgnoredBlocks = (lines: string[], diagnostics: Diagnostic[]) => {
   lines.map((currElement, index) => {
     if (currElement.includes('@@ignore')) {
       const block = getBlockAtPosition(index, lines)
@@ -37,6 +55,4 @@ export function createDiagnosticsForIgnore(lines: string[]): Diagnostic[] {
       })
     }
   })
-
-  return diagnostics
 }

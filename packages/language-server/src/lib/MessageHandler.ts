@@ -1,7 +1,6 @@
 import {
   DocumentFormattingParams,
   TextEdit,
-  Range,
   DeclarationParams,
   CompletionParams,
   CompletionList,
@@ -26,7 +25,6 @@ import {
   fullDocumentRange,
   getBlockAtPosition,
   getCurrentLine,
-  getExperimentalFeaturesRange,
   getModelOrTypeOrEnumOrViewBlock,
   getWordAtPosition,
   isFirstInsideBlock,
@@ -65,7 +63,8 @@ import {
   isRelationField,
   isBlockName,
 } from './rename/renameUtil'
-import { createDiagnosticsForIgnore } from './diagnosticsHandler'
+
+import { validateExperimentalFeatures, validateIgnoredBlocks } from './validations'
 
 export function handleDiagnosticsRequest(
   document: TextDocument,
@@ -110,26 +109,10 @@ export function handleDiagnosticsRequest(
     diagnostics.push(diagnostic)
   }
 
-  // TODO can be removed? Since it was renamed to `previewFeatures`
-  // check for experimentalFeatures inside generator block
-  // Related code in codeActionProvider.ts, around lines 185-204
-  if (document.getText().includes('experimentalFeatures')) {
-    const experimentalFeaturesRange: Range | undefined = getExperimentalFeaturesRange(document)
-    if (experimentalFeaturesRange) {
-      diagnostics.push({
-        severity: DiagnosticSeverity.Error,
-        range: experimentalFeaturesRange,
-        message:
-          "The `experimentalFeatures` property is obsolete and has been renamed to 'previewFeatures' to better communicate what it is.",
-        code: 'Prisma 5',
-        tags: [2],
-      })
-    }
-  }
+  validateExperimentalFeatures(document, diagnostics)
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
-  const diagnosticsForIgnore = createDiagnosticsForIgnore(lines)
-  diagnostics.push(...diagnosticsForIgnore)
+  validateIgnoredBlocks(lines, diagnostics)
 
   return diagnostics
 }
