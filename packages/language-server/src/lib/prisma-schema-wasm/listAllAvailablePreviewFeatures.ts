@@ -1,4 +1,4 @@
-import { prismaSchemaWasm } from '../wasm'
+import { prismaSchemaWasm } from '.'
 import { handleFormatPanic, handleWasmError } from './util'
 
 export default function listAllAvailablePreviewFeatures(onError?: (errorMessage: string) => void): string[] {

@@ -33,7 +33,7 @@ import {
   relationModeValues,
   filterSuggestionsForLine,
 } from './completionUtils'
-import listAllAvailablePreviewFeatures from './prisma-schema-wasm/listAllAvailablePreviewFeatures'
+import listAllAvailablePreviewFeatures from '../prisma-schema-wasm/listAllAvailablePreviewFeatures'
 import {
   Block,
   BlockType,

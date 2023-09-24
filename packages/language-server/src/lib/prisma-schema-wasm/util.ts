@@ -1,4 +1,4 @@
-import { getWasmError, isWasmPanic, WasmPanic } from '../panic'
+import { isWasmPanic, getWasmError, WasmPanic } from '../error/panic'
 
 /**
  * Imports
