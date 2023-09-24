@@ -9,7 +9,7 @@ import {
   Position,
 } from 'vscode-languageserver'
 import * as completions from './completions.json'
-import type { PreviewFeatures } from '../previewFeatures'
+import type { PreviewFeatures } from '../types'
 import { Block, BlockType, getValuesInsideSquareBrackets, isInsideAttribute } from '../util'
 import nativeTypeConstructors, { NativeTypeConstructors } from '../prisma-schema-wasm/nativeTypes'
 

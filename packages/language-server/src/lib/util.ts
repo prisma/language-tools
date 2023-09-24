@@ -1,12 +1,8 @@
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import { Position, Range } from 'vscode-languageserver'
 
-import { PreviewFeatures } from './previewFeatures'
+import { PreviewFeatures } from './types'
 import nativeTypeConstructors, { NativeTypeConstructors } from './prisma-schema-wasm/nativeTypes'
-
-export const relationNamesRegexFilter = /^(model|enum|view)\s+(\w+)\s+{/gm
-
-export const relationNamesMongoDBRegexFilter = /^(model|enum|view|type)\s+(\w+)\s+{/gm
 
 export type BlockType = 'generator' | 'datasource' | 'model' | 'type' | 'enum' | 'view'
 

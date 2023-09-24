@@ -1,5 +1,6 @@
 import { Position } from 'vscode-languageserver'
 import type { TextEdit, TextDocument } from 'vscode-languageserver-textdocument'
+import { relationNamesRegexFilter } from '../types'
 import {
   Block,
   getCurrentLine,
@@ -11,7 +12,6 @@ import {
   extractFirstWord,
   MAX_SAFE_VALUE_i32,
   BlockType,
-  relationNamesRegexFilter,
 } from '../util'
 
 function getType(currentLine: string): string {

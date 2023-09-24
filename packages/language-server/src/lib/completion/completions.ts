@@ -52,9 +52,8 @@ import {
   getFieldTypesFromCurrentBlock,
   getValuesInsideSquareBrackets,
   getCompositeTypeFieldsRecursively,
-  relationNamesRegexFilter,
-  relationNamesMongoDBRegexFilter,
 } from '../util'
+import { relationNamesMongoDBRegexFilter, relationNamesRegexFilter } from '../types'
 
 const getSuggestionForBlockAttribute = (
   block: Block,
