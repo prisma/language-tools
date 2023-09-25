@@ -41,9 +41,6 @@ import {
   isInsideQuotationMark,
   isInsideFieldArgument,
   isInsideGivenProperty,
-  getFirstDatasourceName,
-  getFirstDatasourceProvider,
-  getAllPreviewFeaturesFromGenerators,
   getFieldType,
   getValuesInsideSquareBrackets,
 } from '../util'
@@ -55,6 +52,9 @@ import {
   getFieldTypesFromCurrentBlock,
   getCompositeTypeFieldsRecursively,
   getModelOrTypeOrEnumOrViewBlock,
+  getFirstDatasourceProvider,
+  getAllPreviewFeaturesFromGenerators,
+  getFirstDatasourceName,
 } from '../ast'
 
 const getSuggestionForBlockAttribute = (

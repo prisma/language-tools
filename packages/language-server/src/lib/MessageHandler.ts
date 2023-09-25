@@ -25,7 +25,7 @@ import format from './prisma-schema-wasm/format'
 import textDocumentCompletion from './prisma-schema-wasm/textDocumentCompletion'
 import lint from './prisma-schema-wasm/lint'
 
-import { convertDocumentTextToTrimmedLineArray, positionIsAfterFieldAndType, isInsideAttribute } from './util'
+import { convertDocumentTextToTrimmedLineArray, isInsideAttribute } from './util'
 
 import {
   getSuggestionForFieldAttribute,
@@ -64,6 +64,7 @@ import {
   getDocumentationForBlock,
   getSymbolBeforePosition,
   getModelOrTypeOrEnumOrViewBlock,
+  positionIsAfterFieldAndType,
 } from './ast'
 
 export function handleDiagnosticsRequest(

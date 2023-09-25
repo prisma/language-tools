@@ -71,3 +71,17 @@ export function getSymbolBeforePosition(document: TextDocument, position: Positi
     end: { line: position.line, character: position.character },
   })
 }
+
+export function positionIsAfterFieldAndType(
+  position: Position,
+  document: TextDocument,
+  wordsBeforePosition: string[],
+): boolean {
+  const symbolBeforePosition = getSymbolBeforePosition(document, position)
+  const symbolBeforeIsWhiteSpace = symbolBeforePosition.search(/\s/)
+
+  const hasAtRelation = wordsBeforePosition.length === 2 && symbolBeforePosition === '@'
+  const hasWhiteSpaceBeforePosition = wordsBeforePosition.length === 2 && symbolBeforeIsWhiteSpace !== -1
+
+  return wordsBeforePosition.length > 2 || hasAtRelation || hasWhiteSpaceBeforePosition
+}
