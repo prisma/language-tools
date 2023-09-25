@@ -1,4 +1,4 @@
-import { quickFix } from '../lib/codeActionProvider'
+import { quickFix } from '../lib/code-actions'
 import {
   CodeAction,
   DiagnosticSeverity,

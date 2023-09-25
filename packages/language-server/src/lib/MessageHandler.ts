@@ -37,6 +37,8 @@ import {
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import format from './prisma-schema-wasm/format'
 import textDocumentCompletion from './prisma-schema-wasm/textDocumentCompletion'
+import lint from './prisma-schema-wasm/lint'
+
 import {
   getSuggestionForFieldAttribute,
   getSuggestionsForFieldTypes,
@@ -47,8 +49,8 @@ import {
   suggestEqualSymbol,
   getSuggestionForNativeTypes,
 } from './completion/completions'
-import { quickFix } from './codeActionProvider'
-import lint from './prisma-schema-wasm/lint'
+
+import { quickFix } from './code-actions'
 import {
   insertBasicRename,
   renameReferencesForModelName,
@@ -62,8 +64,7 @@ import {
   printLogMessage,
   isRelationField,
   isBlockName,
-} from './rename/renameUtil'
-
+} from './code-actions/rename'
 import { validateExperimentalFeatures, validateIgnoredBlocks } from './validations'
 
 export function handleDiagnosticsRequest(
