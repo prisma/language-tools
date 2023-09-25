@@ -1,8 +1,8 @@
 import { CompletionItem, CompletionItemKind, CompletionList, Position } from 'vscode-languageserver'
-import { convertToCompletionItems } from './completionUtils'
 
 import * as completions from './completions.json'
 import { getValuesInsideSquareBrackets, isInsideAttribute } from '../ast'
+import { convertToCompletionItems } from './internals'
 
 /**
  * ```prisma

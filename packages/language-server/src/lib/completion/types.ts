@@ -4,13 +4,13 @@ import { convertToCompletionItems } from './internals'
 import * as completions from './completions.json'
 
 /**
- * ```
- * schema.prisma """
- *  |
- * """
+ * ```prisma
+ * model A {
+ *  field |
+ * }
  * ```
  */
-export const allowedBlockTypes: CompletionItem[] = convertToCompletionItems(
-  completions.blockTypes,
-  CompletionItemKind.Class,
+export const corePrimitiveTypes: CompletionItem[] = convertToCompletionItems(
+  completions.primitiveTypes,
+  CompletionItemKind.TypeParameter,
 )

@@ -1,6 +1,6 @@
 import { CompletionItem, CompletionItemKind } from 'vscode-languageserver'
 
-import { convertToCompletionItems } from './completionUtils'
+import { convertToCompletionItems } from './internals'
 import * as completions from './completions.json'
 
 export const dataSourceProviders: CompletionItem[] = convertToCompletionItems(

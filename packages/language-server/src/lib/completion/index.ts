@@ -24,9 +24,11 @@ import {
   suggestEqualSymbol,
 } from './completions'
 
+export * from './arguments'
 export * from './blocks'
 export * from './datasource'
 export * from './generator'
+export * from './types'
 
 export function prismaSchemaWasmCompletions(
   params: CompletionParams,

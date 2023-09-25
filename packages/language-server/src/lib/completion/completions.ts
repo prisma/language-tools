@@ -11,12 +11,7 @@ import { klona } from 'klona'
 import {
   blockAttributes,
   fieldAttributes,
-  corePrimitiveTypes,
-  relationArguments,
   givenBlockAttributeParams,
-  givenFieldAttributeParams,
-  sortLengthProperties,
-  filterSortLengthBasedOnInput,
   toCompletionItems,
   filterSuggestionsForBlock,
   removeInvalidFieldSuggestions,
@@ -54,6 +49,13 @@ import {
   supportedGeneratorFields,
 } from './generator'
 import { dataSourceProviderArguments, dataSourceProviders, relationModeValues } from './datasource'
+import {
+  filterSortLengthBasedOnInput,
+  givenFieldAttributeParams,
+  relationArguments,
+  sortLengthProperties,
+} from './arguments'
+import { corePrimitiveTypes } from './types'
 
 const getSuggestionForBlockAttribute = (
   block: Block,
