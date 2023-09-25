@@ -16,13 +16,13 @@ import {
 import {
   getSuggestionForBlockTypes,
   getSuggestionForFirstInsideBlock,
-  getSuggestionForFieldAttribute,
   getSuggestionForSupportedFields,
   getSuggestionsForInsideRoundBrackets,
   getSuggestionForNativeTypes,
   getSuggestionsForFieldTypes,
   suggestEqualSymbol,
 } from './completions'
+import { getSuggestionForFieldAttribute } from './attributes'
 
 export * from './arguments'
 export * from './blocks'

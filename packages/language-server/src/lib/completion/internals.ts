@@ -1,5 +1,8 @@
 import { CompletionItemKind, CompletionItem, InsertTextFormat, InsertTextMode, MarkupKind } from 'vscode-languageserver'
 
+// Docs about CompletionItem
+// https://code.visualstudio.com/api/references/vscode-api#CompletionItem
+
 type JSONSimpleCompletionItems = {
   label: string
   insertText?: string // optional text to use as completion instead of label
@@ -14,9 +17,6 @@ type JSONFullCompletionItems = {
   fullSignature: string // custom signature to show
   params: { label: string; documentation: string }[]
 }[]
-
-// Docs about CompletionItem
-// https://code.visualstudio.com/api/references/vscode-api#CompletionItem
 
 /**
  * Converts a json object containing labels and documentations to CompletionItems.
@@ -82,4 +82,8 @@ export function convertAttributesToCompletionItems(
     })
   }
   return result
+}
+
+export function toCompletionItems(allowedTypes: string[], kind: CompletionItemKind): CompletionItem[] {
+  return allowedTypes.map((label) => ({ label, kind }))
 }

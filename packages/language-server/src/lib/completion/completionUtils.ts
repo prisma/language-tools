@@ -1,94 +1,10 @@
 import type { TextDocument } from 'vscode-languageserver-textdocument'
-import {
-  CompletionItem,
-  CompletionItemKind,
-  MarkupKind,
-  InsertTextFormat,
-  InsertTextMode,
-  Position,
-} from 'vscode-languageserver'
+import { CompletionItem, Position } from 'vscode-languageserver'
 
-import type { PreviewFeatures } from '../types'
 import nativeTypeConstructors, { NativeTypeConstructors } from '../prisma-schema-wasm/nativeTypes'
 import { Block, BlockType } from '../ast'
-
-import { sqlServerClusteredValuesCompletionItems } from './arguments'
-
-import * as completions from './completions.json'
-import { convertToCompletionItems, convertAttributesToCompletionItems } from './internals'
-
-export function givenBlockAttributeParams({
-  blockAttribute,
-  wordBeforePosition,
-  datasourceProvider,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  previewFeatures,
-}: {
-  blockAttribute: '@@unique' | '@@id' | '@@index' | '@@fulltext'
-  wordBeforePosition: string
-  datasourceProvider: string | undefined
-  previewFeatures: PreviewFeatures[] | undefined
-}): CompletionItem[] {
-  const items = convertToCompletionItems(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    completions.blockAttributes.find((item) => item.label.includes(blockAttribute))!.params,
-    CompletionItemKind.Property,
-  )
-
-  // SQL Server only, suggest clustered
-  if (datasourceProvider === 'sqlserver' && blockAttribute !== '@@fulltext') {
-    // Auto completion for SQL Server only, clustered: true | false
-    if (wordBeforePosition.includes('clustered:')) {
-      return sqlServerClusteredValuesCompletionItems
-    } else {
-      // add clustered to suggestions
-      items.push({
-        label: 'clustered',
-        insertText: 'clustered: $0',
-        insertTextFormat: InsertTextFormat.Snippet,
-        kind: CompletionItemKind.Property,
-        documentation:
-          'An index, unique constraint or primary key can be created as clustered or non-clustered; altering the storage and retrieve behavior of the index.',
-      })
-    }
-  }
-  // PostgreSQL only, suggest type
-  else if (
-    blockAttribute === '@@index' &&
-    datasourceProvider &&
-    ['postgresql', 'postgres'].includes(datasourceProvider)
-  ) {
-    // TODO figure out if we need to add cockroachdb provider here
-    // The type argument is only available for PostgreSQL on @@index
-    items.push({
-      label: 'type',
-      kind: CompletionItemKind.Property,
-      insertText: 'type: $0',
-      insertTextFormat: InsertTextFormat.Snippet,
-      insertTextMode: InsertTextMode.adjustIndentation,
-      documentation: {
-        kind: 'markdown',
-        value: 'Defines the access type of indexes: BTree (default) or Hash.',
-      },
-    })
-  }
-
-  return items
-}
-
-export const blockAttributes: CompletionItem[] = convertAttributesToCompletionItems(
-  completions.blockAttributes,
-  CompletionItemKind.Property,
-)
-
-export const fieldAttributes: CompletionItem[] = convertAttributesToCompletionItems(
-  completions.fieldAttributes,
-  CompletionItemKind.Property,
-)
-
-export function toCompletionItems(allowedTypes: string[], kind: CompletionItemKind): CompletionItem[] {
-  return allowedTypes.map((label) => ({ label, kind }))
-}
+import { nativeFunctionCompletion } from './functions'
+import { nativeTypeCompletion } from './types'
 
 /**
  * Removes all block attribute suggestions that are invalid in this context.
@@ -230,18 +146,9 @@ export function getNativeTypes(
     if (element._number_of_args + element._number_of_optional_args !== 0) {
       const documentation = buildDocumentation(element)
 
-      suggestions.push({
-        label: `${element.name}()`,
-        kind: CompletionItemKind.TypeParameter,
-        insertText: `${element.name}($0)`,
-        documentation: { kind: MarkupKind.Markdown, value: documentation },
-        insertTextFormat: InsertTextFormat.Snippet,
-      })
+      nativeFunctionCompletion(suggestions, element, documentation)
     } else {
-      suggestions.push({
-        label: element.name,
-        kind: CompletionItemKind.TypeParameter,
-      })
+      nativeTypeCompletion(suggestions, element)
     }
   })
 

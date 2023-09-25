@@ -1,23 +1,7 @@
-import {
-  CompletionItem,
-  CompletionList,
-  CompletionItemKind,
-  Position,
-  MarkupKind,
-  InsertTextFormat,
-} from 'vscode-languageserver'
+import { CompletionItem, CompletionList, CompletionItemKind, Position, InsertTextFormat } from 'vscode-languageserver'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import { klona } from 'klona'
-import {
-  blockAttributes,
-  fieldAttributes,
-  givenBlockAttributeParams,
-  toCompletionItems,
-  filterSuggestionsForBlock,
-  removeInvalidFieldSuggestions,
-  getNativeTypes,
-  filterSuggestionsForLine,
-} from './completionUtils'
+import { filterSuggestionsForBlock, removeInvalidFieldSuggestions, getNativeTypes } from './completionUtils'
 import listAllAvailablePreviewFeatures from '../prisma-schema-wasm/listAllAvailablePreviewFeatures'
 
 import { relationNamesMongoDBRegexFilter, relationNamesRegexFilter } from '../types'
@@ -50,12 +34,32 @@ import {
 } from './generator'
 import { dataSourceProviderArguments, dataSourceProviders, relationModeValues } from './datasource'
 import {
+  booleanDefaultCompletions,
+  cacheSequenceDefaultCompletion,
   filterSortLengthBasedOnInput,
-  givenFieldAttributeParams,
+  getCompletionsForBlockAttributeArgs,
+  getCompletionsForFieldAttributeArgs,
+  incrementSequenceDefaultCompletion,
+  maxValueSequenceDefaultCompletion,
+  minValueSequenceDefaultCompletion,
+  opsIndexFulltextCompletion,
   relationArguments,
   sortLengthProperties,
+  startSequenceDefaultCompletion,
+  virtualSequenceDefaultCompletion,
 } from './arguments'
-import { corePrimitiveTypes } from './types'
+import { corePrimitiveTypes, relationManyTypeCompletion, relationSingleTypeCompletion } from './types'
+import { blockAttributes } from './attributes'
+import { toCompletionItems } from './internals'
+import {
+  autoDefaultCompletion,
+  autoincrementDefaultCompletion,
+  cuidDefaultCompletion,
+  dbgeneratedDefaultCompletion,
+  nowDefaultCompletion,
+  sequenceDefaultCompletion,
+  uuidDefaultCompletion,
+} from './functions'
 
 const getSuggestionForBlockAttribute = (
   block: Block,
@@ -148,82 +152,6 @@ export function getSuggestionForNativeTypes(
   }
 }
 
-/**
- * Should suggest all field attributes for a given field
- * EX: id Int |> @id, @default, @datasourceName, ...etc
- *
- * If `@datasourceName.` |> suggests nativeTypes
- * @param block
- * @param currentLine
- * @param lines
- * @param wordsBeforePosition
- * @param document
- * @returns
- */
-export function getSuggestionForFieldAttribute(
-  block: Block,
-  currentLine: string,
-  lines: string[],
-  wordsBeforePosition: string[],
-  document: TextDocument,
-  onError?: (errorMessage: string) => void,
-): CompletionList | undefined {
-  const fieldType = getFieldType(currentLine)
-  // If we don't find a field type (e.g. String, Int...), return no suggestion
-  if (!fieldType) {
-    return
-  }
-
-  let suggestions: CompletionItem[] = []
-
-  // Because @.?
-  if (wordsBeforePosition.length >= 2) {
-    const datasourceName = getFirstDatasourceName(lines)
-    const prismaType = wordsBeforePosition[1]
-    const nativeTypeSuggestions = getNativeTypes(document, prismaType, onError)
-
-    if (datasourceName) {
-      if (!currentLine.includes(`@${datasourceName}`)) {
-        suggestions.push({
-          // https://code.visualstudio.com/docs/editor/intellisense#_types-of-completions
-          kind: CompletionItemKind.Property,
-          label: '@' + datasourceName,
-          documentation:
-            'Defines a native database type that should be used for this field. See https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#native-types-mapping',
-          insertText: `@${datasourceName}$0`,
-          insertTextFormat: InsertTextFormat.Snippet,
-        })
-      }
-
-      if (nativeTypeSuggestions.length !== 0) {
-        if (
-          // Check that we are not separated by a space like `@db. |`
-          wordsBeforePosition[wordsBeforePosition.length - 1] === `@${datasourceName}`
-        ) {
-          suggestions.push(...nativeTypeSuggestions)
-          return {
-            items: suggestions,
-            isIncomplete: false,
-          }
-        }
-      }
-    }
-  }
-
-  suggestions.push(...fieldAttributes)
-
-  const modelOrTypeOrEnum = getDataBlock(fieldType, lines)
-
-  suggestions = filterSuggestionsForLine(suggestions, currentLine, fieldType, modelOrTypeOrEnum?.type)
-
-  suggestions = filterSuggestionsForBlock(suggestions, block, lines)
-
-  return {
-    items: suggestions,
-    isIncomplete: false,
-  }
-}
-
 export function getSuggestionsForFieldTypes(
   foundBlock: Block,
   lines: string[],
@@ -254,18 +182,8 @@ export function getSuggestionsForFieldTypes(
   const completeSuggestions = suggestions.filter((s) => s.label.length === wordBeforePosition.length)
   if (completeSuggestions.length !== 0) {
     for (const sugg of completeSuggestions) {
-      suggestions.push(
-        {
-          label: `${sugg.label}?`,
-          kind: sugg.kind,
-          documentation: sugg.documentation,
-        },
-        {
-          label: `${sugg.label}[]`,
-          kind: sugg.kind,
-          documentation: sugg.documentation,
-        },
-      )
+      relationSingleTypeCompletion(suggestions, sugg)
+      relationManyTypeCompletion(suggestions, sugg)
     }
   }
 
@@ -529,59 +447,24 @@ function getDefaultValues({
         return suggestions
       }
 
-      // Only suggests if empty
       if (!sequenceProperties.some((it) => currentLine.includes(it))) {
-        suggestions.push({
-          label: 'virtual',
-          insertText: 'virtual',
-          kind: CompletionItemKind.Property,
-          documentation:
-            'Virtual sequences are sequences that do not generate monotonically increasing values and instead produce values like those generated by the built-in function unique_rowid(). They are intended for use in combination with SERIAL-typed columns.',
-        })
+        virtualSequenceDefaultCompletion(suggestions)
       }
 
       if (!currentLine.includes('minValue')) {
-        suggestions.push({
-          label: 'minValue',
-          insertText: 'minValue: $0',
-          kind: CompletionItemKind.Property,
-          documentation: 'The new minimum value of the sequence.',
-        })
+        minValueSequenceDefaultCompletion(suggestions)
       }
       if (!currentLine.includes('maxValue')) {
-        suggestions.push({
-          label: 'maxValue',
-          insertText: 'maxValue: $0',
-          kind: CompletionItemKind.Property,
-          documentation: 'The new maximum value of the sequence.',
-        })
+        maxValueSequenceDefaultCompletion(suggestions)
       }
       if (!currentLine.includes('cache')) {
-        suggestions.push({
-          label: 'cache',
-          insertText: 'cache: $0',
-          kind: CompletionItemKind.Property,
-          documentation:
-            'The number of sequence values to cache in memory for reuse in the session. A cache size of 1 means that there is no cache, and cache sizes of less than 1 are not valid.',
-        })
+        cacheSequenceDefaultCompletion(suggestions)
       }
       if (!currentLine.includes('increment')) {
-        suggestions.push({
-          label: 'increment',
-          insertText: 'increment: $0',
-          kind: CompletionItemKind.Property,
-          documentation:
-            'The new value by which the sequence is incremented. A negative number creates a descending sequence. A positive number creates an ascending sequence.',
-        })
+        incrementSequenceDefaultCompletion(suggestions)
       }
       if (!currentLine.includes('start')) {
-        suggestions.push({
-          label: 'start',
-          insertText: 'start: $0',
-          kind: CompletionItemKind.Property,
-          documentation:
-            'The value the sequence starts at if you RESTART or if the sequence hits the MAXVALUE and CYCLE is set.',
-        })
+        startSequenceDefaultCompletion(suggestions)
       }
 
       return suggestions
@@ -590,22 +473,9 @@ function getDefaultValues({
 
   // MongoDB only
   if (datasourceProvider === 'mongodb') {
-    suggestions.push({
-      label: 'auto()',
-      kind: CompletionItemKind.Function,
-      documentation: 'Represents default values that are automatically generated by the database.',
-      insertText: 'auto()',
-      insertTextFormat: InsertTextFormat.Snippet,
-    })
+    autoDefaultCompletion(suggestions)
   } else {
-    suggestions.push({
-      label: 'dbgenerated("")',
-      kind: CompletionItemKind.Function,
-      documentation:
-        'The SQL definition of the default value which is generated by the database. This is not validated by Prisma.',
-      insertText: 'dbgenerated("$0")',
-      insertTextFormat: InsertTextFormat.Snippet,
-    })
+    dbgeneratedDefaultCompletion(suggestions)
   }
 
   const fieldType = getFieldType(currentLine)
@@ -618,12 +488,7 @@ function getDefaultValues({
     case 'BigInt':
     case 'Int':
       if (datasourceProvider === 'cockroachdb') {
-        suggestions.push({
-          label: 'sequence()',
-          kind: CompletionItemKind.Function,
-          documentation:
-            'Create a sequence of integers in the underlying database and assign the incremented values to the ID values of the created records based on the sequence.',
-        })
+        sequenceDefaultCompletion(suggestions)
 
         if (fieldType === 'Int') {
           // @default(autoincrement()) is only supported on BigInt fields for cockroachdb.
@@ -631,50 +496,17 @@ function getDefaultValues({
         }
       }
 
-      suggestions.push({
-        label: 'autoincrement()',
-        kind: CompletionItemKind.Function,
-        documentation:
-          'Create a sequence of integers in the underlying database and assign the incremented values to the ID values of the created records based on the sequence.',
-      })
+      autoincrementDefaultCompletion(suggestions)
       break
     case 'DateTime':
-      suggestions.push({
-        label: 'now()',
-        kind: CompletionItemKind.Function,
-        documentation: {
-          kind: MarkupKind.Markdown,
-          value: 'Set a timestamp of the time when a record is created.',
-        },
-      })
+      nowDefaultCompletion(suggestions)
       break
     case 'String':
-      suggestions.push(
-        {
-          label: 'uuid()',
-          kind: CompletionItemKind.Function,
-          documentation: {
-            kind: MarkupKind.Markdown,
-            value:
-              'Generate a globally unique identifier based on the [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier) spec.',
-          },
-        },
-        {
-          label: 'cuid()',
-          kind: CompletionItemKind.Function,
-          documentation: {
-            kind: MarkupKind.Markdown,
-            value:
-              'Generate a globally unique identifier based on the [cuid](https://github.com/ericelliott/cuid) spec.',
-          },
-        },
-      )
+      uuidDefaultCompletion(suggestions)
+      cuidDefaultCompletion(suggestions)
       break
     case 'Boolean':
-      suggestions.push(
-        { label: 'true', kind: CompletionItemKind.Value },
-        { label: 'false', kind: CompletionItemKind.Value },
-      )
+      booleanDefaultCompletions(suggestions)
       break
   }
 
@@ -805,13 +637,7 @@ function getSuggestionsForAttribute({
         const items: CompletionItem[] = []
         // https://www.notion.so/prismaio/Proposal-More-PostgreSQL-index-types-GiST-GIN-SP-GiST-and-BRIN-e27ef762ee4846a9a282eec1a5129270
         if (datasourceProvider === 'postgresql' && attribute === '@@index') {
-          items.push({
-            label: 'ops',
-            insertText: 'ops: $0',
-            insertTextFormat: InsertTextFormat.Snippet,
-            kind: CompletionItemKind.Property,
-            documentation: 'Specify the operator class for an indexed field.',
-          })
+          opsIndexFulltextCompletion(items)
         }
 
         items.push(
@@ -910,29 +736,29 @@ function getSuggestionsForAttribute({
     // "@@" block attributes
     let blockAtrributeArguments: CompletionItem[] = []
     if (attribute === '@@unique') {
-      blockAtrributeArguments = givenBlockAttributeParams({
-        blockAttribute: '@@unique',
+      blockAtrributeArguments = getCompletionsForBlockAttributeArgs({
+        blockAttributeWithParams: '@@unique',
         wordBeforePosition,
         datasourceProvider,
         previewFeatures,
       })
     } else if (attribute === '@@id') {
-      blockAtrributeArguments = givenBlockAttributeParams({
-        blockAttribute: '@@id',
+      blockAtrributeArguments = getCompletionsForBlockAttributeArgs({
+        blockAttributeWithParams: '@@id',
         wordBeforePosition,
         datasourceProvider,
         previewFeatures,
       })
     } else if (attribute === '@@index') {
-      blockAtrributeArguments = givenBlockAttributeParams({
-        blockAttribute: '@@index',
+      blockAtrributeArguments = getCompletionsForBlockAttributeArgs({
+        blockAttributeWithParams: '@@index',
         wordBeforePosition,
         datasourceProvider,
         previewFeatures,
       })
     } else if (attribute === '@@fulltext') {
-      blockAtrributeArguments = givenBlockAttributeParams({
-        blockAttribute: '@@fulltext',
+      blockAtrributeArguments = getCompletionsForBlockAttributeArgs({
+        blockAttributeWithParams: '@@fulltext',
         wordBeforePosition,
         datasourceProvider,
         previewFeatures,
@@ -945,14 +771,14 @@ function getSuggestionsForAttribute({
       // "@" field attributes
       let fieldAtrributeArguments: CompletionItem[] = []
       if (attribute === '@unique') {
-        fieldAtrributeArguments = givenFieldAttributeParams(
+        fieldAtrributeArguments = getCompletionsForFieldAttributeArgs(
           '@unique',
           previewFeatures,
           datasourceProvider,
           wordBeforePosition,
         )
       } else if (attribute === '@id') {
-        fieldAtrributeArguments = givenFieldAttributeParams(
+        fieldAtrributeArguments = getCompletionsForFieldAttributeArgs(
           '@id',
           previewFeatures,
           datasourceProvider,
