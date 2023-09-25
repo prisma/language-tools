@@ -63,7 +63,7 @@ import {
   getBlocks,
   getDocumentationForBlock,
   getSymbolBeforePosition,
-  getModelOrTypeOrEnumOrViewBlock,
+  getDataBlock,
   positionIsAfterFieldAndType,
   isInsideAttribute,
 } from './ast'
@@ -198,7 +198,7 @@ export function handleHoverRequest(document: TextDocument, params: HoverParams):
     return
   }
 
-  const block = getModelOrTypeOrEnumOrViewBlock(word, lines)
+  const block = getDataBlock(word, lines)
   if (!block) {
     return
   }

@@ -42,7 +42,7 @@ import {
   getFieldsFromCurrentBlock,
   getFieldTypesFromCurrentBlock,
   getCompositeTypeFieldsRecursively,
-  getModelOrTypeOrEnumOrViewBlock,
+  getDataBlock,
   getFirstDatasourceProvider,
   getAllPreviewFeaturesFromGenerators,
   getFirstDatasourceName,
@@ -210,7 +210,7 @@ export function getSuggestionForFieldAttribute(
 
   suggestions.push(...fieldAttributes)
 
-  const modelOrTypeOrEnum = getModelOrTypeOrEnumOrViewBlock(fieldType, lines)
+  const modelOrTypeOrEnum = getDataBlock(fieldType, lines)
 
   suggestions = filterSuggestionsForLine(suggestions, currentLine, fieldType, modelOrTypeOrEnum?.type)
 
@@ -687,7 +687,7 @@ function getDefaultValues({
     })
   }
 
-  const modelOrEnum = getModelOrTypeOrEnumOrViewBlock(fieldType, lines)
+  const modelOrEnum = getDataBlock(fieldType, lines)
   if (modelOrEnum && modelOrEnum.type === 'enum') {
     // get fields from enum block for suggestions
     const values: string[] = getFieldsFromCurrentBlock(lines, modelOrEnum)
@@ -751,7 +751,7 @@ function getSuggestionsForAttribute({
     if (isInsideGivenProperty(untrimmedCurrentLine, wordsBeforePosition, 'references', position)) {
       // Get the name by potentially removing ? and [] from Foo? or Foo[]
       const referencedModelName = wordsBeforePosition[1].replace('?', '').replace('[]', '')
-      const referencedBlock = getModelOrTypeOrEnumOrViewBlock(referencedModelName, lines)
+      const referencedBlock = getDataBlock(referencedModelName, lines)
       // referenced model does not exist
       // TODO type?
       if (!referencedBlock || referencedBlock.type !== 'model') {
