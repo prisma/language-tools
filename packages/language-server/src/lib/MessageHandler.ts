@@ -25,16 +25,7 @@ import format from './prisma-schema-wasm/format'
 import textDocumentCompletion from './prisma-schema-wasm/textDocumentCompletion'
 import lint from './prisma-schema-wasm/lint'
 
-import {
-  Block,
-  convertDocumentTextToTrimmedLineArray,
-  getModelOrTypeOrEnumOrViewBlock,
-  positionIsAfterFieldAndType,
-  isInsideAttribute,
-  getSymbolBeforePosition,
-  getBlocks,
-  getDocumentationForBlock,
-} from './util'
+import { convertDocumentTextToTrimmedLineArray, positionIsAfterFieldAndType, isInsideAttribute } from './util'
 
 import {
   getSuggestionForFieldAttribute,
@@ -62,7 +53,18 @@ import {
   isBlockName,
 } from './code-actions/rename'
 import { validateExperimentalFeatures, validateIgnoredBlocks } from './validations'
-import { fullDocumentRange, getWordAtPosition, getBlockAtPosition, getCurrentLine, isFirstInsideBlock } from './ast'
+import {
+  fullDocumentRange,
+  getWordAtPosition,
+  getBlockAtPosition,
+  getCurrentLine,
+  isFirstInsideBlock,
+  Block,
+  getBlocks,
+  getDocumentationForBlock,
+  getSymbolBeforePosition,
+  getModelOrTypeOrEnumOrViewBlock,
+} from './ast'
 
 export function handleDiagnosticsRequest(
   document: TextDocument,

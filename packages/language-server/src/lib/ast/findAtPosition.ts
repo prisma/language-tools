@@ -1,8 +1,8 @@
 import { Range, Position } from 'vscode-languageserver'
-import { TextDocument } from 'vscode-languageserver-textdocument'
+import type { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { MAX_SAFE_VALUE_i32 } from '../types'
-import { Block, getBlocks } from '../util'
+import { Block, getBlocks } from './block'
 
 export function fullDocumentRange(document: TextDocument): Range {
   const lastLineId = document.lineCount - 1
@@ -60,4 +60,14 @@ export function getBlockAtPosition(line: number, lines: string[]): Block | void 
     }
   }
   return
+}
+
+export function getSymbolBeforePosition(document: TextDocument, position: Position): string {
+  return document.getText({
+    start: {
+      line: position.line,
+      character: position.character - 1,
+    },
+    end: { line: position.line, character: position.character },
+  })
 }
