@@ -1,18 +1,17 @@
 import { Position } from 'vscode-languageserver'
 import type { TextEdit, TextDocument } from 'vscode-languageserver-textdocument'
-import { relationNamesRegexFilter } from '../types'
+
 import {
   Block,
-  getCurrentLine,
-  getWordAtPosition,
-  getBlockAtPosition,
   getValuesInsideSquareBrackets,
   getAllRelationNames,
   getFieldTypesFromCurrentBlock,
   extractFirstWord,
-  MAX_SAFE_VALUE_i32,
   BlockType,
 } from '../util'
+
+import { getBlockAtPosition, getCurrentLine, getWordAtPosition } from '../ast'
+import { MAX_SAFE_VALUE_i32, relationNamesRegexFilter } from '../types'
 
 function getType(currentLine: string): string {
   const wordsInLine: string[] = currentLine.split(/\s+/)

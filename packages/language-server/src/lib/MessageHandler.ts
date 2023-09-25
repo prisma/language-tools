@@ -19,25 +19,22 @@ import {
   SymbolKind,
   LocationLink,
 } from 'vscode-languageserver'
+import type { TextDocument } from 'vscode-languageserver-textdocument'
+
+import format from './prisma-schema-wasm/format'
+import textDocumentCompletion from './prisma-schema-wasm/textDocumentCompletion'
+import lint from './prisma-schema-wasm/lint'
+
 import {
   Block,
   convertDocumentTextToTrimmedLineArray,
-  fullDocumentRange,
-  getBlockAtPosition,
-  getCurrentLine,
   getModelOrTypeOrEnumOrViewBlock,
-  getWordAtPosition,
-  isFirstInsideBlock,
   positionIsAfterFieldAndType,
   isInsideAttribute,
   getSymbolBeforePosition,
   getBlocks,
   getDocumentationForBlock,
 } from './util'
-import type { TextDocument } from 'vscode-languageserver-textdocument'
-import format from './prisma-schema-wasm/format'
-import textDocumentCompletion from './prisma-schema-wasm/textDocumentCompletion'
-import lint from './prisma-schema-wasm/lint'
 
 import {
   getSuggestionForFieldAttribute,
@@ -49,7 +46,6 @@ import {
   suggestEqualSymbol,
   getSuggestionForNativeTypes,
 } from './completion/completions'
-
 import { quickFix } from './code-actions'
 import {
   insertBasicRename,
@@ -66,6 +62,7 @@ import {
   isBlockName,
 } from './code-actions/rename'
 import { validateExperimentalFeatures, validateIgnoredBlocks } from './validations'
+import { fullDocumentRange, getWordAtPosition, getBlockAtPosition, getCurrentLine, isFirstInsideBlock } from './ast'
 
 export function handleDiagnosticsRequest(
   document: TextDocument,
