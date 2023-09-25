@@ -25,6 +25,7 @@ import {
 } from './completions'
 
 export * from './blocks'
+export * from './datasource'
 export * from './generator'
 
 export function prismaSchemaWasmCompletions(

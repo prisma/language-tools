@@ -13,8 +13,6 @@ import {
   fieldAttributes,
   corePrimitiveTypes,
   relationArguments,
-  dataSourceProviders,
-  dataSourceProviderArguments,
   givenBlockAttributeParams,
   givenFieldAttributeParams,
   sortLengthProperties,
@@ -23,7 +21,6 @@ import {
   filterSuggestionsForBlock,
   removeInvalidFieldSuggestions,
   getNativeTypes,
-  relationModeValues,
   filterSuggestionsForLine,
 } from './completionUtils'
 import listAllAvailablePreviewFeatures from '../prisma-schema-wasm/listAllAvailablePreviewFeatures'
@@ -56,6 +53,7 @@ import {
   handlePreviewFeatures,
   supportedGeneratorFields,
 } from './generator'
+import { dataSourceProviderArguments, dataSourceProviders, relationModeValues } from './datasource'
 
 const getSuggestionForBlockAttribute = (
   block: Block,

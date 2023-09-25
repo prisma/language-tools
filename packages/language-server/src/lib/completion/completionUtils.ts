@@ -103,11 +103,6 @@ export const corePrimitiveTypes: CompletionItem[] = convertToCompletionItems(
   CompletionItemKind.TypeParameter,
 )
 
-export const relationModeValues: CompletionItem[] = convertToCompletionItems(
-  completions.relationModeValues,
-  CompletionItemKind.Field,
-)
-
 export function givenBlockAttributeParams({
   blockAttribute,
   wordBeforePosition,
@@ -326,16 +321,6 @@ export const sortLengthProperties: CompletionItem[] = convertToCompletionItems(
 
 export const relationArguments: CompletionItem[] = convertAttributesToCompletionItems(
   completions.relationArguments,
-  CompletionItemKind.Property,
-)
-
-export const dataSourceProviders: CompletionItem[] = convertToCompletionItems(
-  completions.datasourceProviders,
-  CompletionItemKind.Constant,
-)
-
-export const dataSourceProviderArguments: CompletionItem[] = convertToCompletionItems(
-  completions.datasourceProviderArguments,
   CompletionItemKind.Property,
 )
 
