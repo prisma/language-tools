@@ -34,13 +34,7 @@ import {
   filterSuggestionsForLine,
 } from './completionUtils'
 import listAllAvailablePreviewFeatures from '../prisma-schema-wasm/listAllAvailablePreviewFeatures'
-import {
-  declaredNativeTypes,
-  getAllRelationNames,
-  isInsideFieldArgument,
-  getFieldType,
-  getValuesInsideSquareBrackets,
-} from '../util'
+import { declaredNativeTypes, getAllRelationNames, getFieldType } from '../util'
 import { relationNamesMongoDBRegexFilter, relationNamesRegexFilter } from '../types'
 import {
   Block,
@@ -54,6 +48,8 @@ import {
   getFirstDatasourceName,
   isInsideAttribute,
   isInsideGivenProperty,
+  isInsideFieldArgument,
+  getValuesInsideSquareBrackets,
 } from '../ast'
 
 const getSuggestionForBlockAttribute = (

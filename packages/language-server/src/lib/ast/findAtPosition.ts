@@ -133,3 +133,42 @@ export function isInsideAttribute(currentLineUntrimmed: string, position: Positi
   }
   return numberOfOpenBrackets > numberOfClosedBrackets
 }
+
+export function isInsideFieldArgument(currentLineUntrimmed: string, position: Position): boolean {
+  const symbols = '()'
+  let numberOfOpenBrackets = 0
+  let numberOfClosedBrackets = 0
+  for (let i = 0; i < position.character; i++) {
+    if (currentLineUntrimmed[i] === symbols[0]) {
+      numberOfOpenBrackets++
+    } else if (currentLineUntrimmed[i] === symbols[1]) {
+      numberOfClosedBrackets++
+    }
+  }
+  return numberOfOpenBrackets >= 2 && numberOfOpenBrackets > numberOfClosedBrackets
+}
+
+export function getValuesInsideSquareBrackets(line: string): string[] {
+  const regexp = /\[([^\]]+)\]/
+  const matches = regexp.exec(line)
+  if (!matches || !matches[1]) {
+    return []
+  }
+  const result = matches[1].split(',').map((name) => {
+    name = name
+      // trim whitespace
+      .trim()
+      // remove ""?
+      .replace('"', '')
+      .replace('"', '')
+
+    // Remove period at the end for composite types
+    if (name.endsWith('.')) {
+      return name.slice(0, -1)
+    }
+
+    return name
+  })
+
+  return result
+}

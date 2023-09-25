@@ -10,7 +10,7 @@ import {
 } from 'vscode-languageserver'
 import * as completions from './completions.json'
 import type { PreviewFeatures } from '../types'
-import { getValuesInsideSquareBrackets } from '../util'
+import { getValuesInsideSquareBrackets } from '../ast'
 import nativeTypeConstructors, { NativeTypeConstructors } from '../prisma-schema-wasm/nativeTypes'
 import { Block, BlockType, isInsideAttribute } from '../ast'
 

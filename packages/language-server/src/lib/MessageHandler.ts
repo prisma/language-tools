@@ -25,7 +25,7 @@ import format from './prisma-schema-wasm/format'
 import textDocumentCompletion from './prisma-schema-wasm/textDocumentCompletion'
 import lint from './prisma-schema-wasm/lint'
 
-import { convertDocumentTextToTrimmedLineArray } from './util'
+import { convertDocumentTextToTrimmedLineArray } from './ast'
 
 import {
   getSuggestionForFieldAttribute,

@@ -8,9 +8,10 @@ import {
   Range,
 } from 'vscode-languageserver'
 import levenshtein from 'js-levenshtein'
-import { convertDocumentTextToTrimmedLineArray, getAllRelationNames } from '../util'
+import { getAllRelationNames } from '../util'
 import codeActions from '../prisma-schema-wasm/codeActions'
 import { relationNamesRegexFilter } from '../types'
+import { convertDocumentTextToTrimmedLineArray } from '../ast'
 
 function getInsertRange(document: TextDocument): Range {
   // to insert text into a document create a range where start === end.

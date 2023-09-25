@@ -1,7 +1,7 @@
 import { Position } from 'vscode-languageserver'
 import type { TextEdit, TextDocument } from 'vscode-languageserver-textdocument'
 
-import { getValuesInsideSquareBrackets, getAllRelationNames, extractFirstWord } from '../util'
+import { getAllRelationNames, extractFirstWord } from '../util'
 
 import {
   Block,
@@ -9,6 +9,7 @@ import {
   getBlockAtPosition,
   getCurrentLine,
   getFieldTypesFromCurrentBlock,
+  getValuesInsideSquareBrackets,
   getWordAtPosition,
 } from '../ast'
 import { MAX_SAFE_VALUE_i32, relationNamesRegexFilter } from '../types'

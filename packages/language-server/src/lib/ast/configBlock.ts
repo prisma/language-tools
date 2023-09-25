@@ -1,7 +1,7 @@
 import type { Range, TextDocument } from 'vscode-languageserver-textdocument'
 
 import { PreviewFeatures } from '../types'
-import { convertDocumentTextToTrimmedLineArray } from '../util'
+import { convertDocumentTextToTrimmedLineArray } from '.'
 import { getCurrentLine } from './findAtPosition'
 
 export function getFirstDatasourceName(lines: string[]): string | undefined {

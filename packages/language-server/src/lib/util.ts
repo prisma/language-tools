@@ -1,40 +1,6 @@
 import type { TextDocument } from 'vscode-languageserver-textdocument'
-import { Position } from 'vscode-languageserver'
 
 import nativeTypeConstructors, { NativeTypeConstructors } from './prisma-schema-wasm/nativeTypes'
-
-import { getCurrentLine } from './ast'
-
-export function convertDocumentTextToTrimmedLineArray(document: TextDocument): string[] {
-  return Array(document.lineCount)
-    .fill(0)
-    .map((_, i) => getCurrentLine(document, i).trim())
-}
-
-export function getValuesInsideSquareBrackets(line: string): string[] {
-  const regexp = /\[([^\]]+)\]/
-  const matches = regexp.exec(line)
-  if (!matches || !matches[1]) {
-    return []
-  }
-  const result = matches[1].split(',').map((name) => {
-    name = name
-      // trim whitespace
-      .trim()
-      // remove ""?
-      .replace('"', '')
-      .replace('"', '')
-
-    // Remove period at the end for composite types
-    if (name.endsWith('.')) {
-      return name.slice(0, -1)
-    }
-
-    return name
-  })
-
-  return result
-}
 
 export function declaredNativeTypes(document: TextDocument, onError?: (errorMessage: string) => void): boolean {
   const nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(document.getText(), (errorMessage: string) => {
@@ -79,20 +45,6 @@ export function getAllTypeNames(lines: string[]): string[] {
     }
   }
   return typeNames
-}
-
-export function isInsideFieldArgument(currentLineUntrimmed: string, position: Position): boolean {
-  const symbols = '()'
-  let numberOfOpenBrackets = 0
-  let numberOfClosedBrackets = 0
-  for (let i = 0; i < position.character; i++) {
-    if (currentLineUntrimmed[i] === symbols[0]) {
-      numberOfOpenBrackets++
-    } else if (currentLineUntrimmed[i] === symbols[1]) {
-      numberOfClosedBrackets++
-    }
-  }
-  return numberOfOpenBrackets >= 2 && numberOfOpenBrackets > numberOfClosedBrackets
 }
 
 export function getFieldType(line: string): string | undefined {
