@@ -19,11 +19,6 @@ export function extractFirstWord(line: string): string {
   return line.replace(/ .*/, '')
 }
 
-export function extractBlockName(line: string): string {
-  const blockType = extractFirstWord(line)
-  return line.slice(blockType.length, line.length - 1).trim()
-}
-
 export function getAllRelationNames(lines: string[], regexFilter: RegExp): string[] {
   const modelNames: string[] = []
   for (const line of lines) {
@@ -33,18 +28,6 @@ export function getAllRelationNames(lines: string[], regexFilter: RegExp): strin
     }
   }
   return modelNames
-}
-
-export function getAllTypeNames(lines: string[]): string[] {
-  const typeNames: string[] = []
-  for (const line of lines) {
-    const typeRegex = /^type\s+(\w+)\s+{/gm
-    const result = typeRegex.exec(line)
-    if (result && result[1]) {
-      typeNames.push(result[1])
-    }
-  }
-  return typeNames
 }
 
 export function getFieldType(line: string): string | undefined {
@@ -59,4 +42,22 @@ export function getFieldType(line: string): string | undefined {
     return fieldType
   }
   return undefined
+}
+
+// TODO UNUSED
+export function extractBlockName(line: string): string {
+  const blockType = extractFirstWord(line)
+  return line.slice(blockType.length, line.length - 1).trim()
+}
+
+export function getAllTypeBlockNames(lines: string[]): string[] {
+  const typeNames: string[] = []
+  for (const line of lines) {
+    const typeRegex = /^type\s+(\w+)\s+{/gm
+    const result = typeRegex.exec(line)
+    if (result && result[1]) {
+      typeNames.push(result[1])
+    }
+  }
+  return typeNames
 }
