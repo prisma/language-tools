@@ -1,4 +1,8 @@
+import type { Range, TextDocument } from 'vscode-languageserver-textdocument'
+
 import { PreviewFeatures } from '../types'
+import { convertDocumentTextToTrimmedLineArray } from '../util'
+import { getCurrentLine } from './findAtPosition'
 
 export function getFirstDatasourceName(lines: string[]): string | undefined {
   const datasourceBlockFirstLine = lines.find((l) => l.startsWith('datasource') && l.includes('{'))
@@ -49,4 +53,30 @@ export function getAllPreviewFeaturesFromGenerators(lines: string[]): PreviewFea
   } catch (e) {}
 
   return undefined
+}
+
+// TODO (Joël) can be removed? Since it was renamed to `previewFeatures` a long time ago
+export function getExperimentalFeaturesRange(document: TextDocument): Range | undefined {
+  const lines = convertDocumentTextToTrimmedLineArray(document)
+  const experimentalFeatures = 'experimentalFeatures'
+  let reachedStartLine = false
+  for (const [key, item] of lines.entries()) {
+    if (item.startsWith('generator') && item.includes('{')) {
+      reachedStartLine = true
+    }
+    if (!reachedStartLine) {
+      continue
+    }
+    if (reachedStartLine && item.startsWith('}')) {
+      return
+    }
+
+    if (item.startsWith(experimentalFeatures)) {
+      const startIndex = getCurrentLine(document, key).indexOf(experimentalFeatures)
+      return {
+        start: { line: key, character: startIndex },
+        end: { line: key, character: startIndex + experimentalFeatures.length },
+      }
+    }
+  }
 }
