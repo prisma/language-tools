@@ -1,6 +1,6 @@
 import type { Range, TextDocument } from 'vscode-languageserver-textdocument'
 
-import { PreviewFeatures } from '../types'
+import type { PreviewFeatures } from '../types'
 import { convertDocumentTextToTrimmedLineArray } from '.'
 import { getCurrentLine } from './findAtPosition'
 
