@@ -37,10 +37,7 @@ import listAllAvailablePreviewFeatures from '../prisma-schema-wasm/listAllAvaila
 import {
   declaredNativeTypes,
   getAllRelationNames,
-  isInsideAttribute,
-  isInsideQuotationMark,
   isInsideFieldArgument,
-  isInsideGivenProperty,
   getFieldType,
   getValuesInsideSquareBrackets,
 } from '../util'
@@ -55,6 +52,8 @@ import {
   getFirstDatasourceProvider,
   getAllPreviewFeaturesFromGenerators,
   getFirstDatasourceName,
+  isInsideAttribute,
+  isInsideGivenProperty,
 } from '../ast'
 
 const getSuggestionForBlockAttribute = (
@@ -491,6 +490,20 @@ export function getSuggestionForSupportedFields(
     items: toCompletionItems(suggestions, CompletionItemKind.Constant),
     isIncomplete: false,
   }
+}
+
+/***
+ * Checks if inside e.g. "here"
+ * Does not check for escaped quotation marks.
+ */
+function isInsideQuotationMark(currentLineUntrimmed: string, position: Position): boolean {
+  let insideQuotation = false
+  for (let i = 0; i < position.character; i++) {
+    if (currentLineUntrimmed[i] === '"') {
+      insideQuotation = !insideQuotation
+    }
+  }
+  return insideQuotation
 }
 
 function getDefaultValues({

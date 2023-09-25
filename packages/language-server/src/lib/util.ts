@@ -95,68 +95,6 @@ export function isInsideFieldArgument(currentLineUntrimmed: string, position: Po
   return numberOfOpenBrackets >= 2 && numberOfOpenBrackets > numberOfClosedBrackets
 }
 
-/***
- * @param symbols expects e.g. '()', '[]' or '""'
- */
-export function isInsideAttribute(currentLineUntrimmed: string, position: Position, symbols: string): boolean {
-  let numberOfOpenBrackets = 0
-  let numberOfClosedBrackets = 0
-  for (let i = 0; i < position.character; i++) {
-    if (currentLineUntrimmed[i] === symbols[0]) {
-      numberOfOpenBrackets++
-    } else if (currentLineUntrimmed[i] === symbols[1]) {
-      numberOfClosedBrackets++
-    }
-  }
-  return numberOfOpenBrackets > numberOfClosedBrackets
-}
-
-/***
- * Checks if inside e.g. "here"
- * Does not check for escaped quotation marks.
- */
-export function isInsideQuotationMark(currentLineUntrimmed: string, position: Position): boolean {
-  let insideQuotation = false
-  for (let i = 0; i < position.character; i++) {
-    if (currentLineUntrimmed[i] === '"') {
-      insideQuotation = !insideQuotation
-    }
-  }
-  return insideQuotation
-}
-
-// checks if e.g. inside 'fields' or 'references' attribute
-export function isInsideGivenProperty(
-  currentLineUntrimmed: string,
-  wordsBeforePosition: string[],
-  attributeName: string,
-  position: Position,
-): boolean {
-  if (!isInsideAttribute(currentLineUntrimmed, position, '[]')) {
-    return false
-  }
-
-  // We sort all attributes by their position
-  const sortedAttributes = [
-    {
-      name: 'fields',
-      position: wordsBeforePosition.findIndex((word) => word.includes('fields')),
-    },
-    {
-      name: 'references',
-      position: wordsBeforePosition.findIndex((word) => word.includes('references')),
-    },
-  ].sort((a, b) => (a.position < b.position ? 1 : -1))
-
-  // If the last attribute (higher position)
-  // is the one we are looking for we are in this attribute
-  if (sortedAttributes[0].name === attributeName) {
-    return true
-  } else {
-    return false
-  }
-}
-
 export function getFieldType(line: string): string | undefined {
   const wordsInLine: string[] = line.split(/\s+/)
   if (wordsInLine.length < 2) {

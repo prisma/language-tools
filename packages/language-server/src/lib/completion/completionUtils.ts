@@ -10,9 +10,9 @@ import {
 } from 'vscode-languageserver'
 import * as completions from './completions.json'
 import type { PreviewFeatures } from '../types'
-import { getValuesInsideSquareBrackets, isInsideAttribute } from '../util'
+import { getValuesInsideSquareBrackets } from '../util'
 import nativeTypeConstructors, { NativeTypeConstructors } from '../prisma-schema-wasm/nativeTypes'
-import { Block, BlockType } from '../ast'
+import { Block, BlockType, isInsideAttribute } from '../ast'
 
 type JSONSimpleCompletionItems = {
   label: string
