@@ -1,5 +1,4 @@
 import type { TextDocument } from 'vscode-languageserver-textdocument'
-import type { CompletionList } from 'vscode-languageserver'
 import {
   CompletionItem,
   CompletionItemKind,
@@ -8,11 +7,12 @@ import {
   InsertTextMode,
   Position,
 } from 'vscode-languageserver'
+
 import * as completions from './completions.json'
 import type { PreviewFeatures } from '../types'
-import { getValuesInsideSquareBrackets } from '../ast'
+
 import nativeTypeConstructors, { NativeTypeConstructors } from '../prisma-schema-wasm/nativeTypes'
-import { Block, BlockType, isInsideAttribute } from '../ast'
+import { Block, BlockType } from '../ast'
 
 type JSONSimpleCompletionItems = {
   label: string
@@ -27,7 +27,7 @@ type JSONSimpleCompletionItems = {
 /**
  * Converts a json object containing labels and documentations to CompletionItems.
  */
-function convertToCompletionItems(
+export function convertToCompletionItems(
   completionItems: JSONSimpleCompletionItems,
   itemKind: CompletionItemKind,
 ): CompletionItem[] {
@@ -103,18 +103,8 @@ export const corePrimitiveTypes: CompletionItem[] = convertToCompletionItems(
   CompletionItemKind.TypeParameter,
 )
 
-export const allowedBlockTypes: CompletionItem[] = convertToCompletionItems(
-  completions.blockTypes,
-  CompletionItemKind.Class,
-)
-
 export const relationModeValues: CompletionItem[] = convertToCompletionItems(
   completions.relationModeValues,
-  CompletionItemKind.Field,
-)
-
-export const supportedGeneratorFields: CompletionItem[] = convertToCompletionItems(
-  completions.generatorFields,
   CompletionItemKind.Field,
 )
 
@@ -349,36 +339,6 @@ export const dataSourceProviderArguments: CompletionItem[] = convertToCompletion
   CompletionItemKind.Property,
 )
 
-// generator.provider
-
-export const generatorProviders: CompletionItem[] = convertToCompletionItems(
-  completions.generatorProviders,
-  CompletionItemKind.Constant,
-)
-
-export const generatorProviderArguments: CompletionItem[] = convertToCompletionItems(
-  completions.generatorProviderArguments,
-  CompletionItemKind.Property,
-)
-
-// generator.engineType
-
-export const engineTypes: CompletionItem[] = convertToCompletionItems(
-  completions.engineTypes,
-  CompletionItemKind.Constant,
-)
-
-export const engineTypeArguments: CompletionItem[] = convertToCompletionItems(
-  completions.engineTypeArguments,
-  CompletionItemKind.Property,
-)
-
-// generator.previewFeatures
-export const previewFeaturesArguments: CompletionItem[] = convertToCompletionItems(
-  completions.previewFeaturesArguments,
-  CompletionItemKind.Property,
-)
-
 export function toCompletionItems(allowedTypes: string[], kind: CompletionItemKind): CompletionItem[] {
   return allowedTypes.map((label) => ({ label, kind }))
 }
@@ -499,35 +459,6 @@ export function removeInvalidFieldSuggestions(
     }
   }
   return supportedFields
-}
-
-export function handlePreviewFeatures(
-  previewFeaturesArray: string[],
-  position: Position,
-  currentLineUntrimmed: string,
-  isInsideQuotation: boolean,
-): CompletionList {
-  let previewFeatures: CompletionItem[] = previewFeaturesArray.map((pf) => CompletionItem.create(pf))
-  if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
-    if (isInsideQuotation) {
-      const usedValues = getValuesInsideSquareBrackets(currentLineUntrimmed)
-      previewFeatures = previewFeatures.filter((t) => !usedValues.includes(t.label))
-      return {
-        items: previewFeatures,
-        isIncomplete: true,
-      }
-    } else {
-      return {
-        items: previewFeaturesArguments.filter((arg) => !arg.label.includes('[')),
-        isIncomplete: true,
-      }
-    }
-  } else {
-    return {
-      items: previewFeaturesArguments.filter((arg) => !arg.label.includes('"')),
-      isIncomplete: true,
-    }
-  }
 }
 
 export function getNativeTypes(

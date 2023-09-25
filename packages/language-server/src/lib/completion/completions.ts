@@ -11,16 +11,10 @@ import { klona } from 'klona'
 import {
   blockAttributes,
   fieldAttributes,
-  allowedBlockTypes,
   corePrimitiveTypes,
-  supportedGeneratorFields,
   relationArguments,
   dataSourceProviders,
   dataSourceProviderArguments,
-  generatorProviders,
-  generatorProviderArguments,
-  engineTypes,
-  engineTypeArguments,
   givenBlockAttributeParams,
   givenFieldAttributeParams,
   sortLengthProperties,
@@ -29,7 +23,6 @@ import {
   filterSuggestionsForBlock,
   removeInvalidFieldSuggestions,
   getNativeTypes,
-  handlePreviewFeatures,
   relationModeValues,
   filterSuggestionsForLine,
 } from './completionUtils'
@@ -54,6 +47,15 @@ import {
   getFieldType,
   getAllRelationNames,
 } from '../ast'
+import { allowedBlockTypes } from './blocks'
+import {
+  engineTypeArguments,
+  engineTypes,
+  generatorProviderArguments,
+  generatorProviders,
+  handlePreviewFeatures,
+  supportedGeneratorFields,
+} from './generator'
 
 const getSuggestionForBlockAttribute = (
   block: Block,
