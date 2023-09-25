@@ -1,5 +1,5 @@
 import { prismaSchemaWasm } from '.'
-import { handleFormatPanic, handleWasmError } from './util'
+import { handleFormatPanic, handleWasmError } from './internals'
 
 export interface LinterError {
   start: number

@@ -17,9 +17,11 @@ import {
 } from 'vscode-languageserver'
 import { createConnection, IPCMessageReader, IPCMessageWriter } from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
+
 import * as MessageHandler from './lib/MessageHandler'
-import * as util from './lib/prisma-schema-wasm/util'
 import { LSOptions, LSSettings } from './lib/types'
+import { getVersion, getEnginesVersion, getCliVersion } from './lib/prisma-schema-wasm/internals'
+
 const packageJson = require('../../package.json') // eslint-disable-line
 
 function getConnection(options?: LSOptions): Connection {
@@ -51,15 +53,15 @@ export function startServer(options?: LSOptions): void {
 
   connection.onInitialize((params: InitializeParams) => {
     // Logging first...
-    connection.console.info(`Default version of Prisma 'prisma-schema-wasm': ${util.getVersion()}`)
+    connection.console.info(`Default version of Prisma 'prisma-schema-wasm': ${getVersion()}`)
 
     connection.console.info(
       // eslint-disable-next-line
       `Extension name ${packageJson.name} with version ${packageJson.version}`,
     )
-    const prismaEnginesVersion = util.getEnginesVersion()
+    const prismaEnginesVersion = getEnginesVersion()
     connection.console.info(`Prisma Engines version: ${prismaEnginesVersion}`)
-    const prismaCliVersion = util.getCliVersion()
+    const prismaCliVersion = getCliVersion()
     connection.console.info(`Prisma CLI version: ${prismaCliVersion}`)
 
     // ... and then capabilities of the language server

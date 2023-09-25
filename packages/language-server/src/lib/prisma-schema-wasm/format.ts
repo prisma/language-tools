@@ -1,6 +1,6 @@
 import { DocumentFormattingParams } from 'vscode-languageserver'
 import { prismaSchemaWasm } from '.'
-import { handleFormatPanic, handleWasmError } from './util'
+import { handleFormatPanic, handleWasmError } from './internals'
 
 export default function format(
   schema: string,

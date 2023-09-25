@@ -1,7 +1,6 @@
 import { CompletionParams, CompletionList } from 'vscode-languageserver'
 import { prismaSchemaWasm } from '.'
-
-import { handleFormatPanic, handleWasmError } from './util'
+import { handleFormatPanic, handleWasmError } from './internals'
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return */
 
