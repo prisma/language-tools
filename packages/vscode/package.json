@@ -17,7 +17,7 @@
     "checkpoint-client": "1.1.27",
     "env-paths": "2.2.1",
     "minimatch": "6.2.0",
-    "vscode-languageclient": "7.0.0",
+    "vscode-languageclient": "9.0.1",
     "watcher": "1.2.0"
   },
   "repository": {
