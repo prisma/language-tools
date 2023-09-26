@@ -4,8 +4,9 @@ import { convertAttributesToCompletionItems } from '../internals'
 
 import * as completions from '../completions.json'
 import { Block, getFieldType, getFirstDatasourceName, getDataBlock } from '../../ast'
-import { getNativeTypes, filterSuggestionsForLine, filterSuggestionsForBlock } from '../completionUtils'
+import { filterSuggestionsForLine, filterSuggestionsForBlock } from '../completionUtils'
 import { TextDocument } from 'vscode-languageserver-textdocument'
+import { getNativeTypes } from '../types'
 
 export const fieldAttributes: CompletionItem[] = convertAttributesToCompletionItems(
   completions.fieldAttributes,

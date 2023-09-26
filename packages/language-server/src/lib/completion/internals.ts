@@ -1,4 +1,5 @@
 import { CompletionItemKind, CompletionItem, InsertTextFormat, InsertTextMode, MarkupKind } from 'vscode-languageserver'
+import { NativeTypeConstructors } from '../prisma-schema-wasm/nativeTypes'
 
 // Docs about CompletionItem
 // https://code.visualstudio.com/api/references/vscode-api#CompletionItem
@@ -86,4 +87,15 @@ export function convertAttributesToCompletionItems(
 
 export function toCompletionItems(allowedTypes: string[], kind: CompletionItemKind): CompletionItem[] {
   return allowedTypes.map((label) => ({ label, kind }))
+}
+
+export const buildDocumentation = (element: NativeTypeConstructors, documentation = ''): string => {
+  if (element._number_of_optional_args !== 0) {
+    documentation = `${documentation}Number of optional arguments: ${element._number_of_optional_args}.\n`
+  }
+  if (element._number_of_args !== 0) {
+    documentation = `${documentation}Number of required arguments: ${element._number_of_args}.\n`
+  }
+
+  return documentation
 }

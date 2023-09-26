@@ -1,8 +1,11 @@
 import { CompletionItem, CompletionItemKind, CompletionList, Position } from 'vscode-languageserver'
 
 import * as completions from './completions.json'
-import { getValuesInsideSquareBrackets, isInsideAttribute } from '../ast'
+import { Block, getValuesInsideSquareBrackets, isInsideAttribute } from '../ast'
 import { convertToCompletionItems } from './internals'
+import { klona } from 'klona'
+import { removeInvalidFieldSuggestions } from './completionUtils'
+import listAllAvailablePreviewFeatures from '../prisma-schema-wasm/listAllAvailablePreviewFeatures'
 
 /**
  * ```prisma
@@ -11,13 +14,13 @@ import { convertToCompletionItems } from './internals'
  * }
  * ```
  */
-export const supportedGeneratorFields: CompletionItem[] = convertToCompletionItems(
+const supportedGeneratorFields: CompletionItem[] = convertToCompletionItems(
   completions.generatorFields,
   CompletionItemKind.Field,
 )
 
 // generator.provider
-export const generatorProviders: CompletionItem[] = convertToCompletionItems(
+const generatorProviders: CompletionItem[] = convertToCompletionItems(
   completions.generatorProviders,
   CompletionItemKind.Constant,
 )
@@ -29,16 +32,13 @@ export const generatorProviders: CompletionItem[] = convertToCompletionItems(
  * }
  * ```
  */
-export const generatorProviderArguments: CompletionItem[] = convertToCompletionItems(
+const generatorProviderArguments: CompletionItem[] = convertToCompletionItems(
   completions.generatorProviderArguments,
   CompletionItemKind.Property,
 )
 
 // generator.engineType
-export const engineTypes: CompletionItem[] = convertToCompletionItems(
-  completions.engineTypes,
-  CompletionItemKind.Constant,
-)
+const engineTypes: CompletionItem[] = convertToCompletionItems(completions.engineTypes, CompletionItemKind.Constant)
 
 /**
  * ```prisma
@@ -47,7 +47,7 @@ export const engineTypes: CompletionItem[] = convertToCompletionItems(
  * }
  * ```
  */
-export const engineTypeArguments: CompletionItem[] = convertToCompletionItems(
+const engineTypeArguments: CompletionItem[] = convertToCompletionItems(
   completions.engineTypeArguments,
   CompletionItemKind.Property,
 )
@@ -59,12 +59,12 @@ export const engineTypeArguments: CompletionItem[] = convertToCompletionItems(
  * }
  * ```
  */
-export const previewFeaturesArguments: CompletionItem[] = convertToCompletionItems(
+const previewFeaturesArguments: CompletionItem[] = convertToCompletionItems(
   completions.previewFeaturesArguments,
   CompletionItemKind.Property,
 )
 
-export function handlePreviewFeatures(
+function handlePreviewFeatures(
   previewFeaturesArray: string[],
   position: Position,
   currentLineUntrimmed: string,
@@ -89,6 +89,66 @@ export function handlePreviewFeatures(
     return {
       items: previewFeaturesArguments.filter((arg) => !arg.label.includes('"')),
       isIncomplete: true,
+    }
+  }
+}
+
+export function getSuggestionForGeneratorField(block: Block, lines: string[], position: Position): CompletionItem[] {
+  // create deep copy
+  const suggestions: CompletionItem[] = klona(supportedGeneratorFields)
+
+  const labels = removeInvalidFieldSuggestions(
+    suggestions.map((item) => item.label),
+    block,
+    lines,
+    position,
+  )
+
+  return suggestions.filter((item) => labels.includes(item.label))
+}
+
+export const generatorSuggestions = (
+  line: string,
+  untrimmedLine: string,
+  position: Position,
+  isInsideQuotation: boolean,
+  onError?: (errorMessage: string) => void,
+) => {
+  // provider
+  if (line.startsWith('provider')) {
+    const providers: CompletionItem[] = generatorProviders
+    if (isInsideQuotation) {
+      return {
+        items: providers,
+        isIncomplete: true,
+      }
+    } else {
+      return {
+        items: generatorProviderArguments,
+        isIncomplete: true,
+      }
+    }
+  }
+  // previewFeatures
+  else if (line.startsWith('previewFeatures')) {
+    const generatorPreviewFeatures: string[] = listAllAvailablePreviewFeatures(onError)
+    if (generatorPreviewFeatures.length > 0) {
+      return handlePreviewFeatures(generatorPreviewFeatures, position, untrimmedLine, isInsideQuotation)
+    }
+  }
+  // engineType
+  else if (line.startsWith('engineType')) {
+    const engineTypesCompletion: CompletionItem[] = engineTypes
+    if (isInsideQuotation) {
+      return {
+        items: engineTypesCompletion,
+        isIncomplete: true,
+      }
+    } else {
+      return {
+        items: engineTypeArguments,
+        isIncomplete: true,
+      }
     }
   }
 }

@@ -1,8 +1,7 @@
 import { CompletionItem, CompletionList, CompletionItemKind, Position, InsertTextFormat } from 'vscode-languageserver'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import { klona } from 'klona'
-import { filterSuggestionsForBlock, removeInvalidFieldSuggestions, getNativeTypes } from './completionUtils'
-import listAllAvailablePreviewFeatures from '../prisma-schema-wasm/listAllAvailablePreviewFeatures'
+import { filterSuggestionsForBlock } from './completionUtils'
 
 import { relationNamesMongoDBRegexFilter, relationNamesRegexFilter } from '../types'
 import {
@@ -24,14 +23,7 @@ import {
   getAllRelationNames,
 } from '../ast'
 import { allowedBlockTypes } from './blocks'
-import {
-  engineTypeArguments,
-  engineTypes,
-  generatorProviderArguments,
-  generatorProviders,
-  handlePreviewFeatures,
-  supportedGeneratorFields,
-} from './generator'
+import { generatorSuggestions, getSuggestionForGeneratorField } from './generator'
 import { dataSourceProviderArguments, dataSourceProviders, relationModeValues } from './datasource'
 import {
   booleanDefaultCompletions,
@@ -48,7 +40,7 @@ import {
   startSequenceDefaultCompletion,
   virtualSequenceDefaultCompletion,
 } from './arguments'
-import { corePrimitiveTypes, relationManyTypeCompletion, relationSingleTypeCompletion } from './types'
+import { corePrimitiveTypes, getNativeTypes, relationManyTypeCompletion, relationSingleTypeCompletion } from './types'
 import { blockAttributes } from './attributes'
 import { toCompletionItems } from './internals'
 import {
@@ -61,7 +53,7 @@ import {
   uuidDefaultCompletion,
 } from './functions'
 
-const getSuggestionForBlockAttribute = (
+const filterContextBlockAttributes = (
   block: Block,
   lines: string[],
   suggestions: CompletionItem[],
@@ -99,24 +91,17 @@ const getSuggestionForBlockAttribute = (
   return suggestions
 }
 
-function getSuggestionForModelBlockAttribute(block: Block, lines: string[]): CompletionItem[] {
-  if (block.type !== 'model') {
+/**
+ * * Only models and views currently support block attributes
+ */
+function getSuggestionForBlockAttribute(block: Block, lines: string[]): CompletionItem[] {
+  if (!(['model', 'view'] as BlockType[]).includes(block.type)) {
     return []
   }
 
   const suggestions: CompletionItem[] = filterSuggestionsForBlock(klona(blockAttributes), block, lines)
 
-  return getSuggestionForBlockAttribute(block, lines, suggestions)
-}
-
-const getSuggestionForViewBlockAttribute = (block: Block, lines: string[]): CompletionItem[] => {
-  if (block.type !== 'view') {
-    return []
-  }
-
-  const suggestions: CompletionItem[] = filterSuggestionsForBlock(klona(blockAttributes), block, lines)
-
-  return getSuggestionForBlockAttribute(block, lines, suggestions)
+  return filterContextBlockAttributes(block, lines, suggestions)
 }
 
 export function getSuggestionForNativeTypes(
@@ -193,20 +178,6 @@ export function getSuggestionsForFieldTypes(
   }
 }
 
-function getSuggestionForGeneratorField(block: Block, lines: string[], position: Position): CompletionItem[] {
-  // create deep copy
-  const suggestions: CompletionItem[] = klona(supportedGeneratorFields)
-
-  const labels = removeInvalidFieldSuggestions(
-    suggestions.map((item) => item.label),
-    block,
-    lines,
-    position,
-  )
-
-  return suggestions.filter((item) => labels.includes(item.label))
-}
-
 /**
  * gets suggestions for block type
  */
@@ -222,10 +193,8 @@ export function getSuggestionForFirstInsideBlock(
       suggestions = getSuggestionForGeneratorField(block, lines, position)
       break
     case 'model':
-      suggestions = getSuggestionForModelBlockAttribute(block, lines)
-      break
     case 'view':
-      suggestions = getSuggestionForViewBlockAttribute(block, lines)
+      suggestions = getSuggestionForBlockAttribute(block, lines)
       break
     case 'type':
       // No suggestions
@@ -304,44 +273,7 @@ export function getSuggestionForSupportedFields(
 
   switch (blockType) {
     case 'generator':
-      // provider
-      if (currentLine.startsWith('provider')) {
-        const providers: CompletionItem[] = generatorProviders
-        if (isInsideQuotation) {
-          return {
-            items: providers,
-            isIncomplete: true,
-          }
-        } else {
-          return {
-            items: generatorProviderArguments,
-            isIncomplete: true,
-          }
-        }
-      }
-      // previewFeatures
-      else if (currentLine.startsWith('previewFeatures')) {
-        const generatorPreviewFeatures: string[] = listAllAvailablePreviewFeatures(onError)
-        if (generatorPreviewFeatures.length > 0) {
-          return handlePreviewFeatures(generatorPreviewFeatures, position, currentLineUntrimmed, isInsideQuotation)
-        }
-      }
-      // engineType
-      else if (currentLine.startsWith('engineType')) {
-        const engineTypesCompletion: CompletionItem[] = engineTypes
-        if (isInsideQuotation) {
-          return {
-            items: engineTypesCompletion,
-            isIncomplete: true,
-          }
-        } else {
-          return {
-            items: engineTypeArguments,
-            isIncomplete: true,
-          }
-        }
-      }
-      break
+      return generatorSuggestions(currentLine, currentLineUntrimmed, position, isInsideQuotation, onError)
     case 'datasource':
       // provider
       if (currentLine.startsWith('provider')) {

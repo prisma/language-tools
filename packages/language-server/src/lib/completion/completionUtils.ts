@@ -1,10 +1,6 @@
-import type { TextDocument } from 'vscode-languageserver-textdocument'
 import { CompletionItem, Position } from 'vscode-languageserver'
 
-import nativeTypeConstructors, { NativeTypeConstructors } from '../prisma-schema-wasm/nativeTypes'
 import { Block, BlockType } from '../ast'
-import { nativeFunctionCompletion } from './functions'
-import { nativeTypeCompletion } from './types'
 
 /**
  * Removes all block attribute suggestions that are invalid in this context.
@@ -122,46 +118,4 @@ export function removeInvalidFieldSuggestions(
     }
   }
   return supportedFields
-}
-
-export function getNativeTypes(
-  document: TextDocument,
-  prismaType: string,
-  onError?: (errorMessage: string) => void,
-): CompletionItem[] {
-  let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(document.getText(), (errorMessage: string) => {
-    if (onError) {
-      onError(errorMessage)
-    }
-  })
-
-  if (nativeTypes.length === 0) {
-    console.log('Did not receive any native type suggestions from prisma-schema-wasm call.')
-    return []
-  }
-
-  const suggestions: CompletionItem[] = []
-  nativeTypes = nativeTypes.filter((n) => n.prisma_types.includes(prismaType))
-  nativeTypes.forEach((element) => {
-    if (element._number_of_args + element._number_of_optional_args !== 0) {
-      const documentation = buildDocumentation(element)
-
-      nativeFunctionCompletion(suggestions, element, documentation)
-    } else {
-      nativeTypeCompletion(suggestions, element)
-    }
-  })
-
-  return suggestions
-}
-
-const buildDocumentation = (element: NativeTypeConstructors, documentation = ''): string => {
-  if (element._number_of_optional_args !== 0) {
-    documentation = `${documentation}Number of optional arguments: ${element._number_of_optional_args}.\n`
-  }
-  if (element._number_of_args !== 0) {
-    documentation = `${documentation}Number of required arguments: ${element._number_of_args}.\n`
-  }
-
-  return documentation
 }
