@@ -5,6 +5,7 @@ import {
   InsertTextFormat,
   InsertTextMode,
   MarkupKind,
+  Position,
 } from 'vscode-languageserver'
 import { NativeTypeConstructors } from '../prisma-schema-wasm/nativeTypes'
 import { BlockType } from '../ast'
@@ -117,4 +118,18 @@ export function suggestEqualSymbol(blockType: BlockType): CompletionList | undef
     items: [equalSymbol],
     isIncomplete: false,
   }
+}
+
+/***
+ * Checks if inside e.g. "here"
+ * Does not check for escaped quotation marks.
+ */
+export function isInsideQuotationMark(currentLineUntrimmed: string, position: Position): boolean {
+  let insideQuotation = false
+  for (let i = 0; i < position.character; i++) {
+    if (currentLineUntrimmed[i] === '"') {
+      insideQuotation = !insideQuotation
+    }
+  }
+  return insideQuotation
 }

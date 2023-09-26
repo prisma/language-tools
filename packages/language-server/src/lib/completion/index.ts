@@ -1,4 +1,4 @@
-import { CompletionParams, CompletionList, CompletionTriggerKind } from 'vscode-languageserver'
+import { CompletionParams, CompletionList, CompletionTriggerKind, Position } from 'vscode-languageserver'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 
 import textDocumentCompletion from '../prisma-schema-wasm/textDocumentCompletion'
@@ -12,16 +12,41 @@ import {
   isFirstInsideBlock,
   positionIsAfterFieldAndType,
   isInsideAttribute,
+  BlockType,
+  getFirstDatasourceProvider,
 } from '../ast'
-import {
-  getSuggestionForFirstInsideBlock,
-  getSuggestionForSupportedFields,
-  getSuggestionsForInsideRoundBrackets,
-} from './completions'
+import { getSuggestionForFirstInsideBlock, getSuggestionsForInsideRoundBrackets } from './completions'
 import { getSuggestionForFieldAttribute } from './attributes'
 import { getSuggestionForBlockTypes } from './blocks'
-import { suggestEqualSymbol } from './internals'
+import { isInsideQuotationMark, suggestEqualSymbol } from './internals'
 import { getSuggestionForNativeTypes, getSuggestionsForFieldTypes } from './types'
+import { dataSourceSuggestions } from './datasource'
+import { generatorSuggestions } from './generator'
+
+// Suggest fields for a BlockType
+function getSuggestionForSupportedFields(
+  blockType: BlockType,
+  currentLine: string,
+  currentLineUntrimmed: string,
+  position: Position,
+  lines: string[],
+  onError?: (errorMessage: string) => void,
+): CompletionList | undefined {
+  const isInsideQuotation: boolean = isInsideQuotationMark(currentLineUntrimmed, position)
+  // We can filter on the datasource
+  const datasourceProvider = getFirstDatasourceProvider(lines)
+  // We can filter on the previewFeatures enabled
+  // const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
+
+  switch (blockType) {
+    case 'generator':
+      return generatorSuggestions(currentLine, currentLineUntrimmed, position, isInsideQuotation, onError)
+    case 'datasource':
+      return dataSourceSuggestions(currentLine, isInsideQuotation, datasourceProvider)
+    default:
+      return undefined
+  }
+}
 
 export function prismaSchemaWasmCompletions(
   params: CompletionParams,

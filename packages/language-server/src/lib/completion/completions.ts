@@ -16,8 +16,7 @@ import {
   getFieldType,
 } from '../ast'
 
-import { generatorSuggestions, getSuggestionForGeneratorField } from './generator'
-import { dataSourceSuggestions } from './datasource'
+import { getSuggestionForGeneratorField } from './generator'
 import {
   booleanDefaultCompletions,
   cacheSequenceDefaultCompletion,
@@ -72,45 +71,6 @@ export function getSuggestionForFirstInsideBlock(
     items: suggestions,
     isIncomplete: false,
   }
-}
-
-// Suggest fields for a BlockType
-export function getSuggestionForSupportedFields(
-  blockType: BlockType,
-  currentLine: string,
-  currentLineUntrimmed: string,
-  position: Position,
-  lines: string[],
-  onError?: (errorMessage: string) => void,
-): CompletionList | undefined {
-  const isInsideQuotation: boolean = isInsideQuotationMark(currentLineUntrimmed, position)
-  // We can filter on the datasource
-  const datasourceProvider = getFirstDatasourceProvider(lines)
-  // We can filter on the previewFeatures enabled
-  // const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
-
-  switch (blockType) {
-    case 'generator':
-      return generatorSuggestions(currentLine, currentLineUntrimmed, position, isInsideQuotation, onError)
-    case 'datasource':
-      return dataSourceSuggestions(currentLine, isInsideQuotation, datasourceProvider)
-    default:
-      return undefined
-  }
-}
-
-/***
- * Checks if inside e.g. "here"
- * Does not check for escaped quotation marks.
- */
-function isInsideQuotationMark(currentLineUntrimmed: string, position: Position): boolean {
-  let insideQuotation = false
-  for (let i = 0; i < position.character; i++) {
-    if (currentLineUntrimmed[i] === '"') {
-      insideQuotation = !insideQuotation
-    }
-  }
-  return insideQuotation
 }
 
 function getDefaultValues({
