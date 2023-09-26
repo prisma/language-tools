@@ -2,7 +2,6 @@ import { CompletionItem, CompletionList, CompletionItemKind, Position, InsertTex
 
 import {
   Block,
-  BlockType,
   getFieldsFromCurrentBlock,
   getFieldTypesFromCurrentBlock,
   getCompositeTypeFieldsRecursively,
@@ -16,7 +15,6 @@ import {
   getFieldType,
 } from '../ast'
 
-import { getSuggestionForGeneratorField } from './generator'
 import {
   booleanDefaultCompletions,
   cacheSequenceDefaultCompletion,
@@ -42,36 +40,6 @@ import {
   sequenceDefaultCompletion,
   uuidDefaultCompletion,
 } from './functions'
-import { getSuggestionForBlockAttribute } from './attributes'
-
-/**
- * gets suggestions for block type
- */
-export function getSuggestionForFirstInsideBlock(
-  blockType: BlockType,
-  lines: string[],
-  position: Position,
-  block: Block,
-): CompletionList {
-  let suggestions: CompletionItem[] = []
-  switch (blockType) {
-    case 'generator':
-      suggestions = getSuggestionForGeneratorField(block, lines, position)
-      break
-    case 'model':
-    case 'view':
-      suggestions = getSuggestionForBlockAttribute(block, lines)
-      break
-    case 'type':
-      // No suggestions
-      break
-  }
-
-  return {
-    items: suggestions,
-    isIncomplete: false,
-  }
-}
 
 function getDefaultValues({
   currentLine,

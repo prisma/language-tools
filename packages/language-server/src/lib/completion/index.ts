@@ -1,4 +1,10 @@
-import { CompletionParams, CompletionList, CompletionTriggerKind, Position } from 'vscode-languageserver'
+import {
+  CompletionParams,
+  CompletionItem,
+  CompletionList,
+  CompletionTriggerKind,
+  Position,
+} from 'vscode-languageserver'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 
 import textDocumentCompletion from '../prisma-schema-wasm/textDocumentCompletion'
@@ -14,14 +20,15 @@ import {
   isInsideAttribute,
   BlockType,
   getFirstDatasourceProvider,
+  Block,
 } from '../ast'
-import { getSuggestionForFirstInsideBlock, getSuggestionsForInsideRoundBrackets } from './completions'
-import { getSuggestionForFieldAttribute } from './attributes'
+import { getSuggestionsForInsideRoundBrackets } from './completions'
+import { getSuggestionForBlockAttribute, getSuggestionForFieldAttribute } from './attributes'
 import { getSuggestionForBlockTypes } from './blocks'
 import { isInsideQuotationMark, suggestEqualSymbol } from './internals'
 import { getSuggestionForNativeTypes, getSuggestionsForFieldTypes } from './types'
 import { dataSourceSuggestions } from './datasource'
-import { generatorSuggestions } from './generator'
+import { generatorSuggestions, getSuggestionForGeneratorField } from './generator'
 
 // Suggest fields for a BlockType
 function getSuggestionForSupportedFields(
@@ -45,6 +52,35 @@ function getSuggestionForSupportedFields(
       return dataSourceSuggestions(currentLine, isInsideQuotation, datasourceProvider)
     default:
       return undefined
+  }
+}
+
+/**
+ * gets suggestions for block type
+ */
+function getSuggestionForFirstInsideBlock(
+  blockType: BlockType,
+  lines: string[],
+  position: Position,
+  block: Block,
+): CompletionList {
+  let suggestions: CompletionItem[] = []
+  switch (blockType) {
+    case 'generator':
+      suggestions = getSuggestionForGeneratorField(block, lines, position)
+      break
+    case 'model':
+    case 'view':
+      suggestions = getSuggestionForBlockAttribute(block, lines)
+      break
+    case 'type':
+      // No suggestions
+      break
+  }
+
+  return {
+    items: suggestions,
+    isIncomplete: false,
   }
 }
 
