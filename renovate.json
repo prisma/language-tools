@@ -12,6 +12,11 @@
       "updateTypes": ["patch", "minor"]
     },
     {
+      "groupName": "VS Code LSP",
+      "packageNames": ["vscode-languageclient", "vscode-languageserver"],
+      "updateTypes": ["patch", "minor", "major"]
+    },
+    {
       "groupName": "checkpoint-client",
       "packageNames": ["checkpoint-client"],
       "updateTypes": ["patch", "minor"],
