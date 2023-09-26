@@ -24,7 +24,7 @@ import {
 } from '../ast'
 import { allowedBlockTypes } from './blocks'
 import { generatorSuggestions, getSuggestionForGeneratorField } from './generator'
-import { dataSourceProviderArguments, dataSourceProviders, relationModeValues } from './datasource'
+import { dataSourceSuggestions } from './datasource'
 import {
   booleanDefaultCompletions,
   cacheSequenceDefaultCompletion,
@@ -264,7 +264,6 @@ export function getSuggestionForSupportedFields(
   lines: string[],
   onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
-  let suggestions: string[] = []
   const isInsideQuotation: boolean = isInsideQuotationMark(currentLineUntrimmed, position)
   // We can filter on the datasource
   const datasourceProvider = getFirstDatasourceProvider(lines)
@@ -275,71 +274,9 @@ export function getSuggestionForSupportedFields(
     case 'generator':
       return generatorSuggestions(currentLine, currentLineUntrimmed, position, isInsideQuotation, onError)
     case 'datasource':
-      // provider
-      if (currentLine.startsWith('provider')) {
-        const providers: CompletionItem[] = dataSourceProviders
-
-        if (isInsideQuotation) {
-          return {
-            items: providers,
-            isIncomplete: true,
-          }
-        } else {
-          return {
-            items: dataSourceProviderArguments,
-            isIncomplete: true,
-          }
-        }
-      }
-      // url or shadowDatabaseUrl or directUrl
-      else if (
-        currentLine.startsWith('url') ||
-        currentLine.startsWith('shadowDatabaseUrl') ||
-        currentLine.startsWith('directUrl')
-      ) {
-        // check if inside env
-        if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
-          if (currentLine.startsWith('url')) {
-            suggestions = ['DATABASE_URL']
-          } else if (currentLine.startsWith('shadowDatabaseUrl')) {
-            suggestions = ['SHADOW_DATABASE_URL']
-          } else if (currentLine.startsWith('directUrl')) {
-            suggestions = ['DIRECT_URL']
-          }
-        }
-      }
-      // `relationMode` can only be set for SQL databases
-      else if (currentLine.startsWith('relationMode') && datasourceProvider !== 'mongodb') {
-        const relationModeValuesSuggestion: CompletionItem[] = relationModeValues
-        // values inside quotes `"value"`
-        const relationModeValuesSuggestionWithQuotes: CompletionItem[] = klona(relationModeValuesSuggestion).map(
-          (suggestion) => {
-            suggestion.label = `"${suggestion.label}"`
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            suggestion.insertText = `"${suggestion.insertText!}"`
-            return suggestion
-          },
-        )
-
-        if (isInsideQuotation) {
-          return {
-            items: relationModeValuesSuggestion,
-            isIncomplete: false,
-          }
-        }
-        // If line ends with `"`, a value is already set.
-        else if (!currentLine.endsWith('"')) {
-          return {
-            items: relationModeValuesSuggestionWithQuotes,
-            isIncomplete: false,
-          }
-        }
-      }
-  }
-
-  return {
-    items: toCompletionItems(suggestions, CompletionItemKind.Constant),
-    isIncomplete: false,
+      return dataSourceSuggestions(currentLine, isInsideQuotation, datasourceProvider)
+    default:
+      return undefined
   }
 }
 
