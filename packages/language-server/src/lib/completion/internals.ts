@@ -1,5 +1,13 @@
-import { CompletionItemKind, CompletionItem, InsertTextFormat, InsertTextMode, MarkupKind } from 'vscode-languageserver'
+import {
+  CompletionItem,
+  CompletionItemKind,
+  CompletionList,
+  InsertTextFormat,
+  InsertTextMode,
+  MarkupKind,
+} from 'vscode-languageserver'
 import { NativeTypeConstructors } from '../prisma-schema-wasm/nativeTypes'
+import { BlockType } from '../ast'
 
 // Docs about CompletionItem
 // https://code.visualstudio.com/api/references/vscode-api#CompletionItem
@@ -98,4 +106,15 @@ export const buildDocumentation = (element: NativeTypeConstructors, documentatio
   }
 
   return documentation
+}
+
+export function suggestEqualSymbol(blockType: BlockType): CompletionList | undefined {
+  if (!(blockType == 'datasource' || blockType == 'generator')) {
+    return
+  }
+  const equalSymbol: CompletionItem = { label: '=' }
+  return {
+    items: [equalSymbol],
+    isIncomplete: false,
+  }
 }

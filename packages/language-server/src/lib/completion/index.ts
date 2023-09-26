@@ -14,21 +14,14 @@ import {
   isInsideAttribute,
 } from '../ast'
 import {
-  getSuggestionForBlockTypes,
   getSuggestionForFirstInsideBlock,
   getSuggestionForSupportedFields,
   getSuggestionsForInsideRoundBrackets,
-  getSuggestionForNativeTypes,
-  getSuggestionsForFieldTypes,
-  suggestEqualSymbol,
 } from './completions'
 import { getSuggestionForFieldAttribute } from './attributes'
-
-export * from './arguments'
-export * from './blocks'
-export * from './datasource'
-export * from './generator'
-export * from './types'
+import { getSuggestionForBlockTypes } from './blocks'
+import { suggestEqualSymbol } from './internals'
+import { getSuggestionForNativeTypes, getSuggestionsForFieldTypes } from './types'
 
 export function prismaSchemaWasmCompletions(
   params: CompletionParams,

@@ -1,8 +1,5 @@
 import { CompletionItem, CompletionList, CompletionItemKind, Position, InsertTextFormat } from 'vscode-languageserver'
-import type { TextDocument } from 'vscode-languageserver-textdocument'
-import { klona } from 'klona'
 
-import { relationNamesMongoDBRegexFilter, relationNamesRegexFilter } from '../types'
 import {
   Block,
   BlockType,
@@ -12,16 +9,13 @@ import {
   getDataBlock,
   getFirstDatasourceProvider,
   getAllPreviewFeaturesFromGenerators,
-  getFirstDatasourceName,
   isInsideAttribute,
   isInsideGivenProperty,
   isInsideFieldArgument,
   getValuesInsideSquareBrackets,
-  declaredNativeTypes,
   getFieldType,
-  getAllRelationNames,
 } from '../ast'
-import { allowedBlockTypes } from './blocks'
+
 import { generatorSuggestions, getSuggestionForGeneratorField } from './generator'
 import { dataSourceSuggestions } from './datasource'
 import {
@@ -39,7 +33,6 @@ import {
   startSequenceDefaultCompletion,
   virtualSequenceDefaultCompletion,
 } from './arguments'
-import { corePrimitiveTypes, getNativeTypes, relationManyTypeCompletion, relationSingleTypeCompletion } from './types'
 import { toCompletionItems } from './internals'
 import {
   autoDefaultCompletion,
@@ -51,80 +44,6 @@ import {
   uuidDefaultCompletion,
 } from './functions'
 import { getSuggestionForBlockAttribute } from './attributes'
-
-export function getSuggestionForNativeTypes(
-  foundBlock: Block,
-  lines: string[],
-  wordsBeforePosition: string[],
-  document: TextDocument,
-  onError?: (errorMessage: string) => void,
-): CompletionList | undefined {
-  const activeFeatureFlag = declaredNativeTypes(document, onError)
-
-  if (
-    // TODO type? native "@db." types?
-    foundBlock.type !== 'model' ||
-    !activeFeatureFlag ||
-    wordsBeforePosition.length < 2
-  ) {
-    return undefined
-  }
-
-  const datasourceName = getFirstDatasourceName(lines)
-  if (!datasourceName || wordsBeforePosition[wordsBeforePosition.length - 1] !== `@${datasourceName}`) {
-    return undefined
-  }
-
-  // line
-  const prismaType = wordsBeforePosition[1].replace('?', '').replace('[]', '')
-  const suggestions = getNativeTypes(document, prismaType, onError)
-
-  return {
-    items: suggestions,
-    isIncomplete: true,
-  }
-}
-
-export function getSuggestionsForFieldTypes(
-  foundBlock: Block,
-  lines: string[],
-  position: Position,
-  currentLineUntrimmed: string,
-): CompletionList {
-  const suggestions: CompletionItem[] = []
-
-  const datasourceProvider = getFirstDatasourceProvider(lines)
-  // MongoDB doesn't support Decimal
-  if (datasourceProvider === 'mongodb') {
-    suggestions.push(...corePrimitiveTypes.filter((s) => s.label !== 'Decimal'))
-  } else {
-    suggestions.push(...corePrimitiveTypes)
-  }
-
-  if (foundBlock instanceof Block) {
-    // get all model names
-    const modelNames: string[] =
-      datasourceProvider === 'mongodb'
-        ? getAllRelationNames(lines, relationNamesMongoDBRegexFilter)
-        : getAllRelationNames(lines, relationNamesRegexFilter)
-    suggestions.push(...toCompletionItems(modelNames, CompletionItemKind.Reference))
-  }
-
-  const wordsBeforePosition = currentLineUntrimmed.slice(0, position.character).split(' ')
-  const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
-  const completeSuggestions = suggestions.filter((s) => s.label.length === wordBeforePosition.length)
-  if (completeSuggestions.length !== 0) {
-    for (const sugg of completeSuggestions) {
-      relationSingleTypeCompletion(suggestions, sugg)
-      relationManyTypeCompletion(suggestions, sugg)
-    }
-  }
-
-  return {
-    items: suggestions,
-    isIncomplete: true,
-  }
-}
 
 /**
  * gets suggestions for block type
@@ -151,54 +70,6 @@ export function getSuggestionForFirstInsideBlock(
 
   return {
     items: suggestions,
-    isIncomplete: false,
-  }
-}
-
-/**
- * Returns the currently available _blocks_ for completion.
- * Currently available: Generator, Datasource, Model, Enum, View
- * @param lines
- * @returns the list of block suggestions
- */
-export function getSuggestionForBlockTypes(lines: string[]): CompletionList {
-  // create deep copy
-  let suggestions: CompletionItem[] = klona(allowedBlockTypes)
-
-  const datasourceProvider = getFirstDatasourceProvider(lines)
-  const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
-
-  const isEnumAvailable = Boolean(!datasourceProvider?.includes('sqlite'))
-
-  const isViewAvailable = Boolean(previewFeatures?.includes('views'))
-
-  const isTypeAvailable = Boolean(datasourceProvider?.includes('mongodb'))
-
-  if (!isEnumAvailable) {
-    suggestions = suggestions.filter((item) => item.label !== 'enum')
-  }
-
-  if (!isViewAvailable) {
-    suggestions = suggestions.filter((item) => item.label !== 'view')
-  }
-
-  if (!isTypeAvailable) {
-    suggestions = suggestions.filter((item) => item.label !== 'type')
-  }
-
-  return {
-    items: suggestions,
-    isIncomplete: false,
-  }
-}
-
-export function suggestEqualSymbol(blockType: BlockType): CompletionList | undefined {
-  if (!(blockType == 'datasource' || blockType == 'generator')) {
-    return
-  }
-  const equalSymbol: CompletionItem = { label: '=' }
-  return {
-    items: [equalSymbol],
     isIncomplete: false,
   }
 }
