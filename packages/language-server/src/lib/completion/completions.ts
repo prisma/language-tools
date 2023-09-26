@@ -1,7 +1,6 @@
 import { CompletionItem, CompletionList, CompletionItemKind, Position, InsertTextFormat } from 'vscode-languageserver'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import { klona } from 'klona'
-import { filterSuggestionsForBlock } from './completionUtils'
 
 import { relationNamesMongoDBRegexFilter, relationNamesRegexFilter } from '../types'
 import {
@@ -41,7 +40,6 @@ import {
   virtualSequenceDefaultCompletion,
 } from './arguments'
 import { corePrimitiveTypes, getNativeTypes, relationManyTypeCompletion, relationSingleTypeCompletion } from './types'
-import { blockAttributes } from './attributes'
 import { toCompletionItems } from './internals'
 import {
   autoDefaultCompletion,
@@ -52,57 +50,7 @@ import {
   sequenceDefaultCompletion,
   uuidDefaultCompletion,
 } from './functions'
-
-const filterContextBlockAttributes = (
-  block: Block,
-  lines: string[],
-  suggestions: CompletionItem[],
-): CompletionItem[] => {
-  // We can filter on the datasource
-  const datasourceProvider = getFirstDatasourceProvider(lines)
-  // We can filter on the previewFeatures enabled
-  const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
-
-  // Full text indexes (MySQL and MongoDB)
-  // https://www.prisma.io/docs/concepts/components/prisma-schema/indexes#full-text-indexes-mysql-and-mongodb
-  const isFullTextAvailable = Boolean(
-    datasourceProvider &&
-      ['mysql', 'mongodb'].includes(datasourceProvider) &&
-      previewFeatures?.includes('fulltextindex'),
-  )
-
-  const isMultiSchemaAvailable = Boolean(
-    datasourceProvider &&
-      (datasourceProvider.includes('postgres') ||
-        datasourceProvider.includes('cockroachdb') ||
-        datasourceProvider.includes('sqlserver')) &&
-      previewFeatures?.includes('multischema'),
-  )
-
-  if (isFullTextAvailable === false) {
-    // fullTextIndex is not available, we need to filter it out
-    suggestions = suggestions.filter((arg) => arg.label !== '@@fulltext')
-  }
-
-  if (!isMultiSchemaAvailable) {
-    suggestions = suggestions.filter((item) => item.label !== '@@schema')
-  }
-
-  return suggestions
-}
-
-/**
- * * Only models and views currently support block attributes
- */
-function getSuggestionForBlockAttribute(block: Block, lines: string[]): CompletionItem[] {
-  if (!(['model', 'view'] as BlockType[]).includes(block.type)) {
-    return []
-  }
-
-  const suggestions: CompletionItem[] = filterSuggestionsForBlock(klona(blockAttributes), block, lines)
-
-  return filterContextBlockAttributes(block, lines, suggestions)
-}
+import { getSuggestionForBlockAttribute } from './attributes'
 
 export function getSuggestionForNativeTypes(
   foundBlock: Block,
