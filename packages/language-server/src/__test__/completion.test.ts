@@ -1656,7 +1656,7 @@ suite('Completions', function () {
       })
     })
 
-    test('self-filter', () => {
+    test('block suggestion should filter out block attributes that can only be defined once', () => {
       assertCompletion({
         schema: /* prisma */ `
             generator client {
@@ -3485,7 +3485,7 @@ suite('Completions', function () {
       })
     })
 
-    suite('self-filter', () => {
+    suite('field suggestion should filter out field attributes that are already defined', () => {
       test('Baseline', () => {
         assertCompletion({
           schema: /* prisma */ `
