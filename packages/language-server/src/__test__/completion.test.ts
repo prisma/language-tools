@@ -117,6 +117,7 @@ items.length`,
 
 suite('Completions', function () {
   // used in more than 1 suite
+  //#region types
   const fieldProvider = {
     label: 'provider',
     kind: CompletionItemKind.Field,
@@ -145,6 +146,7 @@ suite('Completions', function () {
     label: 'name',
     kind: CompletionItemKind.Property,
   }
+  //#endregion
 
   suite('BASE BLOCKS', () => {
     test('Diagnoses block type suggestions for empty file', () => {
@@ -503,6 +505,7 @@ suite('Completions', function () {
 
   suite('GENERATOR BLOCK', () => {
     // fieldProvider defined above already
+    //#region types
     const fieldOutput = { label: 'output', kind: CompletionItemKind.Field }
     const fieldBinaryTargets = {
       label: 'binaryTargets',
@@ -516,6 +519,7 @@ suite('Completions', function () {
       label: 'engineType',
       kind: CompletionItemKind.Field,
     }
+    //#endregion
 
     test('Diagnoses generator field suggestions in empty block', () => {
       assertCompletion({
@@ -596,6 +600,7 @@ suite('Completions', function () {
   })
 
   suite('BLOCK ATTRIBUTES', () => {
+    //#region types
     const blockAttributeId = {
       label: '@@id',
       kind: CompletionItemKind.Property,
@@ -636,6 +641,7 @@ suite('Completions', function () {
       label: 'two',
       kind: CompletionItemKind.Property,
     }
+    //#endregion
 
     test('@@id([|])', () => {
       assertCompletion({
@@ -1649,6 +1655,40 @@ suite('Completions', function () {
         })
       })
     })
+
+    test('block suggestion should filter out block attributes that can only be defined once', () => {
+      assertCompletion({
+        schema: /* prisma */ `
+            generator client {
+              provider = "prisma-client-js"
+              previewFeatures = ["multiSchema", "fullTextIndex"]
+            }
+            datasource db {
+              provider = "mysql"
+              url = env("DATABASE_URL")
+              schemas = ["one"]
+            }
+
+            model A {
+              id   Int
+              name String
+              
+              @@id([id])
+              @@unique([id])
+              @@index([id])
+              @@fulltext([name])
+              @@map("hi")
+              @@ignore
+              @@schema("bas")
+              |
+            }
+          `,
+        expected: {
+          isIncomplete: false,
+          items: [blockAttributeUnique, blockAttributeIndex, blockAttributeFulltextIndex],
+        },
+      })
+    })
   })
 
   suite('TYPES', () => {
@@ -2067,6 +2107,7 @@ suite('Completions', function () {
   })
 
   suite('FIELD ATTRIBUTES', () => {
+    //#region types
     const fieldAttributeId = {
       label: '@id',
       kind: CompletionItemKind.Property,
@@ -2197,6 +2238,7 @@ suite('Completions', function () {
       label: 'Desc',
       kind: CompletionItemKind.Enum,
     }
+    //#endregion
 
     test('Diagnoses field and block attribute suggestions', () => {
       assertCompletion({
@@ -3438,6 +3480,130 @@ suite('Completions', function () {
           expected: {
             isIncomplete: false,
             items: [fieldsProperty, mapProperty],
+          },
+        })
+      })
+    })
+
+    suite('field suggestion should filter out field attributes that are already defined', () => {
+      test('Baseline', () => {
+        assertCompletion({
+          schema: /* prisma */ `
+              generator client {
+                provider = "prisma-client-js"
+              }
+              
+              datasource db {
+                provider = "postgresql"
+                url      = env("DATABASE_URL")
+              }
+              
+              model A {
+                id  Int @id @unique @default(autoincrement()) @map("hi") @ignore @db.Integer |
+              }
+              `,
+          expected: {
+            isIncomplete: false,
+            items: [fieldAttributeRelation],
+          },
+        })
+      })
+
+      test('@relation', () => {
+        assertCompletion({
+          schema: /* prisma */ `
+              generator client {
+                provider = "prisma-client-js"
+              }
+              
+              datasource db {
+                provider = "postgresql"
+                url      = env("DATABASE_URL")
+              }
+              
+              model A {
+                id  Int @id
+                b   B   @relation(fields: [bId], references: [id]) |
+                bId Int
+              }
+              
+              model B {
+                id Int @id
+                A  A[]
+              }
+              `,
+          expected: {
+            isIncomplete: false,
+            items: [
+              fieldAttributeDatasourceName,
+              fieldAttributeUnique,
+              fieldAttributeMap,
+              fieldAttributeDefault,
+              fieldAttributeIgnore,
+            ],
+          },
+        })
+      })
+      test('@@ignore filters @ignore', () => {
+        assertCompletion({
+          schema: /* prisma */ `
+            generator client {
+              provider = "prisma-client-js"
+            }
+            
+            datasource db {
+              provider = "postgresql"
+              url      = env("DATABASE_URL")
+            }
+            
+            model A {
+              id Int @default(autoincrement()) @map("hi")
+              name String |
+              
+              @@ignore
+            }
+            `,
+          expected: {
+            isIncomplete: false,
+            items: [
+              fieldAttributeDatasourceName,
+              fieldAttributeId,
+              fieldAttributeUnique,
+              fieldAttributeMap,
+              fieldAttributeDefault,
+              fieldAttributeRelation,
+            ],
+          },
+        })
+      })
+      test('@@id filters @id', () => {
+        assertCompletion({
+          schema: /* prisma */ `
+            generator client {
+              provider = "prisma-client-js"
+            }
+            
+            datasource db {
+              provider = "postgresql"
+              url      = env("DATABASE_URL")
+            }
+            
+            model A {
+              id Int |
+              
+              @@id([id])
+            }
+            `,
+          expected: {
+            isIncomplete: false,
+            items: [
+              fieldAttributeDatasourceName,
+              fieldAttributeUnique,
+              fieldAttributeMap,
+              fieldAttributeDefault,
+              fieldAttributeRelation,
+              fieldAttributeIgnore,
+            ],
           },
         })
       })

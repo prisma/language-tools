@@ -392,6 +392,7 @@ export function filterSuggestionsForBlock(
   lines: string[],
 ): CompletionItem[] {
   let reachedStartLine = false
+
   for (const [key, item] of lines.entries()) {
     if (key === block.range.start.line + 1) {
       reachedStartLine = true
@@ -406,11 +407,23 @@ export function filterSuggestionsForBlock(
     // Ignore commented lines
     if (!item.startsWith('//')) {
       // TODO we should also remove the other suggestions if used (default()...)
-      if (item.includes('@id')) {
-        suggestions = suggestions.filter((attribute) => !attribute.label.includes('id'))
-      }
+      // * Filter already-present attributes that can't be duplicated
+      ;['@id', '@@map', '@@ignore', '@@schema'].forEach((label) => {
+        if (item.includes(label)) {
+          suggestions = suggestions.filter((suggestion) => suggestion.label !== label)
+
+          if (label === '@@ignore') {
+            suggestions = suggestions.filter((suggestion) => suggestion.label !== '@ignore')
+          }
+
+          if (label === '@id') {
+            suggestions = suggestions.filter((suggestion) => suggestion.label !== '@@id')
+          }
+        }
+      })
     }
   }
+
   return suggestions
 }
 
@@ -446,9 +459,12 @@ export function filterSuggestionsForLine(
     suggestions = suggestions.filter((suggestion) => suggestion.label !== '@updatedAt')
   }
 
-  if (currentLine.includes('@map')) {
-    suggestions = suggestions.filter((suggestion) => suggestion.label !== '@map')
-  }
+  // * Filter already-present attributes that can't be duplicated
+  fieldAttributes.forEach(({ label }) => {
+    if (currentLine.includes(label)) {
+      suggestions = suggestions.filter((suggestion) => suggestion.label !== label)
+    }
+  })
 
   return suggestions
 }
