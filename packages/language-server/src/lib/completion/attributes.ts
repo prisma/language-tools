@@ -1,4 +1,5 @@
 import { CompletionItem, CompletionItemKind, CompletionList, InsertTextFormat } from 'vscode-languageserver'
+import type { TextDocument } from 'vscode-languageserver-textdocument'
 import { klona } from 'klona'
 
 import { convertAttributesToCompletionItems } from './internals'
@@ -14,15 +15,14 @@ import {
   getAllPreviewFeaturesFromGenerators,
 } from '../ast'
 
-import { TextDocument } from 'vscode-languageserver-textdocument'
 import { getNativeTypes } from './types'
 
-export const fieldAttributes: CompletionItem[] = convertAttributesToCompletionItems(
+const fieldAttributes: CompletionItem[] = convertAttributesToCompletionItems(
   completions.fieldAttributes,
   CompletionItemKind.Property,
 )
 
-export const blockAttributes: CompletionItem[] = convertAttributesToCompletionItems(
+const blockAttributes: CompletionItem[] = convertAttributesToCompletionItems(
   completions.blockAttributes,
   CompletionItemKind.Property,
 )

@@ -21,25 +21,25 @@ import { relationNamesMongoDBRegexFilter, relationNamesRegexFilter } from '../ty
  * }
  * ```
  */
-export const corePrimitiveTypes: CompletionItem[] = convertToCompletionItems(
+const corePrimitiveTypes: CompletionItem[] = convertToCompletionItems(
   completions.primitiveTypes,
   CompletionItemKind.TypeParameter,
 )
 
-export const nativeTypeCompletion = (items: CompletionItem[], element: NativeTypeConstructors) =>
+const nativeTypeCompletion = (items: CompletionItem[], element: NativeTypeConstructors) =>
   items.push({
     label: element.name,
     kind: CompletionItemKind.TypeParameter,
   })
 
-export const relationSingleTypeCompletion = (items: CompletionItem[], sugg: CompletionItem) =>
+const relationSingleTypeCompletion = (items: CompletionItem[], sugg: CompletionItem) =>
   items.push({
     label: `${sugg.label}?`,
     kind: sugg.kind,
     documentation: sugg.documentation,
   })
 
-export const relationManyTypeCompletion = (items: CompletionItem[], sugg: CompletionItem) =>
+const relationManyTypeCompletion = (items: CompletionItem[], sugg: CompletionItem) =>
   items.push({
     label: `${sugg.label}[]`,
     kind: sugg.kind,
