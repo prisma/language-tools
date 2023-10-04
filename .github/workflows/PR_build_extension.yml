@@ -69,7 +69,7 @@ jobs:
       - name: Add artifact to PR
         # Skip for Renovate (only build)
         if: "!contains(github.actor, 'renovate')"
-        uses: gavv/pull-request-artifacts@v1.1.0
+        uses: gavv/pull-request-artifacts@v2.0.0
         with:
           commit: ${{ github.event.pull_request.head.sha }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
