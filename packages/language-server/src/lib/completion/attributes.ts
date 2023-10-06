@@ -9,7 +9,7 @@ import {
   Block,
   getFieldType,
   getFirstDatasourceName,
-  getDataBlock,
+  getDatamodelBlock,
   getFirstDatasourceProvider,
   getAllPreviewFeaturesFromGenerators,
 } from '../ast'
@@ -228,7 +228,7 @@ export function getSuggestionForFieldAttribute(
 
   suggestions.push(...fieldAttributes)
 
-  const modelOrTypeOrEnum = getDataBlock(fieldType, lines)
+  const modelOrTypeOrEnum = getDatamodelBlock(fieldType, lines)
 
   suggestions = filterSuggestionsForLine(suggestions, currentLine, fieldType, modelOrTypeOrEnum?.type)
 

@@ -23,7 +23,7 @@ import {
   Block,
   getAllPreviewFeaturesFromGenerators,
   getCompositeTypeFieldsRecursively,
-  getDataBlock,
+  getDatamodelBlock,
   getFieldTypesFromCurrentBlock,
   getFieldsFromCurrentBlock,
   getValuesInsideSquareBrackets,
@@ -155,7 +155,7 @@ function getDefaultValues({
     scalarListDefaultCompletion(suggestions)
   }
 
-  const dataBlock = getDataBlock(fieldType, lines)
+  const dataBlock = getDatamodelBlock(fieldType, lines)
   if (dataBlock && dataBlock.type === 'enum') {
     // get fields from enum block for suggestions
     const values: string[] = getFieldsFromCurrentBlock(lines, dataBlock)
@@ -219,7 +219,7 @@ function getSuggestionsForAttribute({
     if (isInsideGivenProperty(untrimmedCurrentLine, wordsBeforePosition, 'references', position)) {
       // Get the name by potentially removing ? and [] from Foo? or Foo[]
       const referencedModelName = wordsBeforePosition[1].replace('?', '').replace('[]', '')
-      const referencedBlock = getDataBlock(referencedModelName, lines)
+      const referencedBlock = getDatamodelBlock(referencedModelName, lines)
       // referenced model does not exist
       // TODO type?
       if (!referencedBlock || referencedBlock.type !== 'model') {

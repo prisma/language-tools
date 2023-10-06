@@ -69,7 +69,7 @@ export function* getBlocks(lines: string[]): Generator<Block, void, void> {
   }
 }
 
-export function getDataBlock(blockName: string, lines: string[]): Block | void {
+export function getDatamodelBlock(blockName: string, lines: string[]): Block | void {
   // get start position of block
   const results: number[] = lines
     .map((line, index) => {
@@ -186,7 +186,7 @@ export function getCompositeTypeFieldsRecursively(
     return []
   }
 
-  const typeBlock = getDataBlock(fieldTypeName, lines)
+  const typeBlock = getDatamodelBlock(fieldTypeName, lines)
   if (!typeBlock || typeBlock.type !== 'type') {
     return []
   }

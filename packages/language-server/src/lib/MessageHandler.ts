@@ -48,7 +48,7 @@ import {
   Block,
   getBlocks,
   getDocumentationForBlock,
-  getDataBlock,
+  getDatamodelBlock,
 } from './ast'
 import { prismaSchemaWasmCompletions, localCompletions } from './completion'
 
@@ -182,7 +182,7 @@ export function handleHoverRequest(document: TextDocument, params: HoverParams):
     return
   }
 
-  const block = getDataBlock(word, lines)
+  const block = getDatamodelBlock(word, lines)
   if (!block) {
     return
   }
