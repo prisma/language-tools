@@ -8,7 +8,7 @@ import {
   Position,
 } from 'vscode-languageserver'
 import { NativeTypeConstructors } from '../prisma-schema-wasm/nativeTypes'
-import { BlockType } from '../ast'
+import { BlockType } from '../types'
 
 // Docs about CompletionItem
 // https://code.visualstudio.com/api/references/vscode-api#CompletionItem

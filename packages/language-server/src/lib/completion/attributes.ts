@@ -10,12 +10,12 @@ import {
   getFieldType,
   getFirstDatasourceName,
   getDataBlock,
-  BlockType,
   getFirstDatasourceProvider,
   getAllPreviewFeaturesFromGenerators,
 } from '../ast'
 
 import { getNativeTypes } from './types'
+import { BlockType } from '../types'
 
 const fieldAttributes: CompletionItem[] = convertAttributesToCompletionItems(
   completions.fieldAttributes,

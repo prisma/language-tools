@@ -1,10 +1,8 @@
 import { Position, Range } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { MAX_SAFE_VALUE_i32 } from '../types'
+import { BlockType, MAX_SAFE_VALUE_i32 } from '../types'
 import { getFieldType } from './fields'
 import { getBlockAtPosition } from './findAtPosition'
-
-export type BlockType = 'generator' | 'datasource' | 'model' | 'type' | 'enum' | 'view'
 
 export class Block {
   type: BlockType

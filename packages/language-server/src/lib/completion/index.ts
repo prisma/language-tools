@@ -19,7 +19,6 @@ import {
   isFirstInsideBlock,
   positionIsAfterFieldAndType,
   isInsideAttribute,
-  BlockType,
   getFirstDatasourceProvider,
   Block,
   getAllPreviewFeaturesFromGenerators,
@@ -64,6 +63,7 @@ import {
   uuidDefaultCompletion,
   cuidDefaultCompletion,
 } from './functions'
+import { BlockType } from '../types'
 
 function getDefaultValues({
   currentLine,

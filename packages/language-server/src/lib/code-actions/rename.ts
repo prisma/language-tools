@@ -3,7 +3,6 @@ import type { TextEdit, TextDocument } from 'vscode-languageserver-textdocument'
 
 import {
   Block,
-  BlockType,
   getBlockAtPosition,
   getCurrentLine,
   getFieldTypesFromCurrentBlock,
@@ -11,7 +10,7 @@ import {
   getValuesInsideSquareBrackets,
   getWordAtPosition,
 } from '../ast'
-import { MAX_SAFE_VALUE_i32, relationNamesRegexFilter } from '../types'
+import { BlockType, MAX_SAFE_VALUE_i32, relationNamesRegexFilter } from '../types'
 
 function getType(currentLine: string): string {
   const wordsInLine: string[] = currentLine.split(/\s+/)
