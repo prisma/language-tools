@@ -6,7 +6,7 @@ export * from './configBlock'
 export * from './fields'
 export * from './findAtPosition'
 export * from './relations'
-export * from './types'
+export * from './nativeTypes'
 
 export function convertDocumentTextToTrimmedLineArray(document: TextDocument): string[] {
   return Array(document.lineCount)
