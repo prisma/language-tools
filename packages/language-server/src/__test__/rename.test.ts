@@ -1,9 +1,9 @@
 import type { TextDocument } from 'vscode-languageserver-textdocument'
-import { handleRenameRequest } from '../MessageHandler'
+import { handleRenameRequest } from '../lib/MessageHandler'
 import { WorkspaceEdit, RenameParams, Position } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
-import { MAX_SAFE_VALUE_i32 } from '../util'
+import { MAX_SAFE_VALUE_i32 } from '../lib/constants'
 
 function assertRename(expected: WorkspaceEdit, document: TextDocument, newName: string, position: Position): void {
   const params: RenameParams = {

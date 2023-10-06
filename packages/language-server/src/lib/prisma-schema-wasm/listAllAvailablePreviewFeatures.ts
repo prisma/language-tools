@@ -1,5 +1,5 @@
-import { prismaSchemaWasm } from '../wasm'
-import { handleFormatPanic, handleWasmError } from './util'
+import { prismaSchemaWasm } from '.'
+import { handleFormatPanic, handleWasmError } from './internals'
 
 export default function listAllAvailablePreviewFeatures(onError?: (errorMessage: string) => void): string[] {
   console.log('running preview_features() from prisma-schema-wasm')

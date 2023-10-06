@@ -1,5 +1,5 @@
-import { prismaSchemaWasm } from '../wasm'
-import { handleFormatPanic, handleWasmError } from './util'
+import { prismaSchemaWasm } from '.'
+import { handleFormatPanic, handleWasmError } from './internals'
 
 export interface NativeTypeConstructors {
   name: string

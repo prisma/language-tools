@@ -1,8 +1,8 @@
-import { handleDiagnosticsRequest } from '../MessageHandler'
+import { handleDiagnosticsRequest } from '../lib/MessageHandler'
 import { Diagnostic, DiagnosticSeverity, DiagnosticTag } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
-import { MAX_SAFE_VALUE_i32 } from '../util'
+import { MAX_SAFE_VALUE_i32 } from '../lib/constants'
 
 function assertLinting(expected: Diagnostic[], fixturePath: string): void {
   const document = getTextDocument(fixturePath)

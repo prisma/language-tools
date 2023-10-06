@@ -1,6 +1,6 @@
 import { CodeAction } from 'vscode-languageserver'
-import { prismaSchemaWasm } from '../wasm'
-import { handleFormatPanic, handleWasmError } from './util'
+import { prismaSchemaWasm } from '.'
+import { handleFormatPanic, handleWasmError } from './internals'
 
 export default function codeActions(
   schema: string,

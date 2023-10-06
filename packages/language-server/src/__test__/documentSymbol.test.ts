@@ -1,6 +1,6 @@
 import { DocumentSymbol, SymbolKind } from 'vscode-languageserver'
 import * as assert from 'assert'
-import { handleDocumentSymbol } from '../MessageHandler'
+import { handleDocumentSymbol } from '../lib/MessageHandler'
 import { getTextDocument } from './helper'
 
 function assertSymbols(fixturePath: string, expected: DocumentSymbol[]) {

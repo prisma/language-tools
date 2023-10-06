@@ -1,18 +1,17 @@
 import { Position } from 'vscode-languageserver'
 import type { TextEdit, TextDocument } from 'vscode-languageserver-textdocument'
+
 import {
   Block,
-  getCurrentLine,
-  getWordAtPosition,
   getBlockAtPosition,
-  getValuesInsideSquareBrackets,
-  getAllRelationNames,
+  getCurrentLine,
   getFieldTypesFromCurrentBlock,
-  extractFirstWord,
-  MAX_SAFE_VALUE_i32,
-  BlockType,
-  relationNamesRegexFilter,
-} from '../util'
+  getAllRelationNames,
+  getValuesInsideSquareBrackets,
+  getWordAtPosition,
+} from '../ast'
+import { BlockType } from '../types'
+import { MAX_SAFE_VALUE_i32, relationNamesRegexFilter } from '../constants'
 
 function getType(currentLine: string): string {
   const wordsInLine: string[] = currentLine.split(/\s+/)
@@ -31,6 +30,10 @@ export function isRelationField(currentLine: string, lines: string[]): boolean {
   }
 
   return relationNames.includes(type)
+}
+
+function extractFirstWord(line: string): string {
+  return line.replace(/ .*/, '')
 }
 
 export function isValidFieldName(

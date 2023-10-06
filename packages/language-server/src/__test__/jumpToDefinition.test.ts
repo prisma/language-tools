@@ -1,5 +1,5 @@
 import { Position } from 'vscode-languageserver-textdocument'
-import { handleDefinitionRequest } from '../MessageHandler'
+import { handleDefinitionRequest } from '../lib/MessageHandler'
 import { LocationLink, Range } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'

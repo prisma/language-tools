@@ -1,7 +1,6 @@
 import {
   DocumentFormattingParams,
   TextEdit,
-  Range,
   DeclarationParams,
   CompletionParams,
   CompletionList,
@@ -14,43 +13,19 @@ import {
   DiagnosticSeverity,
   RenameParams,
   WorkspaceEdit,
-  CompletionTriggerKind,
   DocumentSymbolParams,
   DocumentSymbol,
   SymbolKind,
   LocationLink,
 } from 'vscode-languageserver'
-import {
-  Block,
-  convertDocumentTextToTrimmedLineArray,
-  fullDocumentRange,
-  getBlockAtPosition,
-  getCurrentLine,
-  getExperimentalFeaturesRange,
-  getModelOrTypeOrEnumOrViewBlock,
-  getWordAtPosition,
-  isFirstInsideBlock,
-  positionIsAfterFieldAndType,
-  isInsideAttribute,
-  getSymbolBeforePosition,
-  getBlocks,
-  getDocumentationForBlock,
-} from './util'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
+
 import format from './prisma-schema-wasm/format'
-import textDocumentCompletion from './prisma-schema-wasm/textDocumentCompletion'
-import {
-  getSuggestionForFieldAttribute,
-  getSuggestionsForFieldTypes,
-  getSuggestionForBlockTypes,
-  getSuggestionForFirstInsideBlock,
-  getSuggestionForSupportedFields,
-  getSuggestionsForInsideRoundBrackets,
-  suggestEqualSymbol,
-  getSuggestionForNativeTypes,
-} from './completion/completions'
-import { quickFix } from './codeActionProvider'
 import lint from './prisma-schema-wasm/lint'
+
+import { convertDocumentTextToTrimmedLineArray } from './ast'
+
+import { quickFix } from './code-actions'
 import {
   insertBasicRename,
   renameReferencesForModelName,
@@ -64,8 +39,18 @@ import {
   printLogMessage,
   isRelationField,
   isBlockName,
-} from './rename/renameUtil'
-import { createDiagnosticsForIgnore } from './diagnosticsHandler'
+} from './code-actions/rename'
+import { validateExperimentalFeatures, validateIgnoredBlocks } from './validations'
+import {
+  fullDocumentRange,
+  getWordAtPosition,
+  getBlockAtPosition,
+  Block,
+  getBlocks,
+  getDocumentationForBlock,
+  getDatamodelBlock,
+} from './ast'
+import { prismaSchemaWasmCompletions, localCompletions } from './completion'
 
 export function handleDiagnosticsRequest(
   document: TextDocument,
@@ -110,26 +95,10 @@ export function handleDiagnosticsRequest(
     diagnostics.push(diagnostic)
   }
 
-  // TODO can be removed? Since it was renamed to `previewFeatures`
-  // check for experimentalFeatures inside generator block
-  // Related code in codeActionProvider.ts, around lines 185-204
-  if (document.getText().includes('experimentalFeatures')) {
-    const experimentalFeaturesRange: Range | undefined = getExperimentalFeaturesRange(document)
-    if (experimentalFeaturesRange) {
-      diagnostics.push({
-        severity: DiagnosticSeverity.Error,
-        range: experimentalFeaturesRange,
-        message:
-          "The `experimentalFeatures` property is obsolete and has been renamed to 'previewFeatures' to better communicate what it is.",
-        code: 'Prisma 5',
-        tags: [2],
-      })
-    }
-  }
+  validateExperimentalFeatures(document, diagnostics)
 
   const lines = convertDocumentTextToTrimmedLineArray(document)
-  const diagnosticsForIgnore = createDiagnosticsForIgnore(lines)
-  diagnostics.push(...diagnosticsForIgnore)
+  validateIgnoredBlocks(lines, diagnostics)
 
   return diagnostics
 }
@@ -213,7 +182,7 @@ export function handleHoverRequest(document: TextDocument, params: HoverParams):
     return
   }
 
-  const block = getModelOrTypeOrEnumOrViewBlock(word, lines)
+  const block = getDatamodelBlock(word, lines)
   if (!block) {
     return
   }
@@ -234,140 +203,6 @@ export function handleHoverRequest(document: TextDocument, params: HoverParams):
   } */
 
   return
-}
-
-function prismaSchemaWasmCompletions(
-  params: CompletionParams,
-  document: TextDocument,
-  onError?: (errorMessage: string) => void,
-): CompletionList | undefined {
-  const text = document.getText(fullDocumentRange(document))
-
-  const completionList = textDocumentCompletion(text, params, (errorMessage: string) => {
-    if (onError) {
-      onError(errorMessage)
-    }
-  })
-
-  if (completionList.items.length === 0) {
-    return undefined
-  } else {
-    return completionList
-  }
-}
-
-function localCompletions(
-  params: CompletionParams,
-  document: TextDocument,
-  onError?: (errorMessage: string) => void,
-): CompletionList | undefined {
-  const context = params.context
-  const position = params.position
-
-  const lines = convertDocumentTextToTrimmedLineArray(document)
-  const currentLineUntrimmed = getCurrentLine(document, position.line)
-  const currentLineTillPosition = currentLineUntrimmed.slice(0, position.character - 1).trim()
-  const wordsBeforePosition: string[] = currentLineTillPosition.split(/\s+/)
-
-  const symbolBeforePosition = getSymbolBeforePosition(document, position)
-  const symbolBeforePositionIsWhiteSpace = symbolBeforePosition.search(/\s/) !== -1
-
-  const positionIsAfterArray: boolean =
-    wordsBeforePosition.length >= 3 && !currentLineTillPosition.includes('[') && symbolBeforePositionIsWhiteSpace
-
-  // datasource, generator, model, type or enum
-  const foundBlock = getBlockAtPosition(position.line, lines)
-  if (!foundBlock) {
-    if (wordsBeforePosition.length > 1 || (wordsBeforePosition.length === 1 && symbolBeforePositionIsWhiteSpace)) {
-      return
-    }
-    return getSuggestionForBlockTypes(lines)
-  }
-
-  if (isFirstInsideBlock(position, getCurrentLine(document, position.line))) {
-    return getSuggestionForFirstInsideBlock(foundBlock.type, lines, position, foundBlock)
-  }
-
-  // Completion was triggered by a triggerCharacter
-  // triggerCharacters defined in src/server.ts
-  if (context?.triggerKind === CompletionTriggerKind.TriggerCharacter) {
-    switch (context.triggerCharacter as '@' | '"' | '.') {
-      case '@':
-        if (!positionIsAfterFieldAndType(position, document, wordsBeforePosition)) {
-          return
-        }
-        return getSuggestionForFieldAttribute(
-          foundBlock,
-          getCurrentLine(document, position.line),
-          lines,
-          wordsBeforePosition,
-          document,
-          onError,
-        )
-      case '"':
-        return getSuggestionForSupportedFields(
-          foundBlock.type,
-          lines[position.line],
-          currentLineUntrimmed,
-          position,
-          lines,
-          onError,
-        )
-      case '.':
-        // check if inside attribute
-        // Useful to complete composite types
-        if (['model', 'view'].includes(foundBlock.type) && isInsideAttribute(currentLineUntrimmed, position, '()')) {
-          return getSuggestionsForInsideRoundBrackets(currentLineUntrimmed, lines, position, foundBlock)
-        } else {
-          return getSuggestionForNativeTypes(foundBlock, lines, wordsBeforePosition, document, onError)
-        }
-    }
-  }
-
-  switch (foundBlock.type) {
-    case 'model':
-    case 'view':
-    case 'type':
-      // check if inside attribute
-      if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
-        return getSuggestionsForInsideRoundBrackets(currentLineUntrimmed, lines, position, foundBlock)
-      }
-      // check if field type
-      if (!positionIsAfterFieldAndType(position, document, wordsBeforePosition)) {
-        return getSuggestionsForFieldTypes(foundBlock, lines, position, currentLineUntrimmed)
-      }
-      return getSuggestionForFieldAttribute(
-        foundBlock,
-        lines[position.line],
-        lines,
-        wordsBeforePosition,
-        document,
-        onError,
-      )
-    case 'datasource':
-    case 'generator':
-      if (wordsBeforePosition.length === 1 && symbolBeforePositionIsWhiteSpace) {
-        return suggestEqualSymbol(foundBlock.type)
-      }
-      if (
-        currentLineTillPosition.includes('=') &&
-        !currentLineTillPosition.includes(']') &&
-        !positionIsAfterArray &&
-        symbolBeforePosition !== ','
-      ) {
-        return getSuggestionForSupportedFields(
-          foundBlock.type,
-          lines[position.line],
-          currentLineUntrimmed,
-          position,
-          lines,
-          onError,
-        )
-      }
-      break
-    case 'enum':
-      break
-  }
 }
 
 /**

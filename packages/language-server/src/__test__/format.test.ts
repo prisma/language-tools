@@ -1,4 +1,4 @@
-import { handleDocumentFormatting } from '../MessageHandler'
+import { handleDocumentFormatting } from '../lib/MessageHandler'
 import { TextEdit, DocumentFormattingParams } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
