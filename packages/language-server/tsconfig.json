@@ -20,7 +20,6 @@
   "include": [
     "src/**/*",
     "src/lib/**/*",
-    "src/lib/**/**/*",
     "src/**/*.json"
   ],
   "exclude": [
