@@ -10,7 +10,7 @@ import {
 import levenshtein from 'js-levenshtein'
 
 import codeActions from '../prisma-schema-wasm/codeActions'
-import { relationNamesRegexFilter } from '../types'
+import { relationNamesRegexFilter } from '../constants'
 import { convertDocumentTextToTrimmedLineArray, getAllRelationNames } from '../ast'
 
 function getInsertRange(document: TextDocument): Range {

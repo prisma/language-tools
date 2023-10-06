@@ -12,7 +12,7 @@ import {
   getFirstDatasourceProvider,
   getAllRelationNames,
 } from '../ast'
-import { relationNamesMongoDBRegexFilter, relationNamesRegexFilter } from '../types'
+import { relationNamesMongoDBRegexFilter, relationNamesRegexFilter } from '../constants'
 
 /**
  * ```prisma

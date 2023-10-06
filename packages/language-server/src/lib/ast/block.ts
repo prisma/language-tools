@@ -1,6 +1,9 @@
 import { Position, Range } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { BlockType, MAX_SAFE_VALUE_i32 } from '../types'
+
+import { BlockType } from '../types'
+import { MAX_SAFE_VALUE_i32 } from '../constants'
+
 import { getFieldType } from './fields'
 import { getBlockAtPosition } from './findAtPosition'
 

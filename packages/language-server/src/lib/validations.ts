@@ -2,7 +2,7 @@ import { Diagnostic, DiagnosticSeverity, Range, DiagnosticTag } from 'vscode-lan
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { getBlockAtPosition, getExperimentalFeaturesRange } from './ast'
-import { MAX_SAFE_VALUE_i32 } from './types'
+import { MAX_SAFE_VALUE_i32 } from './constants'
 
 // TODO (Joël) can be removed? Since it was renamed to `previewFeatures`
 // check for experimentalFeatures inside generator block

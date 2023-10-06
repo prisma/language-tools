@@ -1,5 +1,11 @@
 import { Connection } from 'vscode-languageserver'
 
+export type BlockType = 'generator' | 'datasource' | 'model' | 'type' | 'enum' | 'view'
+
+export type PreviewFeatures =
+  // value must be lowercase
+  Lowercase<'fullTextIndex'> | Lowercase<'postgresqlExtensions'> | Lowercase<'multiSchema'> | Lowercase<'views'>
+
 export interface LSOptions {
   /**
    * If you have a connection already that the ls should use, pass it in.

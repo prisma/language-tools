@@ -10,7 +10,8 @@ import {
   getValuesInsideSquareBrackets,
   getWordAtPosition,
 } from '../ast'
-import { BlockType, MAX_SAFE_VALUE_i32, relationNamesRegexFilter } from '../types'
+import { BlockType } from '../types'
+import { MAX_SAFE_VALUE_i32, relationNamesRegexFilter } from '../constants'
 
 function getType(currentLine: string): string {
   const wordsInLine: string[] = currentLine.split(/\s+/)

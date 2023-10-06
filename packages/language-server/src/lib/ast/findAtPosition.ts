@@ -1,7 +1,8 @@
 import { Range, Position } from 'vscode-languageserver'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 
-import { MAX_SAFE_VALUE_i32 } from '../types'
+import { MAX_SAFE_VALUE_i32 } from '../constants'
+
 import { Block, getBlocks } from './block'
 
 export function fullDocumentRange(document: TextDocument): Range {
