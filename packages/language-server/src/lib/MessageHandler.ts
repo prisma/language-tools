@@ -50,7 +50,7 @@ import {
   getDocumentationForBlock,
   getDatamodelBlock,
 } from './ast'
-import { prismaSchemaWasmCompletions, localCompletions } from './completion'
+import { prismaSchemaWasmCompletions, localCompletions } from './completions'
 
 export function handleDiagnosticsRequest(
   document: TextDocument,
