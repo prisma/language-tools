@@ -39,15 +39,15 @@ function extractFirstWord(line: string): string {
 export function isValidFieldName(
   currentLine: string,
   position: Position,
-  currentBlock: Block,
+  block: Block,
   document: TextDocument,
 ): boolean {
   if (
-    currentBlock.type === 'datasource' ||
-    currentBlock.type === 'generator' ||
-    currentBlock.type === 'enum' ||
-    position.line == currentBlock.range.start.line ||
-    position.line == currentBlock.range.end.line
+    block.type === 'datasource' ||
+    block.type === 'generator' ||
+    block.type === 'enum' ||
+    position.line == block.range.start.line ||
+    position.line == block.range.end.line
   ) {
     return false
   }
@@ -72,22 +72,22 @@ export function isValidFieldName(
   return type !== '' && type !== undefined
 }
 
-export const isBlockName = (
+export const isDatamodelBlockName = (
   position: Position,
   block: Block,
   lines: string[],
   document: TextDocument,
-  blockType: BlockType,
 ): boolean => {
-  if (block.type !== blockType) {
+  // TODO figure out how to use DatamodelBlockType
+  if (!['model', 'view', 'type', 'enum'].includes(block.type)) {
     return false
   }
 
   if (position.line !== block.range.start.line) {
-    return renameModelOrEnumWhereUsedAsType(block, lines, document, position, blockType)
+    return renameDatamodelBlockWhereUsedAsType(block, lines, document, position)
   }
 
-  switch (blockType) {
+  switch (block.type) {
     case 'model':
       return position.character > 5
 
@@ -101,12 +101,11 @@ export const isBlockName = (
   }
 }
 
-function renameModelOrEnumWhereUsedAsType(
+function renameDatamodelBlockWhereUsedAsType(
   block: Block,
   lines: string[],
   document: TextDocument,
   position: Position,
-  blockType: string,
 ): boolean {
   // TODO type?
   if (block.type !== 'model') {
@@ -119,20 +118,15 @@ function renameModelOrEnumWhereUsedAsType(
   if (!isRelation) {
     return false
   }
-  const indexOfRelation = lines.findIndex((l) => l.startsWith(blockType) && l.includes(currentName))
+  const indexOfRelation = lines.findIndex((l) => l.startsWith(block.type) && l.includes(currentName))
   return indexOfRelation !== -1
 }
 
-export function isEnumValue(
-  currentLine: string,
-  position: Position,
-  currentBlock: Block,
-  document: TextDocument,
-): boolean {
+export function isEnumValue(line: string, position: Position, block: Block, document: TextDocument): boolean {
   return (
-    currentBlock.type === 'enum' &&
-    position.line !== currentBlock.range.start.line &&
-    !currentLine.startsWith('@@') &&
+    block.type === 'enum' &&
+    position.line !== block.range.start.line &&
+    !line.startsWith('@@') &&
     !getWordAtPosition(document, position).startsWith('@')
   )
 }
@@ -198,8 +192,8 @@ function positionIsNotInsideSearchedBlocks(line: number, searchedBlocks: Block[]
  * Renames references in any referenced fields inside a '@relation' attribute in the same model (fields: []).
  * Renames references inside a '@relation' attribute in other model blocks (references: []).
  */
-export function renameReferencesForFieldValue(
-  currentValue: string,
+export function renameReferencesForFieldName(
+  currentName: string,
   newName: string,
   document: TextDocument,
   lines: string[],
@@ -221,15 +215,15 @@ export function renameReferencesForFieldValue(
     if (key === block.range.end.line) {
       break
     }
-    if (item.includes(relationAttribute) && item.includes(currentValue) && !isRelationFieldRename) {
+    if (item.includes(relationAttribute) && item.includes(currentName) && !isRelationFieldRename) {
       // search for fields references
       const currentLineUntrimmed = getCurrentLine(document, key)
       const indexOfFieldsStart = currentLineUntrimmed.indexOf('fields:')
       const indexOfFieldEnd = currentLineUntrimmed.slice(indexOfFieldsStart).indexOf(']') + indexOfFieldsStart
       const fields = currentLineUntrimmed.slice(indexOfFieldsStart, indexOfFieldEnd + 1)
-      const indexOfFoundValue = fields.indexOf(currentValue)
+      const indexOfFoundValue = fields.indexOf(currentName)
       const fieldValues = getValuesInsideSquareBrackets(fields)
-      if (indexOfFoundValue !== -1 && fieldValues.includes(currentValue)) {
+      if (indexOfFoundValue !== -1 && fieldValues.includes(currentName)) {
         // found a referenced field
         edits.push({
           range: {
@@ -239,7 +233,7 @@ export function renameReferencesForFieldValue(
             },
             end: {
               line: key,
-              character: indexOfFieldsStart + indexOfFoundValue + currentValue.length,
+              character: indexOfFieldsStart + indexOfFoundValue + currentName.length,
             },
           },
           newText: newName,
@@ -247,11 +241,11 @@ export function renameReferencesForFieldValue(
       }
     }
     // search for references in index, id and unique block attributes
-    if (searchStringsSameBlock.some((s) => item.includes(s)) && item.includes(currentValue)) {
+    if (searchStringsSameBlock.some((s) => item.includes(s)) && item.includes(currentName)) {
       const currentLineUntrimmed = getCurrentLine(document, key)
       const valuesInsideBracket = getValuesInsideSquareBrackets(currentLineUntrimmed)
-      if (valuesInsideBracket.includes(currentValue)) {
-        const indexOfCurrentValue = currentLineUntrimmed.indexOf(currentValue)
+      if (valuesInsideBracket.includes(currentName)) {
+        const indexOfCurrentValue = currentLineUntrimmed.indexOf(currentName)
         edits.push({
           range: {
             start: {
@@ -260,7 +254,7 @@ export function renameReferencesForFieldValue(
             },
             end: {
               line: key,
-              character: indexOfCurrentValue + currentValue.length,
+              character: indexOfCurrentValue + currentName.length,
             },
           },
           newText: newName,
@@ -271,15 +265,15 @@ export function renameReferencesForFieldValue(
 
   // search for references in other model blocks
   for (const [index, value] of lines.entries()) {
-    if (value.includes(block.name) && value.includes(currentValue) && value.includes(relationAttribute)) {
+    if (value.includes(block.name) && value.includes(currentName) && value.includes(relationAttribute)) {
       const currentLineUntrimmed = getCurrentLine(document, index)
       // get the index of the second word
       const indexOfReferences = currentLineUntrimmed.indexOf('references:')
       const indexOfReferencesEnd = currentLineUntrimmed.slice(indexOfReferences).indexOf(']') + indexOfReferences
       const references = currentLineUntrimmed.slice(indexOfReferences, indexOfReferencesEnd + 1)
-      const indexOfFoundValue = references.indexOf(currentValue)
+      const indexOfFoundValue = references.indexOf(currentName)
       const referenceValues = getValuesInsideSquareBrackets(references)
-      if (indexOfFoundValue !== -1 && referenceValues.includes(currentValue)) {
+      if (indexOfFoundValue !== -1 && referenceValues.includes(currentName)) {
         edits.push({
           range: {
             start: {
@@ -288,7 +282,7 @@ export function renameReferencesForFieldValue(
             },
             end: {
               line: index,
-              character: indexOfReferences + indexOfFoundValue + currentValue.length,
+              character: indexOfReferences + indexOfFoundValue + currentName.length,
             },
           },
           newText: newName,
@@ -446,9 +440,9 @@ export function mapExistsAlready(
   currentLine: string,
   lines: string[],
   block: Block,
-  isModelOrEnumRename: boolean,
+  isDatamodelBlockRename: boolean,
 ): boolean {
-  if (isModelOrEnumRename) {
+  if (isDatamodelBlockRename) {
     return mapBlockAttributeExistsAlready(block, lines)
   } else {
     return mapFieldAttributeExistsAlready(currentLine)
@@ -459,9 +453,9 @@ export function insertMapAttribute(
   currentName: string,
   position: Position,
   block: Block,
-  isModelOrEnumRename: boolean,
+  isDatamodelBlockRename: boolean,
 ): TextEdit {
-  if (isModelOrEnumRename) {
+  if (isDatamodelBlockRename) {
     return insertMapBlockAttribute(currentName, block)
   } else {
     return insertInlineRename(currentName, position.line)

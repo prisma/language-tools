@@ -228,9 +228,9 @@ export function getSuggestionForFieldAttribute(
 
   suggestions.push(...fieldAttributes)
 
-  const modelOrTypeOrEnum = getDatamodelBlock(fieldType, lines)
+  const datamodelBlock = getDatamodelBlock(fieldType, lines)
 
-  suggestions = filterSuggestionsForLine(suggestions, currentLine, fieldType, modelOrTypeOrEnum?.type)
+  suggestions = filterSuggestionsForLine(suggestions, currentLine, fieldType, datamodelBlock?.type)
 
   suggestions = filterSuggestionsForBlock(suggestions, block, lines)
 

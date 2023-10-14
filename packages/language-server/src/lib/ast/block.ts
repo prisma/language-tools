@@ -74,10 +74,8 @@ export function getDatamodelBlock(blockName: string, lines: string[]): Block | v
   const results: number[] = lines
     .map((line, index) => {
       if (
-        (line.includes('model') && line.includes(blockName)) ||
-        (line.includes('type') && line.includes(blockName)) ||
-        (line.includes('enum') && line.includes(blockName)) ||
-        (line.includes('view') && line.includes(blockName))
+        (line.includes('model') || line.includes('type') || line.includes('enum') || line.includes('view')) &&
+        line.includes(blockName)
       ) {
         return index
       }
