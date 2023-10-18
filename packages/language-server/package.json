@@ -31,7 +31,7 @@
   "typings": "dist/src/index",
   "dependencies": {
     "@prisma/prisma-schema-wasm": "5.5.0-15.42bfcd0e4a2e9f73937c1ed5c2f42bf08d07289a",
-    "@types/js-levenshtein": "1.1.1",
+    "@types/js-levenshtein": "1.1.2",
     "js-levenshtein": "1.1.6",
     "klona": "2.0.6",
     "nyc": "15.1.0",
