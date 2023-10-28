@@ -155,7 +155,7 @@
     "mocha": "10.2.0",
     "ovsx": "0.8.3",
     "typescript": "5.2.2",
-    "@vscode/vsce": "2.21.1"
+    "@vscode/vsce": "2.22.0"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
   "publishConfig": {
