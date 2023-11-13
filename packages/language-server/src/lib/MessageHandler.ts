@@ -35,10 +35,10 @@ import {
   extractCurrentName,
   mapExistsAlready,
   insertMapAttribute,
-  renameReferencesForFieldValue,
+  renameReferencesForFieldName,
   printLogMessage,
   isRelationField,
-  isBlockName,
+  isDatamodelBlockName,
 } from './code-actions/rename'
 import { validateExperimentalFeatures, validateIgnoredBlocks } from './validations'
 import {
@@ -221,29 +221,25 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
   const lines: string[] = convertDocumentTextToTrimmedLineArray(document)
   const position = params.position
   const currentLine: string = lines[position.line]
-  const currentBlock = getBlockAtPosition(position.line, lines)
-  if (!currentBlock) {
+  const block = getBlockAtPosition(position.line, lines)
+  if (!block) {
     return
   }
 
-  const isBlockRename =
-    isBlockName(position, currentBlock, lines, document, 'model') ||
-    isBlockName(position, currentBlock, lines, document, 'enum') ||
-    isBlockName(position, currentBlock, lines, document, 'view') ||
-    isBlockName(position, currentBlock, lines, document, 'type')
+  const isDatamodelBlockRename = isDatamodelBlockName(position, block, lines, document)
 
-  const isMappable = currentBlock.type === 'model' || currentBlock.type === 'enum' || currentBlock.type === 'view'
-  const needsMap = !isBlockRename ? true : isMappable
+  const isMappable = ['model', 'enum', 'view'].includes(block.type)
+  const needsMap = !isDatamodelBlockRename ? true : isMappable
 
-  const isEnumValueRename: boolean = isEnumValue(currentLine, params.position, currentBlock, document)
-  const isValidFieldRename: boolean = isValidFieldName(currentLine, params.position, currentBlock, document)
+  const isEnumValueRename: boolean = isEnumValue(currentLine, params.position, block, document)
+  const isValidFieldRename: boolean = isValidFieldName(currentLine, params.position, block, document)
   const isRelationFieldRename: boolean = isValidFieldRename && isRelationField(currentLine, lines)
 
-  if (isBlockRename || isEnumValueRename || isValidFieldRename) {
+  if (isDatamodelBlockRename || isEnumValueRename || isValidFieldRename) {
     const edits: TextEdit[] = []
     const currentName = extractCurrentName(
       currentLine,
-      isBlockRename,
+      isDatamodelBlockRename,
       isEnumValueRename,
       isValidFieldRename,
       document,
@@ -251,11 +247,11 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
     )
 
     let lineNumberOfDefinition = position.line
-    let blockOfDefinition = currentBlock
+    let blockOfDefinition = block
     let lineOfDefinition = currentLine
-    if (isBlockRename) {
+    if (isDatamodelBlockRename) {
       // get definition of model or enum
-      const matchBlockBeginning = new RegExp(`\\s*(${currentBlock.type})\\s+(${currentName})\\s*({)`, 'g')
+      const matchBlockBeginning = new RegExp(`\\s*(${block.type})\\s+(${currentName})\\s*({)`, 'g')
       lineNumberOfDefinition = lines.findIndex((l) => matchBlockBeginning.test(l))
       if (lineNumberOfDefinition === -1) {
         return
@@ -274,21 +270,21 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
     // check if map exists already
     if (
       !isRelationFieldRename &&
-      !mapExistsAlready(lineOfDefinition, lines, blockOfDefinition, isBlockRename) &&
+      !mapExistsAlready(lineOfDefinition, lines, blockOfDefinition, isDatamodelBlockRename) &&
       needsMap
     ) {
       // add map attribute
-      edits.push(insertMapAttribute(currentName, position, blockOfDefinition, isBlockRename))
+      edits.push(insertMapAttribute(currentName, position, blockOfDefinition, isDatamodelBlockRename))
     }
 
     // rename references
-    if (isBlockRename) {
+    if (isDatamodelBlockRename) {
       edits.push(...renameReferencesForModelName(currentName, params.newName, document, lines))
     } else if (isEnumValueRename) {
       edits.push(...renameReferencesForEnumValue(currentName, params.newName, document, lines, blockOfDefinition.name))
     } else if (isValidFieldRename) {
       edits.push(
-        ...renameReferencesForFieldValue(
+        ...renameReferencesForFieldName(
           currentName,
           params.newName,
           document,
@@ -302,10 +298,10 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
     printLogMessage(
       currentName,
       params.newName,
-      isBlockRename,
+      isDatamodelBlockRename,
       isValidFieldRename,
       isEnumValueRename,
-      currentBlock.type,
+      block.type,
     )
     return {
       changes: {
