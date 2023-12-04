@@ -1,7 +1,7 @@
 {
   "name": "language-tools",
   "private": true,
-  "version": "31.0.3084",
+  "version": "31.0.3086",
   "author": "Prisma",
   "license": "Apache-2.0",
   "engines": {
