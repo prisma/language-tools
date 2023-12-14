@@ -59,7 +59,7 @@ jobs:
 
       # Upload to the current job run
       # This is very limited: Only 90 days rentention and cannot get a link easily
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: pr-artifact
           path: ./packages/vscode/*.vsix
