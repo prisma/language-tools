@@ -101,8 +101,8 @@ suite('Linting', () => {
           message:
             'The preview feature "huh" is not known. Expected one of: deno, driverAdapters, fullTextIndex, fullTextSearch, metrics, multiSchema, nativeDistinct, postgresqlExtensions, tracing, views, relationJoins.\nIf this is unexpected, it might be due to your Prisma VSCode Extension being out of date.',
           range: {
-            start: { line: 2, character: 20 },
-            end: { line: 2, character: 27 },
+            start: { line: 2, character: 22 },
+            end: { line: 2, character: 29 },
           },
           severity: DiagnosticSeverity.Error,
         },
