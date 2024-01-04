@@ -24,6 +24,7 @@ suite('Linting', () => {
   const fixturePathWrongType = './linting/wrongType.prisma'
   const fixturePathFieldIgnore = './linting/@ignore.prisma'
   const fixturePathModelIgnore = './linting/@@ignore.prisma'
+  const fixturePathUnknownPreview = './linting/unknownPreview.prisma'
 
   test('Missing argument', () => {
     assertLinting(
@@ -90,6 +91,23 @@ suite('Linting', () => {
         },
       ],
       fixturePathModelIgnore,
+    )
+  })
+
+  test('Unknown previewFeature', () => {
+    assertLinting(
+      [
+        {
+          message:
+            'The preview feature "huh" is not known. Expected one of: deno, driverAdapters, fullTextIndex, fullTextSearch, metrics, multiSchema, nativeDistinct, postgresqlExtensions, tracing, views, relationJoins.\nIf this is unexpected, it might be due to your Prisma VSCode Extension being out of date.',
+          range: {
+            start: { line: 2, character: 20 },
+            end: { line: 2, character: 27 },
+          },
+          severity: DiagnosticSeverity.Error,
+        },
+      ],
+      fixturePathUnknownPreview,
     )
   })
 })
