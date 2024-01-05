@@ -86,7 +86,7 @@ export function handleDiagnosticsRequest(
         end: document.positionAt(diag.end),
       },
       message: previewNotKnownRegex.test(diag.text)
-        ? `${diag.text}\nIf this is unexpected, it might be due to your Prisma VSCode Extension being out of date.`
+        ? `${diag.text}.\nIf this is unexpected, it might be due to your Prisma VSCode Extension being out of date.`
         : diag.text,
       source: 'Prisma',
     }
