@@ -3,6 +3,7 @@ import { Diagnostic, DiagnosticSeverity, DiagnosticTag } from 'vscode-languagese
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
 import { MAX_SAFE_VALUE_i32 } from '../lib/constants'
+import listAllAvailablePreviewFeatures from '../lib/prisma-schema-wasm/listAllAvailablePreviewFeatures'
 
 function assertLinting(expected: Diagnostic[], fixturePath: string): void {
   const document = getTextDocument(fixturePath)
@@ -24,6 +25,7 @@ suite('Linting', () => {
   const fixturePathWrongType = './linting/wrongType.prisma'
   const fixturePathFieldIgnore = './linting/@ignore.prisma'
   const fixturePathModelIgnore = './linting/@@ignore.prisma'
+  const fixturePathUnknownPreview = './linting/unknownPreview.prisma'
 
   test('Missing argument', () => {
     assertLinting(
@@ -90,6 +92,26 @@ suite('Linting', () => {
         },
       ],
       fixturePathModelIgnore,
+    )
+  })
+
+  test('Unknown previewFeature', () => {
+    const previewFeatures = listAllAvailablePreviewFeatures()
+
+    assertLinting(
+      [
+        {
+          message: `The preview feature "huh" is not known. Expected one of: ${previewFeatures.join(
+            ', ',
+          )}.\nIf this is unexpected, it might be due to your Prisma VS Code Extension being out of date.`,
+          range: {
+            start: { line: 2, character: 22 },
+            end: { line: 2, character: 29 },
+          },
+          severity: DiagnosticSeverity.Error,
+        },
+      ],
+      fixturePathUnknownPreview,
     )
   })
 })

@@ -79,14 +79,18 @@ export function handleDiagnosticsRequest(
   }
 
   for (const diag of res) {
+    const previewNotKnownRegex = /The preview feature \"[a-zA-Z]+\" is not known/
     const diagnostic: Diagnostic = {
       range: {
         start: document.positionAt(diag.start),
         end: document.positionAt(diag.end),
       },
-      message: diag.text,
-      source: '',
+      message: previewNotKnownRegex.test(diag.text)
+        ? `${diag.text}.\nIf this is unexpected, it might be due to your Prisma VS Code Extension being out of date.`
+        : diag.text,
+      source: 'Prisma',
     }
+
     if (diag.is_warning) {
       diagnostic.severity = DiagnosticSeverity.Warning
     } else {
