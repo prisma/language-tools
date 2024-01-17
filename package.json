@@ -29,7 +29,7 @@
     "lerna": "6.6.2",
     "lint-staged": "15.2.0",
     "p-retry": "4.6.2",
-    "prettier": "3.2.3",
+    "prettier": "3.2.4",
     "semver": "7.5.4",
     "typescript": "5.3.3"
   },
