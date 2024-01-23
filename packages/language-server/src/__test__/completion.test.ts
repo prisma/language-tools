@@ -1889,8 +1889,47 @@ suite('Completions', function () {
         },
       })
     })
-    test('Diagnoses type suggestions in model - SQLite, PostgreSQL, MySQL, SQL Server, CockroachDB', () => {
-      for (const provider of ['sqlite', 'postgresql', 'mysql', 'sqlserver', 'cockroachdb']) {
+
+    test('Diagnoses type suggestions in model - Sqlite', () => {
+      assertCompletion({
+        provider: 'sqlite',
+        schema: /* Prisma */ `
+            model Post {
+              something |
+            }
+            enum PostType {
+              ADMIN
+              NORMAL
+            }
+            model Something {
+              id Int @id
+            }
+          `,
+        expected: {
+          isIncomplete: true,
+          items: [
+            { label: 'String', kind: CompletionItemKind.TypeParameter },
+            { label: 'Boolean', kind: CompletionItemKind.TypeParameter },
+            { label: 'Int', kind: CompletionItemKind.TypeParameter },
+            { label: 'Float', kind: CompletionItemKind.TypeParameter },
+            { label: 'DateTime', kind: CompletionItemKind.TypeParameter },
+            { label: 'Bytes', kind: CompletionItemKind.TypeParameter },
+            { label: 'Decimal', kind: CompletionItemKind.TypeParameter },
+            { label: 'BigInt', kind: CompletionItemKind.TypeParameter },
+            {
+              label: 'Unsupported',
+              kind: CompletionItemKind.TypeParameter,
+            },
+            { label: 'Post', kind: CompletionItemKind.Reference },
+            { label: 'PostType', kind: CompletionItemKind.Reference },
+            { label: 'Something', kind: CompletionItemKind.Reference },
+          ],
+        },
+      })
+    })
+
+    test('Diagnoses type suggestions in model - PostgreSQL, MySQL, SQL Server, CockroachDB', () => {
+      for (const provider of ['postgresql', 'mysql', 'sqlserver', 'cockroachdb']) {
         console.info(`provider = ${provider}`)
         assertCompletion({
           provider: provider as DatasourceProvider,

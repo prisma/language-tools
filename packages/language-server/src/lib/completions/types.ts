@@ -122,6 +122,9 @@ export function getSuggestionsForFieldTypes(
   // MongoDB doesn't support Decimal
   if (datasourceProvider === 'mongodb') {
     suggestions.push(...corePrimitiveTypes.filter((s) => s.label !== 'Decimal'))
+  } else if (datasourceProvider === 'sqlite') {
+    // TODO(@druue) remove once resolved: https://github.com/prisma/prisma/issues/3786
+    suggestions.push(...corePrimitiveTypes.filter((s) => s.label !== 'Json'))
   } else {
     suggestions.push(...corePrimitiveTypes)
   }
