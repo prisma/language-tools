@@ -45,7 +45,7 @@
     "test:e2e": "sh scripts/e2eTestsOnVsix/test.sh",
     "testScripts": "jest __tests__",
     "test:bump": "sh scripts/e2eTestsOnVsix/bump_version.sh",
-    "prepare": "is-ci || husky install"
+    "prepare": "is-ci || husky"
   },
   "publishConfig": {
     "access": "public"
