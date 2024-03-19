@@ -115,7 +115,7 @@ jobs:
 
       - name: Slack Notification on Failure
         if: ${{ failure() || needs.build.result == 'failure' }}
-        uses: rtCamp/action-slack-notify@v2.2.1
+        uses: rtCamp/action-slack-notify@v2.3.0
         env:
           SLACK_TITLE: '6. Release failed :x:'
           SLACK_COLOR: '#FF0000'
@@ -124,7 +124,7 @@ jobs:
 
       - name: Slack Notification on Success
         if: ${{ success() && needs.build.result == 'success' }}
-        uses: rtCamp/action-slack-notify@v2.2.1
+        uses: rtCamp/action-slack-notify@v2.3.0
         env:
           SLACK_TITLE: '6. Release was successful :white_check_mark:'
           SLACK_COLOR: '#008000'
