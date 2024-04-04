@@ -31,7 +31,7 @@
     "p-retry": "4.6.2",
     "prettier": "3.2.5",
     "semver": "7.6.0",
-    "typescript": "5.4.3"
+    "typescript": "5.4.4"
   },
   "scripts": {
     "bootstrap": "lerna exec -- npm install",
