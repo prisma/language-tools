@@ -154,7 +154,7 @@
     "is-ci": "3.0.1",
     "mocha": "10.4.0",
     "ovsx": "0.9.0",
-    "typescript": "5.4.3",
+    "typescript": "5.4.4",
     "@vscode/vsce": "2.24.0"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
