@@ -40,7 +40,7 @@ async function installExtension({ extensionType, extensionVersion }) {
 
 function spawnVscode(cmd, args) {
   if (process.platform === 'win32' && cmd.endsWith('.cmd')) {
-    args = [cmd, ...args]
+    args = ['/k', cmd, ...args]
     cmd = 'cmd.exe'
   }
 
