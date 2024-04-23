@@ -2,7 +2,6 @@
 
 set -eu
 
-DIR=$(dirname $0)
 EXTENSION_TYPE=$1
 echo "EXTENSION_TYPE: $EXTENSION_TYPE"
 
@@ -20,7 +19,7 @@ fi
 
 echo "EXTENSION_FOLDER_NAME: $EXTENSION_FOLDER_NAME"
 
-EXTENSION_INSTALL_PATH=$(cd $DIR/../../.vscode-test/extensions/$EXTENSION_FOLDER_NAME; pwd)
+EXTENSION_INSTALL_PATH="$HOME/.vscode/extensions/$EXTENSION_FOLDER_NAME"
 
 echo "Path to installed extension $EXTENSION_INSTALL_PATH"
 
