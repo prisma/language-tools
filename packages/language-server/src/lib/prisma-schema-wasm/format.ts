@@ -17,7 +17,7 @@ export default function format(
       })
     }
 
-    return prismaSchemaWasm.format(schema, JSON.stringify(options))
+    return prismaSchemaWasm.format(JSON.stringify(schema), JSON.stringify(options))
   } catch (e) {
     const err = e as Error
 
