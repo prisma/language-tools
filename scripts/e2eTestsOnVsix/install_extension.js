@@ -24,6 +24,7 @@ async function installExtension({ extensionType, extensionVersion }) {
     const result = childProcess.spawnSync(cli, ['--install-extension', `${extensionName}@${extensionVersion}`], {
       encoding: 'utf-8',
       stdio: 'pipe',
+      shell: true,
     })
     console.log(result)
     if (result.stderr.includes('Failed')) {
