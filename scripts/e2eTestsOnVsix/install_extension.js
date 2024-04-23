@@ -22,7 +22,7 @@ async function installExtension({ extensionType, extensionVersion }) {
     console.debug({ cli })
     console.debug({ args })
 
-    const result = spawnVscode(cli, ['--install-extension', `${extensionName}@${extensionVersion}`])
+    const result = spawnVscode(cli, [...args, '--install-extension', `${extensionName}@${extensionVersion}`])
     console.log(result)
     if (result.stderr.includes('Failed')) {
       console.log("It's not ready to be installed yet.")
