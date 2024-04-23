@@ -18,7 +18,7 @@ export default function lint(text: string, onError?: (errorMessage: string) => v
       })
     }
 
-    const result = prismaSchemaWasm.lint(text)
+    const result = prismaSchemaWasm.lint(JSON.stringify(text))
 
     return JSON.parse(result) as LinterError[]
   } catch (e) {
