@@ -101,7 +101,8 @@ suite('Linting', () => {
     assertLinting(
       [
         {
-          message: `Error validating: This line is invalid. It does not start with any known Prisma schema keyword.`,
+          message: `The preview feature "huh" is not known. Expected one of: ${previewFeatures.join(', ')}.
+If this is unexpected, it might be due to your Prisma VS Code Extension being out of date.`,
           range: {
             start: { line: 2, character: 22 },
             end: { line: 2, character: 29 },
