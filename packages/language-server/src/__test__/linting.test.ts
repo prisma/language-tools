@@ -47,7 +47,7 @@ suite('Linting', () => {
     assertLinting(
       [
         {
-          message: 'Type "Use" is neither a built-in type, nor refers to another model, custom type, or enum.',
+          message: 'Type "Use" is neither a built-in type, nor refers to another model, composite type, or enum.',
           range: {
             start: { line: 14, character: 12 },
             end: { line: 14, character: 15 },
@@ -101,9 +101,8 @@ suite('Linting', () => {
     assertLinting(
       [
         {
-          message: `The preview feature "huh" is not known. Expected one of: ${previewFeatures.join(
-            ', ',
-          )}.\nIf this is unexpected, it might be due to your Prisma VS Code Extension being out of date.`,
+          message: `The preview feature "huh" is not known. Expected one of: ${previewFeatures.join(', ')}.
+If this is unexpected, it might be due to your Prisma VS Code Extension being out of date.`,
           range: {
             start: { line: 2, character: 22 },
             end: { line: 2, character: 29 },
