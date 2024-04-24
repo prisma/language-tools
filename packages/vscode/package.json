@@ -125,6 +125,19 @@
           ],
           "default": "off",
           "description": "Setting for logging between the VS Code extension and the language server."
+        },
+        "prisma.enableCodeLens": {
+          "type": "boolean",
+          "default": true
+        },
+        "prisma.scriptRunner": {
+          "type": "string",
+          "enum": [
+            "npx",
+            "pnpm",
+            "yarn"
+          ],
+          "default": "npx"
         }
       }
     },
@@ -142,6 +155,16 @@
       {
         "command": "prisma.filewatcherDisable",
         "title": "Disable the File Watcher functionality for Prisma Client.",
+        "category": "Prisma"
+      },
+      {
+        "command": "prisma.enableCodeLens",
+        "title": "Enable CodeLens",
+        "category": "Prisma"
+      },
+      {
+        "command": "prisma.disableCodeLens",
+        "title": "Disable Codelens",
         "category": "Prisma"
       }
     ]
