@@ -105,7 +105,10 @@ export function quickFix(
     if (
       diag.severity === DiagnosticSeverity.Error &&
       diag.message.startsWith('Type') &&
-      diag.message.includes('is neither a built-in type, nor refers to another model, custom type, or enum.')
+      // In 5.13.0 and earlier we used "custom type" instead of "composite type"
+      // So we only check the beginning of the message for simplicity
+      // See https://github.com/prisma/prisma-engines/pull/4813
+      diag.message.includes('is neither a built-in type, nor refers to another model,')
     ) {
       let diagText = textDocument.getText(diag.range)
       const hasTypeModifierArray: boolean = diagText.endsWith('[]')
