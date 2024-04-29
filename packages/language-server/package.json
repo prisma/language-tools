@@ -2,7 +2,7 @@
   "name": "@prisma/language-server",
   "description": "Prisma Language Server",
   "displayName": "Prisma Language Server",
-  "version": "31.0.3572",
+  "version": "31.0.3573",
   "author": "Prisma",
   "license": "Apache-2.0",
   "publisher": "Prisma",
@@ -10,8 +10,8 @@
     "node": ">=14"
   },
   "prisma": {
-    "enginesVersion": "031bd6305f3237380dd6237ce8572cf5a6d4256a",
-    "cliVersion": "5.14.0-dev.22"
+    "enginesVersion": "264f24ce0b2f544ff968ff76bfaa999de1161361",
+    "cliVersion": "5.14.0-dev.23"
   },
   "bin": {
     "prisma-language-server": "dist/src/bin.js"
@@ -30,7 +30,7 @@
   "main": "./dist/index.js",
   "typings": "dist/src/index",
   "dependencies": {
-    "@prisma/prisma-schema-wasm": "5.14.0-5.031bd6305f3237380dd6237ce8572cf5a6d4256a",
+    "@prisma/prisma-schema-wasm": "5.14.0-6.264f24ce0b2f544ff968ff76bfaa999de1161361",
     "@types/js-levenshtein": "1.1.3",
     "js-levenshtein": "1.1.6",
     "klona": "2.0.6",
