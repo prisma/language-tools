@@ -216,13 +216,9 @@ const plugin: PrismaVSCodePlugin = {
         if (event.affectsConfiguration('prisma.fileWatcher')) {
           setGenerateWatcher(!!workspace.getConfiguration('prisma').get('fileWatcher'))
         }
-
-        if (event.affectsConfiguration('prisma.scriptRunner')) {
-          codelensProvider.updateScriptRunner(workspace.getConfiguration('prisma').get('scriptRunner')!)
-        }
       }),
 
-      commands.registerCommand('prisma.generateClient', (args) => generateClient(args)),
+      commands.registerCommand('prisma.generate', (args: string) => generateClient(args)),
 
       commands.registerCommand('prisma.restartLanguageServer', async () => {
         client = await restartClient(context, client, serverOptions, clientOptions)

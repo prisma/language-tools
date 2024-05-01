@@ -6,7 +6,7 @@ import * as cp from 'child_process'
  */
 export class CodelensProvider implements vscode.CodeLensProvider {
   private enabled: boolean
-  private scriptRunner: string
+
   private generatorRegex: RegExp
   private _onDidChangeCodeLenses: vscode.EventEmitter<void> = new vscode.EventEmitter<void>()
   public readonly onDidChangeCodeLenses: vscode.Event<void> = this._onDidChangeCodeLenses.event
@@ -14,15 +14,10 @@ export class CodelensProvider implements vscode.CodeLensProvider {
   constructor() {
     this.generatorRegex = /(generator [a-zA-Z]+ {)/g
     this.enabled = vscode.workspace.getConfiguration('prisma').get('enableCodeLens', true)
-    this.scriptRunner = vscode.workspace.getConfiguration('prisma').get('scriptRunner')!
 
     vscode.workspace.onDidChangeConfiguration((_) => {
       this._onDidChangeCodeLenses.fire()
     })
-  }
-
-  public updateScriptRunner(scriptRunner: string) {
-    this.scriptRunner = scriptRunner
   }
 
   public provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.CodeLens[] {
@@ -30,30 +25,41 @@ export class CodelensProvider implements vscode.CodeLensProvider {
       return []
     }
 
-    const codelenses = [this.getCodeLensGenerateSchema(document, token)]
+    const codelenses = this.getCodeLensGenerateSchema(document, token)
     return ([] as vscode.CodeLens[]).concat(...codelenses)
   }
 
   private getCodeLensGenerateSchema(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.CodeLens[] {
-    const generatorRange = this.getGeneratorRange(document, token)
+    const generatorRanges = this.getGeneratorRange(document, token)
 
-    return generatorRange
-      ? [
-          new vscode.CodeLens(generatorRange, {
-            title: 'Generate Prisma Client',
-            command: 'prisma.generateClient',
-            tooltip: 'Codelens to generate your Prisma client',
-            arguments: [this.scriptRunner],
-          }),
-        ]
-      : []
+    const lenses = generatorRanges.map(
+      (range) =>
+        new vscode.CodeLens(range, {
+          title: 'Generate',
+          command: 'prisma.generate',
+          tooltip: `Codelens to run Prisma generate`,
+          // ? (@druue) The arguments property does not seem to actually
+          // ? return an array of arguments. It would consistently
+          // ? return one singular string element, even when defined as:
+          // ? [this.scriptRunner, this.schemaPath]
+          // ?
+          // ? I've tried to understand why as there are usages in other
+          // ? codebases that do pass in multiple args so I have to imagine
+          // ? that it can work, but unsure.
+          // ? Reference: https://github.com/microsoft/vscode-extension-samples/blob/main/codelens-sample/
+          // ? arguments: [this.scriptRunner]
+        }),
+    )
+
+    return lenses
   }
 
   // ? (@druue) I really don't like finding it like this :|
-  private getGeneratorRange(document: vscode.TextDocument, _token: vscode.CancellationToken): vscode.Range | undefined {
+  private getGeneratorRange(document: vscode.TextDocument, _token: vscode.CancellationToken): vscode.Range[] {
     const regex = new RegExp(this.generatorRegex)
     const text = document.getText()
 
+    const ranges = []
     let matches
     while ((matches = regex.exec(text)) !== null) {
       const line = document.lineAt(document.positionAt(matches.index).line)
@@ -61,17 +67,23 @@ export class CodelensProvider implements vscode.CodeLensProvider {
       const position = new vscode.Position(line.lineNumber, indexOf)
       const range = document.getWordRangeAtPosition(position, new RegExp(this.generatorRegex))
       if (range) {
-        return range
+        ranges.push(range)
       }
     }
+
+    return ranges
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function generateClient(args: any) {
+export function generateClient(_args: string) {
   const prismaGenerateOutputChannel = vscode.window.createOutputChannel('Prisma Generate')
   const rootPath = vscode.workspace.workspaceFolders?.[0].uri.path
-  const cmd = `(cd ${rootPath} && ${args} prisma generate)`
+
+  const scriptRunner = vscode.workspace.getConfiguration('prisma').get('scriptRunner', 'npx')
+  const schemaPath: string | undefined = vscode.workspace.getConfiguration('prisma').get('schemaPath')
+
+  const pathArgFlag = ` --schema=${schemaPath}`
+  const cmd = `(cd ${rootPath} && ${scriptRunner} prisma generate${schemaPath ? pathArgFlag : ''})`
 
   prismaGenerateOutputChannel.clear()
   prismaGenerateOutputChannel.show(true)

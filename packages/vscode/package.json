@@ -138,6 +138,13 @@
             "yarn"
           ],
           "default": "npx"
+        },
+        "prisma.schemaPath": {
+          "type": "string",
+          "examples": [
+            "/path/to/your/schema.prisma"
+          ],
+          "description": "If you have a Prisma schema file in a custom path, you will need to provide said path `/path/to/your/schema.prisma` to run generate"
         }
       }
     },
@@ -165,6 +172,11 @@
       {
         "command": "prisma.disableCodeLens",
         "title": "Disable Codelens",
+        "category": "Prisma"
+      },
+      {
+        "command": "prisma.generate",
+        "title": "Generate",
         "category": "Prisma"
       }
     ]
