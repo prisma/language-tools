@@ -6,6 +6,7 @@ import { convertToCompletionItems } from './internals'
 import { klona } from 'klona'
 
 import listAllAvailablePreviewFeatures from '../prisma-schema-wasm/listAllAvailablePreviewFeatures'
+import { PrismaSchema } from '../Schema'
 
 /**
  * ```prisma
@@ -102,11 +103,11 @@ function handlePreviewFeatures(
 function removeInvalidFieldSuggestions(
   supportedFields: string[],
   block: Block,
-  lines: string[],
+  schema: PrismaSchema,
   position: Position,
 ): string[] {
   let reachedStartLine = false
-  for (const [key, item] of lines.entries()) {
+  for (const [, key, item] of schema.iterLines()) {
     if (key === block.range.start.line + 1) {
       reachedStartLine = true
     }
@@ -123,14 +124,18 @@ function removeInvalidFieldSuggestions(
   }
   return supportedFields
 }
-export function getSuggestionForGeneratorField(block: Block, lines: string[], position: Position): CompletionItem[] {
+export function getSuggestionForGeneratorField(
+  block: Block,
+  schema: PrismaSchema,
+  position: Position,
+): CompletionItem[] {
   // create deep copy
   const suggestions: CompletionItem[] = klona(supportedGeneratorFields)
 
   const labels = removeInvalidFieldSuggestions(
     suggestions.map((item) => item.label),
     block,
-    lines,
+    schema,
     position,
   )
 

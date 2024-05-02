@@ -1,6 +1,8 @@
-export function getAllRelationNames(lines: string[], regexFilter: RegExp): string[] {
+import { PrismaSchema } from '../Schema'
+
+export function getAllRelationNames(schema: PrismaSchema, regexFilter: RegExp): string[] {
   const modelNames: string[] = []
-  for (const line of lines) {
+  for (const [, , line] of schema.iterLines()) {
     const result = regexFilter.exec(line)
     if (result && result[2]) {
       modelNames.push(result[2])

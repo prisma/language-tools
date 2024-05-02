@@ -11,7 +11,8 @@ import levenshtein from 'js-levenshtein'
 
 import codeActions from '../prisma-schema-wasm/codeActions'
 import { relationNamesRegexFilter } from '../constants'
-import { convertDocumentTextToTrimmedLineArray, getAllRelationNames } from '../ast'
+import { getAllRelationNames } from '../ast'
+import { PrismaSchema } from '../Schema'
 
 function getInsertRange(document: TextDocument): Range {
   // to insert text into a document create a range where start === end.
@@ -88,6 +89,7 @@ export function quickFix(
   params: CodeActionParams,
   onError?: (errorMessage: string) => void,
 ): CodeAction[] {
+  const schema = PrismaSchema.singleFile(textDocument)
   const diagnostics: Diagnostic[] = params.context.diagnostics
 
   if (!diagnostics || diagnostics.length === 0) {
@@ -114,8 +116,7 @@ export function quickFix(
       const hasTypeModifierArray: boolean = diagText.endsWith('[]')
       const hasTypeModifierOptional: boolean = diagText.endsWith('?')
       diagText = removeTypeModifiers(hasTypeModifierArray, hasTypeModifierOptional, diagText)
-      const lines: string[] = convertDocumentTextToTrimmedLineArray(textDocument)
-      const spellingSuggestion = getSpellingSuggestions(diagText, getAllRelationNames(lines, relationNamesRegexFilter))
+      const spellingSuggestion = getSpellingSuggestions(diagText, getAllRelationNames(schema, relationNamesRegexFilter))
       if (spellingSuggestion) {
         codeActionList.push({
           title: `Change spelling to '${spellingSuggestion}'`,

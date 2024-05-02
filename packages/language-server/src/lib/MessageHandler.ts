@@ -23,7 +23,7 @@ import type { TextDocument } from 'vscode-languageserver-textdocument'
 import format from './prisma-schema-wasm/format'
 import lint from './prisma-schema-wasm/lint'
 
-import { convertDocumentTextToTrimmedLineArray } from './ast'
+import { getCurrentLine } from './ast'
 
 import { quickFix } from './code-actions'
 import {
@@ -39,6 +39,8 @@ import {
   printLogMessage,
   isRelationField,
   isDatamodelBlockName,
+  EditsMap,
+  mergeEditMaps,
 } from './code-actions/rename'
 import { validateExperimentalFeatures, validateIgnoredBlocks } from './validations'
 import {
@@ -51,6 +53,7 @@ import {
   getDatamodelBlock,
 } from './ast'
 import { prismaSchemaWasmCompletions, localCompletions } from './completions'
+import { PrismaSchema } from './Schema'
 
 export function handleDiagnosticsRequest(
   document: TextDocument,
@@ -101,8 +104,8 @@ export function handleDiagnosticsRequest(
 
   validateExperimentalFeatures(document, diagnostics)
 
-  const lines = convertDocumentTextToTrimmedLineArray(document)
-  validateIgnoredBlocks(lines, diagnostics)
+  const schema = PrismaSchema.singleFile(document)
+  validateIgnoredBlocks(schema, diagnostics)
 
   return diagnostics
 }
@@ -111,10 +114,9 @@ export function handleDiagnosticsRequest(
  * @todo Use official schema.prisma parser. This is a workaround!
  */
 export function handleDefinitionRequest(document: TextDocument, params: DeclarationParams): LocationLink[] | undefined {
-  const textDocument = params.textDocument
   const position = params.position
 
-  const lines = convertDocumentTextToTrimmedLineArray(document)
+  const schema = PrismaSchema.singleFile(document)
   const word = getWordAtPosition(document, position)
 
   if (word === '') {
@@ -122,26 +124,27 @@ export function handleDefinitionRequest(document: TextDocument, params: Declarat
   }
 
   // get start position of block
-  const results: number[] = lines
-    .map((line, index) => {
+  const results = schema
+    .linesAsArray()
+    .map(([fileUri, lineNo, line]) => {
       if (
         (line.includes('model') && line.includes(word)) ||
         (line.includes('type') && line.includes(word)) ||
         (line.includes('enum') && line.includes(word))
       ) {
-        return index
+        return [fileUri, lineNo]
       }
     })
-    .filter((index) => index !== undefined) as number[]
+    .filter((result) => result !== undefined) as [string, number][]
 
   if (results.length === 0) {
     return
   }
 
   const foundBlocks: Block[] = results
-    .map((result) => {
-      const block = getBlockAtPosition(result, lines)
-      if (block && block.name === word && block.range.start.line === result) {
+    .map(([fileUri, lineNo]) => {
+      const block = getBlockAtPosition(fileUri, lineNo, schema)
+      if (block && block.name === word && block.range.start.line === lineNo) {
         return block
       }
     })
@@ -157,7 +160,7 @@ export function handleDefinitionRequest(document: TextDocument, params: Declarat
 
   return [
     {
-      targetUri: textDocument.uri,
+      targetUri: foundBlocks[0].definingDocument.fileUri,
       targetRange: foundBlocks[0].range,
       targetSelectionRange: foundBlocks[0].nameRange,
     },
@@ -179,14 +182,14 @@ export function handleDocumentFormatting(
 export function handleHoverRequest(document: TextDocument, params: HoverParams): Hover | undefined {
   const position = params.position
 
-  const lines = convertDocumentTextToTrimmedLineArray(document)
+  const schema = PrismaSchema.singleFile(document)
   const word = getWordAtPosition(document, position)
 
   if (word === '') {
     return
   }
 
-  const block = getDatamodelBlock(word, lines)
+  const block = getDatamodelBlock(word, schema)
   if (!block) {
     return
   }
@@ -222,25 +225,26 @@ export function handleCompletionRequest(
 }
 
 export function handleRenameRequest(params: RenameParams, document: TextDocument): WorkspaceEdit | undefined {
-  const lines: string[] = convertDocumentTextToTrimmedLineArray(document)
+  const schema = PrismaSchema.singleFile(document)
+  const schemaLines = schema.linesAsArray()
   const position = params.position
-  const currentLine: string = lines[position.line]
-  const block = getBlockAtPosition(position.line, lines)
+  const currentLine: string = getCurrentLine(document, position.line)
+  const block = getBlockAtPosition(document.uri, position.line, schema)
   if (!block) {
     return
   }
 
-  const isDatamodelBlockRename = isDatamodelBlockName(position, block, lines, document)
+  const isDatamodelBlockRename = isDatamodelBlockName(position, block, schema, document)
 
   const isMappable = ['model', 'enum', 'view'].includes(block.type)
   const needsMap = !isDatamodelBlockRename ? true : isMappable
 
   const isEnumValueRename: boolean = isEnumValue(currentLine, params.position, block, document)
   const isValidFieldRename: boolean = isValidFieldName(currentLine, params.position, block, document)
-  const isRelationFieldRename: boolean = isValidFieldRename && isRelationField(currentLine, lines)
+  const isRelationFieldRename: boolean = isValidFieldRename && isRelationField(currentLine, schema)
 
   if (isDatamodelBlockRename || isEnumValueRename || isValidFieldRename) {
-    const edits: TextEdit[] = []
+    const edits: EditsMap[] = []
     const currentName = extractCurrentName(
       currentLine,
       isDatamodelBlockRename,
@@ -252,16 +256,18 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
 
     let lineNumberOfDefinition = position.line
     let blockOfDefinition = block
-    let lineOfDefinition = currentLine
+    let lineOfDefinitionContent = currentLine
     if (isDatamodelBlockRename) {
       // get definition of model or enum
       const matchBlockBeginning = new RegExp(`\\s*(${block.type})\\s+(${currentName})\\s*({)`, 'g')
-      lineNumberOfDefinition = lines.findIndex((l) => matchBlockBeginning.test(l))
-      if (lineNumberOfDefinition === -1) {
+      const lineOfDefinition = schemaLines.find(([, , l]) => matchBlockBeginning.test(l))
+      if (!lineOfDefinition) {
         return
       }
-      lineOfDefinition = lines[lineNumberOfDefinition]
-      const definitionBlockAtPosition = getBlockAtPosition(lineNumberOfDefinition, lines)
+      const [definitionDoc, lineNo, content] = lineOfDefinition
+      lineNumberOfDefinition = lineNo
+      lineOfDefinitionContent = content
+      const definitionBlockAtPosition = getBlockAtPosition(definitionDoc.fileUri, lineNumberOfDefinition, schema)
       if (!definitionBlockAtPosition) {
         return
       }
@@ -274,7 +280,7 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
     // check if map exists already
     if (
       !isRelationFieldRename &&
-      !mapExistsAlready(lineOfDefinition, lines, blockOfDefinition, isDatamodelBlockRename) &&
+      !mapExistsAlready(lineOfDefinitionContent, schema, blockOfDefinition, isDatamodelBlockRename) &&
       needsMap
     ) {
       // add map attribute
@@ -283,19 +289,12 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
 
     // rename references
     if (isDatamodelBlockRename) {
-      edits.push(...renameReferencesForModelName(currentName, params.newName, document, lines))
+      edits.push(renameReferencesForModelName(currentName, params.newName, schema))
     } else if (isEnumValueRename) {
-      edits.push(...renameReferencesForEnumValue(currentName, params.newName, document, lines, blockOfDefinition.name))
+      edits.push(renameReferencesForEnumValue(currentName, params.newName, schema, blockOfDefinition.name))
     } else if (isValidFieldRename) {
       edits.push(
-        ...renameReferencesForFieldName(
-          currentName,
-          params.newName,
-          document,
-          lines,
-          blockOfDefinition,
-          isRelationFieldRename,
-        ),
+        renameReferencesForFieldName(currentName, params.newName, schema, blockOfDefinition, isRelationFieldRename),
       )
     }
 
@@ -307,10 +306,9 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
       isEnumValueRename,
       block.type,
     )
+
     return {
-      changes: {
-        [document.uri]: edits,
-      },
+      changes: mergeEditMaps(edits),
     }
   }
 
@@ -338,8 +336,8 @@ export function handleCodeActions(
 }
 
 export function handleDocumentSymbol(params: DocumentSymbolParams, document: TextDocument): DocumentSymbol[] {
-  const lines: string[] = convertDocumentTextToTrimmedLineArray(document)
-  return Array.from(getBlocks(lines), (block) => ({
+  const schema = PrismaSchema.singleFile(document)
+  return Array.from(getBlocks(schema), (block) => ({
     kind: {
       model: SymbolKind.Class,
       enum: SymbolKind.Enum,

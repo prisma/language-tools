@@ -12,7 +12,6 @@ import textDocumentCompletion from '../prisma-schema-wasm/textDocumentCompletion
 
 import {
   fullDocumentRange,
-  convertDocumentTextToTrimmedLineArray,
   getCurrentLine,
   getSymbolBeforePosition,
   getBlockAtPosition,
@@ -64,18 +63,19 @@ import {
   cuidDefaultCompletion,
 } from './functions'
 import { BlockType } from '../types'
+import { PrismaSchema } from '../Schema'
 
 function getDefaultValues({
   currentLine,
-  lines,
+  schema,
   wordsBeforePosition,
 }: {
   currentLine: string
-  lines: string[]
+  schema: PrismaSchema
   wordsBeforePosition: string[]
 }): CompletionItem[] {
   const suggestions: CompletionItem[] = []
-  const datasourceProvider = getFirstDatasourceProvider(lines)
+  const datasourceProvider = getFirstDatasourceProvider(schema)
 
   // Completions for sequence(|)
   if (datasourceProvider === 'cockroachdb') {
@@ -155,10 +155,10 @@ function getDefaultValues({
     scalarListDefaultCompletion(suggestions)
   }
 
-  const dataBlock = getDatamodelBlock(fieldType, lines)
+  const dataBlock = getDatamodelBlock(fieldType, schema)
   if (dataBlock && dataBlock.type === 'enum') {
     // get fields from enum block for suggestions
-    const values: string[] = getFieldsFromCurrentBlock(lines, dataBlock)
+    const values: string[] = getFieldsFromCurrentBlock(schema, dataBlock)
     values.forEach((v) => suggestions.push({ label: v, kind: CompletionItemKind.Value }))
   }
 
@@ -169,14 +169,14 @@ function getSuggestionsForAttribute({
   attribute,
   wordsBeforePosition,
   untrimmedCurrentLine,
-  lines,
+  schema,
   block,
   position,
 }: {
   attribute?: '@relation'
   wordsBeforePosition: string[]
   untrimmedCurrentLine: string
-  lines: string[]
+  schema: PrismaSchema
   block: Block
   position: Position
 }): CompletionList | undefined {
@@ -187,9 +187,9 @@ function getSuggestionsForAttribute({
   let suggestions: CompletionItem[] = []
 
   // We can filter on the datasource
-  const datasourceProvider = getFirstDatasourceProvider(lines)
+  const datasourceProvider = getFirstDatasourceProvider(schema)
   // We can filter on the previewFeatures enabled
-  const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
+  const previewFeatures = getAllPreviewFeaturesFromGenerators(schema)
 
   if (attribute === '@relation') {
     if (datasourceProvider === 'mongodb') {
@@ -211,7 +211,7 @@ function getSuggestionsForAttribute({
     // TODO check fields with [] shortcut
     if (isInsideGivenProperty(untrimmedCurrentLine, wordsBeforePosition, 'fields', position)) {
       return {
-        items: toCompletionItems(getFieldsFromCurrentBlock(lines, block, position), CompletionItemKind.Field),
+        items: toCompletionItems(getFieldsFromCurrentBlock(schema, block, position), CompletionItemKind.Field),
         isIncomplete: false,
       }
     }
@@ -219,14 +219,14 @@ function getSuggestionsForAttribute({
     if (isInsideGivenProperty(untrimmedCurrentLine, wordsBeforePosition, 'references', position)) {
       // Get the name by potentially removing ? and [] from Foo? or Foo[]
       const referencedModelName = wordsBeforePosition[1].replace('?', '').replace('[]', '')
-      const referencedBlock = getDatamodelBlock(referencedModelName, lines)
+      const referencedBlock = getDatamodelBlock(referencedModelName, schema)
       // referenced model does not exist
       // TODO type?
       if (!referencedBlock || referencedBlock.type !== 'model') {
         return
       }
       return {
-        items: toCompletionItems(getFieldsFromCurrentBlock(lines, referencedBlock), CompletionItemKind.Field),
+        items: toCompletionItems(getFieldsFromCurrentBlock(schema, referencedBlock), CompletionItemKind.Field),
         isIncomplete: false,
       }
     }
@@ -324,16 +324,16 @@ function getSuggestionsForAttribute({
         }
 
         const currentCompositeAsArray = currentFieldName.split('.')
-        const fieldTypesFromCurrentBlock = getFieldTypesFromCurrentBlock(lines, block)
+        const fieldTypesFromCurrentBlock = getFieldTypesFromCurrentBlock(schema, block)
 
-        const fields = getCompositeTypeFieldsRecursively(lines, currentCompositeAsArray, fieldTypesFromCurrentBlock)
+        const fields = getCompositeTypeFieldsRecursively(schema, currentCompositeAsArray, fieldTypesFromCurrentBlock)
         return {
           items: toCompletionItems(fields, CompletionItemKind.Field),
           isIncomplete: false,
         }
       }
 
-      let fieldsFromCurrentBlock = getFieldsFromCurrentBlock(lines, block, position)
+      let fieldsFromCurrentBlock = getFieldsFromCurrentBlock(schema, block, position)
 
       if (fieldsFromLine.length > 0) {
         // If we are in a composite type, exit here, to not pollute results with first level fields
@@ -484,7 +484,7 @@ function getSuggestionsForAttribute({
 
 function getSuggestionsForInsideRoundBrackets(
   untrimmedCurrentLine: string,
-  lines: string[],
+  schema: PrismaSchema,
   position: Position,
   block: Block,
 ): CompletionList | undefined {
@@ -493,8 +493,8 @@ function getSuggestionsForInsideRoundBrackets(
   if (wordsBeforePosition.some((a) => a.includes('@default'))) {
     return {
       items: getDefaultValues({
-        currentLine: lines[position.line],
-        lines,
+        currentLine: block.definingDocument.getLineContent(position.line),
+        schema,
         wordsBeforePosition,
       }),
       isIncomplete: false,
@@ -504,7 +504,7 @@ function getSuggestionsForInsideRoundBrackets(
       attribute: '@relation',
       wordsBeforePosition,
       untrimmedCurrentLine,
-      lines,
+      schema,
       // document,
       block,
       position,
@@ -520,7 +520,7 @@ function getSuggestionsForInsideRoundBrackets(
     return getSuggestionsForAttribute({
       wordsBeforePosition,
       untrimmedCurrentLine,
-      lines,
+      schema,
       // document,
       block,
       position,
@@ -539,12 +539,12 @@ function getSuggestionForSupportedFields(
   currentLine: string,
   currentLineUntrimmed: string,
   position: Position,
-  lines: string[],
+  schema: PrismaSchema,
   onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
   const isInsideQuotation: boolean = isInsideQuotationMark(currentLineUntrimmed, position)
   // We can filter on the datasource
-  const datasourceProvider = getFirstDatasourceProvider(lines)
+  const datasourceProvider = getFirstDatasourceProvider(schema)
   // We can filter on the previewFeatures enabled
   // const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
 
@@ -563,18 +563,18 @@ function getSuggestionForSupportedFields(
  */
 function getSuggestionForFirstInsideBlock(
   blockType: BlockType,
-  lines: string[],
+  schema: PrismaSchema,
   position: Position,
   block: Block,
 ): CompletionList {
   let suggestions: CompletionItem[] = []
   switch (blockType) {
     case 'generator':
-      suggestions = getSuggestionForGeneratorField(block, lines, position)
+      suggestions = getSuggestionForGeneratorField(block, schema, position)
       break
     case 'model':
     case 'view':
-      suggestions = getSuggestionForBlockAttribute(block, lines)
+      suggestions = getSuggestionForBlockAttribute(block, schema)
       break
     case 'type':
       // No suggestions
@@ -615,7 +615,7 @@ export function localCompletions(
   const context = params.context
   const position = params.position
 
-  const lines = convertDocumentTextToTrimmedLineArray(document)
+  const schema = PrismaSchema.singleFile(document)
   const currentLineUntrimmed = getCurrentLine(document, position.line)
   const currentLineTillPosition = currentLineUntrimmed.slice(0, position.character - 1).trim()
   const wordsBeforePosition: string[] = currentLineTillPosition.split(/\s+/)
@@ -627,16 +627,16 @@ export function localCompletions(
     wordsBeforePosition.length >= 3 && !currentLineTillPosition.includes('[') && symbolBeforePositionIsWhiteSpace
 
   // datasource, generator, model, type or enum
-  const foundBlock = getBlockAtPosition(position.line, lines)
+  const foundBlock = getBlockAtPosition(document.uri, position.line, schema)
   if (!foundBlock) {
     if (wordsBeforePosition.length > 1 || (wordsBeforePosition.length === 1 && symbolBeforePositionIsWhiteSpace)) {
       return
     }
-    return getSuggestionForBlockTypes(lines)
+    return getSuggestionForBlockTypes(schema)
   }
 
   if (isFirstInsideBlock(position, getCurrentLine(document, position.line))) {
-    return getSuggestionForFirstInsideBlock(foundBlock.type, lines, position, foundBlock)
+    return getSuggestionForFirstInsideBlock(foundBlock.type, schema, position, foundBlock)
   }
 
   // Completion was triggered by a triggerCharacter
@@ -650,7 +650,7 @@ export function localCompletions(
         return getSuggestionForFieldAttribute(
           foundBlock,
           getCurrentLine(document, position.line),
-          lines,
+          schema,
           wordsBeforePosition,
           document,
           onError,
@@ -658,19 +658,19 @@ export function localCompletions(
       case '"':
         return getSuggestionForSupportedFields(
           foundBlock.type,
-          lines[position.line],
+          foundBlock.definingDocument.getLineContent(position.line),
           currentLineUntrimmed,
           position,
-          lines,
+          schema,
           onError,
         )
       case '.':
         // check if inside attribute
         // Useful to complete composite types
         if (['model', 'view'].includes(foundBlock.type) && isInsideAttribute(currentLineUntrimmed, position, '()')) {
-          return getSuggestionsForInsideRoundBrackets(currentLineUntrimmed, lines, position, foundBlock)
+          return getSuggestionsForInsideRoundBrackets(currentLineUntrimmed, schema, position, foundBlock)
         } else {
-          return getSuggestionForNativeTypes(foundBlock, lines, wordsBeforePosition, document, onError)
+          return getSuggestionForNativeTypes(foundBlock, schema, wordsBeforePosition, document, onError)
         }
     }
   }
@@ -681,16 +681,16 @@ export function localCompletions(
     case 'type':
       // check if inside attribute
       if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
-        return getSuggestionsForInsideRoundBrackets(currentLineUntrimmed, lines, position, foundBlock)
+        return getSuggestionsForInsideRoundBrackets(currentLineUntrimmed, schema, position, foundBlock)
       }
       // check if field type
       if (!positionIsAfterFieldAndType(position, document, wordsBeforePosition)) {
-        return getSuggestionsForFieldTypes(foundBlock, lines, position, currentLineUntrimmed)
+        return getSuggestionsForFieldTypes(schema, position, currentLineUntrimmed)
       }
       return getSuggestionForFieldAttribute(
         foundBlock,
-        lines[position.line],
-        lines,
+        foundBlock.definingDocument.getLineContent(position.line),
+        schema,
         wordsBeforePosition,
         document,
         onError,
@@ -708,10 +708,10 @@ export function localCompletions(
       ) {
         return getSuggestionForSupportedFields(
           foundBlock.type,
-          lines[position.line],
+          foundBlock.definingDocument.getLineContent(position.line),
           currentLineUntrimmed,
           position,
-          lines,
+          schema,
           onError,
         )
       }
