@@ -319,6 +319,7 @@ export function renameReferencesForEnumValue(
   for (const [document, lineIndex, value] of schema.iterLines()) {
     if (value.includes(searchString) && value.includes(enumName)) {
       const currentLineUntrimmed = document.getUntrimmedLine(lineIndex)
+      console.log({ currentLineUntrimmed })
       // get the index of the second word
       const indexOfCurrentName = currentLineUntrimmed.indexOf(searchString)
       appendEdit(edits, document.fileUri, {
@@ -332,7 +333,7 @@ export function renameReferencesForEnumValue(
             character: indexOfCurrentName + searchString.length,
           },
         },
-        newText: newName,
+        newText: `@default(${newName})`,
       })
     }
   }

@@ -228,11 +228,12 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
   const schema = PrismaSchema.singleFile(document)
   const schemaLines = schema.linesAsArray()
   const position = params.position
-  const currentLine: string = getCurrentLine(document, position.line)
   const block = getBlockAtPosition(document.uri, position.line, schema)
   if (!block) {
-    return
+    return undefined
   }
+
+  const currentLine = block.definingDocument.getLineContent(params.position.line)
 
   const isDatamodelBlockRename = isDatamodelBlockName(position, block, schema, document)
 
