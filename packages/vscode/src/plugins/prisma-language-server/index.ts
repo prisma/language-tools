@@ -13,6 +13,7 @@ import {
   TextDocument,
   window,
   workspace,
+  languages,
 } from 'vscode'
 import {
   CodeAction as lsCodeAction,
@@ -35,6 +36,7 @@ import {
 import { PrismaVSCodePlugin } from '../types'
 import paths from 'env-paths'
 import FileWatcher from 'watcher'
+import { CodelensProvider, generateClient } from '../../CodeLensProvider'
 
 const packageJson = require('../../../../package.json') // eslint-disable-line
 
@@ -116,6 +118,9 @@ const plugin: PrismaVSCodePlugin = {
   enabled: () => true,
   activate: async (context) => {
     const isDebugOrTest = isDebugOrTestSession()
+    const codelensProvider = new CodelensProvider()
+
+    languages.registerCodeLensProvider('*', codelensProvider)
 
     setGenerateWatcher(!!workspace.getConfiguration('prisma').get('fileWatcher'))
 
@@ -213,9 +218,19 @@ const plugin: PrismaVSCodePlugin = {
         }
       }),
 
+      commands.registerCommand('prisma.generate', (args: string) => generateClient(args)),
+
       commands.registerCommand('prisma.restartLanguageServer', async () => {
         client = await restartClient(context, client, serverOptions, clientOptions)
         window.showInformationMessage('Prisma language server restarted.') // eslint-disable-line @typescript-eslint/no-floating-promises
+      }),
+
+      commands.registerCommand('prisma.enableCodeLens', async () => {
+        await workspace.getConfiguration('prisma').update('enableCodeLens', true, true)
+      }),
+
+      commands.registerCommand('prisma.disableCodeLens', async () => {
+        await workspace.getConfiguration('prisma').update('enableCodeLens', false, true)
       }),
 
       /* This command is part of the workaround for https://github.com/prisma/language-tools/issues/311 */

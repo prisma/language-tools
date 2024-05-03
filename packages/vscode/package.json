@@ -125,6 +125,26 @@
           ],
           "default": "off",
           "description": "Setting for logging between the VS Code extension and the language server."
+        },
+        "prisma.enableCodeLens": {
+          "type": "boolean",
+          "default": true
+        },
+        "prisma.scriptRunner": {
+          "type": "string",
+          "enum": [
+            "npx",
+            "pnpm",
+            "yarn"
+          ],
+          "default": "npx"
+        },
+        "prisma.schemaPath": {
+          "type": "string",
+          "examples": [
+            "/path/to/your/schema.prisma"
+          ],
+          "description": "If you have a Prisma schema file in a custom path, you will need to provide said path `/path/to/your/schema.prisma` to run generate"
         }
       }
     },
@@ -142,6 +162,21 @@
       {
         "command": "prisma.filewatcherDisable",
         "title": "Disable the File Watcher functionality for Prisma Client.",
+        "category": "Prisma"
+      },
+      {
+        "command": "prisma.enableCodeLens",
+        "title": "Enable CodeLens",
+        "category": "Prisma"
+      },
+      {
+        "command": "prisma.disableCodeLens",
+        "title": "Disable Codelens",
+        "category": "Prisma"
+      },
+      {
+        "command": "prisma.generate",
+        "title": "Generate",
         "category": "Prisma"
       }
     ]
