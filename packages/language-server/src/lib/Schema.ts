@@ -16,11 +16,11 @@ export class SchemaDocument {
   }
 
   get lines(): Line[] {
-    return this.#untrimmedLines.map((line, lineIndex) => [this, lineIndex, line])
+    return this.#untrimmedLines.map((line, lineIndex) => [this, lineIndex, line.trim()] as const)
   }
 
   getLineContent(lineIndex: number): string {
-    return this.#untrimmedLines[lineIndex][2]
+    return this.#untrimmedLines[lineIndex].trim()
   }
 
   getUntrimmedLine(lineIndex: number): string {

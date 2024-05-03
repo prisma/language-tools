@@ -70,23 +70,23 @@ export function getDatamodelBlock(blockName: string, schema: PrismaSchema): Bloc
   // get start position of block
   const results = schema
     .linesAsArray()
-    .map(([fileUri, index, line]) => {
+    .map(([document, index, line]) => {
       if (
         (line.includes('model') || line.includes('type') || line.includes('enum') || line.includes('view')) &&
         line.includes(blockName)
       ) {
-        return [fileUri, index]
+        return [document, index]
       }
     })
-    .filter((result) => result !== undefined) as [string, number][]
+    .filter((result) => result !== undefined) as [SchemaDocument, number][]
 
   if (results.length === 0) {
     return
   }
 
   const foundBlocks: Block[] = results
-    .map(([fileUri, lineNo]) => {
-      const block = getBlockAtPosition(fileUri, lineNo, schema)
+    .map(([document, lineNo]) => {
+      const block = getBlockAtPosition(document.fileUri, lineNo, schema)
       if (block && block.name === blockName) {
         return block
       }

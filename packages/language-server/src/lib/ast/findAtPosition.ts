@@ -51,7 +51,7 @@ export function getWordAtPosition(document: TextDocument, position: Position): s
   return currentLine.slice(beginning, end + position.character)
 }
 
-export function getBlockAtPosition(fileUri: string, line: number, schema: PrismaSchema): Block | void {
+export function getBlockAtPosition(fileUri: string, line: number, schema: PrismaSchema): Block | undefined {
   for (const block of getBlocks(schema)) {
     if (fileUri !== block.definingDocument.fileUri) {
       continue
