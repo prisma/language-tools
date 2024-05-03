@@ -259,7 +259,7 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
     if (isDatamodelBlockRename) {
       // get definition of model or enum
       const matchBlockBeginning = new RegExp(`\\s*(${block.type})\\s+(${currentName})\\s*({)`, 'g')
-      const lineOfDefinition = schemaLines.find((l) => matchBlockBeginning.test(l.text))
+      const lineOfDefinition = schemaLines.find((line) => matchBlockBeginning.test(line.text))
       if (!lineOfDefinition) {
         return
       }

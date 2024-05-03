@@ -8,7 +8,7 @@ import { PrismaSchema } from '../Schema'
 export function getFirstDatasourceName(schema: PrismaSchema): string | undefined {
   const datasourceBlockFirstLine = schema
     .linesAsArray()
-    .find((l) => l.text.startsWith('datasource') && l.text.includes('{'))
+    .find((line) => line.text.startsWith('datasource') && line.text.includes('{'))
   if (!datasourceBlockFirstLine) {
     return undefined
   }
