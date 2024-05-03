@@ -134,10 +134,13 @@ export function getSuggestionsForFieldTypes(
     datasourceProvider === 'mongodb'
       ? getAllRelationNames(schema, relationNamesMongoDBRegexFilter)
       : getAllRelationNames(schema, relationNamesRegexFilter)
+      
   suggestions.push(...toCompletionItems(modelNames, CompletionItemKind.Reference))
+  
   const wordsBeforePosition = currentLineUntrimmed.slice(0, position.character).split(' ')
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
   const completeSuggestions = suggestions.filter((s) => s.label.length === wordBeforePosition.length)
+  
   if (completeSuggestions.length !== 0) {
     for (const sugg of completeSuggestions) {
       relationSingleTypeCompletion(suggestions, sugg)
