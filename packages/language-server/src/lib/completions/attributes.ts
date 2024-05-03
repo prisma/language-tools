@@ -85,23 +85,25 @@ function filterSuggestionsForBlock(
     }
 
     // Ignore commented lines
-    if (!text.startsWith('//')) {
-      // TODO we should also remove the other suggestions if used (default()...)
-      // * Filter already-present attributes that can't be duplicated
-      ;['@id', '@@map', '@@ignore', '@@schema'].forEach((label) => {
-        if (text.includes(label)) {
-          suggestions = suggestions.filter((suggestion) => suggestion.label !== label)
-
-          if (label === '@@ignore') {
-            suggestions = suggestions.filter((suggestion) => suggestion.label !== '@ignore')
-          }
-
-          if (label === '@id') {
-            suggestions = suggestions.filter((suggestion) => suggestion.label !== '@@id')
-          }
-        }
-      })
+    if (text.startsWith('//')) {
+      continue
     }
+
+    // TODO we should also remove the other suggestions if used (default()...)
+    // * Filter already-present attributes that can't be duplicated
+    ;['@id', '@@map', '@@ignore', '@@schema'].forEach((label) => {
+      if (text.includes(label)) {
+        suggestions = suggestions.filter((suggestion) => suggestion.label !== label)
+
+        if (label === '@@ignore') {
+          suggestions = suggestions.filter((suggestion) => suggestion.label !== '@ignore')
+        }
+
+        if (label === '@id') {
+          suggestions = suggestions.filter((suggestion) => suggestion.label !== '@@id')
+        }
+      }
+    })
   }
 
   return suggestions
