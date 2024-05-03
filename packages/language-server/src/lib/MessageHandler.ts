@@ -23,8 +23,6 @@ import type { TextDocument } from 'vscode-languageserver-textdocument'
 import format from './prisma-schema-wasm/format'
 import lint from './prisma-schema-wasm/lint'
 
-import { getCurrentLine } from './ast'
-
 import { quickFix } from './code-actions'
 import {
   insertBasicRename,
