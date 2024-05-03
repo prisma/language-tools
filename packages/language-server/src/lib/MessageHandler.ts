@@ -53,7 +53,7 @@ import {
   getDatamodelBlock,
 } from './ast'
 import { prismaSchemaWasmCompletions, localCompletions } from './completions'
-import { PrismaSchema } from './Schema'
+import { PrismaSchema, SchemaDocument } from './Schema'
 
 export function handleDiagnosticsRequest(
   document: TextDocument,
@@ -126,24 +126,24 @@ export function handleDefinitionRequest(document: TextDocument, params: Declarat
   // get start position of block
   const results = schema
     .linesAsArray()
-    .map(([fileUri, lineNo, line]) => {
+    .map(([document, lineNo, line]) => {
       if (
         (line.includes('model') && line.includes(word)) ||
         (line.includes('type') && line.includes(word)) ||
         (line.includes('enum') && line.includes(word))
       ) {
-        return [fileUri, lineNo]
+        return [document, lineNo]
       }
     })
-    .filter((result) => result !== undefined) as [string, number][]
+    .filter((result) => result !== undefined) as [SchemaDocument, number][]
 
   if (results.length === 0) {
     return
   }
 
   const foundBlocks: Block[] = results
-    .map(([fileUri, lineNo]) => {
-      const block = getBlockAtPosition(fileUri, lineNo, schema)
+    .map(([document, lineNo]) => {
+      const block = getBlockAtPosition(document.fileUri, lineNo, schema)
       if (block && block.name === word && block.range.start.line === lineNo) {
         return block
       }
