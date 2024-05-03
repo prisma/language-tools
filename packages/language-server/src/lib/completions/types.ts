@@ -13,6 +13,7 @@ import {
   getAllRelationNames,
 } from '../ast'
 import { relationNamesMongoDBRegexFilter, relationNamesRegexFilter } from '../constants'
+import { PrismaSchema } from '../Schema'
 
 /**
  * ```prisma
@@ -79,7 +80,7 @@ export function getNativeTypes(
 
 export function getSuggestionForNativeTypes(
   foundBlock: Block,
-  lines: string[],
+  schema: PrismaSchema,
   wordsBeforePosition: string[],
   document: TextDocument,
   onError?: (errorMessage: string) => void,
@@ -95,7 +96,7 @@ export function getSuggestionForNativeTypes(
     return undefined
   }
 
-  const datasourceName = getFirstDatasourceName(lines)
+  const datasourceName = getFirstDatasourceName(schema)
   if (!datasourceName || wordsBeforePosition[wordsBeforePosition.length - 1] !== `@${datasourceName}`) {
     return undefined
   }
@@ -111,14 +112,13 @@ export function getSuggestionForNativeTypes(
 }
 
 export function getSuggestionsForFieldTypes(
-  foundBlock: Block,
-  lines: string[],
+  schema: PrismaSchema,
   position: Position,
   currentLineUntrimmed: string,
 ): CompletionList {
   const suggestions: CompletionItem[] = []
 
-  const datasourceProvider = getFirstDatasourceProvider(lines)
+  const datasourceProvider = getFirstDatasourceProvider(schema)
   // MongoDB doesn't support Decimal
   if (datasourceProvider === 'mongodb') {
     suggestions.push(...corePrimitiveTypes.filter((s) => s.label !== 'Decimal'))
@@ -129,18 +129,18 @@ export function getSuggestionsForFieldTypes(
     suggestions.push(...corePrimitiveTypes)
   }
 
-  if (foundBlock instanceof Block) {
-    // get all model names
-    const modelNames: string[] =
-      datasourceProvider === 'mongodb'
-        ? getAllRelationNames(lines, relationNamesMongoDBRegexFilter)
-        : getAllRelationNames(lines, relationNamesRegexFilter)
-    suggestions.push(...toCompletionItems(modelNames, CompletionItemKind.Reference))
-  }
-
+  // get all model names
+  const modelNames: string[] =
+    datasourceProvider === 'mongodb'
+      ? getAllRelationNames(schema, relationNamesMongoDBRegexFilter)
+      : getAllRelationNames(schema, relationNamesRegexFilter)
+      
+  suggestions.push(...toCompletionItems(modelNames, CompletionItemKind.Reference))
+  
   const wordsBeforePosition = currentLineUntrimmed.slice(0, position.character).split(' ')
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
   const completeSuggestions = suggestions.filter((s) => s.label.length === wordBeforePosition.length)
+  
   if (completeSuggestions.length !== 0) {
     for (const sugg of completeSuggestions) {
       relationSingleTypeCompletion(suggestions, sugg)

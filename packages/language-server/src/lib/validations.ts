@@ -3,6 +3,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { getBlockAtPosition, getExperimentalFeaturesRange } from './ast'
 import { MAX_SAFE_VALUE_i32 } from './constants'
+import { PrismaSchema } from './Schema'
 
 // TODO (Joël) can be removed? Since it was renamed to `previewFeatures`
 // check for experimentalFeatures inside generator block
@@ -23,10 +24,10 @@ export const validateExperimentalFeatures = (document: TextDocument, diagnostics
   }
 }
 
-export const validateIgnoredBlocks = (lines: string[], diagnostics: Diagnostic[]) => {
-  lines.map((currElement, index) => {
-    if (currElement.includes('@@ignore')) {
-      const block = getBlockAtPosition(index, lines)
+export const validateIgnoredBlocks = (schema: PrismaSchema, diagnostics: Diagnostic[]) => {
+  schema.linesAsArray().map(({ document, lineIndex, text }) => {
+    if (text.includes('@@ignore')) {
+      const block = getBlockAtPosition(document.uri, lineIndex, schema)
       if (block) {
         diagnostics.push({
           range: { start: block.range.start, end: block.range.end },
@@ -40,11 +41,11 @@ export const validateIgnoredBlocks = (lines: string[], diagnostics: Diagnostic[]
           },
         })
       }
-    } else if (currElement.includes('@ignore')) {
+    } else if (text.includes('@ignore')) {
       diagnostics.push({
         range: {
-          start: { line: index, character: 0 },
-          end: { line: index, character: MAX_SAFE_VALUE_i32 },
+          start: { line: lineIndex, character: 0 },
+          end: { line: lineIndex, character: MAX_SAFE_VALUE_i32 },
         },
         message:
           '@ignore: When using Prisma Migrate, this field will be kept in sync with the database schema, however, it will not be exposed in Prisma Client.',

@@ -6,6 +6,7 @@ import { convertToCompletionItems } from './internals'
 import { klona } from 'klona'
 
 import listAllAvailablePreviewFeatures from '../prisma-schema-wasm/listAllAvailablePreviewFeatures'
+import { PrismaSchema } from '../Schema'
 
 /**
  * ```prisma
@@ -102,35 +103,39 @@ function handlePreviewFeatures(
 function removeInvalidFieldSuggestions(
   supportedFields: string[],
   block: Block,
-  lines: string[],
+  schema: PrismaSchema,
   position: Position,
 ): string[] {
   let reachedStartLine = false
-  for (const [key, item] of lines.entries()) {
-    if (key === block.range.start.line + 1) {
+  for (const { lineIndex, text } of schema.iterLines()) {
+    if (lineIndex === block.range.start.line + 1) {
       reachedStartLine = true
     }
-    if (!reachedStartLine || key === position.line) {
+    if (!reachedStartLine || lineIndex === position.line) {
       continue
     }
-    if (key === block.range.end.line) {
+    if (lineIndex === block.range.end.line) {
       break
     }
-    const fieldName = item.replace(/ .*/, '')
+    const fieldName = text.replace(/ .*/, '')
     if (supportedFields.includes(fieldName)) {
       supportedFields = supportedFields.filter((field) => field !== fieldName)
     }
   }
   return supportedFields
 }
-export function getSuggestionForGeneratorField(block: Block, lines: string[], position: Position): CompletionItem[] {
+export function getSuggestionForGeneratorField(
+  block: Block,
+  schema: PrismaSchema,
+  position: Position,
+): CompletionItem[] {
   // create deep copy
   const suggestions: CompletionItem[] = klona(supportedGeneratorFields)
 
   const labels = removeInvalidFieldSuggestions(
     suggestions.map((item) => item.label),
     block,
-    lines,
+    schema,
     position,
   )
 
