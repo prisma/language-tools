@@ -73,23 +73,23 @@ function filterSuggestionsForBlock(
 ): CompletionItem[] {
   let reachedStartLine = false
 
-  for (const [, lineNo, line] of schema.iterLines()) {
-    if (lineNo === block.range.start.line + 1) {
+  for (const { lineIndex, text } of schema.iterLines()) {
+    if (lineIndex === block.range.start.line + 1) {
       reachedStartLine = true
     }
     if (!reachedStartLine) {
       continue
     }
-    if (lineNo === block.range.end.line) {
+    if (lineIndex === block.range.end.line) {
       break
     }
 
     // Ignore commented lines
-    if (!line.startsWith('//')) {
+    if (!text.startsWith('//')) {
       // TODO we should also remove the other suggestions if used (default()...)
       // * Filter already-present attributes that can't be duplicated
       ;['@id', '@@map', '@@ignore', '@@schema'].forEach((label) => {
-        if (line.includes(label)) {
+        if (text.includes(label)) {
           suggestions = suggestions.filter((suggestion) => suggestion.label !== label)
 
           if (label === '@@ignore') {

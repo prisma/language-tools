@@ -124,13 +124,13 @@ export function handleDefinitionRequest(document: TextDocument, params: Declarat
   // get start position of block
   const results = schema
     .linesAsArray()
-    .map(([document, lineNo, line]) => {
+    .map(({ document, lineIndex, text }) => {
       if (
-        (line.includes('model') && line.includes(word)) ||
-        (line.includes('type') && line.includes(word)) ||
-        (line.includes('enum') && line.includes(word))
+        (text.includes('model') && text.includes(word)) ||
+        (text.includes('type') && text.includes(word)) ||
+        (text.includes('enum') && text.includes(word))
       ) {
-        return [document, lineNo]
+        return [document, lineIndex]
       }
     })
     .filter((result) => result !== undefined) as [SchemaDocument, number][]
@@ -141,7 +141,7 @@ export function handleDefinitionRequest(document: TextDocument, params: Declarat
 
   const foundBlocks: Block[] = results
     .map(([document, lineNo]) => {
-      const block = getBlockAtPosition(document.fileUri, lineNo, schema)
+      const block = getBlockAtPosition(document.uri, lineNo, schema)
       if (block && block.name === word && block.range.start.line === lineNo) {
         return block
       }
@@ -158,7 +158,7 @@ export function handleDefinitionRequest(document: TextDocument, params: Declarat
 
   return [
     {
-      targetUri: foundBlocks[0].definingDocument.fileUri,
+      targetUri: foundBlocks[0].definingDocument.uri,
       targetRange: foundBlocks[0].range,
       targetSelectionRange: foundBlocks[0].nameRange,
     },
@@ -231,7 +231,7 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
     return undefined
   }
 
-  const currentLine = block.definingDocument.getLineContent(params.position.line)
+  const currentLine = block.definingDocument.lines[params.position.line].text
 
   const isDatamodelBlockRename = isDatamodelBlockName(position, block, schema, document)
 
@@ -259,14 +259,14 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
     if (isDatamodelBlockRename) {
       // get definition of model or enum
       const matchBlockBeginning = new RegExp(`\\s*(${block.type})\\s+(${currentName})\\s*({)`, 'g')
-      const lineOfDefinition = schemaLines.find(([, , l]) => matchBlockBeginning.test(l))
+      const lineOfDefinition = schemaLines.find((l) => matchBlockBeginning.test(l.text))
       if (!lineOfDefinition) {
         return
       }
-      const [definitionDoc, lineNo, content] = lineOfDefinition
-      lineNumberOfDefinition = lineNo
-      lineOfDefinitionContent = content
-      const definitionBlockAtPosition = getBlockAtPosition(definitionDoc.fileUri, lineNumberOfDefinition, schema)
+      const { document: definitionDoc, lineIndex, text } = lineOfDefinition
+      lineNumberOfDefinition = lineIndex
+      lineOfDefinitionContent = text
+      const definitionBlockAtPosition = getBlockAtPosition(definitionDoc.uri, lineNumberOfDefinition, schema)
       if (!definitionBlockAtPosition) {
         return
       }

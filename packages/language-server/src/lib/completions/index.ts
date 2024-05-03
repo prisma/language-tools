@@ -635,7 +635,7 @@ export function localCompletions(
     return getSuggestionForBlockTypes(schema)
   }
 
-  if (isFirstInsideBlock(position, foundBlock.definingDocument.getUntrimmedLine(position.line))) {
+  if (isFirstInsideBlock(position, foundBlock.definingDocument.lines[position.line].untrimmedText)) {
     return getSuggestionForFirstInsideBlock(foundBlock.type, schema, position, foundBlock)
   }
 

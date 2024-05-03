@@ -53,7 +53,7 @@ export function getWordAtPosition(document: TextDocument, position: Position): s
 
 export function getBlockAtPosition(fileUri: string, line: number, schema: PrismaSchema): Block | undefined {
   for (const block of getBlocks(schema)) {
-    if (fileUri !== block.definingDocument.fileUri) {
+    if (fileUri !== block.definingDocument.uri) {
       continue
     }
     if (block.range.start.line > line) {

@@ -121,7 +121,7 @@ function renameDatamodelBlockWhereUsedAsType(
   }
   const indexOfRelation = schema
     .linesAsArray()
-    .findIndex(([, , l]) => l.startsWith(block.type) && l.includes(currentName))
+    .findIndex((line) => line.text.startsWith(block.type) && line.text.includes(currentName))
   return indexOfRelation !== -1
 }
 
@@ -176,7 +176,7 @@ function insertInlineRename(fileUri: string, currentName: string, line: number):
 
 function insertMapBlockAttribute(oldName: string, block: Block): EditsMap {
   return {
-    [block.definingDocument.fileUri]: [
+    [block.definingDocument.uri]: [
       {
         range: {
           start: {
@@ -215,34 +215,33 @@ export function renameReferencesForFieldName(
   const relationAttribute = '@relation'
   // search in same model first
   let reachedStartLine = false
-  for (const [document, lineNo, item] of schema.iterLines()) {
-    if (lineNo === block.range.start.line + 1) {
+  for (const { document, lineIndex, text, untrimmedText } of schema.iterLines()) {
+    if (lineIndex === block.range.start.line + 1) {
       reachedStartLine = true
     }
     if (!reachedStartLine) {
       continue
     }
-    if (lineNo === block.range.end.line) {
+    if (lineIndex === block.range.end.line) {
       break
     }
-    if (item.includes(relationAttribute) && item.includes(currentName) && !isRelationFieldRename) {
+    if (text.includes(relationAttribute) && text.includes(currentName) && !isRelationFieldRename) {
       // search for fields references
-      const currentLineUntrimmed = document.getUntrimmedLine(lineNo)
-      const indexOfFieldsStart = currentLineUntrimmed.indexOf('fields:')
-      const indexOfFieldEnd = currentLineUntrimmed.slice(indexOfFieldsStart).indexOf(']') + indexOfFieldsStart
-      const fields = currentLineUntrimmed.slice(indexOfFieldsStart, indexOfFieldEnd + 1)
+      const indexOfFieldsStart = untrimmedText.indexOf('fields:')
+      const indexOfFieldEnd = untrimmedText.slice(indexOfFieldsStart).indexOf(']') + indexOfFieldsStart
+      const fields = untrimmedText.slice(indexOfFieldsStart, indexOfFieldEnd + 1)
       const indexOfFoundValue = fields.indexOf(currentName)
       const fieldValues = getValuesInsideSquareBrackets(fields)
       if (indexOfFoundValue !== -1 && fieldValues.includes(currentName)) {
         // found a referenced field
-        appendEdit(edits, document.fileUri, {
+        appendEdit(edits, document.uri, {
           range: {
             start: {
-              line: lineNo,
+              line: lineIndex,
               character: indexOfFieldsStart + indexOfFoundValue,
             },
             end: {
-              line: lineNo,
+              line: lineIndex,
               character: indexOfFieldsStart + indexOfFoundValue + currentName.length,
             },
           },
@@ -251,19 +250,18 @@ export function renameReferencesForFieldName(
       }
     }
     // search for references in index, id and unique block attributes
-    if (searchStringsSameBlock.some((s) => item.includes(s)) && item.includes(currentName)) {
-      const currentLineUntrimmed = document.getUntrimmedLine(lineNo)
-      const valuesInsideBracket = getValuesInsideSquareBrackets(currentLineUntrimmed)
+    if (searchStringsSameBlock.some((s) => text.includes(s)) && text.includes(currentName)) {
+      const valuesInsideBracket = getValuesInsideSquareBrackets(untrimmedText)
       if (valuesInsideBracket.includes(currentName)) {
-        const indexOfCurrentValue = currentLineUntrimmed.indexOf(currentName)
-        appendEdit(edits, document.fileUri, {
+        const indexOfCurrentValue = untrimmedText.indexOf(currentName)
+        appendEdit(edits, document.uri, {
           range: {
             start: {
-              line: lineNo,
+              line: lineIndex,
               character: indexOfCurrentValue,
             },
             end: {
-              line: lineNo,
+              line: lineIndex,
               character: indexOfCurrentValue + currentName.length,
             },
           },
@@ -274,24 +272,23 @@ export function renameReferencesForFieldName(
   }
 
   // search for references in other model blocks
-  for (const [document, index, value] of schema.iterLines()) {
-    if (value.includes(block.name) && value.includes(currentName) && value.includes(relationAttribute)) {
-      const currentLineUntrimmed = document.getUntrimmedLine(index)
+  for (const { document, lineIndex, text, untrimmedText } of schema.iterLines()) {
+    if (text.includes(block.name) && text.includes(currentName) && text.includes(relationAttribute)) {
       // get the index of the second word
-      const indexOfReferences = currentLineUntrimmed.indexOf('references:')
-      const indexOfReferencesEnd = currentLineUntrimmed.slice(indexOfReferences).indexOf(']') + indexOfReferences
-      const references = currentLineUntrimmed.slice(indexOfReferences, indexOfReferencesEnd + 1)
+      const indexOfReferences = untrimmedText.indexOf('references:')
+      const indexOfReferencesEnd = untrimmedText.slice(indexOfReferences).indexOf(']') + indexOfReferences
+      const references = untrimmedText.slice(indexOfReferences, indexOfReferencesEnd + 1)
       const indexOfFoundValue = references.indexOf(currentName)
       const referenceValues = getValuesInsideSquareBrackets(references)
       if (indexOfFoundValue !== -1 && referenceValues.includes(currentName)) {
-        appendEdit(edits, document.fileUri, {
+        appendEdit(edits, document.uri, {
           range: {
             start: {
-              line: index,
+              line: lineIndex,
               character: indexOfReferences + indexOfFoundValue,
             },
             end: {
-              line: index,
+              line: lineIndex,
               character: indexOfReferences + indexOfFoundValue + currentName.length,
             },
           },
@@ -316,12 +313,11 @@ export function renameReferencesForEnumValue(
   const edits: EditsMap = {}
   const searchString = `@default(${currentValue})`
 
-  for (const [document, lineIndex, value] of schema.iterLines()) {
-    if (value.includes(searchString) && value.includes(enumName)) {
-      const currentLineUntrimmed = document.getUntrimmedLine(lineIndex)
+  for (const { document, lineIndex, text, untrimmedText } of schema.iterLines()) {
+    if (text.includes(searchString) && text.includes(enumName)) {
       // get the index of the second word
-      const indexOfCurrentName = currentLineUntrimmed.indexOf(searchString)
-      appendEdit(edits, document.fileUri, {
+      const indexOfCurrentName = untrimmedText.indexOf(searchString)
+      appendEdit(edits, document.uri, {
         range: {
           start: {
             line: lineIndex,
@@ -350,10 +346,10 @@ export function renameReferencesForModelName(currentName: string, newName: strin
   const searchedBlocks = []
   const edits: EditsMap = {}
 
-  for (const [document, index, value] of schema.iterLines()) {
+  for (const { document, lineIndex, text } of schema.iterLines()) {
     // check if inside model
-    if (value.includes(currentName) && positionIsNotInsideSearchedBlocks(index, searchedBlocks)) {
-      const block = getBlockAtPosition(document.fileUri, index, schema)
+    if (text.includes(currentName) && positionIsNotInsideSearchedBlocks(lineIndex, searchedBlocks)) {
+      const block = getBlockAtPosition(document.uri, lineIndex, schema)
       // TODO type here
       if (block && block.type == 'model') {
         searchedBlocks.push(block)
@@ -367,15 +363,15 @@ export function renameReferencesForModelName(currentName: string, newName: strin
               return edits
             }
             for (const { lineIndex, document: foundDocument } of foundFieldTypes.locations) {
-              const currentLineUntrimmed = foundDocument.getUntrimmedLine(lineIndex)
-              const wordsInLine: string[] = foundDocument.getLineContent(lineIndex).split(/\s+/)
+              const currentLineUntrimmed = foundDocument.lines[lineIndex].untrimmedText
+              const wordsInLine: string[] = foundDocument.lines[lineIndex].text.split(/\s+/)
               // get the index of the second word
               const indexOfFirstWord = currentLineUntrimmed.indexOf(wordsInLine[0])
               const indexOfCurrentName = currentLineUntrimmed.indexOf(
                 currentName,
                 indexOfFirstWord + wordsInLine[0].length,
               )
-              appendEdit(edits, document.fileUri, {
+              appendEdit(edits, document.uri, {
                 range: {
                   start: {
                     line: lineIndex,
@@ -403,17 +399,17 @@ function mapFieldAttributeExistsAlready(line: string): boolean {
 
 function mapBlockAttributeExistsAlready(block: Block, schema: PrismaSchema): boolean {
   let reachedStartLine = false
-  for (const [, lineNo, item] of schema.iterLines()) {
-    if (lineNo === block.range.start.line + 1) {
+  for (const { lineIndex, text } of schema.iterLines()) {
+    if (lineIndex === block.range.start.line + 1) {
       reachedStartLine = true
     }
     if (!reachedStartLine) {
       continue
     }
-    if (lineNo === block.range.end.line) {
+    if (lineIndex === block.range.end.line) {
       break
     }
-    if (item.startsWith('@@map(')) {
+    if (text.startsWith('@@map(')) {
       return true
     }
   }
@@ -470,7 +466,7 @@ export function insertMapAttribute(
   if (isDatamodelBlockRename) {
     return insertMapBlockAttribute(currentName, block)
   } else {
-    return insertInlineRename(block.definingDocument.fileUri, currentName, position.line)
+    return insertInlineRename(block.definingDocument.uri, currentName, position.line)
   }
 }
 

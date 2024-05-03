@@ -25,9 +25,9 @@ export const validateExperimentalFeatures = (document: TextDocument, diagnostics
 }
 
 export const validateIgnoredBlocks = (schema: PrismaSchema, diagnostics: Diagnostic[]) => {
-  schema.linesAsArray().map(([document, lineNo, currElement]) => {
-    if (currElement.includes('@@ignore')) {
-      const block = getBlockAtPosition(document.fileUri, lineNo, schema)
+  schema.linesAsArray().map(({ document, lineIndex, text }) => {
+    if (text.includes('@@ignore')) {
+      const block = getBlockAtPosition(document.uri, lineIndex, schema)
       if (block) {
         diagnostics.push({
           range: { start: block.range.start, end: block.range.end },
@@ -41,11 +41,11 @@ export const validateIgnoredBlocks = (schema: PrismaSchema, diagnostics: Diagnos
           },
         })
       }
-    } else if (currElement.includes('@ignore')) {
+    } else if (text.includes('@ignore')) {
       diagnostics.push({
         range: {
-          start: { line: lineNo, character: 0 },
-          end: { line: lineNo, character: MAX_SAFE_VALUE_i32 },
+          start: { line: lineIndex, character: 0 },
+          end: { line: lineIndex, character: MAX_SAFE_VALUE_i32 },
         },
         message:
           '@ignore: When using Prisma Migrate, this field will be kept in sync with the database schema, however, it will not be exposed in Prisma Client.',

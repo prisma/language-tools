@@ -8,12 +8,12 @@ import { PrismaSchema } from '../Schema'
 export function getFirstDatasourceName(schema: PrismaSchema): string | undefined {
   const datasourceBlockFirstLine = schema
     .linesAsArray()
-    .find(([, , l]) => l.startsWith('datasource') && l.includes('{'))
+    .find((l) => l.text.startsWith('datasource') && l.text.includes('{'))
   if (!datasourceBlockFirstLine) {
     return undefined
   }
-  const indexOfBracket = datasourceBlockFirstLine.indexOf('{')
-  return datasourceBlockFirstLine[2].slice('datasource'.length, indexOfBracket).trim()
+  const indexOfBracket = datasourceBlockFirstLine.text.indexOf('{')
+  return datasourceBlockFirstLine.text.slice('datasource'.length, indexOfBracket).trim()
 }
 
 export function getFirstDatasourceProvider(schema: PrismaSchema): string | undefined {

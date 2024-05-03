@@ -25,14 +25,14 @@ export function* getBlocks(schema: PrismaSchema): Generator<Block, void, void> {
   let blockStart: Position = Position.create(0, 0)
   const allowedBlockIdentifiers: BlockType[] = ['model', 'type', 'enum', 'datasource', 'generator', 'view']
 
-  for (const [document, lineNo, item] of schema.iterLines()) {
+  for (const { document, lineIndex, text } of schema.iterLines()) {
     // if start of block: `BlockType name {`
-    if (allowedBlockIdentifiers.some((identifier) => item.startsWith(identifier)) && item.includes('{')) {
+    if (allowedBlockIdentifiers.some((identifier) => text.startsWith(identifier)) && text.includes('{')) {
       if (blockType && blockNameRange) {
         // Recover from missing block end
         yield {
           type: blockType as BlockType,
-          range: Range.create(blockStart, Position.create(lineNo - 1, 0)),
+          range: Range.create(blockStart, Position.create(lineIndex - 1, 0)),
           nameRange: blockNameRange,
           name: blockName,
           definingDocument: document,
@@ -41,21 +41,21 @@ export function* getBlocks(schema: PrismaSchema): Generator<Block, void, void> {
         blockNameRange = undefined
       }
 
-      const index = item.search(/\s+/)
-      blockType = ~index ? (item.slice(0, index) as BlockType) : (item as BlockType)
-      blockName = item.slice(blockType.length, item.length - 2).trimStart()
-      const startCharacter = item.length - 2 - blockName.length
+      const index = text.search(/\s+/)
+      blockType = ~index ? (text.slice(0, index) as BlockType) : (text as BlockType)
+      blockName = text.slice(blockType.length, text.length - 2).trimStart()
+      const startCharacter = text.length - 2 - blockName.length
       blockName = blockName.trimEnd()
-      blockNameRange = Range.create(lineNo, startCharacter, lineNo, startCharacter + blockName.length)
-      blockStart = Position.create(lineNo, 0)
+      blockNameRange = Range.create(lineIndex, startCharacter, lineIndex, startCharacter + blockName.length)
+      blockStart = Position.create(lineIndex, 0)
       continue
     }
 
     // if end of block: `}`
-    if (item.startsWith('}') && blockType && blockNameRange) {
+    if (text.startsWith('}') && blockType && blockNameRange) {
       yield {
         type: blockType as BlockType,
-        range: Range.create(blockStart, Position.create(lineNo, 1)),
+        range: Range.create(blockStart, Position.create(lineIndex, 1)),
         nameRange: blockNameRange,
         name: blockName,
         definingDocument: document,
@@ -70,12 +70,12 @@ export function getDatamodelBlock(blockName: string, schema: PrismaSchema): Bloc
   // get start position of block
   const results = schema
     .linesAsArray()
-    .map(([document, index, line]) => {
+    .map(({ document, lineIndex, text }) => {
       if (
-        (line.includes('model') || line.includes('type') || line.includes('enum') || line.includes('view')) &&
-        line.includes(blockName)
+        (text.includes('model') || text.includes('type') || text.includes('enum') || text.includes('view')) &&
+        text.includes(blockName)
       ) {
-        return [document, index]
+        return [document, lineIndex]
       }
     })
     .filter((result) => result !== undefined) as [SchemaDocument, number][]
@@ -86,7 +86,7 @@ export function getDatamodelBlock(blockName: string, schema: PrismaSchema): Bloc
 
   const foundBlocks: Block[] = results
     .map(([document, lineNo]) => {
-      const block = getBlockAtPosition(document.fileUri, lineNo, schema)
+      const block = getBlockAtPosition(document.uri, lineNo, schema)
       if (block && block.name === blockName) {
         return block
       }
@@ -110,7 +110,7 @@ export function getFieldsFromCurrentBlock(schema: PrismaSchema, block: Block, po
 
   for (let lineIndex = block.range.start.line + 1; lineIndex < block.range.end.line; lineIndex++) {
     if (!position || lineIndex !== position.line) {
-      const [, , line] = lines[lineIndex]
+      const line = lines[lineIndex].text
       const fieldName = getFieldNameFromLine(line)
       if (fieldName) {
         fieldNames.push(fieldName)
@@ -136,7 +136,7 @@ export function getFieldTypesFromCurrentBlock(schema: PrismaSchema, block: Block
   const fieldTypeNames: Record<string, string> = {}
 
   let reachedStartLine = false
-  for (const [document, lineIndex, line] of schema.iterLines()) {
+  for (const { document, lineIndex, text: line } of schema.iterLines()) {
     if (lineIndex === block.range.start.line + 1) {
       reachedStartLine = true
     }

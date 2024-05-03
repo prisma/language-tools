@@ -1,30 +1,32 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
 
-export type Line = [document: SchemaDocument, lineNo: number, text: string]
+export type Line = {
+  readonly document: SchemaDocument
+  readonly lineIndex: number
+  readonly text: string
+  readonly untrimmedText: string
+}
 export class SchemaDocument {
-  #untrimmedLines: string[]
+  readonly lines: Line[]
 
   static fromTextDocument(textDocument: TextDocument): SchemaDocument {
     return new SchemaDocument(textDocument.uri, textDocument.getText())
   }
 
   constructor(
-    readonly fileUri: string,
+    readonly uri: string,
     readonly content: string,
   ) {
-    this.#untrimmedLines = content.split(/\r?\n/)
-  }
-
-  get lines(): Line[] {
-    return this.#untrimmedLines.map((line, lineIndex) => [this, lineIndex, line.trim()] as const)
+    this.lines = content.split(/\r?\n/).map((untrimmedText, lineIndex) => ({
+      document: this,
+      lineIndex,
+      untrimmedText,
+      text: untrimmedText.trim(),
+    }))
   }
 
   getLineContent(lineIndex: number): string {
-    return this.#untrimmedLines[lineIndex].trim()
-  }
-
-  getUntrimmedLine(lineIndex: number): string {
-    return this.#untrimmedLines[lineIndex]
+    return this.lines[lineIndex].text
   }
 }
 
@@ -53,7 +55,7 @@ export class PrismaSchema {
   }
 
   findDocByUri(fileUri: string): SchemaDocument | undefined {
-    return this.documents.find((doc) => doc.fileUri === fileUri)
+    return this.documents.find((doc) => doc.uri === fileUri)
   }
 
   findWithRegex(regexp: RegExp): FindRegexpResult | undefined {
@@ -61,7 +63,7 @@ export class PrismaSchema {
       regexp.lastIndex = 0
       const match = regexp.exec(doc.content)
       if (match) {
-        return { match, documentUri: doc.fileUri }
+        return { match, documentUri: doc.uri }
       }
     }
     return undefined

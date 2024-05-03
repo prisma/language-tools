@@ -107,17 +107,17 @@ function removeInvalidFieldSuggestions(
   position: Position,
 ): string[] {
   let reachedStartLine = false
-  for (const [, key, item] of schema.iterLines()) {
-    if (key === block.range.start.line + 1) {
+  for (const { lineIndex, text } of schema.iterLines()) {
+    if (lineIndex === block.range.start.line + 1) {
       reachedStartLine = true
     }
-    if (!reachedStartLine || key === position.line) {
+    if (!reachedStartLine || lineIndex === position.line) {
       continue
     }
-    if (key === block.range.end.line) {
+    if (lineIndex === block.range.end.line) {
       break
     }
-    const fieldName = item.replace(/ .*/, '')
+    const fieldName = text.replace(/ .*/, '')
     if (supportedFields.includes(fieldName)) {
       supportedFields = supportedFields.filter((field) => field !== fieldName)
     }
