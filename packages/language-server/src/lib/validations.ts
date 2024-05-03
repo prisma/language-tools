@@ -25,7 +25,7 @@ export const validateExperimentalFeatures = (document: TextDocument, diagnostics
 }
 
 export const validateIgnoredBlocks = (schema: PrismaSchema, diagnostics: Diagnostic[]) => {
-  Array.from(schema.iterLines()).map(([document, lineNo, currElement]) => {
+  schema.linesAsArray().map(([document, lineNo, currElement]) => {
     if (currElement.includes('@@ignore')) {
       const block = getBlockAtPosition(document.fileUri, lineNo, schema)
       if (block) {
