@@ -12,7 +12,7 @@ export class CodelensProvider implements vscode.CodeLensProvider {
   public readonly onDidChangeCodeLenses: vscode.Event<void> = this._onDidChangeCodeLenses.event
 
   constructor() {
-    this.generatorRegex = /(generator [a-zA-Z]+ {)/g
+    this.generatorRegex = /(generator +[a-zA-Z0-9]+ +{)/g
     this.enabled = vscode.workspace.getConfiguration('prisma').get('enableCodeLens', true)
 
     vscode.workspace.onDidChangeConfiguration((_) => {
@@ -37,7 +37,7 @@ export class CodelensProvider implements vscode.CodeLensProvider {
         new vscode.CodeLens(range, {
           title: 'Generate',
           command: 'prisma.generate',
-          tooltip: `Codelens to run Prisma generate`,
+          tooltip: `Run "prisma generate"`,
           // ? (@druue) The arguments property does not seem to actually
           // ? return an array of arguments. It would consistently
           // ? return one singular string element, even when defined as:
