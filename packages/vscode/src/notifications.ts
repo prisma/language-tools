@@ -5,7 +5,10 @@ export const showPDPNotification = async () => {
 
   if (pdpNotif) {
     void window
-      .showInformationMessage('Supercharge your Prisma ORM usage with global database caching, serverless connection pooling and real-time database events.', 'Visit Prisma Data Platform')
+      .showInformationMessage(
+        'Supercharge your Prisma ORM usage with global database caching, serverless connection pooling and real-time database events.',
+        'Visit Prisma Data Platform',
+      )
       .then((v) => {
         if (v === undefined) return
 
