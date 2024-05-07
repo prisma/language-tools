@@ -147,6 +147,7 @@
           "description": "If you have a Prisma schema file in a custom path, you will need to provide said path `/path/to/your/schema.prisma` to run generate"
         },
         "prisma.pdpNotification": {
+          "title": "Pdp Notification",
           "type": "boolean",
           "default": "true",
           "description": "..."
