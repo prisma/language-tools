@@ -10,7 +10,7 @@ export const showPDPNotification = async () => {
         if (v === undefined) return
 
         switch (v) {
-          case 'Action 1':
+          case 'Visit Prisma Data Platform':
             void env.openExternal(Uri.parse('https://pris.ly/cli/pdp'))
             break
         }
