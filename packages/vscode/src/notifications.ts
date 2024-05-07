@@ -5,19 +5,13 @@ export const showPDPNotification = async () => {
 
   if (pdpNotif) {
     void window
-      .showInformationMessage('Warning Notification With Actions', 'Action 1', 'Action 2', 'Action 3')
+      .showInformationMessage('Supercharge your Prisma ORM usage with global database caching, serverless connection pooling and real-time database events.', 'Visit Prisma Data Platform')
       .then((v) => {
         if (v === undefined) return
 
         switch (v) {
           case 'Action 1':
-            void env.openExternal(Uri.parse('https://www.prisma.io/'))
-            break
-
-          case 'Action 2':
-            break
-
-          case 'Action 3':
+            void env.openExternal(Uri.parse('https://pris.ly/cli/pdp'))
             break
         }
       })
