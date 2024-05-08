@@ -4,11 +4,12 @@ import * as assert from 'assert'
 import { getTextDocument } from './helper'
 import { MAX_SAFE_VALUE_i32 } from '../lib/constants'
 import listAllAvailablePreviewFeatures from '../lib/prisma-schema-wasm/listAllAvailablePreviewFeatures'
+import { PrismaSchema } from '../lib/Schema'
 
 function assertLinting(expected: Diagnostic[], fixturePath: string): void {
   const document = getTextDocument(fixturePath)
 
-  const diagnosticsResults: Diagnostic[] = handleDiagnosticsRequest(document)
+  const diagnosticsResults: Diagnostic[] = handleDiagnosticsRequest(PrismaSchema.singleFile(document)).get(document.uri)
 
   assert.ok(diagnosticsResults.length != 0)
   expected.forEach((expectedDiagnostic, i) => {

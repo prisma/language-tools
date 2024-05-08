@@ -9,6 +9,7 @@ import {
 import { CURSOR_CHARACTER, findCursorPosition, getTextDocument } from './helper'
 
 import * as assert from 'assert'
+import { PrismaSchema } from '../lib/Schema'
 
 suite('Artificial Panics', () => {
   const OLD_ENV = { ...process.env }
@@ -49,7 +50,7 @@ suite('Artificial Panics', () => {
     }
 
     try {
-      const _codeActions = handleCodeActions(params, document, onError)
+      const _codeActions = handleCodeActions(PrismaSchema.singleFile(document), document, params, onError)
 
       assert.fail("This shouldn't happen!")
     } catch (e) {
@@ -83,7 +84,7 @@ suite('Artificial Panics', () => {
     }
 
     try {
-      const _formatResult = handleDocumentFormatting(params, document, onError)
+      const _formatResult = handleDocumentFormatting(PrismaSchema.singleFile(document), document, params, onError)
 
       assert.fail("This shouldn't happen!")
     } catch (e) {
@@ -109,7 +110,7 @@ suite('Artificial Panics', () => {
     }
 
     try {
-      const _diagnostics = handleDiagnosticsRequest(document, onError)
+      const _diagnostics = handleDiagnosticsRequest(PrismaSchema.singleFile(document), onError)
 
       assert.fail("This shouldn't happen!")
     } catch (e) {
@@ -151,7 +152,7 @@ suite('Artificial Panics', () => {
     }
 
     try {
-      const _completions = handleCompletionRequest(params, document, onError)
+      const _completions = handleCompletionRequest(PrismaSchema.singleFile(document), document, params, onError)
 
       assert.fail("This shouldn't happen!")
     } catch (e) {
@@ -193,7 +194,7 @@ suite('Artificial Panics', () => {
     }
 
     try {
-      const _completions = handleCompletionRequest(params, document, onError)
+      const _completions = handleCompletionRequest(PrismaSchema.singleFile(document), document, params, onError)
 
       assert.fail("This shouldn't happen!")
     } catch (e) {
@@ -224,7 +225,7 @@ suite('Artificial Panics', () => {
     }
 
     try {
-      const _completions = handleCompletionRequest(params, document, onError)
+      const _completions = handleCompletionRequest(PrismaSchema.singleFile(document), document, params, onError)
 
       assert.fail("This shouldn't happen!")
     } catch (e) {

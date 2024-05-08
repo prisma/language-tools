@@ -1,8 +1,6 @@
 import { Position, Range } from 'vscode-languageserver'
-import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { BlockType } from '../types'
-import { MAX_SAFE_VALUE_i32 } from '../constants'
 
 import { getFieldType } from './fields'
 import { getBlockAtPosition } from './findAtPosition'
@@ -215,15 +213,12 @@ function getFieldNameFromLine(line: string) {
   return firstPartOfLine
 }
 
-export const getDocumentationForBlock = (document: TextDocument, block: Block): string[] => {
-  return getDocumentation(document, block.range.start.line, [])
+export const getDocumentationForBlock = (block: Block): string[] => {
+  return getDocumentation(block.definingDocument, block.range.start.line, [])
 }
 
-const getDocumentation = (document: TextDocument, line: number, comments: string[]): string[] => {
-  const comment = document.getText({
-    start: { line: line - 1, character: 0 },
-    end: { line: line - 1, character: MAX_SAFE_VALUE_i32 },
-  })
+const getDocumentation = (document: SchemaDocument, line: number, comments: string[]): string[] => {
+  const comment = document.lines[line - 1]?.untrimmedText ?? ''
 
   if (comment.startsWith('///')) {
     comments.unshift(comment.slice(4).trim())

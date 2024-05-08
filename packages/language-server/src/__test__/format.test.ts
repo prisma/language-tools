@@ -2,6 +2,7 @@ import { handleDocumentFormatting } from '../lib/MessageHandler'
 import { TextEdit, DocumentFormattingParams } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
+import { PrismaSchema } from '../lib/Schema'
 
 function assertFormat(fixturePath: string): void {
   const textDocument = getTextDocument(fixturePath)
@@ -13,7 +14,7 @@ function assertFormat(fixturePath: string): void {
     },
   }
 
-  const formatResult: TextEdit[] = handleDocumentFormatting(params, textDocument)
+  const formatResult: TextEdit[] = handleDocumentFormatting(PrismaSchema.singleFile(textDocument), textDocument, params)
 
   assert.ok(formatResult.length !== 0)
 }

@@ -40,7 +40,7 @@ import {
   EditsMap,
   mergeEditMaps,
 } from './code-actions/rename'
-import { validateExperimentalFeatures, validateIgnoredBlocks } from './validations'
+import { validateIgnoredBlocks } from './validations'
 import {
   fullDocumentRange,
   getWordAtPosition,
@@ -52,19 +52,19 @@ import {
 } from './ast'
 import { prismaSchemaWasmCompletions, localCompletions } from './completions'
 import { PrismaSchema, SchemaDocument } from './Schema'
+import { DiagnosticMap } from './DiagnosticMap'
 
 export function handleDiagnosticsRequest(
-  document: TextDocument,
+  schema: PrismaSchema,
   onError?: (errorMessage: string) => void,
-): Diagnostic[] {
-  const text = document.getText(fullDocumentRange(document))
-  const res = lint(text, (errorMessage: string) => {
+): DiagnosticMap {
+  const res = lint(schema, (errorMessage: string) => {
     if (onError) {
       onError(errorMessage)
     }
   })
 
-  const diagnostics: Diagnostic[] = []
+  const diagnostics = new DiagnosticMap(schema.documents.map((doc) => doc.uri))
   if (
     res.some(
       (diagnostic) =>
@@ -81,6 +81,11 @@ export function handleDiagnosticsRequest(
 
   for (const diag of res) {
     const previewNotKnownRegex = /The preview feature \"[a-zA-Z]+\" is not known/
+    const uri = diag.file_name
+    const document = schema.findDocByUri(uri)
+    if (!document) {
+      continue
+    }
     const diagnostic: Diagnostic = {
       range: {
         start: document.positionAt(diag.start),
@@ -97,12 +102,9 @@ export function handleDiagnosticsRequest(
     } else {
       diagnostic.severity = DiagnosticSeverity.Error
     }
-    diagnostics.push(diagnostic)
+    diagnostics.add(uri, diagnostic)
   }
 
-  validateExperimentalFeatures(document, diagnostics)
-
-  const schema = PrismaSchema.singleFile(document)
   validateIgnoredBlocks(schema, diagnostics)
 
   return diagnostics
@@ -111,11 +113,14 @@ export function handleDiagnosticsRequest(
 /**
  * @todo Use official schema.prisma parser. This is a workaround!
  */
-export function handleDefinitionRequest(document: TextDocument, params: DeclarationParams): LocationLink[] | undefined {
+export function handleDefinitionRequest(
+  schema: PrismaSchema,
+  initiatingDocument: TextDocument,
+  params: DeclarationParams,
+): LocationLink[] | undefined {
   const position = params.position
 
-  const schema = PrismaSchema.singleFile(document)
-  const word = getWordAtPosition(document, position)
+  const word = getWordAtPosition(initiatingDocument, position)
 
   if (word === '') {
     return
@@ -169,19 +174,23 @@ export function handleDefinitionRequest(document: TextDocument, params: Declarat
  * This handler provides the modification to the document to be formatted.
  */
 export function handleDocumentFormatting(
+  schema: PrismaSchema,
+  initiatingDocument: TextDocument,
   params: DocumentFormattingParams,
-  document: TextDocument,
   onError?: (errorMessage: string) => void,
 ): TextEdit[] {
-  const formatted = format(document.getText(), params, onError)
-  return [TextEdit.replace(fullDocumentRange(document), formatted)]
+  const formatted = format(schema, initiatingDocument, params, onError)
+  return [TextEdit.replace(fullDocumentRange(initiatingDocument), formatted)]
 }
 
-export function handleHoverRequest(document: TextDocument, params: HoverParams): Hover | undefined {
+export function handleHoverRequest(
+  schema: PrismaSchema,
+  initiatingDocument: TextDocument,
+  params: HoverParams,
+): Hover | undefined {
   const position = params.position
 
-  const schema = PrismaSchema.singleFile(document)
-  const word = getWordAtPosition(document, position)
+  const word = getWordAtPosition(initiatingDocument, position)
 
   if (word === '') {
     return
@@ -192,22 +201,13 @@ export function handleHoverRequest(document: TextDocument, params: HoverParams):
     return
   }
 
-  const blockDocumentation = getDocumentationForBlock(document, block)
+  const blockDocumentation = getDocumentationForBlock(block)
 
   if (blockDocumentation.length !== 0) {
     return {
       contents: blockDocumentation.join('\n\n'),
     }
   }
-
-  // TODO uncomment once https://github.com/prisma/prisma/issues/2546 is resolved!
-  /*if (docComments.startsWith('//')) {
-    return {
-      contents: docComments.slice(3).trim(),
-    }
-  } */
-
-  return
 }
 
 /**
@@ -215,31 +215,35 @@ export function handleHoverRequest(document: TextDocument, params: HoverParams):
  * This handler provides the initial list of the completion items.
  */
 export function handleCompletionRequest(
-  params: CompletionParams,
+  schema: PrismaSchema,
   document: TextDocument,
+  params: CompletionParams,
   onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
-  return prismaSchemaWasmCompletions(params, document, onError) || localCompletions(params, document, onError)
+  return prismaSchemaWasmCompletions(schema, params, onError) || localCompletions(schema, document, params, onError)
 }
 
-export function handleRenameRequest(params: RenameParams, document: TextDocument): WorkspaceEdit | undefined {
-  const schema = PrismaSchema.singleFile(document)
+export function handleRenameRequest(
+  schema: PrismaSchema,
+  initiatingDocument: TextDocument,
+  params: RenameParams,
+): WorkspaceEdit | undefined {
   const schemaLines = schema.linesAsArray()
   const position = params.position
-  const block = getBlockAtPosition(document.uri, position.line, schema)
+  const block = getBlockAtPosition(initiatingDocument.uri, position.line, schema)
   if (!block) {
     return undefined
   }
 
   const currentLine = block.definingDocument.lines[params.position.line].text
 
-  const isDatamodelBlockRename = isDatamodelBlockName(position, block, schema, document)
+  const isDatamodelBlockRename = isDatamodelBlockName(position, block, schema, initiatingDocument)
 
   const isMappable = ['model', 'enum', 'view'].includes(block.type)
   const needsMap = !isDatamodelBlockRename ? true : isMappable
 
-  const isEnumValueRename: boolean = isEnumValue(currentLine, params.position, block, document)
-  const isValidFieldRename: boolean = isValidFieldName(currentLine, params.position, block, document)
+  const isEnumValueRename: boolean = isEnumValue(currentLine, params.position, block, initiatingDocument)
+  const isValidFieldRename: boolean = isValidFieldName(currentLine, params.position, block, initiatingDocument)
   const isRelationFieldRename: boolean = isValidFieldRename && isRelationField(currentLine, schema)
 
   if (isDatamodelBlockRename || isEnumValueRename || isValidFieldRename) {
@@ -249,7 +253,7 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
       isDatamodelBlockRename,
       isEnumValueRename,
       isValidFieldRename,
-      document,
+      initiatingDocument,
       params.position,
     )
 
@@ -274,7 +278,7 @@ export function handleRenameRequest(params: RenameParams, document: TextDocument
     }
 
     // rename marked string
-    edits.push(insertBasicRename(params.newName, currentName, document, lineNumberOfDefinition))
+    edits.push(insertBasicRename(params.newName, currentName, initiatingDocument, lineNumberOfDefinition))
 
     // check if map exists already
     if (
@@ -323,15 +327,16 @@ export function handleCompletionResolveRequest(item: CompletionItem): Completion
 }
 
 export function handleCodeActions(
+  schema: PrismaSchema,
+  initiatingDocument: TextDocument,
   params: CodeActionParams,
-  document: TextDocument,
   onError?: (errorMessage: string) => void,
 ): CodeAction[] {
   if (!params.context.diagnostics.length) {
     return []
   }
 
-  return quickFix(document, params, onError)
+  return quickFix(schema, initiatingDocument, params, onError)
 }
 
 export function handleDocumentSymbol(params: DocumentSymbolParams, document: TextDocument): DocumentSymbol[] {
