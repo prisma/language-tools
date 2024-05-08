@@ -13,7 +13,7 @@ export const showPDPNotification = async () => {
     .then((v) => {
       if (v === undefined) return
 
-      void env.openExternal(Uri.parse('https://pris.ly/cli/pdp'))
+      void env.openExternal(Uri.parse('https://pris.ly/vscode/pdp'))
     })
 
   await workspace.getConfiguration('prisma').update('pdpNotification', false, ConfigurationTarget.Global)
