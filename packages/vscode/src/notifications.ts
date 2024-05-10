@@ -1,7 +1,7 @@
 import { workspace, window, env, Uri, ConfigurationTarget } from 'vscode'
 
 export const showPDPNotification = async () => {
-  const pdpNotif = workspace.getConfiguration('prisma').get('pdpNotification', true)
+  const pdpNotif = workspace.getConfiguration('prisma').get('showPrismaDataPlatformNotification', true)
 
   if (!pdpNotif) return
 
@@ -16,5 +16,7 @@ export const showPDPNotification = async () => {
       void env.openExternal(Uri.parse('https://pris.ly/vscode/pdp'))
     })
 
-  await workspace.getConfiguration('prisma').update('pdpNotification', false, ConfigurationTarget.Global)
+  await workspace
+    .getConfiguration('prisma')
+    .update('showPrismaDataPlatformNotification', false, ConfigurationTarget.Global)
 }
