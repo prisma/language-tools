@@ -190,7 +190,7 @@
     "@types/glob": "8.1.0",
     "@types/mocha": "10.0.6",
     "@types/vscode": "1.56.0",
-    "@vscode/test-electron": "2.3.9",
+    "@vscode/test-electron": "2.3.10",
     "is-ci": "3.0.1",
     "mocha": "10.4.0",
     "ovsx": "0.9.1",
