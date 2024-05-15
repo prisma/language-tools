@@ -1,10 +1,10 @@
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 import { handleRenameRequest } from '../lib/MessageHandler'
 import { WorkspaceEdit, RenameParams, Position } from 'vscode-languageserver'
-import * as assert from 'assert'
 import { getTextDocument } from './helper'
 import { MAX_SAFE_VALUE_i32 } from '../lib/constants'
 import { PrismaSchema } from '../lib/Schema'
+import { describe, test, expect } from 'vitest'
 
 function assertRename(expected: WorkspaceEdit, document: TextDocument, newName: string, position: Position): void {
   const params: RenameParams = {
@@ -19,11 +19,11 @@ function assertRename(expected: WorkspaceEdit, document: TextDocument, newName: 
     params,
   )
 
-  assert.notStrictEqual(renameResult, undefined)
-  assert.deepStrictEqual(renameResult, expected)
+  expect(renameResult).not.toBeUndefined()
+  expect(renameResult).toStrictEqual(expected)
 }
 
-suite('Rename', () => {
+describe('Rename', () => {
   const renameModelPath = './rename/renameModel.prisma'
   const renameFieldPath = './rename/renameFields.prisma'
   const renameEnumPath = './rename/renameEnum.prisma'

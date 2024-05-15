@@ -1,29 +1,21 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "Node16",
+    "moduleResolution": "Node16",
     "target": "es6",
     "outDir": "dist",
     "noUnusedLocals": false,
-    "lib": [
-      "es6"
-    ],
+    "lib": ["es6"],
     "sourceMap": true,
     "esModuleInterop": true,
     "strict": true,
     "resolveJsonModule": true,
     "composite": true,
-    "typeRoots": [
-      "./node_modules/@types",
-    ]
+    "rootDir": "./src",
+    "typeRoots": ["./node_modules/@types"],
+    "skipLibCheck": true
   },
-  "include": [
-    "src/**/*",
-    "src/lib/**/*",
-    "src/**/*.json"
-  ],
-  "exclude": [
-    "node_modules",
-    ".vscode-test"
-  ]
+  "include": ["src/**/*", "src/lib/**/*", "src/**/*.json"],
+  "exclude": ["node_modules", ".vscode-test"]
 }

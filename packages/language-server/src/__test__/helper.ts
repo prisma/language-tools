@@ -5,7 +5,7 @@ import { URI } from 'vscode-uri'
 
 export const CURSOR_CHARACTER = '|'
 
-const fixturesDir = path.resolve(__dirname, '../../../test/fixtures')
+const fixturesDir = path.resolve(__dirname, '../../test/fixtures')
 
 export function getTextDocument(testFilePath: string): TextDocument {
   const absPath = path.join(fixturesDir, testFilePath)

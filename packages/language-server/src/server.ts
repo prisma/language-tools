@@ -22,7 +22,7 @@ import type { LSOptions, LSSettings } from './lib/types'
 import { getVersion, getEnginesVersion, getCliVersion } from './lib/prisma-schema-wasm/internals'
 import { PrismaSchema } from './lib/Schema'
 
-const packageJson = require('../../package.json') // eslint-disable-line
+const packageJson = require('../package.json') // eslint-disable-line
 
 function getConnection(options?: LSOptions): Connection {
   let connection = options?.connection

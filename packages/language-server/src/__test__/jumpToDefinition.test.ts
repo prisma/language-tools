@@ -1,7 +1,7 @@
 import { Position } from 'vscode-languageserver-textdocument'
+import { describe, test, expect } from 'vitest'
 import { handleDefinitionRequest } from '../lib/MessageHandler'
 import { LocationLink, Range } from 'vscode-languageserver'
-import * as assert from 'assert'
 import { getTextDocument } from './helper'
 import { PrismaSchema } from '../lib/Schema'
 
@@ -15,11 +15,11 @@ function assertJumpToDefinition(position: Position, expectedRange: Range, fixtur
     params,
   )
 
-  assert.ok(defResult !== undefined)
-  assert.deepStrictEqual(defResult[0].targetRange, expectedRange)
+  expect(defResult).not.toBeUndefined()
+  expect(defResult?.[0]?.targetRange).toStrictEqual(expectedRange)
 }
 
-suite('Jump-to-Definition', () => {
+describe('Jump-to-Definition', () => {
   const fixturePathSqlite = './correct_sqlite.prisma'
   const fixturePathMongodb = './correct_mongodb.prisma'
 

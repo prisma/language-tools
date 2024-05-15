@@ -7,12 +7,15 @@ import {
   handleDocumentFormatting,
 } from '../lib/MessageHandler'
 import { CURSOR_CHARACTER, findCursorPosition, getTextDocument } from './helper'
+import { describe, test, expect, vi, afterEach } from 'vitest'
+import '../lib/prisma-schema-wasm/error/wasm'
 
-import * as assert from 'assert'
 import { PrismaSchema } from '../lib/Schema'
 
-suite('Artificial Panics', () => {
-  const OLD_ENV = { ...process.env }
+describe('Artificial Panics', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
 
   test('code actions', () => {
     const fixturePath = './artificial-panic/schema.prisma'
@@ -37,28 +40,12 @@ suite('Artificial Panics', () => {
       },
     }
 
-    process.env.FORCE_PANIC_PRISMA_SCHEMA = '1'
+    vi.stubEnv('FORCE_PANIC_PRISMA_SCHEMA', '1')
+    const onError = vi.fn()
 
-    let calledCount = 0
-    let calledArg: undefined | unknown = undefined
-
-    // No official mock implementation in mocha
-    // -> DIY mock for onError
-    const onError = (arg: unknown) => {
-      calledCount += 1
-      calledArg = arg
-    }
-
-    try {
-      const _codeActions = handleCodeActions(PrismaSchema.singleFile(document), document, params, onError)
-
-      assert.fail("This shouldn't happen!")
-    } catch (e) {
-      assert.ok(calledArg)
-      assert.strictEqual(calledCount, 1)
-    } finally {
-      process.env = { ...OLD_ENV }
-    }
+    handleCodeActions(PrismaSchema.singleFile(document), document, params, onError)
+    expect(onError).toBeCalledTimes(1)
+    expect(onError).toBeCalledWith(expect.any(String))
   })
 
   test('formatter', () => {
@@ -73,52 +60,25 @@ suite('Artificial Panics', () => {
       },
     }
 
-    process.env.FORCE_PANIC_PRISMA_SCHEMA = '1'
+    vi.stubEnv('FORCE_PANIC_PRISMA_SCHEMA', '1')
+    const onError = vi.fn()
 
-    let calledCount = 0
-    let calledArg: undefined | unknown = undefined
-
-    const onError = (arg: unknown) => {
-      calledCount += 1
-      calledArg = arg
-    }
-
-    try {
-      const _formatResult = handleDocumentFormatting(PrismaSchema.singleFile(document), document, params, onError)
-
-      assert.fail("This shouldn't happen!")
-    } catch (e) {
-      assert.ok(calledArg)
-      assert.strictEqual(calledCount, 1)
-    } finally {
-      process.env = { ...OLD_ENV }
-    }
+    handleDocumentFormatting(PrismaSchema.singleFile(document), document, params, onError)
+    expect(onError).toBeCalledTimes(1)
+    expect(onError).toBeCalledWith(expect.any(String))
   })
 
   test('linting', () => {
     const fixturePath = './artificial-panic/schema.prisma'
     const document = getTextDocument(fixturePath)
 
-    process.env.FORCE_PANIC_PRISMA_SCHEMA = '1'
+    vi.stubEnv('FORCE_PANIC_PRISMA_SCHEMA', '1')
+    const onError = vi.fn()
 
-    let calledCount = 0
-    let calledArg: undefined | unknown = undefined
+    handleDiagnosticsRequest(PrismaSchema.singleFile(document), onError)
 
-    const onError = (arg: unknown) => {
-      calledCount += 1
-      calledArg = arg
-    }
-
-    try {
-      const _diagnostics = handleDiagnosticsRequest(PrismaSchema.singleFile(document), onError)
-
-      assert.fail("This shouldn't happen!")
-    } catch (e) {
-      assert.ok(calledArg)
-      assert.strictEqual(calledCount, 1)
-    } finally {
-      process.env = { ...OLD_ENV }
-    }
+    expect(onError).toBeCalledTimes(1)
+    expect(onError).toBeCalledWith(expect.any(String))
   })
 
   test('preview features', () => {
@@ -141,26 +101,11 @@ suite('Artificial Panics', () => {
       position,
     }
 
-    process.env.FORCE_PANIC_PRISMA_SCHEMA_LOCAL = '1'
-
-    let calledCount = 0
-    let calledArg: undefined | unknown = undefined
-
-    const onError = (arg: unknown) => {
-      calledCount += 1
-      calledArg = arg
-    }
-
-    try {
-      const _completions = handleCompletionRequest(PrismaSchema.singleFile(document), document, params, onError)
-
-      assert.fail("This shouldn't happen!")
-    } catch (e) {
-      assert.ok(calledArg)
-      assert.strictEqual(calledCount, 1)
-    } finally {
-      process.env = { ...OLD_ENV }
-    }
+    vi.stubEnv('FORCE_PANIC_PRISMA_SCHEMA_LOCAL', '1')
+    const onError = vi.fn()
+    handleCompletionRequest(PrismaSchema.singleFile(document), document, params, onError)
+    expect(onError).toBeCalledTimes(1)
+    expect(onError).toBeCalledWith(expect.any(String))
   })
 
   test('native types', () => {
@@ -183,26 +128,12 @@ suite('Artificial Panics', () => {
       position,
     }
 
-    process.env.FORCE_PANIC_PRISMA_SCHEMA_LOCAL = '1'
+    vi.stubEnv('FORCE_PANIC_PRISMA_SCHEMA_LOCAL', '1')
+    const onError = vi.fn()
 
-    let calledCount = 0
-    let calledArg: undefined | unknown = undefined
-
-    const onError = (arg: unknown) => {
-      calledCount += 1
-      calledArg = arg
-    }
-
-    try {
-      const _completions = handleCompletionRequest(PrismaSchema.singleFile(document), document, params, onError)
-
-      assert.fail("This shouldn't happen!")
-    } catch (e) {
-      assert.ok(calledArg)
-      assert.strictEqual(calledCount, 1)
-    } finally {
-      process.env = { ...OLD_ENV }
-    }
+    handleCompletionRequest(PrismaSchema.singleFile(document), document, params, onError)
+    expect(onError).toBeCalledTimes(1)
+    expect(onError).toBeCalledWith(expect.any(String))
   })
 
   test('completions', () => {
@@ -214,25 +145,12 @@ suite('Artificial Panics', () => {
       position: { character: 0, line: 0 },
     }
 
-    process.env.FORCE_PANIC_PRISMA_SCHEMA = '1'
+    vi.stubEnv('FORCE_PANIC_PRISMA_SCHEMA', '1')
+    const onError = vi.fn()
 
-    let calledCount = 0
-    let calledArg: undefined | unknown = undefined
+    handleCompletionRequest(PrismaSchema.singleFile(document), document, params, onError)
 
-    const onError = (arg: unknown) => {
-      calledCount += 1
-      calledArg = arg
-    }
-
-    try {
-      const _completions = handleCompletionRequest(PrismaSchema.singleFile(document), document, params, onError)
-
-      assert.fail("This shouldn't happen!")
-    } catch (e) {
-      assert.ok(calledArg)
-      assert.strictEqual(calledCount, 1)
-    } finally {
-      process.env = { ...OLD_ENV }
-    }
+    expect(onError).toBeCalledTimes(1)
+    expect(onError).toBeCalledWith(expect.any(String))
   })
 })
