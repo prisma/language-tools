@@ -51,7 +51,6 @@ export function handleWasmError(e: Error, cmd: string, onError?: (errorMessage: 
   }
 
   if (onError) {
-    console.log('call onError', onError.toString())
     onError(
       // Note: VS Code strips newline characters from the message
       `prisma-schema-wasm errored with: -- ${message} -- For the full output check the "Prisma Language Server" output. In the menu, click "View", then Output and select "Prisma Language Server" in the drop-down menu.`,
