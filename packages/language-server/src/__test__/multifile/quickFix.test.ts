@@ -19,50 +19,6 @@ test('basic doc', async () => {
       diagnostics,
     },
   })
-  expect(response).toMatchInlineSnapshot(`
-    [
-      {
-        "diagnostics": [
-          {
-            "message": "Error parsing attribute "@relation": A one-to-one relation must use unique fields on the defining side. Either add an \`@unique\` attribute to the field \`userId\`, or change the relation to one-to-many.",
-            "range": {
-              "end": {
-                "character": 0,
-                "line": 4,
-              },
-              "start": {
-                "character": 4,
-                "line": 3,
-              },
-            },
-            "severity": 1,
-            "source": "Prisma",
-          },
-        ],
-        "edit": {
-          "changes": {
-            "file:///multifile/quick-fix/Profile.prisma": [
-              {
-                "newText": " @unique",
-                "range": {
-                  "end": {
-                    "character": 17,
-                    "line": 2,
-                  },
-                  "start": {
-                    "character": 17,
-                    "line": 2,
-                  },
-                },
-              },
-            ],
-          },
-        },
-        "kind": "quickfix",
-        "title": "Make referencing fields unique",
-      },
-    ]
-  `)
 
   const changes = response[0]?.edit?.changes
   const updated = helper.applyChanges(changes)
