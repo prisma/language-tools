@@ -1,21 +1,35 @@
 import * as fs from 'fs'
 import { Position, TextDocument } from 'vscode-languageserver-textdocument'
+import { loadSchemaFiles } from '@prisma/schema-files-loader'
 import path from 'path'
 import { URI } from 'vscode-uri'
+import { PrismaSchema, SchemaDocument } from '../lib/Schema'
 
 export const CURSOR_CHARACTER = '|'
 
 const fixturesDir = path.resolve(__dirname, '../../test/fixtures')
+const multifileFixturesDir = path.join(fixturesDir, 'multifile')
 
 export function getTextDocument(testFilePath: string): TextDocument {
   const absPath = path.join(fixturesDir, testFilePath)
   const content: string = fs.readFileSync(absPath, 'utf8')
 
-  return TextDocument.create(fixturePathToUri(testFilePath), 'prisma', 1, content)
+  return TextDocument.create(fixturePathToUri(absPath), 'prisma', 1, content)
+}
+
+export async function getMultifileSchema(folderPath: string): Promise<PrismaSchema> {
+  const files = await loadSchemaFiles(path.join(multifileFixturesDir, folderPath))
+  const schemaDocs = files.map(([filePath, content]) => {
+    const uri = fixturePathToUri(filePath)
+    const doc = TextDocument.create(uri, 'prisma', 1, content)
+    return new SchemaDocument(doc)
+  })
+
+  return new PrismaSchema(schemaDocs)
 }
 
 export function fixturePathToUri(fixturePath: string) {
-  const absPath = path.join(fixturesDir, fixturePath)
+  const absPath = path.isAbsolute(fixturePath) ? fixturePath : path.join(fixturesDir, fixturePath)
 
   // that would normalize testFilePath and resolve all of
   // the . and ..

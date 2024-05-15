@@ -19,7 +19,7 @@ export type Line = {
 export class SchemaDocument {
   readonly lines: Line[]
 
-  constructor(private textDocument: TextDocument) {
+  constructor(readonly textDocument: TextDocument) {
     this.lines = textDocument
       .getText()
       .split(/\r?\n/)
