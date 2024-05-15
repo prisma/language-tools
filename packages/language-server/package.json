@@ -31,12 +31,14 @@
   "typings": "dist/src/index",
   "dependencies": {
     "@prisma/prisma-schema-wasm": "5.15.0-3.97f638f5e0f371a1a553cf726f9d597bbe811bff",
+    "@prisma/schema-files-loader": "5.14.0-dev.77",
     "@types/js-levenshtein": "1.1.3",
     "js-levenshtein": "1.1.6",
     "klona": "2.0.6",
     "nyc": "15.1.0",
     "vscode-languageserver": "8.1.0",
-    "vscode-languageserver-textdocument": "1.0.11"
+    "vscode-languageserver-textdocument": "1.0.11",
+    "vscode-uri": "^3.0.8"
   },
   "devDependencies": {
     "@types/mocha": "10.0.6",

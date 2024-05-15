@@ -11,7 +11,6 @@ import type { TextDocument } from 'vscode-languageserver-textdocument'
 import textDocumentCompletion from '../prisma-schema-wasm/textDocumentCompletion'
 
 import {
-  fullDocumentRange,
   getCurrentLine,
   getSymbolBeforePosition,
   getBlockAtPosition,
@@ -588,13 +587,11 @@ function getSuggestionForFirstInsideBlock(
 }
 
 export function prismaSchemaWasmCompletions(
+  schema: PrismaSchema,
   params: CompletionParams,
-  document: TextDocument,
   onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
-  const text = document.getText(fullDocumentRange(document))
-
-  const completionList = textDocumentCompletion(text, params, (errorMessage: string) => {
+  const completionList = textDocumentCompletion(schema, params, (errorMessage: string) => {
     if (onError) {
       onError(errorMessage)
     }
@@ -608,26 +605,26 @@ export function prismaSchemaWasmCompletions(
 }
 
 export function localCompletions(
+  schema: PrismaSchema,
+  initiatingDocument: TextDocument,
   params: CompletionParams,
-  document: TextDocument,
   onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
   const context = params.context
   const position = params.position
 
-  const schema = PrismaSchema.singleFile(document)
-  const currentLineUntrimmed = getCurrentLine(document, position.line)
+  const currentLineUntrimmed = getCurrentLine(initiatingDocument, position.line)
   const currentLineTillPosition = currentLineUntrimmed.slice(0, position.character - 1).trim()
   const wordsBeforePosition: string[] = currentLineTillPosition.split(/\s+/)
 
-  const symbolBeforePosition = getSymbolBeforePosition(document, position)
+  const symbolBeforePosition = getSymbolBeforePosition(initiatingDocument, position)
   const symbolBeforePositionIsWhiteSpace = symbolBeforePosition.search(/\s/) !== -1
 
   const positionIsAfterArray: boolean =
     wordsBeforePosition.length >= 3 && !currentLineTillPosition.includes('[') && symbolBeforePositionIsWhiteSpace
 
   // datasource, generator, model, type or enum
-  const foundBlock = getBlockAtPosition(document.uri, position.line, schema)
+  const foundBlock = getBlockAtPosition(initiatingDocument.uri, position.line, schema)
   if (!foundBlock) {
     if (wordsBeforePosition.length > 1 || (wordsBeforePosition.length === 1 && symbolBeforePositionIsWhiteSpace)) {
       return
@@ -644,15 +641,15 @@ export function localCompletions(
   if (context?.triggerKind === CompletionTriggerKind.TriggerCharacter) {
     switch (context.triggerCharacter as '@' | '"' | '.') {
       case '@':
-        if (!positionIsAfterFieldAndType(position, document, wordsBeforePosition)) {
+        if (!positionIsAfterFieldAndType(position, initiatingDocument, wordsBeforePosition)) {
           return
         }
         return getSuggestionForFieldAttribute(
           foundBlock,
-          getCurrentLine(document, position.line),
+          getCurrentLine(initiatingDocument, position.line),
           schema,
           wordsBeforePosition,
-          document,
+          initiatingDocument,
           onError,
         )
       case '"':
@@ -670,7 +667,7 @@ export function localCompletions(
         if (['model', 'view'].includes(foundBlock.type) && isInsideAttribute(currentLineUntrimmed, position, '()')) {
           return getSuggestionsForInsideRoundBrackets(currentLineUntrimmed, schema, position, foundBlock)
         } else {
-          return getSuggestionForNativeTypes(foundBlock, schema, wordsBeforePosition, document, onError)
+          return getSuggestionForNativeTypes(foundBlock, schema, wordsBeforePosition, initiatingDocument, onError)
         }
     }
   }
@@ -684,7 +681,7 @@ export function localCompletions(
         return getSuggestionsForInsideRoundBrackets(currentLineUntrimmed, schema, position, foundBlock)
       }
       // check if field type
-      if (!positionIsAfterFieldAndType(position, document, wordsBeforePosition)) {
+      if (!positionIsAfterFieldAndType(position, initiatingDocument, wordsBeforePosition)) {
         return getSuggestionsForFieldTypes(schema, position, currentLineUntrimmed)
       }
       return getSuggestionForFieldAttribute(
@@ -692,7 +689,7 @@ export function localCompletions(
         foundBlock.definingDocument.getLineContent(position.line),
         schema,
         wordsBeforePosition,
-        document,
+        initiatingDocument,
         onError,
       )
     case 'datasource':

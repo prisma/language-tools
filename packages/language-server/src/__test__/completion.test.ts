@@ -4,8 +4,7 @@ import { CompletionList, CompletionParams, CompletionItemKind, CompletionTrigger
 import assert from 'assert'
 import dedent from 'ts-dedent'
 import { CURSOR_CHARACTER, findCursorPosition } from './helper'
-
-/* eslint-disable @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-misused-promises */
+import { PrismaSchema } from '../lib/Schema'
 
 type DatasourceProvider = 'sqlite' | 'postgresql' | 'mysql' | 'mongodb' | 'sqlserver' | 'cockroachdb'
 
@@ -57,7 +56,7 @@ function assertCompletion({
 
   const position = findCursorPosition(schema)
   const document: TextDocument = TextDocument.create(
-    'completions/none.prisma',
+    'file:///completions/none.prisma',
     'prisma',
     1,
     schema.replace(CURSOR_CHARACTER, ''),
@@ -71,7 +70,11 @@ function assertCompletion({
     },
   }
 
-  const completionResult: CompletionList | undefined = handleCompletionRequest(completionParams, document)
+  const completionResult: CompletionList | undefined = handleCompletionRequest(
+    PrismaSchema.singleFile(document),
+    document,
+    completionParams,
+  )
 
   assert.ok(completionResult !== undefined)
 

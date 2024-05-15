@@ -85,18 +85,18 @@ function addTypeModifiers(hasTypeModifierArray: boolean, hasTypeModifierOptional
 }
 
 export function quickFix(
-  textDocument: TextDocument,
+  schema: PrismaSchema,
+  initiatingDocument: TextDocument,
   params: CodeActionParams,
   onError?: (errorMessage: string) => void,
 ): CodeAction[] {
-  const schema = PrismaSchema.singleFile(textDocument)
   const diagnostics: Diagnostic[] = params.context.diagnostics
 
   if (!diagnostics || diagnostics.length === 0) {
     return []
   }
 
-  const codeActionList = codeActions(textDocument.getText(), JSON.stringify(params), (errorMessage: string) => {
+  const codeActionList = codeActions(JSON.stringify(schema), JSON.stringify(params), (errorMessage: string) => {
     if (onError) {
       onError(errorMessage)
     }
@@ -112,7 +112,7 @@ export function quickFix(
       // See https://github.com/prisma/prisma-engines/pull/4813
       diag.message.includes('is neither a built-in type, nor refers to another model,')
     ) {
-      let diagText = textDocument.getText(diag.range)
+      let diagText = initiatingDocument.getText(diag.range)
       const hasTypeModifierArray: boolean = diagText.endsWith('[]')
       const hasTypeModifierOptional: boolean = diagText.endsWith('?')
       diagText = removeTypeModifiers(hasTypeModifierArray, hasTypeModifierOptional, diagText)
@@ -142,7 +142,7 @@ export function quickFix(
           changes: {
             [params.textDocument.uri]: [
               {
-                range: getInsertRange(textDocument),
+                range: getInsertRange(initiatingDocument),
                 newText: `\nmodel ${diagText} {\n\n}\n`,
               },
             ],
@@ -157,7 +157,7 @@ export function quickFix(
           changes: {
             [params.textDocument.uri]: [
               {
-                range: getInsertRange(textDocument),
+                range: getInsertRange(initiatingDocument),
                 newText: `\nenum ${diagText} {\n\n}\n`,
               },
             ],
@@ -184,7 +184,7 @@ export function quickFix(
       diag.severity === DiagnosticSeverity.Error &&
       diag.message.includes('It does not start with any known Prisma schema keyword.')
     ) {
-      const diagText = textDocument.getText(diag.range).split(/\s/)
+      const diagText = initiatingDocument.getText(diag.range).split(/\s/)
       if (diagText.length !== 0) {
         const spellingSuggestion = getSpellingSuggestions(diagText[0], ['model', 'enum', 'datasource', 'generator'])
         if (spellingSuggestion) {

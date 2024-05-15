@@ -1,35 +1,16 @@
-import { Diagnostic, DiagnosticSeverity, Range, DiagnosticTag } from 'vscode-languageserver'
-import { TextDocument } from 'vscode-languageserver-textdocument'
+import { DiagnosticSeverity, DiagnosticTag } from 'vscode-languageserver'
 
-import { getBlockAtPosition, getExperimentalFeaturesRange } from './ast'
+import { getBlockAtPosition } from './ast'
 import { MAX_SAFE_VALUE_i32 } from './constants'
 import { PrismaSchema } from './Schema'
+import { DiagnosticMap } from './DiagnosticMap'
 
-// TODO (Joël) can be removed? Since it was renamed to `previewFeatures`
-// check for experimentalFeatures inside generator block
-// Related code in codeActionProvider.ts, around lines 185-204
-export const validateExperimentalFeatures = (document: TextDocument, diagnostics: Diagnostic[]) => {
-  if (document.getText().includes('experimentalFeatures')) {
-    const experimentalFeaturesRange: Range | undefined = getExperimentalFeaturesRange(document)
-    if (experimentalFeaturesRange) {
-      diagnostics.push({
-        severity: DiagnosticSeverity.Error,
-        range: experimentalFeaturesRange,
-        message:
-          "The `experimentalFeatures` property is obsolete and has been renamed to 'previewFeatures' to better communicate what it is.",
-        code: 'Prisma 5',
-        tags: [2],
-      })
-    }
-  }
-}
-
-export const validateIgnoredBlocks = (schema: PrismaSchema, diagnostics: Diagnostic[]) => {
+export const validateIgnoredBlocks = (schema: PrismaSchema, diagnostics: DiagnosticMap) => {
   schema.linesAsArray().map(({ document, lineIndex, text }) => {
     if (text.includes('@@ignore')) {
       const block = getBlockAtPosition(document.uri, lineIndex, schema)
       if (block) {
-        diagnostics.push({
+        diagnostics.add(document.uri, {
           range: { start: block.range.start, end: block.range.end },
           message:
             '@@ignore: When using Prisma Migrate, this model will be kept in sync with the database schema, however, it will not be exposed in Prisma Client.',
@@ -42,7 +23,7 @@ export const validateIgnoredBlocks = (schema: PrismaSchema, diagnostics: Diagnos
         })
       }
     } else if (text.includes('@ignore')) {
-      diagnostics.push({
+      diagnostics.add(document.uri, {
         range: {
           start: { line: lineIndex, character: 0 },
           end: { line: lineIndex, character: MAX_SAFE_VALUE_i32 },

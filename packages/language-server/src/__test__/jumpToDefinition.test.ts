@@ -3,12 +3,17 @@ import { handleDefinitionRequest } from '../lib/MessageHandler'
 import { LocationLink, Range } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
+import { PrismaSchema } from '../lib/Schema'
 
 function assertJumpToDefinition(position: Position, expectedRange: Range, fixturePath: string): void {
   const textDocument = getTextDocument(fixturePath)
 
   const params = { textDocument, position }
-  const defResult: LocationLink[] | undefined = handleDefinitionRequest(textDocument, params)
+  const defResult: LocationLink[] | undefined = handleDefinitionRequest(
+    PrismaSchema.singleFile(textDocument),
+    textDocument,
+    params,
+  )
 
   assert.ok(defResult !== undefined)
   assert.deepStrictEqual(defResult[0].targetRange, expectedRange)

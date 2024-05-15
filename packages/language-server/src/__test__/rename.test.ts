@@ -4,6 +4,7 @@ import { WorkspaceEdit, RenameParams, Position } from 'vscode-languageserver'
 import * as assert from 'assert'
 import { getTextDocument } from './helper'
 import { MAX_SAFE_VALUE_i32 } from '../lib/constants'
+import { PrismaSchema } from '../lib/Schema'
 
 function assertRename(expected: WorkspaceEdit, document: TextDocument, newName: string, position: Position): void {
   const params: RenameParams = {
@@ -12,7 +13,11 @@ function assertRename(expected: WorkspaceEdit, document: TextDocument, newName: 
     position: position,
   }
 
-  const renameResult: WorkspaceEdit | undefined = handleRenameRequest(params, document)
+  const renameResult: WorkspaceEdit | undefined = handleRenameRequest(
+    PrismaSchema.singleFile(document),
+    document,
+    params,
+  )
 
   assert.notStrictEqual(renameResult, undefined)
   assert.deepStrictEqual(renameResult, expected)
