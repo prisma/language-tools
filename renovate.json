@@ -1,7 +1,7 @@
 {
   "extends": ["config:base"],
   "semanticCommits": true,
-  "ignoreDeps": ["@prisma/language-server", "@prisma/prisma-schema-wasm", "execa"],
+  "ignoreDeps": ["@prisma/language-server", "@prisma/prisma-schema-wasm", "@prisma/schema-files-loader", "execa"],
   "masterIssue": true,
   "reviewers": ["@Jolg42", "@Druue"],
   "rebaseWhen": "conflicted",
