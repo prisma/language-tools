@@ -77,7 +77,7 @@ class Line {
     }
     return {
       line: this.lineNumber,
-      character: index + substring.length,
+      character: index + substring.length + 1,
     }
   }
 }
