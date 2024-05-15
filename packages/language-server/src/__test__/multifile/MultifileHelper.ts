@@ -80,11 +80,4 @@ class Line {
       character: index + substring.length,
     }
   }
-
-  afterLastCharacter(): Position {
-    return {
-      line: this.lineNumber,
-      character: this.text.length,
-    }
-  }
 }

@@ -9,6 +9,7 @@ import {
 import { Position, TextDocuments } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { URI } from 'vscode-uri'
+import { getCurrentLine } from './ast'
 
 export type Line = {
   readonly document: SchemaDocument
@@ -17,18 +18,18 @@ export type Line = {
   readonly untrimmedText: string
 }
 export class SchemaDocument {
-  readonly lines: Line[]
+  readonly lines: Line[] = []
 
   constructor(readonly textDocument: TextDocument) {
-    this.lines = textDocument
-      .getText()
-      .split(/\r?\n/)
-      .map((untrimmedText, lineIndex) => ({
+    for (let i = 0; i < textDocument.lineCount; i++) {
+      const line = getCurrentLine(textDocument, i)
+      this.lines.push({
         document: this,
-        lineIndex,
-        untrimmedText,
-        text: untrimmedText.trim(),
-      }))
+        lineIndex: i,
+        untrimmedText: line,
+        text: line.trim(),
+      })
+    }
   }
 
   get uri(): string {

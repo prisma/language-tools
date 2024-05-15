@@ -10,7 +10,7 @@ test('type name completion', async () => {
     textDocument: {
       uri: post.uri,
     },
-    position: post.lineContaining('author Us').afterLastCharacter(),
+    position: post.lineContaining('author Us').characterAfter('Us'),
   })
 
   const userItem = response?.items.find((item) => item.label === 'User')
