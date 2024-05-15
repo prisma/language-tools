@@ -128,15 +128,15 @@ const plugin: PrismaVSCodePlugin = {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (packageJson.name === 'prisma-insider-pr-build') {
       console.log('Using local Language Server for prisma-insider-pr-build')
-      serverModule = context.asAbsolutePath(path.join('./language-server/dist/src/bin'))
+      serverModule = context.asAbsolutePath(path.join('./language-server/dist/bin'))
     } else if (isDebugMode() || isE2ETestOnPullRequest()) {
       // use Language Server from folder for debugging
       console.log('Using local Language Server from filesystem')
-      serverModule = context.asAbsolutePath(path.join('../../packages/language-server/dist/src/bin'))
+      serverModule = context.asAbsolutePath(path.join('../../packages/language-server/dist/bin'))
     } else {
       console.log('Using published Language Server (npm)')
       // use published npm package for production
-      serverModule = require.resolve('@prisma/language-server/dist/src/bin')
+      serverModule = require.resolve('@prisma/language-server/dist/bin')
     }
     console.log(`serverModule: ${serverModule}`)
 

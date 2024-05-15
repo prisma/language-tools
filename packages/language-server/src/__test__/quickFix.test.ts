@@ -1,4 +1,5 @@
 import { quickFix } from '../lib/code-actions'
+import { describe, test, expect } from 'vitest'
 import {
   CodeAction,
   DiagnosticSeverity,
@@ -7,7 +8,6 @@ import {
   Range,
   Diagnostic,
 } from 'vscode-languageserver'
-import * as assert from 'assert'
 import { fixturePathToUri, getTextDocument } from './helper'
 import { PrismaSchema } from '../lib/Schema'
 
@@ -25,9 +25,9 @@ function assertQuickFix(expected: CodeAction[], fixturePath: string, range: Rang
   }
 
   const quickFixResult: CodeAction[] = quickFix(PrismaSchema.singleFile(textDocument), textDocument, params)
+  expect(quickFixResult.length).toBeGreaterThan(0)
 
-  assert.ok(quickFixResult.length !== 0, "Expected a quick fix, but didn't get one")
-  assert.deepStrictEqual(quickFixResult, expected)
+  expect(quickFixResult).toStrictEqual(expected)
 }
 
 function createDiagnosticErrorUnknownType(unknownType: string, range: Range): Diagnostic {
@@ -39,8 +39,8 @@ function createDiagnosticErrorUnknownType(unknownType: string, range: Range): Di
   }
 }
 
-suite('Quick Fixes', () => {
-  suite('from TS', () => {
+describe('Quick Fixes', () => {
+  describe('from TS', () => {
     const fixturePath = './codeActions/quickFixes.prisma'
     const expectedPath = fixturePathToUri(fixturePath)
 
@@ -198,7 +198,7 @@ suite('Quick Fixes', () => {
     })
   })
 
-  suite('from prisma-schema-wasm', () => {
+  describe('from prisma-schema-wasm', () => {
     const fixturePath = './codeActions/one_to_many_referenced_side_misses_unique_single_field.prisma'
     const expectedPath = fixturePathToUri(fixturePath)
 

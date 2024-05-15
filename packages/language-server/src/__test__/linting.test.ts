@@ -1,6 +1,6 @@
 import { handleDiagnosticsRequest } from '../lib/MessageHandler'
+import { describe, expect, test } from 'vitest'
 import { Diagnostic, DiagnosticSeverity, DiagnosticTag } from 'vscode-languageserver'
-import * as assert from 'assert'
 import { getTextDocument } from './helper'
 import { MAX_SAFE_VALUE_i32 } from '../lib/constants'
 import listAllAvailablePreviewFeatures from '../lib/prisma-schema-wasm/listAllAvailablePreviewFeatures'
@@ -11,17 +11,17 @@ function assertLinting(expected: Diagnostic[], fixturePath: string): void {
 
   const diagnosticsResults: Diagnostic[] = handleDiagnosticsRequest(PrismaSchema.singleFile(document)).get(document.uri)
 
-  assert.ok(diagnosticsResults.length != 0)
+  expect(diagnosticsResults.length).toBeGreaterThan(0)
   expected.forEach((expectedDiagnostic, i) => {
     const actualDiagnostic = diagnosticsResults[i]
-    assert.strictEqual(actualDiagnostic.message, expectedDiagnostic.message)
-    assert.deepStrictEqual(actualDiagnostic.range, expectedDiagnostic.range)
-    assert.strictEqual(actualDiagnostic.severity, expectedDiagnostic.severity)
-    assert.deepStrictEqual(actualDiagnostic.tags, expectedDiagnostic.tags)
+    expect(actualDiagnostic.message).toStrictEqual(expectedDiagnostic.message)
+    expect(actualDiagnostic.range).toStrictEqual(expectedDiagnostic.range)
+    expect(actualDiagnostic.severity).toStrictEqual(expectedDiagnostic.severity)
+    expect(actualDiagnostic.tags).toStrictEqual(expectedDiagnostic.tags)
   })
 }
 
-suite('Linting', () => {
+describe('Linting', () => {
   const fixturePathMissingArgument = './linting/missingArgument.prisma'
   const fixturePathWrongType = './linting/wrongType.prisma'
   const fixturePathFieldIgnore = './linting/@ignore.prisma'

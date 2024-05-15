@@ -1,7 +1,7 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
+import { describe, test, expect } from 'vitest'
 import { handleCompletionRequest } from '../lib/MessageHandler'
 import { CompletionList, CompletionParams, CompletionItemKind, CompletionTriggerKind } from 'vscode-languageserver'
-import assert from 'assert'
 import dedent from 'ts-dedent'
 import { CURSOR_CHARACTER, findCursorPosition } from './helper'
 import { PrismaSchema } from '../lib/Schema'
@@ -76,50 +76,40 @@ function assertCompletion({
     completionParams,
   )
 
-  assert.ok(completionResult !== undefined)
+  expect(completionResult).not.toBeUndefined()
 
-  assert.deepStrictEqual(
-    completionResult.isIncomplete,
-    expected.isIncomplete,
+  expect(
+    completionResult?.isIncomplete,
     `Line ${position.line} - Character ${position.character}
-Expected isIncomplete to be '${expected.isIncomplete}' but got '${completionResult.isIncomplete}'`,
-  )
+Expected isIncomplete to be '${expected.isIncomplete}' but got '${completionResult?.isIncomplete}'`,
+  ).toStrictEqual(expected.isIncomplete)
 
-  assert.deepStrictEqual(
-    completionResult.items.map((item) => item.label),
-    expected.items.map((item) => item.label),
+  expect(
+    completionResult?.items.map((item) => item.label),
     `Line ${position.line} - Character ${position.character}
 mapped items => item.label`,
-  )
+  ).toStrictEqual(expected.items.map((item) => item.label))
 
-  assert.deepStrictEqual(
-    completionResult.items.map((item) => item.kind),
-    expected.items.map((item) => item.kind),
+  expect(
+    completionResult?.items.map((item) => item.kind),
     `Line ${position.line} - Character ${position.character}
 mapped items => item.kind`,
-  )
+  ).toStrictEqual(expected.items.map((item) => item.kind))
 
-  assert.deepStrictEqual(
-    completionResult.items.length,
-    expected.items.length,
+  // TODO: This is missing the output of `expected.items` so one can compare
+  expect(
+    completionResult?.items.length,
     `Line ${position.line} - Character ${position.character}
-Expected ${expected.items.length} suggestions and got ${completionResult.items.length}: ${JSON.stringify(
-      completionResult.items,
+Expected ${expected.items.length} suggestions and got ${completionResult?.items.length}: ${JSON.stringify(
+      completionResult?.items,
       undefined,
       2,
-    )}`, // TODO: This is missing the output of `expected.items` so one can compare
-  )
-
-  assert.deepStrictEqual(
-    completionResult.items.length,
-    expected.items.length,
-    `Line ${position.line} - Character ${position.character}
-items.length`,
-  )
+    )}`,
+  ).toStrictEqual(expected.items.length)
 }
 
-suite('Completions', function () {
-  // used in more than 1 suite
+describe('Completions', function () {
+  // used in more than 1 describe
   //#region types
   const fieldProvider = {
     label: 'provider',
@@ -151,7 +141,7 @@ suite('Completions', function () {
   }
   //#endregion
 
-  suite('BASE BLOCKS', () => {
+  describe('BASE BLOCKS', () => {
     test('Diagnoses block type suggestions for empty file', () => {
       assertCompletion({
         schema: /* Prisma */ `|`,
@@ -230,7 +220,7 @@ suite('Completions', function () {
     })
   })
 
-  suite('DATABASE BLOCK', () => {
+  describe('DATABASE BLOCK', () => {
     const fieldUrl = { label: 'url', kind: CompletionItemKind.Field }
     const fieldDirectUrl = { label: 'directUrl', kind: CompletionItemKind.Field }
     const fieldShadowDatabaseUrl = {
@@ -506,7 +496,7 @@ suite('Completions', function () {
     })
   })
 
-  suite('GENERATOR BLOCK', () => {
+  describe('GENERATOR BLOCK', () => {
     // fieldProvider defined above already
     //#region types
     const fieldOutput = { label: 'output', kind: CompletionItemKind.Field }
@@ -602,7 +592,7 @@ suite('Completions', function () {
     })
   })
 
-  suite('BLOCK ATTRIBUTES', () => {
+  describe('BLOCK ATTRIBUTES', () => {
     //#region types
     const blockAttributeId = {
       label: '@@id',
@@ -666,7 +656,7 @@ suite('Completions', function () {
       })
     })
 
-    suite('First in a line', () => {
+    describe('First in a line', () => {
       test('Empty model', () => {
         assertCompletion({
           schema: /* Prisma */ `
@@ -744,7 +734,7 @@ suite('Completions', function () {
         })
       })
 
-      suite('fullTextIndex', () => {
+      describe('fullTextIndex', () => {
         test('MySQL', () => {
           assertCompletion({
             provider: 'mysql',
@@ -825,8 +815,8 @@ suite('Completions', function () {
       })
     })
 
-    suite('@@unique()', function () {
-      suite('No provider', function () {
+    describe('@@unique()', function () {
+      describe('No provider', function () {
         test('@@unique([|])', () => {
           assertCompletion({
             schema: /* Prisma */ `
@@ -866,7 +856,7 @@ suite('Completions', function () {
           })
         })
       })
-      suite('MongoDB', function () {
+      describe('MongoDB', function () {
         test('@@unique([|])', () => {
           assertCompletion({
             provider: 'mongodb',
@@ -918,8 +908,8 @@ suite('Completions', function () {
       })
     })
 
-    suite('@@index()', function () {
-      suite('No provider', function () {
+    describe('@@index()', function () {
+      describe('No provider', function () {
         test('@@index([|])', () => {
           assertCompletion({
             schema: /* Prisma */ `
@@ -959,7 +949,7 @@ suite('Completions', function () {
           })
         })
       })
-      suite('MongoDB', function () {
+      describe('MongoDB', function () {
         test('@@index([|])', () => {
           assertCompletion({
             provider: 'mongodb',
@@ -1360,7 +1350,7 @@ suite('Completions', function () {
         })
       })
 
-      suite('extendedIndexes - PostgreSQL', function () {
+      describe('extendedIndexes - PostgreSQL', function () {
         test('@@index(|)', () => {
           assertCompletion({
             provider: 'postgresql',
@@ -1503,7 +1493,7 @@ suite('Completions', function () {
       })
     })
 
-    suite('@@fulltext()', function () {
+    describe('@@fulltext()', function () {
       test('@@fulltext(|) - mysql', () => {
         assertCompletion({
           provider: 'mysql',
@@ -1610,7 +1600,7 @@ suite('Completions', function () {
       })
     })
 
-    suite('@@schema()', () => {
+    describe('@@schema()', () => {
       test('@@schema - postgres', () => {
         assertCompletion({
           provider: 'postgresql',
@@ -1694,8 +1684,8 @@ suite('Completions', function () {
     })
   })
 
-  suite('TYPES', () => {
-    suite('Views', () => {
+  describe('TYPES', () => {
+    describe('Views', () => {
       test('Field Types', () => {
         assertCompletion({
           schema: /* Prisma */ `
@@ -1974,8 +1964,8 @@ suite('Completions', function () {
     })
   })
 
-  suite('NATIVE TYPES', () => {
-    suite('CockroachDB', () => {
+  describe('NATIVE TYPES', () => {
+    describe('CockroachDB', () => {
       test('String', () => {
         assertCompletion({
           provider: 'cockroachdb',
@@ -2148,7 +2138,7 @@ suite('Completions', function () {
     })
   })
 
-  suite('FIELD ATTRIBUTES', () => {
+  describe('FIELD ATTRIBUTES', () => {
     //#region types
     const fieldAttributeId = {
       label: '@id',
@@ -2486,7 +2476,7 @@ suite('Completions', function () {
       })
     })
 
-    suite('@default()', function () {
+    describe('@default()', function () {
       test('Scalar lists', () => {
         const scalarTypes = ['String', 'color', 'Int', 'Float', 'Boolean', 'DateTime'] as const
 
@@ -2512,7 +2502,7 @@ suite('Completions', function () {
         }
       })
 
-      suite('No provider', function () {
+      describe('No provider', function () {
         test('Int @id @default(|)', () => {
           assertCompletion({
             schema: /* Prisma */ `
@@ -2618,7 +2608,7 @@ suite('Completions', function () {
           })
         })
       })
-      suite('MongoDB', function () {
+      describe('MongoDB', function () {
         test('String @id @default(|)', () => {
           assertCompletion({
             provider: 'mongodb',
@@ -2716,7 +2706,7 @@ suite('Completions', function () {
           })
         })
       })
-      suite('CockroachDB', function () {
+      describe('CockroachDB', function () {
         test('Int @id @default(|)', () => {
           assertCompletion({
             provider: 'cockroachdb',
@@ -2748,7 +2738,7 @@ suite('Completions', function () {
           })
         })
 
-        suite('@default(sequence())', function () {
+        describe('@default(sequence())', function () {
           test('@default(sequence(|))', () => {
             assertCompletion({
               provider: 'cockroachdb',
@@ -2847,7 +2837,7 @@ suite('Completions', function () {
       })
     })
 
-    suite('@relation()', function () {
+    describe('@relation()', function () {
       test('@relation(|)', () => {
         assertCompletion({
           schema: /* Prisma */ `
@@ -3170,7 +3160,7 @@ suite('Completions', function () {
       })
     })
 
-    suite('namedConstraints', function () {
+    describe('namedConstraints', function () {
       test('@id(|)', () => {
         assertCompletion({
           schema: /* Prisma */ `
@@ -3527,7 +3517,7 @@ suite('Completions', function () {
       })
     })
 
-    suite('field suggestion should filter out field attributes that are already defined', () => {
+    describe('field suggestion should filter out field attributes that are already defined', () => {
       test('Baseline', () => {
         assertCompletion({
           schema: /* prisma */ `
@@ -3652,7 +3642,7 @@ suite('Completions', function () {
     })
   })
 
-  suite('SQL Server: clustered', () => {
+  describe('SQL Server: clustered', () => {
     const clusteredProperty = {
       label: 'clustered',
       kind: CompletionItemKind.Property,

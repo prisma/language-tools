@@ -1,7 +1,7 @@
 import type { Position } from 'vscode-languageserver-textdocument'
+import { describe, test, expect } from 'vitest'
 import { handleHoverRequest } from '../lib/MessageHandler'
 import { Hover } from 'vscode-languageserver'
-import * as assert from 'assert'
 import { getTextDocument } from './helper'
 import { PrismaSchema } from '../lib/Schema'
 
@@ -14,12 +14,12 @@ function assertHover(position: Position, expected: Hover, fixturePath: string): 
   }
   const hoverResult: Hover | undefined = handleHoverRequest(PrismaSchema.singleFile(textDocument), textDocument, params)
 
-  assert.ok(hoverResult !== undefined)
-  assert.deepStrictEqual(hoverResult.contents, expected.contents)
-  assert.deepStrictEqual(hoverResult.range, expected.range)
+  expect(hoverResult).not.toBeUndefined()
+  expect(hoverResult?.contents).toStrictEqual(expected.contents)
+  expect(hoverResult?.range).toStrictEqual(expected.range)
 }
 
-suite('Hover of /// documentation comments', () => {
+describe('Hover of /// documentation comments', () => {
   const fixturePath = './hover_postgresql.prisma'
 
   test('Model', () => {

@@ -1,6 +1,6 @@
 import { getWasmError, isWasmPanic, WasmPanic } from './error/panic'
 
-const packageJson = require('../../../../package.json') // eslint-disable-line
+const packageJson = require('../../../package.json') // eslint-disable-line
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return */
 
@@ -51,6 +51,7 @@ export function handleWasmError(e: Error, cmd: string, onError?: (errorMessage: 
   }
 
   if (onError) {
+    console.log('call onError', onError.toString())
     onError(
       // Note: VS Code strips newline characters from the message
       `prisma-schema-wasm errored with: -- ${message} -- For the full output check the "Prisma Language Server" output. In the menu, click "View", then Output and select "Prisma Language Server" in the drop-down menu.`,
