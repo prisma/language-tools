@@ -24,7 +24,7 @@ test('basic doc', async () => {
   const updated = helper.applyChanges(changes)
   expect(updated).toMatchInlineSnapshot(`
     {
-      "file:///multifile/quick-fix/Profile.prisma": "model Profile {
+      "file:///quick-fix/Profile.prisma": "model Profile {
         id     String @id @default(uuid())
         userId String @unique
         user   User   @relation(fields: [userId], references: [id])

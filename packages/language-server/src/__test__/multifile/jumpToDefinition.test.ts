@@ -36,7 +36,7 @@ test('basic doc', async () => {
             "line": 1,
           },
         },
-        "targetUri": "file:///multifile/user-posts/User.prisma",
+        "targetUri": "file:///user-posts/User.prisma",
       },
     ]
   `)

@@ -10,7 +10,7 @@ test('invalid doc', async () => {
   expect(response).toMatchInlineSnapshot(`
     DiagnosticMap {
       "_map": Map {
-        "file:///multifile/linting/Post.prisma" => [
+        "file:///linting/Post.prisma" => [
           {
             "message": "Type "Like" is neither a built-in type, nor refers to another model, composite type, or enum.",
             "range": {
@@ -27,8 +27,8 @@ test('invalid doc', async () => {
             "source": "Prisma",
           },
         ],
-        "file:///multifile/linting/User.prisma" => [],
-        "file:///multifile/linting/config.prisma" => [],
+        "file:///linting/User.prisma" => [],
+        "file:///linting/config.prisma" => [],
       },
     }
   `)
