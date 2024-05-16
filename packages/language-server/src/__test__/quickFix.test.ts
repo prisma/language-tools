@@ -215,11 +215,7 @@ describe('Quick Fixes', () => {
         },
       ]
 
-      let character = 11
-
-      if (process.platform === 'win32') {
-        character = 12
-      }
+      const character = 11
 
       assertQuickFix(
         [
