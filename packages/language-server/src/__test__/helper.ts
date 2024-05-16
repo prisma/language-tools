@@ -21,7 +21,7 @@ export async function getMultifileSchema(folderPath: string): Promise<PrismaSche
   const files = await loadSchemaFiles(path.join(multifileFixturesDir, folderPath))
   const schemaDocs = files.map(([filePath, content]) => {
     const uri = fixturePathToUri(filePath)
-    const doc = TextDocument.create(uri, 'prisma', 1, content.replace(/\n/g, '\r\n'))
+    const doc = TextDocument.create(uri, 'prisma', 1, content)
     return new SchemaDocument(doc)
   })
 
