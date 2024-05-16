@@ -2,7 +2,6 @@ import type { TextDocument } from 'vscode-languageserver-textdocument'
 import { handleRenameRequest } from '../lib/MessageHandler'
 import { WorkspaceEdit, RenameParams, Position } from 'vscode-languageserver'
 import { getTextDocument } from './helper'
-import { MAX_SAFE_VALUE_i32 } from '../lib/constants'
 import { PrismaSchema } from '../lib/Schema'
 import { describe, test, expect } from 'vitest'
 
@@ -368,8 +367,8 @@ describe('Rename', () => {
             {
               newText: ' @map("Album")',
               range: {
-                start: { line: 136, character: MAX_SAFE_VALUE_i32 },
-                end: { line: 136, character: MAX_SAFE_VALUE_i32 },
+                start: { line: 136, character: 33 },
+                end: { line: 136, character: 33 },
               },
             },
           ],
@@ -415,8 +414,8 @@ describe('Rename', () => {
             {
               newText: ' @map("authorId")',
               range: {
-                start: { line: 4, character: MAX_SAFE_VALUE_i32 },
-                end: { line: 4, character: MAX_SAFE_VALUE_i32 },
+                start: { line: 4, character: 16 },
+                end: { line: 4, character: 16 },
               },
             },
             {
@@ -457,8 +456,8 @@ describe('Rename', () => {
             {
               newText: ' @map("title")',
               range: {
-                start: { line: 17, character: MAX_SAFE_VALUE_i32 },
-                end: { line: 17, character: MAX_SAFE_VALUE_i32 },
+                start: { line: 17, character: 16 },
+                end: { line: 17, character: 16 },
               },
             },
             {
@@ -491,8 +490,8 @@ describe('Rename', () => {
             {
               newText: ' @map("humanId")',
               range: {
-                start: { line: 25, character: MAX_SAFE_VALUE_i32 },
-                end: { line: 25, character: MAX_SAFE_VALUE_i32 },
+                start: { line: 25, character: 13 },
+                end: { line: 25, character: 13 },
               },
             },
             {
@@ -566,8 +565,8 @@ describe('Rename', () => {
             {
               newText: ' @map("A_VARIANT_WITH_UNDERSCORES")',
               range: {
-                start: { line: 8, character: MAX_SAFE_VALUE_i32 },
-                end: { line: 8, character: MAX_SAFE_VALUE_i32 },
+                start: { line: 8, character: 27 },
+                end: { line: 8, character: 27 },
               },
             },
             {

@@ -1,5 +1,5 @@
 model Profile {
-    id    String @id @default(uuid())
+    id     String @id @default(uuid())
     userId String
-    user User @relation(fields: [userId], references: [id])
+    user   User   @relation(fields: [userId], references: [id])
 }

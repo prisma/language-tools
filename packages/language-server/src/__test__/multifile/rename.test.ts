@@ -137,11 +137,11 @@ test('rename field', async () => {
             "newText": " @map("id")",
             "range": {
               "end": {
-                "character": 2147483647,
+                "character": 36,
                 "line": 2,
               },
               "start": {
-                "character": 2147483647,
+                "character": 36,
                 "line": 2,
               },
             },
@@ -164,8 +164,8 @@ test('rename field', async () => {
     ",
       "file:///multifile/user-posts/User.prisma": "/// This is the user of the platform
     model User {
-        primaryKey    String @id @default(uuid())
-     @map("id")    name  String
+        primaryKey    String @id @default(uuid() @map("id"))
+        name  String
         email String
         posts Post[]
     }

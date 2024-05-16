@@ -12,8 +12,8 @@ test('basic doc', async () => {
       uri: profile.uri,
     },
     range: {
-      start: profile.lineContaining('user User').characterAfter('us'),
-      end: profile.lineContaining('user User').characterAfter('user'),
+      start: profile.lineContaining('user   User').characterAfter('us'),
+      end: profile.lineContaining('user   User').characterAfter('user'),
     },
     context: {
       diagnostics,
@@ -25,9 +25,9 @@ test('basic doc', async () => {
   expect(updated).toMatchInlineSnapshot(`
     {
       "file:///multifile/quick-fix/Profile.prisma": "model Profile {
-        id    String @id @default(uuid())
+        id     String @id @default(uuid())
         userId String @unique
-        user User @relation(fields: [userId], references: [id])
+        user   User   @relation(fields: [userId], references: [id])
     }
     ",
     }

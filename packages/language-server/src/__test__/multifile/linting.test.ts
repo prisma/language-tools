@@ -15,11 +15,11 @@ test('invalid doc', async () => {
             "message": "Type "Like" is neither a built-in type, nor refers to another model, composite type, or enum.",
             "range": {
               "end": {
-                "character": 14,
+                "character": 17,
                 "line": 7,
               },
               "start": {
-                "character": 10,
+                "character": 13,
                 "line": 7,
               },
             },

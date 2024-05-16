@@ -11,8 +11,8 @@ import {
   getWordAtPosition,
 } from '../ast'
 import { BlockType } from '../types'
-import { MAX_SAFE_VALUE_i32, relationNamesRegexFilter } from '../constants'
-import { PrismaSchema } from '../Schema'
+import { relationNamesRegexFilter } from '../constants'
+import { Line, PrismaSchema } from '../Schema'
 
 function getType(currentLine: string): string {
   const wordsInLine: string[] = currentLine.split(/\s+/)
@@ -154,24 +154,34 @@ export function printLogMessage(
   console.log(typeOfRename + message)
 }
 
-function insertInlineRename(fileUri: string, currentName: string, line: number): EditsMap {
+function insertInlineRename(currentName: string, line: Line): EditsMap {
+  const character = lastNoNewlineCharacter(line.untrimmedText)
   return {
-    [fileUri]: [
+    [line.document.uri]: [
       {
         range: {
           start: {
-            line: line,
-            character: MAX_SAFE_VALUE_i32,
+            line: line.lineIndex,
+            character,
           },
           end: {
-            line: line,
-            character: MAX_SAFE_VALUE_i32,
+            line: line.lineIndex,
+            character,
           },
         },
         newText: ` @map("${currentName}")`,
       },
     ],
   }
+}
+
+function lastNoNewlineCharacter(lineText: string) {
+  for (let i = lineText.length - 1; i >= 0; i--) {
+    if (lineText[i] !== '\n' && lineText[i] !== '\r') {
+      return i
+    }
+  }
+  return 0
 }
 
 function insertMapBlockAttribute(oldName: string, block: Block): EditsMap {
@@ -466,7 +476,8 @@ export function insertMapAttribute(
   if (isDatamodelBlockRename) {
     return insertMapBlockAttribute(currentName, block)
   } else {
-    return insertInlineRename(block.definingDocument.uri, currentName, position.line)
+    const line = block.definingDocument.lines[position.line]
+    return insertInlineRename(currentName, line)
   }
 }
 
