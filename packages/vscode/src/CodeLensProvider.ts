@@ -83,7 +83,7 @@ export function generateClient(_args: string) {
   const schemaPath: string | undefined = vscode.workspace.getConfiguration('prisma').get('schemaPath')
 
   const pathArgFlag = ` --schema=${schemaPath}`
-  const cmd = `(cd ${rootPath} && ${scriptRunner} prisma generate${schemaPath ? pathArgFlag : ''})`
+  const cmd = `${scriptRunner} prisma generate${schemaPath ? pathArgFlag : ''}`
 
   prismaGenerateOutputChannel.clear()
   prismaGenerateOutputChannel.show(true)
@@ -106,5 +106,5 @@ export function generateClient(_args: string) {
     }
   }
 
-  cp.exec(cmd, (err, stdout, stderr) => handleExec(err, stdout, stderr))
+  cp.exec(cmd, { cwd: rootPath }, (err, stdout, stderr) => handleExec(err, stdout, stderr))
 }
