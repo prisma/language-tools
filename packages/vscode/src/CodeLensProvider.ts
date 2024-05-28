@@ -77,7 +77,7 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 
 export function generateClient(_args: string) {
   const prismaGenerateOutputChannel = vscode.window.createOutputChannel('Prisma Generate')
-  const rootPath = vscode.workspace.workspaceFolders?.[0].uri.path
+  const rootPath = vscode.workspace.workspaceFolders?.[0].uri.fsPath
 
   const scriptRunner = vscode.workspace.getConfiguration('prisma').get('scriptRunner', 'npx')
   const schemaPath: string | undefined = vscode.workspace.getConfiguration('prisma').get('schemaPath')
