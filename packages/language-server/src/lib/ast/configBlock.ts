@@ -37,13 +37,13 @@ export function getAllPreviewFeaturesFromGenerators(schema: PrismaSchema): Previ
    * generator client {
    *   provider        = "prisma-client-js"
    *   // previewFeatures = [] // This will be ignored
-   *   previewFeatures = ["views"]
+   *   previewFeatures  =  ["views"]
    * }
    * ```
    *
-   * ? for more info: https://regex101.com/r/ezoTU2/1
+   * ? for more info: https://regex101.com/r/ezoTU2/2
    */
-  const previewFeaturesRegex = /^\s*(?!\/\/\s)previewFeatures\s=\s(\[.*\])/m
+  const previewFeaturesRegex = /^\s*(?!\/\/\s)previewFeatures\s*=\s*(\[.*\])/m
 
   const result = schema.findWithRegex(previewFeaturesRegex)
 
