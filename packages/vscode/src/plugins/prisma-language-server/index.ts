@@ -37,7 +37,6 @@ import { PrismaVSCodePlugin } from '../types'
 import paths from 'env-paths'
 import FileWatcher from 'watcher'
 import { CodelensProvider, generateClient } from '../../CodeLensProvider'
-import { showPDPNotification } from '../../notifications'
 
 const packageJson = require('../../../../package.json') // eslint-disable-line
 
@@ -210,8 +209,6 @@ const plugin: PrismaVSCodePlugin = {
         },
       } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
     }
-
-    await showPDPNotification()
 
     context.subscriptions.push(
       // when the file watcher settings change, we need to ensure they are applied

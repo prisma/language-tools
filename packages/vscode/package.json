@@ -145,11 +145,6 @@
             "/path/to/your/schema.prisma"
           ],
           "description": "If you have a Prisma schema file in a custom path, you will need to provide said path `/path/to/your/schema.prisma` to run generate"
-        },
-        "prisma.showPrismaDataPlatformNotification": {
-          "type": "boolean",
-          "default": "true",
-          "description": "If checked, a notification will be displayed, once, on the next activation of the Prisma extension only."
         }
       }
     },
