@@ -32,15 +32,19 @@ export function getFirstDatasourceProvider(schema: PrismaSchema): string | undef
 }
 
 export function getAllPreviewFeaturesFromGenerators(schema: PrismaSchema): PreviewFeatures[] | undefined {
-  // matches any `previewFeatures = [x]` in any position
-  // thanks to https://regex101.com for the online scratchpad
-  const previewFeaturesRegex = /previewFeatures\s=\s(\[.*\])/g
+  /**
+   * ```prisma
+   * generator client {
+   *   provider        = "prisma-client-js"
+   *   // previewFeatures = [] // This will be ignored
+   *   previewFeatures  =  ["views"]
+   * }
+   * ```
+   *
+   * ? for more info: https://regex101.com/r/ezoTU2/2
+   */
+  const previewFeaturesRegex = /^\s*(?!\/\/\s)previewFeatures\s*=\s*(\[.*\])/m
 
-  // we could match against all the `previewFeatures = [x]` (could be that there is more than one?)
-  // var matchAll = text.matchAll(regexp)
-  // for (const match of matchAll) {
-  //   console.log(match);
-  // }
   const result = schema.findWithRegex(previewFeaturesRegex)
 
   if (!result || !result.match[1]) {

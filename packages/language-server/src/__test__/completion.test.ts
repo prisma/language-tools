@@ -202,7 +202,9 @@ describe('Completions', function () {
         schema: /* Prisma */ `
         generator client {
           provider        = "prisma-client-js"
-          previewFeatures = ["views"]
+          // ! Assures we are reading the correct previewFeatures section.
+          // previewFeatures   = []
+          previewFeatures   = ["views"]
         }
         |
         `,
