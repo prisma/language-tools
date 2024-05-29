@@ -77,13 +77,13 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 
 export function generateClient(_args: string) {
   const prismaGenerateOutputChannel = vscode.window.createOutputChannel('Prisma Generate')
-  const rootPath = vscode.workspace.workspaceFolders?.[0].uri.path
+  const rootPath = vscode.workspace.workspaceFolders?.[0].uri.fsPath
 
   const scriptRunner = vscode.workspace.getConfiguration('prisma').get('scriptRunner', 'npx')
   const schemaPath: string | undefined = vscode.workspace.getConfiguration('prisma').get('schemaPath')
 
   const pathArgFlag = ` --schema=${schemaPath}`
-  const cmd = `(cd ${rootPath} && ${scriptRunner} prisma generate${schemaPath ? pathArgFlag : ''})`
+  const cmd = `${scriptRunner} prisma generate${schemaPath ? pathArgFlag : ''}`
 
   prismaGenerateOutputChannel.clear()
   prismaGenerateOutputChannel.show(true)
@@ -106,5 +106,5 @@ export function generateClient(_args: string) {
     }
   }
 
-  cp.exec(cmd, (err, stdout, stderr) => handleExec(err, stdout, stderr))
+  cp.exec(cmd, { cwd: rootPath }, (err, stdout, stderr) => handleExec(err, stdout, stderr))
 }
