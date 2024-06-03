@@ -3,7 +3,6 @@ import { buildDocumentation, convertToCompletionItems, toCompletionItems } from 
 
 import * as completions from './completions.json'
 import nativeTypeConstructors, { NativeTypeConstructors } from '../prisma-schema-wasm/nativeTypes'
-import { TextDocument } from 'vscode-languageserver-textdocument'
 import { nativeFunctionCompletion } from './functions'
 import {
   Block,
@@ -48,11 +47,11 @@ const relationManyTypeCompletion = (items: CompletionItem[], sugg: CompletionIte
   })
 
 export function getNativeTypes(
-  document: TextDocument,
+  schema: PrismaSchema,
   prismaType: string,
   onError?: (errorMessage: string) => void,
 ): CompletionItem[] {
-  let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(document.getText(), (errorMessage: string) => {
+  let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(schema, (errorMessage: string) => {
     if (onError) {
       onError(errorMessage)
     }
@@ -82,10 +81,9 @@ export function getSuggestionForNativeTypes(
   foundBlock: Block,
   schema: PrismaSchema,
   wordsBeforePosition: string[],
-  document: TextDocument,
   onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
-  const activeFeatureFlag = declaredNativeTypes(document, onError)
+  const activeFeatureFlag = declaredNativeTypes(schema, onError)
 
   if (
     // TODO type? native "@db." types?
@@ -103,7 +101,7 @@ export function getSuggestionForNativeTypes(
 
   // line
   const prismaType = wordsBeforePosition[1].replace('?', '').replace('[]', '')
-  const suggestions = getNativeTypes(document, prismaType, onError)
+  const suggestions = getNativeTypes(schema, prismaType, onError)
 
   return {
     items: suggestions,
@@ -134,13 +132,13 @@ export function getSuggestionsForFieldTypes(
     datasourceProvider === 'mongodb'
       ? getAllRelationNames(schema, relationNamesMongoDBRegexFilter)
       : getAllRelationNames(schema, relationNamesRegexFilter)
-      
+
   suggestions.push(...toCompletionItems(modelNames, CompletionItemKind.Reference))
-  
+
   const wordsBeforePosition = currentLineUntrimmed.slice(0, position.character).split(' ')
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
   const completeSuggestions = suggestions.filter((s) => s.label.length === wordBeforePosition.length)
-  
+
   if (completeSuggestions.length !== 0) {
     for (const sugg of completeSuggestions) {
       relationSingleTypeCompletion(suggestions, sugg)

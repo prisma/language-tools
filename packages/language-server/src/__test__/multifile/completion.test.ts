@@ -31,3 +31,22 @@ test('type name completion with no name typed', async () => {
   const userItem = response?.items.find((item) => item.label === 'User')
   expect(userItem).not.toBeUndefined()
 })
+
+test('native type complete', async () => {
+  const helper = await getMultifileHelper('complete-native-type')
+  const post = helper.file('Post.prisma')
+
+  const response = handleCompletionRequest(helper.schema, post.textDocument, {
+    textDocument: {
+      uri: post.uri,
+    },
+    position: post.lineContaining('Decimal').characterAfter('@db'),
+  })
+
+  expect(response?.items?.map((item) => item.label)).toMatchInlineSnapshot(`
+    [
+      "Decimal()",
+      "Money",
+    ]
+  `)
+})
