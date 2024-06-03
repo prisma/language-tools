@@ -5,19 +5,29 @@ import { assertQuickFix } from '.'
 import { handleDiagnosticsRequest } from '../../lib/MessageHandler'
 import { PrismaSchema } from '../../lib/Schema'
 
+const isWindows = process.platform === 'win32'
+
 describe('blocks', () => {
   const getFixturePath = (testName: string) => `./codeActions/blocks/${testName}.prisma`
+
+  // Newline differences with windows, courtesy of \r\n.
+  const range: Range = isWindows
+    ? {
+        start: { line: 12, character: 1 },
+        end: { line: 12, character: 2 },
+      }
+    : {
+        start: { line: 12, character: 1 },
+        end: { line: 13, character: 0 },
+      }
+
   test('create missing block in composite type', () => {
     const fixturePath = getFixturePath('unknown_type_composite_type')
     const expectedPath = fixturePathToUri(fixturePath)
     const document = getTextDocument(fixturePath)
-    const onError = vi.fn()
 
+    const onError = vi.fn()
     const diagnostics = handleDiagnosticsRequest(PrismaSchema.singleFile(document), onError).get(expectedPath)
-    const range: Range = {
-      start: { line: 12, character: 1 },
-      end: { line: 13, character: 0 },
-    }
 
     assertQuickFix(
       [
@@ -62,14 +72,14 @@ describe('blocks', () => {
     const fixturePath = getFixturePath('unknown_type_model_mongodb')
     const expectedPath = fixturePathToUri(fixturePath)
     const document = getTextDocument(fixturePath)
-    const onError = vi.fn()
 
+    const onError = vi.fn()
     const diagnostics = handleDiagnosticsRequest(PrismaSchema.singleFile(document), onError).get(expectedPath)
 
-    const range: Range = {
-      start: { line: 12, character: 1 },
-      end: { line: 13, character: 0 },
-    }
+    // const range: Range = {
+    //   start: { line: 12, character: 1 },
+    //   end: { line: 13, character: 0 },
+    // }
 
     assertQuickFix(
       [
@@ -129,8 +139,8 @@ describe('blocks', () => {
     const fixturePath = getFixturePath('unknown_type_model')
     const expectedPath = fixturePathToUri(fixturePath)
     const document = getTextDocument(fixturePath)
-    const onError = vi.fn()
 
+    const onError = vi.fn()
     const diagnostics = handleDiagnosticsRequest(PrismaSchema.singleFile(document), onError).get(expectedPath)
 
     const range: Range = {
@@ -181,14 +191,15 @@ describe('blocks', () => {
     const fixturePath = getFixturePath('spelling')
     const expectedPath = fixturePathToUri(fixturePath)
     const document = getTextDocument(fixturePath)
-    const onError = vi.fn()
 
+    const onError = vi.fn()
     const diagnostics = handleDiagnosticsRequest(PrismaSchema.singleFile(document), onError).get(expectedPath)
 
-    const range: Range = {
-      start: { line: 12, character: 1 },
-      end: { line: 13, character: 0 },
-    }
+    // const range: Range = {
+    //   start: { line: 12, character: 1 },
+    //   end: { line: 13, character: 0 },
+    // }
+
     const rangeSpelling = {
       start: { line: 11, character: 12 },
       end: { line: 11, character: 18 },
