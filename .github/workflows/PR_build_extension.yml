@@ -53,7 +53,6 @@ jobs:
       - name: Copy language-server dist directory inside vscode package
         run: |
           cp -R packages/language-server packages/vscode
-          rm -R packages/vscode/language-server/src packages/vscode/language-server/test
       - name: Build vsix
         run: cd packages/vscode && npm run package -- --out=prisma.vsix
 
