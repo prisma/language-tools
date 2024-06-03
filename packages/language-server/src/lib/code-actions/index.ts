@@ -134,36 +134,6 @@ export function quickFix(
           },
         })
       }
-      codeActionList.push({
-        title: `Create new model '${diagText}'`,
-        kind: CodeActionKind.QuickFix,
-        diagnostics: [diag],
-        edit: {
-          changes: {
-            [params.textDocument.uri]: [
-              {
-                range: getInsertRange(initiatingDocument),
-                newText: `\nmodel ${diagText} {\n\n}\n`,
-              },
-            ],
-          },
-        },
-      })
-      codeActionList.push({
-        title: `Create new enum '${diagText}'`,
-        kind: CodeActionKind.QuickFix,
-        diagnostics: [diag],
-        edit: {
-          changes: {
-            [params.textDocument.uri]: [
-              {
-                range: getInsertRange(initiatingDocument),
-                newText: `\nenum ${diagText} {\n\n}\n`,
-              },
-            ],
-          },
-        },
-      })
     } else if (diag.severity === DiagnosticSeverity.Error && diag.message.includes('`experimentalFeatures`')) {
       codeActionList.push({
         title: "Rename property to 'previewFeatures'",

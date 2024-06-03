@@ -22,7 +22,7 @@
     "directory": "packages/language-server"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p ./",
     "watch": "npm run build -- -w",
     "test": "vitest"
   },
