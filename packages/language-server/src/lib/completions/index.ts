@@ -649,7 +649,6 @@ export function localCompletions(
           getCurrentLine(initiatingDocument, position.line),
           schema,
           wordsBeforePosition,
-          initiatingDocument,
           onError,
         )
       case '"':
@@ -667,7 +666,7 @@ export function localCompletions(
         if (['model', 'view'].includes(foundBlock.type) && isInsideAttribute(currentLineUntrimmed, position, '()')) {
           return getSuggestionsForInsideRoundBrackets(currentLineUntrimmed, schema, position, foundBlock)
         } else {
-          return getSuggestionForNativeTypes(foundBlock, schema, wordsBeforePosition, initiatingDocument, onError)
+          return getSuggestionForNativeTypes(foundBlock, schema, wordsBeforePosition, onError)
         }
     }
   }
@@ -689,7 +688,6 @@ export function localCompletions(
         foundBlock.definingDocument.getLineContent(position.line),
         schema,
         wordsBeforePosition,
-        initiatingDocument,
         onError,
       )
     case 'datasource':

@@ -192,7 +192,6 @@ export function getSuggestionForFieldAttribute(
   currentLine: string,
   schema: PrismaSchema,
   wordsBeforePosition: string[],
-  document: TextDocument,
   onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
   const fieldType = getFieldType(currentLine)
@@ -207,7 +206,7 @@ export function getSuggestionForFieldAttribute(
   if (wordsBeforePosition.length >= 2) {
     const datasourceName = getFirstDatasourceName(schema)
     const prismaType = wordsBeforePosition[1]
-    const nativeTypeSuggestions = getNativeTypes(document, prismaType, onError)
+    const nativeTypeSuggestions = getNativeTypes(schema, prismaType, onError)
 
     if (datasourceName) {
       if (!currentLine.includes(`@${datasourceName}`)) {

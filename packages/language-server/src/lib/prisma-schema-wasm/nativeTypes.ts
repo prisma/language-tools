@@ -1,4 +1,5 @@
 import { prismaSchemaWasm } from '.'
+import { PrismaSchema } from '../Schema'
 import { handleFormatPanic, handleWasmError } from './internals'
 
 export interface NativeTypeConstructors {
@@ -9,7 +10,7 @@ export interface NativeTypeConstructors {
 }
 
 export default function nativeTypeConstructors(
-  text: string,
+  schema: PrismaSchema,
   onError?: (errorMessage: string) => void,
 ): NativeTypeConstructors[] {
   try {
@@ -20,7 +21,7 @@ export default function nativeTypeConstructors(
       })
     }
 
-    const result = prismaSchemaWasm.native_types(text)
+    const result = prismaSchemaWasm.native_types(JSON.stringify(schema))
 
     return JSON.parse(result) as NativeTypeConstructors[]
   } catch (e) {
