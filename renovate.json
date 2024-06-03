@@ -3,7 +3,7 @@
   "semanticCommits": true,
   "ignoreDeps": ["@prisma/language-server", "@prisma/prisma-schema-wasm", "@prisma/schema-files-loader", "execa"],
   "masterIssue": true,
-  "reviewers": ["@Jolg42", "@Druue"],
+  "reviewers": ["@SevInf", "@Druue", "@jkomyno"],
   "rebaseWhen": "conflicted",
   "packageRules": [
     {
