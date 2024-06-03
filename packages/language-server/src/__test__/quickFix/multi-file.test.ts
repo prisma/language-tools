@@ -1,6 +1,6 @@
 import { test, expect } from 'vitest'
 import { handleCodeActions, handleDiagnosticsRequest } from '../../lib/MessageHandler'
-import { getMultifileHelper } from './MultifileHelper'
+import { getMultifileHelper } from '../MultifileHelper'
 test('basic doc', async () => {
   const helper = await getMultifileHelper('quick-fix')
   const profile = helper.file('Profile.prisma')

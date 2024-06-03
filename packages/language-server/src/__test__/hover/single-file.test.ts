@@ -1,9 +1,8 @@
-import type { Position } from 'vscode-languageserver-textdocument'
-import { describe, test, expect } from 'vitest'
-import { handleHoverRequest } from '../lib/MessageHandler'
-import { Hover } from 'vscode-languageserver'
-import { getTextDocument } from './helper'
-import { PrismaSchema } from '../lib/Schema'
+import { expect, describe, test } from 'vitest'
+import { Position, Hover } from 'vscode-languageserver'
+import { handleHoverRequest } from '../../lib/MessageHandler'
+import { PrismaSchema } from '../../lib/Schema'
+import { getTextDocument } from '../helper'
 
 function assertHover(position: Position, expected: Hover, fixturePath: string): void {
   const textDocument = getTextDocument(fixturePath)

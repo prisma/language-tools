@@ -1,6 +1,6 @@
 import { test, expect } from 'vitest'
 import { handleDiagnosticsRequest } from '../../lib/MessageHandler'
-import { getMultifileHelper } from './MultifileHelper'
+import { getMultifileHelper } from '../MultifileHelper'
 
 test('invalid doc', async () => {
   const helper = await getMultifileHelper('linting')

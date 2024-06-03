@@ -1,10 +1,10 @@
-import { handleDiagnosticsRequest } from '../lib/MessageHandler'
-import { describe, expect, test } from 'vitest'
+import { expect, describe, test } from 'vitest'
 import { Diagnostic, DiagnosticSeverity, DiagnosticTag } from 'vscode-languageserver'
-import { getTextDocument } from './helper'
-import { MAX_SAFE_VALUE_i32 } from '../lib/constants'
-import listAllAvailablePreviewFeatures from '../lib/prisma-schema-wasm/listAllAvailablePreviewFeatures'
-import { PrismaSchema } from '../lib/Schema'
+import { handleDiagnosticsRequest } from '../../lib/MessageHandler'
+import { PrismaSchema } from '../../lib/Schema'
+import { MAX_SAFE_VALUE_i32 } from '../../lib/constants'
+import listAllAvailablePreviewFeatures from '../../lib/prisma-schema-wasm/listAllAvailablePreviewFeatures'
+import { getTextDocument } from '../helper'
 
 function assertLinting(expected: Diagnostic[], fixturePath: string): void {
   const document = getTextDocument(fixturePath)

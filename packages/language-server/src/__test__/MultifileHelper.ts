@@ -1,12 +1,12 @@
 import { URI } from 'vscode-uri'
-import { PrismaSchema, SchemaDocument } from '../../lib/Schema'
+import { PrismaSchema, SchemaDocument } from '../lib/Schema'
 import path from 'path'
-import { fixturePathToUri } from '../helper'
+import { fixturePathToUri } from './helper'
 import { Position, TextEdit } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { loadSchemaFiles } from '@prisma/schema-files-loader'
 
-const multifileFixturesDir = path.join(__dirname, 'fixtures')
+const multifileFixturesDir = path.join(__dirname, '__fixtures__/multi-file')
 
 export async function getMultifileHelper(fixturePath: string) {
   const schema = await getMultifileSchema(fixturePath)

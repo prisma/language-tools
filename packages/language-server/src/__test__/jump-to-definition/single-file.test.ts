@@ -1,9 +1,8 @@
-import { Position } from 'vscode-languageserver-textdocument'
-import { describe, test, expect } from 'vitest'
-import { handleDefinitionRequest } from '../lib/MessageHandler'
-import { LocationLink, Range } from 'vscode-languageserver'
-import { getTextDocument } from './helper'
-import { PrismaSchema } from '../lib/Schema'
+import { expect, describe, test } from 'vitest'
+import { Position, Range, LocationLink } from 'vscode-languageserver'
+import { handleDefinitionRequest } from '../../lib/MessageHandler'
+import { PrismaSchema } from '../../lib/Schema'
+import { getTextDocument } from '../helper'
 
 function assertJumpToDefinition(position: Position, expectedRange: Range, fixturePath: string): void {
   const textDocument = getTextDocument(fixturePath)

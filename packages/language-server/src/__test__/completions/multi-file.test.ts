@@ -1,6 +1,6 @@
 import { test, expect } from 'vitest'
 import { handleCompletionRequest } from '../../lib/MessageHandler'
-import { getMultifileHelper } from './MultifileHelper'
+import { getMultifileHelper } from '../MultifileHelper'
 
 test('type name completion', async () => {
   const helper = await getMultifileHelper('complete-field')

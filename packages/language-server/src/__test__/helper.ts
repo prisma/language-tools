@@ -6,7 +6,7 @@ import path from 'path'
 
 export const CURSOR_CHARACTER = '|'
 
-const fixturesDir = path.resolve(__dirname, 'fixtures')
+const fixturesDir = path.resolve(__dirname, '__fixtures__/single-file')
 
 export function getTextDocument(testFilePath: string): TextDocument {
   const absPath = path.join(fixturesDir, testFilePath)

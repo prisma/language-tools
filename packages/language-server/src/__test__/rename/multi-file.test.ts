@@ -1,6 +1,6 @@
 import { test, expect } from 'vitest'
 import { handleRenameRequest } from '../../lib/MessageHandler'
-import { getMultifileHelper } from './MultifileHelper'
+import { getMultifileHelper } from '../MultifileHelper'
 
 test('rename model', async () => {
   const helper = await getMultifileHelper('user-posts')
