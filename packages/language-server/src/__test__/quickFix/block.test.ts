@@ -76,11 +76,6 @@ describe('blocks', () => {
     const onError = vi.fn()
     const diagnostics = handleDiagnosticsRequest(PrismaSchema.singleFile(document), onError).get(expectedPath)
 
-    // const range: Range = {
-    //   start: { line: 12, character: 1 },
-    //   end: { line: 13, character: 0 },
-    // }
-
     assertQuickFix(
       [
         {
@@ -143,11 +138,6 @@ describe('blocks', () => {
     const onError = vi.fn()
     const diagnostics = handleDiagnosticsRequest(PrismaSchema.singleFile(document), onError).get(expectedPath)
 
-    const range: Range = {
-      start: { line: 12, character: 1 },
-      end: { line: 13, character: 0 },
-    }
-
     assertQuickFix(
       [
         {
@@ -194,11 +184,6 @@ describe('blocks', () => {
 
     const onError = vi.fn()
     const diagnostics = handleDiagnosticsRequest(PrismaSchema.singleFile(document), onError).get(expectedPath)
-
-    // const range: Range = {
-    //   start: { line: 12, character: 1 },
-    //   end: { line: 13, character: 0 },
-    // }
 
     const rangeSpelling = {
       start: { line: 11, character: 12 },
