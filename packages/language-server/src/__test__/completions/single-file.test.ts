@@ -1,10 +1,10 @@
-import { TextDocument } from 'vscode-languageserver-textdocument'
-import { describe, test, expect } from 'vitest'
-import { handleCompletionRequest } from '../lib/MessageHandler'
-import { CompletionList, CompletionParams, CompletionItemKind, CompletionTriggerKind } from 'vscode-languageserver'
 import dedent from 'ts-dedent'
-import { CURSOR_CHARACTER, findCursorPosition } from './helper'
-import { PrismaSchema } from '../lib/Schema'
+import { expect, describe, test } from 'vitest'
+import { CompletionList, CompletionParams, CompletionTriggerKind, CompletionItemKind } from 'vscode-languageserver'
+import { handleCompletionRequest } from '../../lib/MessageHandler'
+import { PrismaSchema } from '../../lib/Schema'
+import { findCursorPosition, CURSOR_CHARACTER } from '../helper'
+import { TextDocument } from 'vscode-languageserver-textdocument'
 
 type DatasourceProvider = 'sqlite' | 'postgresql' | 'mysql' | 'mongodb' | 'sqlserver' | 'cockroachdb'
 

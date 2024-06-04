@@ -1,6 +1,6 @@
 import { test, expect } from 'vitest'
 import { handleDefinitionRequest } from '../../lib/MessageHandler'
-import { getMultifileHelper } from './MultifileHelper'
+import { getMultifileHelper } from '../MultifileHelper'
 
 test('basic doc', async () => {
   const helper = await getMultifileHelper('user-posts')
@@ -36,7 +36,7 @@ test('basic doc', async () => {
             "line": 1,
           },
         },
-        "targetUri": "file:///multifile/user-posts/User.prisma",
+        "targetUri": "file:///user-posts/User.prisma",
       },
     ]
   `)

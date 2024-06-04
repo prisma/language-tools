@@ -1,6 +1,6 @@
 import { test, expect } from 'vitest'
 import { handleRenameRequest } from '../../lib/MessageHandler'
-import { getMultifileHelper } from './MultifileHelper'
+import { getMultifileHelper } from '../MultifileHelper'
 
 test('rename model', async () => {
   const helper = await getMultifileHelper('user-posts')
@@ -17,7 +17,7 @@ test('rename model', async () => {
   expect(response).toMatchInlineSnapshot(`
     {
       "changes": {
-        "file:///multifile/user-posts/Post.prisma": [
+        "file:///user-posts/Post.prisma": [
           {
             "newText": "Account",
             "range": {
@@ -32,7 +32,7 @@ test('rename model', async () => {
             },
           },
         ],
-        "file:///multifile/user-posts/User.prisma": [
+        "file:///user-posts/User.prisma": [
           {
             "newText": "Account",
             "range": {
@@ -67,7 +67,7 @@ test('rename model', async () => {
 
   expect(helper.applyChanges(response?.changes)).toMatchInlineSnapshot(`
     {
-      "file:///multifile/user-posts/Post.prisma": "/// This is a blog post
+      "file:///user-posts/Post.prisma": "/// This is a blog post
     model Post {
         id       String @id @default(uuid())
         title    String
@@ -76,7 +76,7 @@ test('rename model', async () => {
         author   Account   @relation(fields: [authorId], references: [id])
     }
     ",
-      "file:///multifile/user-posts/User.prisma": "/// This is the user of the platform
+      "file:///user-posts/User.prisma": "/// This is the user of the platform
     model Account {
         id    String @id @default(uuid())
         name  String
@@ -104,7 +104,7 @@ test('rename field', async () => {
   expect(response).toMatchInlineSnapshot(`
     {
       "changes": {
-        "file:///multifile/user-posts/Post.prisma": [
+        "file:///user-posts/Post.prisma": [
           {
             "newText": "primaryKey",
             "range": {
@@ -119,7 +119,7 @@ test('rename field', async () => {
             },
           },
         ],
-        "file:///multifile/user-posts/User.prisma": [
+        "file:///user-posts/User.prisma": [
           {
             "newText": "primaryKey",
             "range": {
@@ -153,7 +153,7 @@ test('rename field', async () => {
 
   expect(helper.applyChanges(response?.changes)).toMatchInlineSnapshot(`
     {
-      "file:///multifile/user-posts/Post.prisma": "/// This is a blog post
+      "file:///user-posts/Post.prisma": "/// This is a blog post
     model Post {
         id       String @id @default(uuid())
         title    String
@@ -162,7 +162,7 @@ test('rename field', async () => {
         author   User   @relation(fields: [authorId], references: [primaryKey])
     }
     ",
-      "file:///multifile/user-posts/User.prisma": "/// This is the user of the platform
+      "file:///user-posts/User.prisma": "/// This is the user of the platform
     model User {
         primaryKey    String @id @default(uuid() @map("id"))
         name  String

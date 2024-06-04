@@ -1,9 +1,8 @@
-import { Position } from 'vscode-languageserver-textdocument'
-import { describe, test, expect } from 'vitest'
-import { handleDefinitionRequest } from '../lib/MessageHandler'
-import { LocationLink, Range } from 'vscode-languageserver'
-import { getTextDocument } from './helper'
-import { PrismaSchema } from '../lib/Schema'
+import { expect, describe, test } from 'vitest'
+import { Position, Range, LocationLink } from 'vscode-languageserver'
+import { handleDefinitionRequest } from '../../lib/MessageHandler'
+import { PrismaSchema } from '../../lib/Schema'
+import { getTextDocument } from '../helper'
 
 function assertJumpToDefinition(position: Position, expectedRange: Range, fixturePath: string): void {
   const textDocument = getTextDocument(fixturePath)
@@ -20,10 +19,10 @@ function assertJumpToDefinition(position: Position, expectedRange: Range, fixtur
 }
 
 describe('Jump-to-Definition', () => {
-  const fixturePathSqlite = './correct_sqlite.prisma'
-  const fixturePathMongodb = './correct_mongodb.prisma'
+  const getFixturePath = (testName: string) => `./jump-to-definition/${testName}.prisma`
 
   test('SQLite: from attribute to model', () => {
+    const fixturePath = getFixturePath('correct_sqlite')
     assertJumpToDefinition(
       {
         line: 11,
@@ -39,7 +38,7 @@ describe('Jump-to-Definition', () => {
           character: 1,
         },
       },
-      fixturePathSqlite,
+      fixturePath,
     )
     assertJumpToDefinition(
       {
@@ -56,7 +55,7 @@ describe('Jump-to-Definition', () => {
           character: 1,
         },
       },
-      fixturePathSqlite,
+      fixturePath,
     )
     assertJumpToDefinition(
       {
@@ -73,11 +72,12 @@ describe('Jump-to-Definition', () => {
           character: 1,
         },
       },
-      fixturePathSqlite,
+      fixturePath,
     )
   })
 
   test('MongoDB: from attribute to type', () => {
+    const fixturePath = getFixturePath('correct_mongodb')
     assertJumpToDefinition(
       {
         line: 12,
@@ -93,7 +93,7 @@ describe('Jump-to-Definition', () => {
           character: 1,
         },
       },
-      fixturePathMongodb,
+      fixturePath,
     )
   })
 })

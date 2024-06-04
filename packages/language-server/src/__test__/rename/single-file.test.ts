@@ -1,9 +1,11 @@
 import type { TextDocument } from 'vscode-languageserver-textdocument'
-import { handleRenameRequest } from '../lib/MessageHandler'
+
 import { WorkspaceEdit, RenameParams, Position } from 'vscode-languageserver'
-import { getTextDocument } from './helper'
-import { PrismaSchema } from '../lib/Schema'
+
 import { describe, test, expect } from 'vitest'
+import { handleRenameRequest } from '../../lib/MessageHandler'
+import { PrismaSchema } from '../../lib/Schema'
+import { getTextDocument } from '../helper'
 
 function assertRename(expected: WorkspaceEdit, document: TextDocument, newName: string, position: Position): void {
   const params: RenameParams = {

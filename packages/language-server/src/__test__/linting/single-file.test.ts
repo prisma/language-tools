@@ -1,10 +1,10 @@
-import { handleDiagnosticsRequest } from '../lib/MessageHandler'
-import { describe, expect, test } from 'vitest'
+import { expect, describe, test } from 'vitest'
 import { Diagnostic, DiagnosticSeverity, DiagnosticTag } from 'vscode-languageserver'
-import { getTextDocument } from './helper'
-import { MAX_SAFE_VALUE_i32 } from '../lib/constants'
-import listAllAvailablePreviewFeatures from '../lib/prisma-schema-wasm/listAllAvailablePreviewFeatures'
-import { PrismaSchema } from '../lib/Schema'
+import { handleDiagnosticsRequest } from '../../lib/MessageHandler'
+import { PrismaSchema } from '../../lib/Schema'
+import { MAX_SAFE_VALUE_i32 } from '../../lib/constants'
+import listAllAvailablePreviewFeatures from '../../lib/prisma-schema-wasm/listAllAvailablePreviewFeatures'
+import { getTextDocument } from '../helper'
 
 function assertLinting(expected: Diagnostic[], fixturePath: string): void {
   const document = getTextDocument(fixturePath)
@@ -22,13 +22,10 @@ function assertLinting(expected: Diagnostic[], fixturePath: string): void {
 }
 
 describe('Linting', () => {
-  const fixturePathMissingArgument = './linting/missingArgument.prisma'
-  const fixturePathWrongType = './linting/wrongType.prisma'
-  const fixturePathFieldIgnore = './linting/@ignore.prisma'
-  const fixturePathModelIgnore = './linting/@@ignore.prisma'
-  const fixturePathUnknownPreview = './linting/unknownPreview.prisma'
+  const getFixturePath = (testName: string) => `./linting/${testName}.prisma`
 
   test('Missing argument', () => {
+    const fixturePath = getFixturePath('missingArgument')
     assertLinting(
       [
         {
@@ -40,11 +37,12 @@ describe('Linting', () => {
           severity: DiagnosticSeverity.Error,
         },
       ],
-      fixturePathMissingArgument,
+      fixturePath,
     )
   })
 
   test('Wrong type', () => {
+    const fixturePath = getFixturePath('wrongType')
     assertLinting(
       [
         {
@@ -56,11 +54,12 @@ describe('Linting', () => {
           severity: DiagnosticSeverity.Error,
         },
       ],
-      fixturePathWrongType,
+      fixturePath,
     )
   })
 
   test('@ignore : Field', () => {
+    const fixturePath = getFixturePath('@ignore')
     assertLinting(
       [
         {
@@ -74,11 +73,12 @@ describe('Linting', () => {
           severity: DiagnosticSeverity.Hint,
         },
       ],
-      fixturePathFieldIgnore,
+      fixturePath,
     )
   })
 
   test('@@ignore : Model', () => {
+    const fixturePath = getFixturePath('@@ignore')
     assertLinting(
       [
         {
@@ -92,11 +92,12 @@ describe('Linting', () => {
           severity: DiagnosticSeverity.Hint,
         },
       ],
-      fixturePathModelIgnore,
+      fixturePath,
     )
   })
 
   test('Unknown previewFeature', () => {
+    const fixturePath = getFixturePath('unknownPreview')
     const previewFeatures = listAllAvailablePreviewFeatures()
 
     assertLinting(
@@ -111,7 +112,7 @@ If this is unexpected, it might be due to your Prisma VS Code Extension being ou
           severity: DiagnosticSeverity.Error,
         },
       ],
-      fixturePathUnknownPreview,
+      fixturePath,
     )
   })
 })
