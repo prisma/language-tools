@@ -19,7 +19,7 @@ function assertHover(position: Position, expected: Hover, fixturePath: string): 
 }
 
 describe('Hover of /// documentation comments', () => {
-  const fixturePath = './hover_postgresql.prisma'
+  const fixturePath = './hover/postgresql.prisma'
 
   test('Model', () => {
     assertHover(

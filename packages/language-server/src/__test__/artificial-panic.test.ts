@@ -17,8 +17,10 @@ describe('Artificial Panics', () => {
     vi.unstubAllEnvs()
   })
 
+  const getFixturePath = (testName: string) => `./artificial-panic/${testName}.prisma`
+
   test('code actions', () => {
-    const fixturePath = './artificial-panic/schema.prisma'
+    const fixturePath = getFixturePath('schema')
     const document = getTextDocument(fixturePath)
 
     const params: CodeActionParams = {
@@ -49,7 +51,7 @@ describe('Artificial Panics', () => {
   })
 
   test('formatter', () => {
-    const fixturePath = './artificial-panic/schema.prisma'
+    const fixturePath = getFixturePath('schema')
     const document = getTextDocument(fixturePath)
 
     const params: DocumentFormattingParams = {
@@ -69,7 +71,7 @@ describe('Artificial Panics', () => {
   })
 
   test('linting', () => {
-    const fixturePath = './artificial-panic/schema.prisma'
+    const fixturePath = getFixturePath('schema')
     const document = getTextDocument(fixturePath)
 
     vi.stubEnv('FORCE_PANIC_PRISMA_SCHEMA', '1')
@@ -82,7 +84,7 @@ describe('Artificial Panics', () => {
   })
 
   test('preview features', () => {
-    const fixturePath = './artificial-panic/schema.prisma'
+    const fixturePath = getFixturePath('schema')
     let document = getTextDocument(fixturePath)
 
     const schema = document.getText()
@@ -109,7 +111,7 @@ describe('Artificial Panics', () => {
   })
 
   test('native types', () => {
-    const fixturePath = './artificial-panic/native-types.prisma'
+    const fixturePath = getFixturePath('native-types')
     let document = getTextDocument(fixturePath)
 
     const schema = document.getText()
@@ -137,7 +139,7 @@ describe('Artificial Panics', () => {
   })
 
   test('completions', () => {
-    const fixturePath = './artificial-panic/schema.prisma'
+    const fixturePath = getFixturePath('schema')
     const document = getTextDocument(fixturePath)
 
     const params: CompletionParams = {

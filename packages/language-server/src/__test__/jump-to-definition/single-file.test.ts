@@ -19,10 +19,10 @@ function assertJumpToDefinition(position: Position, expectedRange: Range, fixtur
 }
 
 describe('Jump-to-Definition', () => {
-  const fixturePathSqlite = './correct_sqlite.prisma'
-  const fixturePathMongodb = './correct_mongodb.prisma'
+  const getFixturePath = (testName: string) => `./jump-to-definition/${testName}.prisma`
 
   test('SQLite: from attribute to model', () => {
+    const fixturePath = getFixturePath('correct_sqlite')
     assertJumpToDefinition(
       {
         line: 11,
@@ -38,7 +38,7 @@ describe('Jump-to-Definition', () => {
           character: 1,
         },
       },
-      fixturePathSqlite,
+      fixturePath,
     )
     assertJumpToDefinition(
       {
@@ -55,7 +55,7 @@ describe('Jump-to-Definition', () => {
           character: 1,
         },
       },
-      fixturePathSqlite,
+      fixturePath,
     )
     assertJumpToDefinition(
       {
@@ -72,11 +72,12 @@ describe('Jump-to-Definition', () => {
           character: 1,
         },
       },
-      fixturePathSqlite,
+      fixturePath,
     )
   })
 
   test('MongoDB: from attribute to type', () => {
+    const fixturePath = getFixturePath('correct_mongodb')
     assertJumpToDefinition(
       {
         line: 12,
@@ -92,7 +93,7 @@ describe('Jump-to-Definition', () => {
           character: 1,
         },
       },
-      fixturePathMongodb,
+      fixturePath,
     )
   })
 })

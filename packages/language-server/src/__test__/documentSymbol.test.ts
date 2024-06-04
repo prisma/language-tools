@@ -11,8 +11,10 @@ function assertSymbols(fixturePath: string, expected: DocumentSymbol[]) {
 }
 
 describe('DocumentSymbol', () => {
+  const getFixturePath = (testName: string) => `./hover/${testName}.prisma`
   test('hover_postgresql.prisma', () => {
-    assertSymbols('./hover_postgresql.prisma', [
+    const fixturePath = getFixturePath('postgresql')
+    assertSymbols(fixturePath, [
       {
         kind: SymbolKind.Struct,
         name: 'db',
@@ -161,7 +163,8 @@ describe('DocumentSymbol', () => {
   })
 
   test('hover_mongodb.prisma', () => {
-    assertSymbols('./hover_mongodb.prisma', [
+    const fixturePath = getFixturePath('mongodb')
+    assertSymbols(fixturePath, [
       {
         kind: SymbolKind.Function,
         name: 'client',
