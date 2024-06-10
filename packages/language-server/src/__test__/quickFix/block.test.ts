@@ -21,6 +21,8 @@ describe('blocks', () => {
         end: { line: 13, character: 0 },
       }
 
+  const newLine = isWindows ? '\r\n' : '\n'
+
   test('create missing block in composite type', () => {
     const fixturePath = getFixturePath('unknown_type_composite_type')
     const expectedPath = fixturePathToUri(fixturePath)
@@ -40,7 +42,7 @@ describe('blocks', () => {
               [expectedPath]: [
                 {
                   range,
-                  newText: '\ntype Animal {\n\n}\n',
+                  newText: `${newLine}type Animal {${newLine}${newLine}}${newLine}`,
                 },
               ],
             },
@@ -55,7 +57,7 @@ describe('blocks', () => {
               [expectedPath]: [
                 {
                   range,
-                  newText: '\nenum Animal {\n\n}\n',
+                  newText: `${newLine}enum Animal {${newLine}${newLine}}${newLine}`,
                 },
               ],
             },
@@ -87,7 +89,7 @@ describe('blocks', () => {
               [expectedPath]: [
                 {
                   range,
-                  newText: '\nmodel Address {\n\n}\n',
+                  newText: `${newLine}model Address {${newLine}${newLine}}${newLine}`,
                 },
               ],
             },
@@ -102,7 +104,7 @@ describe('blocks', () => {
               [expectedPath]: [
                 {
                   range,
-                  newText: '\nenum Address {\n\n}\n',
+                  newText: `${newLine}enum Address {${newLine}${newLine}}${newLine}`,
                 },
               ],
             },
@@ -117,7 +119,7 @@ describe('blocks', () => {
               [expectedPath]: [
                 {
                   range,
-                  newText: '\ntype Address {\n\n}\n',
+                  newText: `${newLine}type Address {${newLine}${newLine}}${newLine}`,
                 },
               ],
             },
@@ -149,7 +151,7 @@ describe('blocks', () => {
               [expectedPath]: [
                 {
                   range,
-                  newText: '\nmodel Animal {\n\n}\n',
+                  newText: `${newLine}model Animal {${newLine}${newLine}}${newLine}`,
                 },
               ],
             },
@@ -164,7 +166,7 @@ describe('blocks', () => {
               [expectedPath]: [
                 {
                   range,
-                  newText: '\nenum Animal {\n\n}\n',
+                  newText: `\nenum Animal {${newLine}${newLine}}${newLine}`,
                 },
               ],
             },
@@ -201,7 +203,7 @@ describe('blocks', () => {
               [expectedPath]: [
                 {
                   range: range,
-                  newText: '\nmodel Animol {\n\n}\n',
+                  newText: `\nmodel Animol {${newLine}${newLine}}${newLine}`,
                 },
               ],
             },
@@ -216,7 +218,7 @@ describe('blocks', () => {
               [expectedPath]: [
                 {
                   range: range,
-                  newText: '\nenum Animol {\n\n}\n',
+                  newText: `\nenum Animol {${newLine}${newLine}}${newLine}`,
                 },
               ],
             },
