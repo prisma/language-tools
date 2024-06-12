@@ -166,7 +166,7 @@ describe('blocks', () => {
               [expectedPath]: [
                 {
                   range,
-                  newText: `\nenum Animal {${newLine}${newLine}}${newLine}`,
+                  newText: `${newLine}enum Animal {${newLine}${newLine}}${newLine}`,
                 },
               ],
             },
@@ -203,7 +203,7 @@ describe('blocks', () => {
               [expectedPath]: [
                 {
                   range: range,
-                  newText: `\nmodel Animol {${newLine}${newLine}}${newLine}`,
+                  newText: `${newLine}model Animol {${newLine}${newLine}}${newLine}`,
                 },
               ],
             },
@@ -218,7 +218,7 @@ describe('blocks', () => {
               [expectedPath]: [
                 {
                   range: range,
-                  newText: `\nenum Animol {${newLine}${newLine}}${newLine}`,
+                  newText: `${newLine}enum Animol {${newLine}${newLine}}${newLine}`,
                 },
               ],
             },
