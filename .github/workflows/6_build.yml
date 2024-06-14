@@ -32,7 +32,7 @@ jobs:
     outputs:
       tag_name: ${{ steps.names.outputs.tag_name }}
     steps:
-      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
         with:
           ref: ${{ github.event.inputs.branch }}
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
@@ -106,7 +106,7 @@ jobs:
     env:
       SLACK_MESSAGE: '${{ needs.build.outputs.tag_name }} - ${{github.event.inputs.trigger_reason}} '
     steps:
-      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
         with:
           ref: ${{ github.event.inputs.branch }}
 
