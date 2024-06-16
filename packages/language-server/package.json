@@ -2,7 +2,7 @@
   "name": "@prisma/language-server",
   "description": "Prisma Language Server",
   "displayName": "Prisma Language Server",
-  "version": "31.0.5982",
+  "version": "31.0.5983",
   "author": "Prisma",
   "license": "Apache-2.0",
   "publisher": "Prisma",
