@@ -54,7 +54,7 @@ jobs:
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: 3. Test Language Server and publish
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
           inputs: '{ "npm_channel": "latest", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "stable", "trigger_reason": "Manual trigger promoting patch branch to stable" }'
 
       - name: 'Set current job url in SLACK_FOOTER env var'

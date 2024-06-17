@@ -71,7 +71,7 @@ jobs:
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: 6. Build extension
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
           inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{github.event.inputs.branch}}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'
 
       - name: 'Set current job url in SLACK_FOOTER env var'
