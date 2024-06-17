@@ -86,8 +86,6 @@ jobs:
       SLACK_MESSAGE: '${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}'
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.PRISMA_BOT_TOKEN }}
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:

@@ -109,7 +109,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
-          token: ${{ secrets.PRISMA_BOT_TOKEN }}
 
       - name: 'Set current job url in SLACK_FOOTER env var'
         if: ${{ always() }}
