@@ -35,7 +35,7 @@ jobs:
         run: node scripts/bump_extension_version.js "latest"
       - name: Commit and Push
         run: |
-          sh scripts/commit_and_push.sh "bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}."
+          sh scripts/commit_and_push.sh "[skip ci] bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}."
 
       - name: Switch branch
         id: setup_branch
@@ -48,7 +48,7 @@ jobs:
         run: npm install && npm run bootstrap
       - name: Commit and Push
         run: |
-          sh scripts/commit_and_push.sh "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}."
+          sh scripts/commit_and_push.sh "[skip ci] bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}."
 
       - name: Trigger next workflow for Language Server tests
         uses: benc-uk/workflow-dispatch@v1

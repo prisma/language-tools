@@ -62,7 +62,7 @@ jobs:
 
       - name: Commit and push to branch
         run: |
-          sh scripts/commit_and_push.sh "Bump LS to ${{ github.event.inputs.extension_version }} in VS Code. Engines: ${{ steps.packagejson.outputs.engines }}"
+          sh scripts/commit_and_push.sh "[skip ci] Bump LS to ${{ github.event.inputs.extension_version }} in VS Code. Engines: ${{ steps.packagejson.outputs.engines }}"
 
       - name: Trigger next workflow for VS Code e2e tests
         uses: benc-uk/workflow-dispatch@v1

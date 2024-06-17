@@ -43,7 +43,7 @@ jobs:
         run: node scripts/bump_extension_version.js dev
       - name: Commit and Push
         run: |
-          sh scripts/commit_and_push.sh "bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}."
+          sh scripts/commit_and_push.sh "[skip ci] bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}."
 
       - name: Checkout previous branch
         if: endsWith(github.ref, '/main') == false
@@ -55,7 +55,7 @@ jobs:
         run: npm install && npm run bootstrap
       - name: Commit and Push
         run: |
-          sh scripts/commit_and_push.sh "bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}." ${{ steps.setup_branch.outputs.new_branch }}
+          sh scripts/commit_and_push.sh "[skip ci] bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}." ${{ steps.setup_branch.outputs.new_branch }}
 
       - name: Trigger next workflow for Language Server tests
         if: endsWith(github.ref, '/main')
