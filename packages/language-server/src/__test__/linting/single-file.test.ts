@@ -104,7 +104,7 @@ describe('Linting', () => {
       [
         {
           message: `The preview feature "huh" is not known. Expected one of: ${previewFeatures.join(', ')}.
-If this is unexpected, it might be due to your Prisma VS Code Extension being out of date.`,
+If this is unexpected, it might be due to your editor's Prisma Extension being out of date.`,
           range: {
             start: { line: 2, character: 22 },
             end: { line: 2, character: 29 },
