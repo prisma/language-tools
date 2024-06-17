@@ -106,9 +106,10 @@ jobs:
     env:
       SLACK_MESSAGE: '${{ needs.build.outputs.tag_name }} - ${{github.event.inputs.trigger_reason}} '
     steps:
-      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
 
       - name: 'Set current job url in SLACK_FOOTER env var'
         if: ${{ always() }}
