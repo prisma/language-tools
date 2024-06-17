@@ -33,14 +33,14 @@ jobs:
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: E2E tests after release on VSIX
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
           inputs: '{ "extension_type": "insider", "extension_version": "${{ steps.check_published_version.outputs.new_insider_version }}" }'
       - name: Trigger e2e tests for stable
         if: ${{ steps.check_published_version.outputs.new_stable_version }}
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: E2E tests after release on VSIX
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
           inputs: '{ "extension_type": "stable", "extension_version": "${{ steps.check_published_version.outputs.new_stable_version }}" }'
 
       - name: 'Set current job url in SLACK_FOOTER env var'

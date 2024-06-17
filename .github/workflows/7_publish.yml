@@ -51,7 +51,7 @@ jobs:
           repo: 'prisma/language-tools'
           version: 'tags/${{ github.event.inputs.tag_name }}'
           file: ${{ github.event.inputs.asset_name }}
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
 
       - name: publish vsix to marketplace
         run: cd packages/vscode && npx vsce publish --pat ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN}} --packagePath ${{github.workspace}}/${{ github.event.inputs.asset_name }}
@@ -85,7 +85,7 @@ jobs:
     env:
       SLACK_MESSAGE: '${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}'
     steps:
-      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
+      - uses: actions/checkout@v4
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
@@ -103,7 +103,7 @@ jobs:
           repo: 'prisma/language-tools'
           version: 'tags/${{ github.event.inputs.tag_name }}'
           file: ${{ github.event.inputs.asset_name }}
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
 
       - name: Publish vsix to open-vsx.org
         run: cd packages/vscode && npx ovsx publish ${{github.workspace}}/${{ github.event.inputs.asset_name }} --pat  ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}

@@ -29,7 +29,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
           ref: ${{ github.event.inputs.branch }}
@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
       - name: Use Node.js
@@ -80,7 +80,7 @@ jobs:
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: 4. Bump LS in VSCode extension
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
           inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'
 
   slack:
