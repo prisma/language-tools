@@ -41,7 +41,7 @@ if [ "$ENVIRONMENT" = "PRODUCTION" ]; then
     git remote add github "https://$GITHUB_ACTOR:$GH_TOKEN@github.com/$GITHUB_REPOSITORY.git" || true
 
     git add -A .
-    git commit -m "bump tested_prisma_version to $NEW_TESTED_VERSION"
+    git commit -m "[skip ci] bump tested_prisma_version to $NEW_TESTED_VERSION"
     echo "Sync with ${GITHUB_REF} and push to it"
     git pull github "${GITHUB_REF}" --rebase
     git add ./scripts/

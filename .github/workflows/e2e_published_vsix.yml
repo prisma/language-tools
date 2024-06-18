@@ -55,6 +55,8 @@ jobs:
     if: always()
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
       - name: echo new version
         run: echo ${{ needs.test.outputs.installed-extension }}
       - name: Bump version
