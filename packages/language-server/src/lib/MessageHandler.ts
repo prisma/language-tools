@@ -17,6 +17,8 @@ import {
   DocumentSymbol,
   SymbolKind,
   LocationLink,
+  ReferenceParams,
+  Location,
 } from 'vscode-languageserver'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 
@@ -53,6 +55,7 @@ import {
 import { prismaSchemaWasmCompletions, localCompletions } from './completions'
 import { PrismaSchema, SchemaDocument } from './Schema'
 import { DiagnosticMap } from './DiagnosticMap'
+import references from './prisma-schema-wasm/references'
 
 export function handleDiagnosticsRequest(
   schema: PrismaSchema,
@@ -221,6 +224,14 @@ export function handleCompletionRequest(
   onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
   return prismaSchemaWasmCompletions(schema, params, onError) || localCompletions(schema, document, params, onError)
+}
+
+export function handleReferencesRequest(
+  schema: PrismaSchema,
+  params: ReferenceParams,
+  onError?: (errorMessage: string) => void,
+): Location[] | undefined {
+  return references(schema, params, onError)
 }
 
 export function handleRenameRequest(
