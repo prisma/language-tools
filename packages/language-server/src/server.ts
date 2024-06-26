@@ -13,6 +13,7 @@ import {
   DidChangeConfigurationNotification,
   Connection,
   DocumentSymbolParams,
+  ReferenceParams,
 } from 'vscode-languageserver'
 import { createConnection, IPCMessageReader, IPCMessageWriter } from 'vscode-languageserver/node'
 import { TextDocument } from 'vscode-languageserver-textdocument'
@@ -81,6 +82,7 @@ export function startServer(options?: LSOptions): void {
         hoverProvider: true,
         renameProvider: true,
         documentSymbolProvider: true,
+        referencesProvider: true,
       },
     }
 
@@ -180,6 +182,17 @@ export function startServer(options?: LSOptions): void {
     if (doc) {
       const schema = await PrismaSchema.load(doc, documents)
       return MessageHandler.handleCompletionRequest(schema, doc, params, showErrorToast)
+    }
+  })
+
+  connection.onReferences(async (params: ReferenceParams) => {
+    const doc = getDocument(params.textDocument.uri)
+
+    if (doc) {
+      const schema = await PrismaSchema.load(doc, documents)
+      console.dir(params, { depth: null })
+
+      return MessageHandler.handleReferencesRequest(schema, params, showErrorToast)
     }
   })
 
