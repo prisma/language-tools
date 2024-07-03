@@ -9,7 +9,7 @@ export default function hover(
   initiatingDocument: TextDocument,
   params: HoverParams,
   onError?: (errorMessage: string) => void,
-): Hover | undefined {
+): Hover | null {
   try {
     if (process.env.FORCE_PANIC_PRISMA_SCHEMA) {
       handleFormatPanic(() => {
@@ -20,12 +20,12 @@ export default function hover(
 
     const result = prismaSchemaWasm.hover(JSON.stringify(schema), JSON.stringify(params))
 
-    return JSON.parse(result) as Hover
+    return JSON.parse(result) as Hover | null
   } catch (e) {
     const err = e as Error
 
     handleWasmError(err, 'hover', onError)
 
-    return undefined
+    return null
   }
 }
