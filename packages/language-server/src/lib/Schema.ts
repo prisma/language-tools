@@ -21,7 +21,6 @@ export class SchemaDocument {
   readonly lines: Line[] = []
 
   constructor(readonly textDocument: TextDocument) {
-    this.textDocument = textDocument
     for (let i = 0; i < textDocument.lineCount; i++) {
       const line = getCurrentLine(textDocument, i)
       this.lines.push({
