@@ -46,7 +46,7 @@ class MultfileHelper {
   }
 }
 
-export class File {
+class File {
   constructor(readonly schemaDocument: SchemaDocument) {}
 
   get textDocument() {
