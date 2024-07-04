@@ -1,0 +1,6 @@
+/// My favourite is the red panda, could you tell?
+enum FavouriteAnimal {
+    RedPanda
+    Cat
+    Dog
+}

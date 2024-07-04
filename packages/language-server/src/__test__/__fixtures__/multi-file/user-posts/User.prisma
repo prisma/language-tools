@@ -4,4 +4,6 @@ model User {
     name  String
     email String
     posts Post[]
+
+    favouriteAnimal FavouriteAnimal
 }
