@@ -190,7 +190,6 @@ export function startServer(options?: LSOptions): void {
 
     if (doc) {
       const schema = await PrismaSchema.load(doc, documents)
-      console.dir(params, { depth: null })
 
       return MessageHandler.handleReferencesRequest(schema, params, showErrorToast)
     }
