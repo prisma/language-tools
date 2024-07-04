@@ -1,5 +1,5 @@
 /// Address doc
-type A|ddress {
+type Address {
     street String
     city   String
     /// poBox doc

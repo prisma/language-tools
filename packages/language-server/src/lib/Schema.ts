@@ -19,9 +19,8 @@ export type Line = {
 }
 export class SchemaDocument {
   readonly lines: Line[] = []
-  textDocument: TextDocument
 
-  constructor(textDocument: TextDocument) {
+  constructor(readonly textDocument: TextDocument) {
     this.textDocument = textDocument
     for (let i = 0; i < textDocument.lineCount; i++) {
       const line = getCurrentLine(textDocument, i)

@@ -1,7 +1,7 @@
 import { URI } from 'vscode-uri'
 import { PrismaSchema, SchemaDocument } from '../lib/Schema'
 import path from 'path'
-import { CURSOR_CHARACTER, findCursorPosition, fixturePathToUri } from './helper'
+import { fixturePathToUri } from './helper'
 import { Position, TextEdit } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { loadSchemaFiles } from '@prisma/schema-files-loader'
@@ -46,29 +46,15 @@ class MultfileHelper {
   }
 }
 
-class File {
-  constructor(private schemaDocument: SchemaDocument) {}
+export class File {
+  constructor(readonly schemaDocument: SchemaDocument) {}
 
   get textDocument() {
     return this.schemaDocument.textDocument
   }
 
-  private set textDocument(textDocument: TextDocument) {
-    this.schemaDocument.textDocument = textDocument
-  }
-
   get uri() {
     return this.schemaDocument.uri
-  }
-
-  findAndReplaceCursor(): Position {
-    const textDocument = this.textDocument
-    const schemaText = textDocument.getText()
-    const position = findCursorPosition(schemaText)
-
-    this.textDocument = TextDocument.create(this.uri, 'prisma', 1, schemaText.replace(CURSOR_CHARACTER, ''))
-
-    return position
   }
 
   lineContaining(match: string) {
