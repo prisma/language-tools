@@ -193,32 +193,9 @@ export function handleHoverRequest(
   params: HoverParams,
   onError?: (errorMessage: string) => void,
 ): Hover | undefined {
-  const hover_res = hover(schema, initiatingDocument, params, onError)
+  const hoverRes = hover(schema, initiatingDocument, params, onError)
 
-  if (hover_res) {
-    return hover_res
-  }
-
-  const position = params.position
-
-  const word = getWordAtPosition(initiatingDocument, position)
-
-  if (word === '') {
-    return
-  }
-
-  const block = getDatamodelBlock(word, schema)
-  if (!block) {
-    return
-  }
-
-  const blockDocumentation = getDocumentationForBlock(block)
-
-  if (blockDocumentation.length !== 0) {
-    return {
-      contents: blockDocumentation.join('\n\n'),
-    }
-  }
+  return hoverRes ? hoverRes : undefined
 }
 
 /**
