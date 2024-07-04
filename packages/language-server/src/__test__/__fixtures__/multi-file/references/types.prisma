@@ -1,0 +1,12 @@
+/// Address doc
+type Address {
+    street String
+    city   String
+    /// poBox doc
+    poBox  POBox
+}
+
+/// Nested ct doc
+type POBox {
+    name String
+}
