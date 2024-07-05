@@ -1,7 +1,6 @@
-import { test, expect } from 'vitest'
+import { test, expect, describe } from 'vitest'
 import { handleHoverRequest } from '../lib/MessageHandler'
 import { getMultifileHelper } from './MultifileHelper'
-import { describe } from 'node:test'
 
 describe('hover', () => {
   test('model doc from field', async () => {
