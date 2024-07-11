@@ -193,9 +193,7 @@ export function handleHoverRequest(
   params: HoverParams,
   onError?: (errorMessage: string) => void,
 ): Hover | undefined {
-  const hoverRes = hover(schema, initiatingDocument, params, onError)
-
-  return hoverRes ? hoverRes : undefined
+  return hover(schema, initiatingDocument, params, onError)
 }
 
 /**
