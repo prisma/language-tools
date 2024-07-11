@@ -18,7 +18,6 @@ async function testHover(docUri: vscode.Uri, position: vscode.Position, expected
 suite('Should show /// documentation comments for', () => {
   const docUri = getDocUri('hover/schema.prisma')
 
-  // ! Day 9045093485940 of wishing for inline snapshots.
   const expectedHover = `\`\`\`prisma\nmodel Post {\n\t...\n\tauthor User? @relation(name: "PostToUser", fields: [authorId], references: [id])\n}\n\`\`\`\n___\none-to-many\n___\nPost including an author and content.`
 
   test('model', async () => {
