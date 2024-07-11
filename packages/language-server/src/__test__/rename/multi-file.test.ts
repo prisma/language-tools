@@ -52,11 +52,11 @@ test('rename model', async () => {
             "range": {
               "end": {
                 "character": 1,
-                "line": 6,
+                "line": 10,
               },
               "start": {
                 "character": 0,
-                "line": 6,
+                "line": 10,
               },
             },
           },
@@ -69,7 +69,7 @@ test('rename model', async () => {
     {
       "file:///user-posts/Post.prisma": "/// This is a blog post
     model Post {
-        id       String @id @default(uuid())
+        id       String @id @default(uuid()) @map("_id")
         title    String
         content  String
         authorId String
@@ -78,10 +78,14 @@ test('rename model', async () => {
     ",
       "file:///user-posts/User.prisma": "/// This is the user of the platform
     model Account {
-        id    String @id @default(uuid())
+        id    String @id @default(uuid()) @map("_id")
         name  String
         email String
         posts Post[]
+
+        address Address
+
+        favouriteAnimal FavouriteAnimal
     	@@map("User")
     }
     ",
@@ -133,19 +137,6 @@ test('rename field', async () => {
               },
             },
           },
-          {
-            "newText": " @map("id")",
-            "range": {
-              "end": {
-                "character": 36,
-                "line": 2,
-              },
-              "start": {
-                "character": 36,
-                "line": 2,
-              },
-            },
-          },
         ],
       },
     }
@@ -155,7 +146,7 @@ test('rename field', async () => {
     {
       "file:///user-posts/Post.prisma": "/// This is a blog post
     model Post {
-        id       String @id @default(uuid())
+        id       String @id @default(uuid()) @map("_id")
         title    String
         content  String
         authorId String
@@ -164,10 +155,14 @@ test('rename field', async () => {
     ",
       "file:///user-posts/User.prisma": "/// This is the user of the platform
     model User {
-        primaryKey    String @id @default(uuid() @map("id"))
+        primaryKey    String @id @default(uuid()) @map("_id")
         name  String
         email String
         posts Post[]
+
+        address Address
+
+        favouriteAnimal FavouriteAnimal
     }
     ",
     }
