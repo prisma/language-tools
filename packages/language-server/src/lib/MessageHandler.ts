@@ -56,6 +56,7 @@ import { prismaSchemaWasmCompletions, localCompletions } from './completions'
 import { PrismaSchema, SchemaDocument } from './Schema'
 import { DiagnosticMap } from './DiagnosticMap'
 import references from './prisma-schema-wasm/references'
+import hover from './prisma-schema-wasm/hover'
 
 export function handleDiagnosticsRequest(
   schema: PrismaSchema,
@@ -190,27 +191,9 @@ export function handleHoverRequest(
   schema: PrismaSchema,
   initiatingDocument: TextDocument,
   params: HoverParams,
+  onError?: (errorMessage: string) => void,
 ): Hover | undefined {
-  const position = params.position
-
-  const word = getWordAtPosition(initiatingDocument, position)
-
-  if (word === '') {
-    return
-  }
-
-  const block = getDatamodelBlock(word, schema)
-  if (!block) {
-    return
-  }
-
-  const blockDocumentation = getDocumentationForBlock(block)
-
-  if (blockDocumentation.length !== 0) {
-    return {
-      contents: blockDocumentation.join('\n\n'),
-    }
-  }
+  return hover(schema, initiatingDocument, params, onError)
 }
 
 /**

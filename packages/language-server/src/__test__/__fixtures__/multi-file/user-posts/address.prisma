@@ -1,0 +1,6 @@
+/// Petrichor V
+type Address {
+    /// ISO 3166-2 standard
+    country String
+    POBox   Int
+}

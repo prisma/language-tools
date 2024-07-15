@@ -19,7 +19,7 @@ test('basic doc', async () => {
         "targetRange": {
           "end": {
             "character": 1,
-            "line": 6,
+            "line": 10,
           },
           "start": {
             "character": 0,

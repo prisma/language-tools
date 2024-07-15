@@ -213,7 +213,7 @@ export function startServer(options?: LSOptions): void {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
       const schema = await PrismaSchema.load(doc, documents)
-      return MessageHandler.handleHoverRequest(schema, doc, params)
+      return MessageHandler.handleHoverRequest(schema, doc, params, showErrorToast)
     }
   })
 

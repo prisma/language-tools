@@ -18,29 +18,10 @@ async function testHover(docUri: vscode.Uri, position: vscode.Position, expected
 suite('Should show /// documentation comments for', () => {
   const docUri = getDocUri('hover/schema.prisma')
 
+  const expectedHover = `\`\`\`prisma\nmodel Post {\n\t...\n\tauthor User? @relation(name: "PostToUser", fields: [authorId], references: [id])\n}\n\`\`\`\n___\none-to-many\n___\nPost including an author and content.`
+
   test('model', async () => {
     await activate(docUri)
-    await testHover(docUri, new vscode.Position(23, 10), 'Post including an author and content.')
+    await testHover(docUri, new vscode.Position(23, 10), expectedHover)
   })
 })
-
-// TODO do we still need this?
-// TODO uncomment once https://github.com/prisma/prisma/issues/2546 is resolved!
-/*
-suite('Should show // comments for', () => {
-    const docUri = getDocUri('hover.prisma')
-
-    test('model', async() => {
-        await testHover(
-            docUri,
-            new vscode.Position(14, 15),
-            'Documentation for this model.')
-    })
-    test('enum', async () => {
-        await testHover(
-            docUri, 
-            new vscode.Position(25, 9),
-            'This is a test enum.'
-        )
-    })
-}) */
