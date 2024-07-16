@@ -202,11 +202,11 @@ test('rename field - map does not exist', async () => {
             "newText": " @map("name")",
             "range": {
               "end": {
-                "character": 15,
+                "character": 16,
                 "line": 3,
               },
               "start": {
-                "character": 15,
+                "character": 16,
                 "line": 3,
               },
             },
@@ -221,7 +221,7 @@ test('rename field - map does not exist', async () => {
       "file:///user-posts/User.prisma": "/// This is the user of the platform
     model User {
         id    String @id @default(uuid()) @map("_id")
-        fullName  Strin @map("name")g
+        fullName  String @map("name")
         email String
         posts Post[]
 
