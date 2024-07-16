@@ -369,8 +369,8 @@ describe('Rename', () => {
             {
               newText: ' @map("Album")',
               range: {
-                start: { line: 136, character: 33 },
-                end: { line: 136, character: 33 },
+                start: { line: 136, character: 34 },
+                end: { line: 136, character: 34 },
               },
             },
           ],
@@ -416,8 +416,8 @@ describe('Rename', () => {
             {
               newText: ' @map("authorId")',
               range: {
-                start: { line: 4, character: 16 },
-                end: { line: 4, character: 16 },
+                start: { line: 4, character: 17 },
+                end: { line: 4, character: 17 },
               },
             },
             {
@@ -458,8 +458,8 @@ describe('Rename', () => {
             {
               newText: ' @map("title")',
               range: {
-                start: { line: 17, character: 16 },
-                end: { line: 17, character: 16 },
+                start: { line: 17, character: 17 },
+                end: { line: 17, character: 17 },
               },
             },
             {
@@ -492,8 +492,8 @@ describe('Rename', () => {
             {
               newText: ' @map("humanId")',
               range: {
-                start: { line: 25, character: 13 },
-                end: { line: 25, character: 13 },
+                start: { line: 25, character: 14 },
+                end: { line: 25, character: 14 },
               },
             },
             {
@@ -567,8 +567,8 @@ describe('Rename', () => {
             {
               newText: ' @map("A_VARIANT_WITH_UNDERSCORES")',
               range: {
-                start: { line: 8, character: 27 },
-                end: { line: 8, character: 27 },
+                start: { line: 8, character: 28 },
+                end: { line: 8, character: 28 },
               },
             },
             {
