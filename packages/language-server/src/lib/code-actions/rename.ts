@@ -155,7 +155,7 @@ export function printLogMessage(
 }
 
 function insertInlineRename(currentName: string, line: Line): EditsMap {
-  const character = line.untrimmedText.length - 1
+  const character = lastNewLineCharacter(line.untrimmedText)
   return {
     [line.document.uri]: [
       {
@@ -172,6 +172,17 @@ function insertInlineRename(currentName: string, line: Line): EditsMap {
         newText: ` @map("${currentName}")`,
       },
     ],
+  }
+}
+
+function lastNewLineCharacter(lineText: string) {
+  const i = lineText.length - 1
+  if (lineText[i] === '\n' && lineText[i - 1] === '\r') {
+    return i - 1
+  } else if (lineText[i] === '\n') {
+    return i
+  } else {
+    return 0
   }
 }
 
