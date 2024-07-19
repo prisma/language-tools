@@ -155,7 +155,7 @@ export function printLogMessage(
 }
 
 function insertInlineRename(currentName: string, line: Line): EditsMap {
-  const character = lastNoNewlineCharacter(line.untrimmedText)
+  const character = lastNewLineCharacter(line.untrimmedText)
   return {
     [line.document.uri]: [
       {
@@ -175,13 +175,15 @@ function insertInlineRename(currentName: string, line: Line): EditsMap {
   }
 }
 
-function lastNoNewlineCharacter(lineText: string) {
-  for (let i = lineText.length - 1; i >= 0; i--) {
-    if (lineText[i] !== '\n' && lineText[i] !== '\r') {
-      return i
-    }
+function lastNewLineCharacter(lineText: string) {
+  const i = lineText.length - 1
+  if (lineText[i] === '\n' && lineText[i - 1] === '\r') {
+    return i - 1
+  } else if (lineText[i] === '\n') {
+    return i
+  } else {
+    return 0
   }
-  return 0
 }
 
 function insertMapBlockAttribute(oldName: string, block: Block): EditsMap {

@@ -93,7 +93,7 @@ test('rename model', async () => {
   `)
 })
 
-test('rename field', async () => {
+test('rename field - map exists', async () => {
   const helper = await getMultifileHelper('user-posts')
   const user = helper.file('User.prisma')
 
@@ -157,6 +157,71 @@ test('rename field', async () => {
     model User {
         primaryKey    String @id @default(uuid()) @map("_id")
         name  String
+        email String
+        posts Post[]
+
+        address Address
+
+        favouriteAnimal FavouriteAnimal
+    }
+    ",
+    }
+  `)
+})
+
+test('rename field - map does not exist', async () => {
+  const helper = await getMultifileHelper('user-posts')
+  const user = helper.file('User.prisma')
+
+  const response = handleRenameRequest(helper.schema, user.textDocument, {
+    textDocument: {
+      uri: user.uri,
+    },
+    position: user.lineContaining('name  String').characterAfter('na'),
+    newName: 'fullName',
+  })
+
+  expect(response).toMatchInlineSnapshot(`
+    {
+      "changes": {
+        "file:///user-posts/User.prisma": [
+          {
+            "newText": "fullName",
+            "range": {
+              "end": {
+                "character": 8,
+                "line": 3,
+              },
+              "start": {
+                "character": 4,
+                "line": 3,
+              },
+            },
+          },
+          {
+            "newText": " @map("name")",
+            "range": {
+              "end": {
+                "character": 16,
+                "line": 3,
+              },
+              "start": {
+                "character": 16,
+                "line": 3,
+              },
+            },
+          },
+        ],
+      },
+    }
+  `)
+
+  expect(helper.applyChanges(response?.changes)).toMatchInlineSnapshot(`
+    {
+      "file:///user-posts/User.prisma": "/// This is the user of the platform
+    model User {
+        id    String @id @default(uuid()) @map("_id")
+        fullName  String @map("name")
         email String
         posts Post[]
 
