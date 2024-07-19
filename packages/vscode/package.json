@@ -185,12 +185,12 @@
     "@types/glob": "8.1.0",
     "@types/mocha": "10.0.6",
     "@types/vscode": "1.56.0",
-    "@vscode/test-electron": "2.4.0",
+    "@vscode/test-electron": "2.4.1",
     "is-ci": "3.0.1",
-    "mocha": "10.4.0",
+    "mocha": "10.6.0",
     "ovsx": "0.9.1",
-    "typescript": "5.4.5",
-    "@vscode/vsce": "2.27.0"
+    "typescript": "5.5.3",
+    "@vscode/vsce": "2.31.1"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
   "publishConfig": {
