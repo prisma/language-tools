@@ -20,6 +20,19 @@ function test({ PRISMA_USE_LOCAL_LS, version }: { PRISMA_USE_LOCAL_LS: string; v
     launchArgs: [
       // This disables all extensions except the one being testing
       '--disable-extensions',
+      // ? This may or may not be necessary?
+      // ? https://code.visualstudio.com/docs/editor/settings-sync
+      '--sync off',
+      // * Print verbose output (implies --wait).
+      '--verbose',
+      // * Log level to use. Default is 'info'.
+      // * Allowed values are 'critical', 'error', 'warn', 'info', 'debug', 'trace', 'off'.
+      // * You can also configure the log level of an extension by passing extension id and log level
+      // * in the following format: '${publisher}.${name}:${logLevel}'.
+      // * For example: 'vscode.csharp:trace'. Can receive one or more such entries.
+      // ? It says multiple can be passed, unsure if this means
+      // ? multiple for one extension. So lets start like this.
+      '--log critical',
     ],
     extensionTestsEnv: {
       PRISMA_USE_LOCAL_LS,
