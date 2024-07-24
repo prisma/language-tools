@@ -16,6 +16,7 @@ env:
   SLACK_ICON_EMOJI: ':robot_face:'
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
   SLACK_MSG_AUTHOR: prisma-bot
+  ACTIONS_STEP_DEBUG: true
 
 jobs:
   test:
