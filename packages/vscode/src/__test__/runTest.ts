@@ -51,7 +51,9 @@ async function main(): Promise<void> {
       PRISMA_USE_LOCAL_LS: args[0],
     })
   } catch (err) {
-    console.error('Failed to run tests')
+    const errMsg = err instanceof Error ? ` ${err.message}` : ''
+
+    console.error(`Failed to run tests${errMsg}`)
     process.exit(1)
   }
 }
