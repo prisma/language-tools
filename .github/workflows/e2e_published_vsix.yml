@@ -16,7 +16,8 @@ env:
   SLACK_ICON_EMOJI: ':robot_face:'
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
   SLACK_MSG_AUTHOR: prisma-bot
-  ACTIONS_STEP_DEBUG: true
+  # * Enables github logging
+  # ACTIONS_STEP_DEBUG: true
 
 jobs:
   test:
@@ -26,7 +27,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, macos-13, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     outputs:
       installed-extension: ${{ steps.install.outputs.installed-extension }}
     steps:
