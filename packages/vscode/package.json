@@ -190,7 +190,7 @@
     "mocha": "10.6.0",
     "ovsx": "0.9.1",
     "typescript": "5.5.3",
-    "@vscode/vsce": "2.31.1"
+    "@vscode/vsce": "2.27.0"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
   "publishConfig": {
