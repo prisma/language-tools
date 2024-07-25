@@ -1,7 +1,7 @@
 {
   "name": "language-tools",
   "private": true,
-  "version": "31.0.6998",
+  "version": "31.0.6997",
   "author": "Prisma",
   "license": "Apache-2.0",
   "engines": {
@@ -17,7 +17,7 @@
     "@types/node": "14.18.63",
     "@typescript-eslint/eslint-plugin": "7.16.1",
     "@typescript-eslint/parser": "7.16.1",
-    "@vscode/test-electron": "2.4.1",
+    "@vscode/test-electron": "2.4.0",
     "@vscode/vsce": "2.31.1",
     "eslint": "8.57.0",
     "eslint-config-prettier": "9.1.0",
