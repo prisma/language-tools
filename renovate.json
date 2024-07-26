@@ -1,50 +1,108 @@
 {
-  "extends": ["config:base"],
+  "extends": [
+    "config:base"
+  ],
   "semanticCommits": true,
-  "ignoreDeps": ["@prisma/language-server", "@prisma/prisma-schema-wasm", "@prisma/schema-files-loader", "execa"],
+  "ignoreDeps": [
+    "@prisma/language-server",
+    "@prisma/prisma-schema-wasm",
+    "@prisma/schema-files-loader",
+    "execa",
+    "@vscode/vsce"
+  ],
   "masterIssue": true,
-  "reviewers": ["@SevInf", "@Druue", "@jkomyno"],
+  "reviewers": [
+    "@SevInf",
+    "@Druue",
+    "@jkomyno"
+  ],
   "rebaseWhen": "conflicted",
   "packageRules": [
     {
       "groupName": "VS Code",
-      "packageNames": ["vscode", "@types/vscode"],
-      "updateTypes": ["patch", "minor"]
+      "packageNames": [
+        "vscode",
+        "@types/vscode"
+      ],
+      "updateTypes": [
+        "patch",
+        "minor"
+      ]
     },
     {
       "groupName": "VS Code LSP",
-      "packageNames": ["vscode-languageclient", "vscode-languageserver"],
-      "updateTypes": ["patch", "minor", "major"]
+      "packageNames": [
+        "vscode-languageclient",
+        "vscode-languageserver"
+      ],
+      "updateTypes": [
+        "patch",
+        "minor",
+        "major"
+      ]
     },
     {
       "groupName": "checkpoint-client",
-      "packageNames": ["checkpoint-client"],
-      "updateTypes": ["patch", "minor"],
-      "schedule": ["at any time"]
+      "packageNames": [
+        "checkpoint-client"
+      ],
+      "updateTypes": [
+        "patch",
+        "minor"
+      ],
+      "schedule": [
+        "at any time"
+      ]
     },
     {
       "groupName": "devDependencies (non-major)",
       "automerge": "true",
-      "depTypeList": ["devDependencies"],
-      "excludePackageNames": ["@types/vscode"],
-      "updateTypes": ["patch", "minor"]
+      "depTypeList": [
+        "devDependencies"
+      ],
+      "excludePackageNames": [
+        "@types/vscode"
+      ],
+      "updateTypes": [
+        "patch",
+        "minor"
+      ]
     },
     {
       "groupName": "definitelyTyped",
       "automerge": "true",
-      "packagePatterns": ["^@types/"],
-      "excludePackageNames": ["@types/vscode"],
-      "updateTypes": ["patch", "minor"]
+      "packagePatterns": [
+        "^@types/"
+      ],
+      "excludePackageNames": [
+        "@types/vscode"
+      ],
+      "updateTypes": [
+        "patch",
+        "minor"
+      ]
     },
     {
       "groupName": "renovate-meta",
-      "updateTypes": ["lockFileMaintenance", "pin"]
+      "updateTypes": [
+        "lockFileMaintenance",
+        "pin"
+      ]
     },
     {
       "groupName": "dependencies (non-major)",
-      "depTypeList": ["dependencies"],
-      "excludePackageNames": ["@prisma/language-server", "@types/vscode", "@prisma/prisma-schema-wasm"],
-      "updateTypes": ["patch", "minor"]
+      "depTypeList": [
+        "dependencies"
+      ],
+      "excludePackageNames": [
+        "@prisma/language-server",
+        "@types/vscode",
+        "@prisma/prisma-schema-wasm"
+      ],
+      "updateTypes": [
+        "patch",
+        "minor"
+      ]
     }
   ]
 }

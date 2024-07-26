@@ -16,6 +16,8 @@ env:
   SLACK_ICON_EMOJI: ':robot_face:'
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
   SLACK_MSG_AUTHOR: prisma-bot
+  # * Enables github logging
+  # ACTIONS_STEP_DEBUG: true
 
 jobs:
   test:
@@ -23,6 +25,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     outputs:
