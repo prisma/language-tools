@@ -13,7 +13,6 @@
   "masterIssue": true,
   "reviewers": [
     "@SevInf",
-    "@Druue",
     "@jkomyno"
   ],
   "rebaseWhen": "conflicted",
