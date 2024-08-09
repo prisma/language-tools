@@ -26,29 +26,25 @@ export class CodelensProvider implements vscode.CodeLensProvider {
     }
 
     const codelenses = this.getCodeLensGenerateSchema(document, token)
-    return ([] as vscode.CodeLens[]).concat(...codelenses)
+    return codelenses
   }
 
   private getCodeLensGenerateSchema(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.CodeLens[] {
     const generatorRanges = this.getGeneratorRange(document, token)
 
     const lenses = generatorRanges.map(
-      (range) =>
+      (range) => [
         new vscode.CodeLens(range, {
           title: 'Generate',
           command: 'prisma.generate',
           tooltip: `Run "prisma generate"`,
-          // ? (@druue) The arguments property does not seem to actually
-          // ? return an array of arguments. It would consistently
-          // ? return one singular string element, even when defined as:
-          // ? [this.scriptRunner, this.schemaPath]
-          // ?
-          // ? I've tried to understand why as there are usages in other
-          // ? codebases that do pass in multiple args so I have to imagine
-          // ? that it can work, but unsure.
-          // ? Reference: https://github.com/microsoft/vscode-extension-samples/blob/main/codelens-sample/
-          // ? arguments: [this.scriptRunner]
         }),
+        new vscode.CodeLens(range, {
+          title: 'Format',
+          command: 'prisma.format',
+          tooltip: `Run "prisma format"`,
+        })
+      ]
     )
 
     return lenses
@@ -103,6 +99,40 @@ export function generateClient(_args: string) {
       }
     } catch (e) {
       prismaGenerateOutputChannel.append(e as string)
+    }
+  }
+
+  cp.exec(cmd, { cwd: rootPath }, (err, stdout, stderr) => handleExec(err, stdout, stderr))
+}
+
+export function formatPrismaSchema(_args: string) {
+  const prismaFormatOutputChannel = vscode.window.createOutputChannel('Prisma Format')
+  const rootPath = vscode.workspace.workspaceFolders?.[0].uri.fsPath
+
+  const scriptRunner = vscode.workspace.getConfiguration('prisma').get('scriptRunner', 'npx')
+  const schemaPath: string | undefined = vscode.workspace.getConfiguration('prisma').get('schemaPath')
+
+  const pathArgFlag = ` --schema=${schemaPath}`
+  const cmd = `${scriptRunner} prisma format${schemaPath ? pathArgFlag : ''}`
+
+  prismaFormatOutputChannel.clear()
+  prismaFormatOutputChannel.show(true)
+  prismaFormatOutputChannel.appendLine(['Running prisma format:', rootPath, cmd].join('\n- '))
+
+  const handleExec = (err: cp.ExecException | null, stdout: string, stderr: string) => {
+    try {
+      if (err) {
+        prismaFormatOutputChannel.appendLine(err.message)
+        return
+      }
+      if (stdout) {
+        prismaFormatOutputChannel.append(stdout)
+      }
+      if (stderr) {
+        prismaFormatOutputChannel.append(stderr)
+      }
+    } catch (e) {
+      prismaFormatOutputChannel.append(e as string)
     }
   }
 

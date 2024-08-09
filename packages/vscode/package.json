@@ -178,6 +178,11 @@
         "command": "prisma.generate",
         "title": "Generate",
         "category": "Prisma"
+      },
+      {
+        "command": "prisma.format",
+        "title": "Format",
+        "category": "Prisma"
       }
     ]
   },
