@@ -26,7 +26,7 @@ export class CodelensProvider implements vscode.CodeLensProvider {
     }
 
     const codelenses = this.getCodeLensGenerateSchema(document, token)
-    return codelenses
+    return ([] as vscode.CodeLens[]).concat(...codelenses)
   }
 
   private getCodeLensGenerateSchema(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.CodeLens[] {
