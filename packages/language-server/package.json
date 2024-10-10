@@ -40,10 +40,10 @@
   },
   "devDependencies": {
     "@types/node": "18.19.34",
-    "@vitest/coverage-v8": "1.6.0",
+    "@vitest/coverage-v8": "2.1.2",
     "ts-dedent": "2.2.0",
     "typescript": "5.5.3",
-    "vitest": "^1.6.0"
+    "vitest": "^2.0.0"
   },
   "keywords": [
     "autocomplete",
