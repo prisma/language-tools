@@ -36,7 +36,7 @@ import {
 import { PrismaVSCodePlugin } from '../types'
 import paths from 'env-paths'
 import FileWatcher from 'watcher'
-import { CodelensProvider, generateClient } from '../../CodeLensProvider'
+import { CodelensProvider, generateClient, formatPrismaSchema } from '../../CodeLensProvider'
 
 const packageJson = require('../../../../package.json') // eslint-disable-line
 
@@ -219,6 +219,7 @@ const plugin: PrismaVSCodePlugin = {
       }),
 
       commands.registerCommand('prisma.generate', (args: string) => generateClient(args)),
+      commands.registerCommand('prisma.format', (args: string) => formatPrismaSchema(args)),
 
       commands.registerCommand('prisma.restartLanguageServer', async () => {
         client = await restartClient(context, client, serverOptions, clientOptions)
