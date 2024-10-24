@@ -74,7 +74,7 @@ jobs:
 
       - name: Slack Notification on Failure
         if: ${{ needs.test.result == 'failure' && needs.test.outputs.installed-extension }}
-        uses: rtCamp/action-slack-notify@v2.3.0
+        uses: rtCamp/action-slack-notify@v2.3.2
         env:
           SLACK_TITLE: 'Testing released ${{ github.event.inputs.extension_type }} extension failed :x:'
           SLACK_MESSAGE: ${{ github.event.inputs.extension_version }}
@@ -84,7 +84,7 @@ jobs:
 
       - name: Slack Notification on Success
         if: ${{ needs.test.result == 'success' && needs.test.outputs.installed-extension }}
-        uses: rtCamp/action-slack-notify@v2.3.0
+        uses: rtCamp/action-slack-notify@v2.3.2
         env:
           SLACK_TITLE: 'Tested released ${{ github.event.inputs.extension_type }} extension :white_check_mark:'
           SLACK_MESSAGE: ${{ github.event.inputs.extension_version }}
