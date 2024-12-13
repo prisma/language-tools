@@ -2,7 +2,11 @@
   // https://code.visualstudio.com/api/language-extensions/language-configuration-guide
   "comments": {
     // symbol used for single line comment. Remove this entry if your language does not support line comments
-    "lineComment": "//"
+    "lineComment": "//",
+    "blockComment": [
+      "/*",
+      "*/",
+    ],
   },
   // symbols used as brackets
   "brackets": [
