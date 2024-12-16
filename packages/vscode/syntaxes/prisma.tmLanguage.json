@@ -392,8 +392,8 @@
       "name": "comment.prisma"
     },
     "multi_line_comment": {
-      "begin": "/*",
-      "end": "*/",
+      "begin": "/\\*",
+      "end": "\\*/",
       "name": "comment.prisma"
     },
     "double_comment_inline": {
