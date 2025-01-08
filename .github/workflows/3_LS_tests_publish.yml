@@ -98,7 +98,7 @@ jobs:
 
       - name: Slack Notification on Failure
         if: ${{ failure() || needs.tests.result == 'failure' || needs.bump.result == 'failure' }}
-        uses: rtCamp/action-slack-notify@v2.3.0
+        uses: rtCamp/action-slack-notify@v2.3.2
         env:
           SLACK_TITLE: '3. Test Language Server and publish failed :x:'
           SLACK_COLOR: '#FF0000'

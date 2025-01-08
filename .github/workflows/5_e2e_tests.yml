@@ -77,7 +77,7 @@ jobs:
 
       - name: Slack Notification on Failure
         if: ${{ failure() || needs.tests.result == 'failure' }}
-        uses: rtCamp/action-slack-notify@v2.3.0
+        uses: rtCamp/action-slack-notify@v2.3.2
         env:
           SLACK_TITLE: '5. Integration tests in VSCode folder with published LS failed :x:'
           SLACK_COLOR: '#FF0000'
