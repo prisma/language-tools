@@ -42,7 +42,7 @@
     "@types/node": "18.19.34",
     "@vitest/coverage-v8": "1.6.0",
     "ts-dedent": "2.2.0",
-    "typescript": "5.5.3",
+    "typescript": "5.7.3",
     "vitest": "^1.6.0"
   },
   "keywords": [
