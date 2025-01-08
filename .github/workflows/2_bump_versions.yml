@@ -41,6 +41,12 @@ jobs:
       - name: Update versions file in scripts folder
         run: |
           echo "${{ github.event.inputs.version }}" >scripts/versions/prisma_${{ github.event.inputs.npm_channel }}
+
+          if git diff --exit-code; then
+            echo "Version has not changed! We should not attempt to bump."
+            exit 1
+          fi
+
       - name: Update next extension version in scripts folder and output for later use
         id: update # Used to access the calculated next extension version in later steps
         run: node scripts/bump_extension_version.js ${{ github.event.inputs.npm_channel }}
