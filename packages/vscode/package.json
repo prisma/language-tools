@@ -187,9 +187,9 @@
     "@types/vscode": "1.85.0",
     "@vscode/test-electron": "2.4.1",
     "is-ci": "3.0.1",
-    "mocha": "10.6.0",
-    "ovsx": "0.9.1",
-    "typescript": "5.5.3",
+    "mocha": "10.8.2",
+    "ovsx": "0.10.1",
+    "typescript": "5.7.3",
     "@vscode/vsce": "2.29.0"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
