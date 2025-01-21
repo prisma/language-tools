@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "publisher": "Prisma",
   "engines": {
-    "node": ">=14"
+    "node": ">=20"
   },
   "prisma": {
     "enginesVersion": "bc5b02143574be4ad16cc763de8ae69cf036fc4d",
