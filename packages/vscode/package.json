@@ -35,10 +35,7 @@
   "main": "./dist/src/extension.js",
   "activationEvents": [
     "onLanguage:prisma",
-    "onLanguage:javascript",
-    "onLanguage:javascriptreact",
-    "onLanguage:typescript",
-    "onLanguage:typescriptreact"
+    "workspaceContains:**/*.prisma"
   ],
   "contributes": {
     "languages": [
