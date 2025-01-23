@@ -5,7 +5,7 @@
   "author": "Prisma",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=16",
+    "node": ">=20",
     "npm": ">=7"
   },
   "devDependencies": {
