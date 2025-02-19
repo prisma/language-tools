@@ -39,7 +39,7 @@
     "vscode-uri": "^3.0.8"
   },
   "devDependencies": {
-    "@types/node": "18.19.70",
+    "@types/node": "22.13.4",
     "@vitest/coverage-v8": "3.0.6",
     "ts-dedent": "2.2.0",
     "typescript": "5.7.3",
