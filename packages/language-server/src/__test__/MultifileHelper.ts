@@ -85,6 +85,7 @@ class Line {
   }
 }
 
+// TODO: this should use `PrismaSchema.load` instead.
 async function getMultifileSchema(folderPath: string): Promise<PrismaSchema> {
   const files = await loadSchemaFiles(path.join(multifileFixturesDir, folderPath))
   const schemaDocs = files.map(([filePath, content]) => {

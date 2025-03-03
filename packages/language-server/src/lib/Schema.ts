@@ -6,6 +6,7 @@ import {
   FilesResolver,
   CaseSensitivityOptions,
 } from '@prisma/schema-files-loader'
+import { loadConfigFromFile, type PrismaConfigInternal } from '@prisma/config'
 import { Position, TextDocuments } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { URI } from 'vscode-uri'
@@ -54,20 +55,75 @@ type FindRegexpResult = {
   documentUri: string
 }
 
+/**
+ * Will try to load the prisma config file from the given path, default path or create a default config.
+ */
+async function loadConfig(): Promise<PrismaConfigInternal> {
+  const { config, error, resolvedPath } = await loadConfigFromFile({})
+
+  if (error) {
+    switch (error._tag) {
+      case 'ConfigFileNotFound':
+        throw new Error(`Config file not found at "${resolvedPath}"`)
+      case 'ConfigFileParseError':
+        throw new Error(`Failed to parse config file at "${resolvedPath}"`)
+      case 'TypeScriptImportFailed':
+        throw new Error(`Failed to import config file as TypeScript from "${resolvedPath}". Error: ${error.error.message}`)
+      case 'UnknownError':
+        throw new Error(`Unknown error during config file loading: ${error.error.message}`)
+      default:
+        throw new Error(`Unhandled error '${JSON.stringify(error)}' in 'loadConfigFromFile'.`)
+    }
+  }
+
+  return config
+}
+
+async function loadPrismaSchema(
+  fsPath: string,
+  allDocuments: TextDocuments<TextDocument>,
+): Promise<PrismaSchema> {
+  // `loadRelatedSchemaFiles` locates and returns either a single schema files, or a set of related schema files.
+  const schemaFiles = await loadRelatedSchemaFiles(
+    fsPath,
+    createFilesResolver(allDocuments),
+  )
+  const documents = schemaFiles.map(([filePath, content]) => {
+    return new SchemaDocument(TextDocument.create(URI.file(filePath).toString(), 'prisma', 1, content))
+  })
+  return new PrismaSchema(documents)
+}
+
+function loadPrismaSchemaWithConfig(
+  config: PrismaConfigInternal<never>,
+  currentDocument: TextDocument,
+  allDocuments: TextDocuments<TextDocument>,
+): Promise<PrismaSchema> {
+  const fsPath: string = config.schema ?
+    config.schema.kind === 'single' ?
+      config.schema.filePath :
+      config.schema.folderPath :
+    URI.parse(currentDocument.uri).fsPath
+
+  return loadPrismaSchema(fsPath, allDocuments)
+}
+
 export class PrismaSchema {
+  // TODO: remove, use `Prisma.load` directly
   static singleFile(textDocument: TextDocument) {
     return new PrismaSchema([new SchemaDocument(textDocument)])
   }
 
   static async load(currentDocument: TextDocument, allDocuments: TextDocuments<TextDocument>): Promise<PrismaSchema> {
-    const schemaFiles = await loadRelatedSchemaFiles(
-      URI.parse(currentDocument.uri).fsPath,
-      createFilesResolver(allDocuments),
-    )
-    const documents = schemaFiles.map(([filePath, content]) => {
-      return new SchemaDocument(TextDocument.create(URI.file(filePath).toString(), 'prisma', 1, content))
-    })
-    return new PrismaSchema(documents)
+    const config = await loadConfig()
+    if (config instanceof Error) {
+      console.debug('Failed to load Prisma config file', config)
+      console.log('Continuing without Prisma config file')
+      const fsPath = URI.parse(currentDocument.uri).fsPath
+      return loadPrismaSchema(fsPath, allDocuments)
+    }
+
+    return loadPrismaSchemaWithConfig(config, currentDocument, allDocuments)
   }
 
   constructor(readonly documents: SchemaDocument[]) {}

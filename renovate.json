@@ -4,6 +4,7 @@
   ],
   "semanticCommits": true,
   "ignoreDeps": [
+    "@prisma/config",
     "@prisma/language-server",
     "@prisma/prisma-schema-wasm",
     "@prisma/schema-files-loader",
