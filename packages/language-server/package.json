@@ -29,6 +29,7 @@
   "main": "./dist/index.js",
   "typings": "dist/src/index",
   "dependencies": {
+    "@prisma/config": "6.5.0-dev.42",
     "@prisma/prisma-schema-wasm": "6.5.0-39.84310176c3f15859928b573ea73f2c1ec30188eb",
     "@prisma/schema-files-loader": "6.5.0-dev.50",
     "@types/js-levenshtein": "1.1.3",
