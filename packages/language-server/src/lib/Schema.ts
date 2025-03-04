@@ -109,7 +109,7 @@ function loadPrismaSchemaWithConfig(
 }
 
 export class PrismaSchema {
-  // TODO: remove, use `Prisma.load` directly
+  // TODO: remove, use `PrismaSchema.load` directly
   static singleFile(textDocument: TextDocument) {
     return new PrismaSchema([new SchemaDocument(textDocument)])
   }
