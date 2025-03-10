@@ -588,6 +588,10 @@ describe('Completions', function () {
               label: 'binary',
               kind: CompletionItemKind.Constant,
             },
+            {
+              label: 'client',
+              kind: CompletionItemKind.Constant,
+            },
           ],
         },
       })
