@@ -99,11 +99,7 @@ function loadPrismaSchemaWithConfig(
   currentDocument: TextDocument,
   allDocuments: TextDocuments<TextDocument>,
 ): Promise<PrismaSchema> {
-  const fsPath: string = config.schema ?
-    config.schema.kind === 'single' ?
-      config.schema.filePath :
-      config.schema.folderPath :
-    URI.parse(currentDocument.uri).fsPath
+  const fsPath: string = config.schema ?? URI.parse(currentDocument.uri).fsPath
 
   return loadPrismaSchema(fsPath, allDocuments)
 }
