@@ -406,7 +406,7 @@
     },
     {
       "label": "client",
-      "documentation": "TypeScript based query execution. Node-API library for query compilation."
+      "documentation": "TypeScript based query execution. WebAssembly library for query compilation."
     }
   ],
   "engineTypeArguments": [
