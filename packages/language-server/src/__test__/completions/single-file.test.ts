@@ -2183,6 +2183,14 @@ describe('Completions', function () {
       label: 'uuid()',
       kind: CompletionItemKind.Function,
     }
+    const functionUlid = {
+      label: 'ulid()',
+      kind: CompletionItemKind.Function,
+    }
+    const functionNanoid = {
+      label: 'nanoid()',
+      kind: CompletionItemKind.Function,
+    }
     const functionAuto = {
       label: 'auto()',
       kind: CompletionItemKind.Function,
@@ -2543,7 +2551,7 @@ describe('Completions', function () {
                 }`,
             expected: {
               isIncomplete: false,
-              items: [functionDbGenerated, functionUuid, functionCuid],
+              items: [functionDbGenerated, functionUuid, functionCuid, functionUlid, functionNanoid],
             },
           })
         })
@@ -2620,7 +2628,7 @@ describe('Completions', function () {
             }`,
             expected: {
               isIncomplete: false,
-              items: [functionAuto, functionUuid, functionCuid],
+              items: [functionAuto, functionUuid, functionCuid, functionUlid, functionNanoid],
             },
           })
         })
@@ -2660,7 +2668,7 @@ describe('Completions', function () {
             }`,
             expected: {
               isIncomplete: false,
-              items: [functionAuto, functionUuid, functionCuid],
+              items: [functionAuto, functionUuid, functionCuid, functionUlid, functionNanoid],
             },
           })
         })
