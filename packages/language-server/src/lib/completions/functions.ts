@@ -71,6 +71,26 @@ export const cuidDefaultCompletion = (items: CompletionItem[]) =>
     },
   })
 
+export const ulidDefaultCompletion = (items: CompletionItem[]) =>
+  items.push({
+    label: 'ulid()',
+    kind: CompletionItemKind.Function,
+    documentation: {
+      kind: MarkupKind.Markdown,
+      value: 'Generate a universally unique lexicographically sortable identifier based on the [ULID](https://github.com/ulid/spec) spec.',
+    },
+  })
+
+export const nanoidDefaultCompletion = (items: CompletionItem[]) =>
+  items.push({
+    label: 'nanoid()',
+    kind: CompletionItemKind.Function,
+    documentation: {
+      kind: MarkupKind.Markdown,
+      value: 'Generate a secure, URL-friendly, unique identifier based on the [nanoid](https://github.com/ai/nanoid) spec. The length is customizable, defaults to 21.',
+    },
+  })
+
 export const nativeFunctionCompletion = (
   items: CompletionItem[],
   element: NativeTypeConstructors,

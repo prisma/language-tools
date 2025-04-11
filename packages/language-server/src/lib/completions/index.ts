@@ -60,6 +60,8 @@ import {
   nowDefaultCompletion,
   uuidDefaultCompletion,
   cuidDefaultCompletion,
+  ulidDefaultCompletion,
+  nanoidDefaultCompletion,
 } from './functions'
 import { BlockType } from '../types'
 import { PrismaSchema } from '../Schema'
@@ -143,6 +145,8 @@ function getDefaultValues({
     case 'String':
       uuidDefaultCompletion(suggestions)
       cuidDefaultCompletion(suggestions)
+      ulidDefaultCompletion(suggestions)
+      nanoidDefaultCompletion(suggestions)
       break
     case 'Boolean':
       booleanDefaultCompletions(suggestions)
