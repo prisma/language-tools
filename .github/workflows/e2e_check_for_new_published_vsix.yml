@@ -10,11 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '20'
           cache: 'npm'
       - name: Install Dependencies
         run: npm install
@@ -31,14 +33,14 @@ jobs:
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: E2E tests after release on VSIX
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
           inputs: '{ "extension_type": "insider", "extension_version": "${{ steps.check_published_version.outputs.new_insider_version }}" }'
       - name: Trigger e2e tests for stable
         if: ${{ steps.check_published_version.outputs.new_stable_version }}
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: E2E tests after release on VSIX
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
           inputs: '{ "extension_type": "stable", "extension_version": "${{ steps.check_published_version.outputs.new_stable_version }}" }'
 
       - name: 'Set current job url in SLACK_FOOTER env var'
@@ -47,7 +49,7 @@ jobs:
 
       - name: Slack Notification on Failure
         if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@v2.2.1
+        uses: rtCamp/action-slack-notify@v2.3.2
         env:
           SLACK_TITLE: 'Check for new release on Marketplace failed :x:'
           SLACK_COLOR: '#FF0000'

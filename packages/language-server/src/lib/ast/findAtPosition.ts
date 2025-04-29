@@ -4,6 +4,7 @@ import type { TextDocument } from 'vscode-languageserver-textdocument'
 import { MAX_SAFE_VALUE_i32 } from '../constants'
 
 import { Block, getBlocks } from './block'
+import { PrismaSchema } from '../Schema'
 
 export function fullDocumentRange(document: TextDocument): Range {
   const lastLineId = document.lineCount - 1
@@ -50,8 +51,11 @@ export function getWordAtPosition(document: TextDocument, position: Position): s
   return currentLine.slice(beginning, end + position.character)
 }
 
-export function getBlockAtPosition(line: number, lines: string[]): Block | void {
-  for (const block of getBlocks(lines)) {
+export function getBlockAtPosition(fileUri: string, line: number, schema: PrismaSchema): Block | undefined {
+  for (const block of getBlocks(schema)) {
+    if (fileUri !== block.definingDocument.uri) {
+      continue
+    }
     if (block.range.start.line > line) {
       return
     }

@@ -66,7 +66,9 @@ function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersion = '
       // update engines sha
       languageServerPackageJson['prisma']['enginesVersion'] = engineSha
       // update engines version
+      languageServerPackageJson['dependencies']['@prisma/config'] = newPrismaVersion
       languageServerPackageJson['dependencies']['@prisma/prisma-schema-wasm'] = engineVersion
+      languageServerPackageJson['dependencies']['@prisma/schema-files-loader'] = newPrismaVersion
       // update CLI version
       languageServerPackageJson['prisma']['cliVersion'] = newPrismaVersion
       writeJsonToPackageJson({

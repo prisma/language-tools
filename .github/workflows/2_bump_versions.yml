@@ -20,11 +20,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 7
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '20'
           cache: 'npm'
       - name: Install Dependencies
         run: npm install && npm run bootstrap
@@ -39,12 +41,18 @@ jobs:
       - name: Update versions file in scripts folder
         run: |
           echo "${{ github.event.inputs.version }}" >scripts/versions/prisma_${{ github.event.inputs.npm_channel }}
+
+          if git diff --exit-code; then
+            echo "Version has not changed! We should not attempt to bump."
+            exit 1
+          fi
+
       - name: Update next extension version in scripts folder and output for later use
         id: update # Used to access the calculated next extension version in later steps
         run: node scripts/bump_extension_version.js ${{ github.event.inputs.npm_channel }}
       - name: Commit and Push
         run: |
-          sh scripts/commit_and_push.sh "bump Prisma CLI ${{ github.event.inputs.npm_channel }} version to ${{ github.event.inputs.version }} and extension version to ${{ steps.update.outputs.next_extension_version }} in scripts."
+          sh scripts/commit_and_push.sh "[skip ci] bump Prisma CLI ${{ github.event.inputs.npm_channel }} version to ${{ github.event.inputs.version }} and extension version to ${{ steps.update.outputs.next_extension_version }} in scripts."
 
       - name: Switch branch
         id: setup_branch
@@ -66,13 +74,13 @@ jobs:
         run: npm install && npm run bootstrap
       - name: Push to branch
         run: |
-          sh scripts/commit_and_push.sh "bump extension version to ${{ steps.update.outputs.next_extension_version }} in package.json" ${{ steps.setup_branch.outputs.branch}} ${{ steps.setup_branch.outputs.new_branch }}
+          sh scripts/commit_and_push.sh "[skip ci] bump extension version to ${{ steps.update.outputs.next_extension_version }} in package.json" ${{ steps.setup_branch.outputs.branch}} ${{ steps.setup_branch.outputs.new_branch }}
 
       - name: Trigger next workflow for Language Server tests
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: 3. Test Language Server and publish
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
           inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}", "trigger_reason": "Prisma CLI version ${{github.event.inputs.version}}" }'
 
       - name: 'Set current job url in SLACK_FOOTER env var'
@@ -81,7 +89,7 @@ jobs:
 
       - name: Slack Notification on Failure
         if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@v2.2.1
+        uses: rtCamp/action-slack-notify@v2.3.2
         env:
           SLACK_TITLE: '2. Bumping versions failed :x:'
           SLACK_COLOR: '#FF0000'

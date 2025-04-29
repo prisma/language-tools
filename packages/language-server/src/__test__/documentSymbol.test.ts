@@ -1,5 +1,5 @@
 import { DocumentSymbol, SymbolKind } from 'vscode-languageserver'
-import * as assert from 'assert'
+import { describe, test, expect } from 'vitest'
 import { handleDocumentSymbol } from '../lib/MessageHandler'
 import { getTextDocument } from './helper'
 
@@ -7,12 +7,14 @@ function assertSymbols(fixturePath: string, expected: DocumentSymbol[]) {
   const textDocument = getTextDocument(fixturePath)
   const actual = handleDocumentSymbol({ textDocument }, textDocument)
 
-  assert.deepStrictEqual(actual, expected)
+  expect(actual).toStrictEqual(expected)
 }
 
-suite('DocumentSymbol', () => {
+describe('DocumentSymbol', () => {
+  const getFixturePath = (testName: string) => `./hover/${testName}.prisma`
   test('hover_postgresql.prisma', () => {
-    assertSymbols('./hover_postgresql.prisma', [
+    const fixturePath = getFixturePath('postgresql')
+    assertSymbols(fixturePath, [
       {
         kind: SymbolKind.Struct,
         name: 'db',
@@ -161,7 +163,8 @@ suite('DocumentSymbol', () => {
   })
 
   test('hover_mongodb.prisma', () => {
-    assertSymbols('./hover_mongodb.prisma', [
+    const fixturePath = getFixturePath('mongodb')
+    assertSymbols(fixturePath, [
       {
         kind: SymbolKind.Function,
         name: 'client',

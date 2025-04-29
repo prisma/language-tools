@@ -3,7 +3,6 @@ import { buildDocumentation, convertToCompletionItems, toCompletionItems } from 
 
 import * as completions from './completions.json'
 import nativeTypeConstructors, { NativeTypeConstructors } from '../prisma-schema-wasm/nativeTypes'
-import { TextDocument } from 'vscode-languageserver-textdocument'
 import { nativeFunctionCompletion } from './functions'
 import {
   Block,
@@ -13,6 +12,7 @@ import {
   getAllRelationNames,
 } from '../ast'
 import { relationNamesMongoDBRegexFilter, relationNamesRegexFilter } from '../constants'
+import { PrismaSchema } from '../Schema'
 
 /**
  * ```prisma
@@ -47,11 +47,11 @@ const relationManyTypeCompletion = (items: CompletionItem[], sugg: CompletionIte
   })
 
 export function getNativeTypes(
-  document: TextDocument,
+  schema: PrismaSchema,
   prismaType: string,
   onError?: (errorMessage: string) => void,
 ): CompletionItem[] {
-  let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(document.getText(), (errorMessage: string) => {
+  let nativeTypes: NativeTypeConstructors[] = nativeTypeConstructors(schema, (errorMessage: string) => {
     if (onError) {
       onError(errorMessage)
     }
@@ -79,12 +79,11 @@ export function getNativeTypes(
 
 export function getSuggestionForNativeTypes(
   foundBlock: Block,
-  lines: string[],
+  schema: PrismaSchema,
   wordsBeforePosition: string[],
-  document: TextDocument,
   onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
-  const activeFeatureFlag = declaredNativeTypes(document, onError)
+  const activeFeatureFlag = declaredNativeTypes(schema, onError)
 
   if (
     // TODO type? native "@db." types?
@@ -95,14 +94,14 @@ export function getSuggestionForNativeTypes(
     return undefined
   }
 
-  const datasourceName = getFirstDatasourceName(lines)
+  const datasourceName = getFirstDatasourceName(schema)
   if (!datasourceName || wordsBeforePosition[wordsBeforePosition.length - 1] !== `@${datasourceName}`) {
     return undefined
   }
 
   // line
   const prismaType = wordsBeforePosition[1].replace('?', '').replace('[]', '')
-  const suggestions = getNativeTypes(document, prismaType, onError)
+  const suggestions = getNativeTypes(schema, prismaType, onError)
 
   return {
     items: suggestions,
@@ -111,33 +110,35 @@ export function getSuggestionForNativeTypes(
 }
 
 export function getSuggestionsForFieldTypes(
-  foundBlock: Block,
-  lines: string[],
+  schema: PrismaSchema,
   position: Position,
   currentLineUntrimmed: string,
 ): CompletionList {
   const suggestions: CompletionItem[] = []
 
-  const datasourceProvider = getFirstDatasourceProvider(lines)
+  const datasourceProvider = getFirstDatasourceProvider(schema)
   // MongoDB doesn't support Decimal
   if (datasourceProvider === 'mongodb') {
     suggestions.push(...corePrimitiveTypes.filter((s) => s.label !== 'Decimal'))
+  } else if (datasourceProvider === 'sqlite') {
+    // TODO(@druue) remove once resolved: https://github.com/prisma/prisma/issues/3786
+    suggestions.push(...corePrimitiveTypes.filter((s) => s.label !== 'Json'))
   } else {
     suggestions.push(...corePrimitiveTypes)
   }
 
-  if (foundBlock instanceof Block) {
-    // get all model names
-    const modelNames: string[] =
-      datasourceProvider === 'mongodb'
-        ? getAllRelationNames(lines, relationNamesMongoDBRegexFilter)
-        : getAllRelationNames(lines, relationNamesRegexFilter)
-    suggestions.push(...toCompletionItems(modelNames, CompletionItemKind.Reference))
-  }
+  // get all model names
+  const modelNames: string[] =
+    datasourceProvider === 'mongodb'
+      ? getAllRelationNames(schema, relationNamesMongoDBRegexFilter)
+      : getAllRelationNames(schema, relationNamesRegexFilter)
+
+  suggestions.push(...toCompletionItems(modelNames, CompletionItemKind.Reference))
 
   const wordsBeforePosition = currentLineUntrimmed.slice(0, position.character).split(' ')
   const wordBeforePosition = wordsBeforePosition[wordsBeforePosition.length - 1]
   const completeSuggestions = suggestions.filter((s) => s.label.length === wordBeforePosition.length)
+
   if (completeSuggestions.length !== 0) {
     for (const sugg of completeSuggestions) {
       relationSingleTypeCompletion(suggestions, sugg)

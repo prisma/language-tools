@@ -16,6 +16,7 @@ import {
 
 import { getNativeTypes } from './types'
 import { BlockType } from '../types'
+import { PrismaSchema } from '../Schema'
 
 const fieldAttributes: CompletionItem[] = convertAttributesToCompletionItems(
   completions.fieldAttributes,
@@ -27,15 +28,11 @@ const blockAttributes: CompletionItem[] = convertAttributesToCompletionItems(
   CompletionItemKind.Property,
 )
 
-const filterContextBlockAttributes = (
-  block: Block,
-  lines: string[],
-  suggestions: CompletionItem[],
-): CompletionItem[] => {
+const filterContextBlockAttributes = (schema: PrismaSchema, suggestions: CompletionItem[]): CompletionItem[] => {
   // We can filter on the datasource
-  const datasourceProvider = getFirstDatasourceProvider(lines)
+  const datasourceProvider = getFirstDatasourceProvider(schema)
   // We can filter on the previewFeatures enabled
-  const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
+  const previewFeatures = getAllPreviewFeaturesFromGenerators(schema)
 
   // Full text indexes (MySQL and MongoDB)
   // https://www.prisma.io/docs/concepts/components/prisma-schema/indexes#full-text-indexes-mysql-and-mongodb
@@ -69,38 +66,44 @@ const filterContextBlockAttributes = (
  * Removes all block attribute suggestions that are invalid in this context.
  * E.g. `@@id()` when already used should not be in the suggestions.
  */
-function filterSuggestionsForBlock(suggestions: CompletionItem[], block: Block, lines: string[]): CompletionItem[] {
+function filterSuggestionsForBlock(
+  suggestions: CompletionItem[],
+  block: Block,
+  schema: PrismaSchema,
+): CompletionItem[] {
   let reachedStartLine = false
 
-  for (const [key, item] of lines.entries()) {
-    if (key === block.range.start.line + 1) {
+  for (const { lineIndex, text } of schema.iterLines()) {
+    if (lineIndex === block.range.start.line + 1) {
       reachedStartLine = true
     }
     if (!reachedStartLine) {
       continue
     }
-    if (key === block.range.end.line) {
+    if (lineIndex === block.range.end.line) {
       break
     }
 
     // Ignore commented lines
-    if (!item.startsWith('//')) {
-      // TODO we should also remove the other suggestions if used (default()...)
-      // * Filter already-present attributes that can't be duplicated
-      ;['@id', '@@map', '@@ignore', '@@schema'].forEach((label) => {
-        if (item.includes(label)) {
-          suggestions = suggestions.filter((suggestion) => suggestion.label !== label)
-
-          if (label === '@@ignore') {
-            suggestions = suggestions.filter((suggestion) => suggestion.label !== '@ignore')
-          }
-
-          if (label === '@id') {
-            suggestions = suggestions.filter((suggestion) => suggestion.label !== '@@id')
-          }
-        }
-      })
+    if (text.startsWith('//')) {
+      continue
     }
+
+    // TODO we should also remove the other suggestions if used (default()...)
+    // * Filter already-present attributes that can't be duplicated
+    ;['@id', '@@map', '@@ignore', '@@schema'].forEach((label) => {
+      if (text.includes(label)) {
+        suggestions = suggestions.filter((suggestion) => suggestion.label !== label)
+
+        if (label === '@@ignore') {
+          suggestions = suggestions.filter((suggestion) => suggestion.label !== '@ignore')
+        }
+
+        if (label === '@id') {
+          suggestions = suggestions.filter((suggestion) => suggestion.label !== '@@id')
+        }
+      }
+    })
   }
 
   return suggestions
@@ -162,14 +165,14 @@ function filterSuggestionsForLine(
 /**
  * * Only models and views currently support block attributes
  */
-export function getSuggestionForBlockAttribute(block: Block, lines: string[]): CompletionItem[] {
+export function getSuggestionForBlockAttribute(block: Block, schema: PrismaSchema): CompletionItem[] {
   if (!(['model', 'view'] as BlockType[]).includes(block.type)) {
     return []
   }
 
-  const suggestions: CompletionItem[] = filterSuggestionsForBlock(klona(blockAttributes), block, lines)
+  const suggestions: CompletionItem[] = filterSuggestionsForBlock(klona(blockAttributes), block, schema)
 
-  return filterContextBlockAttributes(block, lines, suggestions)
+  return filterContextBlockAttributes(schema, suggestions)
 }
 
 /**
@@ -187,9 +190,8 @@ export function getSuggestionForBlockAttribute(block: Block, lines: string[]): C
 export function getSuggestionForFieldAttribute(
   block: Block,
   currentLine: string,
-  lines: string[],
+  schema: PrismaSchema,
   wordsBeforePosition: string[],
-  document: TextDocument,
   onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
   const fieldType = getFieldType(currentLine)
@@ -202,9 +204,9 @@ export function getSuggestionForFieldAttribute(
 
   // Because @.?
   if (wordsBeforePosition.length >= 2) {
-    const datasourceName = getFirstDatasourceName(lines)
+    const datasourceName = getFirstDatasourceName(schema)
     const prismaType = wordsBeforePosition[1]
-    const nativeTypeSuggestions = getNativeTypes(document, prismaType, onError)
+    const nativeTypeSuggestions = getNativeTypes(schema, prismaType, onError)
 
     if (datasourceName) {
       if (!currentLine.includes(`@${datasourceName}`)) {
@@ -228,11 +230,11 @@ export function getSuggestionForFieldAttribute(
 
   suggestions.push(...fieldAttributes)
 
-  const datamodelBlock = getDatamodelBlock(fieldType, lines)
+  const datamodelBlock = getDatamodelBlock(fieldType, schema)
 
   suggestions = filterSuggestionsForLine(suggestions, currentLine, fieldType, datamodelBlock?.type)
 
-  suggestions = filterSuggestionsForBlock(suggestions, block, lines)
+  suggestions = filterSuggestionsForBlock(suggestions, block, schema)
 
   return {
     items: suggestions,

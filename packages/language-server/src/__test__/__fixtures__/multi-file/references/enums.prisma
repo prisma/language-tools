@@ -1,0 +1,6 @@
+/// enum doc
+enum Pet {
+    /// Cat doc
+    Cat
+    RedPanda
+}

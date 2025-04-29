@@ -1,0 +1,8 @@
+/// This is a blog post
+model Post {
+    id       String @id @default(uuid())
+    title    String
+    content  String
+    authorId String
+    author 
+}

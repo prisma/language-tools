@@ -1,12 +1,28 @@
-import * as fs from 'fs'
 import { Position, TextDocument } from 'vscode-languageserver-textdocument'
+import { URI } from 'vscode-uri'
+
+import * as fs from 'fs'
 import path from 'path'
 
 export const CURSOR_CHARACTER = '|'
 
+const fixturesDir = path.resolve(__dirname, '__fixtures__/single-file')
+
 export function getTextDocument(testFilePath: string): TextDocument {
-  const content: string = fs.readFileSync(path.join(__dirname, '../../../test/fixtures', testFilePath), 'utf8')
-  return TextDocument.create(testFilePath, 'prisma', 1, content)
+  const absPath = path.join(fixturesDir, testFilePath)
+  const content: string = fs.readFileSync(absPath, 'utf8')
+
+  return TextDocument.create(fixturePathToUri(absPath), 'prisma', 1, content)
+}
+
+export function fixturePathToUri(fixturePath: string, rootDir = fixturesDir) {
+  const absPath = path.isAbsolute(fixturePath) ? fixturePath : path.join(rootDir, fixturePath)
+
+  // that would normalize testFilePath and resolve all of
+  // the . and ..
+  const relPath = path.relative(rootDir, absPath)
+  // this will normalize slashes on win/linux
+  return URI.file(`/${relPath}`).toString()
 }
 
 export const findCursorPosition = (input: string): Position => {

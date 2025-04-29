@@ -5,6 +5,7 @@ import { convertToCompletionItems } from './internals'
 
 import * as completions from './completions.json'
 import { getAllPreviewFeaturesFromGenerators, getFirstDatasourceProvider } from '../ast'
+import { PrismaSchema } from '../Schema'
 
 /**
  * ```
@@ -21,12 +22,12 @@ const allowedBlockTypes: CompletionItem[] = convertToCompletionItems(completions
  * @param lines
  * @returns the list of block suggestions
  */
-export function getSuggestionForBlockTypes(lines: string[]): CompletionList {
+export function getSuggestionForBlockTypes(schema: PrismaSchema): CompletionList {
   // create deep copy
   let suggestions: CompletionItem[] = klona(allowedBlockTypes)
 
-  const datasourceProvider = getFirstDatasourceProvider(lines)
-  const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
+  const datasourceProvider = getFirstDatasourceProvider(schema)
+  const previewFeatures = getAllPreviewFeaturesFromGenerators(schema)
 
   const isEnumAvailable = Boolean(!datasourceProvider?.includes('sqlite'))
 

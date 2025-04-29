@@ -2,7 +2,7 @@ import { ExtensionContext } from 'vscode'
 import plugins from './plugins'
 
 export function activate(context: ExtensionContext): void {
-  plugins.map(async (plugin) => {
+  void plugins.map(async (plugin) => {
     const enabled = await plugin.enabled()
     if (enabled) {
       console.log(`Activating ${plugin.name}`)

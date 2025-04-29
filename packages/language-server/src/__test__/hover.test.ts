@@ -1,48 +1,135 @@
-import type { Position } from 'vscode-languageserver-textdocument'
+import { test, expect, describe } from 'vitest'
 import { handleHoverRequest } from '../lib/MessageHandler'
-import { Hover } from 'vscode-languageserver'
-import * as assert from 'assert'
-import { getTextDocument } from './helper'
+import { getMultifileHelper } from './MultifileHelper'
 
-function assertHover(position: Position, expected: Hover, fixturePath: string): void {
-  const textDocument = getTextDocument(fixturePath)
+describe('hover', () => {
+  test('model doc from field', async () => {
+    const helper = await getMultifileHelper('user-posts')
+    const user = helper.file('User.prisma')
 
-  const params = {
-    textDocument,
-    position: position,
-  }
-  const hoverResult: Hover | undefined = handleHoverRequest(textDocument, params)
-
-  assert.ok(hoverResult !== undefined)
-  assert.deepStrictEqual(hoverResult.contents, expected.contents)
-  assert.deepStrictEqual(hoverResult.range, expected.range)
-}
-
-suite('Hover of /// documentation comments', () => {
-  const fixturePath = './hover_postgresql.prisma'
-
-  test('Model', () => {
-    assertHover(
-      {
-        character: 15,
-        line: 24,
+    const response = handleHoverRequest(helper.schema, user.textDocument, {
+      textDocument: {
+        uri: user.uri,
       },
+      position: user.lineContaining('posts Post[]').characterAfter('Po'),
+    })
+
+    expect(response).toMatchInlineSnapshot(`
       {
-        contents: "Post including an author, it's content\n\nand whether it was published",
-      },
-      fixturePath,
-    )
+        "contents": {
+          "kind": "markdown",
+          "value": "\`\`\`prisma
+      model Post {
+      	...
+      	author User @relation(name: "PostToUser", fields: [authorId], references: [id])
+      }
+      \`\`\`
+      ___
+      one-to-many
+      ___
+      This is a blog post",
+        },
+      }
+    `)
   })
-  test('Enum', () => {
-    assertHover(
-      {
-        character: 15,
-        line: 25,
+
+  test('enum doc from field', async () => {
+    const helper = await getMultifileHelper('user-posts')
+    const user = helper.file('User.prisma')
+
+    const response = handleHoverRequest(helper.schema, user.textDocument, {
+      textDocument: {
+        uri: user.uri,
       },
+      position: user.lineContaining('favouriteAnimal FavouriteAnimal').characterAfter('Favo'),
+    })
+
+    expect(response).toMatchInlineSnapshot(`
       {
-        contents: 'This is an enum specifying the UserName.',
+        "contents": {
+          "kind": "markdown",
+          "value": "\`\`\`prisma
+      enum FavouriteAnimal {}
+      \`\`\`
+      ___
+      My favourite is the red panda, could you tell?",
+        },
+      }
+    `)
+  })
+
+  test('composite doc from field', async () => {
+    const helper = await getMultifileHelper('user-posts')
+    const user = helper.file('User.prisma')
+
+    const response = handleHoverRequest(helper.schema, user.textDocument, {
+      textDocument: {
+        uri: user.uri,
       },
-      fixturePath,
-    )
+      position: user.lineContaining('address Address').characterAfter('Addr'),
+    })
+
+    expect(response).toMatchInlineSnapshot(`
+      {
+        "contents": {
+          "kind": "markdown",
+          "value": "\`\`\`prisma
+      type Address {}
+      \`\`\`
+      ___
+      Petrichor V",
+        },
+      }
+    `)
+  })
+
+  test('doc from block name', async () => {
+    const helper = await getMultifileHelper('user-posts')
+    const user = helper.file('animal.prisma')
+
+    const response = handleHoverRequest(helper.schema, user.textDocument, {
+      textDocument: {
+        uri: user.uri,
+      },
+      position: user.lineContaining('enum FavouriteAnimal {').characterAfter('Fav'),
+    })
+
+    expect(response).toMatchInlineSnapshot(`
+      {
+        "contents": {
+          "kind": "markdown",
+          "value": "\`\`\`prisma
+      enum FavouriteAnimal {}
+      \`\`\`
+      ___
+      My favourite is the red panda, could you tell?",
+        },
+      }
+    `)
+  })
+
+  test('doc from field name', async () => {
+    const helper = await getMultifileHelper('user-posts')
+    const user = helper.file('address.prisma')
+
+    const response = handleHoverRequest(helper.schema, user.textDocument, {
+      textDocument: {
+        uri: user.uri,
+      },
+      position: user.lineContaining('country String').characterAfter('cou'),
+    })
+
+    expect(response).toMatchInlineSnapshot(`
+      {
+        "contents": {
+          "kind": "markdown",
+          "value": "\`\`\`prisma
+      country
+      \`\`\`
+      ___
+      ISO 3166-2 standard",
+        },
+      }
+    `)
   })
 })

@@ -1,94 +1,90 @@
 import { Position, Range } from 'vscode-languageserver'
-import { TextDocument } from 'vscode-languageserver-textdocument'
 
 import { BlockType } from '../types'
-import { MAX_SAFE_VALUE_i32 } from '../constants'
 
 import { getFieldType } from './fields'
 import { getBlockAtPosition } from './findAtPosition'
+import { PrismaSchema, SchemaDocument } from '../Schema'
 
-export class Block {
+export interface Block {
   type: BlockType
   range: Range
   nameRange: Range
   name: string
-
-  constructor(type: BlockType, range: Range, nameRange: Range, name: string) {
-    this.type = type
-    this.range = range
-    this.nameRange = nameRange
-    this.name = name
-  }
+  definingDocument: SchemaDocument
 }
 
 // Note: this is a generator function, which returns a Generator object.
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*
-export function* getBlocks(lines: string[]): Generator<Block, void, void> {
+export function* getBlocks(schema: PrismaSchema): Generator<Block, void, void> {
   let blockName = ''
   let blockType = ''
   let blockNameRange: Range | undefined
   let blockStart: Position = Position.create(0, 0)
   const allowedBlockIdentifiers: BlockType[] = ['model', 'type', 'enum', 'datasource', 'generator', 'view']
 
-  for (const [key, item] of lines.entries()) {
+  for (const { document, lineIndex, text } of schema.iterLines()) {
     // if start of block: `BlockType name {`
-    if (allowedBlockIdentifiers.some((identifier) => item.startsWith(identifier)) && item.includes('{')) {
+    if (allowedBlockIdentifiers.some((identifier) => text.startsWith(identifier)) && text.includes('{')) {
       if (blockType && blockNameRange) {
         // Recover from missing block end
-        yield new Block(
-          blockType as BlockType,
-          Range.create(blockStart, Position.create(key - 1, 0)),
-          blockNameRange,
-          blockName,
-        )
+        yield {
+          type: blockType as BlockType,
+          range: Range.create(blockStart, Position.create(lineIndex - 1, 0)),
+          nameRange: blockNameRange,
+          name: blockName,
+          definingDocument: document,
+        }
         blockType = ''
         blockNameRange = undefined
       }
 
-      const index = item.search(/\s+/)
-      blockType = ~index ? (item.slice(0, index) as BlockType) : (item as BlockType)
-      blockName = item.slice(blockType.length, item.length - 2).trimStart()
-      const startCharacter = item.length - 2 - blockName.length
+      const index = text.search(/\s+/)
+      blockType = ~index ? (text.slice(0, index) as BlockType) : (text as BlockType)
+      blockName = text.slice(blockType.length, text.length - 2).trimStart()
+      const startCharacter = text.length - 2 - blockName.length
       blockName = blockName.trimEnd()
-      blockNameRange = Range.create(key, startCharacter, key, startCharacter + blockName.length)
-      blockStart = Position.create(key, 0)
+      blockNameRange = Range.create(lineIndex, startCharacter, lineIndex, startCharacter + blockName.length)
+      blockStart = Position.create(lineIndex, 0)
       continue
     }
 
     // if end of block: `}`
-    if (item.startsWith('}') && blockType && blockNameRange) {
-      yield new Block(
-        blockType as BlockType,
-        Range.create(blockStart, Position.create(key, 1)),
-        blockNameRange,
-        blockName,
-      )
+    if (text.startsWith('}') && blockType && blockNameRange) {
+      yield {
+        type: blockType as BlockType,
+        range: Range.create(blockStart, Position.create(lineIndex, 1)),
+        nameRange: blockNameRange,
+        name: blockName,
+        definingDocument: document,
+      }
       blockType = ''
       blockNameRange = undefined
     }
   }
 }
 
-export function getDatamodelBlock(blockName: string, lines: string[]): Block | void {
+export function getDatamodelBlock(blockName: string, schema: PrismaSchema): Block | void {
   // get start position of block
-  const results: number[] = lines
-    .map((line, index) => {
+  const results = schema
+    .linesAsArray()
+    .map(({ document, lineIndex, text }) => {
       if (
-        (line.includes('model') || line.includes('type') || line.includes('enum') || line.includes('view')) &&
-        line.includes(blockName)
+        (text.includes('model') || text.includes('type') || text.includes('enum') || text.includes('view')) &&
+        text.includes(blockName)
       ) {
-        return index
+        return [document, lineIndex]
       }
     })
-    .filter((index) => index !== undefined) as number[]
+    .filter((result) => result !== undefined) as [SchemaDocument, number][]
 
   if (results.length === 0) {
     return
   }
 
   const foundBlocks: Block[] = results
-    .map((result) => {
-      const block = getBlockAtPosition(result, lines)
+    .map(([document, lineNo]) => {
+      const block = getBlockAtPosition(document.uri, lineNo, schema)
       if (block && block.name === blockName) {
         return block
       }
@@ -106,12 +102,13 @@ export function getDatamodelBlock(blockName: string, lines: string[]): Block | v
   return foundBlocks[0]
 }
 
-export function getFieldsFromCurrentBlock(lines: string[], block: Block, position?: Position): string[] {
+export function getFieldsFromCurrentBlock(schema: PrismaSchema, block: Block, position?: Position): string[] {
   const fieldNames: string[] = []
+  const lines = block.definingDocument.lines
 
   for (let lineIndex = block.range.start.line + 1; lineIndex < block.range.end.line; lineIndex++) {
     if (!position || lineIndex !== position.line) {
-      const line = lines[lineIndex]
+      const line = lines[lineIndex].text
       const fieldName = getFieldNameFromLine(line)
       if (fieldName) {
         fieldNames.push(fieldName)
@@ -122,12 +119,22 @@ export function getFieldsFromCurrentBlock(lines: string[], block: Block, positio
   return fieldNames
 }
 
-export function getFieldTypesFromCurrentBlock(lines: string[], block: Block, position?: Position) {
-  const fieldTypes = new Map<string, { lineIndexes: number[]; fieldName: string | undefined }>()
+export type FoundLocation = {
+  document: SchemaDocument
+  lineIndex: number
+}
+
+export type RenameFieldLocation = {
+  fieldName: string
+  locations: FoundLocation[]
+}
+
+export function getFieldTypesFromCurrentBlock(schema: PrismaSchema, block: Block, position?: Position) {
+  const fieldTypes = new Map<string, RenameFieldLocation>()
   const fieldTypeNames: Record<string, string> = {}
 
   let reachedStartLine = false
-  for (const [lineIndex, line] of lines.entries()) {
+  for (const { document, lineIndex, text: line } of schema.iterLines()) {
     if (lineIndex === block.range.start.line + 1) {
       reachedStartLine = true
     }
@@ -145,10 +152,10 @@ export function getFieldTypesFromCurrentBlock(lines: string[], block: Block, pos
         if (!existingFieldType) {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const fieldName = getFieldNameFromLine(line)!
-          fieldTypes.set(fieldType, { lineIndexes: [lineIndex], fieldName })
+          fieldTypes.set(fieldType, { locations: [{ document, lineIndex }], fieldName })
           fieldTypeNames[fieldName] = fieldType
         } else {
-          existingFieldType.lineIndexes.push(lineIndex)
+          existingFieldType.locations.push({ document, lineIndex })
           fieldTypes.set(fieldType, existingFieldType)
         }
       }
@@ -158,16 +165,10 @@ export function getFieldTypesFromCurrentBlock(lines: string[], block: Block, pos
 }
 
 export function getCompositeTypeFieldsRecursively(
-  lines: string[],
+  schema: PrismaSchema,
   compositeTypeFieldNames: string[],
   fieldTypesFromBlock: {
-    fieldTypes: Map<
-      string,
-      {
-        lineIndexes: number[]
-        fieldName: string | undefined
-      }
-    >
+    fieldTypes: Map<string, RenameFieldLocation>
     fieldTypeNames: Record<string, string>
   },
 ): string[] {
@@ -184,7 +185,7 @@ export function getCompositeTypeFieldsRecursively(
     return []
   }
 
-  const typeBlock = getDatamodelBlock(fieldTypeName, lines)
+  const typeBlock = getDatamodelBlock(fieldTypeName, schema)
   if (!typeBlock || typeBlock.type !== 'type') {
     return []
   }
@@ -192,12 +193,12 @@ export function getCompositeTypeFieldsRecursively(
   // if we are not at the end of the composite type, continue recursively
   if (compositeTypeFieldNames.length) {
     return getCompositeTypeFieldsRecursively(
-      lines,
+      schema,
       compositeTypeFieldNames,
-      getFieldTypesFromCurrentBlock(lines, typeBlock),
+      getFieldTypesFromCurrentBlock(schema, typeBlock),
     )
   } else {
-    return getFieldsFromCurrentBlock(lines, typeBlock)
+    return getFieldsFromCurrentBlock(schema, typeBlock)
   }
 }
 
@@ -212,15 +213,12 @@ function getFieldNameFromLine(line: string) {
   return firstPartOfLine
 }
 
-export const getDocumentationForBlock = (document: TextDocument, block: Block): string[] => {
-  return getDocumentation(document, block.range.start.line, [])
+export const getDocumentationForBlock = (block: Block): string[] => {
+  return getDocumentation(block.definingDocument, block.range.start.line, [])
 }
 
-const getDocumentation = (document: TextDocument, line: number, comments: string[]): string[] => {
-  const comment = document.getText({
-    start: { line: line - 1, character: 0 },
-    end: { line: line - 1, character: MAX_SAFE_VALUE_i32 },
-  })
+const getDocumentation = (document: SchemaDocument, line: number, comments: string[]): string[] => {
+  const comment = document.lines[line - 1]?.untrimmedText ?? ''
 
   if (comment.startsWith('///')) {
     comments.unshift(comment.slice(4).trim())

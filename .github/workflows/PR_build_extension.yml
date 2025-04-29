@@ -27,13 +27,13 @@ jobs:
     outputs:
       tag_name: ${{ steps.names.outputs.tag_name }}
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '20'
           cache: 'npm'
 
       # Build the extension
@@ -53,13 +53,13 @@ jobs:
       - name: Copy language-server dist directory inside vscode package
         run: |
           cp -R packages/language-server packages/vscode
-          rm -R packages/vscode/language-server/src packages/vscode/language-server/test
+          rm -R packages/vscode/language-server/src
       - name: Build vsix
         run: cd packages/vscode && npm run package -- --out=prisma.vsix
 
       # Upload to the current job run
       # This is very limited: Only 90 days rentention and cannot get a link easily
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: pr-artifact
           path: ./packages/vscode/*.vsix
@@ -81,7 +81,7 @@ jobs:
       # Additionally post a comment with a link to GitPod that can use built extension instantly
       - name: Find existing comment
         if: "!contains(github.actor, 'renovate')"
-        uses: peter-evans/find-comment@v2
+        uses: peter-evans/find-comment@v3
         id: fc
         with:
           issue-number: ${{ github.event.pull_request.number }}
@@ -90,7 +90,7 @@ jobs:
 
       - name: Create comment
         if: "!contains(github.actor, 'renovate') && steps.fc.outputs.comment-id == ''"
-        uses: peter-evans/create-or-update-comment@v3
+        uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: '[Try this extension build via GitPod](https://gitpod.io/#vsix=https%3A%2F%2Fgithub.com%2Fprisma%2Flanguage-tools%2Fblob%2Fartifacts%2Fpull-request-artifacts%2Fpr${{ github.event.pull_request.number }}-prisma.vsix%3Fraw%3Dtrue/https://github.com/prisma/language-tools-gitpod)'
@@ -101,7 +101,7 @@ jobs:
     needs: [build]
     if: always() && github.repository == 'prisma/language-tools'
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
 
@@ -111,7 +111,7 @@ jobs:
 
       - name: Slack Notification on Failure
         if: ${{ failure() || needs.build.result == 'failure' }}
-        uses: rtCamp/action-slack-notify@v2.2.1
+        uses: rtCamp/action-slack-notify@v2.3.2
         env:
           SLACK_TITLE: 'PR Build extension failed :x:'
           SLACK_COLOR: '#FF0000'

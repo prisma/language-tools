@@ -29,11 +29,13 @@ jobs:
     env:
       SLACK_MESSAGE: '${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}'
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '20'
           cache: 'npm'
       - name: Print inputs
         run: |
@@ -49,7 +51,7 @@ jobs:
           repo: 'prisma/language-tools'
           version: 'tags/${{ github.event.inputs.tag_name }}'
           file: ${{ github.event.inputs.asset_name }}
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
 
       - name: publish vsix to marketplace
         run: cd packages/vscode && npx vsce publish --pat ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN}} --packagePath ${{github.workspace}}/${{ github.event.inputs.asset_name }}
@@ -60,7 +62,7 @@ jobs:
 
       - name: Slack Notification on Failure
         if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@v2.2.1
+        uses: rtCamp/action-slack-notify@v2.3.2
         env:
           SLACK_TITLE: '7. Publishing to marketplace failed :x:'
           SLACK_COLOR: '#FF0000'
@@ -69,7 +71,7 @@ jobs:
 
       - name: Slack Notification on Success
         if: ${{ success() }}
-        uses: rtCamp/action-slack-notify@v2.2.1
+        uses: rtCamp/action-slack-notify@v2.3.2
         env:
           SLACK_TITLE: '7. Published to marketplace :white_check_mark:'
           SLACK_COLOR: '#008000'
@@ -83,11 +85,11 @@ jobs:
     env:
       SLACK_MESSAGE: '${{ github.event.inputs.tag_name }} - ${{github.event.inputs.trigger_reason}}'
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - uses: actions/checkout@v4
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '20'
           cache: 'npm'
       - name: Print inputs
         run: |
@@ -101,10 +103,10 @@ jobs:
           repo: 'prisma/language-tools'
           version: 'tags/${{ github.event.inputs.tag_name }}'
           file: ${{ github.event.inputs.asset_name }}
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
 
       - name: Publish vsix to open-vsx.org
-        run: cd packages/vscode && npx ovsx publish ${{github.workspace}}/${{ github.event.inputs.asset_name }} --pat  ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
+        run: cd packages/vscode && npx ovsx --debug publish ${{github.workspace}}/${{ github.event.inputs.asset_name }} --pat  ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
 
       - name: 'Set current job url in SLACK_FOOTER env var'
         if: ${{ always() }}
@@ -112,7 +114,7 @@ jobs:
 
       - name: Slack Notification on Failure
         if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@v2.2.1
+        uses: rtCamp/action-slack-notify@v2.3.2
         env:
           SLACK_TITLE: '7. Publishing to open-vsx failed :x:'
           SLACK_COLOR: '#FF0000'
@@ -121,7 +123,7 @@ jobs:
 
       - name: Slack Notification on Success
         if: ${{ success() }}
-        uses: rtCamp/action-slack-notify@v2.2.1
+        uses: rtCamp/action-slack-notify@v2.3.2
         env:
           SLACK_TITLE: '7. Published to open-vsx :white_check_mark:'
           SLACK_COLOR: '#008000'

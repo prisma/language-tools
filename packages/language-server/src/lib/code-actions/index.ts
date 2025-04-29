@@ -11,7 +11,8 @@ import levenshtein from 'js-levenshtein'
 
 import codeActions from '../prisma-schema-wasm/codeActions'
 import { relationNamesRegexFilter } from '../constants'
-import { convertDocumentTextToTrimmedLineArray, getAllRelationNames } from '../ast'
+import { getAllRelationNames } from '../ast'
+import { PrismaSchema } from '../Schema'
 
 function getInsertRange(document: TextDocument): Range {
   // to insert text into a document create a range where start === end.
@@ -84,7 +85,8 @@ function addTypeModifiers(hasTypeModifierArray: boolean, hasTypeModifierOptional
 }
 
 export function quickFix(
-  textDocument: TextDocument,
+  schema: PrismaSchema,
+  initiatingDocument: TextDocument,
   params: CodeActionParams,
   onError?: (errorMessage: string) => void,
 ): CodeAction[] {
@@ -94,7 +96,7 @@ export function quickFix(
     return []
   }
 
-  const codeActionList = codeActions(textDocument.getText(), JSON.stringify(params), (errorMessage: string) => {
+  const codeActionList = codeActions(JSON.stringify(schema), JSON.stringify(params), (errorMessage: string) => {
     if (onError) {
       onError(errorMessage)
     }
@@ -105,14 +107,16 @@ export function quickFix(
     if (
       diag.severity === DiagnosticSeverity.Error &&
       diag.message.startsWith('Type') &&
-      diag.message.includes('is neither a built-in type, nor refers to another model, custom type, or enum.')
+      // In 5.13.0 and earlier we used "custom type" instead of "composite type"
+      // So we only check the beginning of the message for simplicity
+      // See https://github.com/prisma/prisma-engines/pull/4813
+      diag.message.includes('is neither a built-in type, nor refers to another model,')
     ) {
-      let diagText = textDocument.getText(diag.range)
+      let diagText = initiatingDocument.getText(diag.range)
       const hasTypeModifierArray: boolean = diagText.endsWith('[]')
       const hasTypeModifierOptional: boolean = diagText.endsWith('?')
       diagText = removeTypeModifiers(hasTypeModifierArray, hasTypeModifierOptional, diagText)
-      const lines: string[] = convertDocumentTextToTrimmedLineArray(textDocument)
-      const spellingSuggestion = getSpellingSuggestions(diagText, getAllRelationNames(lines, relationNamesRegexFilter))
+      const spellingSuggestion = getSpellingSuggestions(diagText, getAllRelationNames(schema, relationNamesRegexFilter))
       if (spellingSuggestion) {
         codeActionList.push({
           title: `Change spelling to '${spellingSuggestion}'`,
@@ -130,36 +134,6 @@ export function quickFix(
           },
         })
       }
-      codeActionList.push({
-        title: `Create new model '${diagText}'`,
-        kind: CodeActionKind.QuickFix,
-        diagnostics: [diag],
-        edit: {
-          changes: {
-            [params.textDocument.uri]: [
-              {
-                range: getInsertRange(textDocument),
-                newText: `\nmodel ${diagText} {\n\n}\n`,
-              },
-            ],
-          },
-        },
-      })
-      codeActionList.push({
-        title: `Create new enum '${diagText}'`,
-        kind: CodeActionKind.QuickFix,
-        diagnostics: [diag],
-        edit: {
-          changes: {
-            [params.textDocument.uri]: [
-              {
-                range: getInsertRange(textDocument),
-                newText: `\nenum ${diagText} {\n\n}\n`,
-              },
-            ],
-          },
-        },
-      })
     } else if (diag.severity === DiagnosticSeverity.Error && diag.message.includes('`experimentalFeatures`')) {
       codeActionList.push({
         title: "Rename property to 'previewFeatures'",
@@ -180,7 +154,7 @@ export function quickFix(
       diag.severity === DiagnosticSeverity.Error &&
       diag.message.includes('It does not start with any known Prisma schema keyword.')
     ) {
-      const diagText = textDocument.getText(diag.range).split(/\s/)
+      const diagText = initiatingDocument.getText(diag.range).split(/\s/)
       if (diagText.length !== 0) {
         const spellingSuggestion = getSpellingSuggestions(diagText[0], ['model', 'enum', 'datasource', 'generator'])
         if (spellingSuggestion) {

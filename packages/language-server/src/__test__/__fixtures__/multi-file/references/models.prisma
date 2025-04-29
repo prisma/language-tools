@@ -1,0 +1,29 @@
+model User {
+    id String @id @map("_id")
+
+    posts   Post[]
+    /// field doc
+    pet     Pet
+    address Address
+
+    indexedField String
+
+    @@index([indexedField])
+}
+
+/// Documentation
+model Post {
+    id       String    @id @map("_id")
+    authorId String
+    author   User      @relation(fields: [authorId], references: [id])
+    blah     UserTwo[]
+}
+
+model B {
+    /// field doc
+    id String @id @map("_id")
+
+    bId  String?
+    bees B[]     @relation(name: "bees")
+    B    B?      @relation(name: "bees", fields: [bId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}

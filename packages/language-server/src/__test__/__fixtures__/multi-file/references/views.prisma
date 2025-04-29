@@ -1,0 +1,16 @@
+view UserTwo {
+    id String @id @map("_id")
+
+    postId String
+    posts  Post   @relation(fields: [postId], references: [id])
+
+    address Address
+
+    uniqueField      String
+    otherUniqueField String
+
+    @@unique(fields: [uniqueField])
+    @@unique([otherUniqueField])
+    @@unique([address.poBox.name])
+    @@map("hi")
+}

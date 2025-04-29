@@ -1,24 +1,28 @@
-import { Position } from 'vscode-languageserver-textdocument'
-import { handleDefinitionRequest } from '../lib/MessageHandler'
-import { LocationLink, Range } from 'vscode-languageserver'
-import * as assert from 'assert'
-import { getTextDocument } from './helper'
+import { expect, describe, test } from 'vitest'
+import { Position, Range, LocationLink } from 'vscode-languageserver'
+import { handleDefinitionRequest } from '../../lib/MessageHandler'
+import { PrismaSchema } from '../../lib/Schema'
+import { getTextDocument } from '../helper'
 
 function assertJumpToDefinition(position: Position, expectedRange: Range, fixturePath: string): void {
   const textDocument = getTextDocument(fixturePath)
 
   const params = { textDocument, position }
-  const defResult: LocationLink[] | undefined = handleDefinitionRequest(textDocument, params)
+  const defResult: LocationLink[] | undefined = handleDefinitionRequest(
+    PrismaSchema.singleFile(textDocument),
+    textDocument,
+    params,
+  )
 
-  assert.ok(defResult !== undefined)
-  assert.deepStrictEqual(defResult[0].targetRange, expectedRange)
+  expect(defResult).not.toBeUndefined()
+  expect(defResult?.[0]?.targetRange).toStrictEqual(expectedRange)
 }
 
-suite('Jump-to-Definition', () => {
-  const fixturePathSqlite = './correct_sqlite.prisma'
-  const fixturePathMongodb = './correct_mongodb.prisma'
+describe('Jump-to-Definition', () => {
+  const getFixturePath = (testName: string) => `./jump-to-definition/${testName}.prisma`
 
   test('SQLite: from attribute to model', () => {
+    const fixturePath = getFixturePath('correct_sqlite')
     assertJumpToDefinition(
       {
         line: 11,
@@ -34,7 +38,7 @@ suite('Jump-to-Definition', () => {
           character: 1,
         },
       },
-      fixturePathSqlite,
+      fixturePath,
     )
     assertJumpToDefinition(
       {
@@ -51,7 +55,7 @@ suite('Jump-to-Definition', () => {
           character: 1,
         },
       },
-      fixturePathSqlite,
+      fixturePath,
     )
     assertJumpToDefinition(
       {
@@ -68,11 +72,12 @@ suite('Jump-to-Definition', () => {
           character: 1,
         },
       },
-      fixturePathSqlite,
+      fixturePath,
     )
   })
 
   test('MongoDB: from attribute to type', () => {
+    const fixturePath = getFixturePath('correct_mongodb')
     assertJumpToDefinition(
       {
         line: 12,
@@ -88,7 +93,7 @@ suite('Jump-to-Definition', () => {
           character: 1,
         },
       },
-      fixturePathMongodb,
+      fixturePath,
     )
   })
 })

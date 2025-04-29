@@ -1,9 +1,12 @@
 import { DocumentFormattingParams } from 'vscode-languageserver'
 import { prismaSchemaWasm } from '.'
 import { handleFormatPanic, handleWasmError } from './internals'
+import { PrismaSchema } from '../Schema'
+import { TextDocument } from 'vscode-languageserver-textdocument'
 
 export default function format(
-  schema: string,
+  schema: PrismaSchema,
+  initiatingDocument: TextDocument,
   options: DocumentFormattingParams,
   onError?: (errorMessage: string) => void,
 ): string {
@@ -17,7 +20,14 @@ export default function format(
       })
     }
 
-    return prismaSchemaWasm.format(schema, JSON.stringify(options))
+    const result = prismaSchemaWasm.format(JSON.stringify(schema), JSON.stringify(options))
+    // tuples of [filePath, content]
+    const formattedFiles = JSON.parse(result) as Array<[string, string]>
+    const formatResult = formattedFiles.find(([uri]) => uri === initiatingDocument.uri)
+    if (!formatResult) {
+      return initiatingDocument.getText()
+    }
+    return formatResult[1]
   } catch (e) {
     const err = e as Error
 
@@ -27,6 +37,6 @@ export default function format(
 
     handleWasmError(err, 'format', onError)
 
-    return schema
+    return initiatingDocument.getText()
   }
 }

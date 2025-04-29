@@ -1,0 +1,5 @@
+/// This is a blog post
+model Post {
+    id       String @id @default(uuid())
+    price    Decimal @db.
+}

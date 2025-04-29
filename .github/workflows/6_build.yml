@@ -32,13 +32,14 @@ jobs:
     outputs:
       tag_name: ${{ steps.names.outputs.tag_name }}
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '20'
           cache: 'npm'
       - name: Print inputs
         run: |
@@ -93,7 +94,7 @@ jobs:
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: 7. Publish
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
           inputs: '{ "asset_name": "${{ steps.get_asset_name.outputs.asset_name }}", "tag_name": "${{ steps.names.outputs.tag_name }}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'
 
   slack:
@@ -105,7 +106,7 @@ jobs:
     env:
       SLACK_MESSAGE: '${{ needs.build.outputs.tag_name }} - ${{github.event.inputs.trigger_reason}} '
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
 
@@ -115,7 +116,7 @@ jobs:
 
       - name: Slack Notification on Failure
         if: ${{ failure() || needs.build.result == 'failure' }}
-        uses: rtCamp/action-slack-notify@v2.2.1
+        uses: rtCamp/action-slack-notify@v2.3.2
         env:
           SLACK_TITLE: '6. Release failed :x:'
           SLACK_COLOR: '#FF0000'
@@ -124,7 +125,7 @@ jobs:
 
       - name: Slack Notification on Success
         if: ${{ success() && needs.build.result == 'success' }}
-        uses: rtCamp/action-slack-notify@v2.2.1
+        uses: rtCamp/action-slack-notify@v2.3.2
         env:
           SLACK_TITLE: '6. Release was successful :white_check_mark:'
           SLACK_COLOR: '#008000'

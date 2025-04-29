@@ -1,9 +1,11 @@
 import type { TextDocument } from 'vscode-languageserver-textdocument'
-import { handleRenameRequest } from '../lib/MessageHandler'
+
 import { WorkspaceEdit, RenameParams, Position } from 'vscode-languageserver'
-import * as assert from 'assert'
-import { getTextDocument } from './helper'
-import { MAX_SAFE_VALUE_i32 } from '../lib/constants'
+
+import { describe, test, expect } from 'vitest'
+import { handleRenameRequest } from '../../lib/MessageHandler'
+import { PrismaSchema } from '../../lib/Schema'
+import { getTextDocument } from '../helper'
 
 function assertRename(expected: WorkspaceEdit, document: TextDocument, newName: string, position: Position): void {
   const params: RenameParams = {
@@ -12,13 +14,17 @@ function assertRename(expected: WorkspaceEdit, document: TextDocument, newName: 
     position: position,
   }
 
-  const renameResult: WorkspaceEdit | undefined = handleRenameRequest(params, document)
+  const renameResult: WorkspaceEdit | undefined = handleRenameRequest(
+    PrismaSchema.singleFile(document),
+    document,
+    params,
+  )
 
-  assert.notStrictEqual(renameResult, undefined)
-  assert.deepStrictEqual(renameResult, expected)
+  expect(renameResult).not.toBeUndefined()
+  expect(renameResult).toStrictEqual(expected)
 }
 
-suite('Rename', () => {
+describe('Rename', () => {
   const renameModelPath = './rename/renameModel.prisma'
   const renameFieldPath = './rename/renameFields.prisma'
   const renameEnumPath = './rename/renameEnum.prisma'
@@ -363,8 +369,8 @@ suite('Rename', () => {
             {
               newText: ' @map("Album")',
               range: {
-                start: { line: 136, character: MAX_SAFE_VALUE_i32 },
-                end: { line: 136, character: MAX_SAFE_VALUE_i32 },
+                start: { line: 136, character: 34 },
+                end: { line: 136, character: 34 },
               },
             },
           ],
@@ -410,8 +416,8 @@ suite('Rename', () => {
             {
               newText: ' @map("authorId")',
               range: {
-                start: { line: 4, character: MAX_SAFE_VALUE_i32 },
-                end: { line: 4, character: MAX_SAFE_VALUE_i32 },
+                start: { line: 4, character: 17 },
+                end: { line: 4, character: 17 },
               },
             },
             {
@@ -452,8 +458,8 @@ suite('Rename', () => {
             {
               newText: ' @map("title")',
               range: {
-                start: { line: 17, character: MAX_SAFE_VALUE_i32 },
-                end: { line: 17, character: MAX_SAFE_VALUE_i32 },
+                start: { line: 17, character: 17 },
+                end: { line: 17, character: 17 },
               },
             },
             {
@@ -486,8 +492,8 @@ suite('Rename', () => {
             {
               newText: ' @map("humanId")',
               range: {
-                start: { line: 25, character: MAX_SAFE_VALUE_i32 },
-                end: { line: 25, character: MAX_SAFE_VALUE_i32 },
+                start: { line: 25, character: 14 },
+                end: { line: 25, character: 14 },
               },
             },
             {
@@ -561,8 +567,8 @@ suite('Rename', () => {
             {
               newText: ' @map("A_VARIANT_WITH_UNDERSCORES")',
               range: {
-                start: { line: 8, character: MAX_SAFE_VALUE_i32 },
-                end: { line: 8, character: MAX_SAFE_VALUE_i32 },
+                start: { line: 8, character: 28 },
+                end: { line: 8, character: 28 },
               },
             },
             {

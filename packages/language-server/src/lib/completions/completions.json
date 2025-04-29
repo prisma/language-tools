@@ -98,7 +98,7 @@
       "label": "engineType",
       "insertText": "engineType = \"$0\"",
       "documentation": "Defines the query engine type for Prisma Client. Default: `library`. [Learn more](https://pris.ly/d/client-engine-type).",
-      "fullSignature": "engineType = \"library\" | \"binary\""
+      "fullSignature": "engineType = \"library\" | \"binary\" | \"client\""
     },
     {
       "label": "binaryTargets",
@@ -403,6 +403,10 @@
     {
       "label": "binary",
       "documentation": "Executable binary."
+    },
+    {
+      "label": "client",
+      "documentation": "TypeScript based query execution. WebAssembly library for query compilation."
     }
   ],
   "engineTypeArguments": [

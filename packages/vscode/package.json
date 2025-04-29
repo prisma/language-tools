@@ -2,18 +2,18 @@
   "name": "prisma-insider",
   "displayName": "Prisma - Insider",
   "description": "This is the Insider Build of the Prisma VS Code extension (only use it if you are also using the dev version of the CLI).",
-  "version": "31.0.3066",
+  "version": "31.0.7499",
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
-    "vscode": "^1.56.0"
+    "vscode": "^1.85.0"
   },
   "publisher": "Prisma",
   "categories": [
     "Programming Languages"
   ],
   "dependencies": {
-    "@prisma/language-server": "31.0.3066",
+    "@prisma/language-server": "31.0.7498",
     "checkpoint-client": "1.1.33",
     "env-paths": "3.0.0",
     "minimatch": "6.2.0",
@@ -35,10 +35,7 @@
   "main": "./dist/src/extension.js",
   "activationEvents": [
     "onLanguage:prisma",
-    "onLanguage:javascript",
-    "onLanguage:javascriptreact",
-    "onLanguage:typescript",
-    "onLanguage:typescriptreact"
+    "workspaceContains:**/*.prisma"
   ],
   "contributes": {
     "languages": [
@@ -125,6 +122,30 @@
           ],
           "default": "off",
           "description": "Setting for logging between the VS Code extension and the language server."
+        },
+        "prisma.enableCodeLens": {
+          "type": "boolean",
+          "default": true
+        },
+        "prisma.enableDiagnostics": {
+          "type": "boolean",
+          "default": true
+        },
+        "prisma.scriptRunner": {
+          "type": "string",
+          "enum": [
+            "npx",
+            "pnpm",
+            "yarn"
+          ],
+          "default": "npx"
+        },
+        "prisma.schemaPath": {
+          "type": "string",
+          "examples": [
+            "/path/to/your/schema.prisma"
+          ],
+          "description": "If you have a Prisma schema file in a custom path, you will need to provide said path `/path/to/your/schema.prisma` to run generate"
         }
       }
     },
@@ -143,19 +164,34 @@
         "command": "prisma.filewatcherDisable",
         "title": "Disable the File Watcher functionality for Prisma Client.",
         "category": "Prisma"
+      },
+      {
+        "command": "prisma.enableCodeLens",
+        "title": "Enable CodeLens",
+        "category": "Prisma"
+      },
+      {
+        "command": "prisma.disableCodeLens",
+        "title": "Disable CodeLens",
+        "category": "Prisma"
+      },
+      {
+        "command": "prisma.generate",
+        "title": "Generate",
+        "category": "Prisma"
       }
     ]
   },
   "devDependencies": {
     "@types/glob": "8.1.0",
-    "@types/mocha": "10.0.6",
-    "@types/vscode": "1.56.0",
-    "@vscode/test-electron": "2.3.8",
+    "@types/mocha": "10.0.10",
+    "@types/vscode": "1.85.0",
+    "@vscode/test-electron": "2.4.1",
     "is-ci": "3.0.1",
-    "mocha": "10.2.0",
-    "ovsx": "0.8.3",
-    "typescript": "5.3.2",
-    "@vscode/vsce": "2.22.0"
+    "mocha": "10.8.2",
+    "ovsx": "0.10.1",
+    "typescript": "5.7.3",
+    "@vscode/vsce": "2.29.0"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
   "publishConfig": {
