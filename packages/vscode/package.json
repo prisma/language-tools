@@ -130,6 +130,10 @@
           "type": "boolean",
           "default": true
         },
+        "prisma.enableDiagnostics": {
+          "type": "boolean",
+          "default": true
+        },
         "prisma.scriptRunner": {
           "type": "string",
           "enum": [

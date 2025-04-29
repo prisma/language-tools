@@ -18,5 +18,9 @@ export interface LSOptions {
   connection?: Connection
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface LSSettings {}
+export interface LSSettings {
+  /**
+   * Whether to show diagnostics
+   */
+  enableDiagnostics?: boolean
+}

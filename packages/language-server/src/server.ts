@@ -129,24 +129,22 @@ export function startServer(options?: LSOptions): void {
     documentSettings.delete(e.document.uri)
   })
 
-  // function getDocumentSettings(resource: string): Thenable<LSSettings> {
-  //   if (!hasConfigurationCapability) {
-  //     connection.console.info(
-  //       `hasConfigurationCapability === false. Defaults will be used.`,
-  //     )
-  //     return Promise.resolve(globalSettings)
-  //   }
+  function getDocumentSettings(resource: string): Thenable<LSSettings> {
+    if (!hasConfigurationCapability) {
+      connection.console.info(`hasConfigurationCapability === false. Defaults will be used.`)
+      return Promise.resolve({})
+    }
 
-  //   let result = documentSettings.get(resource)
-  //   if (!result) {
-  //     result = connection.workspace.getConfiguration({
-  //       scopeUri: resource,
-  //       section: 'prisma',
-  //     })
-  //     documentSettings.set(resource, result)
-  //   }
-  //   return result
-  // }
+    let result = documentSettings.get(resource)
+    if (!result) {
+      result = connection.workspace.getConfiguration({
+        scopeUri: resource,
+        section: 'prisma',
+      })
+      documentSettings.set(resource, result)
+    }
+    return result
+  }
 
   // Note: VS Code strips newline characters from the message
   function showErrorToast(errorMessage: string): void {
@@ -154,6 +152,13 @@ export function startServer(options?: LSOptions): void {
   }
 
   async function validateTextDocument(textDocument: TextDocument) {
+    const settings = await getDocumentSettings(textDocument.uri)
+
+    if (settings.enableDiagnostics === false) {
+      await connection.sendDiagnostics({ uri: textDocument.uri, diagnostics: [] })
+      return
+    }
+
     const schema = await PrismaSchema.load(textDocument, documents)
     const diagnostics = MessageHandler.handleDiagnosticsRequest(schema, showErrorToast)
     for (const [uri, fileDiagnostics] of diagnostics.entries()) {
