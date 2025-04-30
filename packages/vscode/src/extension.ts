@@ -1,7 +1,10 @@
 import { ExtensionContext } from 'vscode'
 import plugins from './plugins'
+import { registerChatTools } from './plugins/llmTools'
 
 export function activate(context: ExtensionContext): void {
+  registerChatTools(context)
+
   void plugins.map(async (plugin) => {
     const enabled = await plugin.enabled()
     if (enabled) {

@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
-    "vscode": "^1.85.0"
+    "vscode": "^1.99.1"
   },
   "publisher": "Prisma",
   "categories": [
@@ -180,12 +180,31 @@
         "title": "Generate",
         "category": "Prisma"
       }
-    ]
+    ],
+    "languageModelTools": [ {
+      "name": "get_prismas",
+      "displayName": "Get All Prismas",
+      "canBeReferencedInPrompt": true,
+      "toolReferenceName": "get_prismas",
+      "icon": "prisma_icon.svg",
+      "userDescription": "Get all Prisma schemas in the workspace.",
+      "modelDescription": "This tool gets all the Prismas. They are returned as a comma separated string. Call this whenever the user asks about Prisma.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "context": {
+            "type": "string",
+            "description": "Any context the user provided or that might be relevant to the task at hand about Prisma.",
+            "default": "No additional context provided"
+          }
+        }
+      }
+    }]
   },
   "devDependencies": {
     "@types/glob": "8.1.0",
     "@types/mocha": "10.0.10",
-    "@types/vscode": "1.85.0",
+    "@types/vscode": "1.99.1",
     "@vscode/test-electron": "2.4.1",
     "is-ci": "3.0.1",
     "mocha": "10.8.2",
