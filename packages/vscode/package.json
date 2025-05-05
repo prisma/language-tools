@@ -199,7 +199,29 @@
           }
         }
       }
-    }]
+    }],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "Prisma-ViewContainer",
+          "title": "Prisma",
+          "icon": "./prisma_icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "Prisma-ViewContainer": [
+        {
+          "id": "Prisma-StudioView",
+          "name": "Studio"
+        },
+        {
+          "type": "webview",
+          "id": "prisma.databases",
+          "name": "Databases 2"
+        }
+      ]
+    }
   },
   "devDependencies": {
     "@types/glob": "8.1.0",

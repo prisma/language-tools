@@ -3,3 +3,4 @@ pnpm-lock.yaml
 **/dist/*
 .vscode-test
 llmTools.ts
+**/ui/**

@@ -1,9 +1,15 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { ExtensionContext } from 'vscode'
 import plugins from './plugins'
 import { registerChatTools } from './plugins/llmTools'
+import * as studio from './ui/studio'
+import * as databases from './ui/databases'
 
 export function activate(context: ExtensionContext): void {
   registerChatTools(context)
+
+  databases.activate(context)
+  studio.activate(context)
 
   void plugins.map(async (plugin) => {
     const enabled = await plugin.enabled()
