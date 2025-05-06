@@ -9,7 +9,7 @@ async function testAutoFormat(docUri: vscode.Uri, expectedFormatted: string): Pr
   const actualFormatted = (await vscode.commands.executeCommand('vscode.executeFormatDocumentProvider', docUri, {
     insertSpaces: true,
     tabSize: 2,
-  })) as vscode.TextEdit[]
+  })) satisfies vscode.TextEdit[]
 
   const workEdits = new vscode.WorkspaceEdit()
   workEdits.set(docUri, actualFormatted)
@@ -23,7 +23,7 @@ async function testAutoFormat(docUri: vscode.Uri, expectedFormatted: string): Pr
 suite('Should format', () => {
   const docUri = getDocUri('format/schema.prisma')
 
-  const docUriExpected = getDocUri('format/expected.prisma')
+  const docUriExpected = getDocUri('format/expected.snapshot')
   const textDocument = fs.readFileSync(docUriExpected.fsPath, 'utf8')
 
   test('Diagnoses format', async function () {
