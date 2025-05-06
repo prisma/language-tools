@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
-    "vscode": "^1.85.0"
+    "vscode": "^1.96.0"
   },
   "publisher": "Prisma",
   "categories": [
@@ -375,7 +375,7 @@
   "devDependencies": {
     "@types/glob": "8.1.0",
     "@types/mocha": "10.0.10",
-    "@types/vscode": "1.99.1",
+    "@types/vscode": "1.96.0",
     "@vscode/test-electron": "2.4.1",
     "is-ci": "3.0.1",
     "mocha": "10.8.2",

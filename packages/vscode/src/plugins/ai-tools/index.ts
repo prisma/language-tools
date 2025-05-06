@@ -172,9 +172,7 @@ class PDPCreatePPGTool implements LanguageModelTool<PDPCreatePPGToolInput> {
 
 const plugin: PrismaVSCodePlugin = {
   name: 'prisma-ai-tools',
-  enabled: () => {
-    return !!lm && typeof lm.registerTool === 'function'
-  },
+  enabled: () => true,
   activate: (context) => {
     context.subscriptions.push(lm.registerTool('prisma-migrate-status', new MigrateStatusTool()))
     context.subscriptions.push(lm.registerTool('prisma-migrate-dev', new MigrateDevTool()))
