@@ -16,6 +16,7 @@
     "@prisma/language-server": "31.0.7516",
     "checkpoint-client": "1.1.33",
     "env-paths": "2.2.1",
+    "execa": "5.1.1",
     "minimatch": "6.2.0",
     "vscode-languageclient": "7.0.0",
     "watcher": "1.2.0"
@@ -180,12 +181,201 @@
         "title": "Generate",
         "category": "Prisma"
       }
+    ],
+    "languageModelTools": [
+      {
+        "name": "prisma-migrate-status",
+        "tags": [
+          "prisma",
+          "database",
+          "migrations",
+          "postgres",
+          "mysql",
+          "sqlite"
+        ],
+        "toolReferenceName": "prisma-migrate-status",
+        "displayName": "Prisma Migrate Status",
+        "modelDescription": "The prisma migrate status command looks up the migrations in ./prisma/migrations/* folder and the entries in the _prisma_migrations table and compiles information about the state of the migrations in your database.\nExample output:\n\nStatus\n3 migrations found in prisma/migrations\n\nYour local migration history and the migrations table from your database are different:\n\nThe last common migration is: 20201127134938_new_migration\n\nThe migration have not yet been applied:\n20201208100950_test_migration\n\nThe migrations from the database are not found locally in prisma/migrations:\n20201208100950_new_migration",
+        "userDescription": "The `prisma migrate status` command looks up the migration status of your database.",
+        "canBeReferencedInPrompt": true,
+        "icon": "./prisma_icon.svg",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "projectCwd": {
+              "type": "string",
+              "description": "The current working directory of the user's project. This should be the top level directory of the project but in a monorepo setup could also be a specific package or app directory."
+            }
+          }
+        }
+      },
+      {
+        "name": "prisma-migrate-dev",
+        "tags": [
+          "prisma",
+          "database",
+          "migrations",
+          "postgres",
+          "mysql",
+          "sqlite"
+        ],
+        "toolReferenceName": "prisma-migrate-dev",
+        "displayName": "Prisma Migrate Dev",
+        "modelDescription": "Prisma Migrate Dev is used to update Prisma whenever the schema.prisma file has been modified. Always provide a descriptive name argument describing the change that was made to the Prisma Schema.\nThe migrate dev command performs these steps:\n1. Reruns the existing migration history in the shadow database in order to detect schema drift (edited or deleted migration file, or a manual changes to the database schema)\n2. Applies pending migrations to the shadow database (for example, new migrations created by colleagues)\n3. Generates a new migration from any changes you made to the Prisma schema before running migrate dev\n4. Applies all unapplied migrations to the development database and updates the _prisma_migrations table\n5. Triggers the generation of artifacts (for example, Prisma Client)",
+        "userDescription": "`prisma migrate dev` is used to create a new migration and update your local database state whenever the schema.prisma file has been modified.",
+        "canBeReferencedInPrompt": true,
+        "icon": "./prisma_icon.svg",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "projectCwd": {
+              "type": "string",
+              "description": "The current working directory of the user's project. This should be the top level directory of the project but in a monorepo setup could also be a specific package or app directory."
+            },
+            "name": {
+              "type": "string",
+              "description": "A descriptive name argument that will be used in the name of the migration."
+            }
+          }
+        }
+      },
+      {
+        "name": "prisma-migrate-reset",
+        "tags": [
+          "prisma",
+          "database",
+          "migrations",
+          "postgres",
+          "mysql",
+          "sqlite"
+        ],
+        "toolReferenceName": "prisma-migrate-reset",
+        "displayName": "Prisma Migrate Reset",
+        "modelDescription": "Prisma Migrate Reset --force is used to reset the database and migration history if drift is detected. Only run this command on a development database - never on production databases! If in doubt, ask the user to confirm.\nThe migrate reset command performs these steps:\n1. Drops the database/schema if possible, or performs a soft reset if the environment does not allow deleting databases/schemas\n2. Creates a new database/schema with the same name if the database/schema was dropped\n3. Applies all migrations\n4. Runs seed scripts",
+        "userDescription": "`prisma migrate reset --force` is used to reset the database and migration history if drift is detected. Only run this command on a development database - never on production databases!",
+        "canBeReferencedInPrompt": true,
+        "icon": "./prisma_icon.svg",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "projectCwd": {
+              "type": "string",
+              "description": "The current working directory of the user's project. This should be the top level directory of the project but in a monorepo setup could also be a specific package or app directory."
+            }
+          }
+        }
+      },
+      {
+        "name": "prisma-studio",
+        "tags": [
+          "prisma",
+          "database",
+          "postgres",
+          "mysql",
+          "sqlite"
+        ],
+        "toolReferenceName": "prisma-studio",
+        "displayName": "Prisma Studio",
+        "modelDescription": "Open Prisma Studio to view data in your database in a pleasing visual ui.\nProvide the current working directory of the users project. This should be the top level directory of the project.",
+        "userDescription": "Open Prisma Studio to view data in your database in a pleasing visual ui.",
+        "canBeReferencedInPrompt": true,
+        "icon": "./prisma_icon.svg",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "projectCwd": {
+              "type": "string",
+              "description": "The current working directory of the user's project. This should be the top level directory of the project but in a monorepo setup could also be a specific package or app directory."
+            }
+          }
+        }
+      },
+      {
+        "name": "prisma-platform-auth-status",
+        "tags": [
+          "prisma",
+          "database",
+          "ppg",
+          "postgres"
+        ],
+        "toolReferenceName": "prisma-platform-auth-status",
+        "displayName": "Prisma Platform Auth Status",
+        "modelDescription": "Prisma Platform Auth Status provides information about the currently logged in user. If the user is not logged in, you should instruct them to do so by running `npx prisma platform auth login --early-access` and then re-running this command to verify. This login is required to e.g. create and manage Prisma Postgres databases.",
+        "userDescription": "Provides information about the currently logged in user on the Prisma Platform to use e.g. Prisma Postgres.",
+        "canBeReferencedInPrompt": true,
+        "icon": "./prisma_icon.svg",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "projectCwd": {
+              "type": "string",
+              "description": "The current working directory of the user's project. This should be the top level directory of the project but in a monorepo setup could also be a specific package or app directory."
+            }
+          }
+        }
+      },
+      {
+        "name": "prisma-platform-login",
+        "tags": [
+          "prisma",
+          "database",
+          "ppg",
+          "postgres"
+        ],
+        "toolReferenceName": "prisma-platform-login",
+        "displayName": "Prisma Platform Login",
+        "modelDescription": "Login or create an account in order to be able to use Prisma Postgres.",
+        "userDescription": "Login or create an account in order to be able to use Prisma Postgres.",
+        "canBeReferencedInPrompt": true,
+        "icon": "./prisma_icon.svg",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "projectCwd": {
+              "type": "string",
+              "description": "The current working directory of the user's project. This should be the top level directory of the project but in a monorepo setup could also be a specific package or app directory."
+            }
+          }
+        }
+      },
+      {
+        "name": "prisma-postgres-create-database",
+        "tags": [
+          "prisma",
+          "database",
+          "ppg",
+          "postgres"
+        ],
+        "toolReferenceName": "prisma-postgres-create-database",
+        "displayName": "Prisma Postgres Create Database",
+        "modelDescription": "Create a new online Prisma Postgres database.\nSpecify a name that makes sense to the user - maybe the name of the project they are working on.\nSpecify a region that makes sense for the user. Pick between these three options: us-east-1, eu-west-3, ap-northeast-1. If you are unsure, pick us-east-1.\nProvide the current working directory of the users project. This should be the top level directory of the project.\nIf the response indicates that you have reached the workspace plan limit, you should instruct the user to do one of these things:\nIf they want to connect to an existing database, they should go to console.prisma.io and copy the connection string\nIf they want to upgrade their plan, they should go to console.prisma.io and upgrade their plan in order to be able to create more databases\nIf they want to delete a database they no longer need, they should go to console.prisma.io and delete the database project",
+        "userDescription": "Create a new online Prisma Postgres database.",
+        "canBeReferencedInPrompt": true,
+        "icon": "./prisma_icon.svg",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "projectCwd": {
+              "type": "string",
+              "description": "The current working directory of the user's project. This should be the top level directory of the project but in a monorepo setup could also be a specific package or app directory."
+            },
+            "name": {
+              "type": "string",
+              "description": "The name for the new database."
+            },
+            "region": {
+              "type": "string",
+              "description": "The region for the new database. Pick between these three options: us-east-1, eu-west-3, ap-northeast-1"
+            }
+          }
+        }
+      }
     ]
   },
   "devDependencies": {
     "@types/glob": "8.1.0",
     "@types/mocha": "10.0.10",
-    "@types/vscode": "1.85.0",
+    "@types/vscode": "1.99.1",
     "@vscode/test-electron": "2.4.1",
     "is-ci": "3.0.1",
     "mocha": "10.8.2",
