@@ -64,37 +64,6 @@ jobs:
           name: pr-artifact
           path: ./packages/vscode/*.vsix
 
-      # Add artifact as a commit on the `artifacts` branch
-      # and post message with the link in the PR
-      - name: Add artifact to PR
-        # Skip for Renovate (only build)
-        if: "!contains(github.actor, 'renovate')"
-        uses: gavv/pull-request-artifacts@v2.1.0
-        with:
-          commit: ${{ github.event.pull_request.head.sha }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts-branch: artifacts
-          artifacts-dir: pull-request-artifacts
-          artifacts: |
-            ./packages/vscode/prisma.vsix
-
-      # Additionally post a comment with a link to GitPod that can use built extension instantly
-      - name: Find existing comment
-        if: "!contains(github.actor, 'renovate')"
-        uses: peter-evans/find-comment@v3
-        id: fc
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'github-actions[bot]'
-          body-includes: 'via GitPod'
-
-      - name: Create comment
-        if: "!contains(github.actor, 'renovate') && steps.fc.outputs.comment-id == ''"
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body: '[Try this extension build via GitPod](https://gitpod.io/#vsix=https%3A%2F%2Fgithub.com%2Fprisma%2Flanguage-tools%2Fblob%2Fartifacts%2Fpull-request-artifacts%2Fpr${{ github.event.pull_request.number }}-prisma.vsix%3Fraw%3Dtrue/https://github.com/prisma/language-tools-gitpod)'
-
   slack:
     name: Send slack notification
     runs-on: ubuntu-latest
