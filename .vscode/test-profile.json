@@ -1,0 +1,9 @@
+{
+  "name": "no-prisma",
+  "settings": {
+    "editor.tabSize": 2
+  },
+  "extensions": {
+    "disabled": ["prisma"]
+  }
+}

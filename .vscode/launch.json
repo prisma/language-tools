@@ -13,11 +13,12 @@
       "sourceMaps": true,
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode",
-        "--disable-extensions"
+        // Using a test profile to disable the regualr Prisma extension while keeping other extensions (e.g. Github Copilot) enabled
+        "--profile=${workspaceFolder}/.vscode/test-profile.json"
+        // Uncomment this to disable all extensions => Will likely break the AI tools integration with Github Copilot
+        //"--disable-extensions"
       ],
-      "outFiles": [
-        "${workspaceFolder}/packages/vscode/dist/**/*.js"
-      ],
+      "outFiles": ["${workspaceFolder}/packages/vscode/dist/**/*.js"],
       "env": {
         "VSCODE_DEBUG_MODE": "true"
       }
@@ -29,9 +30,7 @@
       "port": 6009,
       "restart": true,
       "timeout": 50000,
-      "outFiles": [
-        "${workspaceFolder}/packages/language-server/dist/**/*.js"
-      ]
+      "outFiles": ["${workspaceFolder}/packages/language-server/dist/**/*.js"]
     },
     {
       "name": "Run Language Server Tests",
@@ -53,9 +52,7 @@
       "runtimeExecutable": null,
       "runtimeArgs": [],
       "env": {},
-      "outFiles": [
-        "${workspaceRoot}/packages/language-server/dist/src/__test__/**/*.js"
-      ],
+      "outFiles": ["${workspaceRoot}/packages/language-server/dist/src/__test__/**/*.js"],
       "preLaunchTask": "npm: watch"
     },
     {
@@ -68,18 +65,13 @@
         "--extensionTestsPath=${workspaceFolder}/packages/vscode/dist/src/__test__/index",
         "${workspaceFolder}/packages/vscode/fixtures"
       ],
-      "outFiles": [
-        "${workspaceFolder}/packages/vscode/dist/src/__test__/**/*.js"
-      ]
+      "outFiles": ["${workspaceFolder}/packages/vscode/dist/src/__test__/**/*.js"]
     }
   ],
   "compounds": [
     {
       "name": "VS Code + Language Server",
-      "configurations": [
-        "Launch VS Code extension",
-        "Attach to Server"
-      ]
+      "configurations": ["Launch VS Code extension", "Attach to Server"]
     }
   ]
 }
