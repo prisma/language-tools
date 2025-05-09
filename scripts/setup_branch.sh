@@ -18,7 +18,7 @@ if [ "$NPM_CHANNEL" = "dev" ]; then
     echo "branch=main" >> "$GITHUB_OUTPUT"
 elif [ "$NPM_CHANNEL" = "promote_patch-dev" ]; then
     PATCH_BRANCH=$(node scripts/setup_branch.js "patch-dev")
-    git checkout stable
+    git checkout -f stable
     git reset --hard "$PATCH_BRANCH" # Reset stable to patch-dev branch
     git push -f # do not merge, only use state of PATCH_BRANCH
     echo "branch=main" >> "$GITHUB_OUTPUT"
@@ -41,19 +41,19 @@ else
             git config --global user.name "Prismo"
 
             if [ "$NPM_CHANNEL" = "latest" ]; then
-                git checkout -b "$BRANCH"
+                git checkout -f -b "$BRANCH"
             else
                 # Patch branch
                 NPM_VERSION=$(cat scripts/versions/prisma_latest)
                 echo "NPM_VERSION to base new branch on: $NPM_VERSION"
-                git checkout -b "$BRANCH" "$NPM_VERSION"
+                git checkout -f -b "$BRANCH" "$NPM_VERSION"
             fi
 
         else
             echo "Not setting up repo because ENVIRONMENT is not set"
         fi
     else 
-        git checkout "$BRANCH"
+        git checkout -f "$BRANCH"
         echo "$BRANCH exists already."
         echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
     fi

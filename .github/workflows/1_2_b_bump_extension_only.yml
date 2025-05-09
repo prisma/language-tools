@@ -29,14 +29,12 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-      - name: Install Dependencies
-        run: npm install && npm run bootstrap
-        shell: bash
-      - name: DEBUG - git diff after install
-        run: git diff
       - name: Checkout main if necessary
         if: endsWith(github.ref, '/main') == false
         run: git fetch && git checkout main
+      - name: Install Dependencies
+        run: npm install && npm run bootstrap
+        shell: bash
       - name: Setup Git
         run: |
           sh scripts/set_git_credentials.sh
@@ -49,7 +47,7 @@ jobs:
 
       - name: Checkout previous branch
         if: endsWith(github.ref, '/main') == false
-        run: git checkout ${{ github.ref_name }}
+        run: git checkout -f ${{ github.ref_name }}
       - name: Update VS Code extension version
         run: |
           node scripts/update_package_json_files.js dev ${{ steps.update.outputs.next_extension_version }} ""
