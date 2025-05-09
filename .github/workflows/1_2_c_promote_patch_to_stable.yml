@@ -23,10 +23,10 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-      - name: Install Dependencies
-        run: npm install && npm run bootstrap
       - name: Checkout main
         run: git fetch && git checkout main
+      - name: Install Dependencies
+        run: npm install && npm run bootstrap
       - name: Setup Git
         run: |
           sh scripts/set_git_credentials.sh
