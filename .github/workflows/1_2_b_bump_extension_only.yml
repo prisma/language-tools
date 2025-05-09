@@ -32,7 +32,9 @@ jobs:
       - name: Install Dependencies
         run: npm install && npm run bootstrap
         shell: bash
-      - name: checkout main if necessary
+      - name: DEBUG - git diff after install
+        run: git diff
+      - name: Checkout main if necessary
         if: endsWith(github.ref, '/main') == false
         run: git fetch && git checkout main
       - name: Setup Git
