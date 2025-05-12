@@ -1,0 +1,22 @@
+{
+  "name": "@prisma/management-api-sdk",
+  "version": "0.0.1",
+  "description": "Prisma Management API SDK",
+  "author": "Prisma",
+  "license": "Apache-2.0",
+  "publisher": "Prisma",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "generate": "bash generate-management-api-sdk.sh",
+    "build": "tsc -p ./",
+    "watch": "npm run build -- -w"
+  },
+  "dependencies": {
+    "axios": "1.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.19.76",
+    "typescript": "5.7.3"
+  }
+}
