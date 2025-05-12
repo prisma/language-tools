@@ -183,9 +183,11 @@ Note that the personal access token is only valid for a year and will need to be
 
 ### Manual Publishing
 
-To do an extension only publish, please follow these steps:
+To do an extension only publish which does not coincide with a Prisma ORM release, please follow these steps:
 
-1. Create a patch branch ending with `.x` if it doesn't exist yet.
+1. Create a patch branch ending with `.x` (e.g. `6.7.x`) if it doesn't exist yet.
 2. Push to the patch branch with the changes.
-3. Step 2 will trigger the script `patch-extension-only`, creating an Insider release
-4. If you were satisfied, manually trigger GH action workflow `publish-patch-branch-to-stable` to release the patch to the stable extension
+3. Step 2 will trigger the workflow [`1/2b. Bump versions for extension only (on push to main and patch branch)`](../../.github/workflows/1_2_b_bump_extension_only.yml). This will kickoff building an Insider release with only those changes - temporarily overwriting any prior Insider releases triggered from the main branch.
+4. Once you want to release to stable, manually trigger GH action workflow [`1/2c. Bump versions for extension only (promotes patch branch to stable release)`](../../.github/workflows/1_2_c_promote_patch_to_stable.yml). Choose your patch branch in `Use workflow from` in the GH action UI.
+
+Note: Best cherry-pick the changes you want to include from the main branch onto the patch branch. Do NOT merge the patch branch back into main or stable!
