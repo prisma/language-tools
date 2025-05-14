@@ -18,6 +18,7 @@
     "env-paths": "2.2.1",
     "execa": "5.1.1",
     "minimatch": "6.2.0",
+    "openapi-fetch": "0.14.0",
     "vscode-languageclient": "7.0.0",
     "watcher": "1.2.0"
   },
@@ -29,6 +30,7 @@
   "scripts": {
     "build": "tsc -p ./",
     "watch": "npm run build -- -w",
+    "generate-api-client": "openapi-typescript https://api.prisma.io/doc --output ./src/plugins/prisma-postgres-manager/management-api/api.d.ts",
     "test": "rm -rf ./dist && npm run build && node dist/src/__test__/runTest true",
     "vscode:prepublish": "npm run build",
     "package": "vsce package"
@@ -535,10 +537,12 @@
     "@types/glob": "8.1.0",
     "@types/mocha": "10.0.10",
     "@types/vscode": "1.96.0",
+    "@types/node": "20.14.8",
     "@vscode/test-electron": "2.4.1",
     "is-ci": "3.0.1",
     "mocha": "10.8.2",
     "ovsx": "0.10.1",
+    "openapi-typescript": "7.8.0",
     "typescript": "5.7.3",
     "@vscode/vsce": "2.29.0"
   },
