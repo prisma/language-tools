@@ -1,30 +1,59 @@
-import { ThemeIcon, window, env, ProgressLocation } from 'vscode'
-import { PrismaProjectItem, PrismaWorkspaceItem } from '../PrismaPostgresTreeDataProvider'
+import { ThemeIcon, window, env, ProgressLocation, QuickPickItemKind } from 'vscode'
+import { PrismaProjectItem } from '../PrismaPostgresTreeDataProvider'
 import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
-import { pickWorkspace } from '../shared-ui/pickWorkspace'
 import { createProjectInclDatabase } from './createProjectInclDatabase'
 import { CommandAbortError } from '../shared-ui/handleCommandError'
 
-const pickProject = async (ppgRepository: PrismaPostgresRepository, workspaceId: string) => {
-  const projects = await ppgRepository.getProjects({ workspaceId })
+const pickProject = async (
+  ppgRepository: PrismaPostgresRepository,
+): Promise<{ workspaceId: string; projectId: string | null }> => {
+  const workspaces = await ppgRepository.getWorkspaces()
 
-  if (projects.length === 0) {
-    return (await createProjectInclDatabase(ppgRepository, workspaceId)).id
+  if (workspaces.length === 0) {
+    throw new CommandAbortError('You need to login to Prisma before you can create a remote database.') // TODO: trigger login flow
   }
 
-  // TODO: Or put projects of all workspaces in the quick pick together?
-  const projectsQuickPickItems = [
-    ...projects.map((p) => ({ type: 'project' as const, id: p.id, label: p.name, iconPath: new ThemeIcon('project') })),
-    { type: 'create-project' as const, label: 'Create Project', iconPath: new ThemeIcon('plus') },
-  ]
+  const workspacesWithProjects = await Promise.all(
+    workspaces.map(async (workspace) => ({
+      ...workspace,
+      projects: await ppgRepository.getProjects({ workspaceId: workspace.id }),
+    })),
+  )
+
+  if (workspacesWithProjects.every((workspace) => workspace.projects.length === 0)) {
+    return {
+      workspaceId: workspaces[0].id,
+      projectId: (await createProjectInclDatabase(ppgRepository, workspaces[0].id)).id,
+    }
+  }
+
+  const projectsQuickPickItems = workspacesWithProjects.flatMap((workspace) => {
+    return [
+      { type: 'workspace' as const, label: workspace.name, kind: QuickPickItemKind.Separator },
+      ...workspace.projects.map((p) => ({
+        type: 'project' as const,
+        id: p.id,
+        workspaceId: workspace.id,
+        label: p.name,
+        iconPath: new ThemeIcon('project'),
+      })),
+      {
+        type: 'create-project' as const,
+        label: 'Create Project',
+        iconPath: new ThemeIcon('plus'),
+        workspaceId: workspace.id,
+      },
+    ]
+  })
+
   const selectedItem = await window.showQuickPick(projectsQuickPickItems, {
     placeHolder: 'Choose a project',
   })
 
   if (selectedItem?.type === 'create-project') {
-    return null
+    return { workspaceId: selectedItem.workspaceId, projectId: null }
   } else if (selectedItem?.type === 'project') {
-    return selectedItem.id
+    return { workspaceId: selectedItem.workspaceId, projectId: selectedItem.id }
   } else {
     throw new CommandAbortError('No project selected')
   }
@@ -32,17 +61,12 @@ const pickProject = async (ppgRepository: PrismaPostgresRepository, workspaceId:
 
 export const createRemoteDatabase = async (ppgRepository: PrismaPostgresRepository, args: unknown) => {
   let workspaceId: string
-  if (args instanceof PrismaWorkspaceItem || args instanceof PrismaProjectItem) {
-    workspaceId = args.workspaceId
-  } else {
-    workspaceId = (await pickWorkspace(ppgRepository)).id
-  }
-
   let projectId: string | null
   if (args instanceof PrismaProjectItem) {
+    workspaceId = args.workspaceId
     projectId = args.projectId
   } else {
-    projectId = await pickProject(ppgRepository, workspaceId)
+    ;({ workspaceId, projectId } = await pickProject(ppgRepository))
   }
 
   if (!projectId) return createProjectInclDatabase(ppgRepository, workspaceId)
