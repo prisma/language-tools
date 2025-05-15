@@ -3,11 +3,7 @@ import assert from 'assert'
 import { getDocUri, activate } from '../helper'
 
 async function testHover(docUri: vscode.Uri, position: vscode.Position, expectedHover: string): Promise<void> {
-  const actualHover: Hover[] = (await vscode.commands.executeCommand(
-    'vscode.executeHoverProvider',
-    docUri,
-    position,
-  )) as Hover[]
+  const actualHover: Hover[] = await vscode.commands.executeCommand('vscode.executeHoverProvider', docUri, position)
 
   assert.ok(actualHover.length === 1)
   assert.ok(actualHover[0].contents.length === 1)

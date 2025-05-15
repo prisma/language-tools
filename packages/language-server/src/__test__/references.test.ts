@@ -4,7 +4,7 @@ import { handleReferencesRequest } from '../lib/MessageHandler'
 import { PrismaSchema } from '../lib/Schema'
 import { getMultifileHelper } from './MultifileHelper'
 
-const getReferences = async (uri: string, schema: PrismaSchema, position: Position) => {
+const getReferences = (uri: string, schema: PrismaSchema, position: Position) => {
   const params: ReferenceParams = {
     textDocument: { uri: uri },
     position,
@@ -16,10 +16,10 @@ const getReferences = async (uri: string, schema: PrismaSchema, position: Positi
 describe('References', async () => {
   const helper = await getMultifileHelper('references')
 
-  test('of a composite type block name', async () => {
+  test('of a composite type block name', () => {
     const file = helper.file('types.prisma')
 
-    const references = await getReferences(
+    const references = getReferences(
       file.uri,
       helper.schema,
       file.lineContaining('type Address').characterAfter('Addr'),
@@ -71,10 +71,10 @@ describe('References', async () => {
     `)
   })
 
-  test('of a composite type as a field type', async () => {
+  test('of a composite type as a field type', () => {
     const file = helper.file('models.prisma')
 
-    const references = await getReferences(
+    const references = getReferences(
       file.uri,
       helper.schema,
       file.lineContaining('address Address').characterAfter('Addr'),
@@ -126,14 +126,10 @@ describe('References', async () => {
     `)
   })
 
-  test('of a model block name', async () => {
+  test('of a model block name', () => {
     const file = helper.file('models.prisma')
 
-    const references = await getReferences(
-      file.uri,
-      helper.schema,
-      file.lineContaining('model Post').characterAfter('Po'),
-    )
+    const references = getReferences(file.uri, helper.schema, file.lineContaining('model Post').characterAfter('Po'))
 
     expect(references).not.toBeUndefined()
     expect(references).toMatchInlineSnapshot(`
@@ -181,14 +177,10 @@ describe('References', async () => {
     `)
   })
 
-  test('of a model relation as a field type', async () => {
+  test('of a model relation as a field type', () => {
     const file = helper.file('models.prisma')
 
-    const references = await getReferences(
-      file.uri,
-      helper.schema,
-      file.lineContaining('author   User').characterAfter('Us'),
-    )
+    const references = getReferences(file.uri, helper.schema, file.lineContaining('author   User').characterAfter('Us'))
 
     expect(references).not.toBeUndefined()
     expect(references).toMatchInlineSnapshot(`
@@ -223,10 +215,10 @@ describe('References', async () => {
     `)
   })
 
-  test('of a field from relation fields', async () => {
+  test('of a field from relation fields', () => {
     const file = helper.file('models.prisma')
 
-    const references = await getReferences(
+    const references = getReferences(
       file.uri,
       helper.schema,
       file.lineContaining('author   User').characterAfter('fields: [auth'),
@@ -252,10 +244,10 @@ describe('References', async () => {
     `)
   })
 
-  test('of a field from relation fields', async () => {
+  test('of a field from relation fields', () => {
     const file = helper.file('models.prisma')
 
-    const references = await getReferences(
+    const references = getReferences(
       file.uri,
       helper.schema,
       file.lineContaining('author   User').characterAfter('references: [i'),

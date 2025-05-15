@@ -155,7 +155,7 @@ export function handleDefinitionRequest(
         return block
       }
     })
-    .filter((block) => block !== undefined) as Block[]
+    .filter((block) => block !== undefined)
 
   if (foundBlocks.length !== 1) {
     return
