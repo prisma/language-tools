@@ -15,12 +15,12 @@ async function testCompletion(
     await activate(docUri)
   }
 
-  const actualCompletions: vscode.CompletionList = (await vscode.commands.executeCommand(
+  const actualCompletions: vscode.CompletionList = await vscode.commands.executeCommand(
     'vscode.executeCompletionItemProvider',
     docUri,
     position,
     triggerCharacter,
-  )) as vscode.CompletionList
+  )
 
   assert.deepStrictEqual(
     actualCompletions.isIncomplete,

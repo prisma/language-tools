@@ -89,7 +89,7 @@ export function getDatamodelBlock(blockName: string, schema: PrismaSchema): Bloc
         return block
       }
     })
-    .filter((block) => block !== undefined) as Block[]
+    .filter((block) => block !== undefined)
 
   if (foundBlocks.length !== 1) {
     return

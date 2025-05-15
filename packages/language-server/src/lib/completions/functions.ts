@@ -77,7 +77,8 @@ export const ulidDefaultCompletion = (items: CompletionItem[]) =>
     kind: CompletionItemKind.Function,
     documentation: {
       kind: MarkupKind.Markdown,
-      value: 'Generate a universally unique lexicographically sortable identifier based on the [ULID](https://github.com/ulid/spec) spec.',
+      value:
+        'Generate a universally unique lexicographically sortable identifier based on the [ULID](https://github.com/ulid/spec) spec.',
     },
   })
 
@@ -87,7 +88,8 @@ export const nanoidDefaultCompletion = (items: CompletionItem[]) =>
     kind: CompletionItemKind.Function,
     documentation: {
       kind: MarkupKind.Markdown,
-      value: 'Generate a secure, URL-friendly, unique identifier based on the [nanoid](https://github.com/ai/nanoid) spec. The length is customizable, defaults to 21.',
+      value:
+        'Generate a secure, URL-friendly, unique identifier based on the [nanoid](https://github.com/ai/nanoid) spec. The length is customizable, defaults to 21.',
     },
   })
 

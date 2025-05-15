@@ -68,7 +68,9 @@ async function loadConfig(): Promise<PrismaConfigInternal> {
       case 'ConfigFileParseError':
         throw new Error(`Failed to parse config file at "${resolvedPath}"`)
       case 'TypeScriptImportFailed':
-        throw new Error(`Failed to import config file as TypeScript from "${resolvedPath}". Error: ${error.error.message}`)
+        throw new Error(
+          `Failed to import config file as TypeScript from "${resolvedPath}". Error: ${error.error.message}`,
+        )
       case 'UnknownError':
         throw new Error(`Unknown error during config file loading: ${error.error.message}`)
       default:
@@ -79,15 +81,9 @@ async function loadConfig(): Promise<PrismaConfigInternal> {
   return config
 }
 
-async function loadPrismaSchema(
-  fsPath: string,
-  allDocuments: TextDocuments<TextDocument>,
-): Promise<PrismaSchema> {
+async function loadPrismaSchema(fsPath: string, allDocuments: TextDocuments<TextDocument>): Promise<PrismaSchema> {
   // `loadRelatedSchemaFiles` locates and returns either a single schema files, or a set of related schema files.
-  const schemaFiles = await loadRelatedSchemaFiles(
-    fsPath,
-    createFilesResolver(allDocuments),
-  )
+  const schemaFiles = await loadRelatedSchemaFiles(fsPath, createFilesResolver(allDocuments))
   const documents = schemaFiles.map(([filePath, content]) => {
     return new SchemaDocument(TextDocument.create(URI.file(filePath).toString(), 'prisma', 1, content))
   })
