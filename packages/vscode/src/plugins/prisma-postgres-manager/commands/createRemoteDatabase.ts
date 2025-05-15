@@ -2,13 +2,14 @@ import { ThemeIcon, window, env, ProgressLocation } from 'vscode'
 import { PrismaProjectItem, PrismaWorkspaceItem } from '../PrismaPostgresTreeDataProvider'
 import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
 import { pickWorkspace } from '../shared-ui/pickWorkspace'
-import { createProject } from './createProject'
+import { createProjectInclDatabase } from './createProjectInclDatabase'
+import { CommandAbortError } from '../shared-ui/handleCommandError'
 
 const pickProject = async (ppgRepository: PrismaPostgresRepository, workspaceId: string) => {
   const projects = await ppgRepository.getProjects({ workspaceId })
 
   if (projects.length === 0) {
-    return (await createProject(ppgRepository, workspaceId)).id
+    return (await createProjectInclDatabase(ppgRepository, workspaceId)).id
   }
 
   // TODO: Or put projects of all workspaces in the quick pick together?
@@ -20,14 +21,12 @@ const pickProject = async (ppgRepository: PrismaPostgresRepository, workspaceId:
     placeHolder: 'Choose a project',
   })
 
-  if (!selectedItem) {
-    throw new Error('No project selected')
-  } else if (selectedItem.type === 'create-project') {
-    return (await createProject(ppgRepository, workspaceId)).id
-  } else if (selectedItem.type === 'project') {
+  if (selectedItem?.type === 'create-project') {
+    return null
+  } else if (selectedItem?.type === 'project') {
     return selectedItem.id
   } else {
-    throw new Error('Missing project ID')
+    throw new CommandAbortError('No project selected')
   }
 }
 
@@ -39,32 +38,31 @@ export const createRemoteDatabase = async (ppgRepository: PrismaPostgresReposito
     workspaceId = (await pickWorkspace(ppgRepository)).id
   }
 
-  console.log('workspaceId', workspaceId)
-
-  let projectId: string
+  let projectId: string | null
   if (args instanceof PrismaProjectItem) {
     projectId = args.projectId
   } else {
     projectId = await pickProject(ppgRepository, workspaceId)
   }
-  console.log('projectId', projectId)
+
+  if (!projectId) return createProjectInclDatabase(ppgRepository, workspaceId)
 
   const regions = ppgRepository.getRegions()
 
   const name = await window.showInputBox({
     prompt: 'Enter the name of the remote database',
   })
+  if (!name) throw new CommandAbortError('Name is required')
+
   const region = await window.showQuickPick(await regions, {
     placeHolder: 'Select the region of the remote database',
   })
-
-  if (!name) throw new Error('Name is required')
-  if (!region) throw new Error('Region is required')
+  if (!region) throw new CommandAbortError('Region is required')
 
   const result = await window.withProgress(
     {
       location: ProgressLocation.Notification,
-      title: 'Creating remote database...',
+      title: `Creating remote database in '${region}'...`,
     },
     () => ppgRepository.createRemoteDatabase({ workspaceId, projectId, name, region }),
   )

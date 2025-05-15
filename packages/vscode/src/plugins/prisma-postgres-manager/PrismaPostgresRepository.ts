@@ -43,7 +43,7 @@ export interface PrismaPostgresRepository {
   deleteRemoteDatabase(params: { workspaceId: string; projectId: string; id: string } | RemoteDatabase): Promise<void>
 
   getProjects(params: { workspaceId: string }): Promise<Project[]>
-  createProject(params: { workspaceId: string; name: string }): Promise<Project>
+  createProject(params: { workspaceId: string; name: string; region: string }): Promise<Project>
   deleteProject(params: { workspaceId: string; id: string } | Project): Promise<void>
 }
 
@@ -101,7 +101,7 @@ export class PrismaPostgresInMemoryRepository implements PrismaPostgresRepositor
     return this.remoteDatabases.filter((db) => db.workspaceId === workspaceId && db.projectId === projectId)
   }
 
-  async createProject({ workspaceId, name }: { workspaceId: string; name: string }): Promise<Project> {
+  async createProject({ workspaceId, name }: { workspaceId: string; name: string; region: string }): Promise<Project> {
     await new Promise((resolve) => setTimeout(resolve, 2000))
     const project: Project = {
       id: Math.random().toString(36).substring(7),
@@ -230,18 +230,30 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
     }))
   }
 
-  async createProject({ workspaceId, name }: { workspaceId: string; name: string }): Promise<Project> {
+  async createProject({
+    workspaceId,
+    name,
+    region,
+  }: {
+    workspaceId: string
+    name: string
+    region: string
+  }): Promise<Project> {
+    if (!isValidRegion(region)) throw new Error(`Invalid region: ${region}.`)
+
     const client = this.getClient(workspaceId)
     const response = await client.POST('/projects', {
       body: {
         name,
-        region: 'us-east-1',
+        region,
       },
     })
 
     if ('error' in response) {
       this.handleError(response.error)
     }
+
+    this.triggerRefresh()
 
     return {
       id: response.data.id,

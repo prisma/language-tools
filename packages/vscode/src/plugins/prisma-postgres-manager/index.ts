@@ -6,7 +6,7 @@ import {
 } from './PrismaPostgresTreeDataProvider'
 import { createRemoteDatabase } from './commands/createRemoteDatabase'
 import { PrismaPostgresApiRepository } from './PrismaPostgresRepository'
-import { createProject } from './commands/createProject'
+import { createProjectInclDatabase } from './commands/createProjectInclDatabase'
 import { deleteProject } from './commands/deleteProject'
 import { deleteRemoteDatabase } from './commands/deleteRemoteDatabase'
 import { handleCommandError } from './shared-ui/handleCommandError'
@@ -43,7 +43,7 @@ export default {
         await handleCommandError('Logout', () => logout(ppgRepository, args))
       }),
       commands.registerCommand('prisma.createProject', async (args: unknown) => {
-        await handleCommandError('Create Project', () => createProject(ppgRepository, args))
+        await handleCommandError('Create Project', () => createProjectInclDatabase(ppgRepository, args))
       }),
       commands.registerCommand('prisma.deleteProject', async (args: unknown) => {
         await handleCommandError('Delete Project', () => deleteProject(ppgRepository, args))
