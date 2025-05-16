@@ -1,0 +1,54 @@
+name: Update API Types
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Run at midnight UTC every day
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  update-api-types:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required for committing changes
+      pull-requests: write # Required for creating PRs
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install && npm run bootstrap
+
+      - name: Generate API client
+        working-directory: packages/vscode
+        run: npm run generate-api-client
+
+      - name: Run linter with auto-fix
+        run: npm run lint
+
+      - name: Check for changes in TypeScript files
+        id: git-check
+        run: |
+          # Only stage .ts and .d.ts files
+          git add "*.ts" "*.d.ts"
+          if git diff --staged --quiet; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Compile if changes exist
+        if: steps.git-check.outputs.changes == 'true'
+        run: npm run compile
+
+      - name: Commit and push if changes exist
+        if: steps.git-check.outputs.changes == 'true'
+        run: |
+          git commit -m "chore: update generated API types"
+          git push
