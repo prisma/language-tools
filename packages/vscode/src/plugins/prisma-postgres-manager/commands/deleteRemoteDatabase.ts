@@ -1,13 +1,12 @@
 import { ProgressLocation } from 'vscode'
 import { window } from 'vscode'
-import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
-import { PrismaRemoteDatabaseItem } from '../PrismaPostgresTreeDataProvider'
+import { isRemoteDatabase, PrismaPostgresRepository } from '../PrismaPostgresRepository'
 
 export const deleteRemoteDatabase = async (ppgRepository: PrismaPostgresRepository, args: unknown) => {
-  if (!(args instanceof PrismaRemoteDatabaseItem)) throw new Error('Invalid arguments')
+  if (!isRemoteDatabase(args)) throw new Error('Invalid arguments')
 
   const confirmDeleteResult = await window.showWarningMessage(
-    `Are you sure you want to delete database '${args.databaseName}'?`,
+    `Are you sure you want to delete database '${args.name}'?`,
     { modal: true },
     { title: 'Delete' },
     { title: 'Cancel', isCloseAffordance: true },
@@ -18,17 +17,15 @@ export const deleteRemoteDatabase = async (ppgRepository: PrismaPostgresReposito
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
-      title: `Deleting database '${args.databaseName}'...`,
+      title: `Deleting database '${args.name}'...`,
     },
     () =>
       ppgRepository.deleteRemoteDatabase({
         workspaceId: args.workspaceId,
         projectId: args.projectId,
-        id: args.databaseId,
+        id: args.id,
       }),
   )
 
-  ppgRepository.triggerRefresh()
-
-  void window.showInformationMessage(`Database '${args.databaseName}' deleted`)
+  void window.showInformationMessage(`Database '${args.name}' deleted`)
 }

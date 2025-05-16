@@ -1,17 +1,13 @@
 import { ExtensionContext, window, commands, env, Uri } from 'vscode'
-import {
-  PrismaPostgresTreeDataProvider,
-  PrismaProjectItem,
-  PrismaRemoteDatabaseItem,
-} from './PrismaPostgresTreeDataProvider'
+import { PrismaPostgresTreeDataProvider } from './PrismaPostgresTreeDataProvider'
 import { createRemoteDatabase } from './commands/createRemoteDatabase'
-import { PrismaPostgresInMemoryRepository } from './PrismaPostgresRepository'
-import { createProject } from './commands/createProject'
+import { isProject, isRemoteDatabase, PrismaPostgresApiRepository } from './PrismaPostgresRepository'
+import { createProjectInclDatabase } from './commands/createProjectInclDatabase'
 import { deleteProject } from './commands/deleteProject'
 import { deleteRemoteDatabase } from './commands/deleteRemoteDatabase'
 import { handleCommandError } from './shared-ui/handleCommandError'
 import { logout } from './commands/logout'
-import { login } from './commands/login'
+import { login, handleAuthCallback } from './commands/login'
 import { Auth } from './management-api/auth'
 
 export default {
@@ -20,21 +16,13 @@ export default {
     return true
   },
   activate(context: ExtensionContext) {
-    const ppgRepository = new PrismaPostgresInMemoryRepository()
+    const ppgRepository = new PrismaPostgresApiRepository()
     const ppgProvider = new PrismaPostgresTreeDataProvider(ppgRepository)
     const auth = new Auth(context.extension.id)
 
     window.registerUriHandler({
       handleUri(uri: Uri) {
-        // TODO: store the received token etc.
-        auth
-          .handleCallback(uri)
-          .then((_result) => {
-            void window.showInformationMessage('Login to Prisma successful!')
-          })
-          .catch((_error) => {
-            void window.showErrorMessage('Login to Prisma failed! Please try again.')
-          })
+        void handleAuthCallback({ uri, ppgRepository, auth })
       },
     })
 
@@ -51,16 +39,14 @@ export default {
         await handleCommandError('Logout', () => logout(ppgRepository, args))
       }),
       commands.registerCommand('prisma.createProject', async (args: unknown) => {
-        await handleCommandError('Create Project', () => createProject(ppgRepository, args))
+        await handleCommandError('Create Project', () => createProjectInclDatabase(ppgRepository, args))
       }),
       commands.registerCommand('prisma.deleteProject', async (args: unknown) => {
         await handleCommandError('Delete Project', () => deleteProject(ppgRepository, args))
       }),
       commands.registerCommand('prisma.openProjectInPrismaConsole', async (args: unknown) => {
-        if (args instanceof PrismaProjectItem) {
-          await env.openExternal(
-            Uri.parse(`https://console.prisma.io/${args.workspaceId}/${args.projectId}/environments`),
-          )
+        if (isProject(args)) {
+          await env.openExternal(Uri.parse(`https://console.prisma.io/${args.workspaceId}/${args.id}/environments`))
         } else {
           throw new Error('Invalid arguments')
         }
@@ -69,9 +55,9 @@ export default {
         await handleCommandError('Create Remote Database', () => createRemoteDatabase(ppgRepository, args))
       }),
       commands.registerCommand('prisma.openRemoteDatabaseInPrismaConsole', async (args: unknown) => {
-        if (args instanceof PrismaRemoteDatabaseItem) {
+        if (isRemoteDatabase(args)) {
           await env.openExternal(
-            Uri.parse(`https://console.prisma.io/${args.workspaceId}/${args.projectId}/${args.databaseId}/dashboard`),
+            Uri.parse(`https://console.prisma.io/${args.workspaceId}/${args.projectId}/${args.id}/dashboard`),
           )
         } else {
           throw new Error('Invalid arguments')

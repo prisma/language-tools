@@ -1,20 +1,33 @@
 import * as vscode from 'vscode'
-import { PrismaPostgresRepository } from './PrismaPostgresRepository'
+import { PrismaPostgresItem, PrismaPostgresRepository } from './PrismaPostgresRepository'
 
-type PrismaItem = PrismaRemoteDatabasesItem | PrismaWorkspaceItem | PrismaRemoteDatabaseItem
-
-export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<PrismaItem> {
-  readonly onDidChangeTreeData: vscode.Event<PrismaItem | undefined | null | void>
+export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<PrismaPostgresItem> {
+  readonly onDidChangeTreeData: vscode.Event<PrismaPostgresItem | undefined | null | void>
 
   constructor(private readonly ppgRepository: PrismaPostgresRepository) {
     this.onDidChangeTreeData = ppgRepository.refreshEventEmitter.event
   }
 
-  getTreeItem(element: PrismaItem): vscode.TreeItem {
-    return element
+  getTreeItem(element: PrismaPostgresItem): vscode.TreeItem {
+    switch (element.type) {
+      case 'remoteRoot':
+        return new PrismaRemoteDatabasesItem()
+      case 'workspace':
+        return new PrismaWorkspaceItem(element.name, element.id)
+      case 'project':
+        return new PrismaProjectItem(element.name, element.id, element.workspaceId)
+      case 'remoteDatabase':
+        return new PrismaRemoteDatabaseItem(
+          element.name,
+          element.region,
+          element.id,
+          element.projectId,
+          element.workspaceId,
+        )
+    }
   }
 
-  async getChildren(element?: PrismaItem): Promise<PrismaItem[]> {
+  async getChildren(element?: PrismaPostgresItem): Promise<PrismaPostgresItem[]> {
     if (!element) {
       if (await this.shouldShowLoginWelcome()) {
         await vscode.commands.executeCommand('setContext', 'prisma.showLoginWelcome', true)
@@ -27,23 +40,22 @@ export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<P
       } else {
         await vscode.commands.executeCommand('setContext', 'prisma.showLoginWelcome', false)
         await vscode.commands.executeCommand('setContext', 'prisma.showCreateDatabaseWelcome', false)
-        return [new PrismaRemoteDatabasesItem()]
+        return [{ type: 'remoteRoot' }]
       }
-    } else if (element instanceof PrismaRemoteDatabasesItem) {
-      return (await this.ppgRepository.getWorkspaces()).map((w) => new PrismaWorkspaceItem(w.name, w.id))
-    } else if (element instanceof PrismaWorkspaceItem) {
-      return (await this.ppgRepository.getProjects({ workspaceId: element.workspaceId })).map(
-        (p) => new PrismaProjectItem(p.name, p.id, p.workspaceId),
-      )
-    } else if (element instanceof PrismaProjectItem) {
-      return (
-        await this.ppgRepository.getRemoteDatabases({
+    }
+
+    switch (element.type) {
+      case 'remoteRoot':
+        return await this.ppgRepository.getWorkspaces()
+      case 'workspace':
+        return await this.ppgRepository.getProjects({ workspaceId: element.id })
+      case 'project':
+        return await this.ppgRepository.getRemoteDatabases({
           workspaceId: element.workspaceId,
-          projectId: element.projectId,
+          projectId: element.id,
         })
-      ).map((r) => new PrismaRemoteDatabaseItem(r.name, r.region, r.id, r.projectId, r.workspaceId))
-    } else {
-      return []
+      case 'remoteDatabase':
+        return []
     }
   }
 
@@ -61,17 +73,19 @@ export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<P
   }
 }
 
-export class PrismaRemoteDatabasesItem extends vscode.TreeItem {
+class PrismaRemoteDatabasesItem extends vscode.TreeItem {
   constructor() {
     super('Remote Databases', vscode.TreeItemCollapsibleState.Expanded)
   }
+
+  id = 'remote-root'
 
   iconPath = new vscode.ThemeIcon('cloud')
 
   contextValue = 'prismaRemoteDatabasesItem'
 }
 
-export class PrismaWorkspaceItem extends vscode.TreeItem {
+class PrismaWorkspaceItem extends vscode.TreeItem {
   constructor(
     public readonly workspaceName: string,
     public readonly workspaceId: string,
@@ -79,12 +93,14 @@ export class PrismaWorkspaceItem extends vscode.TreeItem {
     super(workspaceName, vscode.TreeItemCollapsibleState.Expanded)
   }
 
+  id = `workspace-${this.workspaceId}`
+
   iconPath = new vscode.ThemeIcon('folder')
 
   contextValue = 'prismaWorkspaceItem'
 }
 
-export class PrismaProjectItem extends vscode.TreeItem {
+class PrismaProjectItem extends vscode.TreeItem {
   constructor(
     public readonly projectName: string,
     public readonly projectId: string,
@@ -93,22 +109,26 @@ export class PrismaProjectItem extends vscode.TreeItem {
     super(projectName, vscode.TreeItemCollapsibleState.Expanded)
   }
 
+  id = `project-${this.workspaceId}-${this.projectId}`
+
   iconPath = new vscode.ThemeIcon('project')
 
   contextValue = 'prismaProjectItem'
 }
 
-export class PrismaRemoteDatabaseItem extends vscode.TreeItem {
+class PrismaRemoteDatabaseItem extends vscode.TreeItem {
   constructor(
     public readonly databaseName: string,
-    public readonly region: string,
+    public readonly region: string | null,
     public readonly databaseId: string,
     public readonly projectId: string,
     public readonly workspaceId: string,
   ) {
     super(databaseName, vscode.TreeItemCollapsibleState.None)
-    this.description = `(${region})`
+    this.description = region ? `(${region})` : false
   }
+
+  id = `database-${this.workspaceId}-${this.projectId}-${this.databaseId}`
 
   iconPath = new vscode.ThemeIcon('database')
 

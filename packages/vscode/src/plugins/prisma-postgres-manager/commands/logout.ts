@@ -1,14 +1,13 @@
-import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
-import { PrismaWorkspaceItem } from '../PrismaPostgresTreeDataProvider'
+import { isWorkspace, PrismaPostgresRepository } from '../PrismaPostgresRepository'
 import { pickWorkspace } from '../shared-ui/pickWorkspace'
 
 export const logout = async (ppgRepository: PrismaPostgresRepository, args: unknown) => {
   let workspaceId: string
-  if (args instanceof PrismaWorkspaceItem) {
-    workspaceId = args.workspaceId
+  if (isWorkspace(args)) {
+    workspaceId = args.id
   } else {
     workspaceId = (await pickWorkspace(ppgRepository)).id
   }
 
-  await ppgRepository.workspaceLogout({ workspaceId })
+  await ppgRepository.removeWorkspace({ workspaceId })
 }
