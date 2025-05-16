@@ -58,7 +58,7 @@ jobs:
       - name: Catch version incompatibilities
         if: matrix.os == 'ubuntu-latest'
         run: npm run testScripts
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         with:
           files: ./scripts/__tests__/coverage/clover.xml,./packages/language-server/coverage/clover.xml
           flags: ${{ matrix.os }}
