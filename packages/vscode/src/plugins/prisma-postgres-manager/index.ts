@@ -5,13 +5,13 @@ import {
   PrismaRemoteDatabaseItem,
 } from './PrismaPostgresTreeDataProvider'
 import { createRemoteDatabase } from './commands/createRemoteDatabase'
-import { PrismaPostgresInMemoryRepository } from './PrismaPostgresRepository'
+import { PrismaPostgresApiRepository } from './PrismaPostgresRepository'
 import { createProject } from './commands/createProject'
 import { deleteProject } from './commands/deleteProject'
 import { deleteRemoteDatabase } from './commands/deleteRemoteDatabase'
 import { handleCommandError } from './shared-ui/handleCommandError'
 import { logout } from './commands/logout'
-import { login } from './commands/login'
+import { login, handleAuthCallback } from './commands/login'
 import { Auth } from './management-api/auth'
 
 export default {
@@ -20,21 +20,13 @@ export default {
     return true
   },
   activate(context: ExtensionContext) {
-    const ppgRepository = new PrismaPostgresInMemoryRepository()
+    const ppgRepository = new PrismaPostgresApiRepository()
     const ppgProvider = new PrismaPostgresTreeDataProvider(ppgRepository)
     const auth = new Auth(context.extension.id)
 
     window.registerUriHandler({
       handleUri(uri: Uri) {
-        // TODO: store the received token etc.
-        auth
-          .handleCallback(uri)
-          .then((_result) => {
-            void window.showInformationMessage('Login to Prisma successful!')
-          })
-          .catch((_error) => {
-            void window.showErrorMessage('Login to Prisma failed! Please try again.')
-          })
+        void handleAuthCallback({ uri, ppgRepository, auth })
       },
     })
 

@@ -69,8 +69,6 @@ export const createRemoteDatabase = async (ppgRepository: PrismaPostgresReposito
     () => ppgRepository.createRemoteDatabase({ workspaceId, projectId, name, region }),
   )
 
-  ppgRepository.triggerRefresh()
-
   await window.showInformationMessage(
     `Remote database ${result.name} created in ${result.region}.`,
     {

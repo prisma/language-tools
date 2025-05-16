@@ -28,7 +28,5 @@ export const deleteRemoteDatabase = async (ppgRepository: PrismaPostgresReposito
       }),
   )
 
-  ppgRepository.triggerRefresh()
-
   void window.showInformationMessage(`Database '${args.databaseName}' deleted`)
 }

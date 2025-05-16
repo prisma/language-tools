@@ -1,7 +1,7 @@
 import createClient from 'openapi-fetch'
 import type { paths } from './api'
 
-export const getClient = (token: string) => {
+export const createManagementAPIClient = (token: string) => {
   const client = createClient<paths>({ baseUrl: 'https://api.prisma.io' })
   client.use({
     onRequest({ request }) {

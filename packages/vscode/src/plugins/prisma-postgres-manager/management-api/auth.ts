@@ -40,10 +40,17 @@ export class Auth {
   }
 
   async handleCallback(uri: Uri): Promise<AuthResult | null> {
+    console.log('handleCallback', uri)
+
     if (uri.path !== '/auth/callback') return null
 
-    const code = new URLSearchParams(uri.query).get('code')
-    const state = new URLSearchParams(uri.query).get('state')
+    const params = new URLSearchParams(uri.query)
+
+    const error = params.get('error')
+    if (error) throw new AuthError(error)
+
+    const code = params.get('code')
+    const state = params.get('state')
     if (!code) throw new AuthError('No code found in callback')
     if (!this.latestVerifier) throw new AuthError('No verifier found')
     if (state !== this.latestState) throw new AuthError('Invalid state')

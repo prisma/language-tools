@@ -10,5 +10,5 @@ export const logout = async (ppgRepository: PrismaPostgresRepository, args: unkn
     workspaceId = (await pickWorkspace(ppgRepository)).id
   }
 
-  await ppgRepository.workspaceLogout({ workspaceId })
+  await ppgRepository.removeWorkspace({ workspaceId })
 }

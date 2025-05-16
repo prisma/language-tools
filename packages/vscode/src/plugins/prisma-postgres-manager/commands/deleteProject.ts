@@ -23,7 +23,5 @@ export const deleteProject = async (ppgRepository: PrismaPostgresRepository, arg
     () => ppgRepository.deleteProject({ workspaceId: args.workspaceId, id: args.projectId }),
   )
 
-  ppgRepository.triggerRefresh()
-
   void window.showInformationMessage(`Project '${args.projectName}' deleted`)
 }

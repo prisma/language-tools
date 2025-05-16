@@ -27,7 +27,6 @@ export const createProject = async (ppgRepository: PrismaPostgresRepository, arg
     },
     () => ppgRepository.createProject({ workspaceId, name }),
   )
-  ppgRepository.triggerRefresh()
 
   void window.showInformationMessage(`Project ${name} created`)
 
