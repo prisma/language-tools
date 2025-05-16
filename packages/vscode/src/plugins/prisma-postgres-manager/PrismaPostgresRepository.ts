@@ -1,6 +1,7 @@
 import { commands, EventEmitter } from 'vscode'
 import { createManagementAPIClient } from './management-api/client'
 import { isValidRegion } from './management-api/regions'
+import { CredentialsStore } from '@prisma/credentials-store'
 
 export type Workspace = {
   id: string
@@ -162,16 +163,16 @@ export class PrismaPostgresInMemoryRepository implements PrismaPostgresRepositor
 export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
   public readonly refreshEventEmitter = new EventEmitter<void>()
   private clients: Map<string, ReturnType<typeof createManagementAPIClient>> = new Map()
-  private workspaces: Workspace[] = []
+  private credentialsStore = new CredentialsStore()
   private readonly regions = ['us-east-1', 'eu-west-3', 'ap-northeast-1']
 
   constructor() {}
 
-  private getClient(workspaceId: string) {
+  private async getClient(workspaceId: string) {
     if (!this.clients.has(workspaceId)) {
-      const workspace = this.workspaces.find((workspace) => workspace.id === workspaceId)
-      if (!workspace) throw new Error(`Workspace ${workspaceId} not found`)
-      this.clients.set(workspaceId, createManagementAPIClient(workspace.token))
+      const credentials = await this.credentialsStore.getCredentialsForWorkspace(workspaceId)
+      if (!credentials) throw new Error(`Workspace ${workspaceId} not found`)
+      this.clients.set(workspaceId, createManagementAPIClient(credentials.token))
     }
     return this.clients.get(workspaceId)!
   }
@@ -198,25 +199,43 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
     return Promise.resolve(this.regions)
   }
 
-  getWorkspaces(): Promise<Workspace[]> {
-    return Promise.resolve(this.workspaces)
+  async getWorkspaces(): Promise<Workspace[]> {
+    const credentials = await this.credentialsStore.getCredentials()
+    return credentials
+      .filter((cred) => cred.token) // TODO: workaround due to missing delete method on credentials store
+      .map((cred) => ({
+        id: cred.workspaceId,
+        name: cred.workspaceName,
+        token: cred.token,
+      }))
   }
 
-  addWorkspace({ token }: { token: string }): Promise<void> {
+  async addWorkspace({ token }: { token: string }): Promise<void> {
     const fakeId = token.substring(0, 8)
-    this.workspaces.push({ id: fakeId, name: `Personal Workspace ${fakeId}`, token })
+    await this.credentialsStore.storeCredentials({
+      userName: 'prisma',
+      workspaceName: `Personal Workspace ${fakeId}`,
+      workspaceId: fakeId,
+      token,
+    })
     this.triggerRefresh()
     return Promise.resolve()
   }
 
-  removeWorkspace({ workspaceId }: { workspaceId: string }): Promise<void> {
-    this.workspaces = this.workspaces.filter((workspace) => workspace.id !== workspaceId)
+  async removeWorkspace({ workspaceId }: { workspaceId: string }): Promise<void> {
+    // TODO: workaround due to missing delete method on credentials store
+    await this.credentialsStore.storeCredentials({
+      userName: 'prisma',
+      workspaceName: `Personal Workspace ${workspaceId}`,
+      workspaceId,
+      token: '',
+    })
     this.triggerRefresh()
     return Promise.resolve()
   }
 
   async getProjects({ workspaceId }: { workspaceId: string }): Promise<Project[]> {
-    const client = this.getClient(workspaceId)
+    const client = await this.getClient(workspaceId)
     const response = await client.GET('/projects')
 
     if ('error' in response) {
@@ -241,7 +260,7 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
   }): Promise<Project> {
     if (!isValidRegion(region)) throw new Error(`Invalid region: ${region}.`)
 
-    const client = this.getClient(workspaceId)
+    const client = await this.getClient(workspaceId)
     const response = await client.POST('/projects', {
       body: {
         name,
@@ -263,7 +282,7 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
   }
 
   async deleteProject({ workspaceId, id }: { workspaceId: string; id: string } | Project): Promise<void> {
-    const client = this.getClient(workspaceId)
+    const client = await this.getClient(workspaceId)
     const response = await client.DELETE('/projects/{id}', {
       params: {
         path: { id },
@@ -284,7 +303,7 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
     workspaceId: string
     projectId: string
   }): Promise<RemoteDatabase[]> {
-    const client = this.getClient(workspaceId)
+    const client = await this.getClient(workspaceId)
     const response = await client.GET('/projects/{id}/databases', {
       params: {
         path: { id: projectId },
@@ -317,7 +336,7 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
   }): Promise<RemoteDatabase & { connectionString: string }> {
     if (!isValidRegion(region)) throw new Error(`Invalid region: ${region}.`)
 
-    const client = this.getClient(workspaceId)
+    const client = await this.getClient(workspaceId)
     const response = await client.POST('/projects/{id}/databases', {
       params: {
         path: { id: projectId },
@@ -355,7 +374,7 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
         id: string
       }
     | RemoteDatabase): Promise<void> {
-    const client = this.getClient(workspaceId)
+    const client = await this.getClient(workspaceId)
     const response = await client.DELETE('/projects/{projectId}/databases/{databaseId}', {
       params: {
         path: {
