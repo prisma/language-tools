@@ -2,7 +2,7 @@
   "name": "prisma-insider",
   "displayName": "Prisma - Insider",
   "description": "This is the Insider Build of the Prisma VS Code extension (only use it if you are also using the dev version of the CLI).",
-  "version": "31.0.7561",
+  "version": "31.0.7562",
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
@@ -14,7 +14,7 @@
   ],
   "dependencies": {
     "@prisma/credentials-store": "6.9.0-dev.5",
-    "@prisma/language-server": "31.0.7561",
+    "@prisma/language-server": "31.0.7562",
     "checkpoint-client": "1.1.33",
     "env-paths": "2.2.1",
     "execa": "5.1.1",
