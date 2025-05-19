@@ -1,112 +1,327 @@
-import { commands, EventEmitter } from 'vscode'
+import { EventEmitter } from 'vscode'
+import { createManagementAPIClient } from './management-api/client'
+import { isValidRegion, regions } from './management-api/regions'
+import { CredentialsStore } from '@prisma/credentials-store'
 
+export type WorkspaceId = string
 export type Workspace = {
-  id: string
+  type: 'workspace'
+  id: WorkspaceId
   name: string
+  token: string
+}
+export function isWorkspace(item: unknown): item is Workspace {
+  return typeof item === 'object' && item !== null && 'type' in item && item.type === 'workspace'
 }
 
+export type ProjectId = string
 export type Project = {
-  id: string
+  type: 'project'
+  id: ProjectId
   name: string
-  workspaceId: string
+  workspaceId: WorkspaceId
+}
+export function isProject(item: unknown): item is Project {
+  return typeof item === 'object' && item !== null && 'type' in item && item.type === 'project'
 }
 
+export type RemoteDatabaseId = string
 export type RemoteDatabase = {
-  id: string
+  type: 'remoteDatabase'
+  id: RemoteDatabaseId
   name: string
-  region: string
-  projectId: string
-  workspaceId: string
+  region: string | null
+  projectId: ProjectId
+  workspaceId: WorkspaceId
 }
+export function isRemoteDatabase(item: unknown): item is RemoteDatabase {
+  return typeof item === 'object' && item !== null && 'type' in item && item.type === 'remoteDatabase'
+}
+
+export type NewlyCreatedDatabase = RemoteDatabase & { connectionString: string }
+
+export type PrismaPostgresItem = { type: 'remoteRoot' } | Workspace | Project | RemoteDatabase
 
 export interface PrismaPostgresRepository {
-  readonly refreshEventEmitter: EventEmitter<void>
+  readonly refreshEventEmitter: EventEmitter<void | PrismaPostgresItem>
 
   triggerRefresh(): void
 
   getRegions(): Promise<string[]>
 
   getWorkspaces(): Promise<Workspace[]>
-  workspaceLogin(): Promise<void>
-  workspaceLogout(params: { workspaceId: string }): Promise<void>
+  addWorkspace(params: { token: string }): Promise<void>
+  removeWorkspace(params: { workspaceId: string }): Promise<void>
 
-  getRemoteDatabases(params: { workspaceId: string; projectId: string }): Promise<RemoteDatabase[]>
+  getProjects(params: { workspaceId: string }, options?: { forceCacheRefresh: boolean }): Promise<Project[]>
+  createProject(params: {
+    workspaceId: string
+    name: string
+    region: string
+  }): Promise<{ project: Project; database?: NewlyCreatedDatabase }>
+  deleteProject(params: { workspaceId: string; id: string } | Project): Promise<void>
+
+  getRemoteDatabases(
+    params: { workspaceId: string; projectId: string },
+    options?: { forceCacheRefresh: boolean },
+  ): Promise<RemoteDatabase[]>
   createRemoteDatabase(params: {
     workspaceId: string
     projectId: string
     name: string
     region: string
-  }): Promise<RemoteDatabase & { connectionString: string }>
+  }): Promise<NewlyCreatedDatabase>
   deleteRemoteDatabase(params: { workspaceId: string; projectId: string; id: string } | RemoteDatabase): Promise<void>
-
-  getProjects(params: { workspaceId: string }): Promise<Project[]>
-  createProject(params: { workspaceId: string; name: string }): Promise<Project>
-  deleteProject(params: { workspaceId: string; id: string } | Project): Promise<void>
 }
 
-// TODO: This is temporary in memory implementation to mock out API calls.
-export class PrismaPostgresInMemoryRepository implements PrismaPostgresRepository {
-  public readonly refreshEventEmitter = new EventEmitter<void>()
-  private workspaces: Workspace[] = []
-  private projects: Project[] = []
-  private remoteDatabases: (RemoteDatabase & { connectionString: string })[] = []
-  private readonly regions = ['us-east-1', 'eu-west-3', 'ap-northeast-1']
+export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
+  private clients: Map<string, ReturnType<typeof createManagementAPIClient>> = new Map()
+  private credentialsStore = new CredentialsStore()
+
+  private projectsCache = new Map<WorkspaceId, Map<ProjectId, Project>>()
+  private remoteDatabasesCache = new Map<string, Map<RemoteDatabaseId, RemoteDatabase>>()
+
+  public readonly refreshEventEmitter = new EventEmitter<void | PrismaPostgresItem>()
 
   constructor() {}
 
+  private async getClient(workspaceId: string) {
+    if (!this.clients.has(workspaceId)) {
+      await this.credentialsStore.reloadCredentialsFromDisk()
+      const credentials = await this.credentialsStore.getCredentialsForWorkspace(workspaceId)
+      if (!credentials) throw new Error(`Workspace ${workspaceId} not found`)
+      this.clients.set(workspaceId, createManagementAPIClient(credentials.token))
+    }
+    return this.clients.get(workspaceId)!
+  }
+
+  private checkResponseOrThrow<T, E>(
+    workspaceId: string,
+    response: {
+      error?: E
+      data?: T
+      response: Response
+    },
+  ): asserts response is { error: never; data: T; response: Response } {
+    console.log('Received response', { error: response.error, statusCode: response.response.status })
+
+    if (response.response.status < 400 && !response.error) return
+
+    if (response.response.status === 401) {
+      void this.removeWorkspace({ workspaceId })
+      throw new Error(`Credentials for workspace expired. Please login again.`)
+    }
+
+    const error = response.error
+    if (typeof error === 'object' && error !== null) {
+      if ('error' in error && typeof error === 'object' && error !== null) {
+        if ('message' in error && typeof error.message === 'string') {
+          throw new Error(`API Error: ${error.message}`)
+        }
+      }
+      if ('errorDescription' in error && typeof error.errorDescription === 'string') {
+        throw new Error(`API Error: ${error.errorDescription}`)
+      }
+    }
+
+    throw new Error(`Unknown API error occurred. Status Code: ${response.response.status}.`)
+  }
+
   triggerRefresh() {
+    void this.credentialsStore.reloadCredentialsFromDisk()
+    // Wipe caches
+    this.projectsCache = new Map()
+    this.remoteDatabasesCache = new Map()
+    // Trigger full tree view refresh which will fetch fresh data on demand due to cache misses
     this.refreshEventEmitter.fire()
   }
 
-  async workspaceLogin() {
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    const id = Math.random().toString(36).substring(7)
-    this.workspaces.push({ id, name: `Personal Workspace ${id}` })
-    this.triggerRefresh()
-  }
-
-  async workspaceLogout({ workspaceId }: { workspaceId: string }) {
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    this.workspaces = this.workspaces.filter((workspace) => workspace.id !== workspaceId)
-    this.triggerRefresh()
-  }
-
-  async getRegions(): Promise<string[]> {
-    await new Promise((resolve) => setTimeout(resolve, 100))
-    return this.regions
+  getRegions(): Promise<string[]> {
+    return Promise.resolve(regions.slice())
   }
 
   async getWorkspaces(): Promise<Workspace[]> {
-    await commands.executeCommand('setContext', 'prisma.workspaceCount', this.workspaces.length)
-    return this.workspaces
+    const credentials = await this.credentialsStore.getCredentials()
+    return credentials.map((cred) => ({
+      type: 'workspace',
+      id: cred.workspaceId,
+      name: cred.workspaceName,
+      token: cred.token,
+    }))
   }
 
-  async getProjects({ workspaceId }: { workspaceId: string }): Promise<Project[]> {
-    await new Promise((resolve) => setTimeout(resolve, 100))
-    await commands.executeCommand('setContext', 'prisma.projectCount', this.projects.length)
-    return this.projects.filter((project) => project.workspaceId === workspaceId)
+  async addWorkspace({ token }: { token: string }): Promise<void> {
+    const fakeId = token.substring(0, 8)
+    await this.credentialsStore.storeCredentials({
+      userName: 'prisma',
+      workspaceName: `Personal Workspace ${fakeId}`,
+      workspaceId: fakeId,
+      token,
+    })
+    this.refreshEventEmitter.fire()
+    return Promise.resolve()
   }
 
-  async getRemoteDatabases({
+  async removeWorkspace({ workspaceId }: { workspaceId: string }): Promise<void> {
+    this.clients.delete(workspaceId)
+    await this.credentialsStore.deleteCredentials(workspaceId)
+    this.refreshEventEmitter.fire()
+    return Promise.resolve()
+  }
+
+  async getProjects(
+    { workspaceId }: { workspaceId: string },
+    { forceCacheRefresh }: { forceCacheRefresh: boolean } = { forceCacheRefresh: false },
+  ): Promise<Project[]> {
+    if (!forceCacheRefresh) {
+      const cachedProjects = this.projectsCache.get(workspaceId)
+      if (cachedProjects !== undefined) return Array.from(cachedProjects.values())
+    }
+
+    const client = await this.getClient(workspaceId)
+    const response = await client.GET('/projects')
+
+    this.checkResponseOrThrow(workspaceId, response)
+
+    const projects: Map<string, Project> = new Map(
+      response.data.data.map((project) => [
+        project.id,
+        {
+          type: 'project' as const,
+          id: project.id,
+          name: project.name,
+          workspaceId,
+        },
+      ]),
+    )
+
+    this.projectsCache.set(workspaceId, projects)
+
+    return Array.from(projects.values())
+  }
+
+  async createProject({
     workspaceId,
-    projectId,
+    name,
+    region,
   }: {
     workspaceId: string
-    projectId: string
-  }): Promise<RemoteDatabase[]> {
-    await new Promise((resolve) => setTimeout(resolve, 200))
-    return this.remoteDatabases.filter((db) => db.workspaceId === workspaceId && db.projectId === projectId)
-  }
+    name: string
+    region: string
+  }): Promise<{ project: Project; database?: NewlyCreatedDatabase }> {
+    if (!isValidRegion(region)) throw new Error(`Invalid region: ${region}.`)
 
-  async createProject({ workspaceId, name }: { workspaceId: string; name: string }): Promise<Project> {
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    const project: Project = {
-      id: Math.random().toString(36).substring(7),
-      name,
+    const client = await this.getClient(workspaceId)
+    const response = await client.POST('/projects', {
+      body: {
+        name,
+        region,
+      },
+    })
+
+    this.checkResponseOrThrow(workspaceId, response)
+
+    const newProject = {
+      type: 'project' as const,
+      id: response.data.id,
+      name: response.data.name,
       workspaceId,
     }
-    this.projects.push(project)
-    return project
+
+    let createdDatabase: RemoteDatabase | undefined
+    let connectionString: string | undefined
+    const createdDatabaseData = response.data.databases[0]
+    if (createdDatabaseData) {
+      createdDatabase = {
+        type: 'remoteDatabase' as const,
+        id: createdDatabaseData.id,
+        name: createdDatabaseData.name,
+        region: null,
+        projectId: newProject.id,
+        workspaceId,
+      }
+      connectionString = (createdDatabaseData as Record<string, string>)['connectionString']
+    }
+
+    // Proactively update cache
+    this.projectsCache.get(workspaceId)?.set(newProject.id, newProject)
+    this.remoteDatabasesCache.set(
+      `${workspaceId}.${newProject.id}`,
+      new Map(createdDatabase ? [[createdDatabase.id, createdDatabase]] : []),
+    )
+    this.refreshEventEmitter.fire()
+    // And then refresh list from server in background
+    void this.refreshProjects({ workspaceId })
+
+    if (createdDatabase && connectionString) {
+      return { project: newProject, database: { ...createdDatabase, connectionString } }
+    } else {
+      return { project: newProject }
+    }
+  }
+
+  async deleteProject({ workspaceId, id }: { workspaceId: string; id: string } | Project): Promise<void> {
+    const client = await this.getClient(workspaceId)
+    const response = await client.DELETE('/projects/{id}', {
+      params: {
+        path: { id },
+      },
+    })
+
+    this.checkResponseOrThrow(workspaceId, response)
+
+    // Proactively update cache
+    this.projectsCache.get(workspaceId)?.delete(id)
+    this.refreshEventEmitter.fire()
+    // And then refresh list from server in background
+    void this.refreshProjects({ workspaceId })
+  }
+
+  private async refreshProjects({ workspaceId }: { workspaceId: string }) {
+    await this.getProjects({ workspaceId }, { forceCacheRefresh: true }).then(() => this.refreshEventEmitter.fire())
+  }
+
+  async getRemoteDatabases(
+    {
+      workspaceId,
+      projectId,
+    }: {
+      workspaceId: string
+      projectId: string
+    },
+    { forceCacheRefresh }: { forceCacheRefresh: boolean } = { forceCacheRefresh: false },
+  ): Promise<RemoteDatabase[]> {
+    if (!forceCacheRefresh) {
+      const cachedDatabases = this.remoteDatabasesCache.get(`${workspaceId}.${projectId}`)
+      if (cachedDatabases !== undefined) return Array.from(cachedDatabases.values())
+    }
+
+    const client = await this.getClient(workspaceId)
+    const response = await client.GET('/projects/{id}/databases', {
+      params: {
+        path: { id: projectId },
+      },
+    })
+
+    this.checkResponseOrThrow(workspaceId, response)
+
+    const databases: Map<string, RemoteDatabase> = new Map(
+      response.data.data.map((db) => [
+        db.id,
+        {
+          type: 'remoteDatabase' as const,
+          id: db.id,
+          name: db.name,
+          region: db.region,
+          projectId,
+          workspaceId,
+        },
+      ]),
+    )
+
+    this.remoteDatabasesCache.set(`${workspaceId}.${projectId}`, databases)
+
+    return Array.from(databases.values())
   }
 
   async createRemoteDatabase({
@@ -119,23 +334,38 @@ export class PrismaPostgresInMemoryRepository implements PrismaPostgresRepositor
     projectId: string
     name: string
     region: string
-  }): Promise<RemoteDatabase & { connectionString: string }> {
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    const database: RemoteDatabase & { connectionString: string } = {
-      id: Math.random().toString(36).substring(7),
-      name,
-      region,
+  }): Promise<NewlyCreatedDatabase> {
+    if (!isValidRegion(region)) throw new Error(`Invalid region: ${region}.`)
+
+    const client = await this.getClient(workspaceId)
+    const response = await client.POST('/projects/{id}/databases', {
+      params: {
+        path: { id: projectId },
+      },
+      body: {
+        name,
+        region,
+      },
+    })
+
+    this.checkResponseOrThrow(workspaceId, response)
+
+    const newDatabase = {
+      type: 'remoteDatabase' as const,
+      id: response.data.id,
+      name: response.data.name,
+      region: response.data.region,
       projectId,
       workspaceId,
-      connectionString: `prisma+postgresql://${name}-${region}-${Math.random().toString(36).substring(7)}`,
     }
-    this.remoteDatabases.push(database)
-    return database
-  }
 
-  async deleteProject({ workspaceId, id }: { workspaceId: string; id: string } | Project): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    this.projects = this.projects.filter((project) => !(project.id === id && project.workspaceId === workspaceId))
+    // Proactively update cache
+    this.remoteDatabasesCache.get(workspaceId)?.set(newDatabase.id, newDatabase)
+    this.refreshEventEmitter.fire()
+    // And then refresh list from server in background
+    void this.refreshRemoteDatabases({ workspaceId, projectId })
+
+    return { ...newDatabase, connectionString: response.data.connectionString }
   }
 
   async deleteRemoteDatabase({
@@ -149,9 +379,28 @@ export class PrismaPostgresInMemoryRepository implements PrismaPostgresRepositor
         id: string
       }
     | RemoteDatabase): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    this.remoteDatabases = this.remoteDatabases.filter(
-      (db) => !(db.id === id && db.workspaceId === workspaceId && db.projectId === projectId),
+    const client = await this.getClient(workspaceId)
+    const response = await client.DELETE('/projects/{projectId}/databases/{databaseId}', {
+      params: {
+        path: {
+          projectId,
+          databaseId: id,
+        },
+      },
+    })
+
+    this.checkResponseOrThrow(workspaceId, response)
+
+    // Proactively update cache
+    this.remoteDatabasesCache.get(`${workspaceId}.${projectId}`)?.delete(id)
+    this.refreshEventEmitter.fire()
+    // And then refresh list from server in background
+    void this.refreshRemoteDatabases({ workspaceId, projectId })
+  }
+
+  private async refreshRemoteDatabases({ workspaceId, projectId }: { workspaceId: string; projectId: string }) {
+    await this.getRemoteDatabases({ workspaceId, projectId }, { forceCacheRefresh: true }).then(() =>
+      this.refreshEventEmitter.fire(),
     )
   }
 }

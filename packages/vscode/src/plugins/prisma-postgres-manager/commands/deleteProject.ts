@@ -1,13 +1,12 @@
 import { window } from 'vscode'
 import { ProgressLocation } from 'vscode'
-import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
-import { PrismaProjectItem } from '../PrismaPostgresTreeDataProvider'
+import { isProject, PrismaPostgresRepository } from '../PrismaPostgresRepository'
 
 export const deleteProject = async (ppgRepository: PrismaPostgresRepository, args: unknown) => {
-  if (!(args instanceof PrismaProjectItem)) throw new Error('Invalid arguments')
+  if (!isProject(args)) throw new Error('Invalid arguments')
 
   const confirmDeleteResult = await window.showWarningMessage(
-    `Are you sure you want to delete project '${args.projectName}'?`,
+    `Are you sure you want to delete project '${args.name}'?`,
     { modal: true },
     { title: 'Delete' },
     { title: 'Cancel', isCloseAffordance: true },
@@ -18,12 +17,10 @@ export const deleteProject = async (ppgRepository: PrismaPostgresRepository, arg
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
-      title: `Deleting project '${args.projectName}'...`,
+      title: `Deleting project '${args.name}'...`,
     },
-    () => ppgRepository.deleteProject({ workspaceId: args.workspaceId, id: args.projectId }),
+    () => ppgRepository.deleteProject({ workspaceId: args.workspaceId, id: args.id }),
   )
 
-  ppgRepository.triggerRefresh()
-
-  void window.showInformationMessage(`Project '${args.projectName}' deleted`)
+  void window.showInformationMessage(`Project '${args.name}' deleted`)
 }
