@@ -6,8 +6,8 @@ import * as path from 'path'
 
 const studio: PrismaVSCodePlugin = {
   name: 'Studio',
-  enabled: async () => true,
-  activate: async (context: ExtensionContext) => {
+  enabled: () => true,
+  activate: (context: ExtensionContext) => {
     const staticFilesRoot = Uri.joinPath(context.extensionUri, 'node_modules', '@prisma', 'studio-core')
 
     const panel = window.createWebviewPanel('studio', 'Studio', ViewColumn.One, {
@@ -15,10 +15,8 @@ const studio: PrismaVSCodePlugin = {
       localResourceRoots: [staticFilesRoot],
     })
 
-
-    const server = http.createServer(async (req, res) => {
-    console.log("PATH", staticFilesRoot)
-
+    const server = http.createServer((req, res) => {
+      console.log('PATH', staticFilesRoot)
 
       if (req.url !== undefined && req.url !== '/') {
         let contentType = ''
