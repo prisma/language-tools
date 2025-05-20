@@ -21,7 +21,8 @@
     "minimatch": "6.2.0",
     "openapi-fetch": "0.14.0",
     "vscode-languageclient": "7.0.0",
-    "watcher": "1.2.0"
+    "watcher": "1.2.0",
+    "@prisma/studio-core": "0.0.0-dev.202505200022"
   },
   "repository": {
     "type": "git",
