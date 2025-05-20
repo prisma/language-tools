@@ -25,6 +25,10 @@ jobs:
       - name: Install Dependencies
         run: npm install && npm run bootstrap
 
+      - name: Setup Git
+        run: |
+          sh scripts/set_git_credentials.sh
+
       - name: Generate API client
         working-directory: packages/vscode
         run: npm run generate-api-client
