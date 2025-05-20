@@ -20,7 +20,7 @@
     "checkpoint-client": "1.1.33",
     "env-paths": "2.2.1",
     "execa": "5.1.1",
-    "get-port": "7.1.0",
+    "get-port": "5.1.1",
     "hono": "4.7.10",
     "minimatch": "6.2.0",
     "openapi-fetch": "0.14.0",
