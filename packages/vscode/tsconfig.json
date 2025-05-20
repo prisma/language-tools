@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "Node16",
     "noUnusedLocals": true,
     "target": "es6",
     "outDir": "dist",
@@ -11,7 +11,8 @@
     "strict": true,
     "composite": true,
     "declaration": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "moduleResolution": "node16",
   },
   "include": ["src"],
   "exclude": ["node_modules", ".vscode-test"]
