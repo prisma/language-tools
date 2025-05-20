@@ -13,7 +13,7 @@
     "Programming Languages"
   ],
   "dependencies": {
-    "@prisma/credentials-store": "6.9.0-dev.5",
+    "@prisma/credentials-store": "6.9.0-dev.11",
     "@prisma/language-server": "31.0.7570",
     "checkpoint-client": "1.1.33",
     "env-paths": "2.2.1",

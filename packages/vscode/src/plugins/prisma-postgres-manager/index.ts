@@ -16,9 +16,9 @@ export default {
     return true
   },
   activate(context: ExtensionContext) {
-    const ppgRepository = new PrismaPostgresApiRepository()
-    const ppgProvider = new PrismaPostgresTreeDataProvider(ppgRepository)
     const auth = new Auth(context.extension.id)
+    const ppgRepository = new PrismaPostgresApiRepository(auth)
+    const ppgProvider = new PrismaPostgresTreeDataProvider(ppgRepository)
 
     window.registerUriHandler({
       handleUri(uri: Uri) {

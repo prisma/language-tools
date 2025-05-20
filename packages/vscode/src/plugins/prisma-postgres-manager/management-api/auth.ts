@@ -7,6 +7,7 @@ const TOKEN_URL = 'https://auth.prisma.io/token'
 
 export type AuthResult = {
   token: string
+  refreshToken: string
 }
 
 export class AuthError extends Error {
@@ -68,9 +69,30 @@ export class Auth {
       body: body,
     })
 
+    return this.parseTokenResponse(response)
+  }
+
+  async refreshToken(refreshToken: string): Promise<AuthResult> {
+    const body = new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+      client_id: CLIENT_ID,
+    })
+    const response = await fetch(TOKEN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body,
+    })
+
+    const result = await this.parseTokenResponse(response)
+
+    return result
+  }
+
+  private async parseTokenResponse(response: Response): Promise<AuthResult> {
     const data = await response.json()
 
-    if (response.status !== 200) throw new AuthError(`Received status code ${response.status} from token endpoint`)
+    if (response.status !== 200) throw new AuthError(`Failed to get token. Status code ${response.status}.`)
     if (
       !data ||
       typeof data !== 'object' ||
@@ -78,10 +100,13 @@ export class Auth {
       !data.access_token ||
       typeof data.access_token !== 'string'
     ) {
-      throw new AuthError('No access token received in token endpoint response')
+      throw new AuthError('No access token received in token endpoint response.')
+    }
+    if (!('refresh_token' in data) || !data.refresh_token || typeof data.refresh_token !== 'string') {
+      throw new AuthError('No refresh token received in token endpoint response.')
     }
 
-    return { token: data.access_token }
+    return { token: data.access_token, refreshToken: data.refresh_token }
   }
 
   private getRedirectUri(): string {
