@@ -7,7 +7,7 @@ import getPort from 'get-port'
 import { serve } from '@hono/node-server'
 import { createAccelerateHttpClient } from '@prisma/studio-core/data/accelerate'
 import { serializeError } from '@prisma/studio-core/data/bff'
-
+import { Query } from '@prisma/studio-core/data'
 
 /**
  * Starts a local server for Prisma Studio and serves the UI files.
@@ -23,10 +23,10 @@ export async function startStudioServer(args: { dbUrl: string; context: Extensio
 
   // gives access to accelerate (and more soon) via bff client
   app.post('/bff', async (c) => {
-    const { query } = await c.req.json()
+    const { query } = (await c.req.json()) as unknown as { query: Query }
 
     const [error, results] = await createAccelerateHttpClient({
-      apiKey: new URL(dbUrl).searchParams.get('api_key') ?? "",
+      apiKey: new URL(dbUrl).searchParams.get('api_key') ?? '',
       // TODO: these need to be dynamic based on the user's project
       engineHash: '173f8d54f8d52e692c7e27e72a88314ec7aeff60',
       clientVersion: '6.5.0',

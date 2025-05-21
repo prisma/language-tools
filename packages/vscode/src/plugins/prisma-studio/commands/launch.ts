@@ -15,7 +15,7 @@ export async function launch(args: { dbUrl?: string; context: ExtensionContext }
     })
 
     // TODO: improve URL validation
-    if (dbUrl === undefined || dbUrl === "") {
+    if (dbUrl === undefined || dbUrl === '') {
       return window.showErrorMessage('A valid URL is required to launch Prisma Studio.')
     }
 

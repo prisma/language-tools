@@ -12,7 +12,7 @@
     "composite": true,
     "declaration": true,
     "skipLibCheck": true,
-    "moduleResolution": "node16",
+    "moduleResolution": "node16"
   },
   "include": ["src"],
   "exclude": ["node_modules", ".vscode-test"]

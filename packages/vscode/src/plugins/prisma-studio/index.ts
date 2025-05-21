@@ -7,7 +7,7 @@ export default {
   enabled() {
     return true
   },
-  async activate(context: ExtensionContext) {
+  activate(context: ExtensionContext) {
     context.subscriptions.push(commands.registerCommand('prisma.studio.launch', () => launch({ context })))
   },
   deactivate() {},

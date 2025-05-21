@@ -1,6 +1,6 @@
-import { ExtensionContext,  ViewColumn, window } from 'vscode'
+import { ExtensionContext, ViewColumn, window } from 'vscode'
 import { getWebviewHtml } from './getStudioPageHtml'
-import { startStudioServer } from './startStudioServer';
+import { startStudioServer } from './startStudioServer'
 
 /**
  * Opens Prisma Studio in a webview panel.
