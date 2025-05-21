@@ -1300,15 +1300,10 @@
     tmp "~0.2.1"
     tslib "^2.3.0"
 
-"@nrwl/nx-linux-x64-gnu@15.9.4":
+"@nrwl/nx-darwin-arm64@15.9.4":
   version "15.9.4"
-  resolved "https://registry.npmjs.org/@nrwl/nx-linux-x64-gnu/-/nx-linux-x64-gnu-15.9.4.tgz"
-  integrity sha512-q4OyH72mdrE4KellBWtwpr5EwfxHKNoFP9//7FAILO68ROh0rpMd7YQMlTB7T04UEUHjKEEsFGTlVXIee3Viwg==
-
-"@nrwl/nx-linux-x64-musl@15.9.4":
-  version "15.9.4"
-  resolved "https://registry.npmjs.org/@nrwl/nx-linux-x64-musl/-/nx-linux-x64-musl-15.9.4.tgz"
-  integrity sha512-67+/XNMR1CgLPyeGX8jqSG6l8yYD0iiwUgcu1Vaxq6N05WwnqVisIW8XzLSRUtKt4WyVQgOWk3aspImpMVOG3Q==
+  resolved "https://registry.npmjs.org/@nrwl/nx-darwin-arm64/-/nx-darwin-arm64-15.9.4.tgz"
+  integrity sha512-XnvrnT9BJsgThY/4xUcYtE077ERq/img8CkRj7MOOBNOh0/nVcR4LGbBKDHtwE3HPk0ikyS/SxRyNa9msvi3QQ==
 
 "@nrwl/tao@15.9.4":
   version "15.9.4"
@@ -1825,10 +1820,10 @@
     ora "^7.0.1"
     semver "^7.6.2"
 
-"@vscode/vsce-sign-linux-x64@2.0.1":
+"@vscode/vsce-sign-darwin-arm64@2.0.1":
   version "2.0.1"
-  resolved "https://registry.npmjs.org/@vscode/vsce-sign-linux-x64/-/vsce-sign-linux-x64-2.0.1.tgz"
-  integrity sha512-6N6dkZoJX/WKezZ3efCKVKjnbx+TlnUtNUkepyUUhCa3dGjGDqUkeakE2Kz266Bsp0Mm/68zS9HLKVOEv9vn0A==
+  resolved "https://registry.npmjs.org/@vscode/vsce-sign-darwin-arm64/-/vsce-sign-darwin-arm64-2.0.1.tgz"
+  integrity sha512-iFnCbC8RBUyT0ZKEmop5yi7/NxP5G2gIW/giJHYDYppkhfyAR5STxlpf8Vx9hqIS0jPbeldNSn5a5BGMKtGXug==
 
 "@vscode/vsce-sign@^2.0.0":
   version "2.0.3"
@@ -3724,6 +3719,11 @@ fs.realpath@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/fs.realpath/-/fs.realpath-1.0.0.tgz"
   integrity sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==
+
+fsevents@^2.3.2:
+  version "2.3.3"
+  resolved "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz"
+  integrity sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==
 
 function-bind@^1.1.1:
   version "1.1.1"

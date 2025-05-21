@@ -13,11 +13,15 @@
     "Programming Languages"
   ],
   "dependencies": {
+    "@hono/node-server": "1.14.2",
     "@prisma/credentials-store": "6.9.0-dev.5",
     "@prisma/language-server": "31.0.7570",
+    "@prisma/studio-core": "0.0.0-dev.202505202227",
     "checkpoint-client": "1.1.33",
     "env-paths": "2.2.1",
     "execa": "5.1.1",
+    "get-port": "5.1.1",
+    "hono": "4.7.10",
     "minimatch": "6.2.0",
     "openapi-fetch": "0.14.0",
     "vscode-languageclient": "7.0.0",
@@ -237,6 +241,12 @@
         "title": "Delete Remote Prisma Postgres Database",
         "icon": "$(trash)",
         "category": "Prisma"
+      },
+      {
+        "command": "prisma.studio.launch",
+        "title": "Launch Prisma Studio",
+        "category": "Prisma",
+        "icon": "$(link-external)"
       }
     ],
     "languageModelTools": [
@@ -537,15 +547,15 @@
   "devDependencies": {
     "@types/glob": "8.1.0",
     "@types/mocha": "10.0.10",
-    "@types/vscode": "1.96.0",
     "@types/node": "20.14.8",
+    "@types/vscode": "1.96.0",
     "@vscode/test-electron": "2.4.1",
+    "@vscode/vsce": "2.29.0",
     "is-ci": "3.0.1",
     "mocha": "10.8.2",
-    "ovsx": "0.10.1",
     "openapi-typescript": "7.8.0",
-    "typescript": "5.7.3",
-    "@vscode/vsce": "2.29.0"
+    "ovsx": "0.10.1",
+    "typescript": "5.7.3"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",
   "publishConfig": {
