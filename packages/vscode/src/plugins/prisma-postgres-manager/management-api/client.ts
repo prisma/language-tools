@@ -18,20 +18,18 @@ class FetchError extends Error {
  */
 const createTokenRefreshingFetch = (initialToken: string, tokenRefreshHandler: () => Promise<{ token: string }>) => {
   let currentToken = initialToken
-  let isRefreshing = false
   let refreshPromise: Promise<{ token: string }> | null = null
   let subscribers: ((token: string) => void)[] = []
 
+  const isRefreshing = () => refreshPromise !== null
+
   const refreshAccessToken = async (): Promise<string> => {
-    if (isRefreshing) {
+    if (isRefreshing()) {
       console.log('token refresh already in progress, waiting for it to complete...')
       return new Promise((resolve) => subscribers.push(resolve))
     }
 
-    isRefreshing = true
-
     refreshPromise = tokenRefreshHandler().finally(() => {
-      isRefreshing = false
       refreshPromise = null
     })
 

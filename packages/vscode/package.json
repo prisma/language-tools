@@ -21,7 +21,8 @@
     "minimatch": "6.2.0",
     "openapi-fetch": "0.14.0",
     "vscode-languageclient": "7.0.0",
-    "watcher": "1.2.0"
+    "watcher": "1.2.0",
+    "zod": "3.25.13"
   },
   "repository": {
     "type": "git",
