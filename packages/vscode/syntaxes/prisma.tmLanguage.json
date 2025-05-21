@@ -2,9 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
   "name": "Prisma",
   "scopeName": "source.prisma",
-  "fileTypes": [
-    "prisma"
-  ],
+  "fileTypes": ["prisma"],
   "patterns": [
     {
       "include": "#triple_comment"
