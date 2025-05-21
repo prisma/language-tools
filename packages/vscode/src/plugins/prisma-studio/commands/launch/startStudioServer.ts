@@ -1,5 +1,6 @@
 import { ExtensionContext, Uri } from 'vscode'
 import { getAppRootHtml } from './getStudioPageHtml'
+import { getColorScheme } from './getColorScheme'
 import { Hono } from 'hono'
 import path from 'path'
 import { readFile } from 'fs/promises'
@@ -40,9 +41,12 @@ export async function startStudioServer(args: { dbUrl: string; context: Extensio
     return c.json([null, results])
   })
 
+  // colorScheme
+  const colorScheme = getColorScheme()
+
   // gives access and renders the main studio page
   app.get('/', (c) => {
-    return c.html(getAppRootHtml({ serverUrl }))
+    return c.html(getAppRootHtml({ serverUrl, colorScheme }))
   })
 
   // gives access to client side rendering resources
