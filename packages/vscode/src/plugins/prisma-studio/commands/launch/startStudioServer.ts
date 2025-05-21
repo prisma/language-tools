@@ -26,10 +26,11 @@ export async function startStudioServer(args: { dbUrl: string; context: Extensio
     const { query } = (await c.req.json()) as unknown as { query: Query }
 
     const [error, results] = await createAccelerateHttpClient({
+      host: new URL(dbUrl).host,
       apiKey: new URL(dbUrl).searchParams.get('api_key') ?? '',
-      // TODO: these need to be dynamic based on the user's project
-      engineHash: '173f8d54f8d52e692c7e27e72a88314ec7aeff60',
-      clientVersion: '6.5.0',
+      // TODO: these need to be dynamic based on the vscode build
+      engineHash: '2060c79ba17c6bb9f5823312b6f6b7f4a845738e',
+      clientVersion: '6.8.2',
       provider: 'postgres',
     }).execute(query)
 
