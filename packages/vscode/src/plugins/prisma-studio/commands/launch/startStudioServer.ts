@@ -78,7 +78,7 @@ export async function startStudioServer(args: { dbUrl: string; context: Extensio
   const port = await getPort()
   const serverUrl = `http://localhost:${port}`
 
-  const server = serve({ fetch: app.fetch, port }, () => {
+  const server = serve({ fetch: app.fetch, port, overrideGlobalObjects: false }, () => {
     console.log(`Studio server is running at ${serverUrl}`)
   })
 
