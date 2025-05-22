@@ -133,4 +133,10 @@ class PrismaRemoteDatabaseItem extends vscode.TreeItem {
   iconPath = new vscode.ThemeIcon('database')
 
   contextValue = 'prismaRemoteDatabaseItem'
+
+  command = {
+    command: 'prisma.studio.launchForDatabase',
+    title: 'Launch Prisma Studio',
+    arguments: [{ workspaceId: this.workspaceId, projectId: this.projectId, databaseId: this.databaseId }],
+  }
 }

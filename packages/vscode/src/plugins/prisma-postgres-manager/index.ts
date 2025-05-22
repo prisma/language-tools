@@ -11,6 +11,7 @@ import { login, handleAuthCallback } from './commands/login'
 import { Auth } from './management-api/auth'
 import { ConnectionStringStorage } from './ConnectionStringStorage'
 import { getRemoteDatabaseConnectionString } from './commands/getRemoteDatabaseConnectionString'
+import { launchStudioForRemoteDatabase } from './commands/launchStudio'
 
 export default {
   name: 'Prisma Postgres',
@@ -73,6 +74,11 @@ export default {
       }),
       commands.registerCommand('prisma.deleteRemoteDatabase', async (args: unknown) => {
         await handleCommandError('Delete Remote Database', () => deleteRemoteDatabase(ppgRepository, args))
+      }),
+      commands.registerCommand('prisma.studio.launchForDatabase', async (args: unknown) => {
+        await handleCommandError('Launch Studio for Database', () =>
+          launchStudioForRemoteDatabase({ ppgRepository, args, context }),
+        )
       }),
     )
   },

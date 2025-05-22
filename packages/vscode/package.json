@@ -254,6 +254,12 @@
         "title": "Launch Prisma Studio",
         "category": "Prisma",
         "icon": "$(link-external)"
+      },
+      {
+        "command": "prisma.studio.launchForDatabase",
+        "title": "Launch Prisma Studio",
+        "category": "Prisma",
+        "icon": "$(link-external)"
       }
     ],
     "languageModelTools": [
@@ -483,6 +489,10 @@
         },
         {
           "command": "prisma.openRemoteDatabaseInPrismaConsole",
+          "when": "false"
+        },
+        {
+          "command": "prisma.studio.launchForDatabase",
           "when": "false"
         }
       ],

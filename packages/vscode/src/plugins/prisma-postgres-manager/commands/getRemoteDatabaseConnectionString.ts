@@ -23,7 +23,7 @@ export const getRemoteDatabaseConnectionString = async (ppgRepository: PrismaPos
   const result = await window.showInformationMessage(
     `Create Connection String`,
     {
-      detail: `No locally stored connection string found for remote database ${args.name}.\nDo you want to create a new connection string?`,
+      detail: `No locally stored connection string found for remote database ${args.name}.\n\nDo you want to create a new connection string?`,
       modal: true,
     },
     { id: 'create', title: 'Create connection string', isCloseAffordance: false },
