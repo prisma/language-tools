@@ -9,7 +9,10 @@ import { startStudioServer } from './startStudioServer'
 export async function openNewStudioTab(args: { dbUrl: string; context: ExtensionContext }) {
   const { server, url } = await startStudioServer(args)
 
-  const panel = window.createWebviewPanel('studio', 'Studio', ViewColumn.One, { enableScripts: true })
+  const panel = window.createWebviewPanel('studio', 'Studio', ViewColumn.One, {
+    enableScripts: true,
+    retainContextWhenHidden: true,
+  })
 
   panel.webview.html = getWebviewHtml(url)
 
