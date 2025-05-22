@@ -21,6 +21,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/workspaces': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Retrieve information about the workspaces accessible by the current actor */
+    get: operations['getWorkspaces']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/projects': {
     parameters: {
       query?: never
@@ -195,6 +212,44 @@ export interface operations {
               name: string
               /** @enum {string} */
               status: 'available' | 'unavailable' | 'unsupported'
+            }[]
+          }
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            error: 'unauthorized'
+            errorDescription: string
+          }
+        }
+      }
+    }
+  }
+  getWorkspaces: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Retrieve information about the workspaces accessible by the current actor */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: {
+              id: string
+              displayName: string
             }[]
           }
         }
