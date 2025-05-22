@@ -530,7 +530,7 @@
     "viewsWelcome": [
       {
         "view": "prismaPostgresDatabases",
-        "contents": "Login to Prisma Postgres to get started with the best Postgres solution ever!\n[Login or Signup](command:prisma.login)\nLearn more about Prisma Postgres [here](https://www.prisma.io/postgres).",
+        "contents": "Connect to Prisma Data Platform\nManage your Prisma Postgres databases directly from your editor.\n[Sign in to get started](command:prisma.login)\nLearn more about Prisma Postgres [here](https://www.prisma.io/postgres).",
         "when": "prisma.showLoginWelcome == true && prisma.initialLoginInProgress == false"
       },
       {
