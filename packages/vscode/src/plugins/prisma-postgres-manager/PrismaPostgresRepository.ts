@@ -258,24 +258,26 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
 
     let createdDatabase: RemoteDatabase | undefined
     let connectionString: string | undefined
-    const createdDatabaseData = response.data.databases[0]
-    if (createdDatabaseData) {
-      createdDatabase = {
-        type: 'remoteDatabase' as const,
-        id: createdDatabaseData.id,
-        name: createdDatabaseData.name,
-        region: null,
-        projectId: newProject.id,
-        workspaceId,
+    if ('databases' in response.data) {
+      const createdDatabaseData = response.data.databases[0]
+      if (createdDatabaseData) {
+        createdDatabase = {
+          type: 'remoteDatabase' as const,
+          id: createdDatabaseData.id,
+          name: createdDatabaseData.name,
+          region: null,
+          projectId: newProject.id,
+          workspaceId,
+        }
+        connectionString = createdDatabaseData.connectionString
+        
+        await this.connectionStringStorage.storeConnectionString({
+          workspaceId,
+          projectId: newProject.id,
+          databaseId: createdDatabase.id,
+          connectionString,
+        })
       }
-      connectionString = (createdDatabaseData as Record<string, string>)['connectionString']
-
-      await this.connectionStringStorage.storeConnectionString({
-        workspaceId,
-        projectId: newProject.id,
-        databaseId: createdDatabase.id,
-        connectionString,
-      })
     }
 
     // Proactively update cache

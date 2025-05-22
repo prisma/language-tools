@@ -465,7 +465,7 @@
         {
           "id": "prismaActivitybar",
           "title": "Prisma",
-          "icon": "prisma_icon.svg"
+          "icon": "prisma_icon_large.svg"
         }
       ]
     },
