@@ -5,6 +5,12 @@ import type { ConnectionStringStorage } from './ConnectionStringStorage'
 import { Auth } from './management-api/auth'
 import type { paths } from './management-api/api.d'
 import { z } from 'zod'
+import envPaths from 'env-paths'
+import * as fs from 'fs'
+import * as path from 'path'
+import * as process from 'process'
+
+const PPG_DEV_GLOBAL_ROOT = envPaths('prisma-dev')
 
 export type RegionId = NonNullable<
   NonNullable<paths['/projects/{id}/databases']['post']['requestBody']>['content']['application/json']['region']
@@ -51,6 +57,9 @@ export function isRemoteDatabase(item: unknown): item is RemoteDatabase {
 
 export type LocalDatabase = {
   type: 'localDatabase'
+  id: string
+  name: string
+  url: string
 }
 export function isLocalDatabase(item: unknown): item is LocalDatabase {
   return typeof item === 'object' && item !== null && 'type' in item && item.type === 'localDatabase'
@@ -65,6 +74,31 @@ export type PrismaPostgresItem =
   | Project
   | RemoteDatabase
   | LocalDatabase
+
+// TODO: these types should come from the dev package
+type PpgDevServerExportConfig = {
+  accelerate: {
+    url: string
+  }
+  database: {
+    connectionString: string
+  }
+  ppg: {
+    url: string
+  }
+  shadowDatabase: {
+    connectionString: string
+  }
+}
+type PpgDevServerConfig = {
+  name: string
+  version: string
+  pid: number
+  port: number
+  databasePort: number
+  shadowDatabasePort: number
+  exports: PpgDevServerExportConfig
+}
 
 export interface PrismaPostgresRepository {
   readonly refreshEventEmitter: EventEmitter<void | PrismaPostgresItem>
@@ -107,6 +141,8 @@ export interface PrismaPostgresRepository {
     projectId: string
     databaseId: string
   }): Promise<string>
+
+  getLocalDatabases(): LocalDatabase[]
 }
 
 export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
@@ -593,5 +629,46 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
     await this.getRemoteDatabases({ workspaceId, projectId }, { forceCacheRefresh: true }).then(() =>
       this.refreshEventEmitter.fire(),
     )
+  }
+
+  getLocalDatabases() {
+    const dataPath = PPG_DEV_GLOBAL_ROOT.data
+
+    try {
+      if (!fs.existsSync(dataPath)) {
+        return []
+      }
+
+      const items = fs.readdirSync(dataPath)
+
+      const folders = items.filter((item) => {
+        const itemPath = path.join(dataPath, item)
+        return fs.statSync(itemPath).isDirectory()
+      })
+
+      const configs: { type: 'localDatabase'; name: string; id: string; url: string }[] = []
+      for (const folder of folders) {
+        const serverJsonPath = path.join(dataPath, folder, 'server.json')
+
+        if (fs.existsSync(serverJsonPath)) {
+          try {
+            const serverJsonContent = fs.readFileSync(serverJsonPath, 'utf-8')
+            const { name, exports, pid } = JSON.parse(serverJsonContent) as PpgDevServerConfig
+
+            try {
+              process.kill(pid, 0) // does not kill but throws if pid does not exist
+              configs.push({ type: 'localDatabase', name, id: name, url: exports.ppg.url })
+            } catch (e) {}
+          } catch (error) {
+            console.warn(`Failed to parse server.json in folder ${folder}:`, error)
+          }
+        }
+      }
+
+      return configs
+    } catch (error) {
+      console.error('Error reading PPG dev server config list:', error)
+      return []
+    }
   }
 }

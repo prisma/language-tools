@@ -18,7 +18,7 @@
     "@prisma/language-server": "31.0.7595",
     "@prisma/studio-core": "0.0.0-dev.202505221536",
     "checkpoint-client": "1.1.33",
-    "env-paths": "2.2.1",
+    "env-paths": "^2.2.1",
     "execa": "5.1.1",
     "get-port": "5.1.1",
     "hono": "4.7.10",
