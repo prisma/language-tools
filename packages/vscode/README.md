@@ -26,7 +26,7 @@ You can find both the [stable](https://open-vsx.org/extension/Prisma/prisma) and
   - Completion results appear for symbols as you type.
   - You can trigger this manually with the <kbd>Ctrl</kbd>+<kbd>Space</kbd> shortcut.
 - Symbols for schema blocks `datasource`, `generator`, `model`, `enum` and `type`
-  - They are listed in the [Outline view of VS Code](https://code.visualstudio.com/docs/getstarted/userinterface#_outline-view) and clicking them will go to their definition.  
+  - They are listed in the [Outline view of VS Code](https://code.visualstudio.com/docs/getstarted/userinterface#_outline-view) and clicking them will go to their definition.
 - Documentation help
   - Documentation of a completion result pops up as completion results are provided.
 - Quick info on hover

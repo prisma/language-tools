@@ -1,5 +1,6 @@
 import * as crypto from 'crypto'
 import { Uri, env } from 'vscode'
+import z from 'zod'
 
 const CLIENT_ID = 'cmamnw2go00005812nlbzb4pi'
 const LOGIN_URL = 'https://auth.prisma.io/authorize'
@@ -7,6 +8,7 @@ const TOKEN_URL = 'https://auth.prisma.io/token'
 
 export type AuthResult = {
   token: string
+  refreshToken: string
 }
 
 export class AuthError extends Error {
@@ -68,20 +70,38 @@ export class Auth {
       body: body,
     })
 
+    return this.parseTokenResponse(response)
+  }
+
+  async refreshToken(refreshToken: string): Promise<AuthResult> {
+    const body = new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+      client_id: CLIENT_ID,
+    })
+    const response = await fetch(TOKEN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body,
+    })
+
+    const result = await this.parseTokenResponse(response)
+
+    return result
+  }
+
+  private async parseTokenResponse(response: Response): Promise<AuthResult> {
     const data = await response.json()
 
-    if (response.status !== 200) throw new AuthError(`Received status code ${response.status} from token endpoint`)
-    if (
-      !data ||
-      typeof data !== 'object' ||
-      !('access_token' in data) ||
-      !data.access_token ||
-      typeof data.access_token !== 'string'
-    ) {
-      throw new AuthError('No access token received in token endpoint response')
-    }
+    if (response.status !== 200) throw new AuthError(`Failed to get token. Status code ${response.status}.`)
+    const parsed = z
+      .object({
+        access_token: z.string(),
+        refresh_token: z.string(),
+      })
+      .parse(data)
 
-    return { token: data.access_token }
+    return { token: parsed.access_token, refreshToken: parsed.refresh_token }
   }
 
   private getRedirectUri(): string {

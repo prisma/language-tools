@@ -1,6 +1,7 @@
 import { EventEmitter } from 'vscode'
 import { createManagementAPIClient } from './management-api/client'
 import { CredentialsStore } from '@prisma/credentials-store'
+import { Auth } from './management-api/auth'
 import type { paths } from './management-api/api.d'
 
 export type RegionId = NonNullable<
@@ -59,7 +60,7 @@ export interface PrismaPostgresRepository {
   getRegions(): Promise<Region[]>
 
   getWorkspaces(): Promise<Workspace[]>
-  addWorkspace(params: { token: string }): Promise<void>
+  addWorkspace(params: { token: string; refreshToken: string }): Promise<void>
   removeWorkspace(params: { workspaceId: string }): Promise<void>
 
   getProjects(params: { workspaceId: string }, options?: { forceCacheRefresh: boolean }): Promise<Project[]>
@@ -93,14 +94,25 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
 
   public readonly refreshEventEmitter = new EventEmitter<void | PrismaPostgresItem>()
 
-  constructor() {}
+  constructor(private readonly auth: Auth) {}
 
   private async getClient(workspaceId: string) {
     if (!this.clients.has(workspaceId)) {
       await this.credentialsStore.reloadCredentialsFromDisk()
       const credentials = await this.credentialsStore.getCredentialsForWorkspace(workspaceId)
-      if (!credentials) throw new Error(`Workspace ${workspaceId} not found`)
-      this.clients.set(workspaceId, createManagementAPIClient(credentials.token))
+      if (!credentials) throw new Error(`Workspace '${workspaceId}' not found`)
+
+      const refreshTokenHandler = async () => {
+        const credentials = await this.credentialsStore.getCredentialsForWorkspace(workspaceId)
+        if (!credentials) throw new Error(`Workspace '${workspaceId}' not found`)
+        const { token, refreshToken } = await this.auth.refreshToken(credentials.refreshToken)
+        await this.credentialsStore.storeCredentials({ ...credentials, token, refreshToken })
+        return { token }
+      }
+
+      const client = createManagementAPIClient(credentials.token, refreshTokenHandler)
+
+      this.clients.set(workspaceId, client)
     }
     return this.clients.get(workspaceId)!
   }
@@ -178,18 +190,18 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
     return credentials.map((cred) => ({
       type: 'workspace',
       id: cred.workspaceId,
-      name: cred.workspaceName,
+      name: `Personal Workspace ${cred.workspaceId}`, // TODO: pending /me endpoint api
       token: cred.token,
     }))
   }
 
-  async addWorkspace({ token }: { token: string }): Promise<void> {
+  async addWorkspace({ token, refreshToken }: { token: string; refreshToken: string }): Promise<void> {
     const fakeId = token.substring(0, 8)
     await this.credentialsStore.storeCredentials({
-      userName: 'prisma',
-      workspaceName: `Personal Workspace ${fakeId}`,
+      userId: 'prisma', // TODO: pending /me endpoint api
       workspaceId: fakeId,
       token,
+      refreshToken,
     })
     this.refreshEventEmitter.fire()
     return Promise.resolve()

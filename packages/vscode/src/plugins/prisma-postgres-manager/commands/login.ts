@@ -35,7 +35,7 @@ export const handleAuthCallback = async ({
         location: ProgressLocation.Notification,
         title: 'Logging in to Prisma workspace...',
       },
-      () => ppgRepository.addWorkspace({ token: result.token }),
+      () => ppgRepository.addWorkspace({ token: result.token, refreshToken: result.refreshToken }),
     )
     void window.showInformationMessage('Login to Prisma successful!')
   } catch (error) {

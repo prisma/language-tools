@@ -1,7 +1,7 @@
 {
   "name": "language-tools",
   "private": true,
-  "version": "31.0.7570",
+  "version": "31.0.7578",
   "author": "Prisma",
   "license": "Apache-2.0",
   "engines": {
@@ -39,7 +39,7 @@
     "format": "prettier \"packages/**/*.{ts,js,json,md}\" --write",
     "lint": "eslint \"packages/**/*.{js,ts}\" --fix",
     "compile": "lerna run build",
-    "watch": "lerna run build -- -w",
+    "watch": "tsc -b --watch",
     "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "sh scripts/e2e.sh",
     "test:e2e": "sh scripts/e2eTestsOnVsix/test.sh",
