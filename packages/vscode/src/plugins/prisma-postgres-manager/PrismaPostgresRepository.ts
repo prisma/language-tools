@@ -163,7 +163,7 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
     if (this.regionsCache.length > 0) return this.regionsCache
 
     const workspaceId = (await this.getWorkspaces()).at(0)?.id
-    if (!workspaceId) return Promise.resolve([])
+    if (!workspaceId) return []
 
     const client = await this.getClient(workspaceId)
     const response = await client.GET('/regions')
