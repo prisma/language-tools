@@ -9,6 +9,8 @@ import { handleCommandError } from './shared-ui/handleCommandError'
 import { logout } from './commands/logout'
 import { login, handleAuthCallback } from './commands/login'
 import { Auth } from './management-api/auth'
+import { ConnectionStringStorage } from './ConnectionStringStorage'
+import { getRemoteDatabaseConnectionString } from './commands/getRemoteDatabaseConnectionString'
 
 export default {
   name: 'Prisma Postgres',
@@ -17,7 +19,8 @@ export default {
   },
   activate(context: ExtensionContext) {
     const auth = new Auth(context.extension.id)
-    const ppgRepository = new PrismaPostgresApiRepository(auth)
+    const connectionStringStorage = new ConnectionStringStorage(context.secrets)
+    const ppgRepository = new PrismaPostgresApiRepository(auth, connectionStringStorage)
     const ppgProvider = new PrismaPostgresTreeDataProvider(ppgRepository)
 
     window.registerUriHandler({
@@ -53,6 +56,11 @@ export default {
       }),
       commands.registerCommand('prisma.createRemoteDatabase', async (args: unknown) => {
         await handleCommandError('Create Remote Database', () => createRemoteDatabase(ppgRepository, args))
+      }),
+      commands.registerCommand('prisma.getRemoteDatabaseConnectionString', async (args: unknown) => {
+        await handleCommandError('Get Remote Database Connection String', () =>
+          getRemoteDatabaseConnectionString(ppgRepository, args),
+        )
       }),
       commands.registerCommand('prisma.openRemoteDatabaseInPrismaConsole', async (args: unknown) => {
         if (isRemoteDatabase(args)) {

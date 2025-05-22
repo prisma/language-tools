@@ -232,6 +232,12 @@
         "category": "Prisma"
       },
       {
+        "command": "prisma.getRemoteDatabaseConnectionString",
+        "title": "Get Connection String",
+        "icon": "$(shield)",
+        "category": "Prisma"
+      },
+      {
         "command": "prisma.openRemoteDatabaseInPrismaConsole",
         "title": "Open Remote Prisma Postgres Database in Prisma Console",
         "icon": "$(link-external)",
@@ -524,6 +530,10 @@
           "command": "prisma.openRemoteDatabaseInPrismaConsole",
           "when": "viewItem == prismaRemoteDatabaseItem",
           "group": "inline"
+        },
+        {
+          "command": "prisma.getRemoteDatabaseConnectionString",
+          "when": "viewItem == prismaRemoteDatabaseItem"
         }
       ]
     },

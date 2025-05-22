@@ -2,6 +2,7 @@ import { EventEmitter } from 'vscode'
 import { createManagementAPIClient } from './management-api/client'
 import { isValidRegion, regions } from './management-api/regions'
 import { CredentialsStore } from '@prisma/credentials-store'
+import type { ConnectionStringStorage } from './ConnectionStringStorage'
 import { Auth } from './management-api/auth'
 
 export type WorkspaceId = string
@@ -73,6 +74,17 @@ export interface PrismaPostgresRepository {
     region: string
   }): Promise<NewlyCreatedDatabase>
   deleteRemoteDatabase(params: { workspaceId: string; projectId: string; id: string } | RemoteDatabase): Promise<void>
+
+  getStoredRemoteDatabaseConnectionString(params: {
+    workspaceId: string
+    projectId: string
+    databaseId: string
+  }): Promise<string | undefined>
+  createRemoteDatabaseConnectionString(params: {
+    workspaceId: string
+    projectId: string
+    databaseId: string
+  }): Promise<string>
 }
 
 export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
@@ -84,7 +96,10 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
 
   public readonly refreshEventEmitter = new EventEmitter<void | PrismaPostgresItem>()
 
-  constructor(private readonly auth: Auth) {}
+  constructor(
+    private readonly auth: Auth,
+    private readonly connectionStringStorage: ConnectionStringStorage,
+  ) {}
 
   private async getClient(workspaceId: string) {
     if (!this.clients.has(workspaceId)) {
@@ -176,6 +191,7 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
 
   async removeWorkspace({ workspaceId }: { workspaceId: string }): Promise<void> {
     this.clients.delete(workspaceId)
+    await this.connectionStringStorage.removeConnectionString({ workspaceId })
     await this.credentialsStore.deleteCredentials(workspaceId)
     this.refreshEventEmitter.fire()
     return Promise.resolve()
@@ -253,6 +269,13 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
         workspaceId,
       }
       connectionString = (createdDatabaseData as Record<string, string>)['connectionString']
+
+      await this.connectionStringStorage.storeConnectionString({
+        workspaceId,
+        projectId: newProject.id,
+        databaseId: createdDatabase.id,
+        connectionString,
+      })
     }
 
     // Proactively update cache
@@ -281,6 +304,11 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
     })
 
     this.checkResponseOrThrow(workspaceId, response)
+
+    await this.connectionStringStorage.removeConnectionString({
+      workspaceId,
+      projectId: id,
+    })
 
     // Proactively update cache
     this.projectsCache.get(workspaceId)?.delete(id)
@@ -336,6 +364,49 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
     return Array.from(databases.values())
   }
 
+  async getStoredRemoteDatabaseConnectionString({
+    workspaceId,
+    projectId,
+    databaseId,
+  }: {
+    workspaceId: string
+    projectId: string
+    databaseId: string
+  }): Promise<string | undefined> {
+    return this.connectionStringStorage.getConnectionString({ workspaceId, projectId, databaseId })
+  }
+
+  async createRemoteDatabaseConnectionString({
+    workspaceId,
+    projectId,
+    databaseId,
+  }: {
+    workspaceId: string
+    projectId: string
+    databaseId: string
+  }): Promise<string> {
+    const client = await this.getClient(workspaceId)
+    const response = await client.POST('/projects/{projectId}/databases/{databaseId}/connections', {
+      params: {
+        path: { projectId, databaseId },
+      },
+      body: {
+        name: "Created by Prisma's VSCode Extension",
+      },
+    })
+
+    this.checkResponseOrThrow(workspaceId, response)
+
+    const connectionString = response.data.connectionString
+    await this.connectionStringStorage.storeConnectionString({
+      workspaceId,
+      projectId,
+      databaseId,
+      connectionString,
+    })
+    return connectionString
+  }
+
   async createRemoteDatabase({
     workspaceId,
     projectId,
@@ -370,6 +441,7 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
       projectId,
       workspaceId,
     }
+    const connectionString = response.data.connectionString
 
     // Proactively update cache
     this.remoteDatabasesCache.get(workspaceId)?.set(newDatabase.id, newDatabase)
@@ -377,7 +449,14 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
     // And then refresh list from server in background
     void this.refreshRemoteDatabases({ workspaceId, projectId })
 
-    return { ...newDatabase, connectionString: response.data.connectionString }
+    await this.connectionStringStorage.storeConnectionString({
+      workspaceId,
+      projectId,
+      databaseId: newDatabase.id,
+      connectionString,
+    })
+
+    return { ...newDatabase, connectionString }
   }
 
   async deleteRemoteDatabase({
@@ -402,6 +481,12 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
     })
 
     this.checkResponseOrThrow(workspaceId, response)
+
+    await this.connectionStringStorage.removeConnectionString({
+      workspaceId,
+      projectId,
+      databaseId: id,
+    })
 
     // Proactively update cache
     this.remoteDatabasesCache.get(`${workspaceId}.${projectId}`)?.delete(id)
