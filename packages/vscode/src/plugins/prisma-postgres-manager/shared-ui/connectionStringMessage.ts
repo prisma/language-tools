@@ -19,7 +19,7 @@ export const presentConnectionString = async ({
   await window.showInformationMessage(
     TITLE_COPY[type],
     {
-      detail: `Connection string:\n${truncatedConnectionString}\n\nWe store this connection string securely in VSCode Secret Storage on this machine. We recommend you store it in another secure place with your application configuration, too.`,
+      detail: `Connection string:\n${truncatedConnectionString}\n\nWe store this connection string securely in VS Code Secret Storage on this machine. We recommend you store it in another secure place with your application configuration, too.`,
       modal: true,
     },
     { title: 'Copy connection string', isCloseAffordance: true },
