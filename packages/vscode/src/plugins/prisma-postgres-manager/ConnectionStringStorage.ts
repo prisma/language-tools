@@ -1,17 +1,21 @@
 import type { SecretStorage } from 'vscode'
 import z from 'zod'
 
+const WorkspaceIdSchema = z.string()
+const ProjectIdSchema = z.string()
+const DatabaseIdSchema = z.string()
+
 // Storing connection strings in this JSON structure under a single key in the secret storage.
 // This allows for easy deletion of multiple entries when a project is deleted or the user logs out from a workspace.
 const StoredConnectionStringsSchema = z.object({
   workspaces: z.record(
-    z.string(), // workspaceId
+    WorkspaceIdSchema,
     z.object({
       projects: z.record(
-        z.string(), // projectId
+        ProjectIdSchema,
         z.object({
           databases: z.record(
-            z.string(), // databaseId
+            DatabaseIdSchema,
             z.object({
               connectionString: z.string(),
             }),

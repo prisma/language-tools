@@ -1,9 +1,18 @@
 import { EventEmitter } from 'vscode'
 import { createManagementAPIClient } from './management-api/client'
-import { isValidRegion, regions } from './management-api/regions'
 import { CredentialsStore } from '@prisma/credentials-store'
 import type { ConnectionStringStorage } from './ConnectionStringStorage'
 import { Auth } from './management-api/auth'
+import type { paths } from './management-api/api.d'
+
+export type RegionId = NonNullable<
+  NonNullable<paths['/projects/{id}/databases']['post']['requestBody']>['content']['application/json']['region']
+>
+export type Region = {
+  id: string
+  name: string
+  status: 'available' | 'unavailable' | 'unsupported'
+}
 
 export type WorkspaceId = string
 export type Workspace = {
@@ -62,7 +71,7 @@ export interface PrismaPostgresRepository {
 
   triggerRefresh(): void
 
-  getRegions(): Promise<string[]>
+  getRegions(): Promise<Region[]>
 
   getWorkspaces(): Promise<Workspace[]>
   addWorkspace(params: { token: string; refreshToken: string }): Promise<void>
@@ -104,6 +113,7 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
   private clients: Map<string, ReturnType<typeof createManagementAPIClient>> = new Map()
   private credentialsStore = new CredentialsStore()
 
+  private regionsCache: Region[] = []
   private projectsCache = new Map<WorkspaceId, Map<ProjectId, Project>>()
   private remoteDatabasesCache = new Map<string, Map<RemoteDatabaseId, RemoteDatabase>>()
 
@@ -170,14 +180,37 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
   triggerRefresh() {
     void this.credentialsStore.reloadCredentialsFromDisk()
     // Wipe caches
+    this.regionsCache = []
     this.projectsCache = new Map()
     this.remoteDatabasesCache = new Map()
     // Trigger full tree view refresh which will fetch fresh data on demand due to cache misses
     this.refreshEventEmitter.fire()
   }
 
-  getRegions(): Promise<string[]> {
-    return Promise.resolve(regions.slice())
+  async getRegions(): Promise<Region[]> {
+    if (this.regionsCache.length > 0) return this.regionsCache
+
+    const workspaceId = (await this.getWorkspaces()).at(0)?.id
+    if (!workspaceId) return []
+
+    const client = await this.getClient(workspaceId)
+    const response = await client.GET('/regions')
+    this.checkResponseOrThrow(workspaceId, response)
+
+    this.regionsCache = response.data.data
+
+    return this.regionsCache
+  }
+
+  private ensureValidRegion(value: string): asserts value is RegionId {
+    // This is not super precise but at the point this validation is called, the
+    // regions are already in the cache.
+    // Async type asserting function do not exist in typescript and we anyways have
+    // a potential runtime mismatch between the actually available regions and the
+    // regions known to the type system.
+    if (!this.regionsCache.some((r) => r.id === value)) {
+      throw new Error(`Invalid region: ${value}.`)
+    }
   }
 
   async getWorkspaces(): Promise<Workspace[]> {
@@ -250,7 +283,7 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
     name: string
     region: string
   }): Promise<{ project: Project; database?: NewlyCreatedDatabase }> {
-    if (!isValidRegion(region)) throw new Error(`Invalid region: ${region}.`)
+    this.ensureValidRegion(region)
 
     const client = await this.getClient(workspaceId)
     const response = await client.POST('/projects', {
@@ -271,24 +304,26 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
 
     let createdDatabase: RemoteDatabase | undefined
     let connectionString: string | undefined
-    const createdDatabaseData = response.data.databases[0]
-    if (createdDatabaseData) {
-      createdDatabase = {
-        type: 'remoteDatabase' as const,
-        id: createdDatabaseData.id,
-        name: createdDatabaseData.name,
-        region: null,
-        projectId: newProject.id,
-        workspaceId,
-      }
-      connectionString = (createdDatabaseData as Record<string, string>)['connectionString']
+    if ('databases' in response.data) {
+      const createdDatabaseData = response.data.databases[0]
+      if (createdDatabaseData) {
+        createdDatabase = {
+          type: 'remoteDatabase' as const,
+          id: createdDatabaseData.id,
+          name: createdDatabaseData.name,
+          region: createdDatabaseData.region,
+          projectId: newProject.id,
+          workspaceId,
+        }
+        connectionString = createdDatabaseData.connectionString
 
-      await this.connectionStringStorage.storeConnectionString({
-        workspaceId,
-        projectId: newProject.id,
-        databaseId: createdDatabase.id,
-        connectionString,
-      })
+        await this.connectionStringStorage.storeConnectionString({
+          workspaceId,
+          projectId: newProject.id,
+          databaseId: createdDatabase.id,
+          connectionString,
+        })
+      }
     }
 
     // Proactively update cache
@@ -431,7 +466,7 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
     name: string
     region: string
   }): Promise<NewlyCreatedDatabase> {
-    if (!isValidRegion(region)) throw new Error(`Invalid region: ${region}.`)
+    this.ensureValidRegion(region)
 
     const client = await this.getClient(workspaceId)
     const response = await client.POST('/projects/{id}/databases', {
