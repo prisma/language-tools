@@ -13,9 +13,8 @@ export const getRemoteDatabaseConnectionString = async (ppgRepository: PrismaPos
 
   if (connectionString) {
     void presentConnectionString({
-      name: args.name,
-      region: args.region,
       connectionString,
+      type: 'connectionStringDisplay',
     })
     return
   }
@@ -46,8 +45,7 @@ export const getRemoteDatabaseConnectionString = async (ppgRepository: PrismaPos
   )
 
   void presentConnectionString({
-    name: args.name,
-    region: args.region,
     connectionString: createdConnectionString,
+    type: 'connectionStringCreated',
   })
 }
