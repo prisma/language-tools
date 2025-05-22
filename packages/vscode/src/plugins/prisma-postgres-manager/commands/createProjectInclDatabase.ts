@@ -36,9 +36,8 @@ export const createProjectInclDatabase = async (ppgRepository: PrismaPostgresRep
 
   if (result.database?.connectionString) {
     await presentConnectionString({
-      name: result.database.name,
-      region: result.database.region,
       connectionString: result.database.connectionString,
+      type: 'databaseCreated',
     })
   } else {
     void window.showInformationMessage(`Project ${name} created`)
