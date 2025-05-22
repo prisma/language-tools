@@ -223,17 +223,27 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
         const client = await this.getClient(cred.workspaceId)
         const response = await client.GET('/workspaces')
         this.checkResponseOrThrow(cred.workspaceId, response)
+        const workspaceInfo = response.data.data.at(0)
+        if (!workspaceInfo) throw new Error(`Workspaces endpoint returned no workspace info.`)
+
         const workspace: Workspace = {
           type: 'workspace',
-          id: cred.workspaceId,
-          name: response.data.data[0].displayName,
+          id: workspaceInfo.id,
+          name: workspaceInfo.displayName,
         }
         this.workspacesCache.set(workspace.id, workspace)
         return workspace
       }),
     )
     return results
-      .flatMap((r) => (r.status === 'fulfilled' ? [r.value] : []))
+      .flatMap((r) => {
+        if (r.status === 'fulfilled') {
+          return [r.value]
+        } else {
+          console.error(`Failed to get workspace info`, r.reason)
+          return []
+        }
+      })
       .sort((a, b) => a.name.localeCompare(b.name))
   }
 
