@@ -232,6 +232,12 @@
         "category": "Prisma"
       },
       {
+        "command": "prisma.getRemoteDatabaseConnectionString",
+        "title": "Get Connection String",
+        "icon": "$(shield)",
+        "category": "Prisma"
+      },
+      {
         "command": "prisma.openRemoteDatabaseInPrismaConsole",
         "title": "Open Remote Prisma Postgres Database in Prisma Console",
         "icon": "$(link-external)",
@@ -245,6 +251,12 @@
       },
       {
         "command": "prisma.studio.launch",
+        "title": "Launch Prisma Studio",
+        "category": "Prisma",
+        "icon": "$(link-external)"
+      },
+      {
+        "command": "prisma.studio.launchForDatabase",
         "title": "Launch Prisma Studio",
         "category": "Prisma",
         "icon": "$(link-external)"
@@ -478,6 +490,10 @@
         {
           "command": "prisma.openRemoteDatabaseInPrismaConsole",
           "when": "false"
+        },
+        {
+          "command": "prisma.studio.launchForDatabase",
+          "when": "false"
         }
       ],
       "view/title": [
@@ -524,6 +540,10 @@
           "command": "prisma.openRemoteDatabaseInPrismaConsole",
           "when": "viewItem == prismaRemoteDatabaseItem",
           "group": "inline"
+        },
+        {
+          "command": "prisma.getRemoteDatabaseConnectionString",
+          "when": "viewItem == prismaRemoteDatabaseItem"
         }
       ]
     },
