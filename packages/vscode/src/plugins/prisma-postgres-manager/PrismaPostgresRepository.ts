@@ -232,7 +232,9 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
         return workspace
       }),
     )
-    return results.flatMap((r) => (r.status === 'fulfilled' ? [r.value] : []))
+    return results
+      .flatMap((r) => (r.status === 'fulfilled' ? [r.value] : []))
+      .sort((a, b) => a.name.localeCompare(b.name))
   }
 
   async addWorkspace({ token, refreshToken }: { token: string; refreshToken: string }): Promise<void> {
