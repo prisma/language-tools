@@ -2,7 +2,7 @@
   "name": "prisma-insider",
   "displayName": "Prisma - Insider",
   "description": "This is the Insider Build of the Prisma VS Code extension (only use it if you are also using the dev version of the CLI).",
-  "version": "31.0.7578",
+  "version": "31.0.7580",
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
@@ -15,7 +15,7 @@
   "dependencies": {
     "@hono/node-server": "1.14.2",
     "@prisma/credentials-store": "6.9.0-dev.11",
-    "@prisma/language-server": "31.0.7578",
+    "@prisma/language-server": "31.0.7580",
     "@prisma/studio-core": "0.0.0-dev.202505202227",
     "checkpoint-client": "1.1.33",
     "env-paths": "2.2.1",
@@ -550,7 +550,7 @@
     "viewsWelcome": [
       {
         "view": "prismaPostgresDatabases",
-        "contents": "Login to Prisma Postgres to get started with the best Postgres solution ever!\n[Login or Signup](command:prisma.login)\nLearn more about Prisma Postgres [here](https://www.prisma.io/postgres).",
+        "contents": "Connect to Prisma Data Platform\nManage your Prisma Postgres databases directly from your editor.\n[Sign in to get started](command:prisma.login)\nLearn more about Prisma Postgres [here](https://www.prisma.io/postgres).",
         "when": "prisma.showLoginWelcome == true && prisma.initialLoginInProgress == false"
       },
       {
