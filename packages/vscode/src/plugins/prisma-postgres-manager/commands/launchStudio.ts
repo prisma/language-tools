@@ -3,7 +3,23 @@ import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
 import { z } from 'zod'
 import { launch } from '../../prisma-studio/commands/launch'
 
-export const launchStudioForRemoteDatabase = async ({
+const LaunchArgSchema = z.union([
+  z.object({
+    type: z.literal('local'),
+  }),
+  z.object({
+    type: z.literal('remote'),
+    workspaceId: z.string(),
+    projectId: z.string(),
+    databaseId: z.string(),
+  }),
+])
+type LaunchArg = z.infer<typeof LaunchArgSchema>
+
+const DEFAULT_LOCAL_CONNECTION_STRING =
+  'prisma+postgres://localhost:51213/?api_key=eyJkYXRhYmFzZVVybCI6InBvc3RncmVzOi8vcG9zdGdyZXM6cG9zdGdyZXNAbG9jYWxob3N0OjUxMjE0L3Bvc3RncmVzP2Nvbm5lY3Rpb25fbGltaXQ9MSZjb25uZWN0X3RpbWVvdXQ9MCZtYXhfaWRsZV9jb25uZWN0aW9uX2xpZmV0aW1lPTAmcG9vbF90aW1lb3V0PTAmc29ja2V0X3RpbWVvdXQ9MCZzc2xtb2RlPWRpc2FibGUiLCJzaGFkb3dEYXRhYmFzZVVybCI6InBvc3RncmVzOi8vcG9zdGdyZXM6cG9zdGdyZXNAbG9jYWxob3N0OjUxMjE1L3Bvc3RncmVzP2Nvbm5lY3Rpb25fbGltaXQ9MSZjb25uZWN0X3RpbWVvdXQ9MCZtYXhfaWRsZV9jb25uZWN0aW9uX2xpZmV0aW1lPTAmcG9vbF90aW1lb3V0PTAmc29ja2V0X3RpbWVvdXQ9MCZzc2xtb2RlPWRpc2FibGUifQ'
+
+export const launchStudio = async ({
   ppgRepository,
   context,
   args,
@@ -12,13 +28,7 @@ export const launchStudioForRemoteDatabase = async ({
   context: ExtensionContext
   args: unknown
 }) => {
-  const database = z
-    .object({
-      workspaceId: z.string(),
-      projectId: z.string(),
-      databaseId: z.string(),
-    })
-    .parse(args)
+  const database = LaunchArgSchema.parse(args)
 
   const connectionString = await getConnectionString(ppgRepository, database)
 
@@ -27,14 +37,9 @@ export const launchStudioForRemoteDatabase = async ({
   void launch({ dbUrl: connectionString, context })
 }
 
-const getConnectionString = async (
-  ppgRepository: PrismaPostgresRepository,
-  database: {
-    workspaceId: string
-    projectId: string
-    databaseId: string
-  },
-) => {
+const getConnectionString = async (ppgRepository: PrismaPostgresRepository, database: LaunchArg) => {
+  if (database.type === 'local') return DEFAULT_LOCAL_CONNECTION_STRING
+
   const connectionString = await ppgRepository.getStoredRemoteDatabaseConnectionString(database)
 
   if (connectionString) return connectionString

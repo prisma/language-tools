@@ -49,9 +49,22 @@ export function isRemoteDatabase(item: unknown): item is RemoteDatabase {
   return typeof item === 'object' && item !== null && 'type' in item && item.type === 'remoteDatabase'
 }
 
+export type LocalDatabase = {
+  type: 'localDatabase'
+}
+export function isLocalDatabase(item: unknown): item is LocalDatabase {
+  return typeof item === 'object' && item !== null && 'type' in item && item.type === 'localDatabase'
+}
+
 export type NewlyCreatedDatabase = RemoteDatabase & { connectionString: string }
 
-export type PrismaPostgresItem = { type: 'remoteRoot' } | Workspace | Project | RemoteDatabase
+export type PrismaPostgresItem =
+  | { type: 'localRoot' }
+  | { type: 'remoteRoot' }
+  | Workspace
+  | Project
+  | RemoteDatabase
+  | LocalDatabase
 
 export interface PrismaPostgresRepository {
   readonly refreshEventEmitter: EventEmitter<void | PrismaPostgresItem>
@@ -303,7 +316,7 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
           workspaceId,
         }
         connectionString = createdDatabaseData.connectionString
-        
+
         await this.connectionStringStorage.storeConnectionString({
           workspaceId,
           projectId: newProject.id,

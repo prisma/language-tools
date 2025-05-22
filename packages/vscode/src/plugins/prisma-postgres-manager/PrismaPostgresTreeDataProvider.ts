@@ -10,6 +10,8 @@ export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<P
 
   getTreeItem(element: PrismaPostgresItem): vscode.TreeItem {
     switch (element.type) {
+      case 'localRoot':
+        return new PrismaLocalDatabasesItem()
       case 'remoteRoot':
         return new PrismaRemoteDatabasesItem()
       case 'workspace':
@@ -24,6 +26,8 @@ export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<P
           element.projectId,
           element.workspaceId,
         )
+      case 'localDatabase':
+        return new PrismaLocalDatabaseItem()
     }
   }
 
@@ -40,11 +44,13 @@ export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<P
       } else {
         await vscode.commands.executeCommand('setContext', 'prisma.showLoginWelcome', false)
         await vscode.commands.executeCommand('setContext', 'prisma.showCreateDatabaseWelcome', false)
-        return [{ type: 'remoteRoot' }]
+        return [{ type: 'localRoot' }, { type: 'remoteRoot' }]
       }
     }
 
     switch (element.type) {
+      case 'localRoot':
+        return [{ type: 'localDatabase' }]
       case 'remoteRoot':
         return await this.ppgRepository.getWorkspaces()
       case 'workspace':
@@ -55,6 +61,8 @@ export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<P
           projectId: element.id,
         })
       case 'remoteDatabase':
+        return []
+      case 'localDatabase':
         return []
     }
   }
@@ -70,6 +78,36 @@ export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<P
       ),
     )
     return res.flat().length === 0
+  }
+}
+
+class PrismaLocalDatabasesItem extends vscode.TreeItem {
+  constructor() {
+    super('Local Databases', vscode.TreeItemCollapsibleState.Expanded)
+  }
+
+  id = 'local-root'
+
+  iconPath = new vscode.ThemeIcon('device-desktop')
+
+  contextValue = 'prismaLocalDatabasesItem'
+}
+
+class PrismaLocalDatabaseItem extends vscode.TreeItem {
+  constructor() {
+    super('Default Local Database', vscode.TreeItemCollapsibleState.None)
+  }
+
+  id = `database-local-default`
+
+  iconPath = new vscode.ThemeIcon('database')
+
+  contextValue = 'prismaLocalDatabaseItem'
+
+  command = {
+    command: 'prisma.studio.launchForDatabase',
+    title: 'Launch Prisma Studio',
+    arguments: [{ type: 'local' }],
   }
 }
 
@@ -137,6 +175,8 @@ class PrismaRemoteDatabaseItem extends vscode.TreeItem {
   command = {
     command: 'prisma.studio.launchForDatabase',
     title: 'Launch Prisma Studio',
-    arguments: [{ workspaceId: this.workspaceId, projectId: this.projectId, databaseId: this.databaseId }],
+    arguments: [
+      { type: 'remote', workspaceId: this.workspaceId, projectId: this.projectId, databaseId: this.databaseId },
+    ],
   }
 }
