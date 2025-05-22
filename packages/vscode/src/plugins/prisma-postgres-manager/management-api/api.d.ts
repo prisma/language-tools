@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+  '/regions': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Retrieve all available regions */
+    get: operations['getRegions']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/projects': {
     parameters: {
       query?: never
@@ -128,6 +145,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/projects/{projectId}/databases/{databaseId}/backups': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Retrieve database backups */
+    get: operations['getProjectsByProjectIdDatabasesByDatabaseIdBackups']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
 export type webhooks = Record<string, never>
 export interface components {
@@ -140,6 +174,46 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
+  getRegions: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Retrieve all available regions */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: {
+              id: string
+              name: string
+              /** @enum {string} */
+              status: 'available' | 'unavailable' | 'unsupported'
+            }[]
+          }
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            error: 'unauthorized'
+            errorDescription: string
+          }
+        }
+      }
+    }
+  }
   getProjects: {
     parameters: {
       query?: {
@@ -167,6 +241,7 @@ export interface operations {
               databases: {
                 id: string
                 name: string
+                isDefault: boolean
               }[]
             }[]
             pagination: {
@@ -207,7 +282,7 @@ export interface operations {
            * @default us-east-1
            * @enum {string}
            */
-          region?: 'us-east-1' | 'eu-west-3' | 'ap-northeast-1'
+          region?: 'us-east-1' | 'eu-west-3' | 'ap-northeast-1' | 'ap-southeast-1'
           name?: string
         }
       }
@@ -219,16 +294,36 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': {
-            /** Format: date-time */
-            createdAt: string
-            id: string
-            name: string
-            databases: {
-              id: string
-              name: string
-            }[]
-          }
+          'application/json':
+            | {
+                /** Format: date-time */
+                createdAt: string
+                id: string
+                name: string
+                databases: {
+                  /** Format: date-time */
+                  createdAt: string
+                  id: string
+                  name: string
+                  region: string
+                  isDefault: boolean
+                  connectionString: string
+                  status: string
+                  apiKeys: {
+                    id: string
+                    name: string
+                    /** Format: date-time */
+                    createdAt: string
+                    connectionString: string
+                  }[]
+                }[]
+              }
+            | {
+                /** Format: date-time */
+                createdAt: string
+                id: string
+                name: string
+              }
         }
       }
       /** @description Unauthorized */
@@ -271,6 +366,7 @@ export interface operations {
             databases: {
               id: string
               name: string
+              isDefault: boolean
             }[]
           }
         }
@@ -389,6 +485,7 @@ export interface operations {
             databases: {
               id: string
               name: string
+              isDefault: boolean
             }[]
           }
         }
@@ -439,6 +536,7 @@ export interface operations {
               id: string
               name: string
               region: string | null
+              isDefault: boolean
             }[]
             pagination: {
               /** @description Next cursor to continue pagination */
@@ -487,8 +585,10 @@ export interface operations {
            * @default us-east-1
            * @enum {string}
            */
-          region?: 'us-east-1' | 'eu-west-3' | 'ap-northeast-1'
+          region?: 'us-east-1' | 'eu-west-3' | 'ap-northeast-1' | 'ap-southeast-1'
           name?: string
+          /** @default false */
+          isDefault?: boolean
         }
       }
     }
@@ -505,6 +605,7 @@ export interface operations {
             id: string
             name: string
             region: string
+            isDefault: boolean
             connectionString: string
             status: string
             apiKeys: {
@@ -516,6 +617,13 @@ export interface operations {
             }[]
           }
         }
+      }
+      /** @description Default database already exists */
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
       }
       /** @description Unauthorized */
       401: {
@@ -563,6 +671,7 @@ export interface operations {
             id: string
             name: string
             region: string | null
+            isDefault: boolean
           }
         }
       }
@@ -764,6 +873,55 @@ export interface operations {
     responses: {
       /** @description Database connection string deleted */
       204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            error: {
+              code: string
+              message: string
+            }
+          }
+        }
+      }
+      /** @description Database with the specified ID was not found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            error: {
+              code: string
+              message: string
+            }
+          }
+        }
+      }
+    }
+  }
+  getProjectsByProjectIdDatabasesByDatabaseIdBackups: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        projectId: string
+        databaseId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Retrieve database backups */
+      200: {
         headers: {
           [name: string]: unknown
         }

@@ -3,6 +3,7 @@ import { isProject, PrismaPostgresRepository } from '../PrismaPostgresRepository
 import { createProjectInclDatabase } from './createProjectInclDatabase'
 import { CommandAbortError } from '../shared-ui/handleCommandError'
 import { presentConnectionString } from '../shared-ui/connectionStringMessage'
+import { pickRegion } from '../shared-ui/pickRegion'
 
 const pickProject = async (
   ppgRepository: PrismaPostgresRepository,
@@ -82,17 +83,14 @@ export const createRemoteDatabase = async (ppgRepository: PrismaPostgresReposito
   })
   if (!name) throw new CommandAbortError('Name is required')
 
-  const region = await window.showQuickPick(await regions, {
-    placeHolder: 'Select the region of the remote database',
-  })
-  if (!region) throw new CommandAbortError('Region is required')
+  const region = await pickRegion(await regions)
 
   const result = await window.withProgress(
     {
       location: ProgressLocation.Notification,
-      title: `Creating remote database in '${region}'...`,
+      title: `Creating remote database in ${region.name}...`,
     },
-    () => ppgRepository.createRemoteDatabase({ workspaceId, projectId, name, region }),
+    () => ppgRepository.createRemoteDatabase({ workspaceId, projectId, name, region: region.id }),
   )
 
   await presentConnectionString({
