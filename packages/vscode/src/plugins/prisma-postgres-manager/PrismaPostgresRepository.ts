@@ -19,7 +19,6 @@ export type Workspace = {
   type: 'workspace'
   id: WorkspaceId
   name: string
-  token: string
 }
 export function isWorkspace(item: unknown): item is Workspace {
   return typeof item === 'object' && item !== null && 'type' in item && item.type === 'workspace'
@@ -114,6 +113,7 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
   private credentialsStore = new CredentialsStore()
 
   private regionsCache: Region[] = []
+  private workspacesCache = new Map<WorkspaceId, Workspace>()
   private projectsCache = new Map<WorkspaceId, Map<ProjectId, Project>>()
   private remoteDatabasesCache = new Map<string, Map<RemoteDatabaseId, RemoteDatabase>>()
 
@@ -181,6 +181,7 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
     void this.credentialsStore.reloadCredentialsFromDisk()
     // Wipe caches
     this.regionsCache = []
+    this.workspacesCache = new Map()
     this.projectsCache = new Map()
     this.remoteDatabasesCache = new Map()
     // Trigger full tree view refresh which will fetch fresh data on demand due to cache misses
@@ -214,30 +215,60 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
   }
 
   async getWorkspaces(): Promise<Workspace[]> {
+    if (this.workspacesCache.size > 0) return Array.from(this.workspacesCache.values())
+
     const credentials = await this.credentialsStore.getCredentials()
-    return credentials.map((cred) => ({
-      type: 'workspace',
-      id: cred.workspaceId,
-      name: `Personal Workspace ${cred.workspaceId}`, // TODO: pending /me endpoint api
-      token: cred.token,
-    }))
+    const results = await Promise.allSettled(
+      credentials.map(async (cred) => {
+        const client = await this.getClient(cred.workspaceId)
+        const response = await client.GET('/workspaces')
+        this.checkResponseOrThrow(cred.workspaceId, response)
+        const workspace: Workspace = {
+          type: 'workspace',
+          id: cred.workspaceId,
+          name: response.data.data[0].displayName,
+        }
+        this.workspacesCache.set(workspace.id, workspace)
+        return workspace
+      }),
+    )
+    return results.flatMap((r) => (r.status === 'fulfilled' ? [r.value] : []))
   }
 
   async addWorkspace({ token, refreshToken }: { token: string; refreshToken: string }): Promise<void> {
-    const fakeId = token.substring(0, 8)
-    await this.credentialsStore.storeCredentials({
-      userId: 'prisma', // TODO: pending /me endpoint api
-      workspaceId: fakeId,
-      token,
-      refreshToken,
+    const client = createManagementAPIClient(token, () => {
+      throw new Error('Received token has to be instantly refreshed. Something is wrong.')
     })
+    const response = await client.GET('/workspaces')
+
+    if (response.error) throw new Error(`Failed to retrieve workspace information.`)
+
+    const workspaces = response.data.data
+
+    if (workspaces.length === 0) throw new Error(`Received token does not grant access to any workspaces.`)
+
+    await Promise.all(
+      workspaces.map(async ({ id, displayName }) => {
+        await this.credentialsStore.storeCredentials({
+          workspaceId: id,
+          token,
+          refreshToken,
+        })
+        this.workspacesCache.set(id, {
+          type: 'workspace',
+          id,
+          name: displayName,
+        })
+      }),
+    )
+
     this.refreshEventEmitter.fire()
-    return Promise.resolve()
   }
 
   async removeWorkspace({ workspaceId }: { workspaceId: string }): Promise<void> {
     this.clients.delete(workspaceId)
     await this.connectionStringStorage.removeConnectionString({ workspaceId })
+    this.workspacesCache.delete(workspaceId)
     await this.credentialsStore.deleteCredentials(workspaceId)
     this.refreshEventEmitter.fire()
     return Promise.resolve()
