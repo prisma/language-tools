@@ -11,11 +11,11 @@ export const handleCommandError = async <T>(cmdTitle: string, cmd: () => Promise
     return await cmd()
   } catch (error) {
     if (error instanceof CommandAbortError) {
-      void window.showInformationMessage(`${cmdTitle} aborted:\n${error.message}`)
+      void window.showInformationMessage(`${cmdTitle} aborted: ${error.message}`)
     } else if (error instanceof Error) {
-      void window.showErrorMessage(`${cmdTitle} failed:\n${error.message}`)
+      void window.showErrorMessage(`${cmdTitle} failed: ${error.message}`)
     } else {
-      void window.showErrorMessage(`${cmdTitle}:\nAn unknown error occurred`)
+      void window.showErrorMessage(`${cmdTitle} failed: An unknown error occurred`)
     }
     return null
   }
