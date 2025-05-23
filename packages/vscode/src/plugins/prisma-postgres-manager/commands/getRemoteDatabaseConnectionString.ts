@@ -34,7 +34,7 @@ export const getRemoteDatabaseConnectionString = async (ppgRepository: PrismaPos
   const createdConnectionString = await window.withProgress(
     {
       location: ProgressLocation.Notification,
-      title: `Creating connection string for database '${args.name}'...`,
+      title: `Creating connection string...`,
     },
     () =>
       ppgRepository.createRemoteDatabaseConnectionString({

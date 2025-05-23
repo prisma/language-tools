@@ -17,10 +17,10 @@ export const deleteProject = async (ppgRepository: PrismaPostgresRepository, arg
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
-      title: `Deleting project '${args.name}'...`,
+      title: `Deleting project...`,
     },
     () => ppgRepository.deleteProject({ workspaceId: args.workspaceId, id: args.id }),
   )
 
-  void window.showInformationMessage(`Project '${args.name}' deleted`)
+  void window.showInformationMessage(`Project deleted`)
 }

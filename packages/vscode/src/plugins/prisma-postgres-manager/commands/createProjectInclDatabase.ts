@@ -27,7 +27,7 @@ export const createProjectInclDatabase = async (ppgRepository: PrismaPostgresRep
   const result = await window.withProgress(
     {
       location: ProgressLocation.Notification,
-      title: `Creating project with database in ${region.name}...`,
+      title: `Creating project with database...`,
     },
     () => ppgRepository.createProject({ workspaceId, name, region: region.id }),
   )
@@ -38,7 +38,7 @@ export const createProjectInclDatabase = async (ppgRepository: PrismaPostgresRep
       type: 'databaseCreated',
     })
   } else {
-    void window.showInformationMessage(`Project ${name} created`)
+    void window.showInformationMessage(`Project created`)
   }
 
   return result

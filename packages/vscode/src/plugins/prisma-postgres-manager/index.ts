@@ -59,9 +59,7 @@ export default {
         await handleCommandError('Create Remote Database', () => createRemoteDatabase(ppgRepository, args))
       }),
       commands.registerCommand('prisma.getRemoteDatabaseConnectionString', async (args: unknown) => {
-        await handleCommandError('Get Remote Database Connection String', () =>
-          getRemoteDatabaseConnectionString(ppgRepository, args),
-        )
+        await handleCommandError('Get Connection String', () => getRemoteDatabaseConnectionString(ppgRepository, args))
       }),
       commands.registerCommand('prisma.openRemoteDatabaseInPrismaConsole', async (args: unknown) => {
         if (isRemoteDatabase(args)) {
@@ -76,7 +74,7 @@ export default {
         await handleCommandError('Delete Remote Database', () => deleteRemoteDatabase(ppgRepository, args))
       }),
       commands.registerCommand('prisma.studio.launchForDatabase', async (args: unknown) => {
-        await handleCommandError('Launch Studio for Database', () => launchStudio({ ppgRepository, args, context }))
+        await handleCommandError('Launch Studio', () => launchStudio({ ppgRepository, args, context }))
       }),
     )
   },

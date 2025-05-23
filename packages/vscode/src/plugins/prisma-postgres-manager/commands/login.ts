@@ -37,9 +37,9 @@ export const handleAuthCallback = async ({
       },
       () => ppgRepository.addWorkspace({ token: result.token, refreshToken: result.refreshToken }),
     )
-    void window.showInformationMessage('Login to Prisma successful!')
+    void window.showInformationMessage('Workspace connected!')
   } catch (error) {
     console.error(error)
-    void window.showErrorMessage('Login to Prisma failed! Please try again.')
+    void window.showErrorMessage('Login to Workspace failed! Please try again.')
   }
 }

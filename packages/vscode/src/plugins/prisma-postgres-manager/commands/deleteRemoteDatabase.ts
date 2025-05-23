@@ -17,7 +17,7 @@ export const deleteRemoteDatabase = async (ppgRepository: PrismaPostgresReposito
   await window.withProgress(
     {
       location: ProgressLocation.Notification,
-      title: `Deleting database '${args.name}'...`,
+      title: `Deleting database...`,
     },
     () =>
       ppgRepository.deleteRemoteDatabase({
@@ -27,5 +27,5 @@ export const deleteRemoteDatabase = async (ppgRepository: PrismaPostgresReposito
       }),
   )
 
-  void window.showInformationMessage(`Database '${args.name}' deleted`)
+  void window.showInformationMessage(`Database deleted`)
 }
