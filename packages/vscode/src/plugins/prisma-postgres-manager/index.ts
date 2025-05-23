@@ -1,4 +1,4 @@
-import { ExtensionContext, window, commands, env, Uri } from 'vscode'
+import { ExtensionContext, window, commands, env, Uri, lm } from 'vscode'
 import { PrismaPostgresTreeDataProvider } from './PrismaPostgresTreeDataProvider'
 import { createRemoteDatabase } from './commands/createRemoteDatabase'
 import { isProject, isRemoteDatabase, PrismaPostgresApiRepository } from './PrismaPostgresRepository'
@@ -12,6 +12,8 @@ import { Auth } from './management-api/auth'
 import { ConnectionStringStorage } from './ConnectionStringStorage'
 import { getRemoteDatabaseConnectionString } from './commands/getRemoteDatabaseConnectionString'
 import { launchStudio } from './commands/launchStudio'
+import { PDPAuthLoginTool } from './ai-tools/PDPAuthLoginTool'
+import { PDPCreatePPGTool } from './ai-tools/PDPCreatePPGTool'
 
 export default {
   name: 'Prisma Postgres',
@@ -79,6 +81,9 @@ export default {
         await handleCommandError('Launch Studio for Database', () => launchStudio({ ppgRepository, args, context }))
       }),
     )
+
+    context.subscriptions.push(lm.registerTool('prisma-platform-login', new PDPAuthLoginTool()))
+    context.subscriptions.push(lm.registerTool('prisma-postgres-create-database', new PDPCreatePPGTool(ppgRepository)))
   },
   deactivate() {},
 }
