@@ -191,19 +191,19 @@
       },
       {
         "command": "prisma.refresh",
-        "title": "Refresh Database List",
+        "title": "Refresh Prisma Postgres List",
         "icon": "$(refresh)",
         "category": "Prisma"
       },
       {
         "command": "prisma.login",
-        "title": "Login to Workspace",
+        "title": "Login to Prisma Platform Workspace",
         "icon": "$(sign-in)",
         "category": "Prisma"
       },
       {
         "command": "prisma.logout",
-        "title": "Logout from Workspace",
+        "title": "Logout from Prisma Platform Workspace",
         "icon": "$(sign-out)",
         "category": "Prisma"
       },
@@ -215,7 +215,7 @@
       },
       {
         "command": "prisma.deleteProject",
-        "title": "Delete Project",
+        "title": "Delete Prisma Postgres Project",
         "icon": "$(trash)",
         "category": "Prisma"
       },
@@ -239,13 +239,13 @@
       },
       {
         "command": "prisma.openRemoteDatabaseInPrismaConsole",
-        "title": "Open in Prisma Console",
+        "title": "Open Remote Prisma Postgres Database in Prisma Console",
         "icon": "$(link-external)",
         "category": "Prisma"
       },
       {
         "command": "prisma.deleteRemoteDatabase",
-        "title": "Delete Database",
+        "title": "Delete Remote Prisma Postgres Database",
         "icon": "$(trash)",
         "category": "Prisma"
       },
@@ -371,30 +371,6 @@
         }
       },
       {
-        "name": "prisma-platform-auth-status",
-        "tags": [
-          "prisma",
-          "database",
-          "ppg",
-          "postgres"
-        ],
-        "toolReferenceName": "prisma-platform-auth-status",
-        "displayName": "Prisma Platform Auth Status",
-        "modelDescription": "Prisma Platform Auth Status provides information about the currently logged in user. If the user is not logged in, you should instruct them to do so by using the `prisma-platform-login` tool and then re-running this command to verify. This login is required to e.g. create and manage Prisma Postgres databases.",
-        "userDescription": "Provides information about the currently logged in user on the Prisma Platform to use e.g. Prisma Postgres.",
-        "canBeReferencedInPrompt": true,
-        "icon": "./prisma_icon.svg",
-        "inputSchema": {
-          "type": "object",
-          "properties": {
-            "projectCwd": {
-              "type": "string",
-              "description": "The current working directory of the user's project. This should be the top level directory of the project but in a monorepo setup could also be a specific package or app directory."
-            }
-          }
-        }
-      },
-      {
         "name": "prisma-platform-login",
         "tags": [
           "prisma",
@@ -407,16 +383,7 @@
         "modelDescription": "Login or create an account in order to be able to use Prisma Postgres.",
         "userDescription": "Login or create an account in order to be able to use Prisma Postgres.",
         "canBeReferencedInPrompt": true,
-        "icon": "./prisma_icon.svg",
-        "inputSchema": {
-          "type": "object",
-          "properties": {
-            "projectCwd": {
-              "type": "string",
-              "description": "The current working directory of the user's project. This should be the top level directory of the project but in a monorepo setup could also be a specific package or app directory."
-            }
-          }
-        }
+        "icon": "./prisma_icon.svg"
       },
       {
         "name": "prisma-postgres-create-database",
@@ -428,26 +395,29 @@
         ],
         "toolReferenceName": "prisma-postgres-create-database",
         "displayName": "Prisma Postgres Create Database",
-        "modelDescription": "Create a new online Prisma Postgres database.\nSpecify a name that makes sense to the user - maybe the name of the project they are working on.\nSpecify a region that makes sense for the user. Pick between these three options: us-east-1, eu-west-3, ap-northeast-1. If you are unsure, pick us-east-1.\nProvide the current working directory of the users project. This should be the top level directory of the project.\nIf the response indicates that you have reached the workspace plan limit, you should instruct the user to do one of these things:\nIf they want to connect to an existing database, they should go to console.prisma.io and copy the connection string\nIf they want to upgrade their plan, they should go to console.prisma.io and upgrade their plan in order to be able to create more databases\nIf they want to delete a database they no longer need, they should go to console.prisma.io and delete the database project.\nIf the user is not logged in, you should suggest them to login via the `prisma-platform-login` tool.",
+        "modelDescription": "Create a new online Prisma Postgres database.\nSpecify a name that makes sense to the user - maybe the name of the project they are working on.\nSpecify a region that makes sense for the user. Pick between these options: us-east-1, eu-west-3, ap-northeast-1, ap-southeast-1 or call the tool without a region to get an up-to-date list of available regions. If you are unsure, pick us-east-1.\n\nIf the response indicates that you have reached the workspace plan limit, you should instruct the user to do one of these things:\nIf they want to connect to an existing database, they should go to console.prisma.io and copy the connection string\nIf they want to upgrade their plan, they should go to console.prisma.io and upgrade their plan in order to be able to create more databases\nIf they want to delete a database they no longer need, they should go to console.prisma.io and delete the database project.\nIf the user is not logged in, you should suggest them to login via the `prisma-platform-login` tool.",
         "userDescription": "Create a new online Prisma Postgres database.",
         "canBeReferencedInPrompt": true,
         "icon": "./prisma_icon.svg",
         "inputSchema": {
           "type": "object",
           "properties": {
-            "projectCwd": {
+            "workspaceId": {
               "type": "string",
-              "description": "The current working directory of the user's project. This should be the top level directory of the project but in a monorepo setup could also be a specific package or app directory."
+              "description": "The id of workspace in which the new database shall be created. You can leave this blank if you don't have a prisma workspace id. The tool will prompt you provide you with a list of workspaces should the user have multiple workspaces."
             },
             "name": {
               "type": "string",
               "description": "The name for the new database."
             },
-            "region": {
+            "regionId": {
               "type": "string",
-              "description": "The region for the new database. Pick between these three options: us-east-1, eu-west-3, ap-northeast-1"
+              "description": "The region for the new database. If you do not specify a region the tool will return a list of available regions and prompt you to specify one of them."
             }
-          }
+          },
+          "required": [
+            "name"
+          ]
         }
       }
     ],
@@ -493,6 +463,10 @@
         },
         {
           "command": "prisma.studio.launchForDatabase",
+          "when": "false"
+        },
+        {
+          "command": "prisma.studio.getRemoteDatabaseConnectionString",
           "when": "false"
         }
       ],
