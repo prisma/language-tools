@@ -191,19 +191,19 @@
       },
       {
         "command": "prisma.refresh",
-        "title": "Refresh Prisma Postgres List",
+        "title": "Refresh Database List",
         "icon": "$(refresh)",
         "category": "Prisma"
       },
       {
         "command": "prisma.login",
-        "title": "Login to Prisma Platform Workspace",
+        "title": "Login to Workspace",
         "icon": "$(sign-in)",
         "category": "Prisma"
       },
       {
         "command": "prisma.logout",
-        "title": "Logout from Prisma Platform Workspace",
+        "title": "Logout from Workspace",
         "icon": "$(sign-out)",
         "category": "Prisma"
       },
@@ -215,7 +215,7 @@
       },
       {
         "command": "prisma.deleteProject",
-        "title": "Delete Prisma Postgres Project",
+        "title": "Delete Project",
         "icon": "$(trash)",
         "category": "Prisma"
       },
@@ -239,13 +239,13 @@
       },
       {
         "command": "prisma.openRemoteDatabaseInPrismaConsole",
-        "title": "Open Remote Prisma Postgres Database in Prisma Console",
+        "title": "Open in Prisma Console",
         "icon": "$(link-external)",
         "category": "Prisma"
       },
       {
         "command": "prisma.deleteRemoteDatabase",
-        "title": "Delete Remote Prisma Postgres Database",
+        "title": "Delete Database",
         "icon": "$(trash)",
         "category": "Prisma"
       },
