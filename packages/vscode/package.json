@@ -260,6 +260,12 @@
         "title": "Launch Prisma Studio",
         "category": "Prisma",
         "icon": "$(link-external)"
+      },
+      {
+        "command": "prisma.studio.getRemoteDatabaseConnectionString",
+        "title": "Get Remote Database Connection String",
+        "icon": "$(link-external)",
+        "category": "Prisma"
       }
     ],
     "languageModelTools": [
