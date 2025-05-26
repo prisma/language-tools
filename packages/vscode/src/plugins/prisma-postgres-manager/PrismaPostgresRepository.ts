@@ -4,6 +4,7 @@ import { CredentialsStore } from '@prisma/credentials-store'
 import type { ConnectionStringStorage } from './ConnectionStringStorage'
 import { Auth } from './management-api/auth'
 import type { paths } from './management-api/api.d'
+import { z } from 'zod'
 
 export type RegionId = NonNullable<
   NonNullable<paths['/projects/{id}/databases']['post']['requestBody']>['content']['application/json']['region']
@@ -159,22 +160,24 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
 
     if (response.response.status === 401) {
       void this.removeWorkspace({ workspaceId })
-      throw new Error(`Credentials for workspace expired. Please login again.`)
+      throw new Error(`Session expired. Please sign in to continue.`)
     }
 
-    const error = response.error
-    if (typeof error === 'object' && error !== null) {
-      if ('error' in error && typeof error === 'object' && error !== null) {
-        if ('message' in error && typeof error.message === 'string') {
-          throw new Error(`API Error: ${error.message}`)
-        }
-      }
-      if ('errorDescription' in error && typeof error.errorDescription === 'string') {
-        throw new Error(`API Error: ${error.errorDescription}`)
-      }
-    }
+    const error = z
+      .object({
+        message: z.string().optional(),
+        errorDescription: z.string().optional(),
+        error: z
+          .object({
+            message: z.string().optional(),
+          })
+          .optional(),
+      })
+      .safeParse(response.error)
 
-    throw new Error(`Unknown API error occurred. Status Code: ${response.response.status}.`)
+    const errorMessage = error.data?.message || error.data?.error?.message || error.data?.errorDescription
+    if (!errorMessage) throw new Error(`Unknown API error occurred. Status Code: ${response.response.status}.`)
+    throw new Error(errorMessage)
   }
 
   triggerRefresh() {
