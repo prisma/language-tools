@@ -42,7 +42,7 @@ export const launchStudio = async ({
 
 const getConnectionString = async (ppgRepository: PrismaPostgresRepository, database: LaunchArg) => {
   if (database.type === 'local') {
-    const localDatabases = ppgRepository.getLocalDatabases()
+    const localDatabases = await ppgRepository.getLocalDatabases()
 
     return localDatabases.find((db) => db.id === database.id)!.url
   }

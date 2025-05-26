@@ -6,7 +6,7 @@ import { Auth } from './management-api/auth'
 import type { paths } from './management-api/api.d'
 import { z } from 'zod'
 import envPaths from 'env-paths'
-import * as fs from 'fs'
+import * as fs from 'fs/promises'
 import * as path from 'path'
 import * as process from 'process'
 
@@ -142,7 +142,7 @@ export interface PrismaPostgresRepository {
     databaseId: string
   }): Promise<string>
 
-  getLocalDatabases(): LocalDatabase[]
+  getLocalDatabases(): Promise<LocalDatabase[]>
 }
 
 export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
@@ -631,37 +631,43 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
     )
   }
 
-  getLocalDatabases() {
+  async getLocalDatabases(): Promise<LocalDatabase[]> {
     const dataPath = PPG_DEV_GLOBAL_ROOT.data
 
     try {
-      if (!fs.existsSync(dataPath)) {
+      try {
+        await fs.access(dataPath)
+      } catch (e) {
         return []
       }
 
-      const items = fs.readdirSync(dataPath)
+      const items = await fs.readdir(dataPath)
 
-      const folders = items.filter((item) => {
+      const folderPromises = items.map(async (item) => {
         const itemPath = path.join(dataPath, item)
-        return fs.statSync(itemPath).isDirectory()
+        const stat = await fs.stat(itemPath)
+        return stat.isDirectory() ? item : null
       })
 
-      const configs: { type: 'localDatabase'; name: string; id: string; url: string }[] = []
+      const folders = (await Promise.all(folderPromises)).filter((folder): folder is string => folder !== null)
+
+      const configs: LocalDatabase[] = []
       for (const folder of folders) {
         const serverJsonPath = path.join(dataPath, folder, 'server.json')
 
-        if (fs.existsSync(serverJsonPath)) {
-          try {
-            const serverJsonContent = fs.readFileSync(serverJsonPath, 'utf-8')
-            const { name, exports, pid } = JSON.parse(serverJsonContent) as PpgDevServerConfig
+        try {
+          await fs.access(serverJsonPath)
+          const serverJsonContent = await fs.readFile(serverJsonPath, 'utf-8')
+          const { name, exports, pid } = JSON.parse(serverJsonContent) as PpgDevServerConfig
 
-            try {
-              process.kill(pid, 0) // does not kill but throws if pid does not exist
-              configs.push({ type: 'localDatabase', name, id: name, url: exports.ppg.url })
-            } catch (e) {}
-          } catch (error) {
-            console.warn(`Failed to parse server.json in folder ${folder}:`, error)
+          try {
+            process.kill(pid, 0) // does not kill but throws if pid does not exist
+            configs.push({ type: 'localDatabase', name, id: name, url: exports.ppg.url })
+          } catch (e) {
+            // Process with pid does not exist, so we don't add it
           }
+        } catch (error) {
+          console.warn(`Failed to parse server.json in folder ${folder}:`, error)
         }
       }
 
