@@ -3,21 +3,24 @@ import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
 import { z } from 'zod'
 import { launch } from '../../prisma-studio/commands/launch'
 
-const LaunchArgSchema = z.union([
-  z.object({
-    type: z.literal('local'),
-  }),
-  z.object({
-    type: z.literal('remote'),
-    workspaceId: z.string(),
-    projectId: z.string(),
-    databaseId: z.string(),
-  }),
-])
-type LaunchArg = z.infer<typeof LaunchArgSchema>
+export const LaunchArgLocalSchema = z.object({
+  type: z.literal('local'),
+  id: z.string(),
+  name: z.string(),
+  url: z.string(),
+})
+export type LaunchArgLocal = z.infer<typeof LaunchArgLocalSchema>
 
-const DEFAULT_LOCAL_CONNECTION_STRING =
-  'prisma+postgres://localhost:51213/?api_key=eyJkYXRhYmFzZVVybCI6InBvc3RncmVzOi8vcG9zdGdyZXM6cG9zdGdyZXNAbG9jYWxob3N0OjUxMjE0L3Bvc3RncmVzP2Nvbm5lY3Rpb25fbGltaXQ9MSZjb25uZWN0X3RpbWVvdXQ9MCZtYXhfaWRsZV9jb25uZWN0aW9uX2xpZmV0aW1lPTAmcG9vbF90aW1lb3V0PTAmc29ja2V0X3RpbWVvdXQ9MCZzc2xtb2RlPWRpc2FibGUiLCJzaGFkb3dEYXRhYmFzZVVybCI6InBvc3RncmVzOi8vcG9zdGdyZXM6cG9zdGdyZXNAbG9jYWxob3N0OjUxMjE1L3Bvc3RncmVzP2Nvbm5lY3Rpb25fbGltaXQ9MSZjb25uZWN0X3RpbWVvdXQ9MCZtYXhfaWRsZV9jb25uZWN0aW9uX2xpZmV0aW1lPTAmcG9vbF90aW1lb3V0PTAmc29ja2V0X3RpbWVvdXQ9MCZzc2xtb2RlPWRpc2FibGUifQ'
+export const LaunchArgRemoteSchema = z.object({
+  type: z.literal('remote'),
+  workspaceId: z.string(),
+  projectId: z.string(),
+  databaseId: z.string(),
+})
+export type LaunchArgRemote = z.infer<typeof LaunchArgRemoteSchema>
+
+const LaunchArgSchema = z.union([LaunchArgLocalSchema, LaunchArgRemoteSchema])
+type LaunchArg = z.infer<typeof LaunchArgSchema>
 
 export const launchStudio = async ({
   ppgRepository,
@@ -38,7 +41,11 @@ export const launchStudio = async ({
 }
 
 const getConnectionString = async (ppgRepository: PrismaPostgresRepository, database: LaunchArg) => {
-  if (database.type === 'local') return DEFAULT_LOCAL_CONNECTION_STRING
+  if (database.type === 'local') {
+    const localDatabases = await ppgRepository.getLocalDatabases()
+
+    return localDatabases.find((db) => db.id === database.id)!.url
+  }
 
   const connectionString = await ppgRepository.getStoredRemoteDatabaseConnectionString(database)
 
