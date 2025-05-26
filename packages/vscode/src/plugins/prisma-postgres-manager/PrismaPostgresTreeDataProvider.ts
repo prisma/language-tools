@@ -184,7 +184,7 @@ class PrismaRemoteDatabaseItem extends vscode.TreeItem {
         workspaceId: this.workspaceId,
         projectId: this.projectId,
         databaseId: this.databaseId,
-      } as LaunchArgRemote,
+      } satisfies LaunchArgRemote,
     ],
   }
 }
