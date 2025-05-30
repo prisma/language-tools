@@ -1,8 +1,8 @@
-export function getAppRootHtml(args: { serverUrl: string }): string {
-  const { serverUrl } = args
+export function getAppRootHtml(args: { serverUrl: string; colorScheme: string }): string {
+  const { serverUrl, colorScheme } = args
 
   return `<!DOCTYPE html>
-<html lang="en" style="height: 100%;">
+<html lang="en" class="${colorScheme}" style="height: 100%; color-scheme: ${colorScheme};">
 <head>
   <meta charset="UTF-8" />
   <link rel="stylesheet" href="./dist/ui/index.css">
