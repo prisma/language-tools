@@ -1,9 +1,20 @@
 <h2 align="center">Prisma VS Code Extension</h2>
 <div align="center">
-  Adds syntax highlighting, linting, code completion, formatting, jump-to-definition and more for <a href="https://www.prisma.io/docs/concepts/components/prisma-schema">Prisma Schema</a> files.
+  Adds a database management UI, syntax highlighting, linting, code completion, formatting, jump-to-definition and more for <a href="https://www.prisma.io/docs/concepts/components/prisma-schema">Prisma Schema</a> files.
 </div>
 
 ## Features
+
+### Visual database management UI
+
+The Prisma VS Code extension features a database managent UI that you can access via the **Prisma logo** in the sidebar. It allows to manage Prisma Postgres instances:
+
+- Authenticate with the [Prisma Console](https://console.prisma.io)
+- Create and delete Prisma Postgres instances (remote & local)
+- View and edit data via an embedded Prisma Studio
+- Visualize your database schema
+
+### Editor support
 
 - Syntax highlighting of `schema.prisma`
 - Linting
@@ -42,7 +53,15 @@
 ## Preview
 
 <details>
-  <summary>Syntax-Highlighting</summary>
+  <summary>Database management UI</summary>
+
+The database management UI gives you a visual way to perform various database workflows.
+![Preview Schema](tbd)
+
+</details>
+
+<details>
+  <summary>Syntax highlighting</summary>
 
 Syntax highlighting eases visual comprehension of the Prisma schema.
 ![Preview Schema](https://user-images.githubusercontent.com/1328733/147264843-fc32c2aa-7490-4e49-9478-abc16cbd0682.png)
