@@ -1,6 +1,6 @@
 <h2 align="center">Prisma VS Code Extension</h2>
 <div align="center">
-  Adds a database management UI, syntax highlighting, linting, code completion, formatting, jump-to-definition and more for <a href="https://www.prisma.io/docs/concepts/components/prisma-schema">Prisma Schema</a> files.
+  Adds a database management UI, syntax highlighting, linting, code completion, formatting, jump-to-definition and more.
 </div>
 
 ## Features
