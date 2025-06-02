@@ -56,7 +56,7 @@ The Prisma VS Code extension features a database managent UI that you can access
   <summary>Database management UI</summary>
 
 The database management UI gives you a visual way to perform various database workflows.
-![Preview Schema](tbd)
+![Preview Schema](https://cdn.sanity.io/images/p2zxqf70/production/f7a4f862f7f12d96c98eafef1b6bf0f2d0cac943-3740x1964.png)
 
 </details>
 
