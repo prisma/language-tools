@@ -8,7 +8,7 @@ export const LaunchArgLocalSchema = z.object({
   id: z.string(),
   name: z.string(),
   url: z.string(),
-  pid: z.number()
+  pid: z.number(),
 })
 export type LaunchArgLocal = z.infer<typeof LaunchArgLocalSchema>
 
@@ -34,7 +34,7 @@ export const launchStudio = async ({
 }) => {
   const database = LaunchArgSchema.parse(args)
 
-  if (database.type === "local") {
+  if (database.type === 'local') {
     await ppgRepository.startLocalDatabase(database)
   }
 

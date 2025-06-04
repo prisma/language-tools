@@ -3,7 +3,7 @@ import z from 'zod'
 
 export const StartLocalDatabaseArgsSchema = z.object({
   name: z.string(),
-  pid: z.number()
+  pid: z.number(),
 })
 
 export type StartLocalDatabaseArgs = z.infer<typeof StartLocalDatabaseArgsSchema>

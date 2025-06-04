@@ -659,7 +659,7 @@ export class PrismaPostgresRepository {
     await this.refreshLocalDatabases()
   }
 
-  async startLocalDatabase(args: { pid: number, name: string }): Promise<void> {
+  async startLocalDatabase(args: { pid: number; name: string }): Promise<void> {
     const { pid } = args
 
     if (isPidRunning(pid) === false) {
@@ -667,7 +667,7 @@ export class PrismaPostgresRepository {
     }
   }
 
-  async deleteLocalDatabase(args: { pid: number, name: string, url: string }): Promise<void> {
+  async deleteLocalDatabase(args: { pid: number; name: string; url: string }): Promise<void> {
     const { pid, name, url } = args
     const databasePath = path.join(PPG_DEV_GLOBAL_ROOT.data, name)
 

@@ -98,7 +98,7 @@ export default {
       }),
       commands.registerCommand('prisma.copyLocalDatabaseURL', async (args: unknown) => {
         await handleCommandError('Copy Local Database URL', () => copyLocalDatabaseUrl(args))
-      })
+      }),
     )
   },
   deactivate() {},

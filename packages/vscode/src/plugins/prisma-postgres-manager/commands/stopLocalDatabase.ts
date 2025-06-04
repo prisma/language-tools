@@ -3,7 +3,7 @@ import z from 'zod'
 
 export const StopLocalDatabaseArgsSchema = z.object({
   pid: z.number(),
-  url: z.string()
+  url: z.string(),
 })
 
 export type StopLocalDatabaseArgs = z.infer<typeof StopLocalDatabaseArgsSchema>

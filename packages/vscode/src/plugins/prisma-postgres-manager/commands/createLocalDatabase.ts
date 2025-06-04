@@ -5,8 +5,8 @@ export async function createLocalDatabase(ppgRepository: PrismaPostgresRepositor
   const name = await window.showInputBox({
     prompt: 'Enter your local database name',
     placeHolder: 'e.g., MyAwesomeProject',
-    value: "default"
+    value: 'default',
   })
 
-  await ppgRepository.createLocalDatabase({ name: name ?? "default" })
+  await ppgRepository.createLocalDatabase({ name: name ?? 'default' })
 }
