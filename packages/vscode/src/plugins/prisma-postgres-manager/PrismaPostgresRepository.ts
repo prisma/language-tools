@@ -1,4 +1,4 @@
-import { EventEmitter } from 'vscode'
+import { EventEmitter, ExtensionContext, Uri } from 'vscode'
 import { createManagementAPIClient } from './management-api/client'
 import { CredentialsStore } from '@prisma/credentials-store'
 import type { ConnectionStringStorage } from './ConnectionStringStorage'
@@ -8,7 +8,11 @@ import { z } from 'zod'
 import envPaths from 'env-paths'
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import * as process from 'process'
+import { fork } from 'child_process'
+import { waitForPortBorrowed } from './utils/waitForPortBorrowed'
+import { waitForPortAvailable } from './utils/waitForPortAvailable'
+import { getUniquePorts } from './utils/getUniquePorts'
+import { isPidRunning } from './utils/isPidRunning'
 
 const PPG_DEV_GLOBAL_ROOT = envPaths('prisma-dev')
 
@@ -60,12 +64,14 @@ export type LocalDatabase = {
   id: string
   name: string
   url: string
+  pid: number
+  running: boolean
 }
 export function isLocalDatabase(item: unknown): item is LocalDatabase {
   return typeof item === 'object' && item !== null && 'type' in item && item.type === 'localDatabase'
 }
 
-export type NewlyCreatedDatabase = RemoteDatabase & { connectionString: string }
+export type NewRemoteDatabase = RemoteDatabase & { connectionString: string }
 
 export type PrismaPostgresItem =
   | { type: 'localRoot' }
@@ -100,52 +106,7 @@ type PpgDevServerConfig = {
   exports: PpgDevServerExportConfig
 }
 
-export interface PrismaPostgresRepository {
-  readonly refreshEventEmitter: EventEmitter<void | PrismaPostgresItem>
-
-  triggerRefresh(): void
-
-  getRegions(): Promise<Region[]>
-
-  getWorkspaces(): Promise<Workspace[]>
-  addWorkspace(params: { token: string; refreshToken: string }): Promise<void>
-  removeWorkspace(params: { workspaceId: string }): Promise<void>
-
-  getProjects(params: { workspaceId: string }, options?: { forceCacheRefresh: boolean }): Promise<Project[]>
-  createProject(params: {
-    workspaceId: string
-    name: string
-    region: string
-  }): Promise<{ project: Project; database?: NewlyCreatedDatabase }>
-  deleteProject(params: { workspaceId: string; id: string } | Project): Promise<void>
-
-  getRemoteDatabases(
-    params: { workspaceId: string; projectId: string },
-    options?: { forceCacheRefresh: boolean },
-  ): Promise<RemoteDatabase[]>
-  createRemoteDatabase(params: {
-    workspaceId: string
-    projectId: string
-    name: string
-    region: string
-  }): Promise<NewlyCreatedDatabase>
-  deleteRemoteDatabase(params: { workspaceId: string; projectId: string; id: string } | RemoteDatabase): Promise<void>
-
-  getStoredRemoteDatabaseConnectionString(params: {
-    workspaceId: string
-    projectId: string
-    databaseId: string
-  }): Promise<string | undefined>
-  createRemoteDatabaseConnectionString(params: {
-    workspaceId: string
-    projectId: string
-    databaseId: string
-  }): Promise<string>
-
-  getLocalDatabases(): Promise<LocalDatabase[]>
-}
-
-export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
+export class PrismaPostgresRepository {
   private clients: Map<string, ReturnType<typeof createManagementAPIClient>> = new Map()
   private credentialsStore = new CredentialsStore()
 
@@ -159,6 +120,7 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
   constructor(
     private readonly auth: Auth,
     private readonly connectionStringStorage: ConnectionStringStorage,
+    private readonly context: ExtensionContext,
   ) {}
 
   private async getClient(workspaceId: string) {
@@ -364,7 +326,7 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
     workspaceId: string
     name: string
     region: string
-  }): Promise<{ project: Project; database?: NewlyCreatedDatabase }> {
+  }): Promise<{ project: Project; database?: NewRemoteDatabase }> {
     this.ensureValidRegion(region)
 
     const client = await this.getClient(workspaceId)
@@ -547,7 +509,7 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
     projectId: string
     name: string
     region: string
-  }): Promise<NewlyCreatedDatabase> {
+  }): Promise<NewRemoteDatabase> {
     this.ensureValidRegion(region)
 
     const client = await this.getClient(workspaceId)
@@ -631,6 +593,10 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
     )
   }
 
+  private async refreshLocalDatabases() {
+    this.refreshEventEmitter.fire()
+  }
+
   async getLocalDatabases(): Promise<LocalDatabase[]> {
     const dataPath = PPG_DEV_GLOBAL_ROOT.data
 
@@ -659,13 +625,9 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
           await fs.access(serverJsonPath)
           const serverJsonContent = await fs.readFile(serverJsonPath, 'utf-8')
           const { name, exports, pid } = JSON.parse(serverJsonContent) as PpgDevServerConfig
+          const running = isPidRunning(pid)
 
-          try {
-            process.kill(pid, 0) // does not kill but throws if pid does not exist
-            configs.push({ type: 'localDatabase', name, id: name, url: exports.ppg.url })
-          } catch (e) {
-            // Process with pid does not exist, so we don't add it
-          }
+          configs.push({ type: 'localDatabase', name, id: name, url: exports.ppg.url, pid, running })
         } catch (error) {
           console.warn(`Failed to parse server.json in folder ${folder}:`, error)
         }
@@ -676,5 +638,56 @@ export class PrismaPostgresApiRepository implements PrismaPostgresRepository {
       console.error('Error reading PPG dev server config list:', error)
       return []
     }
+  }
+
+  async createLocalDatabase(args: { name: string }): Promise<void> {
+    const { name } = args
+    const [port, databasePort, shadowDatabasePort] = (await getUniquePorts(3)).map(String)
+    const ppgDevServerEntryPoint = Uri.joinPath(
+      this.context.extensionUri,
+      ...['dist', 'src', 'plugins', 'prisma-postgres-manager', 'utils', 'spawnPpgDevServer.js'],
+    )
+
+    const childProcess = fork(ppgDevServerEntryPoint.path, [name, port, databasePort, shadowDatabasePort])
+    childProcess.on('error', (error) => console.error(`[PPG Dev] Process (${name}) error for database:`, error))
+    childProcess.on('exit', (code, signal) => console.log(`[PPG Dev] Process (${name}) exited (${code}, ${signal})`))
+    childProcess.on('spawn', () => console.log(`[PPG Dev] Process (${name}) spawned successfully`))
+    childProcess.stdout?.on('data', (data) => console.log(`[PPG Child ${name}] ${data.toString().trim()}`))
+    childProcess.stderr?.on('data', (data) => console.error(`[PPG Child ${name}] ${data.toString().trim()}`))
+
+    await waitForPortBorrowed(+port)
+    await this.refreshLocalDatabases()
+  }
+
+  async startLocalDatabase(args: { pid: number, name: string }): Promise<void> {
+    const { pid } = args
+
+    if (isPidRunning(pid) === false) {
+      await this.createLocalDatabase(args)
+    }
+  }
+
+  async deleteLocalDatabase(args: { pid: number, name: string, url: string }): Promise<void> {
+    const { pid, name, url } = args
+    const databasePath = path.join(PPG_DEV_GLOBAL_ROOT.data, name)
+
+    try {
+      await this.stopLocalDatabase({ pid, url }).catch(() => {})
+      await fs.rm(databasePath, { recursive: true, force: true })
+      console.log(`Deleted local database folder: ${databasePath}`)
+    } catch (error) {
+      console.error(`Failed to delete local database folder: ${databasePath}`, error)
+    }
+
+    await this.refreshLocalDatabases()
+  }
+
+  async stopLocalDatabase(args: { pid: number; url: string }): Promise<void> {
+    const { pid, url } = args
+    const { port } = new URL(url)
+
+    process.kill(pid, 'SIGTERM')
+    await waitForPortAvailable(+port)
+    await this.refreshLocalDatabases()
   }
 }
