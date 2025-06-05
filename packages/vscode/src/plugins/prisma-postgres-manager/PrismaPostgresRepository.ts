@@ -81,30 +81,6 @@ export type PrismaPostgresItem =
   | RemoteDatabase
   | LocalDatabase
 
-// TODO: these types should come from the dev package
-type PpgDevServerExportConfig = {
-  accelerate: {
-    url: string
-  }
-  database: {
-    connectionString: string
-  }
-  ppg: {
-    url: string
-  }
-  shadowDatabase: {
-    connectionString: string
-  }
-}
-type PpgDevServerConfig = {
-  name: string
-  version: string
-  pid: number
-  port: number
-  databasePort: number
-  shadowDatabasePort: number
-  exports: PpgDevServerExportConfig
-}
 
 export class PrismaPostgresRepository {
   private clients: Map<string, ReturnType<typeof createManagementAPIClient>> = new Map()
@@ -598,49 +574,23 @@ export class PrismaPostgresRepository {
   }
 
   async getLocalDatabases(): Promise<LocalDatabase[]> {
-    const dataPath = PPG_DEV_GLOBAL_ROOT.data
+    const { ServerState } = await import("@prisma/dev/internal/state")
 
-    try {
-      try {
-        await fs.access(dataPath)
-      } catch (e) {
-        return []
+    const localDatabases = (await ServerState.scan()).map((state) => {
+      const { name, exports, pid, status } = state
+      const running = status === 'running'
+      const url = exports?.ppg.url
+
+      if (url !== undefined && pid !== undefined) {
+        return { type: 'localDatabase', pid, name, id: name, url, running } as const
       }
+    })
 
-      const items = await fs.readdir(dataPath)
-
-      const folderPromises = items.map(async (item) => {
-        const itemPath = path.join(dataPath, item)
-        const stat = await fs.stat(itemPath)
-        return stat.isDirectory() ? item : null
-      })
-
-      const folders = (await Promise.all(folderPromises)).filter((folder): folder is string => folder !== null)
-
-      const configs: LocalDatabase[] = []
-      for (const folder of folders) {
-        const serverJsonPath = path.join(dataPath, folder, 'server.json')
-
-        try {
-          await fs.access(serverJsonPath)
-          const serverJsonContent = await fs.readFile(serverJsonPath, 'utf-8')
-          const { name, exports, pid } = JSON.parse(serverJsonContent) as PpgDevServerConfig
-          const running = isPidRunning(pid)
-
-          configs.push({ type: 'localDatabase', name, id: name, url: exports.ppg.url, pid, running })
-        } catch (error) {
-          console.warn(`Failed to parse server.json in folder ${folder}:`, error)
-        }
-      }
-
-      return configs
-    } catch (error) {
-      console.error('Error reading PPG dev server config list:', error)
-      return []
-    }
+    return localDatabases.filter((db) => db !== undefined)
   }
 
   async createLocalDatabase(args: { name: string }): Promise<void> {
+    // TODO: once ppg dev has a daemon, this should be replaced
     const { name } = args
     const [port, databasePort, shadowDatabasePort] = (await getUniquePorts(3)).map(String)
     const ppgDevServerEntryPoint = Uri.joinPath(
