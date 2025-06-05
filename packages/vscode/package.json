@@ -506,6 +506,22 @@
         {
           "command": "prisma.studio.getRemoteDatabaseConnectionString",
           "when": "false"
+        },
+        {
+          "command": "prisma.stopLocalDatabase",
+          "when": "false"
+        },
+        {
+          "command": "prisma.startLocalDatabase",
+          "when": "false"
+        },
+        {
+          "command": "prisma.deleteLocalDatabase",
+          "when": "false"
+        },
+        {
+          "command": "prisma.copyLocalDatabaseURL",
+          "when": "false"
         }
       ],
       "view/title": [
