@@ -394,7 +394,7 @@
         ],
         "toolReferenceName": "prisma-studio",
         "displayName": "Prisma Studio",
-        "modelDescription": "Open Prisma Studio to view data in your database in a pleasing visual ui.\nUse this tool instead of running `prisma studio` on the CLI.\nProvide the current working directory of the users project. This should be the top level directory of the project but in a monorepo setup could also be a specific package or app directory.",
+        "modelDescription": "Open Prisma Studio to view data in your database in a pleasing visual ui.\nUse this tool instead of running `prisma studio` on the CLI.\nProvide the current working directory of the users project. This should be the top level directory of the project.",
         "userDescription": "Open Prisma Studio to view data in your database in a pleasing visual ui.",
         "canBeReferencedInPrompt": true,
         "icon": "./prisma_icon.svg",
