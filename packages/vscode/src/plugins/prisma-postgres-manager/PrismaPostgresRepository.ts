@@ -81,7 +81,6 @@ export type PrismaPostgresItem =
   | RemoteDatabase
   | LocalDatabase
 
-
 export class PrismaPostgresRepository {
   private clients: Map<string, ReturnType<typeof createManagementAPIClient>> = new Map()
   private credentialsStore = new CredentialsStore()
@@ -574,7 +573,7 @@ export class PrismaPostgresRepository {
   }
 
   async getLocalDatabases(): Promise<LocalDatabase[]> {
-    const { ServerState } = await import("@prisma/dev/internal/state")
+    const { ServerState } = await import('@prisma/dev/internal/state')
 
     const localDatabases = (await ServerState.scan()).map((state) => {
       const { name, exports, pid, status } = state
