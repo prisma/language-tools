@@ -17,6 +17,7 @@ import { stopLocalDatabase } from './commands/stopLocalDatabase'
 import { startLocalDatabase } from './commands/startLocalDatabase'
 import { copyLocalDatabaseUrl } from './commands/copyLocalDatabaseUrl'
 import { deleteLocalDatabase } from './commands/deleteLocalDatabase'
+import { deployLocalDatabase } from './commands/deployLocalDatabase'
 
 export default {
   name: 'Prisma Postgres',
@@ -98,6 +99,9 @@ export default {
       }),
       commands.registerCommand('prisma.copyLocalDatabaseURL', async (args: unknown) => {
         await handleCommandError('Copy Local Database URL', () => copyLocalDatabaseUrl(args))
+      }),
+      commands.registerCommand('prisma.deployLocalDatabase', async (args: unknown) => {
+        await handleCommandError('Deploy Local Database', () => deployLocalDatabase(ppgRepository, args))
       }),
     )
   },

@@ -13,6 +13,7 @@ import { waitForPortAvailable } from './utils/waitForPortAvailable'
 import { getUniquePorts } from './utils/getUniquePorts'
 import { isPidRunning } from './utils/isPidRunning'
 import { ServerState } from '@prisma/dev/internal/state'
+import { dumpDB } from '@prisma/dev/internal/db'
 import { proxySignals } from 'foreground-child/proxy-signals'
 import { fork } from 'child_process'
 
@@ -644,5 +645,22 @@ export class PrismaPostgresRepository {
     process.kill(pid, 'SIGTERM')
     await waitForPortAvailable(+port)
     await this.refreshLocalDatabases()
+  }
+
+  async deployLocalDatabase(args: { name: string }) {
+    const { name } = args
+
+    const state = await ServerState.createExclusively({ name, persistenceMode: 'stateful' })
+
+    try {
+      const dump = await dumpDB({ dataDir: state.pgliteDataDirPath })
+      console.log('dump', dump)
+    } catch (e) {
+      console.log(e)
+
+      await state.close()
+    }
+
+    await state.close()
   }
 }

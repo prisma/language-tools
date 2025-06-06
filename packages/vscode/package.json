@@ -298,6 +298,12 @@
         "title": "Delete Local Database",
         "category": "Prisma",
         "icon": "$(trash)"
+      },
+      {
+        "command": "prisma.deployLocalDatabase",
+        "title": "Deploy Local Database",
+        "category": "Prisma",
+        "icon": "$(cloud-upload)"
       }
     ],
     "languageModelTools": [
@@ -522,6 +528,10 @@
         {
           "command": "prisma.copyLocalDatabaseURL",
           "when": "false"
+        },
+        {
+          "command": "prisma.deployLocalDatabase",
+          "when": "false"
         }
       ],
       "view/title": [
@@ -574,6 +584,12 @@
           "command": "prisma.startLocalDatabase",
           "when": "viewItem == prismaLocalDatabaseItemStopped",
           "group": "inline"
+        },
+        {
+          "command": "prisma.deployLocalDatabase",
+          "when": "viewItem == prismaLocalDatabaseItemStarted || viewItem == prismaLocalDatabaseItemStopped",
+          "group": "inline",
+          "icon": "$(cloud-upload)"
         },
         {
           "command": "prisma.deleteRemoteDatabase",
