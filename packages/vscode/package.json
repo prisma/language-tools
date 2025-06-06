@@ -15,11 +15,13 @@
   "dependencies": {
     "@hono/node-server": "1.14.2",
     "@prisma/credentials-store": "6.9.0-dev.18",
+    "@prisma/dev": "0.6.1",
     "@prisma/language-server": "31.0.7630",
     "@prisma/studio-core": "0.0.0-dev.202506031545",
     "checkpoint-client": "1.1.33",
     "env-paths": "^2.2.1",
     "execa": "5.1.1",
+    "foreground-child": "3.3.1",
     "get-port": "5.1.1",
     "hono": "4.7.10",
     "minimatch": "6.2.0",
@@ -232,6 +234,12 @@
         "category": "Prisma"
       },
       {
+        "command": "prisma.createLocalDatabase",
+        "title": "Create Local Prisma Postgres Database",
+        "icon": "$(add)",
+        "category": "Prisma"
+      },
+      {
         "command": "prisma.getRemoteDatabaseConnectionString",
         "title": "Get Connection String",
         "icon": "$(shield)",
@@ -266,6 +274,30 @@
         "title": "Get Remote Database Connection String",
         "icon": "$(link-external)",
         "category": "Prisma"
+      },
+      {
+        "command": "prisma.stopLocalDatabase",
+        "title": "Stop Local Database",
+        "category": "Prisma",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "prisma.startLocalDatabase",
+        "title": "Start Local Database",
+        "category": "Prisma",
+        "icon": "$(debug-start)"
+      },
+      {
+        "command": "prisma.copyLocalDatabaseURL",
+        "title": "Copy Local Database URL",
+        "category": "Prisma",
+        "icon": "$(clippy)"
+      },
+      {
+        "command": "prisma.deleteLocalDatabase",
+        "title": "Delete Local Database",
+        "category": "Prisma",
+        "icon": "$(trash)"
       }
     ],
     "languageModelTools": [
@@ -474,6 +506,22 @@
         {
           "command": "prisma.studio.getRemoteDatabaseConnectionString",
           "when": "false"
+        },
+        {
+          "command": "prisma.stopLocalDatabase",
+          "when": "false"
+        },
+        {
+          "command": "prisma.startLocalDatabase",
+          "when": "false"
+        },
+        {
+          "command": "prisma.deleteLocalDatabase",
+          "when": "false"
+        },
+        {
+          "command": "prisma.copyLocalDatabaseURL",
+          "when": "false"
         }
       ],
       "view/title": [
@@ -513,6 +561,21 @@
           "group": "inline"
         },
         {
+          "command": "prisma.createLocalDatabase",
+          "when": "viewItem == prismaLocalDatabasesItem",
+          "group": "inline"
+        },
+        {
+          "command": "prisma.stopLocalDatabase",
+          "when": "viewItem == prismaLocalDatabaseItemStarted",
+          "group": "inline"
+        },
+        {
+          "command": "prisma.startLocalDatabase",
+          "when": "viewItem == prismaLocalDatabaseItemStopped",
+          "group": "inline"
+        },
+        {
           "command": "prisma.deleteRemoteDatabase",
           "when": "viewItem == prismaRemoteDatabaseItem"
         },
@@ -524,6 +587,18 @@
         {
           "command": "prisma.getRemoteDatabaseConnectionString",
           "when": "viewItem == prismaRemoteDatabaseItem"
+        },
+        {
+          "command": "prisma.copyLocalDatabaseURL",
+          "when": "viewItem == prismaLocalDatabaseItemStarted",
+          "group": "inline",
+          "icon": "$(clippy)"
+        },
+        {
+          "command": "prisma.deleteLocalDatabase",
+          "when": "viewItem == prismaLocalDatabaseItemStarted || viewItem == prismaLocalDatabaseItemStopped",
+          "group": "inline",
+          "icon": "$(trash)"
         }
       ]
     },
