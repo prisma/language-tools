@@ -15,7 +15,7 @@
   "dependencies": {
     "@hono/node-server": "1.14.2",
     "@prisma/credentials-store": "6.9.0-dev.18",
-    "@prisma/language-server": "31.0.7625",
+    "@prisma/language-server": "31.0.7626",
     "@prisma/studio-core": "0.0.0-dev.202506031545",
     "checkpoint-client": "1.1.33",
     "env-paths": "^2.2.1",
