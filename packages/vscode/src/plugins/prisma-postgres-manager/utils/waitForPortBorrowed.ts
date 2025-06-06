@@ -1,9 +1,12 @@
 import { connect } from 'net'
+import { setTimeout } from 'node:timers/promises'
 
 export async function waitForPortBorrowed(port: number, attemptsMade = 0): Promise<void> {
-  if (attemptsMade >= 10) return
+  if (attemptsMade >= 10) {
+    throw new Error(`Port ${port} was not borrowed`)
+  }
 
-  await new Promise((resolve) => setTimeout(resolve, attemptsMade * 100))
+  await setTimeout(attemptsMade * 100)
 
   await new Promise<void>((resolve, reject) => {
     const socket = connect(port, '127.0.0.1', resolve)
