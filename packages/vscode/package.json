@@ -14,7 +14,7 @@
   ],
   "dependencies": {
     "@hono/node-server": "1.14.2",
-    "@prisma/dev": "0.5.0",
+    "@prisma/dev": "0.6.1",
     "@prisma/credentials-store": "6.9.0-dev.18",
     "@prisma/language-server": "31.0.7625",
     "@prisma/studio-core": "0.0.0-dev.202506031545",

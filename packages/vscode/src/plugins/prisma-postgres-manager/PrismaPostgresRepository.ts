@@ -13,6 +13,7 @@ import { waitForPortBorrowed } from './utils/waitForPortBorrowed'
 import { waitForPortAvailable } from './utils/waitForPortAvailable'
 import { getUniquePorts } from './utils/getUniquePorts'
 import { isPidRunning } from './utils/isPidRunning'
+import { ServerState } from '@prisma/dev/internal/state'
 
 const PPG_DEV_GLOBAL_ROOT = envPaths('prisma-dev')
 
@@ -573,8 +574,6 @@ export class PrismaPostgresRepository {
   }
 
   async getLocalDatabases(): Promise<LocalDatabase[]> {
-    const { ServerState } = await import('@prisma/dev/internal/state')
-
     const localDatabases = (await ServerState.scan()).map((state) => {
       const { name, exports, pid, status } = state
       const running = status === 'running'
