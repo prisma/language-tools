@@ -8,12 +8,13 @@ import { z } from 'zod'
 import envPaths from 'env-paths'
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import { fork } from 'child_process'
 import { waitForPortBorrowed } from './utils/waitForPortBorrowed'
 import { waitForPortAvailable } from './utils/waitForPortAvailable'
 import { getUniquePorts } from './utils/getUniquePorts'
 import { isPidRunning } from './utils/isPidRunning'
 import { ServerState } from '@prisma/dev/internal/state'
+import { proxySignals } from 'foreground-child/proxy-signals'
+import { fork } from 'child_process'
 
 const PPG_DEV_GLOBAL_ROOT = envPaths('prisma-dev')
 
@@ -591,17 +592,23 @@ export class PrismaPostgresRepository {
     // TODO: once ppg dev has a daemon, this should be replaced
     const { name } = args
     const [port, databasePort, shadowDatabasePort] = (await getUniquePorts(3)).map(String)
-    const ppgDevServerEntryPoint = Uri.joinPath(
+    const { path: ppgDevServerPath } = Uri.joinPath(
       this.context.extensionUri,
       ...['dist', 'src', 'plugins', 'prisma-postgres-manager', 'utils', 'spawnPpgDevServer.js'],
     )
 
-    const childProcess = fork(ppgDevServerEntryPoint.path, [name, port, databasePort, shadowDatabasePort])
-    childProcess.on('error', (error) => console.error(`[PPG Dev] Process (${name}) error for database:`, error))
-    childProcess.on('exit', (code, signal) => console.log(`[PPG Dev] Process (${name}) exited (${code}, ${signal})`))
-    childProcess.on('spawn', () => console.log(`[PPG Dev] Process (${name}) spawned successfully`))
-    childProcess.stdout?.on('data', (data) => console.log(`[PPG Child ${name}] ${data.toString().trim()}`))
-    childProcess.stderr?.on('data', (data) => console.error(`[PPG Child ${name}] ${data.toString().trim()}`))
+    const child = fork(ppgDevServerPath, [name, port, databasePort, shadowDatabasePort], {
+      stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
+      detached: true,
+    })
+
+    child.on('error', (error) => console.error(`[PPG Dev] Process (${name}) error for database:`, error))
+    child.on('exit', (code, signal) => console.log(`[PPG Dev] Process (${name}) exited (${code}, ${signal})`))
+    child.on('spawn', () => console.log(`[PPG Dev] Process (${name}) spawned successfully`))
+    child.stdout?.on('data', (data) => console.log(`[PPG Child ${name}] ${data.toString().trim()}`))
+    child.stderr?.on('data', (data) => console.error(`[PPG Child ${name}] ${data.toString().trim()}`))
+
+    proxySignals(child) // closes the children if parent is closed (ie. vscode)
 
     await waitForPortBorrowed(+port)
     await this.refreshLocalDatabases()
