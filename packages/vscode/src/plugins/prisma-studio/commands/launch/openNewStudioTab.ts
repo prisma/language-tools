@@ -14,7 +14,7 @@ export async function openNewStudioTab(args: { dbUrl: string; context: Extension
     retainContextWhenHidden: true,
   })
 
-  panel.webview.html = getStudioPageHtml({serverUrl: url})
+  panel.webview.html = getStudioPageHtml({ serverUrl: url })
 
   panel.onDidDispose(() => {
     server.close()

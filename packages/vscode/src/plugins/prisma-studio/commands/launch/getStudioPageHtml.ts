@@ -1,4 +1,4 @@
-export function getStudioPageHtml(args: { serverUrl: string; }): string {
+export function getStudioPageHtml(args: { serverUrl: string }): string {
   const { serverUrl } = args
 
   return `<!DOCTYPE html>
