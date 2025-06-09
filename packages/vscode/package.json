@@ -605,12 +605,12 @@
     "viewsWelcome": [
       {
         "view": "prismaPostgresDatabases",
-        "contents": "Connect to Prisma Data Platform\nManage your Prisma Postgres databases directly from your editor.\n[Sign in to get started](command:prisma.login)\nLearn more about Prisma Postgres [here](https://www.prisma.io/postgres).",
+        "contents": "Connect to Prisma Data Platform\nManage your Prisma Postgres databases directly from your editor.\n[Sign in to get started](command:prisma.login)\nLearn more about Prisma Postgres [here](https://www.prisma.io/postgres?utm_source=vscode&utm_medium=extension&utm_campaign=welcome-view).",
         "when": "prisma.showLoginWelcome == true && prisma.initialLoginInProgress == false"
       },
       {
         "view": "prismaPostgresDatabases",
-        "contents": "Create a new Postgres database on the amazing Prisma Data Platform in no time!\n[Create Postgres Database](command:prisma.createRemoteDatabase)\nWant to use a different workspace? [Logout](command:prisma.logout)\nLearn more about Prisma Postgres [here](https://www.prisma.io/postgres).",
+        "contents": "Create a new Postgres database on the amazing Prisma Data Platform in no time!\n[Create Postgres Database](command:prisma.createRemoteDatabase)\nWant to use a different workspace? [Logout](command:prisma.logout)\nLearn more about Prisma Postgres [here](https://www.prisma.io/postgres?utm_source=vscode&utm_medium=extension&utm_campaign=welcome-view).",
         "when": "prisma.showCreateDatabaseWelcome == true && prisma.initialCreateDatabaseInProgress == false"
       },
       {
