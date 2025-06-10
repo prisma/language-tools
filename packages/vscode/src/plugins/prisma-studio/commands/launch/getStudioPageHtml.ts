@@ -5,7 +5,6 @@ export function getAppRootHtml(args: { serverUrl: string }): string {
 <html lang="en" style="height: 100%;">
 <head>
   <meta charset="UTF-8" />
-  <link rel="stylesheet" href="./dist/ui/index.css">
   <style>
     body {
       margin: 0;
@@ -47,6 +46,7 @@ export function getAppRootHtml(args: { serverUrl: string }): string {
     const root = ReactDOMClient.createRoot(container);
     root.render(React.createElement(Studio, { adapter }));
   </script>
+  <link rel="stylesheet" href="${serverUrl}/dist/ui/index.css">
 </body>
 </html>`
 }
