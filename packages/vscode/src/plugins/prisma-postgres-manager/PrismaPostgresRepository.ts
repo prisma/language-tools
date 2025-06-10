@@ -188,7 +188,7 @@ export class PrismaPostgresRepository {
     // a potential runtime mismatch between the actually available regions and the
     // regions known to the type system.
     if (!this.regionsCache.some((r) => r.id === value)) {
-      throw new Error(`Invalid region: ${value}.`)
+      throw new Error(`Invalid region: ${value}. Available regions: ${this.regionsCache.map((r) => r.id).join(', ')}.`)
     }
   }
 
