@@ -1,5 +1,5 @@
 import { ExtensionContext, ViewColumn, window } from 'vscode'
-import { getWebviewHtml } from './getStudioPageHtml'
+import { getStudioPageHtml } from './getStudioPageHtml'
 import { startStudioServer } from './startStudioServer'
 
 /**
@@ -14,7 +14,7 @@ export async function openNewStudioTab(args: { dbUrl: string; context: Extension
     retainContextWhenHidden: true,
   })
 
-  panel.webview.html = getWebviewHtml(url)
+  panel.webview.html = getStudioPageHtml({ serverUrl: url })
 
   panel.onDidDispose(() => {
     server.close()
