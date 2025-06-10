@@ -1,5 +1,9 @@
 import * as vscode from 'vscode'
-import { PrismaPostgresItem, PrismaPostgresRepository } from './PrismaPostgresRepository'
+import { LocalDatabase, PrismaPostgresItem, PrismaPostgresRepository } from './PrismaPostgresRepository'
+import { LaunchArgLocal, LaunchArgRemote } from './commands/launchStudio'
+import { StartLocalDatabaseArgs } from './commands/startLocalDatabase'
+import { StopLocalDatabaseArgs } from './commands/stopLocalDatabase'
+import { CopyLocalDatabaseUrlArgs } from './commands/copyLocalDatabaseUrl'
 
 export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<PrismaPostgresItem> {
   readonly onDidChangeTreeData: vscode.Event<PrismaPostgresItem | undefined | null | void>
@@ -27,7 +31,7 @@ export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<P
           element.workspaceId,
         )
       case 'localDatabase':
-        return new PrismaLocalDatabaseItem()
+        return new PrismaLocalDatabaseItem(element)
     }
   }
 
@@ -50,7 +54,7 @@ export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<P
 
     switch (element.type) {
       case 'localRoot':
-        return [{ type: 'localDatabase' }]
+        return this.ppgRepository.getLocalDatabases()
       case 'remoteRoot':
         return await this.ppgRepository.getWorkspaces()
       case 'workspace':
@@ -94,20 +98,27 @@ class PrismaLocalDatabasesItem extends vscode.TreeItem {
 }
 
 class PrismaLocalDatabaseItem extends vscode.TreeItem {
-  constructor() {
-    super('Default Local Database', vscode.TreeItemCollapsibleState.None)
-  }
+  constructor(element: LocalDatabase) {
+    const { id, name, url, pid, running } = element
 
-  id = `database-local-default`
+    super(name, vscode.TreeItemCollapsibleState.None)
 
-  iconPath = new vscode.ThemeIcon('database')
+    this.id = `local-database-${id}-${name}`
 
-  contextValue = 'prismaLocalDatabaseItem'
+    this.iconPath = new vscode.ThemeIcon('database')
 
-  command = {
-    command: 'prisma.studio.launchForDatabase',
-    title: 'Launch Prisma Studio',
-    arguments: [{ type: 'local' }],
+    this.contextValue = running ? 'prismaLocalDatabaseItemStarted' : 'prismaLocalDatabaseItemStopped'
+
+    this.command = {
+      command: 'prisma.studio.launchForDatabase',
+      title: 'Launch Prisma Studio',
+      arguments: [
+        { type: 'local', id, name, url, pid } satisfies LaunchArgLocal &
+          StartLocalDatabaseArgs &
+          StopLocalDatabaseArgs &
+          CopyLocalDatabaseUrlArgs,
+      ],
+    }
   }
 }
 
@@ -176,7 +187,12 @@ class PrismaRemoteDatabaseItem extends vscode.TreeItem {
     command: 'prisma.studio.launchForDatabase',
     title: 'Launch Prisma Studio',
     arguments: [
-      { type: 'remote', workspaceId: this.workspaceId, projectId: this.projectId, databaseId: this.databaseId },
+      {
+        type: 'remote',
+        workspaceId: this.workspaceId,
+        projectId: this.projectId,
+        databaseId: this.databaseId,
+      } satisfies LaunchArgRemote,
     ],
   }
 }
