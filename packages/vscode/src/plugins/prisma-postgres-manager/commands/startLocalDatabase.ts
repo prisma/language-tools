@@ -8,7 +8,7 @@ export const StartLocalDatabaseArgsSchema = z.object({
 
 export type StartLocalDatabaseArgs = z.infer<typeof StartLocalDatabaseArgsSchema>
 
-export async function startLocalDatabase(ppgRepository: PrismaPostgresRepository, args: unknown) {
+export async function startLocalDatabase(ppgRepository: PrismaPostgresRepository, args: StartLocalDatabaseArgs) {
   const { name, pid } = StartLocalDatabaseArgsSchema.parse(args)
 
   await ppgRepository.startLocalDatabase({ pid, name })

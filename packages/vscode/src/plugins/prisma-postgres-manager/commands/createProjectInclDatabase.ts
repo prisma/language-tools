@@ -1,17 +1,28 @@
 import { ProgressLocation, window } from 'vscode'
-import { isWorkspace, PrismaPostgresRepository } from '../PrismaPostgresRepository'
+import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
 import { pickWorkspace } from '../shared-ui/pickWorkspace'
 import { CommandAbortError } from '../shared-ui/handleCommandError'
 import { presentConnectionString } from '../shared-ui/connectionStringMessage'
 import { pickRegion } from '../shared-ui/pickRegion'
+import z from 'zod'
 
-export const createProjectInclDatabase = async (ppgRepository: PrismaPostgresRepository, args: unknown) => {
-  let workspaceId: string
-  if (isWorkspace(args)) {
-    workspaceId = args.id
-  } else if (typeof args === 'string') {
-    workspaceId = args
-  } else {
+export const CreateProjectInclDatabaseArgsSchema = z.union([
+  z.object({
+    id: z.string().optional(), // workspaceId
+    skipRefresh: z.boolean().optional(),
+  }),
+  z.undefined(),
+])
+
+export type CreateProjectInclDatabaseArgs = z.infer<typeof CreateProjectInclDatabaseArgsSchema>
+
+export const createProjectInclDatabase = async (
+  ppgRepository: PrismaPostgresRepository,
+  args: CreateProjectInclDatabaseArgs,
+) => {
+  let { id: workspaceId, skipRefresh } = CreateProjectInclDatabaseArgsSchema.parse(args) ?? {}
+
+  if (workspaceId === undefined) {
     workspaceId = (await pickWorkspace(ppgRepository)).id
   }
 
@@ -29,7 +40,7 @@ export const createProjectInclDatabase = async (ppgRepository: PrismaPostgresRep
       location: ProgressLocation.Notification,
       title: `Creating project with database...`,
     },
-    () => ppgRepository.createProject({ workspaceId, name, region: region.id }),
+    () => ppgRepository.createProject({ workspaceId, name, region: region.id, skipRefresh }),
   )
 
   if (result.database?.connectionString) {

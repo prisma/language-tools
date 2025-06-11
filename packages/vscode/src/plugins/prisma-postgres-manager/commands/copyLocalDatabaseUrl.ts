@@ -7,7 +7,7 @@ const CopyLocalDatabaseUrlArgsSchema = z.object({
 
 export type CopyLocalDatabaseUrlArgs = z.infer<typeof CopyLocalDatabaseUrlArgsSchema>
 
-export async function copyLocalDatabaseUrl(args: unknown) {
+export async function copyLocalDatabaseUrl(args: CopyLocalDatabaseUrlArgs) {
   const item = CopyLocalDatabaseUrlArgsSchema.parse(args)
 
   if (item && typeof item === 'object' && typeof item.url === 'string') {

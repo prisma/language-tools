@@ -4,6 +4,7 @@ import { LaunchArgLocal, LaunchArgRemote } from './commands/launchStudio'
 import { StartLocalDatabaseArgs } from './commands/startLocalDatabase'
 import { StopLocalDatabaseArgs } from './commands/stopLocalDatabase'
 import { CopyLocalDatabaseUrlArgs } from './commands/copyLocalDatabaseUrl'
+import { DeployLocalDatabaseArgs } from './commands/deployLocalDatabase'
 
 export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<PrismaPostgresItem> {
   readonly onDidChangeTreeData: vscode.Event<PrismaPostgresItem | undefined | null | void>
@@ -113,10 +114,11 @@ class PrismaLocalDatabaseItem extends vscode.TreeItem {
       command: 'prisma.studio.launchForDatabase',
       title: 'Launch Prisma Studio',
       arguments: [
-        { type: 'local', id, name, url, pid } satisfies LaunchArgLocal &
+        { type: 'local', id, name, url, pid, running } satisfies LaunchArgLocal &
           StartLocalDatabaseArgs &
           StopLocalDatabaseArgs &
-          CopyLocalDatabaseUrlArgs,
+          CopyLocalDatabaseUrlArgs &
+          DeployLocalDatabaseArgs,
       ],
     }
   }
