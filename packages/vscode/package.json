@@ -17,7 +17,7 @@
     "@prisma/credentials-store": "6.9.0-dev.18",
     "@prisma/dev": "0.6.1",
     "@prisma/language-server": "31.0.7640",
-    "@prisma/studio-core": "0.0.0-dev.202506031545",
+    "@prisma/studio-core": "0.2.6",
     "checkpoint-client": "1.1.33",
     "env-paths": "^2.2.1",
     "execa": "5.1.1",
