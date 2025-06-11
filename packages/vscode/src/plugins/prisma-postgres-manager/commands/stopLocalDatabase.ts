@@ -8,7 +8,10 @@ export const StopLocalDatabaseArgsSchema = z.object({
 
 export type StopLocalDatabaseArgs = z.infer<typeof StopLocalDatabaseArgsSchema>
 
-export async function stopLocalDatabase(ppgRepository: PrismaPostgresRepository, args: StopLocalDatabaseArgs): Promise<void> {
+export async function stopLocalDatabase(
+  ppgRepository: PrismaPostgresRepository,
+  args: StopLocalDatabaseArgs,
+): Promise<void> {
   const { pid, url } = StopLocalDatabaseArgsSchema.parse(args)
 
   await ppgRepository.stopLocalDatabase({ pid, url })
