@@ -1,5 +1,5 @@
-import { ThemeIcon, window, ProgressLocation, QuickPickItemKind, workspace } from 'vscode'
-import { isProject, PrismaPostgresRepository } from '../PrismaPostgresRepository'
+import { ThemeIcon, window, ProgressLocation, QuickPickItemKind } from 'vscode'
+import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
 import { createProjectInclDatabase } from './createProjectInclDatabase'
 import { CommandAbortError } from '../shared-ui/handleCommandError'
 import { presentConnectionString } from '../shared-ui/connectionStringMessage'
