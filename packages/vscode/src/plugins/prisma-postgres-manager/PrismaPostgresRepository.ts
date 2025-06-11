@@ -12,8 +12,6 @@ import { waitForPortBorrowed } from './utils/waitForPortBorrowed'
 import { waitForPortAvailable } from './utils/waitForPortAvailable'
 import { getUniquePorts } from './utils/getUniquePorts'
 import { isPidRunning } from './utils/isPidRunning'
-import { ServerState } from '@prisma/dev/internal/state'
-import { dumpDB } from '@prisma/dev/internal/db'
 import { proxySignals } from 'foreground-child/proxy-signals'
 import { fork } from 'child_process'
 
@@ -586,6 +584,8 @@ export class PrismaPostgresRepository {
   }
 
   async getLocalDatabases(): Promise<LocalDatabase[]> {
+    const { ServerState } = await import('@prisma/dev/internal/state')
+    
     return (await ServerState.scan()).map((state) => {
       const { name, exports, status } = state
       const running = status === 'running'
@@ -661,6 +661,8 @@ export class PrismaPostgresRepository {
 
   async deployLocalDatabase(args: { name: string; url: string; projectId: string; workspaceId: string }) {
     const { Client } = await import('@prisma/ppg')
+    const { ServerState } = await import("@prisma/dev/internal/state")
+    const { dumpDB } = await import("@prisma/dev/internal/db")
     const { name, url, projectId, workspaceId } = args
 
     const state = await ServerState.createExclusively({ name, persistenceMode: 'stateful' })
