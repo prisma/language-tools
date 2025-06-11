@@ -108,79 +108,14 @@ class StudioTool implements LanguageModelTool<ToolProjectDirInput> {
   }
 }
 
-class PDPAuthStatusTool implements LanguageModelTool<ToolProjectDirInput> {
-  async invoke(options: LanguageModelToolInvocationOptions<ToolProjectDirInput>, cancelToken: CancellationToken) {
-    const result = await runCommand({
-      args: ['platform', 'auth', 'show', '--early-access'],
-      cwd: options.input.projectCwd,
-      cancelToken,
-    })
-    return new LanguageModelToolResult([new LanguageModelTextPart(result)])
-  }
-
-  prepareInvocation(
-    _options: LanguageModelToolInvocationPrepareOptions<ToolProjectDirInput>,
-    _token: CancellationToken,
-  ): ProviderResult<PreparedToolInvocation> {
-    return {
-      invocationMessage: 'Checking auth status...',
-    }
-  }
-}
-
-class PDPAuthLoginTool implements LanguageModelTool<ToolProjectDirInput> {
-  async invoke(options: LanguageModelToolInvocationOptions<ToolProjectDirInput>, cancelToken: CancellationToken) {
-    const result = await runCommand({
-      args: ['platform', 'auth', 'login', '--early-access'],
-      cwd: options.input.projectCwd,
-      cancelToken,
-    })
-    return new LanguageModelToolResult([new LanguageModelTextPart(result)])
-  }
-
-  prepareInvocation(
-    _options: LanguageModelToolInvocationPrepareOptions<ToolProjectDirInput>,
-    _token: CancellationToken,
-  ): ProviderResult<PreparedToolInvocation> {
-    return {
-      invocationMessage: 'Checking auth status...',
-    }
-  }
-}
-
-type PDPCreatePPGToolInput = ToolProjectDirInput & { name: string; region: string }
-
-class PDPCreatePPGTool implements LanguageModelTool<PDPCreatePPGToolInput> {
-  async invoke(options: LanguageModelToolInvocationOptions<PDPCreatePPGToolInput>, cancelToken: CancellationToken) {
-    const result = await runCommand({
-      args: ['init', '--db', '--name', options.input.name, '--region', options.input.region, '--non-interactive'],
-      cwd: options.input.projectCwd,
-      cancelToken,
-    })
-    return new LanguageModelToolResult([new LanguageModelTextPart(result)])
-  }
-
-  prepareInvocation(
-    options: LanguageModelToolInvocationPrepareOptions<PDPCreatePPGToolInput>,
-    _token: CancellationToken,
-  ): ProviderResult<PreparedToolInvocation> {
-    return {
-      invocationMessage: `Creating Prisma Postgres database ${options.input.name} in ${options.input.region}...`,
-    }
-  }
-}
-
 const plugin: PrismaVSCodePlugin = {
-  name: 'prisma-ai-tools',
+  name: 'prisma-local-ai-tools',
   enabled: () => true,
   activate: (context) => {
     context.subscriptions.push(lm.registerTool('prisma-migrate-status', new MigrateStatusTool()))
     context.subscriptions.push(lm.registerTool('prisma-migrate-dev', new MigrateDevTool()))
     context.subscriptions.push(lm.registerTool('prisma-migrate-reset', new MigrateResetTool()))
     context.subscriptions.push(lm.registerTool('prisma-studio', new StudioTool()))
-    context.subscriptions.push(lm.registerTool('prisma-platform-auth-status', new PDPAuthStatusTool()))
-    context.subscriptions.push(lm.registerTool('prisma-platform-login', new PDPAuthLoginTool()))
-    context.subscriptions.push(lm.registerTool('prisma-postgres-create-database', new PDPCreatePPGTool()))
   },
   deactivate: () => {},
 }

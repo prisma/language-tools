@@ -1,4 +1,4 @@
-import { ExtensionContext, window, commands, env, Uri } from 'vscode'
+import { ExtensionContext, window, commands, env, Uri, lm } from 'vscode'
 import { PrismaPostgresTreeDataProvider } from './PrismaPostgresTreeDataProvider'
 import { createRemoteDatabase, CreateRemoteDatabaseArgs } from './commands/createRemoteDatabase'
 import { isProject, isRemoteDatabase, PrismaPostgresRepository } from './PrismaPostgresRepository'
@@ -12,6 +12,8 @@ import { Auth } from './management-api/auth'
 import { ConnectionStringStorage } from './ConnectionStringStorage'
 import { getRemoteDatabaseConnectionString } from './commands/getRemoteDatabaseConnectionString'
 import { launchStudio } from './commands/launchStudio'
+import { PDPAuthLoginTool } from './ai-tools/PDPAuthLoginTool'
+import { PDPCreatePPGTool } from './ai-tools/PDPCreatePPGTool'
 import { createLocalDatabase } from './commands/createLocalDatabase'
 import { stopLocalDatabase, StopLocalDatabaseArgs } from './commands/stopLocalDatabase'
 import { startLocalDatabase, StartLocalDatabaseArgs } from './commands/startLocalDatabase'
@@ -104,6 +106,9 @@ export default {
         await handleCommandError('Deploy Local Database', () => deployLocalDatabase(ppgRepository, args))
       }),
     )
+
+    context.subscriptions.push(lm.registerTool('prisma-platform-login', new PDPAuthLoginTool()))
+    context.subscriptions.push(lm.registerTool('prisma-postgres-create-database', new PDPCreatePPGTool(ppgRepository)))
   },
   deactivate() {},
 }

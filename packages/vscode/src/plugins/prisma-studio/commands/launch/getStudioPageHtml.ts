@@ -1,15 +1,17 @@
-export function getAppRootHtml(args: { serverUrl: string }): string {
+export function getStudioPageHtml(args: { serverUrl: string }): string {
   const { serverUrl } = args
 
   return `<!DOCTYPE html>
 <html lang="en" style="height: 100%;">
 <head>
   <meta charset="UTF-8" />
-  <link rel="stylesheet" href="./dist/ui/index.css">
+  <link rel="stylesheet" href="${serverUrl}/dist/ui/index.css">
   <style>
     body {
       margin: 0;
+      padding: 0;
       height: 100%;
+      color: black;
     }
     #root {
       height: 100%;
@@ -31,9 +33,9 @@ export function getAppRootHtml(args: { serverUrl: string }): string {
   <script type="module">
     import React from 'react';
     import ReactDOMClient from 'react-dom/client';
-    import { Studio } from './dist/ui/index.js';
-    import { createStudioBFFClient } from "./dist/data/bff/index.js";
-    import { createPostgresAdapter } from "./dist/data/postgres-core/index.js";
+    import { Studio } from '${serverUrl}/dist/ui/index.js';
+    import { createStudioBFFClient } from "${serverUrl}/dist/data/bff/index.js";
+    import { createPostgresAdapter } from "${serverUrl}/dist/data/postgres-core/index.js";
 
     // TODO: In the future we should have a createUniversalAdapter
     const adapter = createPostgresAdapter({
@@ -46,31 +48,19 @@ export function getAppRootHtml(args: { serverUrl: string }): string {
     const container = document.getElementById('root');
     const root = ReactDOMClient.createRoot(container);
     root.render(React.createElement(Studio, { adapter }));
-  </script>
-</body>
-</html>`
-}
 
-export function getWebviewHtml(serverUrl: string): string {
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <style>
-    body, html { 
-        margin: 0; 
-        padding: 0; 
-        height: 100%; 
-        overflow: hidden; 
-    }
-    iframe { 
-        width: 100%; 
-        height: 100%; 
-        border: none; 
-    }
-  </style>
-</head>
-<body>
-  <iframe src="${serverUrl}"></iframe>
+    // forces vscode to allow following links when clicked
+    document.body.addEventListener('click', (event) => {
+      const link = event.target.closest('a[href]');
+      if (link) {
+        event.preventDefault();
+        const href = link.getAttribute('href');
+        if (href) {
+          window.location.href = href;
+        }
+      }
+    });
+  </script>
 </body>
 </html>`
 }

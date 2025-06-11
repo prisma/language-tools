@@ -2,7 +2,7 @@
   "name": "prisma-insider",
   "displayName": "Prisma - Insider",
   "description": "This is the Insider Build of the Prisma VS Code extension (only use it if you are also using the dev version of the CLI).",
-  "version": "31.0.7631",
+  "version": "31.0.7642",
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
@@ -16,9 +16,9 @@
     "@hono/node-server": "1.14.2",
     "@prisma/credentials-store": "6.9.0-dev.18",
     "@prisma/dev": "0.7.1",
-    "@prisma/language-server": "31.0.7631",
+    "@prisma/language-server": "31.0.7642",
     "@prisma/ppg": "0.5.2",
-    "@prisma/studio-core": "0.0.0-dev.202506031545",
+    "@prisma/studio-core": "0.2.6",
     "checkpoint-client": "1.1.33",
     "env-paths": "^2.2.1",
     "execa": "5.1.1",
@@ -622,12 +622,12 @@
     "viewsWelcome": [
       {
         "view": "prismaPostgresDatabases",
-        "contents": "Connect to Prisma Data Platform\nManage your Prisma Postgres databases directly from your editor.\n[Sign in to get started](command:prisma.login)\nLearn more about Prisma Postgres [here](https://www.prisma.io/postgres).",
+        "contents": "Connect to Prisma Data Platform\nManage your Prisma Postgres databases directly from your editor.\n[Sign in to get started](command:prisma.login)\nLearn more about Prisma Postgres [here](https://www.prisma.io/postgres?utm_source=vscode&utm_medium=extension&utm_campaign=welcome-view).",
         "when": "prisma.showLoginWelcome == true && prisma.initialLoginInProgress == false"
       },
       {
         "view": "prismaPostgresDatabases",
-        "contents": "Create a new Postgres database on the amazing Prisma Data Platform in no time!\n[Create Postgres Database](command:prisma.createRemoteDatabase)\nWant to use a different workspace? [Logout](command:prisma.logout)\nLearn more about Prisma Postgres [here](https://www.prisma.io/postgres).",
+        "contents": "Create a new Postgres database on the amazing Prisma Data Platform in no time!\n[Create Postgres Database](command:prisma.createRemoteDatabase)\nWant to use a different workspace? [Logout](command:prisma.logout)\nLearn more about Prisma Postgres [here](https://www.prisma.io/postgres?utm_source=vscode&utm_medium=extension&utm_campaign=welcome-view).",
         "when": "prisma.showCreateDatabaseWelcome == true && prisma.initialCreateDatabaseInProgress == false"
       },
       {

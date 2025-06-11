@@ -1,6 +1,6 @@
 import { ExtensionContext, Uri } from 'vscode'
-import { getAppRootHtml } from './getStudioPageHtml'
 import { Hono } from 'hono'
+import { cors } from 'hono/cors' // Import the cors middleware
 import path from 'path'
 import { readFile } from 'fs/promises'
 import getPort from 'get-port'
@@ -21,6 +21,8 @@ export async function startStudioServer(args: { dbUrl: string; context: Extensio
 
   const app = new Hono()
 
+  app.use('*', cors())
+
   // gives access to accelerate (and more soon) via bff client
   app.post('/bff', async (c) => {
     const { query } = (await c.req.json()) as unknown as { query: Query }
@@ -39,11 +41,6 @@ export async function startStudioServer(args: { dbUrl: string; context: Extensio
     }
 
     return c.json([null, results])
-  })
-
-  // gives access and renders the main studio page
-  app.get('/', (c) => {
-    return c.html(getAppRootHtml({ serverUrl }))
   })
 
   // gives access to client side rendering resources
