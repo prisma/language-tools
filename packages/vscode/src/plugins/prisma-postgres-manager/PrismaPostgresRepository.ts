@@ -579,13 +579,13 @@ export class PrismaPostgresRepository {
     )
   }
 
-  private async refreshLocalDatabases() {
+  private refreshLocalDatabases() {
     this.refreshEventEmitter.fire()
   }
 
   async getLocalDatabases(): Promise<LocalDatabase[]> {
     const { ServerState } = await import('@prisma/dev/internal/state')
-    
+
     return (await ServerState.scan()).map((state) => {
       const { name, exports, status } = state
       const running = status === 'running'
@@ -613,8 +613,8 @@ export class PrismaPostgresRepository {
     child.on('error', (error) => console.error(`[PPG Dev] Process (${name}) error for database:`, error))
     child.on('exit', (code, signal) => console.log(`[PPG Dev] Process (${name}) exited (${code}, ${signal})`))
     child.on('spawn', () => console.log(`[PPG Dev] Process (${name}) spawned successfully`))
-    child.stdout?.on('data', (data) => console.log(`[PPG Child ${name}] ${data.toString().trim()}`))
-    child.stderr?.on('data', (data) => console.error(`[PPG Child ${name}] ${data.toString().trim()}`))
+    child.stdout?.on('data', (data) => console.log(`[PPG Child ${name}] ${String(data).trim()}`))
+    child.stderr?.on('data', (data) => console.error(`[PPG Child ${name}] ${String(data).trim()}`))
 
     proxySignals(child) // closes the children if parent is closed (ie. vscode)
 
@@ -661,14 +661,14 @@ export class PrismaPostgresRepository {
 
   async deployLocalDatabase(args: { name: string; url: string; projectId: string; workspaceId: string }) {
     const { Client } = await import('@prisma/ppg')
-    const { ServerState } = await import("@prisma/dev/internal/state")
-    const { dumpDB } = await import("@prisma/dev/internal/db")
+    const { ServerState } = await import('@prisma/dev/internal/state')
+    const { dumpDB } = await import('@prisma/dev/internal/db')
     const { name, url, projectId, workspaceId } = args
 
     const state = await ServerState.createExclusively({ name, persistenceMode: 'stateful' })
 
     try {
-      let dump = await dumpDB({ dataDir: state.pgliteDataDirPath })
+      const dump = await dumpDB({ dataDir: state.pgliteDataDirPath })
       await new Client({ connectionString: url }).query(dump, [])
     } catch (e) {
       await state.close()

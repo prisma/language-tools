@@ -16,11 +16,10 @@ export const CreateProjectInclDatabaseArgsSchema = z.union([
 
 export type CreateProjectInclDatabaseArgs = z.infer<typeof CreateProjectInclDatabaseArgsSchema>
 
-export const createProjectInclDatabase = async (
-  ppgRepository: PrismaPostgresRepository,
-  args: CreateProjectInclDatabaseArgs,
-) => {
-  let { id: workspaceId, skipRefresh } = CreateProjectInclDatabaseArgsSchema.parse(args) ?? {}
+export const createProjectInclDatabase = async (ppgRepository: PrismaPostgresRepository, args: unknown) => {
+  const validatedArgs = CreateProjectInclDatabaseArgsSchema.parse(args) ?? {}
+  let { id: workspaceId } = validatedArgs
+  const { skipRefresh } = validatedArgs
 
   if (workspaceId === undefined) {
     workspaceId = (await pickWorkspace(ppgRepository)).id
@@ -53,4 +52,11 @@ export const createProjectInclDatabase = async (
   }
 
   return result
+}
+
+export const createProjectInclDatabaseSafely = async (
+  ppgRepository: PrismaPostgresRepository,
+  args: CreateProjectInclDatabaseArgs,
+) => {
+  return createProjectInclDatabase(ppgRepository, args)
 }

@@ -1,6 +1,6 @@
 import { ThemeIcon, window, ProgressLocation, QuickPickItemKind } from 'vscode'
 import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
-import { createProjectInclDatabase } from './createProjectInclDatabase'
+import { createProjectInclDatabaseSafely } from './createProjectInclDatabase'
 import { CommandAbortError } from '../shared-ui/handleCommandError'
 import { presentConnectionString } from '../shared-ui/connectionStringMessage'
 import { pickRegion } from '../shared-ui/pickRegion'
@@ -41,7 +41,7 @@ const pickProject = async (
   )
 
   if (workspacesWithProjects.every((workspace) => workspace.projects.length === 0)) {
-    const result = await createProjectInclDatabase(ppgRepository, { ...workspaces[0], skipRefresh })
+    const result = await createProjectInclDatabaseSafely(ppgRepository, { ...workspaces[0], skipRefresh })
     return {
       workspaceId: workspaces[0].id,
       projectId: result.project.id,
@@ -81,9 +81,10 @@ const pickProject = async (
   }
 }
 
-export const createRemoteDatabase = async (ppgRepository: PrismaPostgresRepository, args: CreateRemoteDatabaseArgs) => {
+export const createRemoteDatabase = async (ppgRepository: PrismaPostgresRepository, args: unknown) => {
   const validatedArgs = CreateRemoteDatabaseArgsSchema.parse(args) ?? {}
-  let { skipRefresh, workspaceId, id: projectId } = validatedArgs
+  let { workspaceId, id: projectId } = validatedArgs
+  const { skipRefresh } = validatedArgs
   let databaseId: string | undefined
 
   if (workspaceId === undefined || projectId === undefined) {
@@ -91,7 +92,7 @@ export const createRemoteDatabase = async (ppgRepository: PrismaPostgresReposito
   }
 
   if (databaseId) return // pickProject already created a new project incl database
-  if (!projectId) return createProjectInclDatabase(ppgRepository, { id: workspaceId, skipRefresh })
+  if (!projectId) return createProjectInclDatabaseSafely(ppgRepository, { id: workspaceId, skipRefresh })
 
   const regions = ppgRepository.getRegions()
 
@@ -123,4 +124,11 @@ export const createRemoteDatabase = async (ppgRepository: PrismaPostgresReposito
   })
 
   return { project: { workspaceId, id: projectId }, database }
+}
+
+export const createRemoteDatabaseSafely = async (
+  ppgRepository: PrismaPostgresRepository,
+  args: CreateRemoteDatabaseArgs,
+) => {
+  return createRemoteDatabase(ppgRepository, args)
 }

@@ -1,6 +1,6 @@
 import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
 import z from 'zod'
-import { createRemoteDatabase } from './createRemoteDatabase'
+import { createRemoteDatabaseSafely } from './createRemoteDatabase'
 import { ProgressLocation, window } from 'vscode'
 
 export const DeployLocalDatabaseArgsSchema = z.object({
@@ -12,10 +12,7 @@ export const DeployLocalDatabaseArgsSchema = z.object({
 
 export type DeployLocalDatabaseArgs = z.infer<typeof DeployLocalDatabaseArgsSchema>
 
-export async function deployLocalDatabase(
-  ppgRepository: PrismaPostgresRepository,
-  args: DeployLocalDatabaseArgs,
-): Promise<void> {
+export async function deployLocalDatabase(ppgRepository: PrismaPostgresRepository, args: unknown): Promise<void> {
   const { name, pid, url, running } = DeployLocalDatabaseArgsSchema.parse(args)
 
   if (running) {
@@ -26,14 +23,14 @@ export async function deployLocalDatabase(
     )
 
     if (confirmation !== 'Yes') {
-      window.showInformationMessage('Deployment cancelled.')
+      void window.showInformationMessage('Deployment cancelled.')
       return
     }
 
     await ppgRepository.stopLocalDatabase({ pid, url })
   }
 
-  const createdDb = await createRemoteDatabase(ppgRepository, { skipRefresh: true })
+  const createdDb = await createRemoteDatabaseSafely(ppgRepository, { skipRefresh: true })
 
   if (createdDb?.database === undefined) {
     throw new Error('Unexpected error, no database was returned')
@@ -52,5 +49,12 @@ export async function deployLocalDatabase(
     () => ppgRepository.deployLocalDatabase({ name, url: connectionString, projectId, workspaceId }),
   )
 
-  window.showInformationMessage('Deployment was successful!')
+  void window.showInformationMessage('Deployment was successful!')
+}
+
+export async function deployLocalDatabaseSalefy(
+  ppgRepository: PrismaPostgresRepository,
+  args: DeployLocalDatabaseArgs,
+) {
+  return deployLocalDatabase(ppgRepository, args)
 }
