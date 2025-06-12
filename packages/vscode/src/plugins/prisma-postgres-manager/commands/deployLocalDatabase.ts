@@ -42,9 +42,6 @@ export async function deployLocalDatabase(ppgRepository: PrismaPostgresRepositor
   void window.showInformationMessage('Deployment was successful!')
 }
 
-export async function deployLocalDatabaseSalefy(
-  ppgRepository: PrismaPostgresRepository,
-  args: LocalDatabase,
-) {
+export async function deployLocalDatabaseSalefy(ppgRepository: PrismaPostgresRepository, args: LocalDatabase) {
   return deployLocalDatabase(ppgRepository, args)
 }
