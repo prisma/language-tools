@@ -1,32 +1,19 @@
 import { ThemeIcon, window, ProgressLocation, QuickPickItemKind } from 'vscode'
-import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
+import { PrismaPostgresRepository, ProjectSchema } from '../PrismaPostgresRepository'
 import { createProjectInclDatabaseSafely } from './createProjectInclDatabase'
 import { CommandAbortError } from '../shared-ui/handleCommandError'
 import { presentConnectionString } from '../shared-ui/connectionStringMessage'
 import { pickRegion } from '../shared-ui/pickRegion'
 import z from 'zod'
 
-export const CreateRemoteDatabaseArgsSchema = z.union([
-  z.object({
-    id: z.undefined(),
-    workspaceId: z.undefined(),
-    skipRefresh: z.boolean().optional(),
-  }),
-  z.object({
-    id: z.string(), // projectId
-    workspaceId: z.string(),
-    skipRefresh: z.boolean().optional(),
-  }),
-  z.undefined(),
-])
+export const CreateRemoteDatabaseArgsSchema = z.union([ProjectSchema, z.undefined()])
 
 export type CreateRemoteDatabaseArgs = z.infer<typeof CreateRemoteDatabaseArgsSchema>
 
 const pickProject = async (
   ppgRepository: PrismaPostgresRepository,
-  args: { skipRefresh?: boolean },
+  options: { skipRefresh?: boolean },
 ): Promise<{ workspaceId: string; projectId?: string; databaseId?: string }> => {
-  const { skipRefresh } = args
   const workspaces = await ppgRepository.getWorkspaces()
 
   if (workspaces.length === 0) {
@@ -41,7 +28,7 @@ const pickProject = async (
   )
 
   if (workspacesWithProjects.every((workspace) => workspace.projects.length === 0)) {
-    const result = await createProjectInclDatabaseSafely(ppgRepository, { ...workspaces[0], skipRefresh })
+    const result = await createProjectInclDatabaseSafely(ppgRepository, workspaces[0], options)
     return {
       workspaceId: workspaces[0].id,
       projectId: result.project.id,
@@ -81,18 +68,25 @@ const pickProject = async (
   }
 }
 
-export const createRemoteDatabase = async (ppgRepository: PrismaPostgresRepository, args: unknown) => {
-  const validatedArgs = CreateRemoteDatabaseArgsSchema.parse(args) ?? {}
-  let { workspaceId, id: projectId } = validatedArgs
-  const { skipRefresh } = validatedArgs
+export const createRemoteDatabase = async (
+  ppgRepository: PrismaPostgresRepository,
+  args: unknown,
+  options: { skipRefresh?: boolean },
+) => {
+  const validatedArgs = CreateRemoteDatabaseArgsSchema.parse(args)
+  let workspaceId = validatedArgs?.workspaceId
+  let projectId = validatedArgs?.id
   let databaseId: string | undefined
 
   if (workspaceId === undefined || projectId === undefined) {
-    ;({ workspaceId, projectId, databaseId } = await pickProject(ppgRepository, { skipRefresh }))
+    ;({ workspaceId, projectId, databaseId } = await pickProject(ppgRepository, options))
   }
 
+  const workspaces = await ppgRepository.getWorkspaces()
+  const workspace = workspaces.find((w) => (w.id = workspaceId))!
+
   if (databaseId) return // pickProject already created a new project incl database
-  if (!projectId) return createProjectInclDatabaseSafely(ppgRepository, { id: workspaceId, skipRefresh })
+  if (!projectId) return createProjectInclDatabaseSafely(ppgRepository, workspace, options)
 
   const regions = ppgRepository.getRegions()
 
@@ -114,7 +108,7 @@ export const createRemoteDatabase = async (ppgRepository: PrismaPostgresReposito
         projectId,
         name,
         region: region.id,
-        skipRefresh,
+        options,
       }),
   )
 
@@ -129,6 +123,7 @@ export const createRemoteDatabase = async (ppgRepository: PrismaPostgresReposito
 export const createRemoteDatabaseSafely = async (
   ppgRepository: PrismaPostgresRepository,
   args: CreateRemoteDatabaseArgs,
+  options: { skipRefresh?: boolean },
 ) => {
-  return createRemoteDatabase(ppgRepository, args)
+  return createRemoteDatabase(ppgRepository, args, options)
 }

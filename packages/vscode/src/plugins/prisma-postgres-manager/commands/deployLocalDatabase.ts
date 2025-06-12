@@ -30,7 +30,7 @@ export async function deployLocalDatabase(ppgRepository: PrismaPostgresRepositor
     await ppgRepository.stopLocalDatabase({ pid, url })
   }
 
-  const createdDb = await createRemoteDatabaseSafely(ppgRepository, { skipRefresh: true })
+  const createdDb = await createRemoteDatabaseSafely(ppgRepository, undefined, { skipRefresh: true })
 
   if (createdDb?.database === undefined) {
     throw new Error('Unexpected error, no database was returned')

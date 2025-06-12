@@ -26,50 +26,54 @@ export type Region = {
   status: 'available' | 'unavailable' | 'unsupported'
 }
 
+export const WorkspaceSchema = z.object({
+  type: z.literal('workspace'),
+  id: z.string(),
+  name: z.string(),
+})
 export type WorkspaceId = string
-export type Workspace = {
-  type: 'workspace'
-  id: WorkspaceId
-  name: string
-}
+export type Workspace = z.infer<typeof WorkspaceSchema>
 export function isWorkspace(item: unknown): item is Workspace {
-  return typeof item === 'object' && item !== null && 'type' in item && item.type === 'workspace'
+  return WorkspaceSchema.safeParse(item).success
 }
 
+export const ProjectSchema = z.object({
+  type: z.literal('project'),
+  id: z.string(),
+  name: z.string(),
+  workspaceId: z.string(),
+})
 export type ProjectId = string
-export type Project = {
-  type: 'project'
-  id: ProjectId
-  name: string
-  workspaceId: WorkspaceId
-}
+export type Project = z.infer<typeof ProjectSchema>
 export function isProject(item: unknown): item is Project {
-  return typeof item === 'object' && item !== null && 'type' in item && item.type === 'project'
+  return ProjectSchema.safeParse(item).success
 }
 
+export const RemoteDatabaseSchema = z.object({
+  type: z.literal('remoteDatabase'),
+  id: z.string(),
+  name: z.string(),
+  region: z.string().nullable(),
+  projectId: z.string(),
+  workspaceId: z.string(),
+})
 export type RemoteDatabaseId = string
-export type RemoteDatabase = {
-  type: 'remoteDatabase'
-  id: RemoteDatabaseId
-  name: string
-  region: string | null
-  projectId: ProjectId
-  workspaceId: WorkspaceId
-}
+export type RemoteDatabase = z.infer<typeof RemoteDatabaseSchema>
 export function isRemoteDatabase(item: unknown): item is RemoteDatabase {
-  return typeof item === 'object' && item !== null && 'type' in item && item.type === 'remoteDatabase'
+  return RemoteDatabaseSchema.safeParse(item).success
 }
 
-export type LocalDatabase = {
-  type: 'localDatabase'
-  id: string
-  name: string
-  url: string
-  pid: number
-  running: boolean
-}
+export const LocalDatabaseSchema = z.object({
+  type: z.literal('localDatabase'),
+  id: z.string(),
+  name: z.string(),
+  url: z.string().url(),
+  pid: z.number(),
+  running: z.boolean(),
+})
+export type LocalDatabase = z.infer<typeof LocalDatabaseSchema>
 export function isLocalDatabase(item: unknown): item is LocalDatabase {
-  return typeof item === 'object' && item !== null && 'type' in item && item.type === 'localDatabase'
+  return LocalDatabaseSchema.safeParse(item).success
 }
 
 export type NewRemoteDatabase = RemoteDatabase & { connectionString: string }
@@ -298,12 +302,12 @@ export class PrismaPostgresRepository {
     workspaceId,
     name,
     region,
-    skipRefresh,
+    options,
   }: {
     workspaceId: string
     name: string
     region: string
-    skipRefresh?: boolean
+    options: { skipRefresh?: boolean }
   }): Promise<{ project: Project; database?: NewRemoteDatabase }> {
     this.ensureValidRegion(region)
 
@@ -348,7 +352,7 @@ export class PrismaPostgresRepository {
       }
     }
 
-    if (skipRefresh !== true) {
+    if (options.skipRefresh !== true) {
       // Proactively update cache
       this.projectsCache.get(workspaceId)?.set(newProject.id, newProject)
       this.remoteDatabasesCache.set(
@@ -485,13 +489,13 @@ export class PrismaPostgresRepository {
     projectId,
     name,
     region,
-    skipRefresh,
+    options,
   }: {
     workspaceId: string
     projectId: string
     name: string
     region: string
-    skipRefresh?: boolean
+    options: { skipRefresh?: boolean }
   }): Promise<NewRemoteDatabase> {
     this.ensureValidRegion(region)
 
@@ -518,7 +522,7 @@ export class PrismaPostgresRepository {
     }
     const connectionString = response.data.connectionString
 
-    if (skipRefresh !== true) {
+    if (options.skipRefresh !== true) {
       // Proactively update cache
       this.remoteDatabasesCache.get(workspaceId)?.set(newDatabase.id, newDatabase)
 
