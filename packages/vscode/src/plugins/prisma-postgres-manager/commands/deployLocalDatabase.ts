@@ -1,19 +1,9 @@
-import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
-import z from 'zod'
+import { LocalDatabase, LocalDatabaseSchema, PrismaPostgresRepository } from '../PrismaPostgresRepository'
 import { createRemoteDatabaseSafely } from './createRemoteDatabase'
 import { ProgressLocation, window } from 'vscode'
 
-export const DeployLocalDatabaseArgsSchema = z.object({
-  name: z.string(),
-  pid: z.number(),
-  url: z.string(),
-  running: z.boolean(),
-})
-
-export type DeployLocalDatabaseArgs = z.infer<typeof DeployLocalDatabaseArgsSchema>
-
 export async function deployLocalDatabase(ppgRepository: PrismaPostgresRepository, args: unknown): Promise<void> {
-  const { name, pid, url, running } = DeployLocalDatabaseArgsSchema.parse(args)
+  const { name, pid, url, running } = LocalDatabaseSchema.parse(args)
 
   if (running) {
     const confirmation = await window.showInformationMessage(
@@ -54,7 +44,7 @@ export async function deployLocalDatabase(ppgRepository: PrismaPostgresRepositor
 
 export async function deployLocalDatabaseSalefy(
   ppgRepository: PrismaPostgresRepository,
-  args: DeployLocalDatabaseArgs,
+  args: LocalDatabase,
 ) {
   return deployLocalDatabase(ppgRepository, args)
 }
