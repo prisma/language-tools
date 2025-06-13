@@ -1,15 +1,11 @@
-import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
-import z from 'zod'
-
-export const StartLocalDatabaseArgsSchema = z.object({
-  name: z.string(),
-  pid: z.number(),
-})
-
-export type StartLocalDatabaseArgs = z.infer<typeof StartLocalDatabaseArgsSchema>
+import { LocalDatabase, LocalDatabaseSchema, PrismaPostgresRepository } from '../PrismaPostgresRepository'
 
 export async function startLocalDatabase(ppgRepository: PrismaPostgresRepository, args: unknown) {
-  const { name, pid } = StartLocalDatabaseArgsSchema.parse(args)
+  const { name, pid } = LocalDatabaseSchema.parse(args)
 
   await ppgRepository.startLocalDatabase({ pid, name })
+}
+
+export async function startLocalDatabaseSafely(ppgRepository: PrismaPostgresRepository, args: LocalDatabase) {
+  return startLocalDatabase(ppgRepository, args)
 }

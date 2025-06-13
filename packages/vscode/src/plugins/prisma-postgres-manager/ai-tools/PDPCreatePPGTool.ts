@@ -59,6 +59,7 @@ export class PDPCreatePPGTool implements LanguageModelTool<PDPCreatePPGToolInput
         workspaceId: workspace.id,
         name: options.input.name,
         region: options.input.regionId,
+        options: {},
       })
 
       toolResults.push(

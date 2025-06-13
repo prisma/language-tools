@@ -1,4 +1,4 @@
-import { unstable_startServer, Server } from '@prisma/dev'
+import type { Server } from '@prisma/dev'
 
 let server: Server | undefined
 
@@ -16,6 +16,8 @@ async function main() {
   }
 
   try {
+    const { unstable_startServer } = await import('@prisma/dev')
+
     server = await unstable_startServer({ persistenceMode: 'stateful', name, port, databasePort, shadowDatabasePort })
 
     console.log(`[PPG Dev] Server started successfully for database: ${name}`)
@@ -26,16 +28,20 @@ async function main() {
 }
 
 // Handle process termination gracefully
-process.on('SIGTERM', async () => {
-  console.log('[PPG Dev] Received SIGTERM, shutting down gracefully...')
-  await server?.close()
-  process.exit(0)
+process.on('SIGTERM', () => {
+  void (async () => {
+    console.log('[PPG Dev] Received SIGTERM, shutting down gracefully...')
+    await server?.close()
+    process.exit(0)
+  })()
 })
 
-process.on('SIGINT', async () => {
-  console.log('[PPG Dev] Received SIGINT, shutting down gracefully...')
-  await server?.close()
-  process.exit(0)
+process.on('SIGINT', () => {
+  void (async () => {
+    console.log('[PPG Dev] Received SIGINT, shutting down gracefully...')
+    await server?.close()
+    process.exit(0)
+  })()
 })
 
 void main()

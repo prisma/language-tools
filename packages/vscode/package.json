@@ -15,8 +15,9 @@
   "dependencies": {
     "@hono/node-server": "1.14.2",
     "@prisma/credentials-store": "6.9.0-dev.18",
-    "@prisma/dev": "0.6.1",
+    "@prisma/dev": "0.7.1",
     "@prisma/language-server": "31.0.7647",
+    "@prisma/ppg": "0.5.2",
     "@prisma/studio-core": "0.2.6",
     "checkpoint-client": "1.1.33",
     "env-paths": "^2.2.1",
@@ -298,6 +299,12 @@
         "title": "Delete Local Database",
         "category": "Prisma",
         "icon": "$(trash)"
+      },
+      {
+        "command": "prisma.deployLocalDatabase",
+        "title": "Deploy Local Database",
+        "category": "Prisma",
+        "icon": "$(cloud-upload)"
       }
     ],
     "languageModelTools": [
@@ -522,6 +529,10 @@
         {
           "command": "prisma.copyLocalDatabaseURL",
           "when": "false"
+        },
+        {
+          "command": "prisma.deployLocalDatabase",
+          "when": "false"
         }
       ],
       "view/title": [
@@ -574,6 +585,12 @@
           "command": "prisma.startLocalDatabase",
           "when": "viewItem == prismaLocalDatabaseItemStopped",
           "group": "inline"
+        },
+        {
+          "command": "prisma.deployLocalDatabase",
+          "when": "viewItem == prismaLocalDatabaseItemStarted || viewItem == prismaLocalDatabaseItemStopped",
+          "group": "inline",
+          "icon": "$(cloud-upload)"
         },
         {
           "command": "prisma.deleteRemoteDatabase",
