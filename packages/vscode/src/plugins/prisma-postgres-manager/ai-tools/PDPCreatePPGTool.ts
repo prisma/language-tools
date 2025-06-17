@@ -14,7 +14,7 @@ type PDPCreatePPGToolInput = { name: string; workspaceId?: string; regionId?: st
 export class PDPCreatePPGTool implements LanguageModelTool<PDPCreatePPGToolInput> {
   constructor(private readonly ppgRepository: PrismaPostgresRepository) {}
 
-  async invoke(options: LanguageModelToolInvocationOptions<PDPCreatePPGToolInput>, cancelToken: CancellationToken) {
+  async invoke(options: LanguageModelToolInvocationOptions<PDPCreatePPGToolInput>, _cancelToken: CancellationToken) {
     const workspaces = await this.ppgRepository.getWorkspaces()
     if (workspaces.length === 0) {
       return new LanguageModelToolResult([

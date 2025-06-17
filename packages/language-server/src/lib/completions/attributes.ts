@@ -1,5 +1,4 @@
 import { CompletionItem, CompletionItemKind, CompletionList, InsertTextFormat } from 'vscode-languageserver'
-import type { TextDocument } from 'vscode-languageserver-textdocument'
 import { klona } from 'klona'
 
 import { convertAttributesToCompletionItems } from './internals'
