@@ -31,8 +31,8 @@ export async function startStudioServer(args: { dbUrl: string; context: Extensio
       host: new URL(dbUrl).host,
       apiKey: new URL(dbUrl).searchParams.get('api_key') ?? '',
       // TODO: these need to be dynamic based on the vscode build
-      engineHash: '2060c79ba17c6bb9f5823312b6f6b7f4a845738e',
-      clientVersion: '6.8.2',
+      engineHash: '81e4af48011447c3cc503a190e86995b66d2a28e',
+      clientVersion: '6.9.0',
       provider: 'postgres',
     }).execute(query)
 
