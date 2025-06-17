@@ -18,7 +18,7 @@ import { fork } from 'child_process'
 const PPG_DEV_GLOBAL_ROOT = envPaths('prisma-dev')
 
 export type RegionId = NonNullable<
-  NonNullable<paths['/projects/{id}/databases']['post']['requestBody']>['content']['application/json']['region']
+  NonNullable<paths['/projects/{projectId}/databases']['post']['requestBody']>['content']['application/json']['region']
 >
 export type Region = {
   id: string
@@ -414,9 +414,9 @@ export class PrismaPostgresRepository {
     }
 
     const client = await this.getClient(workspaceId)
-    const response = await client.GET('/projects/{id}/databases', {
+    const response = await client.GET('/projects/{projectId}/databases', {
       params: {
-        path: { id: projectId },
+        path: { projectId },
       },
     })
 
@@ -500,9 +500,9 @@ export class PrismaPostgresRepository {
     this.ensureValidRegion(region)
 
     const client = await this.getClient(workspaceId)
-    const response = await client.POST('/projects/{id}/databases', {
+    const response = await client.POST('/projects/{projectId}/databases', {
       params: {
-        path: { id: projectId },
+        path: { projectId },
       },
       body: {
         name,

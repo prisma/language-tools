@@ -1,8 +1,4 @@
-import type { Range, TextDocument } from 'vscode-languageserver-textdocument'
-
 import type { PreviewFeatures } from '../types'
-import { convertDocumentTextToTrimmedLineArray } from '.'
-import { getCurrentLine } from './findAtPosition'
 import { PrismaSchema } from '../Schema'
 
 export function getFirstDatasourceName(schema: PrismaSchema): string | undefined {

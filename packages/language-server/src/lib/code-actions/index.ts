@@ -1,24 +1,11 @@
 import type { TextDocument } from 'vscode-languageserver-textdocument'
-import {
-  CodeActionParams,
-  CodeAction,
-  Diagnostic,
-  DiagnosticSeverity,
-  CodeActionKind,
-  Range,
-} from 'vscode-languageserver'
+import { CodeActionParams, CodeAction, Diagnostic, DiagnosticSeverity, CodeActionKind } from 'vscode-languageserver'
 import levenshtein from 'js-levenshtein'
 
 import codeActions from '../prisma-schema-wasm/codeActions'
 import { relationNamesRegexFilter } from '../constants'
 import { getAllRelationNames } from '../ast'
 import { PrismaSchema } from '../Schema'
-
-function getInsertRange(document: TextDocument): Range {
-  // to insert text into a document create a range where start === end.
-  const start = { line: document.lineCount, character: 0 }
-  return { start, end: start }
-}
 
 /**
  * Given a name and a list of symbols whose names are *not* equal to the name, return a spelling suggestion if there is one that is close enough.

@@ -46,6 +46,8 @@ jobs:
         run: npm install && npm run bootstrap
       - name: Build all packages
         run: npm run compile
+      - name: Lint all packages
+        run: npm run lint
       - name: Run Language Server tests
         run: npx lerna run test --scope @prisma/language-server
       - name: Run VS Code extension tests in headless mode

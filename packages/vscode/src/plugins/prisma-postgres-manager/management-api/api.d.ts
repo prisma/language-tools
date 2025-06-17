@@ -4,40 +4,6 @@
  */
 
 export interface paths {
-  '/regions': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** @description Retrieve all available regions */
-    get: operations['getRegions']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/workspaces': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** @description Retrieve information about the workspaces accessible by the current actor */
-    get: operations['getWorkspaces']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
   '/projects': {
     parameters: {
       query?: never
@@ -91,7 +57,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/projects/{id}/databases': {
+  '/projects/{projectId}/databases': {
     parameters: {
       query?: never
       header?: never
@@ -99,10 +65,10 @@ export interface paths {
       cookie?: never
     }
     /** @description Retrieve all databases for a project */
-    get: operations['getProjectsByIdDatabases']
+    get: operations['getProjectsByProjectIdDatabases']
     put?: never
     /** @description Create a new database for a project */
-    post: operations['postProjectsByIdDatabases']
+    post: operations['postProjectsByProjectIdDatabases']
     delete?: never
     options?: never
     head?: never
@@ -179,6 +145,57 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/projects/{projectId}/databases/{databaseId}/backups/{backupId}/recoveries': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** @description Restore a backup to a new database */
+    post: operations['postProjectsByProjectIdDatabasesByDatabaseIdBackupsByBackupIdRecoveries']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/regions': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Retrieve all available regions */
+    get: operations['getRegions']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/workspaces': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** @description Retrieve information about the workspaces accessible by the current actor */
+    get: operations['getWorkspaces']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
 export type webhooks = Record<string, never>
 export interface components {
@@ -191,84 +208,6 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
-  getRegions: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description Retrieve all available regions */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            data: {
-              id: string
-              name: string
-              /** @enum {string} */
-              status: 'available' | 'unavailable' | 'unsupported'
-            }[]
-          }
-        }
-      }
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @constant */
-            error: 'unauthorized'
-            errorDescription: string
-          }
-        }
-      }
-    }
-  }
-  getWorkspaces: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description Retrieve information about the workspaces accessible by the current actor */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            data: {
-              id: string
-              displayName: string
-            }[]
-          }
-        }
-      }
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @constant */
-            error: 'unauthorized'
-            errorDescription: string
-          }
-        }
-      }
-    }
-  }
   getProjects: {
     parameters: {
       query?: {
@@ -337,7 +276,7 @@ export interface operations {
            * @default us-east-1
            * @enum {string}
            */
-          region?: 'us-east-1' | 'eu-west-3' | 'ap-northeast-1' | 'ap-southeast-1'
+          region?: 'us-east-1' | 'us-west-1' | 'eu-west-3' | 'ap-northeast-1' | 'ap-southeast-1'
           name?: string
         }
       }
@@ -567,12 +506,12 @@ export interface operations {
       }
     }
   }
-  getProjectsByIdDatabases: {
+  getProjectsByProjectIdDatabases: {
     parameters: {
       query?: never
       header?: never
       path: {
-        id: string
+        projectId: string
       }
       cookie?: never
     }
@@ -624,12 +563,12 @@ export interface operations {
       }
     }
   }
-  postProjectsByIdDatabases: {
+  postProjectsByProjectIdDatabases: {
     parameters: {
       query?: never
       header?: never
       path: {
-        id: string
+        projectId: string
       }
       cookie?: never
     }
@@ -640,7 +579,7 @@ export interface operations {
            * @default us-east-1
            * @enum {string}
            */
-          region?: 'us-east-1' | 'eu-west-3' | 'ap-northeast-1' | 'ap-southeast-1'
+          region?: 'us-east-1' | 'us-west-1' | 'eu-west-3' | 'ap-northeast-1' | 'ap-southeast-1'
           name?: string
           /** @default false */
           isDefault?: boolean
@@ -831,7 +770,22 @@ export interface operations {
         headers: {
           [name: string]: unknown
         }
-        content?: never
+        content: {
+          'application/json': {
+            data: {
+              id: string
+              name: string
+              /** Format: date-time */
+              createdAt: string
+            }[]
+            pagination: {
+              /** @description Next cursor to continue pagination */
+              nextCursor: string | null
+              /** @description Whether there are more items to paginate */
+              hasMore: boolean
+            }
+          }
+        }
       }
       /** @description Unauthorized */
       401: {
@@ -968,8 +922,8 @@ export interface operations {
       query?: never
       header?: never
       path: {
-        projectId: string
         databaseId: string
+        projectId: string
       }
       cookie?: never
     }
@@ -980,7 +934,22 @@ export interface operations {
         headers: {
           [name: string]: unknown
         }
-        content?: never
+        content: {
+          'application/json': {
+            data: {
+              id: string
+              createdAt: string
+              /** @enum {string} */
+              backupType: 'full' | 'incremental'
+              size: number
+              /** @enum {string} */
+              status: 'running' | 'completed' | 'failed' | 'unknown'
+            }[]
+            meta: {
+              backupRetentionDays: number
+            }
+          }
+        }
       }
       /** @description Unauthorized */
       401: {
@@ -1007,6 +976,153 @@ export interface operations {
               code: string
               message: string
             }
+          }
+        }
+      }
+    }
+  }
+  postProjectsByProjectIdDatabasesByDatabaseIdBackupsByBackupIdRecoveries: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        projectId: string
+        databaseId: string
+        backupId: string
+      }
+      cookie?: never
+    }
+    requestBody?: {
+      content: {
+        'application/json': {
+          /** @description Name of the new database */
+          targetDatabaseName?: string
+        }
+      }
+    }
+    responses: {
+      /** @description Restore initiated */
+      202: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: {
+              /** Format: date-time */
+              createdAt: string
+              id: string
+              name: string
+              region: string | null
+              isDefault: boolean
+              status: string
+            }
+          }
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            error: {
+              code: string
+              message: string
+            }
+          }
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            error: {
+              code: string
+              message: string
+            }
+          }
+        }
+      }
+    }
+  }
+  getRegions: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Retrieve all available regions */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: {
+              id: string
+              name: string
+              /** @enum {string} */
+              status: 'available' | 'unavailable' | 'unsupported'
+            }[]
+          }
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            error: 'unauthorized'
+            errorDescription: string
+          }
+        }
+      }
+    }
+  }
+  getWorkspaces: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Retrieve information about the workspaces accessible by the current actor */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: {
+              id: string
+              displayName: string
+            }[]
+          }
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            error: 'unauthorized'
+            errorDescription: string
           }
         }
       }

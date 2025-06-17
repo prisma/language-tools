@@ -43,15 +43,7 @@ import {
   mergeEditMaps,
 } from './code-actions/rename'
 import { validateIgnoredBlocks } from './validations'
-import {
-  fullDocumentRange,
-  getWordAtPosition,
-  getBlockAtPosition,
-  Block,
-  getBlocks,
-  getDocumentationForBlock,
-  getDatamodelBlock,
-} from './ast'
+import { fullDocumentRange, getWordAtPosition, getBlockAtPosition, Block, getBlocks } from './ast'
 import { prismaSchemaWasmCompletions, localCompletions } from './completions'
 import { PrismaSchema, SchemaDocument } from './Schema'
 import { DiagnosticMap } from './DiagnosticMap'
