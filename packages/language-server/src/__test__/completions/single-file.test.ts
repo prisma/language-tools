@@ -311,7 +311,7 @@ describe('Completions', function () {
         schema: /* Prisma */ `
         datasource db {
           url      = env("DATABASE_URL")
-          |      
+          |
         }`,
         expected: {
           isIncomplete: false,
@@ -989,7 +989,7 @@ describe('Completions', function () {
           model Post {
             id Int @id @default()
             email String? @unique
-            name String 
+            name String
             |
           }`,
           expected: {
@@ -1035,7 +1035,7 @@ describe('Completions', function () {
             |
             @@fulltext()
             @@fulltext([title, content], )
-          }          
+          }
           `,
             expected: {
               isIncomplete: false,
@@ -1113,7 +1113,7 @@ describe('Completions', function () {
           model Shard {
             id      Int    @id
             |
-          }          
+          }
           `,
           expected: {
             isIncomplete: false,
@@ -1696,7 +1696,7 @@ describe('Completions', function () {
             id    Int @id
             title   String
             content String
-            
+
             @@index(|)
           }
         `,
@@ -1714,7 +1714,7 @@ describe('Completions', function () {
           id    Int @id
           title   String
           content String
-          
+
           @@index([title], |)
         }
       `,
@@ -1732,7 +1732,7 @@ describe('Completions', function () {
           id    Int @id
           title   String
           content String
-          
+
           @@index([title], type: |)
         }
       `,
@@ -1757,7 +1757,7 @@ describe('Completions', function () {
           id    Int @id
           title   String
           content String
-          
+
           @@index([title], type: Hash, |)
         }
       `,
@@ -1775,7 +1775,7 @@ describe('Completions', function () {
           id    Int @id
           title   String
           content String
-          
+
           @@index([title(|)])
         }
       `,
@@ -1796,7 +1796,7 @@ describe('Completions', function () {
           id    Int @id
           title   String @db.Inet
           content String
-          
+
           @@index([title(ops: |)])
         }
       `,
@@ -1814,7 +1814,7 @@ describe('Completions', function () {
           id    Int @id
           title   String @db.Inet
           content String
-          
+
           @@index([title(ops: |)], type: Gist)
         }
       `,
@@ -1840,10 +1840,10 @@ describe('Completions', function () {
             id      Int    @id
             title   String @db.VarChar(255)
             content String @db.Text
-            
+
             @@fulltext(|)
             @@fulltext([title, content], )
-          }          
+          }
           `,
           expected: {
             isIncomplete: false,
@@ -1860,10 +1860,10 @@ describe('Completions', function () {
             id      Int    @id
             title   String @db.VarChar(255)
             content String @db.Text
-            
+
             @@fulltext()
             @@fulltext([title, content], |)
-          }          
+          }
           `,
           expected: {
             isIncomplete: false,
@@ -1881,7 +1881,7 @@ describe('Completions', function () {
             id      String @id @map("_id") @db.ObjectId
             title   String
             content String
-            
+
             @@fulltext(|)
             @@fulltext([title, content], )
           }
@@ -1913,7 +1913,7 @@ describe('Completions', function () {
             id      String @id @map("_id") @db.ObjectId
             title   String
             content String
-            
+
             @@fulltext()
             @@fulltext([title, content], |)
           }
@@ -2000,7 +2000,7 @@ describe('Completions', function () {
             model A {
               id   Int
               name String
-              
+
               @@id([id])
               @@unique([id])
               @@index([id])
@@ -2085,11 +2085,11 @@ describe('Completions', function () {
         model Post {
             id Int @id @default()
             email String? @unique
-            name String 
+            name String
         }
         model Person {
-            id String 
-            name Post 
+            id String
+            name Post
         }
         model Test {
           email    String  @unique
@@ -2123,7 +2123,7 @@ describe('Completions', function () {
         }
         model DateTest {
             id Int @id @default(autoincrement())
-            update DateTime  
+            update DateTime
             type UserType @default()
         }
         enum UserType {
@@ -2528,6 +2528,14 @@ describe('Completions', function () {
       label: 'nanoid()',
       kind: CompletionItemKind.Function,
     }
+    const functionKsuid = {
+      label: 'ksuid()',
+      kind: CompletionItemKind.Function,
+    }
+    const functionTypeid = {
+      label: 'typeid()',
+      kind: CompletionItemKind.Function,
+    }
     const functionAuto = {
       label: 'auto()',
       kind: CompletionItemKind.Function,
@@ -2625,12 +2633,12 @@ describe('Completions', function () {
           model Post {
             id Int @id @default()
             email String? @unique
-            name String 
+            name String
           }
 
           model Person {
               id String |
-              name Post 
+              name Post
           }`,
         expected: {
           isIncomplete: false,
@@ -2649,11 +2657,11 @@ describe('Completions', function () {
           model Post {
             id Int @id @default()
             email String? @unique
-            name String 
+            name String
           }
 
           model Person {
-              id String 
+              id String
               name Post |
           }`,
         expected: {
@@ -2883,7 +2891,7 @@ describe('Completions', function () {
                 id    Int             @id
                 lists ${scalarType}[] @default(|)
               }
-              
+
               enum color {
                 RED
                 GREEN
@@ -2905,7 +2913,7 @@ describe('Completions', function () {
                     model Post {
                         id Int @id @default(|)
                         email String? @unique
-                        name String 
+                        name String
                     }`,
             expected: {
               isIncomplete: false,
@@ -2919,7 +2927,7 @@ describe('Completions', function () {
                     model Post {
                         id BigInt @id @default(|)
                         email String? @unique
-                        name String 
+                        name String
                     }`,
             expected: {
               isIncomplete: false,
@@ -2937,7 +2945,15 @@ describe('Completions', function () {
                 }`,
             expected: {
               isIncomplete: false,
-              items: [functionDbGenerated, functionUuid, functionCuid, functionUlid, functionNanoid],
+              items: [
+                functionDbGenerated,
+                functionUuid,
+                functionCuid,
+                functionUlid,
+                functionNanoid,
+                functionKsuid,
+                functionTypeid,
+              ],
             },
           })
         })
@@ -2973,7 +2989,7 @@ describe('Completions', function () {
             schema: /* Prisma */ `
                   model DateTest {
                     id Int @id @default(autoincrement())
-                    update DateTime  
+                    update DateTime
                     enum UserType @default(|)
                   }
                   enum UserType {
@@ -3014,7 +3030,15 @@ describe('Completions', function () {
             }`,
             expected: {
               isIncomplete: false,
-              items: [functionAuto, functionUuid, functionCuid, functionUlid, functionNanoid],
+              items: [
+                functionAuto,
+                functionUuid,
+                functionCuid,
+                functionUlid,
+                functionNanoid,
+                functionKsuid,
+                functionTypeid,
+              ],
             },
           })
         })
@@ -3037,7 +3061,7 @@ describe('Completions', function () {
                     model Post {
                         id BigInt @id @default(|)
                         email String? @unique
-                        name String 
+                        name String
                     }`,
             expected: {
               isIncomplete: false,
@@ -3054,7 +3078,15 @@ describe('Completions', function () {
             }`,
             expected: {
               isIncomplete: false,
-              items: [functionAuto, functionUuid, functionCuid, functionUlid, functionNanoid],
+              items: [
+                functionAuto,
+                functionUuid,
+                functionCuid,
+                functionUlid,
+                functionNanoid,
+                functionKsuid,
+                functionTypeid,
+              ],
             },
           })
         })
@@ -3110,7 +3142,7 @@ describe('Completions', function () {
                   model Post {
                       id Int @id @default(|)
                       email String? @unique
-                      name String 
+                      name String
                   }`,
             expected: {
               isIncomplete: false,
@@ -3125,7 +3157,7 @@ describe('Completions', function () {
                   model Post {
                       id BigInt @id @default(|)
                       email String? @unique
-                      name String 
+                      name String
                   }`,
             expected: {
               isIncomplete: false,
@@ -3604,7 +3636,7 @@ describe('Completions', function () {
           schema: /* Prisma */ `
           model Id {
             id String @id(|) @db.VarChar(3000)
-          }  
+          }
           `,
           expected: {
             isIncomplete: false,
@@ -3621,7 +3653,7 @@ describe('Completions', function () {
             id      Int    @id
             title   String @db.VarChar(255)
             content String @db.Text
-            
+
             @@fulltext()
             @@fulltext([title, content], )
           }
@@ -3637,13 +3669,13 @@ describe('Completions', function () {
           model CompoundId {
             id_1 String @db.VarChar(3000)
             id_2 String @db.VarChar(3000)
-          
+
             @@id([id_1(length: 100), id_2(length: 10)])
           }
           model CompoundUnique {
             unique_1 Int
             unique_2 Int
-          
+
             @@unique([unique_1(sort: Desc), unique_2])
           }
           model Post {
@@ -3653,7 +3685,7 @@ describe('Completions', function () {
             slug2      String   @unique() @db.VarChar(3000)
             author     String
             created_at DateTime
-          
+
             @@id([title(length: 100, |), abstract()])
             @@index([author, created_at(sort: )])
             @@index([author, ])
@@ -3675,7 +3707,7 @@ describe('Completions', function () {
             id      Int    @id
             title   String @db.VarChar(255)
             content String @db.Text
-            
+
             @@fulltext()
             @@fulltext([title, content], )
           }
@@ -3691,13 +3723,13 @@ describe('Completions', function () {
           model CompoundId {
             id_1 String @db.VarChar(3000)
             id_2 String @db.VarChar(3000)
-          
+
             @@id([id_1(length: 100), id_2(length: 10)])
           }
           model CompoundUnique {
             unique_1 Int
             unique_2 Int
-          
+
             @@unique([unique_1(sort: Desc), unique_2])
           }
           model Post {
@@ -3707,7 +3739,7 @@ describe('Completions', function () {
             slug2      String   @unique() @db.VarChar(3000)
             author     String
             created_at DateTime
-          
+
             @@id([title(length: 100, ), abstract(|)])
           }
           `,
@@ -3920,12 +3952,12 @@ describe('Completions', function () {
               generator client {
                 provider = "prisma-client-js"
               }
-              
+
               datasource db {
                 provider = "postgresql"
                 url      = env("DATABASE_URL")
               }
-              
+
               model A {
                 id  Int @id @unique @default(autoincrement()) @map("hi") @ignore @db.Integer |
               }
@@ -3943,18 +3975,18 @@ describe('Completions', function () {
               generator client {
                 provider = "prisma-client-js"
               }
-              
+
               datasource db {
                 provider = "postgresql"
                 url      = env("DATABASE_URL")
               }
-              
+
               model A {
                 id  Int @id
                 b   B   @relation(fields: [bId], references: [id]) |
                 bId Int
               }
-              
+
               model B {
                 id Int @id
                 A  A[]
@@ -3978,16 +4010,16 @@ describe('Completions', function () {
             generator client {
               provider = "prisma-client-js"
             }
-            
+
             datasource db {
               provider = "postgresql"
               url      = env("DATABASE_URL")
             }
-            
+
             model A {
               id Int @default(autoincrement()) @map("hi")
               name String |
-              
+
               @@ignore
             }
             `,
@@ -4010,15 +4042,15 @@ describe('Completions', function () {
             generator client {
               provider = "prisma-client-js"
             }
-            
+
             datasource db {
               provider = "postgresql"
               url      = env("DATABASE_URL")
             }
-            
+
             model A {
               id Int |
-              
+
               @@id([id])
             }
             `,
