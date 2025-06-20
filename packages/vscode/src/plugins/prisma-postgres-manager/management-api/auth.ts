@@ -37,7 +37,9 @@ export class Auth {
     authUrl.searchParams.set('state', this.latestState)
     authUrl.searchParams.set('code_challenge', challenge)
     authUrl.searchParams.set('code_challenge_method', 'S256')
-    authUrl.searchParams.set('utm_source', 'extension')
+    authUrl.searchParams.set('utm_source', 'vscode')
+    authUrl.searchParams.set('utm_medium', 'extension')
+    authUrl.searchParams.set('utm_campaign', 'oauth')
 
     await env.openExternal(Uri.parse(authUrl.toString()))
   }
