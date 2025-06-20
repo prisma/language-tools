@@ -11,6 +11,7 @@ import * as path from 'path'
 import { waitForProcessKilled } from './utils/waitForProcessKilled'
 import { proxySignals } from 'foreground-child/proxy-signals'
 import { fork } from 'child_process'
+import * as chokidar from 'chokidar'
 
 const PPG_DEV_GLOBAL_ROOT = envPaths('prisma-dev')
 
@@ -99,7 +100,17 @@ export class PrismaPostgresRepository {
     private readonly auth: Auth,
     private readonly connectionStringStorage: ConnectionStringStorage,
     private readonly context: ExtensionContext,
-  ) {}
+  ) {
+    const watcher = chokidar.watch(PPG_DEV_GLOBAL_ROOT.data, {
+      ignoreInitial: true,
+    })
+
+    watcher.on('addDir', () => this.refreshLocalDatabases())
+    watcher.on('unlinkDir', () => this.refreshLocalDatabases())
+    watcher.on('change', () => this.refreshLocalDatabases())
+
+    context.subscriptions.push({ dispose: () => watcher.close() })
+  }
 
   private async getClient(workspaceId: string) {
     if (!this.clients.has(workspaceId)) {

@@ -20,6 +20,7 @@
     "@prisma/ppg": "0.5.2",
     "@prisma/studio-core": "0.2.6",
     "checkpoint-client": "1.1.33",
+    "chokidar": "^4.0.3",
     "env-paths": "^2.2.1",
     "execa": "5.1.1",
     "foreground-child": "3.3.1",
