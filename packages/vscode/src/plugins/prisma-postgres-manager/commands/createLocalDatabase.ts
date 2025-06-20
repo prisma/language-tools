@@ -8,5 +8,5 @@ export async function createLocalDatabase(ppgRepository: PrismaPostgresRepositor
     value: 'default',
   })
 
-  await ppgRepository.createLocalDatabase({ name: name ?? 'default' })
+  await ppgRepository.createOrStartLocalDatabase({ name: name ?? 'default' })
 }

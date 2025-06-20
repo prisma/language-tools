@@ -96,7 +96,7 @@ class PrismaLocalDatabasesItem extends vscode.TreeItem {
 
 class PrismaLocalDatabaseItem extends vscode.TreeItem {
   constructor(element: LocalDatabase) {
-    const { id, name, url, pid, running } = element
+    const { id, name, running } = element
 
     super(name, vscode.TreeItemCollapsibleState.None)
 
@@ -109,7 +109,7 @@ class PrismaLocalDatabaseItem extends vscode.TreeItem {
     this.command = {
       command: 'prisma.studio.launchForDatabase',
       title: 'Launch Prisma Studio',
-      arguments: [{ type: 'local', id, name, url, pid } satisfies LaunchArgLocal],
+      arguments: [{ type: 'local', id, name } satisfies LaunchArgLocal],
     }
   }
 }

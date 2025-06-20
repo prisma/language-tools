@@ -100,7 +100,7 @@ export default {
         await handleCommandError('Delete Local Database', () => deleteLocalDatabase(ppgRepository, args))
       }),
       commands.registerCommand('prisma.copyLocalDatabaseURL', async (args: unknown) => {
-        await handleCommandError('Copy Local Database URL', () => copyLocalDatabaseUrl(args))
+        await handleCommandError('Copy Local Database URL', () => copyLocalDatabaseUrl(ppgRepository, args))
       }),
       commands.registerCommand('prisma.deployLocalDatabase', async (args: unknown) => {
         await handleCommandError('Deploy Local Database', () => deployLocalDatabase(ppgRepository, args))

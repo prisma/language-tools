@@ -7,8 +7,6 @@ export const LaunchArgLocalSchema = z.object({
   type: z.literal('local'),
   id: z.string(),
   name: z.string(),
-  url: z.string(),
-  pid: z.number(),
 })
 export type LaunchArgLocal = z.infer<typeof LaunchArgLocalSchema>
 
@@ -35,7 +33,7 @@ export const launchStudio = async ({
   const database = LaunchArgSchema.parse(args)
 
   if (database.type === 'local') {
-    await ppgRepository.startLocalDatabase(database)
+    await ppgRepository.createOrStartLocalDatabase(database)
   }
 
   const connectionString = await getConnectionString(ppgRepository, database)
@@ -47,9 +45,7 @@ export const launchStudio = async ({
 
 const getConnectionString = async (ppgRepository: PrismaPostgresRepository, database: LaunchArg) => {
   if (database.type === 'local') {
-    const localDatabases = await ppgRepository.getLocalDatabases()
-
-    return localDatabases.find((db) => db.id === database.id)!.url
+    return await ppgRepository.getLocalDatabaseConnectionString(database)
   }
 
   const connectionString = await ppgRepository.getStoredRemoteDatabaseConnectionString(database)
