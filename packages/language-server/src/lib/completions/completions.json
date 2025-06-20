@@ -215,6 +215,13 @@
       "documentation": "Designate which schema this belongs to. [Learn more](https://pris.ly/d/multi-schema-configuration)",
       "fullSignature": "@@schema(_: String)",
       "params": []
+    },
+    {
+      "label": "@@shardKey",
+      "insertText": "@@shardKey($0)",
+      "documentation": "Defines a shard key based on multiple fields of the model. Only compatible with Planetscale.",
+      "fullSignature": "@@shardKey(_: FieldReference[])",
+      "params": []
     }
   ],
   "fieldAttributes": [
@@ -328,6 +335,12 @@
       "label": "@ignore",
       "fullSignature": "@ignore",
       "documentation": "A field with an `@ignore` attribute can be kept in sync with the database schema using Prisma Migrate and Introspection, but won't be exposed in Prisma Client.",
+      "params": []
+    },
+    {
+      "label": "@shardKey",
+      "fullSignature": "@shardKey",
+      "documentation": "Defines the field as the shard key for the model. Only compatible with Planetscale.",
       "params": []
     }
   ],

@@ -49,6 +49,10 @@ const filterContextBlockAttributes = (schema: PrismaSchema, suggestions: Complet
       previewFeatures?.includes('multischema'),
   )
 
+  const isShardKeyAvailable = Boolean(
+    datasourceProvider && datasourceProvider.includes('mysql') && previewFeatures?.includes('shardkeys'),
+  )
+
   if (isFullTextAvailable === false) {
     // fullTextIndex is not available, we need to filter it out
     suggestions = suggestions.filter((arg) => arg.label !== '@@fulltext')
@@ -56,6 +60,10 @@ const filterContextBlockAttributes = (schema: PrismaSchema, suggestions: Complet
 
   if (!isMultiSchemaAvailable) {
     suggestions = suggestions.filter((item) => item.label !== '@@schema')
+  }
+
+  if (!isShardKeyAvailable) {
+    suggestions = suggestions.filter((item) => item.label !== '@@shardKey')
   }
 
   return suggestions
@@ -127,8 +135,19 @@ function filterSuggestionsForLine(
   suggestions: CompletionItem[],
   currentLine: string,
   fieldType: string,
-  fieldBlockType?: BlockType,
+  fieldBlockType: BlockType | undefined,
+  schema: PrismaSchema,
 ) {
+  const datasourceProvider = getFirstDatasourceProvider(schema)
+  const previewFeatures = getAllPreviewFeaturesFromGenerators(schema)
+
+  const isShardKeyAvailable = Boolean(
+    datasourceProvider && datasourceProvider.includes('mysql') && previewFeatures?.includes('shardkeys'),
+  )
+  if (!isShardKeyAvailable) {
+    suggestions = suggestions.filter((item) => item.label !== '@shardKey')
+  }
+
   if (fieldBlockType === 'type') {
     // @default & @relation are invalid on field referencing a composite type
     // we filter them out
@@ -231,7 +250,7 @@ export function getSuggestionForFieldAttribute(
 
   const datamodelBlock = getDatamodelBlock(fieldType, schema)
 
-  suggestions = filterSuggestionsForLine(suggestions, currentLine, fieldType, datamodelBlock?.type)
+  suggestions = filterSuggestionsForLine(suggestions, currentLine, fieldType, datamodelBlock?.type, schema)
 
   suggestions = filterSuggestionsForBlock(suggestions, block, schema)
 
