@@ -1,14 +1,16 @@
 import { env, window } from 'vscode'
-import { LocalDatabase, LocalDatabaseSchema } from '../PrismaPostgresRepository'
+import { LocalDatabase, LocalDatabaseSchema, PrismaPostgresRepository } from '../PrismaPostgresRepository'
 
-export async function copyLocalDatabaseUrl(args: unknown) {
-  const item = LocalDatabaseSchema.parse(args)
+export async function copyLocalDatabaseUrl(ppgRepository: PrismaPostgresRepository, args: unknown) {
+  const { name } = LocalDatabaseSchema.parse(args)
 
-  await env.clipboard.writeText(item.url)
+  const url = await ppgRepository.getLocalDatabaseConnectionString({ name })
+
+  await env.clipboard.writeText(url)
 
   void window.showInformationMessage(`PPg Dev URL copied to your clipboard!`)
 }
 
-export async function copyLocalDatabaseUrlSafely(args: LocalDatabase) {
-  return copyLocalDatabaseUrl(args)
+export async function copyLocalDatabaseUrlSafely(ppgRepository: PrismaPostgresRepository, args: LocalDatabase) {
+  return copyLocalDatabaseUrl(ppgRepository, args)
 }

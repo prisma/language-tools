@@ -3,9 +3,10 @@ import { createRemoteDatabaseSafely } from './createRemoteDatabase'
 import { ProgressLocation, window } from 'vscode'
 
 export async function deployLocalDatabase(ppgRepository: PrismaPostgresRepository, args: unknown): Promise<void> {
-  const { name, pid, url, running } = LocalDatabaseSchema.parse(args)
+  const { name } = LocalDatabaseSchema.parse(args)
+  const database = await ppgRepository.getLocalDatabase({ name })
 
-  if (running) {
+  if (database?.running) {
     const confirmation = await window.showInformationMessage(
       'To deploy your local Prisma Postgres database, you will need to stop the database first. Proceed?',
       { modal: true },
@@ -16,8 +17,6 @@ export async function deployLocalDatabase(ppgRepository: PrismaPostgresRepositor
       void window.showInformationMessage('Deployment cancelled.')
       return
     }
-
-    await ppgRepository.stopLocalDatabase({ pid, url })
   }
 
   const createdDb = await createRemoteDatabaseSafely(ppgRepository, undefined, { skipRefresh: true })
