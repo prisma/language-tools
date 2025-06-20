@@ -93,6 +93,28 @@ export const nanoidDefaultCompletion = (items: CompletionItem[]) =>
     },
   })
 
+export const ksuidDefaultCompletion = (items: CompletionItem[]) =>
+  items.push({
+    label: 'ksuid()',
+    kind: CompletionItemKind.Function,
+    documentation: {
+      kind: MarkupKind.Markdown,
+      value:
+        'Generate a K-Sortable, URL-friendly, globally unique identifier based on the [ksuid](https://github.com/segmentio/ksuid) spec.',
+    },
+  })
+
+export const typeidDefaultCompletion = (items: CompletionItem[]) =>
+  items.push({
+    label: 'typeid()',
+    kind: CompletionItemKind.Function,
+    documentation: {
+      kind: MarkupKind.Markdown,
+      value:
+        'Generate a Prefixed, K-Sortable, URL-friendly, globally unique identifier based on the [typeid](https://github.com/jetify-com/typeid) spec. The default prefix is `id`',
+    },
+  })
+
 export const nativeFunctionCompletion = (
   items: CompletionItem[],
   element: NativeTypeConstructors,
