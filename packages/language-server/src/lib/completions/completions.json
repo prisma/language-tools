@@ -219,7 +219,7 @@
     {
       "label": "@@shardKey",
       "insertText": "@@shardKey($0)",
-      "documentation": "Defines a shard key based on multiple fields of the model. Only compatible with Planetscale.",
+      "documentation": "Defines a shard key based on multiple fields of the model. Only compatible with PlanetScale and Vitess.",
       "fullSignature": "@@shardKey(_: FieldReference[])",
       "params": []
     }
@@ -340,7 +340,7 @@
     {
       "label": "@shardKey",
       "fullSignature": "@shardKey",
-      "documentation": "Defines the field as the shard key for the model. Only compatible with Planetscale.",
+      "documentation": "Defines the field as the shard key for the model. Only compatible with PlanetScale and Vitess.",
       "params": []
     }
   ],
