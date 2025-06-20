@@ -18,7 +18,7 @@ async function main() {
   try {
     const { unstable_startServer } = await import('@prisma/dev')
 
-    server = await unstable_startServer({ persistenceMode: 'stateful', name, port, databasePort, shadowDatabasePort })
+    server = await unstable_startServer({ persistenceMode: 'stateful', name })
 
     console.log(`[PPG Dev] Server started successfully for database: ${name}`)
   } catch (error) {
