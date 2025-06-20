@@ -628,6 +628,10 @@ describe('Completions', function () {
       label: '@@schema',
       kind: CompletionItemKind.Property,
     }
+    const blockAttributeShardKey = {
+      label: '@@shardKey',
+      kind: CompletionItemKind.Property,
+    }
     const typeProperty = {
       label: 'type',
       kind: CompletionItemKind.Property,
@@ -817,6 +821,53 @@ describe('Completions', function () {
               ],
             },
           })
+        })
+      })
+    })
+
+    describe('shardKey', () => {
+      test('MySQL', () => {
+        assertCompletion({
+          provider: 'mysql',
+          previewFeatures: ['shardKeys'],
+          schema: /* Prisma */ `
+          model Shard {
+            id      Int    @id
+            |
+          }          
+          `,
+          expected: {
+            isIncomplete: false,
+            items: [
+              blockAttributeMap,
+              blockAttributeUnique,
+              blockAttributeIndex,
+              blockAttributeIgnore,
+              blockAttributeShardKey,
+            ],
+          },
+        })
+      })
+      test('PostgreSQL', () => {
+        assertCompletion({
+          provider: 'postgresql',
+          previewFeatures: ['shardKeys'],
+          schema: /* Prisma */ `
+            model A {
+              id    Int @id
+              |
+            }
+          `,
+          expected: {
+            isIncomplete: false,
+            items: [
+              blockAttributeMap,
+              blockAttributeUnique,
+              blockAttributeIndex,
+              blockAttributeIgnore,
+              // blockAttributeShardKey,
+            ],
+          },
         })
       })
     })
@@ -2178,6 +2229,10 @@ describe('Completions', function () {
       label: '@db',
       kind: CompletionItemKind.Property,
     }
+    const fieldAttributeShardKey = {
+      label: '@shardKey',
+      kind: CompletionItemKind.Property,
+    }
 
     const functionCuid = {
       label: 'cuid()',
@@ -2421,6 +2476,55 @@ describe('Completions', function () {
           isIncomplete: false,
           items: [fieldAttributeUnique, fieldAttributeDefault, fieldAttributeRelation, fieldAttributeIgnore],
         },
+      })
+    })
+
+    describe('@shardKey', () => {
+      test('MySQL', () => {
+        assertCompletion({
+          provider: 'mysql',
+          previewFeatures: ['shardKeys'],
+          schema: /* Prisma */ `
+          model Post {
+            id Int @id @default()
+            name String |
+          }`,
+          expected: {
+            isIncomplete: false,
+            items: [
+              fieldAttributeDatasourceName,
+              fieldAttributeUnique,
+              fieldAttributeMap,
+              fieldAttributeDefault,
+              fieldAttributeRelation,
+              fieldAttributeIgnore,
+              fieldAttributeShardKey,
+            ],
+          },
+        })
+      })
+      test('PostgreSQL', () => {
+        assertCompletion({
+          provider: 'postgresql',
+          previewFeatures: ['shardKeys'],
+          schema: /* Prisma */ `
+          model Post {
+            id Int @id @default()
+            name String |
+          }`,
+          expected: {
+            isIncomplete: false,
+            items: [
+              fieldAttributeDatasourceName,
+              fieldAttributeUnique,
+              fieldAttributeMap,
+              fieldAttributeDefault,
+              fieldAttributeRelation,
+              fieldAttributeIgnore,
+              // fieldAttributeShardKey
+            ],
+          },
+        })
       })
     })
 
