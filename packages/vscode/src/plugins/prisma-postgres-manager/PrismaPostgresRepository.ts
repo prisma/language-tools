@@ -619,6 +619,8 @@ export class PrismaPostgresRepository {
       let running = status === 'running' || status === 'starting_up'
       let pid = state.pid ?? -1
 
+      // ppg dev quirk: after a deploy command, since it's run in the same
+      // process as vscode, it stores the process pid and think it's running
       if (pid === process.pid) {
         pid = -1
         running = false
