@@ -8,12 +8,10 @@ import { z } from 'zod'
 import envPaths from 'env-paths'
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import { waitForPortBorrowed } from './utils/waitForPortBorrowed'
-import { waitForPortAvailable } from './utils/waitForPortAvailable'
-import { getUniquePorts } from './utils/getUniquePorts'
-import { isPidRunning } from './utils/isPidRunning'
+import { waitForProcessKilled } from './utils/waitForProcessKilled'
 import { proxySignals } from 'foreground-child/proxy-signals'
 import { fork } from 'child_process'
+import * as chokidar from 'chokidar'
 
 const PPG_DEV_GLOBAL_ROOT = envPaths('prisma-dev')
 
@@ -94,6 +92,7 @@ export class PrismaPostgresRepository {
   private workspacesCache = new Map<WorkspaceId, Workspace>()
   private projectsCache = new Map<WorkspaceId, Map<ProjectId, Project>>()
   private remoteDatabasesCache = new Map<string, Map<RemoteDatabaseId, RemoteDatabase>>()
+  private localDatabasesCache: { timestamp: number; data: LocalDatabase[] } | undefined
 
   public readonly refreshEventEmitter = new EventEmitter<void | PrismaPostgresItem>()
 
@@ -101,7 +100,17 @@ export class PrismaPostgresRepository {
     private readonly auth: Auth,
     private readonly connectionStringStorage: ConnectionStringStorage,
     private readonly context: ExtensionContext,
-  ) {}
+  ) {
+    const watcher = chokidar.watch(PPG_DEV_GLOBAL_ROOT.data, {
+      ignoreInitial: true,
+    })
+
+    watcher.on('addDir', () => this.refreshLocalDatabases())
+    watcher.on('unlinkDir', () => this.refreshLocalDatabases())
+    watcher.on('change', () => this.refreshLocalDatabases())
+
+    context.subscriptions.push({ dispose: () => watcher.close() })
+  }
 
   private async getClient(workspaceId: string) {
     if (!this.clients.has(workspaceId)) {
@@ -587,78 +596,107 @@ export class PrismaPostgresRepository {
     this.refreshEventEmitter.fire()
   }
 
-  async getLocalDatabases(): Promise<LocalDatabase[]> {
-    const { ServerState } = await import('@prisma/dev/internal/state')
+  async getLocalDatabase(args: { name: string }) {
+    const { name } = args
 
-    return (await ServerState.scan()).map((state) => {
+    const databases = await this.getLocalDatabases()
+
+    return databases.find((db) => db.name === name)
+  }
+
+  async getLocalDatabases(): Promise<LocalDatabase[]> {
+    const now = Date.now()
+
+    // we cache the local databases for 100ms to prevent overusage of filesystem
+    if (this.localDatabasesCache && now - this.localDatabasesCache.timestamp < 100) {
+      return this.localDatabasesCache.data
+    }
+
+    const { ServerState } = await import('@prisma/dev/internal/state')
+    const data = (await ServerState.scan()).map((state) => {
       const { name, exports, status } = state
-      const running = status === 'running'
       const url = exports?.ppg.url ?? 'http://offline'
-      const pid = state.pid ?? -1
+      let running = status === 'running' || status === 'starting_up'
+      let pid = state.pid ?? -1
+
+      // ppg dev quirk: after a deploy command, since it's run in the same
+      // process as vscode, it stores the process pid and think it's running
+      if (pid === process.pid) {
+        pid = -1
+        running = false
+      }
 
       return { type: 'localDatabase', pid, name, id: name, url, running } as const
     })
+
+    this.localDatabasesCache = { timestamp: now, data }
+
+    return data
   }
 
-  async createLocalDatabase(args: { name: string }): Promise<void> {
-    // TODO: once ppg dev has a daemon, this should be replaced
+  async createOrStartLocalDatabase(args: { name: string }): Promise<void> {
     const { name } = args
-    const [port, databasePort, shadowDatabasePort] = (await getUniquePorts(3)).map(String)
-    const { path: ppgDevServerPath } = Uri.joinPath(
+
+    // skip spawning a new server if we know the server is running
+    const database = await this.getLocalDatabase({ name })
+    if (database?.running === true) return
+
+    // TODO: once ppg dev has a daemon, this should be replaced
+    const { path } = Uri.joinPath(
       this.context.extensionUri,
       ...['dist', 'src', 'plugins', 'prisma-postgres-manager', 'utils', 'spawnPpgDevServer.js'],
     )
 
-    const child = fork(ppgDevServerPath, [name, port, databasePort, shadowDatabasePort], {
-      stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
-      detached: true,
-    })
-
-    child.on('error', (error) => console.error(`[PPG Dev] Process (${name}) error for database:`, error))
-    child.on('exit', (code, signal) => console.log(`[PPG Dev] Process (${name}) exited (${code}, ${signal})`))
-    child.on('spawn', () => console.log(`[PPG Dev] Process (${name}) spawned successfully`))
+    const child = fork(path, [name], { stdio: ['ignore', 'pipe', 'pipe', 'ipc'], detached: true })
     child.stdout?.on('data', (data) => console.log(`[PPG Child ${name}] ${String(data).trim()}`))
     child.stderr?.on('data', (data) => console.error(`[PPG Child ${name}] ${String(data).trim()}`))
-
     proxySignals(child) // closes the children if parent is closed (ie. vscode)
 
-    await waitForPortBorrowed(+port)
+    await new Promise((resolve, reject) => {
+      child.on('error', reject)
+
+      child.stdout?.on('data', (data) => {
+        if (String(data).includes('[PPG Dev] Server started')) {
+          return resolve(undefined)
+        }
+      })
+
+      child.stderr?.on('data', (data) => {
+        if (String(data).includes('[PPG Dev] Error starting')) {
+          return reject(new Error(`${data}`))
+        }
+      })
+    })
 
     void this.refreshLocalDatabases()
   }
 
-  async startLocalDatabase(args: { pid: number; name: string }): Promise<void> {
-    const { pid, name } = args
+  async deleteLocalDatabase(args: { name: string }): Promise<void> {
+    const { name } = args
 
-    if (isPidRunning(pid) === false || pid === process.pid) {
-      console.log(`[startLocalDatabase] starting local database ${name}`)
-      await this.createLocalDatabase(args)
-    } else {
-      console.log(`[startLocalDatabase] local database ${name} already started`)
-    }
-  }
+    const database = await this.getLocalDatabase({ name })
 
-  async deleteLocalDatabase(args: { pid: number; name: string; url: string }): Promise<void> {
-    const { pid, name, url } = args
-    const databasePath = path.join(PPG_DEV_GLOBAL_ROOT.data, name)
+    if (database !== undefined) {
+      const databasePath = path.join(PPG_DEV_GLOBAL_ROOT.data, name)
 
-    try {
-      await this.stopLocalDatabase({ pid, url }).catch(() => {})
+      await this.stopLocalDatabase({ name }).catch(() => {})
       await fs.rm(databasePath, { recursive: true, force: true })
-      console.log(`[deleteLocalDatabase] Deleted local database folder: ${databasePath}`)
-    } catch (error) {
-      console.error(`[deleteLocalDatabase] Failed to delete local database folder: ${databasePath}`, error)
     }
 
     void this.refreshLocalDatabases()
   }
 
-  async stopLocalDatabase(args: { pid: number; url: string }): Promise<void> {
-    const { pid, url } = args
-    const { port } = new URL(url)
+  async stopLocalDatabase(args: { name: string }): Promise<void> {
+    const { name } = args
 
-    process.kill(pid, 'SIGTERM')
-    await waitForPortAvailable(+port)
+    const database = await this.getLocalDatabase({ name })
+
+    if (database?.running) {
+      const { pid } = database
+
+      process.kill(pid, 'SIGTERM')
+      await waitForProcessKilled(pid)
+    }
 
     void this.refreshLocalDatabases()
   }
@@ -668,6 +706,8 @@ export class PrismaPostgresRepository {
     const { ServerState } = await import('@prisma/dev/internal/state')
     const { dumpDB } = await import('@prisma/dev/internal/db')
     const { name, url, projectId, workspaceId } = args
+
+    await this.stopLocalDatabase({ name }) // db has to be stopped before dumping
 
     const state = await ServerState.createExclusively({ name, persistenceMode: 'stateful' })
 
@@ -683,5 +723,18 @@ export class PrismaPostgresRepository {
 
     void this.refreshProjects({ workspaceId })
     void this.refreshRemoteDatabases({ projectId, workspaceId })
+  }
+
+  async getLocalDatabaseConnectionString(args: { name: string }) {
+    const { name } = args
+
+    const database = await this.getLocalDatabase({ name })
+
+    if (database?.running !== true) {
+      void this.refreshLocalDatabases()
+      throw new Error('This database has been deleted or stopped')
+    }
+
+    return database.url
   }
 }
