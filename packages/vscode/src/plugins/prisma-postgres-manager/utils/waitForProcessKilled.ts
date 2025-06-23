@@ -8,7 +8,7 @@ export async function waitForProcessKilled(pid: number, attemptsMade = 0): Promi
   }
 
   if (attemptsMade >= 100) {
-    throw new Error(`Process ${pid} did not terminate after ${10} attempts.`)
+    throw new Error(`Process ${pid} did not terminate after ${attemptsMade} attempts.`)
   }
 
   await setTimeout(100)
