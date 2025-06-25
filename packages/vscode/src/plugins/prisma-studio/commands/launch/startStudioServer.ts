@@ -65,15 +65,6 @@ export async function startStudioServer(args: { dbUrl: string; context: Extensio
 
     let contentType = contentTypeMap[fileExt] ?? 'application/octet-stream'
     
-    if (contentType.includes("image/")) {
-        try {
-          const base64 = Buffer.from(await readFile(filePath)).toString('base64')
-          return c.body(`export default "data:${contentType};base64,${base64}"`, 200, { 'Content-Type': 'text/javascript' })
-        } catch (error) {
-          return c.text('File not found', 404)
-        }
-    }
-
     try {
       return c.body(await readFile(filePath), 200, { 'Content-Type': contentType })
     } catch (error) {
