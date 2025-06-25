@@ -1,13 +1,13 @@
 import { ExtensionContext, Uri } from 'vscode'
 import { Hono } from 'hono'
-import { cors } from 'hono/cors' // Import the cors middleware
+import { cors } from 'hono/cors'
 import path from 'path'
 import { readFile } from 'fs/promises'
 import getPort from 'get-port'
 import { serve } from '@hono/node-server'
-import { createAccelerateHttpClient } from '@prisma/studio-core/data/accelerate'
-import { serializeError } from '@prisma/studio-core/data/bff'
-import { Query } from '@prisma/studio-core/data'
+import { createAccelerateHttpClient } from '@prisma/studio-core-licensed/data/accelerate'
+import { serializeError } from '@prisma/studio-core-licensed/data/bff'
+import { Query } from '@prisma/studio-core-licensed/data'
 
 /**
  * Starts a local server for Prisma Studio and serves the UI files.
@@ -16,7 +16,7 @@ import { Query } from '@prisma/studio-core/data'
  */
 export async function startStudioServer(args: { dbUrl: string; context: ExtensionContext }) {
   const { dbUrl, context } = args
-  const staticFilesPath = ['node_modules', '@prisma', 'studio-core']
+  const staticFilesPath = ['node_modules', '@prisma', 'studio-core-licensed']
   const staticFilesRoot = Uri.joinPath(context.extensionUri, ...staticFilesPath)
 
   const app = new Hono()
@@ -63,7 +63,16 @@ export async function startStudioServer(args: { dbUrl: string; context: Extensio
       '.svg': 'image/svg+xml',
     }
 
-    const contentType = contentTypeMap[fileExt] ?? 'application/octet-stream'
+    let contentType = contentTypeMap[fileExt] ?? 'application/octet-stream'
+    
+    if (contentType.includes("image/")) {
+        try {
+          const base64 = Buffer.from(await readFile(filePath)).toString('base64')
+          return c.body(`export default "data:${contentType};base64,${base64}"`, 200, { 'Content-Type': 'text/javascript' })
+        } catch (error) {
+          return c.text('File not found', 404)
+        }
+    }
 
     try {
       return c.body(await readFile(filePath), 200, { 'Content-Type': contentType })
