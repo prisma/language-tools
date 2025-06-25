@@ -63,8 +63,8 @@ export async function startStudioServer(args: { dbUrl: string; context: Extensio
       '.svg': 'image/svg+xml',
     }
 
-    let contentType = contentTypeMap[fileExt] ?? 'application/octet-stream'
-    
+    const contentType = contentTypeMap[fileExt] ?? 'application/octet-stream'
+
     try {
       return c.body(await readFile(filePath), 200, { 'Content-Type': contentType })
     } catch (error) {
