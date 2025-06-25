@@ -18,7 +18,7 @@
     "@prisma/dev": "0.10.0",
     "@prisma/language-server": "31.0.7685",
     "@prisma/ppg": "0.5.2",
-    "@prisma/studio-core": "0.2.6",
+    "@prisma/studio-core-licensed": "0.3.4",
     "checkpoint-client": "1.1.33",
     "chokidar": "^4.0.3",
     "env-paths": "^2.2.1",
