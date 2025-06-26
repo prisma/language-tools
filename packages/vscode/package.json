@@ -15,10 +15,10 @@
   "dependencies": {
     "@hono/node-server": "1.14.2",
     "@prisma/credentials-store": "6.9.0-dev.18",
-    "@prisma/dev": "0.10.0",
+    "@prisma/dev": "0.11.1",
     "@prisma/language-server": "31.0.7696",
     "@prisma/ppg": "0.5.2",
-    "@prisma/studio-core-licensed": "0.3.4",
+    "@prisma/studio-core-licensed": "0.5.0",
     "checkpoint-client": "1.1.33",
     "chokidar": "^4.0.3",
     "env-paths": "^2.2.1",
