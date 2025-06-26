@@ -84,15 +84,140 @@ export type PrismaPostgresItem =
   | RemoteDatabase
   | LocalDatabase
 
-export class PrismaPostgresRepository {
-  private clients: Map<string, ReturnType<typeof createManagementAPIClient>> = new Map()
-  private credentialsStore = new CredentialsStore()
+// Simple cache manager to handle all caching logic
+class CacheManager {
+  private regions: Region[] = []
+  private workspaces = new Map<WorkspaceId, Workspace>()
+  private projects = new Map<string, Map<ProjectId, Project>>()
+  private databases = new Map<string, Map<RemoteDatabaseId, RemoteDatabase>>()
+  private localDatabases: { timestamp: number; data: LocalDatabase[] } | undefined
 
-  private regionsCache: Region[] = []
-  private workspacesCache = new Map<WorkspaceId, Workspace>()
-  private projectsCache = new Map<WorkspaceId, Map<ProjectId, Project>>()
-  private remoteDatabasesCache = new Map<string, Map<RemoteDatabaseId, RemoteDatabase>>()
-  private localDatabasesCache: { timestamp: number; data: LocalDatabase[] } | undefined
+  generateKey(workspaceId: string, projectId?: string): string {
+    return projectId ? `${workspaceId}.${projectId}` : workspaceId
+  }
+
+  // Workspace cache
+  setWorkspaces(workspaces: Workspace[]): void {
+    this.workspaces.clear()
+    workspaces.forEach((w) => this.workspaces.set(w.id, w))
+  }
+
+  getWorkspaces(): Workspace[] {
+    return Array.from(this.workspaces.values())
+  }
+
+  hasWorkspaces(): boolean {
+    return this.workspaces.size > 0
+  }
+
+  removeWorkspace(workspaceId: string): void {
+    this.workspaces.delete(workspaceId)
+    this.projects.delete(workspaceId)
+    // Remove all databases for this workspace
+    Array.from(this.databases.keys())
+      .filter((key) => key.startsWith(`${workspaceId}.`))
+      .forEach((key) => this.databases.delete(key))
+  }
+
+  // Project cache
+  setProjects(workspaceId: string, projects: Project[]): void {
+    const projectMap = new Map<ProjectId, Project>()
+    projects.forEach((p) => projectMap.set(p.id, p))
+    this.projects.set(workspaceId, projectMap)
+  }
+
+  getProjects(workspaceId: string): Project[] {
+    return Array.from(this.projects.get(workspaceId)?.values() || [])
+  }
+
+  hasProjects(workspaceId: string): boolean {
+    return this.projects.has(workspaceId)
+  }
+
+  addProject(project: Project): void {
+    if (!this.projects.has(project.workspaceId)) {
+      this.projects.set(project.workspaceId, new Map())
+    }
+    this.projects.get(project.workspaceId)!.set(project.id, project)
+  }
+
+  removeProject(workspaceId: string, projectId: string): void {
+    this.projects.get(workspaceId)?.delete(projectId)
+    this.databases.delete(this.generateKey(workspaceId, projectId))
+  }
+
+  // Database cache
+  setDatabases(workspaceId: string, projectId: string, databases: RemoteDatabase[]): void {
+    const databaseMap = new Map<RemoteDatabaseId, RemoteDatabase>()
+    databases.forEach((db) => databaseMap.set(db.id, db))
+    this.databases.set(this.generateKey(workspaceId, projectId), databaseMap)
+  }
+
+  getDatabases(workspaceId: string, projectId: string): RemoteDatabase[] {
+    return Array.from(this.databases.get(this.generateKey(workspaceId, projectId))?.values() || [])
+  }
+
+  hasDatabases(workspaceId: string, projectId: string): boolean {
+    return this.databases.has(this.generateKey(workspaceId, projectId))
+  }
+
+  addDatabase(database: RemoteDatabase): void {
+    const key = this.generateKey(database.workspaceId, database.projectId)
+    if (!this.databases.has(key)) {
+      this.databases.set(key, new Map())
+    }
+    this.databases.get(key)!.set(database.id, database)
+  }
+
+  removeDatabase(workspaceId: string, projectId: string, databaseId: string): void {
+    this.databases.get(this.generateKey(workspaceId, projectId))?.delete(databaseId)
+  }
+
+  clearDatabases(workspaceId: string, projectId: string): void {
+    this.databases.delete(this.generateKey(workspaceId, projectId))
+  }
+
+  // Region cache
+  setRegions(regions: Region[]): void {
+    this.regions = regions
+  }
+
+  getRegions(): Region[] {
+    return this.regions
+  }
+
+  hasRegions(): boolean {
+    return this.regions.length > 0
+  }
+
+  // Local database cache
+  setLocalDatabases(databases: LocalDatabase[]): void {
+    this.localDatabases = { timestamp: Date.now(), data: databases }
+  }
+
+  getLocalDatabases(): LocalDatabase[] | undefined {
+    const now = Date.now()
+    if (this.localDatabases && now - this.localDatabases.timestamp < 100) {
+      return this.localDatabases.data
+    }
+    return undefined
+  }
+
+  clearAll(): void {
+    this.workspaces.clear()
+    this.projects.clear()
+    this.databases.clear()
+    this.regions = []
+    this.localDatabases = undefined
+  }
+}
+
+export class PrismaPostgresRepository {
+  private isPreloading = false
+  private preloadPromise: Promise<void> | null = null
+  private clients = new Map<string, ReturnType<typeof createManagementAPIClient>>()
+  private credentialsStore = new CredentialsStore()
+  private cache = new CacheManager()
 
   public readonly refreshEventEmitter = new EventEmitter<void | PrismaPostgresItem>()
 
@@ -105,11 +230,59 @@ export class PrismaPostgresRepository {
       ignoreInitial: true,
     })
 
-    watcher.on('addDir', () => this.refreshLocalDatabases())
-    watcher.on('unlinkDir', () => this.refreshLocalDatabases())
-    watcher.on('change', () => this.refreshLocalDatabases())
+    watcher.on('addDir', () => this.refreshEventEmitter.fire())
+    watcher.on('unlinkDir', () => this.refreshEventEmitter.fire())
+    watcher.on('change', () => this.refreshEventEmitter.fire())
 
     context.subscriptions.push({ dispose: () => watcher.close() })
+
+    // Start preloading data in the background for better UX
+    this.preloadPromise = this.preloadAllData()
+  }
+
+  private async waitForPreload(): Promise<void> {
+    // Don't wait for preload if we're currently in the preloading process
+    if (this.isPreloading || !this.preloadPromise) {
+      return
+    }
+
+    try {
+      await this.preloadPromise
+    } catch (error) {
+      // If preloading failed, we'll just proceed without it
+      console.warn('Preloading failed, proceeding with direct fetch:', error)
+    }
+  }
+
+  private async preloadAllData(): Promise<void> {
+    try {
+      this.isPreloading = true
+
+      // Load workspaces first
+      const workspaces = await this.getWorkspaces()
+
+      // Load projects for all workspaces in parallel
+      const projectPromises = workspaces.map(async (workspace) => {
+        const projects = await this.getProjects({ workspaceId: workspace.id })
+
+        // Load databases for all projects in parallel
+        const databasePromises = projects.map((project) =>
+          this.getRemoteDatabases({ workspaceId: workspace.id, projectId: project.id }),
+        )
+
+        // Wait for all databases to load (but don't block other workspaces)
+        await Promise.allSettled(databasePromises)
+        return projects
+      })
+
+      // Wait for all workspaces to finish loading their projects and databases
+      await Promise.allSettled(projectPromises)
+    } catch (error) {
+      console.error('Error preloading data:', error)
+      // Don't throw - preloading is optional for UX, shouldn't break functionality
+    } finally {
+      this.isPreloading = false
+    }
   }
 
   private async getClient(workspaceId: string) {
@@ -127,7 +300,6 @@ export class PrismaPostgresRepository {
       }
 
       const client = createManagementAPIClient(credentials.token, refreshTokenHandler)
-
       this.clients.set(workspaceId, client)
     }
     return this.clients.get(workspaceId)!
@@ -135,11 +307,7 @@ export class PrismaPostgresRepository {
 
   private checkResponseOrThrow<T, E>(
     workspaceId: string,
-    response: {
-      error?: E
-      data?: T
-      response: Response
-    },
+    response: { error?: E; data?: T; response: Response },
   ): asserts response is { error: never; data: T; response: Response } {
     console.log('Received response', { error: response.error, statusCode: response.response.status })
 
@@ -150,62 +318,65 @@ export class PrismaPostgresRepository {
       throw new Error(`Session expired. Please sign in to continue.`)
     }
 
-    const error = z
-      .object({
-        message: z.string().optional(),
-        errorDescription: z.string().optional(),
-        error: z
-          .object({
-            message: z.string().optional(),
-          })
-          .optional(),
-      })
-      .safeParse(response.error)
-
-    const errorMessage = error.data?.message || error.data?.error?.message || error.data?.errorDescription
-    if (!errorMessage) throw new Error(`Unknown API error occurred. Status Code: ${response.response.status}.`)
+    const errorMessage = this.extractErrorMessage(response.error)
+    if (!errorMessage) {
+      throw new Error(`Unknown API error occurred. Status Code: ${response.response.status}.`)
+    }
     throw new Error(errorMessage)
   }
 
-  triggerRefresh() {
+  private extractErrorMessage(error: unknown): string | undefined {
+    const parsed = z
+      .object({
+        message: z.string().optional(),
+        errorDescription: z.string().optional(),
+        error: z.object({ message: z.string().optional() }).optional(),
+      })
+      .safeParse(error)
+
+    return parsed.data?.message || parsed.data?.error?.message || parsed.data?.errorDescription
+  }
+
+  triggerRefresh(): void {
     void this.credentialsStore.reloadCredentialsFromDisk()
-    // Wipe caches
-    this.regionsCache = []
-    this.workspacesCache = new Map()
-    this.projectsCache = new Map()
-    this.remoteDatabasesCache = new Map()
-    // Trigger full tree view refresh which will fetch fresh data on demand due to cache misses
+    this.cache.clearAll()
+    this.preloadPromise = this.preloadAllData()
     this.refreshEventEmitter.fire()
   }
 
   async getRegions(): Promise<Region[]> {
-    if (this.regionsCache.length > 0) return this.regionsCache
+    await this.waitForPreload()
 
-    const workspaceId = (await this.getWorkspaces()).at(0)?.id
+    if (this.cache.hasRegions()) {
+      return this.cache.getRegions()
+    }
+
+    const workspaces = await this.getWorkspaces()
+    const workspaceId = workspaces[0]?.id
     if (!workspaceId) return []
 
     const client = await this.getClient(workspaceId)
     const response = await client.GET('/regions')
     this.checkResponseOrThrow(workspaceId, response)
 
-    this.regionsCache = response.data.data
-
-    return this.regionsCache
+    const regions = response.data.data
+    this.cache.setRegions(regions)
+    return regions
   }
 
   private ensureValidRegion(value: string): asserts value is RegionId {
-    // This is not super precise but at the point this validation is called, the
-    // regions are already in the cache.
-    // Async type asserting function do not exist in typescript and we anyways have
-    // a potential runtime mismatch between the actually available regions and the
-    // regions known to the type system.
-    if (!this.regionsCache.some((r) => r.id === value)) {
-      throw new Error(`Invalid region: ${value}. Available regions: ${this.regionsCache.map((r) => r.id).join(', ')}.`)
+    const regions = this.cache.getRegions()
+    if (!regions.some((r) => r.id === value)) {
+      throw new Error(`Invalid region: ${value}. Available regions: ${regions.map((r) => r.id).join(', ')}.`)
     }
   }
 
   async getWorkspaces(): Promise<Workspace[]> {
-    if (this.workspacesCache.size > 0) return Array.from(this.workspacesCache.values())
+    await this.waitForPreload()
+
+    if (this.cache.hasWorkspaces()) {
+      return this.cache.getWorkspaces()
+    }
 
     const credentials = await this.credentialsStore.getCredentials()
     const results = await Promise.allSettled(
@@ -213,28 +384,24 @@ export class PrismaPostgresRepository {
         const client = await this.getClient(cred.workspaceId)
         const response = await client.GET('/workspaces')
         this.checkResponseOrThrow(cred.workspaceId, response)
+
         const workspaceInfo = response.data.data.at(0)
         if (!workspaceInfo) throw new Error(`Workspaces endpoint returned no workspace info.`)
 
-        const workspace: Workspace = {
-          type: 'workspace',
+        return {
+          type: 'workspace' as const,
           id: workspaceInfo.id,
           name: workspaceInfo.displayName,
         }
-        this.workspacesCache.set(workspace.id, workspace)
-        return workspace
       }),
     )
-    return results
-      .flatMap((r) => {
-        if (r.status === 'fulfilled') {
-          return [r.value]
-        } else {
-          console.error(`Failed to get workspace info`, r.reason)
-          return []
-        }
-      })
+
+    const workspaces = results
+      .flatMap((r) => (r.status === 'fulfilled' ? [r.value] : []))
       .sort((a, b) => a.name.localeCompare(b.name))
+
+    this.cache.setWorkspaces(workspaces)
+    return workspaces
   }
 
   async addWorkspace({ token, refreshToken }: { token: string; refreshToken: string }): Promise<void> {
@@ -246,7 +413,6 @@ export class PrismaPostgresRepository {
     if (response.error) throw new Error(`Failed to retrieve workspace information.`)
 
     const workspaces = response.data.data
-
     if (workspaces.length === 0) throw new Error(`Received token does not grant access to any workspaces.`)
 
     await Promise.all(
@@ -256,11 +422,15 @@ export class PrismaPostgresRepository {
           token,
           refreshToken,
         })
-        this.workspacesCache.set(id, {
-          type: 'workspace',
-          id,
-          name: displayName,
-        })
+
+        this.cache.setWorkspaces([
+          ...this.cache.getWorkspaces(),
+          {
+            type: 'workspace',
+            id,
+            name: displayName,
+          },
+        ])
       }),
     )
 
@@ -270,125 +440,99 @@ export class PrismaPostgresRepository {
   async removeWorkspace({ workspaceId }: { workspaceId: string }): Promise<void> {
     this.clients.delete(workspaceId)
     await this.connectionStringStorage.removeConnectionString({ workspaceId })
-    this.workspacesCache.delete(workspaceId)
     await this.credentialsStore.deleteCredentials(workspaceId)
+    this.cache.removeWorkspace(workspaceId)
     this.refreshEventEmitter.fire()
-    return Promise.resolve()
   }
 
-  async getProjects(
-    { workspaceId }: { workspaceId: string },
-    { forceCacheRefresh }: { forceCacheRefresh: boolean } = { forceCacheRefresh: false },
-  ): Promise<Project[]> {
-    if (!forceCacheRefresh) {
-      const cachedProjects = this.projectsCache.get(workspaceId)
-      if (cachedProjects !== undefined) return Array.from(cachedProjects.values())
+  async getProjects({ workspaceId }: { workspaceId: string }): Promise<Project[]> {
+    await this.waitForPreload()
+
+    if (this.cache.hasProjects(workspaceId)) {
+      return this.cache.getProjects(workspaceId)
     }
 
     const client = await this.getClient(workspaceId)
     const response = await client.GET('/projects')
-
     this.checkResponseOrThrow(workspaceId, response)
 
-    const projects: Map<string, Project> = new Map(
-      response.data.data.map((project) => [
-        project.id,
-        {
-          type: 'project' as const,
-          id: project.id,
-          name: project.name,
-          workspaceId,
-        },
-      ]),
-    )
+    const projects: Project[] = response.data.data.map((project) => ({
+      type: 'project' as const,
+      id: project.id,
+      name: project.name,
+      workspaceId,
+    }))
 
-    this.projectsCache.set(workspaceId, projects)
-
-    return Array.from(projects.values())
+    this.cache.setProjects(workspaceId, projects)
+    return projects
   }
 
   async createProject({
     workspaceId,
     name,
     region,
-    options,
+    options = {},
   }: {
     workspaceId: string
     name: string
     region: string
-    options: { skipRefresh?: boolean }
+    options?: { skipRefresh?: boolean }
   }): Promise<{ project: Project; database?: NewRemoteDatabase }> {
     this.ensureValidRegion(region)
 
     const client = await this.getClient(workspaceId)
     const response = await client.POST('/projects', {
-      body: {
-        name,
-        region,
-      },
+      body: { name, region },
     })
-
     this.checkResponseOrThrow(workspaceId, response)
 
-    const newProject = {
+    const newProject: Project = {
       type: 'project' as const,
       id: response.data.id,
       name: response.data.name,
       workspaceId,
     }
 
-    let createdDatabase: RemoteDatabase | undefined
-    let connectionString: string | undefined
+    let createdDatabase: NewRemoteDatabase | undefined
     if ('databases' in response.data) {
-      const createdDatabaseData = response.data.databases[0]
-      if (createdDatabaseData) {
-        createdDatabase = {
+      const databaseData = response.data.databases[0]
+      if (databaseData) {
+        const database: RemoteDatabase = {
           type: 'remoteDatabase' as const,
-          id: createdDatabaseData.id,
-          name: createdDatabaseData.name,
-          region: createdDatabaseData.region,
+          id: databaseData.id,
+          name: databaseData.name,
+          region: databaseData.region,
           projectId: newProject.id,
           workspaceId,
         }
-        connectionString = createdDatabaseData.connectionString
 
         await this.connectionStringStorage.storeConnectionString({
           workspaceId,
           projectId: newProject.id,
-          databaseId: createdDatabase.id,
-          connectionString,
+          databaseId: database.id,
+          connectionString: databaseData.connectionString,
         })
+
+        createdDatabase = { ...database, connectionString: databaseData.connectionString }
       }
     }
 
-    if (options.skipRefresh !== true) {
-      // Proactively update cache
-      this.projectsCache.get(workspaceId)?.set(newProject.id, newProject)
-      this.remoteDatabasesCache.set(
-        `${workspaceId}.${newProject.id}`,
-        new Map(createdDatabase ? [[createdDatabase.id, createdDatabase]] : []),
-      )
-
-      // Update in the background
+    if (!options.skipRefresh) {
+      this.cache.addProject(newProject)
+      if (createdDatabase) {
+        this.cache.addDatabase(createdDatabase)
+      }
       this.refreshEventEmitter.fire()
-      void this.refreshProjects({ workspaceId })
     }
 
-    if (createdDatabase && connectionString) {
-      return { project: newProject, database: { ...createdDatabase, connectionString } }
-    } else {
-      return { project: newProject }
-    }
+    return { project: newProject, database: createdDatabase }
   }
 
-  async deleteProject({ workspaceId, id }: { workspaceId: string; id: string } | Project): Promise<void> {
+  async deleteProject({ workspaceId, id }: { workspaceId: string; id: string }): Promise<void> {
     const client = await this.getClient(workspaceId)
     const response = await client.DELETE('/projects/{id}', {
-      params: {
-        path: { id },
-      },
+      params: { path: { id } },
     })
-
     this.checkResponseOrThrow(workspaceId, response)
 
     await this.connectionStringStorage.removeConnectionString({
@@ -396,58 +540,41 @@ export class PrismaPostgresRepository {
       projectId: id,
     })
 
-    // Proactively update cache
-    this.projectsCache.get(workspaceId)?.delete(id)
+    this.cache.removeProject(workspaceId, id)
     this.refreshEventEmitter.fire()
-    // And then refresh list from server in background
-    void this.refreshProjects({ workspaceId })
   }
 
-  private async refreshProjects({ workspaceId }: { workspaceId: string }) {
-    await this.getProjects({ workspaceId }, { forceCacheRefresh: true }).then(() => this.refreshEventEmitter.fire())
-  }
+  async getRemoteDatabases({
+    workspaceId,
+    projectId,
+  }: {
+    workspaceId: string
+    projectId: string
+  }): Promise<RemoteDatabase[]> {
+    await this.waitForPreload()
 
-  async getRemoteDatabases(
-    {
-      workspaceId,
-      projectId,
-    }: {
-      workspaceId: string
-      projectId: string
-    },
-    { forceCacheRefresh }: { forceCacheRefresh: boolean } = { forceCacheRefresh: false },
-  ): Promise<RemoteDatabase[]> {
-    if (!forceCacheRefresh) {
-      const cachedDatabases = this.remoteDatabasesCache.get(`${workspaceId}.${projectId}`)
-      if (cachedDatabases !== undefined) return Array.from(cachedDatabases.values())
+    if (this.cache.hasDatabases(workspaceId, projectId)) {
+      return this.cache.getDatabases(workspaceId, projectId)
     }
 
     const client = await this.getClient(workspaceId)
     const response = await client.GET('/projects/{projectId}/databases', {
-      params: {
-        path: { projectId },
-      },
+      params: { path: { projectId } },
     })
 
     this.checkResponseOrThrow(workspaceId, response)
 
-    const databases: Map<string, RemoteDatabase> = new Map(
-      response.data.data.map((db) => [
-        db.id,
-        {
-          type: 'remoteDatabase' as const,
-          id: db.id,
-          name: db.name,
-          region: db.region,
-          projectId,
-          workspaceId,
-        },
-      ]),
-    )
+    const databases: RemoteDatabase[] = response.data.data.map((db) => ({
+      type: 'remoteDatabase' as const,
+      id: db.id,
+      name: db.name,
+      region: db.region,
+      projectId,
+      workspaceId,
+    }))
 
-    this.remoteDatabasesCache.set(`${workspaceId}.${projectId}`, databases)
-
-    return Array.from(databases.values())
+    this.cache.setDatabases(workspaceId, projectId, databases)
+    return databases
   }
 
   async getStoredRemoteDatabaseConnectionString({
@@ -498,30 +625,24 @@ export class PrismaPostgresRepository {
     projectId,
     name,
     region,
-    options,
+    options = {},
   }: {
     workspaceId: string
     projectId: string
     name: string
     region: string
-    options: { skipRefresh?: boolean }
+    options?: { skipRefresh?: boolean }
   }): Promise<NewRemoteDatabase> {
     this.ensureValidRegion(region)
 
     const client = await this.getClient(workspaceId)
     const response = await client.POST('/projects/{projectId}/databases', {
-      params: {
-        path: { projectId },
-      },
-      body: {
-        name,
-        region,
-      },
+      params: { path: { projectId } },
+      body: { name, region },
     })
-
     this.checkResponseOrThrow(workspaceId, response)
 
-    const newDatabase = {
+    const newDatabase: RemoteDatabase = {
       type: 'remoteDatabase' as const,
       id: response.data.id,
       name: response.data.name,
@@ -529,16 +650,8 @@ export class PrismaPostgresRepository {
       projectId,
       workspaceId,
     }
+
     const connectionString = response.data.connectionString
-
-    if (options.skipRefresh !== true) {
-      // Proactively update cache
-      this.remoteDatabasesCache.get(workspaceId)?.set(newDatabase.id, newDatabase)
-
-      // Update in the background
-      this.refreshEventEmitter.fire()
-      void this.refreshRemoteDatabases({ workspaceId, projectId })
-    }
 
     await this.connectionStringStorage.storeConnectionString({
       workspaceId,
@@ -547,6 +660,11 @@ export class PrismaPostgresRepository {
       connectionString,
     })
 
+    if (!options.skipRefresh) {
+      this.cache.addDatabase(newDatabase)
+      this.refreshEventEmitter.fire()
+    }
+
     return { ...newDatabase, connectionString }
   }
 
@@ -554,23 +672,15 @@ export class PrismaPostgresRepository {
     workspaceId,
     projectId,
     id,
-  }:
-    | {
-        workspaceId: string
-        projectId: string
-        id: string
-      }
-    | RemoteDatabase): Promise<void> {
+  }: {
+    workspaceId: string
+    projectId: string
+    id: string
+  }): Promise<void> {
     const client = await this.getClient(workspaceId)
     const response = await client.DELETE('/projects/{projectId}/databases/{databaseId}', {
-      params: {
-        path: {
-          projectId,
-          databaseId: id,
-        },
-      },
+      params: { path: { projectId, databaseId: id } },
     })
-
     this.checkResponseOrThrow(workspaceId, response)
 
     await this.connectionStringStorage.removeConnectionString({
@@ -579,38 +689,19 @@ export class PrismaPostgresRepository {
       databaseId: id,
     })
 
-    // Proactively update cache
-    this.remoteDatabasesCache.get(`${workspaceId}.${projectId}`)?.delete(id)
-    this.refreshEventEmitter.fire()
-    // And then refresh list from server in background
-    void this.refreshRemoteDatabases({ workspaceId, projectId })
-  }
-
-  private async refreshRemoteDatabases({ workspaceId, projectId }: { workspaceId: string; projectId: string }) {
-    await this.getRemoteDatabases({ workspaceId, projectId }, { forceCacheRefresh: true }).then(() =>
-      this.refreshEventEmitter.fire(),
-    )
-  }
-
-  private refreshLocalDatabases() {
+    this.cache.removeDatabase(workspaceId, projectId, id)
     this.refreshEventEmitter.fire()
   }
 
-  async getLocalDatabase(args: { name: string }) {
+  async getLocalDatabase(args: { name: string }): Promise<LocalDatabase | undefined> {
     const { name } = args
-
     const databases = await this.getLocalDatabases()
-
     return databases.find((db) => db.name === name)
   }
 
   async getLocalDatabases(): Promise<LocalDatabase[]> {
-    const now = Date.now()
-
-    // we cache the local databases for 100ms to prevent overusage of filesystem
-    if (this.localDatabasesCache && now - this.localDatabasesCache.timestamp < 100) {
-      return this.localDatabasesCache.data
-    }
+    const cached = this.cache.getLocalDatabases()
+    if (cached) return cached
 
     const { ServerState } = await import('@prisma/dev/internal/state')
     const data = (await ServerState.scan()).map((state) => {
@@ -629,8 +720,7 @@ export class PrismaPostgresRepository {
       return { type: 'localDatabase', pid, name, id: name, url, running } as const
     })
 
-    this.localDatabasesCache = { timestamp: now, data }
-
+    this.cache.setLocalDatabases(data)
     return data
   }
 
@@ -668,7 +758,7 @@ export class PrismaPostgresRepository {
       })
     })
 
-    void this.refreshLocalDatabases()
+    this.refreshEventEmitter.fire()
   }
 
   async deleteLocalDatabase(args: { name: string }): Promise<void> {
@@ -683,7 +773,7 @@ export class PrismaPostgresRepository {
       await fs.rm(databasePath, { recursive: true, force: true })
     }
 
-    void this.refreshLocalDatabases()
+    this.refreshEventEmitter.fire()
   }
 
   async stopLocalDatabase(args: { name: string }): Promise<void> {
@@ -698,10 +788,15 @@ export class PrismaPostgresRepository {
       await waitForProcessKilled(pid)
     }
 
-    void this.refreshLocalDatabases()
+    this.refreshEventEmitter.fire()
   }
 
-  async deployLocalDatabase(args: { name: string; url: string; projectId: string; workspaceId: string }) {
+  async deployLocalDatabase(args: {
+    name: string
+    url: string
+    projectId: string
+    workspaceId: string
+  }): Promise<void> {
     const { Client } = await import('@prisma/ppg')
     const { ServerState } = await import('@prisma/dev/internal/state')
     const { dumpDB } = await import('@prisma/dev/internal/db')
@@ -721,8 +816,8 @@ export class PrismaPostgresRepository {
 
     await state.close()
 
-    void this.refreshProjects({ workspaceId })
-    void this.refreshRemoteDatabases({ projectId, workspaceId })
+    this.cache.clearDatabases(workspaceId, projectId)
+    this.refreshEventEmitter.fire()
   }
 
   async getLocalDatabaseConnectionString(args: { name: string }) {
@@ -731,7 +826,7 @@ export class PrismaPostgresRepository {
     const database = await this.getLocalDatabase({ name })
 
     if (database?.running !== true) {
-      void this.refreshLocalDatabases()
+      this.refreshEventEmitter.fire()
       throw new Error('This database has been deleted or stopped')
     }
 
