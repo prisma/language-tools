@@ -226,9 +226,9 @@ export class PrismaPostgresRepository {
       ignoreInitial: true,
     })
 
-    watcher.on('addDir', () => this.refreshLocalDatabases())
-    watcher.on('unlinkDir', () => this.refreshLocalDatabases())
-    watcher.on('change', () => this.refreshLocalDatabases())
+    watcher.on('addDir', () => this.refreshEventEmitter.fire())
+    watcher.on('unlinkDir', () => this.refreshEventEmitter.fire())
+    watcher.on('change', () => this.refreshEventEmitter.fire())
 
     context.subscriptions.push({ dispose: () => watcher.close() })
 
@@ -689,10 +689,6 @@ export class PrismaPostgresRepository {
     this.refreshEventEmitter.fire()
   }
 
-  private refreshLocalDatabases(): void {
-    this.refreshEventEmitter.fire()
-  }
-
   async getLocalDatabase(args: { name: string }): Promise<LocalDatabase | undefined> {
     const { name } = args
     const databases = await this.getLocalDatabases()
@@ -758,7 +754,7 @@ export class PrismaPostgresRepository {
       })
     })
 
-    void this.refreshLocalDatabases()
+    this.refreshEventEmitter.fire()
   }
 
   async deleteLocalDatabase(args: { name: string }): Promise<void> {
@@ -773,7 +769,7 @@ export class PrismaPostgresRepository {
       await fs.rm(databasePath, { recursive: true, force: true })
     }
 
-    void this.refreshLocalDatabases()
+    this.refreshEventEmitter.fire()
   }
 
   async stopLocalDatabase(args: { name: string }): Promise<void> {
@@ -788,7 +784,7 @@ export class PrismaPostgresRepository {
       await waitForProcessKilled(pid)
     }
 
-    void this.refreshLocalDatabases()
+    this.refreshEventEmitter.fire()
   }
 
   async deployLocalDatabase(args: {
@@ -816,9 +812,7 @@ export class PrismaPostgresRepository {
 
     await state.close()
 
-    // Refresh relevant caches by clearing them
-    this.cache.setProjects(workspaceId, []) // This will force refresh on next call
-    this.cache.setDatabases(workspaceId, projectId, []) // This will force refresh on next call
+    this.cache.setDatabases(workspaceId, projectId, [])
     this.refreshEventEmitter.fire()
   }
 
@@ -828,7 +822,7 @@ export class PrismaPostgresRepository {
     const database = await this.getLocalDatabase({ name })
 
     if (database?.running !== true) {
-      void this.refreshLocalDatabases()
+      this.refreshEventEmitter.fire()
       throw new Error('This database has been deleted or stopped')
     }
 
