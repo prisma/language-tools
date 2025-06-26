@@ -213,8 +213,7 @@ class CacheManager {
 }
 
 export class PrismaPostgresRepository {
-  private isPreloading = false
-  private preloadPromise: Promise<void> | null = null
+  private reloadPromise: Promise<void> | undefined = undefined
   private clients = new Map<string, ReturnType<typeof createManagementAPIClient>>()
   private credentialsStore = new CredentialsStore()
   private cache = new CacheManager()
@@ -237,37 +236,32 @@ export class PrismaPostgresRepository {
     context.subscriptions.push({ dispose: () => watcher.close() })
 
     // Start preloading data in the background for better UX
-    this.preloadPromise = this.preloadAllData()
+    this.reloadPromise = this.reloadAllData()
   }
 
-  private async waitForPreload(): Promise<void> {
-    // Don't wait for preload if we're currently in the preloading process
-    if (this.isPreloading || !this.preloadPromise) {
+  private async reloadAllData(): Promise<void> {
+    // Only one reload at once
+    if (this.reloadPromise) {
       return
     }
 
-    try {
-      await this.preloadPromise
-    } catch (error) {
-      // If preloading failed, we'll just proceed without it
-      console.warn('Preloading failed, proceeding with direct fetch:', error)
-    }
-  }
+    // Empty all the caches
+    this.cache.clearAll()
 
-  private async preloadAllData(): Promise<void> {
     try {
-      this.isPreloading = true
+      // Load the regions
+      const regionsPromise = this.getRegions({ reload: true })
 
       // Load workspaces first
-      const workspaces = await this.getWorkspaces()
+      const workspaces = await this.getWorkspaces({ reload: true })
 
       // Load projects for all workspaces in parallel
       const projectPromises = workspaces.map(async (workspace) => {
-        const projects = await this.getProjects({ workspaceId: workspace.id })
+        const projects = await this.getProjects({ workspaceId: workspace.id, reload: true })
 
         // Load databases for all projects in parallel
         const databasePromises = projects.map((project) =>
-          this.getRemoteDatabases({ workspaceId: workspace.id, projectId: project.id }),
+          this.getRemoteDatabases({ workspaceId: workspace.id, projectId: project.id, reload: true }),
         )
 
         // Wait for all databases to load (but don't block other workspaces)
@@ -276,12 +270,12 @@ export class PrismaPostgresRepository {
       })
 
       // Wait for all workspaces to finish loading their projects and databases
-      await Promise.allSettled(projectPromises)
+      await Promise.allSettled([...projectPromises, regionsPromise])
     } catch (error) {
-      console.error('Error preloading data:', error)
+      console.error('Error reloading data:', error)
       // Don't throw - preloading is optional for UX, shouldn't break functionality
     } finally {
-      this.isPreloading = false
+      this.reloadPromise = undefined
     }
   }
 
@@ -339,13 +333,14 @@ export class PrismaPostgresRepository {
 
   triggerRefresh(): void {
     void this.credentialsStore.reloadCredentialsFromDisk()
-    this.cache.clearAll()
-    this.preloadPromise = this.preloadAllData()
+    this.reloadPromise = this.reloadAllData()
     this.refreshEventEmitter.fire()
   }
 
-  async getRegions(): Promise<Region[]> {
-    await this.waitForPreload()
+  async getRegions({ reload }: { reload?: boolean } = {}): Promise<Region[]> {
+    if (!reload) {
+      await this.reloadPromise
+    }
 
     if (this.cache.hasRegions()) {
       return this.cache.getRegions()
@@ -371,8 +366,10 @@ export class PrismaPostgresRepository {
     }
   }
 
-  async getWorkspaces(): Promise<Workspace[]> {
-    await this.waitForPreload()
+  async getWorkspaces({ reload }: { reload?: boolean } = {}): Promise<Workspace[]> {
+    if (!reload) {
+      await this.reloadPromise
+    }
 
     if (this.cache.hasWorkspaces()) {
       return this.cache.getWorkspaces()
@@ -445,8 +442,10 @@ export class PrismaPostgresRepository {
     this.refreshEventEmitter.fire()
   }
 
-  async getProjects({ workspaceId }: { workspaceId: string }): Promise<Project[]> {
-    await this.waitForPreload()
+  async getProjects({ workspaceId, reload }: { workspaceId: string; reload?: boolean }): Promise<Project[]> {
+    if (!reload) {
+      await this.reloadPromise
+    }
 
     if (this.cache.hasProjects(workspaceId)) {
       return this.cache.getProjects(workspaceId)
@@ -547,11 +546,15 @@ export class PrismaPostgresRepository {
   async getRemoteDatabases({
     workspaceId,
     projectId,
+    reload,
   }: {
     workspaceId: string
     projectId: string
+    reload?: boolean
   }): Promise<RemoteDatabase[]> {
-    await this.waitForPreload()
+    if (!reload) {
+      await this.reloadPromise
+    }
 
     if (this.cache.hasDatabases(workspaceId, projectId)) {
       return this.cache.getDatabases(workspaceId, projectId)
