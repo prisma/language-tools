@@ -13,8 +13,8 @@
     "Programming Languages"
   ],
   "dependencies": {
-    "@hono/node-server": "1.14.2",
-    "@prisma/credentials-store": "6.9.0-dev.18",
+    "@hono/node-server": "1.14.4",
+    "@prisma/credentials-store": "6.10.1",
     "@prisma/dev": "0.11.1",
     "@prisma/language-server": "31.0.7697",
     "@prisma/ppg": "0.5.2",
@@ -25,12 +25,12 @@
     "execa": "5.1.1",
     "foreground-child": "3.3.1",
     "get-port": "5.1.1",
-    "hono": "4.7.10",
+    "hono": "4.8.3",
     "minimatch": "6.2.0",
     "openapi-fetch": "0.14.0",
     "vscode-languageclient": "7.0.0",
     "watcher": "1.2.0",
-    "zod": "3.24.3"
+    "zod": "3.25.67"
   },
   "repository": {
     "type": "git",
