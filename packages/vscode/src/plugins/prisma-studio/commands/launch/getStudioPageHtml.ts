@@ -42,7 +42,8 @@ export function getStudioPageHtml(args: { serverUrl: string }): string {
       executor: createStudioBFFClient({
         customPayload: {},
         url: "${serverUrl}/bff"
-      })
+      }),
+      noParameters: true
     });
 
     const container = document.getElementById('root');
