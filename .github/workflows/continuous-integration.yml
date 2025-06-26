@@ -65,17 +65,12 @@ jobs:
         run: |
           cd packages/vscode
           npx playwright install --with-deps
-      
-      - name: Verify Playwright installation
-        run: |
-          cd packages/vscode
-          npx playwright --version
-          npm run --silent
 
       - name: Run Playwright UI tests
         uses: coactions/setup-xvfb@v1
         with:
-          run: cd packages/vscode && npm run test:playwright
+          run: npm run test:playwright
+          working-directory: packages/vscode
         env:
           CI: true
 
