@@ -75,10 +75,7 @@ jobs:
       - name: Run Playwright UI tests
         uses: coactions/setup-xvfb@v1
         with:
-          run: |
-            cd packages/vscode
-            cat package.json
-            npm run test:playwright
+          run: cd packages/vscode && npm run test:playwright
         env:
           CI: true
 
