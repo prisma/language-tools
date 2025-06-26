@@ -42,8 +42,8 @@ export const COMMANDS = {
 } as const
 
 export const KEYBOARD_SHORTCUTS = {
-  COMMAND_PALETTE: 'Meta+Shift+P',
-  FILE_EXPLORER: 'Meta+Shift+E',
+  COMMAND_PALETTE: process.platform === 'darwin' ? 'Meta+Shift+P' : 'Control+Shift+P',
+  FILE_EXPLORER: process.platform === 'darwin' ? 'Meta+Shift+E' : 'Control+Shift+E',
   ENTER: 'Enter',
   ESCAPE: 'Escape',
 } as const
