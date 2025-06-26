@@ -3,25 +3,25 @@ export const TIMEOUTS = {
   VSCODE_LAUNCH: 30000,
   WORKBENCH_LOAD: 10000,
   EXTENSION_ACTIVATION: 3000,
-  
+
   // UI interactions
   COMMAND_PALETTE: 5000,
   FILE_EXPLORER: 3000,
   EDITOR_LOAD: 5000,
-  
+
   // Command execution
   COMMAND_EXECUTION: 2000,
   COMMAND_SEARCH: 1000,
-  
+
   // File operations
   FILE_OPEN: 1000,
   EXPLORER_TOGGLE: 500,
-  
+
   // Default timeouts for page helper
   DEFAULT_WORKBENCH: 10000,
   DEFAULT_COMMAND_PALETTE: 5000,
   DEFAULT_FILE_EXPLORER: 3000,
-  DEFAULT_EDITOR: 5000
+  DEFAULT_EDITOR: 5000,
 } as const
 
 export const SELECTORS = {
@@ -34,18 +34,18 @@ export const SELECTORS = {
   SIMPLE_BROWSER: '.simple-browser-workbench',
   TAB: '.tab',
   STUDIO_TAB: '.tab:has-text("Studio")',
-  WEBVIEW: 'webview, iframe, .webview'
+  WEBVIEW: 'webview, iframe, .webview',
 } as const
 
 export const COMMANDS = {
-  LAUNCH_PRISMA_STUDIO: 'Prisma: Launch Prisma Studio'
+  LAUNCH_PRISMA_STUDIO: 'Prisma: Launch Prisma Studio',
 } as const
 
 export const KEYBOARD_SHORTCUTS = {
   COMMAND_PALETTE: 'Meta+Shift+P',
   FILE_EXPLORER: 'Meta+Shift+E',
   ENTER: 'Enter',
-  ESCAPE: 'Escape'
+  ESCAPE: 'Escape',
 } as const
 
 export const WAIT_TIMES = {
@@ -55,9 +55,9 @@ export const WAIT_TIMES = {
   FILE_OPEN: 1000,
   EXPLORER_TOGGLE: 500,
   STUDIO_LAUNCH: 5000,
-  INPUT_RESPONSE: 1000
+  INPUT_RESPONSE: 1000,
 } as const
 
 export const TEST_DATA = {
-  FAKE_DATABASE_URL: 'prisma+postgres://user:password@host.example.com:5432/database?schema=public'
+  FAKE_DATABASE_URL: 'prisma+postgres://user:password@host.example.com:5432/database?schema=public',
 } as const

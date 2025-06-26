@@ -16,7 +16,7 @@ test.beforeEach(async () => {
     rootPath,
     testWorkspace,
     disableExtensions: true,
-    timeout: TIMEOUTS.VSCODE_LAUNCH
+    timeout: TIMEOUTS.VSCODE_LAUNCH,
   })
 })
 
@@ -26,18 +26,18 @@ test('launches VS Code with Prisma extension', async () => {
 
 test('can execute Prisma: Launch Prisma Studio command', async () => {
   const helper = await VSCodePageHelper.create(electronApp)
-  
+
   // Execute the command with a fake database URL
   await helper.executeCommandWithInput(COMMANDS.LAUNCH_PRISMA_STUDIO, TEST_DATA.FAKE_DATABASE_URL)
-  
+
   // Wait for Studio tab to open
   const studioTabOpened = await helper.waitForStudioTab()
   expect(studioTabOpened).toBe(true)
-  
+
   // Verify that the Studio tab is actually present
   const hasStudioTab = await helper.checkForStudioTab()
   expect(hasStudioTab).toBe(true)
-  
+
   // Verify that there's a webview element (Studio runs in a webview)
   const hasWebview = await helper.checkForWebview()
   expect(hasWebview).toBe(true)
@@ -45,11 +45,11 @@ test('can execute Prisma: Launch Prisma Studio command', async () => {
 
 test('loads Prisma schema file in workspace', async () => {
   const helper = await VSCodePageHelper.create(electronApp)
-  
+
   await helper.openFile('schema.prisma')
-  
+
   const cleanContent = await helper.getCleanEditorContent()
-  
+
   // Check for key Prisma schema elements using regex for flexible matching
   expect(cleanContent).toMatch(/generator\s+client/)
   expect(cleanContent).toMatch(/datasource\s+db/)

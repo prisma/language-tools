@@ -12,9 +12,9 @@ export interface VSCodeSetupOptions {
 
 export async function setupVSCode(options: VSCodeSetupOptions): Promise<ElectronApplication> {
   const { rootPath, testWorkspace, disableExtensions = true, timeout = 30000 } = options
-  
+
   const executablePath = await downloadAndUnzipVSCode()
-  
+
   const args = [
     '--extensionDevelopmentPath=' + rootPath,
     ...(disableExtensions ? ['--disable-extensions'] : []),
@@ -26,14 +26,14 @@ export async function setupVSCode(options: VSCodeSetupOptions): Promise<Electron
     '--disable-gpu',
     '--user-data-dir=' + path.join(__dirname, '../tmp/user-data'),
     '--wait',
-    testWorkspace
+    testWorkspace,
   ]
-  
+
   const electronApp = await electron.launch({
     executablePath,
     args,
-    timeout
+    timeout,
   })
-  
+
   return electronApp
 }
