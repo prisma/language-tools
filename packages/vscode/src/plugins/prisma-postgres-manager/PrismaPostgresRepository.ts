@@ -173,6 +173,10 @@ class CacheManager {
     this.databases.get(this.generateKey(workspaceId, projectId))?.delete(databaseId)
   }
 
+  clearDatabases(workspaceId: string, projectId: string): void {
+    this.databases.delete(this.generateKey(workspaceId, projectId))
+  }
+
   // Region cache
   setRegions(regions: Region[]): void {
     this.regions = regions
@@ -812,7 +816,7 @@ export class PrismaPostgresRepository {
 
     await state.close()
 
-    this.cache.setDatabases(workspaceId, projectId, [])
+    this.cache.clearDatabases(workspaceId, projectId)
     this.refreshEventEmitter.fire()
   }
 
