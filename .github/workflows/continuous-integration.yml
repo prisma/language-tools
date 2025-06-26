@@ -31,7 +31,7 @@ jobs:
   test:
     name: Tests + Shellcheck
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
+    timeout-minutes: 25
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -54,6 +54,30 @@ jobs:
         uses: coactions/setup-xvfb@v1
         with:
           run: npm test "useLocalLS"
+
+      # Playwright testing
+      - name: Install Playwright browsers
+        run: |
+          cd packages/vscode
+          npx playwright install --with-deps
+
+      - name: Run Playwright UI tests
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: |
+            cd packages/vscode
+            npm run test:playwright
+        env:
+          CI: true
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-${{ matrix.os }}
+          path: packages/vscode/playwright-report/
+          retention-days: 30
+
       - name: Catch shell script issues
         if: matrix.os == 'ubuntu-latest'
         run: npm run shell:lint

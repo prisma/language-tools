@@ -42,6 +42,8 @@
     "watch": "npm run build -- -w",
     "generate-api-client": "openapi-typescript https://api.prisma.io/doc --output ./src/plugins/prisma-postgres-manager/management-api/api.d.ts",
     "test": "rm -rf ./dist && npm run build && node dist/src/__test__/runTest true",
+    "test:playwright": "playwright test",
+    "test:playwright:headless": "CI=true xvfb-run -a npm run test:playwright",
     "vscode:prepublish": "npm run build",
     "package": "vsce package"
   },
@@ -639,6 +641,7 @@
     ]
   },
   "devDependencies": {
+    "@playwright/test": "^1.48.0",
     "@types/glob": "8.1.0",
     "@types/mocha": "10.0.10",
     "@types/node": "20.14.8",
