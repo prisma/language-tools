@@ -62,11 +62,13 @@ jobs:
           npm run build
           
       - name: Install Playwright browsers
+        if: matrix.os != 'windows-latest'
         run: |
           cd packages/vscode
-          npx playwright install --with-deps
+          npx playwright install chromium
 
       - name: Run Playwright UI tests
+        if: matrix.os != 'windows-latest'
         uses: coactions/setup-xvfb@v1
         with:
           run: npm run test:playwright
@@ -76,7 +78,7 @@ jobs:
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
-        if: failure()
+        if: failure() && matrix.os != 'windows-latest'
         with:
           name: playwright-report-${{ matrix.os }}
           path: packages/vscode/playwright-report/

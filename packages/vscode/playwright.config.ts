@@ -1,4 +1,4 @@
-import { defineConfig } from '@playwright/test'
+import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
   testDir: './tests/playwright',
@@ -19,6 +19,7 @@ export default defineConfig({
       use: {
         // Note: headless doesn't apply to Electron apps
         // Headless mode is controlled via VS Code arguments in vscode-setup.ts
+        ...devices['Desktop Chrome'],
       },
     },
   ],
