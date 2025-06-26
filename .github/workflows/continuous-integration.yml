@@ -56,17 +56,28 @@ jobs:
           run: npm test "useLocalLS"
 
       # Playwright testing
+      - name: Build VS Code extension
+        run: |
+          cd packages/vscode
+          npm run build
+          
       - name: Install Playwright browsers
         run: |
           cd packages/vscode
           npx playwright install --with-deps
+      
+      - name: Verify Playwright installation
+        run: |
+          cd packages/vscode
+          npx playwright --version
+          npm run --silent
 
       - name: Run Playwright UI tests
         uses: coactions/setup-xvfb@v1
         with:
           run: |
             cd packages/vscode
-            npm run test:playwright:headless
+            npm run test:playwright
         env:
           CI: true
 
