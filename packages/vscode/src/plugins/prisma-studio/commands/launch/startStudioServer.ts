@@ -1,4 +1,4 @@
-import { ExtensionContext, Uri } from 'vscode'
+import { env, type ExtensionContext, Uri } from 'vscode'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import path from 'path'
@@ -7,15 +7,26 @@ import getPort from 'get-port'
 import { serve } from '@hono/node-server'
 import { createAccelerateHttpClient } from '@prisma/studio-core-licensed/data/accelerate'
 import { serializeError } from '@prisma/studio-core-licensed/data/bff'
-import { Query } from '@prisma/studio-core-licensed/data'
+import type { Query } from '@prisma/studio-core-licensed/data'
+import type { StudioProps } from '@prisma/studio-core-licensed/ui'
+import type TelemetryReporter from '../../../../telemetryReporter'
+import type { LaunchArg } from '../../../prisma-postgres-manager/commands/launchStudio'
+
+export interface StartStudioServerArgs {
+  context: ExtensionContext
+  database: LaunchArg
+  dbUrl: string
+  telemetryReporter: TelemetryReporter
+}
 
 /**
  * Starts a local server for Prisma Studio and serves the UI files.
  * @param args - An object containing the static files root URI.
  * @returns The URL of the running server.
  */
-export async function startStudioServer(args: { dbUrl: string; context: ExtensionContext }) {
-  const { dbUrl, context } = args
+export async function startStudioServer(args: StartStudioServerArgs) {
+  const { database, dbUrl, context, telemetryReporter } = args
+
   const staticFilesPath = ['node_modules', '@prisma', 'studio-core-licensed']
   const staticFilesRoot = Uri.joinPath(context.extensionUri, ...staticFilesPath)
 
@@ -24,8 +35,8 @@ export async function startStudioServer(args: { dbUrl: string; context: Extensio
   app.use('*', cors())
 
   // gives access to accelerate (and more soon) via bff client
-  app.post('/bff', async (c) => {
-    const { query } = (await c.req.json()) as unknown as { query: Query }
+  app.post('/bff', async (ctx) => {
+    const { query } = (await ctx.req.json()) as unknown as { query: Query }
 
     const [error, results] = await createAccelerateHttpClient({
       host: new URL(dbUrl).host,
@@ -37,15 +48,56 @@ export async function startStudioServer(args: { dbUrl: string; context: Extensio
     }).execute(query)
 
     if (error) {
-      return c.json([serializeError(error)])
+      return ctx.json([serializeError(error)])
     }
 
-    return c.json([null, results])
+    return ctx.json([null, results])
+  })
+
+  const commonInformation = {
+    ppg:
+      database.type === 'local'
+        ? {
+            databaseId: null,
+            name: database.name,
+            projectId: null,
+            type: 'local',
+            workspaceId: null,
+          }
+        : {
+            databaseId: database.databaseId,
+            name: null,
+            projectId: database.projectId,
+            type: 'remote',
+            workspaceId: database.workspaceId,
+          },
+    vscode: { machineId: env.machineId, sessionId: env.sessionId },
+  }
+
+  app.post('/telemetry', async (ctx) => {
+    const { eventId, name, payload, timestamp } =
+      await ctx.req.json<Parameters<NonNullable<StudioProps['onEvent']>>[0]>()
+
+    if (name !== 'studio_launched') {
+      return ctx.body(null, 204)
+    }
+
+    void telemetryReporter
+      .sendTelemetryEvent({
+        check_if_update_available: false,
+        client_event_id: eventId,
+        command: name,
+        information: JSON.stringify({ ...commonInformation, eventPayload: payload }),
+        local_timestamp: timestamp,
+      })
+      .catch(() => {})
+
+    return ctx.body(null, 204)
   })
 
   // gives access to client side rendering resources
-  app.get('/*', async (c) => {
-    const reqPath = c.req.path.substring(1)
+  app.get('/*', async (ctx) => {
+    const reqPath = ctx.req.path.substring(1)
     const filePath = path.join(staticFilesRoot.path, reqPath)
     const fileExt = path.extname(filePath).toLowerCase()
 
@@ -66,9 +118,9 @@ export async function startStudioServer(args: { dbUrl: string; context: Extensio
     const contentType = contentTypeMap[fileExt] ?? 'application/octet-stream'
 
     try {
-      return c.body(await readFile(filePath), 200, { 'Content-Type': contentType })
+      return ctx.body(await readFile(filePath), 200, { 'Content-Type': contentType })
     } catch (error) {
-      return c.text('File not found', 404)
+      return ctx.text('File not found', 404)
     }
   })
 
