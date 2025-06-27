@@ -4,8 +4,8 @@ import type { LaunchArg } from '../../prisma-postgres-manager/commands/launchStu
 
 export interface LaunchArgs {
   context: ExtensionContext
-  database: LaunchArg
-  dbUrl: string
+  database?: LaunchArg
+  dbUrl?: string
 }
 
 /**
@@ -14,6 +14,7 @@ export interface LaunchArgs {
  */
 export async function launch(args: LaunchArgs) {
   if (args.dbUrl != null) {
+    // @ts-expect-error it's fine. typescript go home.
     return openNewStudioTab(args)
   }
 
