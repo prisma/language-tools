@@ -6,7 +6,7 @@ import type { LaunchArg } from '../../../prisma-postgres-manager/commands/launch
 
 export interface OpenNewStudioTabArgs {
   context: ExtensionContext
-  database: LaunchArg
+  database?: LaunchArg
   dbUrl: string
 }
 

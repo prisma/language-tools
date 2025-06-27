@@ -14,7 +14,7 @@ import type { LaunchArg } from '../../../prisma-postgres-manager/commands/launch
 
 export interface StartStudioServerArgs {
   context: ExtensionContext
-  database: LaunchArg
+  database?: LaunchArg
   dbUrl: string
   telemetryReporter: TelemetryReporter
 }
@@ -55,8 +55,15 @@ export async function startStudioServer(args: StartStudioServerArgs) {
   })
 
   const commonInformation = {
-    ppg:
-      database.type === 'local'
+    ppg: !database
+      ? {
+          databaseId: null,
+          name: null,
+          projectId: null,
+          type: dbUrl.includes('localhost') ? 'local' : 'remote',
+          workspaceId: null,
+        }
+      : database.type === 'local'
         ? {
             databaseId: null,
             name: database.name,
