@@ -19,7 +19,7 @@ export const LaunchArgRemoteSchema = z.object({
 export type LaunchArgRemote = z.infer<typeof LaunchArgRemoteSchema>
 
 const LaunchArgSchema = z.union([LaunchArgLocalSchema, LaunchArgRemoteSchema])
-type LaunchArg = z.infer<typeof LaunchArgSchema>
+export type LaunchArg = z.infer<typeof LaunchArgSchema>
 
 export const launchStudio = async ({
   ppgRepository,
@@ -40,7 +40,7 @@ export const launchStudio = async ({
 
   if (!connectionString) return
 
-  void launch({ dbUrl: connectionString, context })
+  void launch({ database, dbUrl: connectionString, context })
 }
 
 const getConnectionString = async (ppgRepository: PrismaPostgresRepository, database: LaunchArg) => {
