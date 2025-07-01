@@ -53,6 +53,7 @@ export function getStudioPageHtml(args: { serverUrl: string }): string {
       });
     };
 
+    window.__PVCE__ = true;
     const container = document.getElementById('root');
     const root = ReactDOMClient.createRoot(container);
     root.render(React.createElement(Studio, { adapter, onEvent }));
