@@ -46,9 +46,17 @@ export function getStudioPageHtml(args: { serverUrl: string }): string {
       noParameters: true
     });
 
+    const onEvent = (event) => {
+      fetch('${serverUrl}/telemetry', {
+        body: JSON.stringify(event),
+        method: 'POST',
+      });
+    };
+
+    window.__PVCE__ = true;
     const container = document.getElementById('root');
     const root = ReactDOMClient.createRoot(container);
-    root.render(React.createElement(Studio, { adapter }));
+    root.render(React.createElement(Studio, { adapter, onEvent }));
 
     // forces vscode to allow following links when clicked
     document.body.addEventListener('click', (event) => {

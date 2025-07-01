@@ -1,5 +1,5 @@
-import { check } from 'checkpoint-client'
-import { Disposable, workspace } from 'vscode'
+import { type Check, check } from 'checkpoint-client'
+import { type Disposable, workspace } from 'vscode'
 import { getProjectHash } from './hashes'
 
 type TelemetryLevel = 'off' | 'crash' | 'error' | 'all' | undefined
@@ -14,18 +14,19 @@ export default class TelemetryReporter {
   private static TELEMETRY_OLD_SETTING_ID = 'enableTelemetry'
 
   constructor(
-    private extensionId: string,
-    private extensionVersion: string,
+    private product: string,
+    private version: string,
   ) {
     this.updateUserOptIn()
     this.configListener = workspace.onDidChangeConfiguration(() => this.updateUserOptIn())
   }
 
-  public async sendTelemetryEvent(): Promise<void> {
+  public async sendTelemetryEvent(event?: Omit<Check.Input, 'product' | 'project_hash' | 'version'>): Promise<void> {
     if (this.userOptIn) {
       await check({
-        product: this.extensionId,
-        version: this.extensionVersion,
+        ...event,
+        product: this.product,
+        version: this.version,
         project_hash: await getProjectHash(),
       })
     }
