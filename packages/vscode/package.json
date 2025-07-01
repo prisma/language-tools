@@ -16,7 +16,7 @@
     "@hono/node-server": "1.14.2",
     "@prisma/credentials-store": "6.9.0-dev.18",
     "@prisma/dev": "0.11.1",
-    "@prisma/language-server": "31.0.7712",
+    "@prisma/language-server": "31.0.7713",
     "@prisma/ppg": "0.5.2",
     "@prisma/studio-core-licensed": "0.5.0",
     "checkpoint-client": "1.1.33",
