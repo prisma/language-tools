@@ -82,20 +82,3 @@ jobs:
           workflow: 3. Test Language Server and publish
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
           inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}", "trigger_reason": "Prisma CLI version ${{github.event.inputs.version}}" }'
-
-      - name: 'Set current job url in SLACK_FOOTER env var'
-        if: ${{ failure() }}
-        run: echo "SLACK_FOOTER=<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|Click here to go to the job logs>" >> $GITHUB_ENV
-
-      - name: Slack Notification on Failure
-        if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@v2.3.2
-        env:
-          SLACK_TITLE: '2. Bumping versions failed :x:'
-          SLACK_COLOR: '#FF0000'
-          SLACK_MESSAGE: '${{github.event.inputs.version}} - On new Prisma CLI version ${{github.event.inputs.version}}'
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_FAILURES }}
-          SLACK_CHANNEL: feed-language-tools-failures
-          SLACK_USERNAME: Prismo
-          SLACK_ICON_EMOJI: ':boom:'
-          SLACK_MSG_AUTHOR: prisma-bot

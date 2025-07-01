@@ -57,7 +57,7 @@ jobs:
         run: |
           PACKAGE_JSON_PATH="./packages/language-server/package.json"
           echo $PACKAGE_JSON_PATH
-          ENGINES_VERSION=$(jq -r '.prisma.enginesVersion' ${PACKAGE_JSON_PATH}) 
+          ENGINES_VERSION=$(jq -r '.prisma.enginesVersion' ${PACKAGE_JSON_PATH})
           echo "engines=$ENGINES_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Commit and push to branch
@@ -70,20 +70,3 @@ jobs:
           workflow: 5. Integration tests in VSCode folder with published LS
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
           inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'
-
-      - name: 'Set current job url in SLACK_FOOTER env var'
-        if: ${{ failure() }}
-        run: echo "SLACK_FOOTER=<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|Click here to go to the job logs>" >> $GITHUB_ENV
-
-      - name: Slack Notification on Failure
-        if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@v2.3.2
-        env:
-          SLACK_TITLE: '4. Bumping LS in VSCode extension failed :x:'
-          SLACK_COLOR: '#FF0000'
-          SLACK_MESSAGE: '${{github.event.inputs.extension_version}} - ${{github.event.inputs.trigger_reason}} '
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_FAILURES }}
-          SLACK_CHANNEL: feed-language-tools-failures
-          SLACK_USERNAME: Prismo
-          SLACK_ICON_EMOJI: ':boom:'
-          SLACK_MSG_AUTHOR: prisma-bot
