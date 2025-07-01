@@ -4,3 +4,7 @@
 *.vsix
 *.exe
 language-server
+/tests/tmp
+/tests/playwright/tmp
+/test-results
+/playwright-report
