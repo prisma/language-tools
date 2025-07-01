@@ -53,19 +53,3 @@ jobs:
           workflow: 2. Bump versions
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
           inputs: '{ "npm_channel": "patch-dev", "version": "${{ steps.check_update.outputs.patch-dev_version }}" }'
-
-      - name: 'Set current job url in SLACK_FOOTER env var'
-        if: ${{ failure() }}
-        run: echo "SLACK_FOOTER=<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|Click here to go to the job logs>" >> $GITHUB_ENV
-
-      - name: Slack Notification on Failure
-        if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@v2.3.2
-        env:
-          SLACK_TITLE: '1. Checking for Prisma CLI Update failed :x:'
-          SLACK_COLOR: '#FF0000'
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_FAILURES }}
-          SLACK_CHANNEL: feed-language-tools-failures
-          SLACK_USERNAME: Prismo
-          SLACK_ICON_EMOJI: ':boom:'
-          SLACK_MSG_AUTHOR: prisma-bot

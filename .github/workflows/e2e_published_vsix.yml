@@ -12,10 +12,7 @@ on:
         required: true
 
 env:
-  SLACK-USERNAME: Prismo
-  SLACK_ICON_EMOJI: ':robot_face:'
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
-  SLACK_MSG_AUTHOR: prisma-bot
   # * Enables github logging
   # ACTIONS_STEP_DEBUG: true
 
@@ -67,27 +64,3 @@ jobs:
         run: npm run test:bump ${{ github.event.inputs.extension_type }} ${{ github.event.inputs.extension_version }}
         env:
           GH_TOKEN: ${{ secrets.PRISMA_BOT_TOKEN }} # Needed and used in the shell script behind test:bump
-
-      - name: 'Set current job url in SLACK_FOOTER env var'
-        if: ${{ always() }}
-        run: echo "SLACK_FOOTER=<$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|Click here to go to the job logs>" >> $GITHUB_ENV
-
-      - name: Slack Notification on Failure
-        if: ${{ needs.test.result == 'failure' && needs.test.outputs.installed-extension }}
-        uses: rtCamp/action-slack-notify@v2.3.2
-        env:
-          SLACK_TITLE: 'Testing released ${{ github.event.inputs.extension_type }} extension failed :x:'
-          SLACK_MESSAGE: ${{ github.event.inputs.extension_version }}
-          SLACK_COLOR: '#FF0000'
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_FAILURES }}
-          SLACK_CHANNEL: feed-language-tools-failures
-
-      - name: Slack Notification on Success
-        if: ${{ needs.test.result == 'success' && needs.test.outputs.installed-extension }}
-        uses: rtCamp/action-slack-notify@v2.3.2
-        env:
-          SLACK_TITLE: 'Tested released ${{ github.event.inputs.extension_type }} extension :white_check_mark:'
-          SLACK_MESSAGE: ${{ github.event.inputs.extension_version }}
-          SLACK_COLOR: '#008000'
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_CHANNEL: feed-vscode-e2e-tests
