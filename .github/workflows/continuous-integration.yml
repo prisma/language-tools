@@ -56,19 +56,12 @@ jobs:
           run: npm test "useLocalLS"
 
       # Playwright testing
-      - name: Build VS Code extension
-        run: |
-          cd packages/vscode
-          npm run build
-          
       - name: Install Playwright browsers
-        if: matrix.os != 'windows-latest'
         run: |
           cd packages/vscode
           npx playwright install chromium
 
       - name: Run Playwright UI tests
-        if: matrix.os != 'windows-latest'
         uses: coactions/setup-xvfb@v1
         with:
           run: npm run test:playwright
@@ -78,7 +71,7 @@ jobs:
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
-        if: failure() && matrix.os != 'windows-latest'
+        if: failure()
         with:
           name: playwright-report-${{ matrix.os }}
           path: packages/vscode/playwright-report/
