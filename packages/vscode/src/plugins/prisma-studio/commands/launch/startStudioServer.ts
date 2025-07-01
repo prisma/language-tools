@@ -97,7 +97,9 @@ export async function startStudioServer(args: StartStudioServerArgs) {
         information: JSON.stringify({ ...commonInformation, eventPayload: payload }),
         local_timestamp: timestamp,
       })
-      .catch(() => {})
+      .catch(() => {
+        // noop
+      })
 
     return ctx.body(null, 204)
   })
