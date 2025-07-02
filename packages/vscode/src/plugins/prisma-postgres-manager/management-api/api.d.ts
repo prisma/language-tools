@@ -276,7 +276,7 @@ export interface operations {
            * @default us-east-1
            * @enum {string}
            */
-          region?: 'us-east-1' | 'us-west-1' | 'eu-west-3' | 'ap-northeast-1' | 'ap-southeast-1'
+          region?: 'us-east-1' | 'us-west-1' | 'eu-west-3' | 'eu-central-1' | 'ap-northeast-1' | 'ap-southeast-1'
           name?: string
         }
       }
@@ -579,7 +579,7 @@ export interface operations {
            * @default us-east-1
            * @enum {string}
            */
-          region?: 'us-east-1' | 'us-west-1' | 'eu-west-3' | 'ap-northeast-1' | 'ap-southeast-1'
+          region?: 'us-east-1' | 'us-west-1' | 'eu-west-3' | 'eu-central-1' | 'ap-northeast-1' | 'ap-southeast-1'
           name?: string
           /** @default false */
           isDefault?: boolean
