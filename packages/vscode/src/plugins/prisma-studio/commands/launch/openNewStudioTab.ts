@@ -3,6 +3,7 @@ import { getStudioPageHtml } from './getStudioPageHtml'
 import { startStudioServer } from './startStudioServer'
 import TelemetryReporter from '../../../../telemetryReporter'
 import type { LaunchArg } from '../../../prisma-postgres-manager/commands/launchStudio'
+import { getPackageJSON } from '../../../../getPackageJSON'
 
 export interface OpenNewStudioTabArgs {
   context: ExtensionContext
@@ -16,11 +17,12 @@ export interface OpenNewStudioTabArgs {
  */
 export async function openNewStudioTab(args: OpenNewStudioTabArgs) {
   const { context } = args
-  const { extension } = context
+
+  const packageJSON = getPackageJSON(context)
 
   const telemetryReporter = new TelemetryReporter(
-    `prisma.${extension.id}.studio`,
-    (extension.packageJSON as { version: string }).version,
+    `prisma.${packageJSON.name || 'prisma-unknown'}.studio`,
+    (packageJSON as { version: string }).version || '0.0.0',
   )
 
   const { server, url } = await startStudioServer({ ...args, telemetryReporter })

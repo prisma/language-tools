@@ -3,6 +3,7 @@ import TelemetryReporter from '../../../telemetryReporter'
 import { LocalDatabaseSchema, PrismaPostgresRepository } from '../PrismaPostgresRepository'
 import { createRemoteDatabaseSafely } from './createRemoteDatabase'
 import { type ExtensionContext, ProgressLocation, window } from 'vscode'
+import { getPackageJSON } from '../../../getPackageJSON'
 
 export interface DeployLocalDatabaseOptions {
   args: unknown
@@ -13,9 +14,11 @@ export interface DeployLocalDatabaseOptions {
 export async function deployLocalDatabase(options: DeployLocalDatabaseOptions): Promise<void> {
   const { args, context, ppgRepository } = options
 
+  const packageJson = getPackageJSON(context)
+
   const telemetryReporter = new TelemetryReporter(
-    `prisma.${context.extension.id}.dev`,
-    (context.extension.packageJSON as { version: string }).version,
+    `prisma.${packageJson.name || 'prisma-unknown'}.dev`,
+    packageJson.version || '0.0.0',
   )
 
   try {
