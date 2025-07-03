@@ -4,6 +4,7 @@ import { LocalDatabaseSchema, PrismaPostgresRepository } from '../PrismaPostgres
 import { createRemoteDatabaseSafely } from './createRemoteDatabase'
 import { type ExtensionContext, ProgressLocation, window } from 'vscode'
 import { getPackageJSON } from '../../../getPackageJSON'
+import { isDebugOrTestSession } from '../../../util'
 
 export interface DeployLocalDatabaseOptions {
   args: unknown
@@ -26,18 +27,22 @@ export async function deployLocalDatabase(options: DeployLocalDatabaseOptions): 
 
     const attemptEventId = randomUUID()
 
-    void telemetryReporter
-      .sendTelemetryEvent({
-        check_if_update_available: false,
-        command: 'deploy-to-ppg-attempt',
-        client_event_id: attemptEventId,
-        information: JSON.stringify({
-          name,
-        }),
-      })
-      .catch(() => {
-        // noop
-      })
+    const isDebugOrTest = isDebugOrTestSession()
+
+    if (!isDebugOrTest) {
+      void telemetryReporter
+        .sendTelemetryEvent({
+          check_if_update_available: false,
+          command: 'deploy-to-ppg-attempt',
+          client_event_id: attemptEventId,
+          information: JSON.stringify({
+            name,
+          }),
+        })
+        .catch(() => {
+          // noop
+        })
+    }
 
     const database = await ppgRepository.getLocalDatabase({ name })
 
@@ -73,21 +78,23 @@ export async function deployLocalDatabase(options: DeployLocalDatabaseOptions): 
       () => ppgRepository.deployLocalDatabase({ name, url: connectionString, projectId, workspaceId }),
     )
 
-    void telemetryReporter
-      .sendTelemetryEvent({
-        check_if_update_available: false,
-        client_event_id: randomUUID(),
-        command: 'deploy-to-ppg-success',
-        information: JSON.stringify({
-          name,
-          projectId,
-          workspaceId,
-        }),
-        previous_client_event_id: attemptEventId,
-      })
-      .catch(() => {
-        // noop
-      })
+    if (!isDebugOrTest) {
+      void telemetryReporter
+        .sendTelemetryEvent({
+          check_if_update_available: false,
+          client_event_id: randomUUID(),
+          command: 'deploy-to-ppg-success',
+          information: JSON.stringify({
+            name,
+            projectId,
+            workspaceId,
+          }),
+          previous_client_event_id: attemptEventId,
+        })
+        .catch(() => {
+          // noop
+        })
+    }
 
     void window.showInformationMessage('Deployment was successful!')
   } finally {
