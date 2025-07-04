@@ -11,6 +11,7 @@ import type { Query } from '@prisma/studio-core-licensed/data'
 import type { StudioProps } from '@prisma/studio-core-licensed/ui'
 import type TelemetryReporter from '../../../../telemetryReporter'
 import type { LaunchArg } from '../../../prisma-postgres-manager/commands/launchStudio'
+import { isDebugOrTestSession } from '../../../../util'
 
 export interface StartStudioServerArgs {
   context: ExtensionContext
@@ -85,7 +86,7 @@ export async function startStudioServer(args: StartStudioServerArgs) {
     const { eventId, name, payload, timestamp } =
       await ctx.req.json<Parameters<NonNullable<StudioProps['onEvent']>>[0]>()
 
-    if (name !== 'studio_launched') {
+    if (isDebugOrTestSession() || name !== 'studio_launched') {
       return ctx.body(null, 204)
     }
 
