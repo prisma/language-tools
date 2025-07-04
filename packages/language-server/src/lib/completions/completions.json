@@ -105,6 +105,11 @@
       "insertText": "binaryTargets = \"$0\"",
       "documentation": "Specifies the OS on which the Prisma Client will run to ensure compatibility of the query engine. [Learn more](https://pris.ly/d/generator-fields).",
       "fullSignature": "binaryTargets = BinaryTargets[] | env(\"ENVIRONMENT_VARIABLE\")"
+    },
+    {
+      "label": "moduleFormat",
+      "insertText": "moduleFormat = \"$0\"",
+      "documentation": "Defines the module format for the generated Prisma Client. Can be 'cjs' or 'esm'."
     }
   ],
   "blockAttributes": [
@@ -399,6 +404,10 @@
     {
       "label": "prisma-client-js",
       "documentation": "Built-in generator."
+    },
+    {
+      "label": "prisma-client",
+      "documentation": "Built-in generator with ESM support. Generates the Prisma Client into a custom directory. Currently in early access."
     }
   ],
   "generatorProviderArguments": [
