@@ -514,6 +514,10 @@ describe('Completions', function () {
       label: 'engineType',
       kind: CompletionItemKind.Field,
     }
+    const moduleFormat = {
+      label: 'moduleFormat',
+      kind: CompletionItemKind.Field,
+    }
     //#endregion
 
     test('Diagnoses generator field suggestions in empty block', () => {
@@ -524,7 +528,7 @@ describe('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldPreviewFeatures, fieldOutput, fieldEngineType, fieldBinaryTargets],
+          items: [fieldProvider, fieldPreviewFeatures, fieldOutput, fieldEngineType, fieldBinaryTargets, moduleFormat],
         },
       })
     })
@@ -538,7 +542,7 @@ describe('Completions', function () {
           }`,
         expected: {
           isIncomplete: false,
-          items: [fieldPreviewFeatures, fieldOutput, fieldEngineType, fieldBinaryTargets],
+          items: [fieldPreviewFeatures, fieldOutput, fieldEngineType, fieldBinaryTargets, moduleFormat],
         },
       })
       assertCompletion({
@@ -549,7 +553,7 @@ describe('Completions', function () {
           }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldPreviewFeatures, fieldEngineType, fieldBinaryTargets],
+          items: [fieldProvider, fieldPreviewFeatures, fieldEngineType, fieldBinaryTargets, moduleFormat],
         },
       })
     })
