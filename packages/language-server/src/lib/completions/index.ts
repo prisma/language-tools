@@ -543,16 +543,16 @@ function getSuggestionForSupportedFields(
   currentLineUntrimmed: string,
   position: Position,
   schema: PrismaSchema,
+  block?: Block,
   onError?: (errorMessage: string) => void,
 ): CompletionList | undefined {
   const isInsideQuotation: boolean = isInsideQuotationMark(currentLineUntrimmed, position)
   // We can filter on the datasource
   const datasourceProvider = getFirstDatasourceProvider(schema)
-  // We can filter on the previewFeatures enabled
-  // const previewFeatures = getAllPreviewFeaturesFromGenerators(lines)
 
   switch (blockType) {
     case 'generator':
+      console.log('[getSuggestionForSupportedFields] generator', block)
       return generatorSuggestions(currentLine, currentLineUntrimmed, position, isInsideQuotation, onError)
     case 'datasource':
       return dataSourceSuggestions(currentLine, isInsideQuotation, datasourceProvider)
@@ -629,6 +629,7 @@ export function localCompletions(
 
   // datasource, generator, model, type or enum
   const foundBlock = getBlockAtPosition(initiatingDocument.uri, position.line, schema)
+
   if (!foundBlock) {
     if (wordsBeforePosition.length > 1 || (wordsBeforePosition.length === 1 && symbolBeforePositionIsWhiteSpace)) {
       return
@@ -636,7 +637,7 @@ export function localCompletions(
     return getSuggestionForBlockTypes(schema)
   }
 
-  if (isFirstInsideBlock(position, foundBlock.definingDocument.lines[position.line].untrimmedText)) {
+  if (isFirstInsideBlock(position, currentLineUntrimmed)) {
     return getSuggestionForFirstInsideBlock(foundBlock.type, schema, position, foundBlock)
   }
 
@@ -662,6 +663,7 @@ export function localCompletions(
           currentLineUntrimmed,
           position,
           schema,
+          foundBlock,
           onError,
         )
       case '.':
@@ -696,7 +698,21 @@ export function localCompletions(
       )
     case 'datasource':
     case 'generator':
+      console.log('is generator')
+      // If we're on a line with just whitespace, suggest field names
+      if (currentLineTillPosition.trim() === '') {
+        if (foundBlock.type === 'generator') {
+          const generatorFields = getSuggestionForGeneratorField(foundBlock, schema, position)
+          console.log('getSuggestionForGeneratorField returned:', generatorFields.length, 'items')
+          return {
+            items: generatorFields,
+            isIncomplete: false,
+          }
+        }
+        // For datasource, we could add similar logic here if needed
+      }
       if (wordsBeforePosition.length === 1 && symbolBeforePositionIsWhiteSpace) {
+        console.log('suggestEqualSymbol')
         return suggestEqualSymbol(foundBlock.type)
       }
       if (
@@ -705,12 +721,14 @@ export function localCompletions(
         !positionIsAfterArray &&
         symbolBeforePosition !== ','
       ) {
+        console.log('getSuggestionForSupportedFields')
         return getSuggestionForSupportedFields(
           foundBlock.type,
           foundBlock.definingDocument.getLineContent(position.line),
           currentLineUntrimmed,
           position,
           schema,
+          foundBlock,
           onError,
         )
       }

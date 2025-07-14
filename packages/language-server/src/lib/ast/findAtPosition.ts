@@ -21,6 +21,10 @@ export function getCurrentLine(document: TextDocument, line: number): string {
   })
 }
 
+/**
+ * Check if the position is at the beginning of a new line in the block,
+ * not necessarily the first line of the block.
+ */
 export function isFirstInsideBlock(position: Position, currentLine: string): boolean {
   if (currentLine.trim().length === 0) {
     return true
