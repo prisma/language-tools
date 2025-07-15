@@ -173,9 +173,8 @@ function getProviderFromBlock(block: Block): string | undefined {
   const lines = block.definingDocument.lines
   for (let lineIndex = block.range.start.line + 1; lineIndex < block.range.end.line; lineIndex++) {
     const line = lines[lineIndex].text.trim()
-    console.log(`getProviderFromBlock [line][lineIndex]`, line)
     if (line.startsWith('provider')) {
-      // TODO: given a line like `provider = "prisma-client-js"`, extract the value of the provider (e.g., 'prisma-client-js').
+      // given a line like `provider = "prisma-client"`, extract the value of the provider (e.g., 'prisma-client').
       const match = line.match(/\s*provider\s*=\s*"([^"]+)"/)
       return match ? match[1] : undefined
     }
@@ -247,9 +246,7 @@ export function getSuggestionForGeneratorField(
   schema: PrismaSchema,
   position: Position,
 ): CompletionItem[] {
-  console.log('getSuggestionForGeneratorField [block]', block)
   const provider = getProviderFromBlock(block)
-  console.log('getSuggestionForGeneratorField [provider]', provider)
   
   let suggestions: CompletionItem[]
   if (provider === 'prisma-client-js') {
@@ -267,7 +264,6 @@ export function getSuggestionForGeneratorField(
     schema,
     position,
   )
-  console.log('getSuggestionForGeneratorField [labels]', labels)
 
   return suggestions.filter((item) => labels.includes(item.label))
 }
@@ -367,7 +363,7 @@ export const generatorSuggestions = (
       }
     }
     return {
-      items: moduleFormatsArguments,
+      items: generatedFileExtensionArguments,
       isIncomplete: true,
     }
   }
