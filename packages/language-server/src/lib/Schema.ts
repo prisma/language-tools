@@ -91,7 +91,7 @@ async function loadPrismaSchema(fsPath: string, allDocuments: TextDocuments<Text
 }
 
 function loadPrismaSchemaWithConfig(
-  config: PrismaConfigInternal<never>,
+  config: PrismaConfigInternal,
   currentDocument: TextDocument,
   allDocuments: TextDocuments<TextDocument>,
 ): Promise<PrismaSchema> {
