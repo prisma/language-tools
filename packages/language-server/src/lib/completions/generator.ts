@@ -29,7 +29,7 @@ const generatorProviders: CompletionItem[] = convertToCompletionItems(
 /**
  * ```prisma
  * generator client {
- *  provider = "|"
+ *   provider = "|"
  * }
  * ```
  */
@@ -44,7 +44,8 @@ const engineTypes: CompletionItem[] = convertToCompletionItems(completions.engin
 /**
  * ```prisma
  * generator client {
- *  engineType = "|"
+ *   provider = "prisma-client-js"
+ *   engineType = "|"
  * }
  * ```
  */
@@ -53,17 +54,133 @@ const engineTypeArguments: CompletionItem[] = convertToCompletionItems(
   CompletionItemKind.Property,
 )
 
-/**
- * ```prisma
- * generator client {
- *  previewFeatures = ["|"]
- * }
- * ```
- */
+// generator.previewFeatures
 const previewFeaturesArguments: CompletionItem[] = convertToCompletionItems(
   completions.previewFeaturesArguments,
   CompletionItemKind.Property,
 )
+
+
+/**
+ * ```prisma
+ * generator client {
+ *   provider = "prisma-client"
+ *   runtime = |
+ * }
+ * ```
+ */
+const runtimeArguments: CompletionItem[] = convertToCompletionItems(
+  completions.runtimeArguments,
+  CompletionItemKind.Property,
+)
+
+/**
+ * ```prisma
+ * generator client {
+ *   provider = "prisma-client"
+ *   runtime = "|"
+ * }
+ * ```
+ */
+const runtimes: CompletionItem[] = convertToCompletionItems(completions.runtimes, CompletionItemKind.Constant)
+
+/**
+ * ```prisma
+ * generator client {
+ *   provider = "prisma-client"
+ *   moduleFormats = |
+ * }
+ * ```
+ */
+const moduleFormatsArguments: CompletionItem[] = convertToCompletionItems(
+  completions.moduleFormatArguments,
+  CompletionItemKind.Property,
+)
+
+/**
+ * ```prisma
+ * generator client {
+ *   provider = "prisma-client"
+ *   moduleFormats = "|""
+ * }
+ * ```
+ */
+const moduleFormats: CompletionItem[] = convertToCompletionItems(completions.moduleFormats, CompletionItemKind.Constant)
+
+/**
+ * ```prisma
+ * generator client {
+ *   provider = "prisma-client"
+ *   generatedFileExtension = |
+ * }
+ * ```
+ */
+const generatedFileExtensionArguments: CompletionItem[] = convertToCompletionItems(
+  completions.generatedFileExtensionArguments,
+  CompletionItemKind.Property,
+)
+
+/**
+ * ```prisma
+ * generator client {
+ *   provider = "prisma-client"
+ *   generatedFileExtension = "|""
+ * }
+ * ```
+ */
+const generatedFileExtensions: CompletionItem[] = convertToCompletionItems(completions.generatedFileExtensions, CompletionItemKind.Constant)
+
+/**
+ * ```prisma
+ * generator client {
+ *   provider = "prisma-client"
+ *   importFileExtension = |
+ * }
+ * ```
+ */
+const importFileExtensionArguments: CompletionItem[] = convertToCompletionItems(
+  completions.importFileExtensionArguments,
+  CompletionItemKind.Property,
+)
+
+/**
+ * ```prisma
+ * generator client {
+ *   provider = "prisma-client"
+ *   importFileExtension = "|""
+ * }
+ * ```
+ */
+const importFileExtensions: CompletionItem[] = convertToCompletionItems(completions.importFileExtension, CompletionItemKind.Constant)
+
+
+// Fields for prisma-client generator
+const prismaClientFields: CompletionItem[] = convertToCompletionItems(
+  completions.generatorPrismaClientFields,
+  CompletionItemKind.Field,
+)
+
+// Fields for prisma-client-js generator
+const prismaClientJSFields: CompletionItem[] = convertToCompletionItems(
+  completions.generatorPrismaClientJSFields,
+  CompletionItemKind.Field,
+)
+
+/**
+ * Helper function to get the provider value from a generator block
+ */
+function getProviderFromBlock(block: Block): string | undefined {
+  const lines = block.definingDocument.lines
+  for (let lineIndex = block.range.start.line + 1; lineIndex < block.range.end.line; lineIndex++) {
+    const line = lines[lineIndex].text.trim()
+    if (line.startsWith('provider')) {
+      // given a line like `provider = "prisma-client"`, extract the value of the provider (e.g., 'prisma-client').
+      const match = line.match(/\s*provider\s*=\s*"([^"]+)"/)
+      return match ? match[1] : undefined
+    }
+  }
+  return undefined
+}
 
 function handlePreviewFeatures(
   previewFeaturesArray: string[],
@@ -129,8 +246,17 @@ export function getSuggestionForGeneratorField(
   schema: PrismaSchema,
   position: Position,
 ): CompletionItem[] {
-  // create deep copy
-  const suggestions: CompletionItem[] = klona(supportedGeneratorFields)
+  const provider = getProviderFromBlock(block)
+  
+  let suggestions: CompletionItem[]
+  if (provider === 'prisma-client-js') {
+    suggestions = klona(prismaClientJSFields)
+  } else if (provider === 'prisma-client') {
+    suggestions = klona(prismaClientFields)
+  } else {
+    // Default to showing all fields if no provider is set yet
+    suggestions = klona(supportedGeneratorFields)
+  }
 
   const labels = removeInvalidFieldSuggestions(
     suggestions.map((item) => item.label),
@@ -149,6 +275,10 @@ export const generatorSuggestions = (
   isInsideQuotation: boolean,
   onError?: (errorMessage: string) => void,
 ) => {
+  /**
+   * Common cases for generator blocks:
+   */
+
   // provider
   if (line.startsWith('provider')) {
     const providers: CompletionItem[] = generatorProviders
@@ -157,33 +287,98 @@ export const generatorSuggestions = (
         items: providers,
         isIncomplete: true,
       }
-    } else {
-      return {
-        items: generatorProviderArguments,
-        isIncomplete: true,
-      }
+    }
+    return {
+      items: generatorProviderArguments,
+      isIncomplete: true,
     }
   }
+
   // previewFeatures
-  else if (line.startsWith('previewFeatures')) {
+  if (line.startsWith('previewFeatures')) {
     const generatorPreviewFeatures: string[] = listAllAvailablePreviewFeatures(onError)
     if (generatorPreviewFeatures.length > 0) {
       return handlePreviewFeatures(generatorPreviewFeatures, position, untrimmedLine, isInsideQuotation)
     }
+    return undefined
   }
+
+  /**
+   * Cases for `provider = "prisma-client-js"`
+   */
+
   // engineType
-  else if (line.startsWith('engineType')) {
+  if (line.startsWith('engineType')) {
     const engineTypesCompletion: CompletionItem[] = engineTypes
     if (isInsideQuotation) {
       return {
         items: engineTypesCompletion,
         isIncomplete: true,
       }
-    } else {
+    }
+    return {
+      items: engineTypeArguments,
+      isIncomplete: true,
+    }
+  }
+
+  /**
+   * Cases for `provider = "prisma-client"`
+   */
+
+  // runtime
+  if (line.startsWith('runtime')) {
+    if (isInsideQuotation) {
       return {
-        items: engineTypeArguments,
+        items: runtimes,
         isIncomplete: true,
       }
+    }
+    return {
+      items: runtimeArguments,
+      isIncomplete: true,
+    }
+  }
+
+  // runtime
+  if (line.startsWith('moduleFormat')) {
+    if (isInsideQuotation) {
+      return {
+        items: moduleFormats,
+        isIncomplete: true,
+      }
+    }
+    return {
+      items: moduleFormatsArguments,
+      isIncomplete: true,
+    }
+  }
+
+  // generatedFileExtension
+  if (line.startsWith('generatedFileExtension')) {
+    if (isInsideQuotation) {
+      return {
+        items: generatedFileExtensions,
+        isIncomplete: true,
+      }
+    }
+    return {
+      items: generatedFileExtensionArguments,
+      isIncomplete: true,
+    }
+  }
+
+  // importFileExtension
+  if (line.startsWith('importFileExtension')) {
+    if (isInsideQuotation) {
+      return {
+        items: importFileExtensions,
+        isIncomplete: true,
+      }
+    }
+    return {
+      items: importFileExtensionArguments,
+      isIncomplete: true,
     }
   }
 }

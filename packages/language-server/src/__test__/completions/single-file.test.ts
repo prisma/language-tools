@@ -514,6 +514,22 @@ describe('Completions', function () {
       label: 'engineType',
       kind: CompletionItemKind.Field,
     }
+    const fieldRuntime = {
+      label: 'runtime',
+      kind: CompletionItemKind.Field,
+    }
+    const fieldModuleFormat = {
+      label: 'moduleFormat',
+      kind: CompletionItemKind.Field,
+    }
+    const fieldGeneratedFileExtension = {
+      label: 'generatedFileExtension',
+      kind: CompletionItemKind.Field,
+    }
+    const fieldImportFileExtension = {
+      label: 'importFileExtension',
+      kind: CompletionItemKind.Field,
+    }
     //#endregion
 
     test('Diagnoses generator field suggestions in empty block', () => {
@@ -524,76 +540,340 @@ describe('Completions', function () {
         }`,
         expected: {
           isIncomplete: false,
-          items: [fieldProvider, fieldPreviewFeatures, fieldOutput, fieldEngineType, fieldBinaryTargets],
+          items: [fieldProvider],
         },
       })
     })
 
-    test('Diagnoses generator field suggestions with existing fields', () => {
-      assertCompletion({
-        schema: /* Prisma */ `
-          generator gen {
-            provider = 'sqlite'
-            |
-          }`,
-        expected: {
-          isIncomplete: false,
-          items: [fieldPreviewFeatures, fieldOutput, fieldEngineType, fieldBinaryTargets],
-        },
+    describe('no generator', () => {
+      test('with output defined', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            generator gen {
+              output = "../generated/prisma"
+              |
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [fieldProvider],
+          },
+        })
       })
-      assertCompletion({
-        schema: /* Prisma */ `
-          generator gen {
-            output  = "node_modules/@prisma/client"
-            |
-          }`,
-        expected: {
-          isIncomplete: false,
-          items: [fieldProvider, fieldPreviewFeatures, fieldEngineType, fieldBinaryTargets],
-        },
+
+      test('with preview features defined', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            generator gen {
+              previewFeatures = []
+              |
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [fieldProvider],
+          },
+        })
       })
     })
 
-    test('engineType = |', () => {
-      assertCompletion({
-        schema: /* Prisma */ `
-          generator gen {
-            engineType = |
-          }`,
-        expected: {
-          isIncomplete: true,
-          items: [
-            {
-              label: '""',
-              kind: CompletionItemKind.Property,
-            },
-          ],
-        },
+    describe('prisma-client', () => {
+      test('Diagnoses generator field suggestions with existing fields', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            generator gen {
+              provider = "prisma-client"
+              |
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [fieldPreviewFeatures, fieldOutput, fieldRuntime, fieldModuleFormat, fieldGeneratedFileExtension, fieldImportFileExtension],
+          },
+        })
+      })
+
+      test('runtime = |', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            generator gen {
+              provider = "prisma-client"
+              runtime = |
+            }`,
+          expected: {
+            isIncomplete: true,
+            items: [
+              {
+                label: '""',
+                kind: CompletionItemKind.Property,
+              },
+            ],
+          },
+        })
+      })
+
+      test('runtime = "|"', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            generator gen {
+              provider = "prisma-client"
+              runtime = "|"
+            }`,
+          expected: {
+            isIncomplete: true,
+            items: [
+              {
+                label: 'nodejs',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'node',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'deno',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'bun',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'deno-deploy',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'workerd',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'cloudflare',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'edge-light',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'vercel',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'react-native',
+                kind: CompletionItemKind.Constant,
+              },
+            ],
+          },
+        })
+      })
+
+      test('moduleFormat = |', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            generator gen {
+              provider = "prisma-client"
+              moduleFormat = |
+            }`,
+          expected: {
+            isIncomplete: true,
+            items: [
+              {
+                label: '""',
+                kind: CompletionItemKind.Property,
+              },
+            ],
+          },
+        })
+      })
+
+      test('moduleFormat = "|"', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            generator gen {
+              provider = "prisma-client"
+              moduleFormat = "|"
+            }`,
+          expected: {
+            isIncomplete: true,
+            items: [
+              {
+                label: 'esm',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'cjs',
+                kind: CompletionItemKind.Constant,
+              },
+            ],
+          },
+        })
+      })
+
+      test('generatedFileExtension = |', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            generator gen {
+              provider = "prisma-client"
+              generatedFileExtension = |
+            }`,
+          expected: {
+            isIncomplete: true,
+            items: [
+              {
+                label: '""',
+                kind: CompletionItemKind.Property,
+              },
+            ],
+          },
+        })
+      })
+
+      test('generatedFileExtension = "|"', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            generator gen {
+              provider = "prisma-client"
+              generatedFileExtension = "|"
+            }`,
+          expected: {
+            isIncomplete: true,
+            items: [
+              {
+                label: 'ts',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'mts',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'cts',
+                kind: CompletionItemKind.Constant,
+              },
+            ],
+          },
+        })
+      })
+
+      test('importFileExtension = |', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            generator gen {
+              provider = "prisma-client"
+              importFileExtension = |
+            }`,
+          expected: {
+            isIncomplete: true,
+            items: [
+              {
+                label: '""',
+                kind: CompletionItemKind.Property,
+              },
+            ],
+          },
+        })
+      })
+
+      test('importFileExtension = "|"', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            generator gen {
+              provider = "prisma-client"
+              importFileExtension = "|"
+            }`,
+          expected: {
+            isIncomplete: true,
+            items: [
+              {
+                label: 'ts',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'mts',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'cts',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'js',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'mjs',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'cjs',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: '',
+                kind: CompletionItemKind.Constant,
+              },
+            ],
+          },
+        })
       })
     })
-    test('engineType = "|"', () => {
-      assertCompletion({
-        schema: /* Prisma */ `
-          generator gen {
-            engineType = "|"
-          }`,
-        expected: {
-          isIncomplete: true,
-          items: [
-            {
-              label: 'library',
-              kind: CompletionItemKind.Constant,
-            },
-            {
-              label: 'binary',
-              kind: CompletionItemKind.Constant,
-            },
-            {
-              label: 'client',
-              kind: CompletionItemKind.Constant,
-            },
-          ],
-        },
+
+    describe('prisma-client-js', () => {
+      test('Diagnoses generator field suggestions with existing fields', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            generator asd {
+              provider = "prisma-client-js"
+              |
+            }`,
+          expected: {
+            isIncomplete: false,
+            items: [fieldPreviewFeatures, fieldOutput, fieldEngineType, fieldBinaryTargets],
+          },
+        })
+      })
+
+      test('engineType = |', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            generator gen {
+              provider = "prisma-client-js"
+              engineType = |
+            }`,
+          expected: {
+            isIncomplete: true,
+            items: [
+              {
+                label: '""',
+                kind: CompletionItemKind.Property,
+              },
+            ],
+          },
+        })
+      })
+
+      test('engineType = "|"', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            generator gen {
+              provider = "prisma-client-js"
+              engineType = "|"
+            }`,
+          expected: {
+            isIncomplete: true,
+            items: [
+              {
+                label: 'library',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'binary',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'client',
+                kind: CompletionItemKind.Constant,
+              },
+            ],
+          },
+        })
       })
     })
   })

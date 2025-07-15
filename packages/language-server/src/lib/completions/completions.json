@@ -81,7 +81,47 @@
       "insertText": "provider = \"$0\"",
       "documentation": "Describes which generator to use. This can point to a file that implements a generator or specify a built-in generator directly. [Learn more](https://pris.ly/d/generator-fields).",
       "fullSignature": "provider = \"String\""
+    }
+  ],
+  "generatorPrismaClientFields": [
+    {
+      "label": "previewFeatures",
+      "insertText": "previewFeatures = [\"$0\"]",
+      "documentation": "Enables Preview Feature flags. [Learn more](https://pris.ly/d/preview-features).",
+      "fullSignature": "previewFeatures = PreviewFeature[]"
     },
+    {
+      "label": "output",
+      "insertText": "output = \"$0\"",
+      "documentation": "Directory where Prisma Client is generated, e.g. ../src/generated/prisma.",
+      "fullSignature": "output = \"String\""
+    },
+    {
+      "label": "runtime",
+      "insertText": "runtime = \"$0\"",
+      "documentation": "Target runtime environment. Supported values: nodejs (alias node), deno, bun, deno-deploy, workerd (alias cloudflare), edge-light (alias vercel), react-native.",
+      "fullSignature": "runtime = \"nodejs\" | \"node\" | \"deno\" | \"bun\" | \"deno-deploy\" | \"workerd\" | \"cloudflare\" | \"edge-light\" | \"vercel\" | \"react-native\""
+    },
+    {
+      "label": "moduleFormat",
+      "insertText": "moduleFormat = \"$0\"",
+      "documentation": "Module format (esm or cjs). Determines whether import.meta.url or __dirname is used.",
+      "fullSignature": "moduleFormat = \"esm\" | \"cjs\""
+    },
+    {
+      "label": "generatedFileExtension",
+      "insertText": "generatedFileExtension = \"$0\"",
+      "documentation": "File extension for generated TypeScript files (ts, mts, cts).",
+      "fullSignature": "generatedFileExtension = \"ts\" | \"mts\" | \"cts\""
+    },
+    {
+      "label": "importFileExtension",
+      "insertText": "importFileExtension = \"$0\"",
+      "documentation": "File extension used in import statements. Can be ts, mts, cts, js, mjs, cjs, or empty (for bare imports).",
+      "fullSignature": "importFileExtension = \"ts\" | \"mts\" | \"cts\" | \"js\" | \"mjs\" | \"cjs\" | \"\""
+    }
+  ],
+  "generatorPrismaClientJSFields": [
     {
       "label": "previewFeatures",
       "insertText": "previewFeatures = [\"$0\"]",
@@ -397,8 +437,12 @@
   ],
   "generatorProviders": [
     {
+      "label": "prisma-client",
+      "documentation": "Built-in generator with ESM support built-in, in preview"
+    },
+    {
       "label": "prisma-client-js",
-      "documentation": "Built-in generator."
+      "documentation": "Built-in generator, stable but legacy."
     }
   ],
   "generatorProviderArguments": [
@@ -422,11 +466,126 @@
       "documentation": "TypeScript based query execution. WebAssembly library for query compilation."
     }
   ],
+  "runtimes": [
+    {
+      "label": "nodejs",
+      "documentation": "Node.js runtime (Default)"
+    },
+    {
+      "label": "node",
+      "documentation": "Alias of \"nodejs\""
+    },
+    {
+      "label": "deno",
+      "documentation": "Deno runtime"
+    },
+    {
+      "label": "bun",
+      "documentation": "Bun runtime"
+    },
+    {
+      "label": "deno-deploy",
+      "documentation": "Deno runtime"
+    },
+    {
+      "label": "workerd",
+      "documentation": "Cloudflare Workerd runtime"
+    },
+    {
+      "label": "cloudflare",
+      "documentation": "Alias of \"workerd\""
+    },
+    {
+      "label": "edge-light",
+      "documentation": "Vercel Edge Light runtime"
+    },
+    {
+      "label": "vercel",
+      "documentation": "Alias of \"edge-light\""
+    },
+    {
+      "label": "react-native",
+      "documentation": "React Native runtime"
+    }
+  ],
+  "moduleFormats": [
+    {
+      "label": "esm",
+      "documentation": "ESM module format. (Default)"
+    },
+    {
+      "label": "cjs",
+      "documentation": "CommonJS module format."
+    }
+  ],
+  "generatedFileExtensions": [
+    {
+      "label": "ts"
+    },
+    {
+      "label": "mts"
+    },
+    {
+      "label": "cts"
+    }
+  ],
+  "importFileExtension": [
+    {
+      "label": "ts"
+    },
+    {
+      "label": "mts"
+    },
+    {
+      "label": "cts"
+    },
+    {
+      "label": "js"
+    },
+    {
+      "label": "mjs"
+    },
+    {
+      "label": "cjs"
+    },
+    {
+      "label": "",
+      "documentation": "For bare imports."
+    }
+  ],
   "engineTypeArguments": [
     {
       "label": "\"\"",
       "insertText": "\"$0\"",
       "documentation": "Specifies the engine type."
+    }
+  ],
+  "runtimeArguments": [
+    {
+      "label": "\"\"",
+      "insertText": "\"$0\"",
+      "documentation": "Specifies the target runtime environment."
+    }
+  ],
+  "moduleFormatArguments": [
+    {
+      "label": "\"\"",
+      "insertText": "\"$0\"",
+      "documentation": "Determines whether `import.meta.url` or `__dirname` is used."
+    }
+  ],
+  "generatedFileExtensionArguments": [
+    {
+      "label": "\"\"",
+      "insertText": "\"$0\"",
+      "documentation": "File extension for generated TypeScript files."
+    }
+  ],
+  "importFileExtensionArguments": [
+    {
+      "label": "\"\"",
+      "insertText": "\"$0\"",
+      "documentation": "File extension used in import statements."
     }
   ],
   "datasourceProviders": [
