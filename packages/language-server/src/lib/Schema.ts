@@ -65,9 +65,9 @@ async function loadConfig(): Promise<PrismaConfigInternal> {
     switch (error._tag) {
       case 'ConfigFileNotFound':
         throw new Error(`Config file not found at "${resolvedPath}"`)
-      case 'ConfigFileParseError':
+      case 'ConfigFileSyntaxError':
         throw new Error(`Failed to parse config file at "${resolvedPath}"`)
-      case 'TypeScriptImportFailed':
+      case 'ConfigLoadError':
         throw new Error(
           `Failed to import config file as TypeScript from "${resolvedPath}". Error: ${error.error.message}`,
         )
