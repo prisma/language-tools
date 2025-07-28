@@ -1104,6 +1104,7 @@ describe('Completions', function () {
                 blockAttributeUnique,
                 blockAttributeIndex,
                 blockAttributeIgnore,
+                blockAttributeSchema,
               ],
             },
           })
@@ -1151,6 +1152,7 @@ describe('Completions', function () {
               blockAttributeUnique,
               blockAttributeIndex,
               blockAttributeIgnore,
+              blockAttributeSchema,
               // blockAttributeShardKey,
             ],
           },
