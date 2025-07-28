@@ -420,7 +420,7 @@ describe('Completions', function () {
         `,
         expected: {
           isIncomplete: false,
-          items: [fieldShadowDatabaseUrl, fieldDirectUrl, fieldRelationMode, fieldPostgresqlExtensions],
+          items: [fieldShadowDatabaseUrl, fieldDirectUrl, fieldRelationMode, fieldPostgresqlExtensions, fieldSchemas],
         },
       })
     })
@@ -430,7 +430,6 @@ describe('Completions', function () {
         schema: /* Prisma */ `
           generator client {
             provider = "prisma-client-js"
-            previewFeatures = ["multiSchema"]
           }
 
           datasource db {
@@ -585,7 +584,14 @@ describe('Completions', function () {
             }`,
           expected: {
             isIncomplete: false,
-            items: [fieldPreviewFeatures, fieldOutput, fieldRuntime, fieldModuleFormat, fieldGeneratedFileExtension, fieldImportFileExtension],
+            items: [
+              fieldPreviewFeatures,
+              fieldOutput,
+              fieldRuntime,
+              fieldModuleFormat,
+              fieldGeneratedFileExtension,
+              fieldImportFileExtension,
+            ],
           },
         })
       })
@@ -1098,6 +1104,7 @@ describe('Completions', function () {
                 blockAttributeUnique,
                 blockAttributeIndex,
                 blockAttributeIgnore,
+                blockAttributeSchema,
               ],
             },
           })
@@ -1145,6 +1152,7 @@ describe('Completions', function () {
               blockAttributeUnique,
               blockAttributeIndex,
               blockAttributeIgnore,
+              blockAttributeSchema,
               // blockAttributeShardKey,
             ],
           },
@@ -1941,7 +1949,6 @@ describe('Completions', function () {
       test('@@schema - postgres', () => {
         assertCompletion({
           provider: 'postgresql',
-          previewFeatures: ['multiSchema'],
           schema: /* prisma */ `
             model Schema {
               id Int @id
@@ -1965,7 +1972,6 @@ describe('Completions', function () {
           schema: /* prisma */ `
             generator client {
               provider = "prisma-client-js"
-              previewFeatures = ["multiSchema"]
             }
             datasource db {
               provider = "postgresql"
@@ -1991,7 +1997,7 @@ describe('Completions', function () {
         schema: /* prisma */ `
             generator client {
               provider = "prisma-client-js"
-              previewFeatures = ["multiSchema", "fullTextIndex"]
+              previewFeatures = ["fullTextIndex"]
             }
             datasource db {
               provider = "mysql"

@@ -45,8 +45,7 @@ const filterContextBlockAttributes = (schema: PrismaSchema, suggestions: Complet
     datasourceProvider &&
       (datasourceProvider.includes('postgres') ||
         datasourceProvider.includes('cockroachdb') ||
-        datasourceProvider.includes('sqlserver')) &&
-      previewFeatures?.includes('multischema'),
+        datasourceProvider.includes('sqlserver')),
   )
 
   const isShardKeyAvailable = Boolean(
