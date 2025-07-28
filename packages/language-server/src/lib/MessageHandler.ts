@@ -42,7 +42,7 @@ import {
   EditsMap,
   mergeEditMaps,
 } from './code-actions/rename'
-import { validateIgnoredBlocks } from './validations'
+import { validateExternalBlocks, validateIgnoredBlocks } from './validations'
 import { fullDocumentRange, getWordAtPosition, getBlockAtPosition, Block, getBlocks } from './ast'
 import { prismaSchemaWasmCompletions, localCompletions } from './completions'
 import { PrismaSchema, SchemaDocument } from './Schema'
@@ -102,6 +102,7 @@ export function handleDiagnosticsRequest(
   }
 
   validateIgnoredBlocks(schema, diagnostics)
+  validateExternalBlocks(schema, diagnostics)
 
   return diagnostics
 }

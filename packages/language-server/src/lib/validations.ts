@@ -1,6 +1,6 @@
 import { DiagnosticSeverity, DiagnosticTag } from 'vscode-languageserver'
 
-import { getBlockAtPosition } from './ast'
+import { getBlockAtPosition, getBlocks } from './ast'
 import { MAX_SAFE_VALUE_i32 } from './constants'
 import { PrismaSchema } from './Schema'
 import { DiagnosticMap } from './DiagnosticMap'
@@ -39,4 +39,39 @@ export const validateIgnoredBlocks = (schema: PrismaSchema, diagnostics: Diagnos
       })
     }
   })
+}
+
+export const validateExternalBlocks = (schema: PrismaSchema, diagnostics: DiagnosticMap) => {
+  const externalTables = new Set(schema.config?.tables?.external)
+  const externalEnums = new Set(schema.config?.enums?.external)
+
+  for (const block of getBlocks(schema)) {
+    if (block.type === 'model' || block.type === 'enum') {
+      const blockStartOffset = block.definingDocument.textDocument.offsetAt(block.range.start)
+      const blockEndOffset = block.definingDocument.textDocument.offsetAt(block.range.end)
+
+      const [, mapped] =
+        block.definingDocument.content
+          .slice(blockStartOffset, blockEndOffset)
+          .match(/^\s*@@map\s*\(\s*['"]([^'"]+)['"]\s*\)/m) ?? []
+
+      const [, schema] =
+        block.definingDocument.content
+          .slice(blockStartOffset, blockEndOffset)
+          .match(/^\s*@@schema\s*\(\s*['"]([^'"]+)['"]\s*\)/m) ?? []
+
+      const name = mapped ? mapped : block.name
+      const needle = schema ? `${schema}.${name}` : name
+      const haystack = block.type === 'model' ? externalTables : externalEnums
+
+      if (haystack.has(needle)) {
+        diagnostics.add(block.definingDocument.uri, {
+          range: block.range,
+          message: `The ${block.type} "${block.name}" is marked as external in the Prisma config file.`,
+          tags: [DiagnosticTag.Unnecessary],
+          severity: DiagnosticSeverity.Hint,
+        })
+      }
+    }
+  }
 }

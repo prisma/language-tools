@@ -1,0 +1,36 @@
+model User {
+    id    String @id @default(uuid())
+    posts Post[]
+    likes Like[]
+    role  Role
+
+    @@schema("public")
+}
+
+model Post {
+    id       String @id @default(uuid())
+    title    String
+    authorId String
+    author   User   @relation(fields: [authorId], references: [id])
+    likes    Like[]
+
+    @@map("P0st")
+    @@schema("public")
+}
+
+model Like {
+    id     String @id @default(uuid())
+    userId String
+    user   User   @relation(fields: [userId], references: [id])
+    postId String
+    post   Post   @relation(fields: [postId], references: [id])
+
+    @@schema("likes")
+}
+
+enum Role {
+    USER
+    ADMIN
+
+    @@schema("public")
+}
