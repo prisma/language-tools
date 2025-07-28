@@ -8,11 +8,7 @@ export type BlockType = ConfigBlockType | DatamodelBlockType
 
 export type PreviewFeatures =
   // value must be lowercase
-  | Lowercase<'fullTextIndex'>
-  | Lowercase<'postgresqlExtensions'>
-  | Lowercase<'multiSchema'>
-  | Lowercase<'views'>
-  | Lowercase<'shardKeys'>
+  Lowercase<'fullTextIndex'> | Lowercase<'postgresqlExtensions'> | Lowercase<'views'> | Lowercase<'shardKeys'>
 
 export interface LSOptions {
   /**
