@@ -33,3 +33,70 @@ test('invalid doc', async () => {
     }
   `)
 })
+
+test('external tables and enums', async () => {
+  const helper = await getMultifileHelper('external-config')
+
+  const response = handleDiagnosticsRequest(helper.schema)
+
+  expect(response).toMatchInlineSnapshot(`
+    DiagnosticMap {
+      "_map": Map {
+        "file:///external-config/config.prisma" => [],
+        "file:///external-config/schema.prisma" => [
+          {
+            "message": "The model "Post" is marked as external in the Prisma config file.",
+            "range": {
+              "end": {
+                "character": 1,
+                "line": 18,
+              },
+              "start": {
+                "character": 0,
+                "line": 9,
+              },
+            },
+            "severity": 4,
+            "tags": [
+              1,
+            ],
+          },
+          {
+            "message": "The model "Like" is marked as external in the Prisma config file.",
+            "range": {
+              "end": {
+                "character": 1,
+                "line": 28,
+              },
+              "start": {
+                "character": 0,
+                "line": 20,
+              },
+            },
+            "severity": 4,
+            "tags": [
+              1,
+            ],
+          },
+          {
+            "message": "The enum "Role" is marked as external in the Prisma config file.",
+            "range": {
+              "end": {
+                "character": 1,
+                "line": 35,
+              },
+              "start": {
+                "character": 0,
+                "line": 30,
+              },
+            },
+            "severity": 4,
+            "tags": [
+              1,
+            ],
+          },
+        ],
+      },
+    }
+  `)
+})

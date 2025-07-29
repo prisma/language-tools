@@ -1,0 +1,10 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas = ["likes", "public"]
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = []
+}

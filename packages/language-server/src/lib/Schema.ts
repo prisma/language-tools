@@ -81,23 +81,27 @@ async function loadConfig(): Promise<PrismaConfigInternal> {
   return config
 }
 
-async function loadPrismaSchema(fsPath: string, allDocuments: TextDocuments<TextDocument>): Promise<PrismaSchema> {
+async function loadPrismaSchema(
+  fsPath: string,
+  allDocuments: TextDocuments<TextDocument>,
+  config?: PrismaConfigInternal,
+): Promise<PrismaSchema> {
   // `loadRelatedSchemaFiles` locates and returns either a single schema files, or a set of related schema files.
   const schemaFiles = await loadRelatedSchemaFiles(fsPath, createFilesResolver(allDocuments))
   const documents = schemaFiles.map(([filePath, content]) => {
     return new SchemaDocument(TextDocument.create(URI.file(filePath).toString(), 'prisma', 1, content))
   })
-  return new PrismaSchema(documents)
+  return new PrismaSchema(documents, config)
 }
 
 function loadPrismaSchemaWithConfig(
-  config: PrismaConfigInternal,
   currentDocument: TextDocument,
   allDocuments: TextDocuments<TextDocument>,
+  config: PrismaConfigInternal,
 ): Promise<PrismaSchema> {
   const fsPath: string = config.schema ?? URI.parse(currentDocument.uri).fsPath
 
-  return loadPrismaSchema(fsPath, allDocuments)
+  return loadPrismaSchema(fsPath, allDocuments, config)
 }
 
 export class PrismaSchema {
@@ -115,10 +119,13 @@ export class PrismaSchema {
       return loadPrismaSchema(fsPath, allDocuments)
     }
 
-    return loadPrismaSchemaWithConfig(config, currentDocument, allDocuments)
+    return loadPrismaSchemaWithConfig(currentDocument, allDocuments, config)
   }
 
-  constructor(readonly documents: SchemaDocument[]) {}
+  constructor(
+    readonly documents: SchemaDocument[],
+    readonly config?: PrismaConfigInternal,
+  ) {}
 
   *iterLines(): Generator<Line, void, void> {
     for (const doc of this.documents) {
