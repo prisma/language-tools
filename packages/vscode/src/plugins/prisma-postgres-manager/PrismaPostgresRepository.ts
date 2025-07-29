@@ -12,11 +12,14 @@ import { waitForProcessKilled } from './utils/waitForProcessKilled'
 import { proxySignals } from 'foreground-child/proxy-signals'
 import { fork } from 'child_process'
 import * as chokidar from 'chokidar'
+import type { FetchResponse } from 'openapi-fetch'
 
 const PPG_DEV_GLOBAL_ROOT = envPaths('prisma-dev')
 
 export type RegionId = NonNullable<
-  NonNullable<paths['/projects/{projectId}/databases']['post']['requestBody']>['content']['application/json']['region']
+  NonNullable<
+    paths['/v1/projects/{projectId}/databases']['post']['requestBody']
+  >['content']['application/json']['region']
 >
 export type Region = {
   id: string
@@ -351,7 +354,7 @@ export class PrismaPostgresRepository {
     if (!workspaceId) return []
 
     const client = await this.getClient(workspaceId)
-    const response = await client.GET('/regions')
+    const response = await client.GET('/v1/regions/postgres')
     this.checkResponseOrThrow(workspaceId, response)
 
     const regions = response.data.data
@@ -376,19 +379,25 @@ export class PrismaPostgresRepository {
     }
 
     const credentials = await this.credentialsStore.getCredentials()
+
     const results = await Promise.allSettled(
       credentials.map(async (cred) => {
         const client = await this.getClient(cred.workspaceId)
-        const response = await client.GET('/workspaces')
+
+        const response = await client.GET('/v1/workspaces')
+
         this.checkResponseOrThrow(cred.workspaceId, response)
 
-        const workspaceInfo = response.data.data.at(0)
-        if (!workspaceInfo) throw new Error(`Workspaces endpoint returned no workspace info.`)
+        const [workspaceInfo] = response.data.data
+
+        if (!workspaceInfo) {
+          throw new Error(`Workspaces endpoint returned no workspace info.`)
+        }
 
         return {
+          id: workspaceInfo.id as string,
+          name: workspaceInfo.name,
           type: 'workspace' as const,
-          id: workspaceInfo.id,
-          name: workspaceInfo.displayName,
         }
       }),
     )
@@ -405,27 +414,33 @@ export class PrismaPostgresRepository {
     const client = createManagementAPIClient(token, () => {
       throw new Error('Received token has to be instantly refreshed. Something is wrong.')
     })
-    const response = await client.GET('/workspaces')
 
-    if (response.error) throw new Error(`Failed to retrieve workspace information.`)
+    const response = await client.GET('/v1/workspaces')
 
-    const workspaces = response.data.data
-    if (workspaces.length === 0) throw new Error(`Received token does not grant access to any workspaces.`)
+    if (response.error) {
+      throw new Error(`Failed to retrieve workspace information.`)
+    }
+
+    const { data: workspaces } = response.data
+
+    if (workspaces.length === 0) {
+      throw new Error(`Received token does not grant access to any workspaces.`)
+    }
 
     await Promise.all(
-      workspaces.map(async ({ id, displayName }) => {
+      workspaces.map(async ({ id, name }) => {
         await this.credentialsStore.storeCredentials({
-          workspaceId: id,
-          token,
           refreshToken,
+          token,
+          workspaceId: id as string,
         })
 
         this.cache.setWorkspaces([
           ...this.cache.getWorkspaces(),
           {
+            id: id as string,
+            name,
             type: 'workspace',
-            id,
-            name: displayName,
           },
         ])
       }),
@@ -452,17 +467,30 @@ export class PrismaPostgresRepository {
     }
 
     const client = await this.getClient(workspaceId)
-    const response = await client.GET('/projects')
-    this.checkResponseOrThrow(workspaceId, response)
 
-    const projects: Project[] = response.data.data.map((project) => ({
-      type: 'project' as const,
-      id: project.id,
-      name: project.name,
-      workspaceId,
-    }))
+    const projects: Project[] = []
+    let pagination: { hasMore: boolean; nextCursor: string | null | undefined } | undefined = undefined
+
+    do {
+      const response = (await client.GET('/v1/projects', {
+        params: {
+          query: { cursor: pagination?.nextCursor || null, limit: 100 },
+        },
+      })) as FetchResponse<paths['/v1/projects']['get'], undefined, `${string}/${string}`>
+
+      this.checkResponseOrThrow(workspaceId, response)
+
+      const { data } = response
+
+      pagination = data.pagination
+
+      projects.push(
+        ...data.data.map((project) => ({ id: project.id, name: project.name, type: 'project' as const, workspaceId })),
+      )
+    } while (pagination?.hasMore)
 
     this.cache.setProjects(workspaceId, projects)
+
     return projects
   }
 
@@ -480,64 +508,53 @@ export class PrismaPostgresRepository {
     this.ensureValidRegion(region)
 
     const client = await this.getClient(workspaceId)
-    const response = await client.POST('/projects', {
+
+    const response = await client.POST('/v1/projects', {
       body: { name, region },
     })
+
     this.checkResponseOrThrow(workspaceId, response)
 
-    const newProject: Project = {
-      type: 'project' as const,
-      id: response.data.id,
-      name: response.data.name,
+    const { database, ...project } = response.data.data
+
+    await this.connectionStringStorage.storeConnectionString({
+      connectionString: database.connectionString,
+      databaseId: database.id,
+      projectId: project.id,
+      workspaceId,
+    })
+
+    const simplifiedProject = { id: project.id, name: project.name, type: project.type, workspaceId }
+    const simplifiedDatabase = {
+      connectionString: database.connectionString,
+      id: database.id,
+      name: database.name,
+      projectId: project.id,
+      region: database.region.name,
+      type: 'remoteDatabase' as const,
       workspaceId,
     }
 
-    let createdDatabase: NewRemoteDatabase | undefined
-    if ('databases' in response.data) {
-      const databaseData = response.data.databases[0]
-      if (databaseData) {
-        const database: RemoteDatabase = {
-          type: 'remoteDatabase' as const,
-          id: databaseData.id,
-          name: databaseData.name,
-          region: databaseData.region,
-          projectId: newProject.id,
-          workspaceId,
-        }
-
-        await this.connectionStringStorage.storeConnectionString({
-          workspaceId,
-          projectId: newProject.id,
-          databaseId: database.id,
-          connectionString: databaseData.connectionString,
-        })
-
-        createdDatabase = { ...database, connectionString: databaseData.connectionString }
-      }
-    }
-
     if (!options.skipRefresh) {
-      this.cache.addProject(newProject)
-      if (createdDatabase) {
-        this.cache.addDatabase(createdDatabase)
-      }
+      this.cache.addProject(simplifiedProject)
+      this.cache.addDatabase(simplifiedDatabase)
+
       this.refreshEventEmitter.fire()
     }
 
-    return { project: newProject, database: createdDatabase }
+    return { project: simplifiedProject, database: simplifiedDatabase }
   }
 
   async deleteProject({ workspaceId, id }: { workspaceId: string; id: string }): Promise<void> {
     const client = await this.getClient(workspaceId)
-    const response = await client.DELETE('/projects/{id}', {
+
+    const response = await client.DELETE('/v1/projects/{id}', {
       params: { path: { id } },
     })
+
     this.checkResponseOrThrow(workspaceId, response)
 
-    await this.connectionStringStorage.removeConnectionString({
-      workspaceId,
-      projectId: id,
-    })
+    await this.connectionStringStorage.removeConnectionString({ projectId: id, workspaceId })
 
     this.cache.removeProject(workspaceId, id)
     this.refreshEventEmitter.fire()
@@ -561,22 +578,38 @@ export class PrismaPostgresRepository {
     }
 
     const client = await this.getClient(workspaceId)
-    const response = await client.GET('/projects/{projectId}/databases', {
-      params: { path: { projectId } },
-    })
 
-    this.checkResponseOrThrow(workspaceId, response)
+    const databases: RemoteDatabase[] = []
+    let pagination: { hasMore: boolean; nextCursor: string | null | undefined } | undefined = undefined
 
-    const databases: RemoteDatabase[] = response.data.data.map((db) => ({
-      type: 'remoteDatabase' as const,
-      id: db.id,
-      name: db.name,
-      region: db.region,
-      projectId,
-      workspaceId,
-    }))
+    do {
+      const response = (await client.GET('/v1/projects/{projectId}/databases', {
+        params: {
+          path: { projectId },
+          query: { cursor: pagination?.nextCursor || null, limit: 100 },
+        },
+      })) as FetchResponse<paths['/v1/projects/{projectId}/databases']['get'], undefined, `${string}/${string}`>
+
+      this.checkResponseOrThrow(workspaceId, response)
+
+      const { data } = response
+
+      pagination = data.pagination
+
+      databases.push(
+        ...data.data.map((database) => ({
+          id: database.id,
+          name: database.name,
+          projectId,
+          region: database.region?.name ?? null,
+          type: 'remoteDatabase' as const,
+          workspaceId,
+        })),
+      )
+    } while (pagination?.hasMore)
 
     this.cache.setDatabases(workspaceId, projectId, databases)
+
     return databases
   }
 
@@ -602,7 +635,8 @@ export class PrismaPostgresRepository {
     databaseId: string
   }): Promise<string> {
     const client = await this.getClient(workspaceId)
-    const response = await client.POST('/projects/{projectId}/databases/{databaseId}/connections', {
+
+    const response = await client.POST('/v1/databases/{databaseId}/connections', {
       params: {
         path: { projectId, databaseId },
       },
@@ -613,13 +647,10 @@ export class PrismaPostgresRepository {
 
     this.checkResponseOrThrow(workspaceId, response)
 
-    const connectionString = response.data.connectionString
-    await this.connectionStringStorage.storeConnectionString({
-      workspaceId,
-      projectId,
-      databaseId,
-      connectionString,
-    })
+    const { connectionString } = response.data.data
+
+    await this.connectionStringStorage.storeConnectionString({ connectionString, databaseId, projectId, workspaceId })
+
     return connectionString
   }
 
@@ -639,36 +670,40 @@ export class PrismaPostgresRepository {
     this.ensureValidRegion(region)
 
     const client = await this.getClient(workspaceId)
-    const response = await client.POST('/projects/{projectId}/databases', {
+
+    const response = await client.POST('/v1/projects/{projectId}/databases', {
       params: { path: { projectId } },
       body: { name, region },
     })
+
     this.checkResponseOrThrow(workspaceId, response)
 
-    const newDatabase: RemoteDatabase = {
-      type: 'remoteDatabase' as const,
-      id: response.data.id,
-      name: response.data.name,
-      region: response.data.region,
+    const { data: database } = response.data
+
+    await this.connectionStringStorage.storeConnectionString({
+      connectionString: database.connectionString,
+      databaseId: database.id,
       projectId,
+      workspaceId,
+    })
+
+    const simplifiedDatabase = {
+      connectionString: database.connectionString,
+      id: database.id,
+      name: database.name,
+      region: database.region.name,
+      projectId,
+      type: 'remoteDatabase' as const,
       workspaceId,
     }
 
-    const connectionString = response.data.connectionString
-
-    await this.connectionStringStorage.storeConnectionString({
-      workspaceId,
-      projectId,
-      databaseId: newDatabase.id,
-      connectionString,
-    })
-
     if (!options.skipRefresh) {
-      this.cache.addDatabase(newDatabase)
+      this.cache.addDatabase(simplifiedDatabase)
+
       this.refreshEventEmitter.fire()
     }
 
-    return { ...newDatabase, connectionString }
+    return simplifiedDatabase
   }
 
   async deleteRemoteDatabase({
@@ -681,18 +716,17 @@ export class PrismaPostgresRepository {
     id: string
   }): Promise<void> {
     const client = await this.getClient(workspaceId)
-    const response = await client.DELETE('/projects/{projectId}/databases/{databaseId}', {
+
+    const response = await client.DELETE('/v1/databases/{databaseId}', {
       params: { path: { projectId, databaseId: id } },
     })
+
     this.checkResponseOrThrow(workspaceId, response)
 
-    await this.connectionStringStorage.removeConnectionString({
-      workspaceId,
-      projectId,
-      databaseId: id,
-    })
+    await this.connectionStringStorage.removeConnectionString({ databaseId: id, projectId, workspaceId })
 
     this.cache.removeDatabase(workspaceId, projectId, id)
+
     this.refreshEventEmitter.fire()
   }
 
