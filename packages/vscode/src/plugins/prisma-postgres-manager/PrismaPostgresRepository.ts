@@ -395,7 +395,7 @@ export class PrismaPostgresRepository {
         }
 
         return {
-          id: workspaceInfo.id as string,
+          id: workspaceInfo.id,
           name: workspaceInfo.name,
           type: 'workspace' as const,
         }
@@ -432,17 +432,10 @@ export class PrismaPostgresRepository {
         await this.credentialsStore.storeCredentials({
           refreshToken,
           token,
-          workspaceId: id as string,
+          workspaceId: id,
         })
 
-        this.cache.setWorkspaces([
-          ...this.cache.getWorkspaces(),
-          {
-            id: id as string,
-            name,
-            type: 'workspace',
-          },
-        ])
+        this.cache.setWorkspaces([...this.cache.getWorkspaces(), { id, name, type: 'workspace' }])
       }),
     )
 
