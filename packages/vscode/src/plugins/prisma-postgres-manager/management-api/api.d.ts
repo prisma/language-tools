@@ -296,7 +296,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         data: {
-                            id: unknown;
+                            id: string;
                             /** @constant */
                             type: "workspace";
                             name: string;
@@ -437,7 +437,7 @@ export interface operations {
                                     pass: string;
                                 };
                                 apiKeys: {
-                                    id: unknown;
+                                    id: string;
                                     /** @constant */
                                     type: "connection";
                                     name: string;
@@ -470,7 +470,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                id: unknown | (string);
+                id: string;
             };
             cookie?: never;
         };
@@ -525,7 +525,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                id: unknown | (string);
+                id: string;
             };
             cookie?: never;
         };
@@ -586,7 +586,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                id: unknown | (string);
+                id: string;
             };
             cookie?: never;
         };
@@ -635,7 +635,7 @@ export interface operations {
             };
             header?: never;
             path: {
-                projectId: unknown | (string);
+                projectId: string;
             };
             cookie?: never;
         };
@@ -703,7 +703,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                projectId: unknown | (string);
+                projectId: string;
             };
             cookie?: never;
         };
@@ -750,7 +750,7 @@ export interface operations {
                                 pass: string;
                             };
                             apiKeys: {
-                                id: unknown;
+                                id: string;
                                 /** @constant */
                                 type: "connection";
                                 name: string;
@@ -796,7 +796,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                databaseId: unknown | (string);
+                databaseId: string;
             };
             cookie?: never;
         };
@@ -858,7 +858,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                databaseId: unknown | (string);
+                databaseId: string;
             };
             cookie?: never;
         };
@@ -919,7 +919,7 @@ export interface operations {
             };
             header?: never;
             path: {
-                databaseId: unknown | (string);
+                databaseId: string;
             };
             cookie?: never;
         };
@@ -933,7 +933,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         data: {
-                            id: unknown;
+                            id: string;
                             /** @constant */
                             type: "connection";
                             name: string;
@@ -974,7 +974,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                databaseId: unknown | (string);
+                databaseId: string;
             };
             cookie?: never;
         };
@@ -994,7 +994,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         data: {
-                            id: unknown;
+                            id: string;
                             /** @constant */
                             type: "connection";
                             name: string;
@@ -1044,7 +1044,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                id: unknown | (string);
+                id: string;
             };
             cookie?: never;
         };
@@ -1094,7 +1094,7 @@ export interface operations {
             };
             header?: never;
             path: {
-                databaseId: unknown | (string);
+                databaseId: string;
             };
             cookie?: never;
         };
@@ -1170,7 +1170,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                databaseId: unknown | (string);
+                databaseId: string;
                 backupId: string;
             };
             cookie?: never;
