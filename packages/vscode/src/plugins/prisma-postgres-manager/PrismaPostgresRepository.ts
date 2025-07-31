@@ -631,7 +631,7 @@ export class PrismaPostgresRepository {
 
     const response = await client.POST('/v1/databases/{databaseId}/connections', {
       params: {
-        path: { projectId, databaseId },
+        path: { databaseId },
       },
       body: {
         name: "Created by Prisma's VSCode Extension",
