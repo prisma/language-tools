@@ -711,7 +711,7 @@ export class PrismaPostgresRepository {
     const client = await this.getClient(workspaceId)
 
     const response = await client.DELETE('/v1/databases/{databaseId}', {
-      params: { path: { projectId, databaseId: id } },
+      params: { path: { databaseId: id } },
     })
 
     this.checkResponseOrThrow(workspaceId, response)
