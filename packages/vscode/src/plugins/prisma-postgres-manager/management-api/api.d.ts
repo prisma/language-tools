@@ -4,7 +4,27 @@
  */
 
 export interface paths {
-    "/v1/workspaces": {
+    "/v1/connections/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete database connection string
+         * @description Deletes the database connection string with the given ID.
+         */
+        delete: operations["deleteV1ConnectionsById"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/databases/{databaseId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -12,12 +32,100 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get list of workspaces
-         * @description Returns the list of workspaces the current token can access.
+         * Get database
+         * @description Returns the database with the given ID.
          */
-        get: operations["getV1Workspaces"];
+        get: operations["getV1DatabasesByDatabaseId"];
         put?: never;
         post?: never;
+        /**
+         * Delete database
+         * @description Deletes the database with the given ID.
+         */
+        delete: operations["deleteV1DatabasesByDatabaseId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/databases/{databaseId}/connections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get list of database connections
+         * @description Returns all connections for the given database.
+         */
+        get: operations["getV1DatabasesByDatabaseIdConnections"];
+        put?: never;
+        /**
+         * Create database connection string
+         * @description Creates a new connection string for the given database.
+         */
+        post: operations["postV1DatabasesByDatabaseIdConnections"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/databases/{databaseId}/connections/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete database connection string
+         * @description Deletes the database connection string with the given ID.
+         */
+        delete: operations["deleteV1DatabasesByDatabaseIdConnectionsById"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/databases/{databaseId}/backups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get list of backups
+         * @description Returns backups for the specified database.
+         */
+        get: operations["getV1DatabasesByDatabaseIdBackups"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/databases/{databaseId}/backups/{backupId}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Restore backup
+         * @description Restore an existing backup to a new database.
+         */
+        post: operations["postV1DatabasesByDatabaseIdBackupsByBackupIdRestore"];
         delete?: never;
         options?: never;
         head?: never;
@@ -116,114 +224,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/databases/{databaseId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get database
-         * @description Returns the database with the given ID.
-         */
-        get: operations["getV1DatabasesByDatabaseId"];
-        put?: never;
-        post?: never;
-        /**
-         * Delete database
-         * @description Deletes the database with the given ID.
-         */
-        delete: operations["deleteV1DatabasesByDatabaseId"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/databases/{databaseId}/connections": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get list of database connections
-         * @description Returns all connections for the given database.
-         */
-        get: operations["getV1DatabasesByDatabaseIdConnections"];
-        put?: never;
-        /**
-         * Create database connection string
-         * @description Creates a new connection string for the given database.
-         */
-        post: operations["postV1DatabasesByDatabaseIdConnections"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/connections/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Delete database connection string
-         * @description Deletes the database connection string with the given ID.
-         */
-        delete: operations["deleteV1ConnectionsById"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/databases/{databaseId}/backups": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get list of backups
-         * @description Returns backups for the specified database.
-         */
-        get: operations["getV1DatabasesByDatabaseIdBackups"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/databases/{databaseId}/backups/{backupId}/restore": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Restore backup
-         * @description Restore an existing backup to a new database.
-         */
-        post: operations["postV1DatabasesByDatabaseIdBackupsByBackupIdRestore"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/regions/postgres": {
         parameters: {
             query?: never;
@@ -264,6 +264,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get list of workspaces
+         * @description Returns the list of workspaces the current token can access.
+         */
+        get: operations["getV1Workspaces"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -276,196 +296,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    getV1Workspaces: {
-        parameters: {
-            query?: {
-                cursor?: string | null;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Returns the list of workspaces the current token can access. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data: {
-                            id: string;
-                            /** @constant */
-                            type: "workspace";
-                            name: string;
-                            /** Format: date-time */
-                            createdAt: string;
-                        }[];
-                        pagination: {
-                            /** @description Next cursor to continue pagination */
-                            nextCursor: string | null;
-                            /** @description Whether there are more items to paginate */
-                            hasMore: boolean;
-                        };
-                    };
-                };
-            };
-            /** @description Missing or invalid authorization token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @constant */
-                        error: "unauthorized";
-                        errorDescription: string;
-                    };
-                };
-            };
-        };
-    };
-    getV1Projects: {
-        parameters: {
-            query?: {
-                cursor?: string | null;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Returns the list of projects. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data: {
-                            id: string;
-                            /** @constant */
-                            type: "project";
-                            name: string;
-                            /** Format: date-time */
-                            createdAt: string;
-                            workspace: {
-                                id: string;
-                                name: string;
-                            };
-                        }[];
-                        pagination: {
-                            /** @description Next cursor to continue pagination */
-                            nextCursor: string | null;
-                            /** @description Whether there are more items to paginate */
-                            hasMore: boolean;
-                        };
-                    };
-                };
-            };
-            /** @description Missing or invalid authorization token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @constant */
-                        error: "unauthorized";
-                        errorDescription: string;
-                    };
-                };
-            };
-        };
-    };
-    postV1Projects: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /** @enum {string} */
-                    region?: "us-east-1" | "us-west-1" | "eu-west-3" | "eu-central-1" | "ap-northeast-1" | "ap-southeast-1";
-                    name?: string;
-                };
-            };
-        };
-        responses: {
-            /** @description New project created. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data: {
-                            id: string;
-                            /** @constant */
-                            type: "project";
-                            name: string;
-                            /** Format: date-time */
-                            createdAt: string;
-                            workspace: {
-                                id: string;
-                                name: string;
-                            };
-                            database: {
-                                id: string;
-                                /** @constant */
-                                type: "database";
-                                name: string;
-                                status: string;
-                                /** Format: date-time */
-                                createdAt: string;
-                                isDefault: boolean;
-                                region: {
-                                    id: string;
-                                    name: string;
-                                };
-                                connectionString: string;
-                                directConnection: {
-                                    host: string;
-                                    user: string;
-                                    pass: string;
-                                };
-                                apiKeys: {
-                                    id: string;
-                                    /** @constant */
-                                    type: "connection";
-                                    name: string;
-                                    /** Format: date-time */
-                                    createdAt: string;
-                                    connectionString: string;
-                                }[];
-                            };
-                        };
-                    };
-                };
-            };
-            /** @description Missing or invalid authorization token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @constant */
-                        error: "unauthorized";
-                        errorDescription: string;
-                    };
-                };
-            };
-        };
-    };
-    getV1ProjectsById: {
+    deleteV1ConnectionsById: {
         parameters: {
             query?: never;
             header?: never;
@@ -476,129 +307,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Project retrieved. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data: {
-                            id: string;
-                            /** @constant */
-                            type: "project";
-                            name: string;
-                            /** Format: date-time */
-                            createdAt: string;
-                            workspace: {
-                                id: string;
-                                name: string;
-                            };
-                        };
-                    };
-                };
-            };
-            /** @description Missing or invalid authorization token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @constant */
-                        error: "unauthorized";
-                        errorDescription: string;
-                    };
-                };
-            };
-            /** @description Project with the specified ID was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    deleteV1ProjectsById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Project deleted. */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Project cannot be deleted due to existing dependencies. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error: {
-                            code: string;
-                            message: string;
-                        };
-                    };
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @constant */
-                        error: "unauthorized";
-                        errorDescription: string;
-                    };
-                };
-            };
-            /** @description Project with the specified ID was not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error: {
-                            code: string;
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    postV1ProjectsByIdTransfer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    recipientAccessToken: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Project transferred */
+            /** @description Deleted the database connection string. */
             204: {
                 headers: {
                     [name: string]: unknown;
@@ -612,182 +321,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        /** @constant */
-                        error: "unauthorized";
-                        errorDescription: string;
-                    };
-                };
-            };
-            /** @description Project with the given ID was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    getV1ProjectsByProjectIdDatabases: {
-        parameters: {
-            query?: {
-                cursor?: string | null;
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                projectId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Returned the databases for the given project ID. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data: {
-                            id: string;
-                            /** @constant */
-                            type: "database";
-                            name: string;
-                            /** @enum {string} */
-                            status: "failure" | "provisioning" | "ready" | "recovering";
-                            /** Format: date-time */
-                            createdAt: string;
-                            isDefault: boolean;
-                            project: {
-                                id: string;
-                                name: string;
-                            };
-                            region: {
-                                id: string;
-                                name: string;
-                            } | null;
-                        }[];
-                        pagination: {
-                            /** @description Next cursor to continue pagination */
-                            nextCursor: string | null;
-                            /** @description Whether there are more items to paginate */
-                            hasMore: boolean;
+                        error: {
+                            code: string;
+                            message: string;
                         };
                     };
                 };
             };
-            /** @description Missing or invalid authorization token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @constant */
-                        error: "unauthorized";
-                        errorDescription: string;
-                    };
-                };
-            };
-            /** @description Project with the given ID was not found. */
+            /** @description Database with the given ID was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-        };
-    };
-    postV1ProjectsByProjectIdDatabases: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                projectId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /** @enum {string} */
-                    region?: "us-east-1" | "us-west-1" | "eu-west-3" | "eu-central-1" | "ap-northeast-1" | "ap-southeast-1";
-                    name?: string;
-                    /** @default false */
-                    isDefault?: boolean;
-                };
-            };
-        };
-        responses: {
-            /** @description Created a new database for the project. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
                 content: {
                     "application/json": {
-                        data: {
-                            id: string;
-                            /** @constant */
-                            type: "database";
-                            name: string;
-                            status: string;
-                            /** Format: date-time */
-                            createdAt: string;
-                            isDefault: boolean;
-                            project: {
-                                id: string;
-                                name: string;
-                            };
-                            region: {
-                                id: string;
-                                name: string;
-                            };
-                            connectionString: string;
-                            directConnection: {
-                                host: string;
-                                user: string;
-                                pass: string;
-                            };
-                            apiKeys: {
-                                id: string;
-                                /** @constant */
-                                type: "connection";
-                                name: string;
-                                /** Format: date-time */
-                                createdAt: string;
-                                connectionString: string;
-                            }[];
+                        error: {
+                            code: string;
+                            message: string;
                         };
                     };
                 };
-            };
-            /** @description The request is invalid due to missing or invalid parameters. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid authorization token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @constant */
-                        error: "unauthorized";
-                        errorDescription: string;
-                    };
-                };
-            };
-            /** @description Project does not belong to the service token’s workspace. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -838,9 +391,10 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        /** @constant */
-                        error: "unauthorized";
-                        errorDescription: string;
+                        error: {
+                            code: string;
+                            message: string;
+                        };
                     };
                 };
             };
@@ -849,7 +403,14 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
             };
         };
     };
@@ -865,15 +426,11 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Deleted the database successfully. */
-            200: {
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": {
-                        message: string;
-                    };
-                };
+                content?: never;
             };
             /** @description Missing or invalid authorization token. */
             401: {
@@ -882,9 +439,10 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        /** @constant */
-                        error: "unauthorized";
-                        errorDescription: string;
+                        error: {
+                            code: string;
+                            message: string;
+                        };
                     };
                 };
             };
@@ -893,7 +451,14 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
             };
             /** @description Database with the given ID was not found. */
             404: {
@@ -945,9 +510,7 @@ export interface operations {
                             };
                         }[];
                         pagination: {
-                            /** @description Next cursor to continue pagination */
                             nextCursor: string | null;
-                            /** @description Whether there are more items to paginate */
                             hasMore: boolean;
                         };
                     };
@@ -1039,12 +602,13 @@ export interface operations {
             };
         };
     };
-    deleteV1ConnectionsById: {
+    deleteV1DatabasesByDatabaseIdConnectionsById: {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 id: string;
+                databaseId: string;
             };
             cookie?: never;
         };
@@ -1112,7 +676,7 @@ export interface operations {
                             /** @enum {string} */
                             backupType: "full" | "incremental";
                             createdAt: string;
-                            size: number;
+                            size?: number;
                             /** @enum {string} */
                             status: "running" | "completed" | "failed" | "unknown";
                             /** @constant */
@@ -1161,7 +725,14 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
             };
         };
     };
@@ -1178,7 +749,6 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
-                    /** @description Name of the new database */
                     targetDatabaseName?: string;
                 };
             };
@@ -1246,7 +816,516 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getV1Projects: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Returns the list of projects. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** @constant */
+                            type: "project";
+                            name: string;
+                            /** Format: date-time */
+                            createdAt: string;
+                            workspace: {
+                                id: string;
+                                name: string;
+                            };
+                        }[];
+                        pagination: {
+                            nextCursor: string | null;
+                            hasMore: boolean;
+                        };
+                    };
+                };
+            };
+            /** @description Missing or invalid authorization token. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    postV1Projects: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    region?: "us-east-1" | "us-west-1" | "eu-west-3" | "eu-central-1" | "ap-northeast-1" | "ap-southeast-1";
+                    name?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description New project created. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** @constant */
+                            type: "project";
+                            name: string;
+                            /** Format: date-time */
+                            createdAt: string;
+                            workspace: {
+                                id: string;
+                                name: string;
+                            };
+                            database: {
+                                id: string;
+                                /** @constant */
+                                type: "database";
+                                name: string;
+                                status: string;
+                                /** Format: date-time */
+                                createdAt: string;
+                                isDefault: boolean;
+                                region: {
+                                    id: string;
+                                    name: string;
+                                };
+                                connectionString: string;
+                                directConnection: {
+                                    host: string;
+                                    user: string;
+                                    pass: string;
+                                };
+                                apiKeys: {
+                                    id: string;
+                                    /** @constant */
+                                    type: "connection";
+                                    name: string;
+                                    /** Format: date-time */
+                                    createdAt: string;
+                                    connectionString: string;
+                                }[];
+                            };
+                        };
+                    };
+                };
+            };
+            /** @description Missing or invalid authorization token. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getV1ProjectsById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Project retrieved. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** @constant */
+                            type: "project";
+                            name: string;
+                            /** Format: date-time */
+                            createdAt: string;
+                            workspace: {
+                                id: string;
+                                name: string;
+                            };
+                        };
+                    };
+                };
+            };
+            /** @description Missing or invalid authorization token. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description Project with the specified ID was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    deleteV1ProjectsById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Project deleted. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
                 content?: never;
+            };
+            /** @description Project cannot be deleted due to existing dependencies. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description Project with the specified ID was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    postV1ProjectsByIdTransfer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    recipientAccessToken: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Project transferred */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid authorization token. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description Project with the given ID was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getV1ProjectsByProjectIdDatabases: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Returned the databases for the given project ID. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** @constant */
+                            type: "database";
+                            name: string;
+                            /** @enum {string} */
+                            status: "failure" | "provisioning" | "ready" | "recovering";
+                            /** Format: date-time */
+                            createdAt: string;
+                            isDefault: boolean;
+                            project: {
+                                id: string;
+                                name: string;
+                            };
+                            region: {
+                                id: string;
+                                name: string;
+                            } | null;
+                        }[];
+                        pagination: {
+                            nextCursor: string | null;
+                            hasMore: boolean;
+                        };
+                    };
+                };
+            };
+            /** @description Missing or invalid authorization token. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description Project with the given ID was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    postV1ProjectsByProjectIdDatabases: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    region?: "us-east-1" | "us-west-1" | "eu-west-3" | "eu-central-1" | "ap-northeast-1" | "ap-southeast-1";
+                    name?: string;
+                    /** @default false */
+                    isDefault?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description Created a new database for the project. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** @constant */
+                            type: "database";
+                            name: string;
+                            status: string;
+                            /** Format: date-time */
+                            createdAt: string;
+                            isDefault: boolean;
+                            project: {
+                                id: string;
+                                name: string;
+                            };
+                            region: {
+                                id: string;
+                                name: string;
+                            };
+                            connectionString: string;
+                            directConnection: {
+                                host: string;
+                                user: string;
+                                pass: string;
+                            };
+                            apiKeys: {
+                                id: string;
+                                /** @constant */
+                                type: "connection";
+                                name: string;
+                                /** Format: date-time */
+                                createdAt: string;
+                                connectionString: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+            /** @description The request is invalid due to missing or invalid parameters. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description Missing or invalid authorization token. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description Project does not belong to the service token’s workspace. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
             };
         };
     };
@@ -1284,9 +1363,10 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        /** @constant */
-                        error: "unauthorized";
-                        errorDescription: string;
+                        error: {
+                            code: string;
+                            message: string;
+                        };
                     };
                 };
             };
@@ -1324,9 +1404,60 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        /** @constant */
-                        error: "unauthorized";
-                        errorDescription: string;
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getV1Workspaces: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Returns the list of workspaces the current token can access. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** @constant */
+                            type: "workspace";
+                            name: string;
+                            /** Format: date-time */
+                            createdAt: string;
+                        }[];
+                        pagination: {
+                            nextCursor: string | null;
+                            hasMore: boolean;
+                        };
+                    };
+                };
+            };
+            /** @description Missing or invalid authorization token. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
                     };
                 };
             };
