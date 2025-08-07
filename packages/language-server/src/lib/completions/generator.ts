@@ -60,7 +60,6 @@ const previewFeaturesArguments: CompletionItem[] = convertToCompletionItems(
   CompletionItemKind.Property,
 )
 
-
 /**
  * ```prisma
  * generator client {
@@ -128,7 +127,10 @@ const generatedFileExtensionArguments: CompletionItem[] = convertToCompletionIte
  * }
  * ```
  */
-const generatedFileExtensions: CompletionItem[] = convertToCompletionItems(completions.generatedFileExtensions, CompletionItemKind.Constant)
+const generatedFileExtensions: CompletionItem[] = convertToCompletionItems(
+  completions.generatedFileExtensions,
+  CompletionItemKind.Constant,
+)
 
 /**
  * ```prisma
@@ -151,8 +153,10 @@ const importFileExtensionArguments: CompletionItem[] = convertToCompletionItems(
  * }
  * ```
  */
-const importFileExtensions: CompletionItem[] = convertToCompletionItems(completions.importFileExtension, CompletionItemKind.Constant)
-
+const importFileExtensions: CompletionItem[] = convertToCompletionItems(
+  completions.importFileExtension,
+  CompletionItemKind.Constant,
+)
 
 // Fields for prisma-client generator
 const prismaClientFields: CompletionItem[] = convertToCompletionItems(
@@ -247,7 +251,7 @@ export function getSuggestionForGeneratorField(
   position: Position,
 ): CompletionItem[] {
   const provider = getProviderFromBlock(block)
-  
+
   let suggestions: CompletionItem[]
   if (provider === 'prisma-client-js') {
     suggestions = klona(prismaClientJSFields)
