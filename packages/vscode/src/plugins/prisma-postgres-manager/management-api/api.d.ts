@@ -224,6 +224,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspaceId}/integrations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get list of integrations
+         * @description Returns integrations for the given workspace.
+         */
+        get: operations["getV1WorkspacesByWorkspaceIdIntegrations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspaceId}/integrations/{clientId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Revoke integration tokens
+         * @description Revokes the integration tokens with the given client ID.
+         */
+        delete: operations["deleteV1WorkspacesByWorkspaceIdIntegrationsByClientId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/regions/postgres": {
         parameters: {
             query?: never;
@@ -1315,6 +1355,130 @@ export interface operations {
             };
             /** @description Project does not belong to the service token’s workspace. */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getV1WorkspacesByWorkspaceIdIntegrations: {
+        parameters: {
+            query?: {
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Returned the integrations for the given workspace ID. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            id: string;
+                            /** Format: date-time */
+                            createdAt: string;
+                            scopes: string[];
+                            client: {
+                                id: string;
+                                name: string;
+                                /** Format: date-time */
+                                createdAt: string;
+                            };
+                            createdByUser: {
+                                id: string;
+                                email: string;
+                                displayName: string | null;
+                            };
+                        }[];
+                        pagination: {
+                            nextCursor: string | null;
+                            hasMore: boolean;
+                        };
+                    };
+                };
+            };
+            /** @description Missing or invalid authorization token. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description Workspace with the given ID was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    deleteV1WorkspacesByWorkspaceIdIntegrationsByClientId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Revoked the integration tokens. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid authorization token. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
+                        };
+                    };
+                };
+            };
+            /** @description Integration with the given client ID was not found. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
