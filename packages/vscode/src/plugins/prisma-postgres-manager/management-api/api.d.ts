@@ -72,26 +72,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/databases/{databaseId}/connections/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Delete database connection string
-         * @description Deletes the database connection string with the given ID.
-         */
-        delete: operations["deleteV1DatabasesByDatabaseIdConnectionsById"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/databases/{databaseId}/backups": {
         parameters: {
             query?: never;
@@ -611,55 +591,6 @@ export interface operations {
                         };
                     };
                 };
-            };
-            /** @description Missing or invalid authorization token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error: {
-                            code: string;
-                            message: string;
-                        };
-                    };
-                };
-            };
-            /** @description Database with the given ID was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error: {
-                            code: string;
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    deleteV1DatabasesByDatabaseIdConnectionsById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-                databaseId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Deleted the database connection string. */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
             /** @description Missing or invalid authorization token. */
             401: {
