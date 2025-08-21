@@ -99,8 +99,8 @@
     {
       "label": "runtime",
       "insertText": "runtime = \"$0\"",
-      "documentation": "Target runtime environment. Supported values: nodejs (alias node), deno, bun, deno-deploy, workerd (alias cloudflare), vercel-edge (alias vercel, edge-light), react-native.",
-      "fullSignature": "runtime = \"nodejs\" | \"deno\" | \"bun\" | \"workerd\" | \"cloudflare\" | \"vercel-edge\" | \"vercel\" | \"edge-light\" | \"react-native\""
+      "documentation": "Target runtime environment. Supported values: nodejs, deno, bun, workerd (alias cloudflare), vercel-edge (alias edge-light), react-native.",
+      "fullSignature": "runtime = \"nodejs\" | \"deno\" | \"bun\" | \"workerd\" | \"cloudflare\" | \"vercel-edge\" | \"edge-light\" | \"react-native\""
     },
     {
       "label": "moduleFormat",
@@ -490,10 +490,6 @@
     {
       "label": "vercel-edge",
       "documentation": "Vercel Edge runtime"
-    },
-    {
-      "label": "vercel",
-      "documentation": "Alias of \"vercel-edge\""
     },
     {
       "label": "edge-light",

@@ -650,10 +650,6 @@ describe('Completions', function () {
                 kind: CompletionItemKind.Constant,
               },
               {
-                label: 'vercel',
-                kind: CompletionItemKind.Constant,
-              },
-              {
                 label: 'edge-light',
                 kind: CompletionItemKind.Constant,
               },
