@@ -630,19 +630,11 @@ describe('Completions', function () {
                 kind: CompletionItemKind.Constant,
               },
               {
-                label: 'node',
-                kind: CompletionItemKind.Constant,
-              },
-              {
                 label: 'deno',
                 kind: CompletionItemKind.Constant,
               },
               {
                 label: 'bun',
-                kind: CompletionItemKind.Constant,
-              },
-              {
-                label: 'deno-deploy',
                 kind: CompletionItemKind.Constant,
               },
               {
@@ -654,11 +646,15 @@ describe('Completions', function () {
                 kind: CompletionItemKind.Constant,
               },
               {
-                label: 'edge-light',
+                label: 'vercel-edge',
                 kind: CompletionItemKind.Constant,
               },
               {
                 label: 'vercel',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'edge-light',
                 kind: CompletionItemKind.Constant,
               },
               {
