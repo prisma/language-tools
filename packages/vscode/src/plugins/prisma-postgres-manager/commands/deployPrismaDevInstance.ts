@@ -1,19 +1,21 @@
 import { randomUUID } from 'node:crypto'
 import TelemetryReporter from '../../../telemetryReporter'
-import { LocalDatabaseSchema, PrismaPostgresRepository } from '../PrismaPostgresRepository'
+import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
 import { createRemoteDatabaseSafely } from './createRemoteDatabase'
 import { type ExtensionContext, ProgressLocation, window } from 'vscode'
 import { getPackageJSON } from '../../../getPackageJSON'
 import { isDebugOrTestSession } from '../../../util'
+import { DevInstanceSchema, PrismaDevRepository } from '../PrismaDevRepository'
 
 export interface DeployLocalDatabaseOptions {
   args: unknown
   context: ExtensionContext
   ppgRepository: PrismaPostgresRepository
+  prismaDevRepository: PrismaDevRepository
 }
 
-export async function deployLocalDatabase(options: DeployLocalDatabaseOptions): Promise<void> {
-  const { args, context, ppgRepository } = options
+export async function deployPrismaDevInstance(options: DeployLocalDatabaseOptions): Promise<void> {
+  const { args, context, ppgRepository, prismaDevRepository } = options
 
   const packageJson = getPackageJSON(context)
 
@@ -23,7 +25,7 @@ export async function deployLocalDatabase(options: DeployLocalDatabaseOptions): 
   )
 
   try {
-    const { name } = LocalDatabaseSchema.parse(args)
+    const { name } = DevInstanceSchema.parse(args)
 
     const attemptEventId = randomUUID()
 
@@ -44,18 +46,17 @@ export async function deployLocalDatabase(options: DeployLocalDatabaseOptions): 
         })
     }
 
-    const database = await ppgRepository.getLocalDatabase({ name })
+    const database = await prismaDevRepository.getInstance({ name })
 
     if (database?.running) {
       const confirmation = await window.showInformationMessage(
-        'To deploy your local Prisma Postgres database, you will need to stop the database first. Proceed?',
+        'To deploy your Prisma Dev database, you will need to stop the database first. Proceed?',
         { modal: true },
         'Yes',
       )
 
       if (confirmation !== 'Yes') {
-        void window.showInformationMessage('Deployment cancelled.')
-        return
+        return void window.showInformationMessage('Deployment cancelled.')
       }
     }
 
@@ -75,7 +76,10 @@ export async function deployLocalDatabase(options: DeployLocalDatabaseOptions): 
         location: ProgressLocation.Notification,
         title: `Deploying remote database...`,
       },
-      () => ppgRepository.deployLocalDatabase({ name, url: connectionString, projectId, workspaceId }),
+      async () => {
+        await prismaDevRepository.deployInstance({ name, url: connectionString })
+        ppgRepository.triggerRefresh()
+      },
     )
 
     if (!isDebugOrTest) {
@@ -96,7 +100,7 @@ export async function deployLocalDatabase(options: DeployLocalDatabaseOptions): 
         })
     }
 
-    void window.showInformationMessage('Deployment was successful!')
+    await window.showInformationMessage('Deployment was successful!')
   } finally {
     telemetryReporter.dispose()
   }

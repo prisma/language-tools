@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers/promises'
 import type { Server } from '@prisma/dev'
 
 let server: Server | undefined
@@ -39,7 +40,7 @@ async function main() {
         error: error instanceof Error ? error.message : String(error),
       }),
     )
-    await new Promise((r) => setTimeout(r, 1000))
+    await setTimeout(1000)
     process.exit(1)
   }
 }

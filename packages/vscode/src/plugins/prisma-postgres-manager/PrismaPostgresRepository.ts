@@ -1,20 +1,11 @@
-import { EventEmitter, ExtensionContext, Uri } from 'vscode'
+import { EventEmitter } from 'vscode'
 import { createManagementAPIClient } from './management-api/client'
 import { CredentialsStore } from '@prisma/credentials-store'
 import type { ConnectionStringStorage } from './ConnectionStringStorage'
 import { Auth } from './management-api/auth'
 import type { paths } from './management-api/api.d'
 import { z } from 'zod'
-import envPaths from 'env-paths'
-import * as fs from 'fs/promises'
-import * as path from 'path'
-import { waitForProcessKilled } from './utils/waitForProcessKilled'
-import { proxySignals } from 'foreground-child/proxy-signals'
-import { fork } from 'child_process'
-import * as chokidar from 'chokidar'
 import type { FetchResponse } from 'openapi-fetch'
-
-const PPG_DEV_GLOBAL_ROOT = envPaths('prisma-dev')
 
 export type RegionId = NonNullable<
   NonNullable<
@@ -50,7 +41,7 @@ export function isProject(item: unknown): item is Project {
   return ProjectSchema.safeParse(item).success
 }
 
-export const RemoteDatabaseSchema = z.object({
+export const DatabaseSchema = z.object({
   type: z.literal('remoteDatabase'),
   id: z.string(),
   name: z.string(),
@@ -58,42 +49,22 @@ export const RemoteDatabaseSchema = z.object({
   projectId: z.string(),
   workspaceId: z.string(),
 })
-export type RemoteDatabaseId = string
-export type RemoteDatabase = z.infer<typeof RemoteDatabaseSchema>
-export function isRemoteDatabase(item: unknown): item is RemoteDatabase {
-  return RemoteDatabaseSchema.safeParse(item).success
+export type DatabaseId = string
+export type Database = z.infer<typeof DatabaseSchema>
+export function isRemoteDatabase(item: unknown): item is Database {
+  return DatabaseSchema.safeParse(item).success
 }
 
-export const LocalDatabaseSchema = z.object({
-  type: z.literal('localDatabase'),
-  id: z.string(),
-  name: z.string(),
-  url: z.string().url(),
-  pid: z.number(),
-  running: z.boolean(),
-})
-export type LocalDatabase = z.infer<typeof LocalDatabaseSchema>
-export function isLocalDatabase(item: unknown): item is LocalDatabase {
-  return LocalDatabaseSchema.safeParse(item).success
-}
+export type NewRemoteDatabase = Database & { connectionString: string }
 
-export type NewRemoteDatabase = RemoteDatabase & { connectionString: string }
-
-export type PrismaPostgresItem =
-  | { type: 'localRoot' }
-  | { type: 'remoteRoot' }
-  | Workspace
-  | Project
-  | RemoteDatabase
-  | LocalDatabase
+export type PrismaPostgresItem = { type: 'remoteRoot' } | Workspace | Project | Database
 
 // Simple cache manager to handle all caching logic
 class CacheManager {
   private regions: Region[] = []
   private workspaces = new Map<WorkspaceId, Workspace>()
   private projects = new Map<string, Map<ProjectId, Project>>()
-  private databases = new Map<string, Map<RemoteDatabaseId, RemoteDatabase>>()
-  private localDatabases: { timestamp: number; data: LocalDatabase[] } | undefined
+  private databases = new Map<string, Map<DatabaseId, Database>>()
 
   generateKey(workspaceId: string, projectId?: string): string {
     return projectId ? `${workspaceId}.${projectId}` : workspaceId
@@ -150,13 +121,13 @@ class CacheManager {
   }
 
   // Database cache
-  setDatabases(workspaceId: string, projectId: string, databases: RemoteDatabase[]): void {
-    const databaseMap = new Map<RemoteDatabaseId, RemoteDatabase>()
+  setDatabases(workspaceId: string, projectId: string, databases: Database[]): void {
+    const databaseMap = new Map<DatabaseId, Database>()
     databases.forEach((db) => databaseMap.set(db.id, db))
     this.databases.set(this.generateKey(workspaceId, projectId), databaseMap)
   }
 
-  getDatabases(workspaceId: string, projectId: string): RemoteDatabase[] {
+  getDatabases(workspaceId: string, projectId: string): Database[] {
     return Array.from(this.databases.get(this.generateKey(workspaceId, projectId))?.values() || [])
   }
 
@@ -164,7 +135,7 @@ class CacheManager {
     return this.databases.has(this.generateKey(workspaceId, projectId))
   }
 
-  addDatabase(database: RemoteDatabase): void {
+  addDatabase(database: Database): void {
     const key = this.generateKey(database.workspaceId, database.projectId)
     if (!this.databases.has(key)) {
       this.databases.set(key, new Map())
@@ -193,25 +164,11 @@ class CacheManager {
     return this.regions.length > 0
   }
 
-  // Local database cache
-  setLocalDatabases(databases: LocalDatabase[]): void {
-    this.localDatabases = { timestamp: Date.now(), data: databases }
-  }
-
-  getLocalDatabases(): LocalDatabase[] | undefined {
-    const now = Date.now()
-    if (this.localDatabases && now - this.localDatabases.timestamp < 100) {
-      return this.localDatabases.data
-    }
-    return undefined
-  }
-
   clearAll(): void {
     this.workspaces.clear()
     this.projects.clear()
     this.databases.clear()
     this.regions = []
-    this.localDatabases = undefined
   }
 }
 
@@ -226,18 +183,7 @@ export class PrismaPostgresRepository {
   constructor(
     private readonly auth: Auth,
     private readonly connectionStringStorage: ConnectionStringStorage,
-    private readonly context: ExtensionContext,
   ) {
-    const watcher = chokidar.watch(PPG_DEV_GLOBAL_ROOT.data, {
-      ignoreInitial: true,
-    })
-
-    watcher.on('addDir', () => this.refreshEventEmitter.fire())
-    watcher.on('unlinkDir', () => this.refreshEventEmitter.fire())
-    watcher.on('change', () => this.refreshEventEmitter.fire())
-
-    context.subscriptions.push({ dispose: () => watcher.close() })
-
     // Start preloading data in the background for better UX
     this.reloadPromise = this.reloadAllData()
   }
@@ -561,7 +507,7 @@ export class PrismaPostgresRepository {
     workspaceId: string
     projectId: string
     reload?: boolean
-  }): Promise<RemoteDatabase[]> {
+  }): Promise<Database[]> {
     if (!reload) {
       await this.reloadPromise
     }
@@ -572,7 +518,7 @@ export class PrismaPostgresRepository {
 
     const client = await this.getClient(workspaceId)
 
-    const databases: RemoteDatabase[] = []
+    const databases: Database[] = []
     let pagination: { hasMore: boolean; nextCursor: string | null | undefined } | undefined = undefined
 
     do {
@@ -721,145 +667,5 @@ export class PrismaPostgresRepository {
     this.cache.removeDatabase(workspaceId, projectId, id)
 
     this.refreshEventEmitter.fire()
-  }
-
-  async getLocalDatabase(args: { name: string }): Promise<LocalDatabase | undefined> {
-    const { name } = args
-    const databases = await this.getLocalDatabases()
-    return databases.find((db) => db.name === name)
-  }
-
-  async getLocalDatabases(): Promise<LocalDatabase[]> {
-    const cached = this.cache.getLocalDatabases()
-    if (cached) return cached
-
-    const { ServerState } = await import('@prisma/dev/internal/state')
-    const data = (await ServerState.scan()).map((state) => {
-      const { name, exports, status } = state
-      const url = exports?.ppg.url ?? 'http://offline'
-      let running = status === 'running' || status === 'starting_up'
-      let pid = state.pid ?? -1
-
-      // ppg dev quirk: after a deploy command, since it's run in the same
-      // process as vscode, it stores the process pid and think it's running
-      if (pid === process.pid) {
-        pid = -1
-        running = false
-      }
-
-      return { type: 'localDatabase', pid, name, id: name, url, running } as const
-    })
-
-    this.cache.setLocalDatabases(data)
-    return data
-  }
-
-  async createOrStartLocalDatabase(args: { name: string }): Promise<void> {
-    const { name } = args
-
-    // skip spawning a new server if we know the server is running
-    const database = await this.getLocalDatabase({ name })
-    if (database?.running === true) return
-
-    // TODO: once ppg dev has a daemon, this should be replaced
-    const { path } = Uri.joinPath(
-      this.context.extensionUri,
-      ...['dist', 'src', 'plugins', 'prisma-postgres-manager', 'utils', 'spawnPpgDevServer.js'],
-    )
-
-    const child = fork(path, [name], { stdio: ['ignore', 'pipe', 'pipe', 'ipc'], detached: true })
-    child.stdout?.on('data', (data) => console.log(`[PPG Child ${name}] ${String(data).trim()}`))
-    child.stderr?.on('data', (data) => console.error(`[PPG Child ${name}] ${String(data).trim()}`))
-    proxySignals(child) // closes the children if parent is closed (ie. vscode)
-
-    await new Promise((resolve, reject) => {
-      child.on('error', reject)
-
-      child.stdout?.on('data', (data) => {
-        if (String(data).includes('[PPG Dev] Server started')) {
-          return resolve(undefined)
-        }
-      })
-
-      child.stderr?.on('data', (data) => {
-        if (String(data).includes('[PPG Dev] Error starting')) {
-          return reject(new Error(`${data}`))
-        }
-      })
-    })
-
-    this.refreshEventEmitter.fire()
-  }
-
-  async deleteLocalDatabase(args: { name: string }): Promise<void> {
-    const { name } = args
-
-    const database = await this.getLocalDatabase({ name })
-
-    if (database !== undefined) {
-      const databasePath = path.join(PPG_DEV_GLOBAL_ROOT.data, name)
-
-      await this.stopLocalDatabase({ name }).catch(() => {})
-      await fs.rm(databasePath, { recursive: true, force: true })
-    }
-
-    this.refreshEventEmitter.fire()
-  }
-
-  async stopLocalDatabase(args: { name: string }): Promise<void> {
-    const { name } = args
-
-    const database = await this.getLocalDatabase({ name })
-
-    if (database?.running) {
-      const { pid } = database
-
-      process.kill(pid, 'SIGTERM')
-      await waitForProcessKilled(pid)
-    }
-
-    this.refreshEventEmitter.fire()
-  }
-
-  async deployLocalDatabase(args: {
-    name: string
-    url: string
-    projectId: string
-    workspaceId: string
-  }): Promise<void> {
-    const { Client } = await import('@prisma/ppg')
-    const { ServerState } = await import('@prisma/dev/internal/state')
-    const { dumpDB } = await import('@prisma/dev/internal/db')
-    const { name, url, projectId, workspaceId } = args
-
-    await this.stopLocalDatabase({ name }) // db has to be stopped before dumping
-
-    const state = await ServerState.createExclusively({ name, persistenceMode: 'stateful' })
-
-    try {
-      const dump = await dumpDB({ dataDir: state.pgliteDataDirPath })
-      await new Client({ connectionString: url }).query(dump, [])
-    } catch (e) {
-      await state.close()
-      throw e
-    }
-
-    await state.close()
-
-    this.cache.clearDatabases(workspaceId, projectId)
-    this.refreshEventEmitter.fire()
-  }
-
-  async getLocalDatabaseConnectionString(args: { name: string }) {
-    const { name } = args
-
-    const database = await this.getLocalDatabase({ name })
-
-    if (database?.running !== true) {
-      this.refreshEventEmitter.fire()
-      throw new Error('This database has been deleted or stopped')
-    }
-
-    return database.url
   }
 }

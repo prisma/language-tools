@@ -238,7 +238,7 @@
         "category": "Prisma"
       },
       {
-        "command": "prisma.createLocalDatabase",
+        "command": "prisma.createDevInstance",
         "title": "Create Local Prisma Postgres Database",
         "icon": "$(add)",
         "category": "Prisma"
@@ -280,31 +280,31 @@
         "category": "Prisma"
       },
       {
-        "command": "prisma.stopLocalDatabase",
+        "command": "prisma.stopDevInstance",
         "title": "Stop Local Database",
         "category": "Prisma",
         "icon": "$(debug-stop)"
       },
       {
-        "command": "prisma.startLocalDatabase",
+        "command": "prisma.startDevInstance",
         "title": "Start Local Database",
         "category": "Prisma",
         "icon": "$(debug-start)"
       },
       {
-        "command": "prisma.copyLocalDatabaseURL",
+        "command": "prisma.copyDevInstanceURL",
         "title": "Copy Local Database URL",
         "category": "Prisma",
         "icon": "$(clippy)"
       },
       {
-        "command": "prisma.deleteLocalDatabase",
+        "command": "prisma.deleteDevInstance",
         "title": "Delete Local Database",
         "category": "Prisma",
         "icon": "$(trash)"
       },
       {
-        "command": "prisma.deployLocalDatabase",
+        "command": "prisma.deployDevInstance",
         "title": "Deploy Local Database",
         "category": "Prisma",
         "icon": "$(cloud-upload)"
@@ -473,7 +473,12 @@
       "prismaActivitybar": [
         {
           "id": "prismaPostgresDatabases",
-          "name": "Prisma Postgres",
+          "name": "Prisma Postgres (Cloud)",
+          "type": "tree"
+        },
+        {
+          "id": "prismaDevInstances",
+          "name": "Prisma Postgres (Local)",
           "type": "tree"
         }
       ]
@@ -518,23 +523,23 @@
           "when": "false"
         },
         {
-          "command": "prisma.stopLocalDatabase",
+          "command": "prisma.stopDevInstance",
           "when": "false"
         },
         {
-          "command": "prisma.startLocalDatabase",
+          "command": "prisma.startDevInstance",
           "when": "false"
         },
         {
-          "command": "prisma.deleteLocalDatabase",
+          "command": "prisma.deleteDevInstance",
           "when": "false"
         },
         {
-          "command": "prisma.copyLocalDatabaseURL",
+          "command": "prisma.copyDevInstanceURL",
           "when": "false"
         },
         {
-          "command": "prisma.deployLocalDatabase",
+          "command": "prisma.deployDevInstance",
           "when": "false"
         }
       ],
@@ -542,6 +547,11 @@
         {
           "command": "prisma.refresh",
           "when": "view == prismaPostgresDatabases",
+          "group": "navigation"
+        },
+        {
+          "command": "prisma.createDevInstance",
+          "when": "view == prismaDevInstances",
           "group": "navigation"
         }
       ],
@@ -575,22 +585,22 @@
           "group": "inline"
         },
         {
-          "command": "prisma.createLocalDatabase",
+          "command": "prisma.createDevInstance",
           "when": "viewItem == prismaLocalDatabasesItem",
           "group": "inline"
         },
         {
-          "command": "prisma.stopLocalDatabase",
+          "command": "prisma.stopDevInstance",
           "when": "viewItem == prismaLocalDatabaseItemStarted",
           "group": "inline"
         },
         {
-          "command": "prisma.startLocalDatabase",
+          "command": "prisma.startDevInstance",
           "when": "viewItem == prismaLocalDatabaseItemStopped",
           "group": "inline"
         },
         {
-          "command": "prisma.deployLocalDatabase",
+          "command": "prisma.deployDevInstance",
           "when": "viewItem == prismaLocalDatabaseItemStarted || viewItem == prismaLocalDatabaseItemStopped",
           "group": "inline",
           "icon": "$(cloud-upload)"
@@ -609,13 +619,13 @@
           "when": "viewItem == prismaRemoteDatabaseItem"
         },
         {
-          "command": "prisma.copyLocalDatabaseURL",
+          "command": "prisma.copyDevInstanceURL",
           "when": "viewItem == prismaLocalDatabaseItemStarted",
           "group": "inline",
           "icon": "$(clippy)"
         },
         {
-          "command": "prisma.deleteLocalDatabase",
+          "command": "prisma.deleteDevInstance",
           "when": "viewItem == prismaLocalDatabaseItemStarted || viewItem == prismaLocalDatabaseItemStopped",
           "group": "inline",
           "icon": "$(trash)"
@@ -637,6 +647,11 @@
         "view": "prismaPostgresDatabases",
         "contents": "Login in progress...\nSomething went wrong? [try again](command:prisma.login)",
         "when": "prisma.initialLoginInProgress == true"
+      },
+      {
+        "view": "prismaDevInstances",
+        "contents": "Develop and test your app using local Prisma Postgres databases — no Docker required.\nDeploy to Prisma's Data Platform when you're ready to go live!\n[Create your first local database](command:prisma.createDevInstance)\nLearn more about Prisma Dev [here](https://www.prisma.io/docs/postgres/database/local-development?utm_source=vscode&utm_medium=extension&utm_campaign=welcome-view).",
+        "when": "prisma.showDevWelcome == true"
       }
     ]
   },
