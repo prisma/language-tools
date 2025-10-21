@@ -9,12 +9,18 @@ export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<P
     this.onDidChangeTreeData = ppgRepository.refreshEventEmitter.event
   }
 
-  getTreeItem(element: PrismaPostgresItem): vscode.TreeItem {
+  async getTreeItem(element: PrismaPostgresItem): Promise<vscode.TreeItem> {
     switch (element.type) {
-      case 'localRoot':
-        return new PrismaLocalDatabasesItem()
-      case 'remoteRoot':
-        return new PrismaRemoteDatabasesItem()
+      case 'localRoot': {
+        const localDatabases = await this.ppgRepository.getLocalDatabases()
+
+        return new PrismaLocalDatabasesItem(localDatabases)
+      }
+      case 'remoteRoot': {
+        const isLoggedIn = await this.isLoggedIn()
+
+        return new PrismaRemoteDatabasesItem(isLoggedIn)
+      }
       case 'workspace':
         return new PrismaWorkspaceItem(element.name, element.id)
       case 'project':
@@ -83,7 +89,6 @@ export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<P
     const workspaces = await this.ppgRepository.getWorkspaces()
 
     return workspaces.length > 0
-    // return workspaces.length === 0
   }
 
   async hasProjects(): Promise<boolean> {
@@ -98,8 +103,11 @@ export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<P
 }
 
 class PrismaLocalDatabasesItem extends vscode.TreeItem {
-  constructor() {
-    super('Local Databases', vscode.TreeItemCollapsibleState.Expanded)
+  constructor(localDatabases: LocalDatabase[]) {
+    super(
+      'Local Databases',
+      localDatabases.length === 0 ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Expanded,
+    )
   }
 
   id = 'local-root'
@@ -130,8 +138,11 @@ class PrismaLocalDatabaseItem extends vscode.TreeItem {
 }
 
 class PrismaRemoteDatabasesItem extends vscode.TreeItem {
-  constructor() {
-    super('Remote Databases', vscode.TreeItemCollapsibleState.Expanded)
+  constructor(isLoggedIn: boolean) {
+    super(
+      'Remote Databases',
+      !isLoggedIn ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Expanded,
+    )
   }
 
   id = 'remote-root'
