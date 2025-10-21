@@ -34,26 +34,39 @@ export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<P
 
   async getChildren(element?: PrismaPostgresItem): Promise<PrismaPostgresItem[]> {
     if (!element) {
-      if (await this.shouldShowLoginWelcome()) {
-        await vscode.commands.executeCommand('setContext', 'prisma.showLoginWelcome', true)
-        await vscode.commands.executeCommand('setContext', 'prisma.showCreateDatabaseWelcome', false)
-        return []
-      } else if (await this.shouldShowCreateDatabaseWelcome()) {
-        await vscode.commands.executeCommand('setContext', 'prisma.showLoginWelcome', false)
-        await vscode.commands.executeCommand('setContext', 'prisma.showCreateDatabaseWelcome', true)
-        return []
-      } else {
-        await vscode.commands.executeCommand('setContext', 'prisma.showLoginWelcome', false)
-        await vscode.commands.executeCommand('setContext', 'prisma.showCreateDatabaseWelcome', false)
-        return [{ type: 'localRoot' }, { type: 'remoteRoot' }]
+      const isLoggedIn = await this.isLoggedIn()
+
+      const children = [{ type: 'localRoot' as const }, { type: 'remoteRoot' as const }]
+
+      if (!isLoggedIn) {
+        await Promise.all([
+          vscode.commands.executeCommand('setContext', 'prisma.showLoginWelcome', true),
+          vscode.commands.executeCommand('setContext', 'prisma.showCreateDatabaseWelcome', false),
+        ])
+
+        return children
       }
+
+      const hasProjects = await this.hasProjects()
+
+      await Promise.all([
+        vscode.commands.executeCommand('setContext', 'prisma.showLoginWelcome', false),
+        vscode.commands.executeCommand('setContext', 'prisma.showCreateDatabaseWelcome', !hasProjects),
+      ])
+
+      return children
     }
 
     switch (element.type) {
       case 'localRoot':
         return this.ppgRepository.getLocalDatabases()
-      case 'remoteRoot':
-        return await this.ppgRepository.getWorkspaces()
+      case 'remoteRoot': {
+        if (await this.isLoggedIn()) {
+          return await this.ppgRepository.getWorkspaces()
+        }
+
+        return []
+      }
       case 'workspace':
         return await this.ppgRepository.getProjects({ workspaceId: element.id })
       case 'project':
@@ -61,24 +74,26 @@ export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<P
           workspaceId: element.workspaceId,
           projectId: element.id,
         })
-      case 'remoteDatabase':
-        return []
-      case 'localDatabase':
+      default:
         return []
     }
   }
 
-  async shouldShowLoginWelcome(): Promise<boolean> {
-    return (await this.ppgRepository.getWorkspaces()).length === 0
+  async isLoggedIn(): Promise<boolean> {
+    const workspaces = await this.ppgRepository.getWorkspaces()
+
+    return workspaces.length > 0
+    // return workspaces.length === 0
   }
 
-  async shouldShowCreateDatabaseWelcome(): Promise<boolean> {
-    const res = await Promise.all(
-      (await this.ppgRepository.getWorkspaces()).map(
-        async (w) => await this.ppgRepository.getProjects({ workspaceId: w.id }),
-      ),
+  async hasProjects(): Promise<boolean> {
+    const workspaces = await this.ppgRepository.getWorkspaces()
+
+    const projectsPerWorkspace = await Promise.all(
+      workspaces.map((workspace) => this.ppgRepository.getProjects({ workspaceId: workspace.id })),
     )
-    return res.flat().length === 0
+
+    return projectsPerWorkspace.some((projects) => projects.length > 0)
   }
 }
 
