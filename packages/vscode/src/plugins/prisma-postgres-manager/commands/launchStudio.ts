@@ -2,10 +2,10 @@ import { ExtensionContext, ProgressLocation, window } from 'vscode'
 import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
 import { z } from 'zod'
 import { launch } from '../../prisma-studio/commands/launch'
+import { PrismaDevRepository } from '../PrismaDevRepository'
 
 export const LaunchArgLocalSchema = z.object({
   type: z.literal('local'),
-  id: z.string(),
   name: z.string(),
 })
 export type LaunchArgLocal = z.infer<typeof LaunchArgLocalSchema>
@@ -21,33 +21,40 @@ export type LaunchArgRemote = z.infer<typeof LaunchArgRemoteSchema>
 const LaunchArgSchema = z.union([LaunchArgLocalSchema, LaunchArgRemoteSchema])
 export type LaunchArg = z.infer<typeof LaunchArgSchema>
 
-export const launchStudio = async ({
-  ppgRepository,
-  context,
+export async function launchStudio({
   args,
+  context,
+  ppgRepository,
+  prismaDevRepository,
 }: {
-  ppgRepository: PrismaPostgresRepository
-  context: ExtensionContext
   args: unknown
-}) => {
+  context: ExtensionContext
+  ppgRepository: PrismaPostgresRepository
+  prismaDevRepository: PrismaDevRepository
+}): Promise<void> {
   const database = LaunchArgSchema.parse(args)
 
   if (database.type === 'local') {
-    await ppgRepository.createOrStartLocalDatabase(database)
+    await prismaDevRepository.startInstance(database)
+
+    const connectionString = await prismaDevRepository.getInstanceConnectionString(database)
+
+    return void (await launch({ database, dbUrl: connectionString, context }))
   }
 
   const connectionString = await getConnectionString(ppgRepository, database)
 
-  if (!connectionString) return
-
-  void launch({ database, dbUrl: connectionString, context })
-}
-
-const getConnectionString = async (ppgRepository: PrismaPostgresRepository, database: LaunchArg) => {
-  if (database.type === 'local') {
-    return await ppgRepository.getLocalDatabaseConnectionString(database)
+  if (!connectionString) {
+    return
   }
 
+  await launch({ database, dbUrl: connectionString, context })
+}
+
+async function getConnectionString(
+  ppgRepository: PrismaPostgresRepository,
+  database: Exclude<LaunchArg, { type: 'local' }>,
+) {
   const connectionString = await ppgRepository.getStoredRemoteDatabaseConnectionString(database)
 
   if (connectionString) return connectionString

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
-import { LocalDatabase, PrismaPostgresItem, PrismaPostgresRepository } from './PrismaPostgresRepository'
-import { LaunchArgLocal, LaunchArgRemote } from './commands/launchStudio'
+import { PrismaPostgresItem, PrismaPostgresRepository } from './PrismaPostgresRepository'
+import { LaunchArgRemote } from './commands/launchStudio'
 
 export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<PrismaPostgresItem> {
   readonly onDidChangeTreeData: vscode.Event<PrismaPostgresItem | undefined | null | void>
@@ -11,8 +11,6 @@ export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<P
 
   getTreeItem(element: PrismaPostgresItem): vscode.TreeItem {
     switch (element.type) {
-      case 'localRoot':
-        return new PrismaLocalDatabasesItem()
       case 'remoteRoot':
         return new PrismaRemoteDatabasesItem()
       case 'workspace':
@@ -27,8 +25,8 @@ export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<P
           element.projectId,
           element.workspaceId,
         )
-      case 'localDatabase':
-        return new PrismaLocalDatabaseItem(element)
+      default:
+        throw new Error(`Unknown element type: ${(element satisfies never as { type: string }).type}`)
     }
   }
 
@@ -45,13 +43,11 @@ export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<P
       } else {
         await vscode.commands.executeCommand('setContext', 'prisma.showLoginWelcome', false)
         await vscode.commands.executeCommand('setContext', 'prisma.showCreateDatabaseWelcome', false)
-        return [{ type: 'localRoot' }, { type: 'remoteRoot' }]
+        return [{ type: 'remoteRoot' }]
       }
     }
 
     switch (element.type) {
-      case 'localRoot':
-        return this.ppgRepository.getLocalDatabases()
       case 'remoteRoot':
         return await this.ppgRepository.getWorkspaces()
       case 'workspace':
@@ -63,8 +59,8 @@ export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<P
         })
       case 'remoteDatabase':
         return []
-      case 'localDatabase':
-        return []
+      default:
+        throw new Error(`Unknown element type: ${(element satisfies never as { type: string }).type}`)
     }
   }
 
@@ -79,38 +75,6 @@ export class PrismaPostgresTreeDataProvider implements vscode.TreeDataProvider<P
       ),
     )
     return res.flat().length === 0
-  }
-}
-
-class PrismaLocalDatabasesItem extends vscode.TreeItem {
-  constructor() {
-    super('Local Databases', vscode.TreeItemCollapsibleState.Expanded)
-  }
-
-  id = 'local-root'
-
-  iconPath = new vscode.ThemeIcon('device-desktop')
-
-  contextValue = 'prismaLocalDatabasesItem'
-}
-
-class PrismaLocalDatabaseItem extends vscode.TreeItem {
-  constructor(element: LocalDatabase) {
-    const { id, name, running } = element
-
-    super(name, vscode.TreeItemCollapsibleState.None)
-
-    this.id = `local-database-${id}-${name}`
-
-    this.iconPath = new vscode.ThemeIcon('database')
-
-    this.contextValue = running ? 'prismaLocalDatabaseItemStarted' : 'prismaLocalDatabaseItemStopped'
-
-    this.command = {
-      command: 'prisma.studio.launchForDatabase',
-      title: 'Launch Prisma Studio',
-      arguments: [{ type: 'local', id, name } satisfies LaunchArgLocal],
-    }
   }
 }
 

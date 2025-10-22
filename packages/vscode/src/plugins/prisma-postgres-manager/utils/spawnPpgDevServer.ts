@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers/promises'
 import type { Server } from '@prisma/dev'
 
 let server: Server | undefined
@@ -23,7 +24,7 @@ async function main() {
   try {
     const { unstable_startServer } = await import('@prisma/dev')
 
-    server = await unstable_startServer({ persistenceMode: 'stateful', name })
+    server = await unstable_startServer({ debug: true, persistenceMode: 'stateful', name })
 
     // this message is important and required to know on the spawning side if alive
     console.log(
@@ -39,7 +40,7 @@ async function main() {
         error: error instanceof Error ? error.message : String(error),
       }),
     )
-    await new Promise((r) => setTimeout(r, 1000))
+    await setTimeout(1000)
     process.exit(1)
   }
 }

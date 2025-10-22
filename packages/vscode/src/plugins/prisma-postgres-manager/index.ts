@@ -14,12 +14,9 @@ import { getRemoteDatabaseConnectionString } from './commands/getRemoteDatabaseC
 import { launchStudio } from './commands/launchStudio'
 import { PDPAuthLoginTool } from './ai-tools/PDPAuthLoginTool'
 import { PDPCreatePPGTool } from './ai-tools/PDPCreatePPGTool'
-import { createLocalDatabase } from './commands/createLocalDatabase'
-import { stopLocalDatabase } from './commands/stopLocalDatabase'
-import { startLocalDatabase } from './commands/startLocalDatabase'
-import { copyLocalDatabaseUrl } from './commands/copyLocalDatabaseUrl'
-import { deleteLocalDatabase } from './commands/deleteLocalDatabase'
-import { deployLocalDatabase } from './commands/deployLocalDatabase'
+import { deployPrismaDevInstance } from './commands/deployPrismaDevInstance'
+import { PrismaDevTreeDataProvider } from './PrismaDevTreeDataProvider'
+import { DevInstanceSchema, PrismaDevRepository } from './PrismaDevRepository'
 
 export default {
   name: 'Prisma Postgres',
@@ -29,8 +26,8 @@ export default {
   activate(context: ExtensionContext) {
     const auth = new Auth(context.extension.id)
     const connectionStringStorage = new ConnectionStringStorage(context.secrets)
-    const ppgRepository = new PrismaPostgresRepository(auth, connectionStringStorage, context)
-    const ppgProvider = new PrismaPostgresTreeDataProvider(ppgRepository)
+    const ppgRepository = new PrismaPostgresRepository(auth, connectionStringStorage)
+    const prismaDevRepository = new PrismaDevRepository(context)
 
     window.registerUriHandler({
       handleUri(uri: Uri) {
@@ -38,7 +35,8 @@ export default {
       },
     })
 
-    window.registerTreeDataProvider('prismaPostgresDatabases', ppgProvider)
+    window.registerTreeDataProvider('prismaPostgresDatabases', new PrismaPostgresTreeDataProvider(ppgRepository))
+    window.registerTreeDataProvider('prismaDevInstances', new PrismaDevTreeDataProvider(prismaDevRepository))
 
     context.subscriptions.push(
       commands.registerCommand('prisma.refresh', () => {
@@ -82,28 +80,54 @@ export default {
         await handleCommandError('Delete Remote Database', () => deleteRemoteDatabase(ppgRepository, args))
       }),
       commands.registerCommand('prisma.studio.launchForDatabase', async (args: unknown) => {
-        await handleCommandError('Launch Studio', () => launchStudio({ ppgRepository, args, context }))
+        await handleCommandError('Launch Studio', () =>
+          launchStudio({ args, context, ppgRepository, prismaDevRepository }),
+        )
       }),
 
       /** Local Db Commands */
 
-      commands.registerCommand('prisma.createLocalDatabase', async () => {
-        await handleCommandError('Create Local Database', () => createLocalDatabase(ppgRepository))
+      commands.registerCommand('prisma.createDevInstance', async () => {
+        await handleCommandError('Create Local Database', async () => {
+          const name = await window.showInputBox({
+            prompt: 'Enter your `prisma dev` instance name',
+            placeHolder: 'e.g., MyAwesomeProject',
+            value: 'default',
+          })
+
+          await prismaDevRepository.startInstance({ name: name ?? 'default' })
+        })
       }),
-      commands.registerCommand('prisma.stopLocalDatabase', async (args: unknown) => {
-        await handleCommandError('Stop Local Database', () => stopLocalDatabase(ppgRepository, args))
+      commands.registerCommand('prisma.stopDevInstance', async (args: unknown) => {
+        await handleCommandError('Stop Local Database', () =>
+          prismaDevRepository.stopInstance(DevInstanceSchema.parse(args)),
+        )
       }),
-      commands.registerCommand('prisma.startLocalDatabase', async (args: unknown) => {
-        await handleCommandError('Start Local Database', () => startLocalDatabase(ppgRepository, args))
+      commands.registerCommand('prisma.startDevInstance', async (args: unknown) => {
+        await handleCommandError('Start Local Database', () =>
+          prismaDevRepository.startInstance(DevInstanceSchema.parse(args)),
+        )
       }),
-      commands.registerCommand('prisma.deleteLocalDatabase', async (args: unknown) => {
-        await handleCommandError('Delete Local Database', () => deleteLocalDatabase(ppgRepository, args))
+      commands.registerCommand('prisma.deleteDevInstance', async (args: unknown) => {
+        await handleCommandError('Delete Local Database', () =>
+          prismaDevRepository.deleteInstance(DevInstanceSchema.parse(args)),
+        )
       }),
-      commands.registerCommand('prisma.copyLocalDatabaseURL', async (args: unknown) => {
-        await handleCommandError('Copy Local Database URL', () => copyLocalDatabaseUrl(ppgRepository, args))
+      commands.registerCommand('prisma.copyDevInstanceURL', async (args: unknown) => {
+        await handleCommandError('Copy Local Database URL', async () => {
+          const { name } = DevInstanceSchema.parse(args)
+
+          const url = await prismaDevRepository.getInstanceConnectionString({ name })
+
+          await env.clipboard.writeText(url)
+
+          await window.showInformationMessage('Prisma Dev URL copied to your clipboard!')
+        })
       }),
-      commands.registerCommand('prisma.deployLocalDatabase', async (args: unknown) => {
-        await handleCommandError('Deploy Local Database', () => deployLocalDatabase({ args, context, ppgRepository }))
+      commands.registerCommand('prisma.deployDevInstance', async (args: unknown) => {
+        await handleCommandError('Deploy Local Database', () =>
+          deployPrismaDevInstance({ args, context, ppgRepository, prismaDevRepository }),
+        )
       }),
     )
 
