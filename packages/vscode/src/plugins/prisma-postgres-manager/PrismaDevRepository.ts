@@ -94,16 +94,9 @@ export class PrismaDevRepository {
         return
       }
 
-      const { deleteServer, getServerStatus } = await import('@prisma/dev/internal/state')
+      const { deleteServer } = await import('@prisma/dev/internal/state')
 
-      const status = await getServerStatus(name)
-
-      if (status.pid === process.pid) {
-        status.pid = undefined
-        status.status = 'not_running'
-      }
-
-      await deleteServer(status)
+      await deleteServer(name, true)
     } finally {
       this.refreshEventEmitter.fire()
     }
@@ -117,12 +110,12 @@ export class PrismaDevRepository {
 
       const { ServerState } = await import('@prisma/dev/internal/state')
 
-      const state = await ServerState.createExclusively({ name, persistenceMode: 'stateful' })
+      const state = await ServerState.createExclusively({ debug: true, name, persistenceMode: 'stateful' })
 
       try {
         const { dumpDB } = await import('@prisma/dev/internal/db')
 
-        const dump = await dumpDB({ dataDir: state.pgliteDataDirPath })
+        const dump = await dumpDB({ dataDir: state.pgliteDataDirPath, debug: true })
 
         const { Client } = await import('@prisma/ppg')
 
@@ -166,7 +159,7 @@ export class PrismaDevRepository {
 
     const { isServerRunning, ServerState } = await import('@prisma/dev/internal/state')
 
-    const states = await ServerState.scan()
+    const states = await ServerState.scan({ debug: true, onlyMetadata: true })
 
     const instances = states.map((state) => ({
       id: state.name,
@@ -186,22 +179,15 @@ export class PrismaDevRepository {
     try {
       const { name } = args
 
-      const database = await this.getInstance({ name })
+      const instance = await this.getInstance({ name })
 
-      if (!database?.running) {
+      if (!instance?.running) {
         return
       }
 
-      const { getServerStatus, killServer } = await import('@prisma/dev/internal/state')
+      const { killServer } = await import('@prisma/dev/internal/state')
 
-      const status = await getServerStatus(name)
-
-      if (status.pid === process.pid) {
-        status.pid = undefined
-        status.status = 'not_running'
-      }
-
-      await killServer(status)
+      await killServer(name, true)
     } finally {
       this.refreshEventEmitter.fire()
     }

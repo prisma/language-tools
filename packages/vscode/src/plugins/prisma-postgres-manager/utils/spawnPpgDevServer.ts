@@ -24,7 +24,7 @@ async function main() {
   try {
     const { unstable_startServer } = await import('@prisma/dev')
 
-    server = await unstable_startServer({ persistenceMode: 'stateful', name })
+    server = await unstable_startServer({ debug: true, persistenceMode: 'stateful', name })
 
     // this message is important and required to know on the spawning side if alive
     console.log(
