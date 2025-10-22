@@ -159,7 +159,7 @@ export class PrismaDevRepository {
 
     const { isServerRunning, ServerState } = await import('@prisma/dev/internal/state')
 
-    const states = await ServerState.scan({ debug: true, onlyMetadata: true })
+    const states = await ServerState.scan({ debug: true })
 
     const instances = states.map((state) => ({
       id: state.name,
