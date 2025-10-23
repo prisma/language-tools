@@ -112,6 +112,21 @@ export const createRemoteDatabase = async (
       }),
   )
 
+  if (!database.connectionString) {
+    database.connectionString = await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: `Creating connection string...`,
+      },
+      () =>
+        ppgRepository.createRemoteDatabaseConnectionString({
+          databaseId: database.id,
+          projectId,
+          workspaceId,
+        }),
+    )
+  }
+
   await presentConnectionString({
     connectionString: database.connectionString,
     type: 'databaseCreated',
