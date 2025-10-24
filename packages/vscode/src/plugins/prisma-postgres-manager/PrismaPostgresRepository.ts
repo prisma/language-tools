@@ -490,12 +490,12 @@ export class PrismaPostgresRepository {
 
     const strippedProjectId = stripResourceIdentifierPrefix(project.id)
 
-    const simplifiedProject = {
+    const simplifiedProject: Project = {
       id: strippedProjectId,
       name: project.name,
       type: project.type,
       workspaceId,
-    } satisfies Project
+    }
 
     if (!database) {
       return { database: null, project: simplifiedProject }
@@ -514,7 +514,7 @@ export class PrismaPostgresRepository {
       })
     }
 
-    const simplifiedDatabase = {
+    const simplifiedDatabase: NewRemoteDatabase = {
       connectionString,
       id: strippedDatabaseId,
       name: database.name,
@@ -522,7 +522,7 @@ export class PrismaPostgresRepository {
       region: database.region.name,
       type: 'remoteDatabase' as const,
       workspaceId,
-    } satisfies NewRemoteDatabase
+    }
 
     if (!options.skipRefresh) {
       this.cache.addProject(simplifiedProject)
@@ -682,7 +682,7 @@ export class PrismaPostgresRepository {
       })
     }
 
-    const simplifiedDatabase = {
+    const simplifiedDatabase: NewRemoteDatabase = {
       connectionString,
       id: strippedDatabaseId,
       name: database.name,
@@ -690,7 +690,7 @@ export class PrismaPostgresRepository {
       projectId,
       type: 'remoteDatabase' as const,
       workspaceId,
-    } satisfies NewRemoteDatabase
+    }
 
     if (!options.skipRefresh) {
       this.cache.addDatabase(simplifiedDatabase)
