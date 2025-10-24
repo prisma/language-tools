@@ -81,7 +81,12 @@ export class ConnectionStringStorage {
     databaseId: string
   }): Promise<string | undefined> {
     const storage = await this.getStoredConnectionStrings()
-    return storage.workspaces[workspaceId]?.projects[projectId]?.databases[databaseId]?.connectionString
+
+    return (
+      storage.workspaces[workspaceId]?.projects[projectId]?.databases[databaseId]?.connectionString ||
+      storage.workspaces[`wksp_${workspaceId}`]?.projects[`proj_${projectId}`]?.databases[`db_${databaseId}`]
+        ?.connectionString
+    )
   }
 
   async removeConnectionString({

@@ -4,7 +4,7 @@ import type { Server } from '@prisma/dev'
 let server: Server | undefined
 
 async function main() {
-  const name = process.argv[2]
+  const [, , name] = process.argv
 
   console.log(
     JSON.stringify({
@@ -26,20 +26,10 @@ async function main() {
 
     server = await unstable_startServer({ debug: true, persistenceMode: 'stateful', name })
 
-    // this message is important and required to know on the spawning side if alive
-    console.log(
-      JSON.stringify({
-        message: `[PPG Dev] Server started successfully for database: ${name}`,
-      }),
-    )
+    process.send?.({ type: 'started' })
   } catch (error) {
-    // this message is important and required to know on the spawning side if dead
-    console.error(
-      JSON.stringify({
-        message: `[PPG Dev] Error starting server for database ${name}`,
-        error: error instanceof Error ? error.message : String(error),
-      }),
-    )
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    process.send?.({ type: 'error', error: errorMessage })
     await setTimeout(1000)
     process.exit(1)
   }

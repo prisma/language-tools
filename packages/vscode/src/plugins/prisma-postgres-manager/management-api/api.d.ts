@@ -92,20 +92,20 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/databases/{databaseId}/backups/{backupId}/restore": {
+    "/v1/databases/{databaseId}/usage": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
         /**
-         * Restore backup
-         * @description Restore an existing backup to a new database.
+         * Get database usage metrics
+         * @description Returns usage metrics for the specified database.
          */
-        post: operations["postV1DatabasesByDatabaseIdBackupsByBackupIdRestore"];
+        get: operations["getV1DatabasesByDatabaseIdUsage"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -588,6 +588,9 @@ export interface operations {
                                 id: string;
                                 name: string;
                             };
+                            host: string | null;
+                            pass: string | null;
+                            user: string | null;
                         };
                     };
                 };
@@ -707,49 +710,60 @@ export interface operations {
             };
         };
     };
-    postV1DatabasesByDatabaseIdBackupsByBackupIdRestore: {
+    getV1DatabasesByDatabaseIdUsage: {
         parameters: {
-            query?: never;
+            query?: {
+                startDate?: string;
+                endDate?: string;
+            };
             header?: never;
             path: {
                 databaseId: string;
-                backupId: string;
             };
             cookie?: never;
         };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    targetDatabaseName?: string;
-                };
-            };
-        };
+        requestBody?: never;
         responses: {
-            /** @description Started restoring the backup to the new database. */
-            202: {
+            /** @description Returned usage metrics for the given database. */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        data: {
-                            id: string;
-                            /** @constant */
-                            type: "database";
-                            name: string;
-                            /** @enum {string} */
-                            status: "failure" | "provisioning" | "ready" | "recovering";
+                        period: {
                             /** Format: date-time */
-                            createdAt: string;
-                            isDefault: boolean;
-                            project: {
-                                id: string;
-                                name: string;
+                            start: string;
+                            /** Format: date-time */
+                            end: string;
+                        };
+                        metrics: {
+                            operations: {
+                                used: number;
+                                /** @constant */
+                                unit: "ops";
                             };
-                            region: {
-                                id: string;
-                                name: string;
-                            } | null;
+                            storage: {
+                                used: number;
+                                /** @constant */
+                                unit: "GiB";
+                            };
+                        };
+                        /** Format: date-time */
+                        generatedAt: string;
+                    };
+                };
+            };
+            /** @description Invalid request parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: {
+                            code: string;
+                            message: string;
                         };
                     };
                 };
@@ -768,8 +782,8 @@ export interface operations {
                     };
                 };
             };
-            /** @description A backup restore conflict occurred. */
-            409: {
+            /** @description Database with the given ID was not found. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -782,8 +796,8 @@ export interface operations {
                     };
                 };
             };
-            /** @description Remote database backups are not supported */
-            422: {
+            /** @description Error occurred while fetching metrics */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -862,9 +876,11 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
+                    /** @default true */
+                    createDatabase?: boolean;
+                    name?: string;
                     /** @enum {string} */
                     region?: "us-east-1" | "us-west-1" | "eu-west-3" | "eu-central-1" | "ap-northeast-1" | "ap-southeast-1";
-                    name?: string;
                 };
             };
         };
@@ -892,19 +908,14 @@ export interface operations {
                                 /** @constant */
                                 type: "database";
                                 name: string;
-                                status: string;
+                                /** @enum {string} */
+                                status: "provisioning" | "ready";
                                 /** Format: date-time */
                                 createdAt: string;
                                 isDefault: boolean;
                                 region: {
                                     id: string;
                                     name: string;
-                                };
-                                connectionString: string;
-                                directConnection: {
-                                    host: string;
-                                    user: string;
-                                    pass: string;
                                 };
                                 apiKeys: {
                                     id: string;
@@ -915,7 +926,13 @@ export interface operations {
                                     createdAt: string;
                                     connectionString: string;
                                 }[];
-                            };
+                                connectionString: string | null;
+                                directConnection: {
+                                    host: string;
+                                    pass: string;
+                                    user: string;
+                                } | null;
+                            } | null;
                         };
                     };
                 };
@@ -1209,6 +1226,10 @@ export interface operations {
                     name?: string;
                     /** @default false */
                     isDefault?: boolean;
+                    fromDatabase?: {
+                        id: string;
+                        backupId?: string;
+                    };
                 };
             };
         };
@@ -1225,7 +1246,8 @@ export interface operations {
                             /** @constant */
                             type: "database";
                             name: string;
-                            status: string;
+                            /** @enum {string} */
+                            status: "provisioning" | "ready";
                             /** Format: date-time */
                             createdAt: string;
                             isDefault: boolean;
@@ -1237,12 +1259,6 @@ export interface operations {
                                 id: string;
                                 name: string;
                             };
-                            connectionString: string;
-                            directConnection: {
-                                host: string;
-                                user: string;
-                                pass: string;
-                            };
                             apiKeys: {
                                 id: string;
                                 /** @constant */
@@ -1252,6 +1268,12 @@ export interface operations {
                                 createdAt: string;
                                 connectionString: string;
                             }[];
+                            connectionString: string | null;
+                            directConnection: {
+                                host: string;
+                                pass: string;
+                                user: string;
+                            } | null;
                         };
                     };
                 };

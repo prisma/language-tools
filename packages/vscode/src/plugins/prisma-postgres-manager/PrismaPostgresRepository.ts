@@ -55,7 +55,7 @@ export function isRemoteDatabase(item: unknown): item is Database {
   return DatabaseSchema.safeParse(item).success
 }
 
-export type NewRemoteDatabase = Database & { connectionString: string }
+export type NewRemoteDatabase = Database & { connectionString: string | null }
 
 export type PrismaPostgresItem = { type: 'remoteRoot' } | Workspace | Project | Database
 
@@ -229,23 +229,46 @@ export class PrismaPostgresRepository {
   }
 
   private async getClient(workspaceId: string) {
-    if (!this.clients.has(workspaceId)) {
+    const strippedWorkspaceId = stripResourceIdentifierPrefix(workspaceId)
+
+    if (!this.clients.has(strippedWorkspaceId)) {
       await this.credentialsStore.reloadCredentialsFromDisk()
-      const credentials = await this.credentialsStore.getCredentialsForWorkspace(workspaceId)
-      if (!credentials) throw new Error(`Workspace '${workspaceId}' not found`)
+
+      const credentials =
+        (await this.credentialsStore.getCredentialsForWorkspace(strippedWorkspaceId)) ||
+        (await this.credentialsStore.getCredentialsForWorkspace(workspaceId))
+
+      if (!credentials) {
+        throw new Error(`Workspace '${strippedWorkspaceId}' not found`)
+      }
 
       const refreshTokenHandler = async () => {
-        const credentials = await this.credentialsStore.getCredentialsForWorkspace(workspaceId)
-        if (!credentials) throw new Error(`Workspace '${workspaceId}' not found`)
+        const credentials =
+          (await this.credentialsStore.getCredentialsForWorkspace(strippedWorkspaceId)) ||
+          (await this.credentialsStore.getCredentialsForWorkspace(workspaceId))
+
+        if (!credentials) {
+          throw new Error(`Workspace '${strippedWorkspaceId}' not found`)
+        }
+
         const { token, refreshToken } = await this.auth.refreshToken(credentials.refreshToken)
-        await this.credentialsStore.storeCredentials({ ...credentials, token, refreshToken })
+
+        await this.credentialsStore.storeCredentials({
+          ...credentials,
+          token,
+          refreshToken,
+          workspaceId: strippedWorkspaceId,
+        })
+
         return { token }
       }
 
       const client = createManagementAPIClient(credentials.token, refreshTokenHandler)
-      this.clients.set(workspaceId, client)
+
+      this.clients.set(strippedWorkspaceId, client)
     }
-    return this.clients.get(workspaceId)!
+
+    return this.clients.get(strippedWorkspaceId)!
   }
 
   private checkResponseOrThrow<T, E>(
@@ -334,15 +357,15 @@ export class PrismaPostgresRepository {
 
         this.checkResponseOrThrow(cred.workspaceId, response)
 
-        const [workspaceInfo] = response.data.data
+        const [workspace] = response.data.data
 
-        if (!workspaceInfo) {
+        if (!workspace) {
           throw new Error(`Workspaces endpoint returned no workspace info.`)
         }
 
         return {
-          id: workspaceInfo.id,
-          name: workspaceInfo.name,
+          id: stripResourceIdentifierPrefix(workspace.id),
+          name: workspace.name,
           type: 'workspace' as const,
         }
       }),
@@ -353,6 +376,7 @@ export class PrismaPostgresRepository {
       .sort((a, b) => a.name.localeCompare(b.name))
 
     this.cache.setWorkspaces(workspaces)
+
     return workspaces
   }
 
@@ -375,13 +399,15 @@ export class PrismaPostgresRepository {
 
     await Promise.all(
       workspaces.map(async ({ id, name }) => {
+        const strippedWorkspaceId = stripResourceIdentifierPrefix(id)
+
         await this.credentialsStore.storeCredentials({
           refreshToken,
           token,
-          workspaceId: id,
+          workspaceId: strippedWorkspaceId,
         })
 
-        this.cache.setWorkspaces([...this.cache.getWorkspaces(), { id, name, type: 'workspace' }])
+        this.cache.setWorkspaces([...this.cache.getWorkspaces(), { id: strippedWorkspaceId, name, type: 'workspace' }])
       }),
     )
 
@@ -392,6 +418,7 @@ export class PrismaPostgresRepository {
     this.clients.delete(workspaceId)
     await this.connectionStringStorage.removeConnectionString({ workspaceId })
     await this.credentialsStore.deleteCredentials(workspaceId)
+    await this.credentialsStore.deleteCredentials(`wksp_${workspaceId}`)
     this.cache.removeWorkspace(workspaceId)
     this.refreshEventEmitter.fire()
   }
@@ -424,7 +451,12 @@ export class PrismaPostgresRepository {
       pagination = data.pagination
 
       projects.push(
-        ...data.data.map((project) => ({ id: project.id, name: project.name, type: 'project' as const, workspaceId })),
+        ...data.data.map((project) => ({
+          id: stripResourceIdentifierPrefix(project.id),
+          name: project.name,
+          type: 'project' as const,
+          workspaceId,
+        })),
       )
     } while (pagination?.hasMore)
 
@@ -443,7 +475,7 @@ export class PrismaPostgresRepository {
     name: string
     region: string
     options?: { skipRefresh?: boolean }
-  }): Promise<{ project: Project; database?: NewRemoteDatabase }> {
+  }): Promise<{ project: Project; database: NewRemoteDatabase | null }> {
     this.ensureValidRegion(region)
 
     const client = await this.getClient(workspaceId)
@@ -456,19 +488,37 @@ export class PrismaPostgresRepository {
 
     const { database, ...project } = response.data.data
 
-    await this.connectionStringStorage.storeConnectionString({
-      connectionString: database.connectionString,
-      databaseId: database.id,
-      projectId: project.id,
-      workspaceId,
-    })
+    const strippedProjectId = stripResourceIdentifierPrefix(project.id)
 
-    const simplifiedProject = { id: project.id, name: project.name, type: project.type, workspaceId }
-    const simplifiedDatabase = {
-      connectionString: database.connectionString,
-      id: database.id,
+    const simplifiedProject: Project = {
+      id: strippedProjectId,
+      name: project.name,
+      type: project.type,
+      workspaceId,
+    }
+
+    if (!database) {
+      return { database: null, project: simplifiedProject }
+    }
+
+    const { connectionString } = database
+
+    const strippedDatabaseId = stripResourceIdentifierPrefix(database.id)
+
+    if (connectionString) {
+      await this.connectionStringStorage.storeConnectionString({
+        connectionString,
+        databaseId: strippedDatabaseId,
+        projectId: strippedProjectId,
+        workspaceId,
+      })
+    }
+
+    const simplifiedDatabase: NewRemoteDatabase = {
+      connectionString,
+      id: strippedDatabaseId,
       name: database.name,
-      projectId: project.id,
+      projectId: strippedProjectId,
       region: database.region.name,
       type: 'remoteDatabase' as const,
       workspaceId,
@@ -481,7 +531,7 @@ export class PrismaPostgresRepository {
       this.refreshEventEmitter.fire()
     }
 
-    return { project: simplifiedProject, database: simplifiedDatabase }
+    return { database: simplifiedDatabase, project: simplifiedProject }
   }
 
   async deleteProject({ workspaceId, id }: { workspaceId: string; id: string }): Promise<void> {
@@ -537,7 +587,7 @@ export class PrismaPostgresRepository {
 
       databases.push(
         ...data.data.map((database) => ({
-          id: database.id,
+          id: stripResourceIdentifierPrefix(database.id),
           name: database.name,
           projectId,
           region: database.region?.name ?? null,
@@ -619,16 +669,22 @@ export class PrismaPostgresRepository {
 
     const { data: database } = response.data
 
-    await this.connectionStringStorage.storeConnectionString({
-      connectionString: database.connectionString,
-      databaseId: database.id,
-      projectId,
-      workspaceId,
-    })
+    const { connectionString, id } = database
 
-    const simplifiedDatabase = {
-      connectionString: database.connectionString,
-      id: database.id,
+    const strippedDatabaseId = stripResourceIdentifierPrefix(id)
+
+    if (connectionString) {
+      await this.connectionStringStorage.storeConnectionString({
+        connectionString,
+        databaseId: strippedDatabaseId,
+        projectId,
+        workspaceId,
+      })
+    }
+
+    const simplifiedDatabase: NewRemoteDatabase = {
+      connectionString,
+      id: strippedDatabaseId,
       name: database.name,
       region: database.region.name,
       projectId,
@@ -668,4 +724,15 @@ export class PrismaPostgresRepository {
 
     this.refreshEventEmitter.fire()
   }
+}
+
+/**
+ * Management API returns resource identifiers with prefixes like `proj_<projectId>` for projects, `db_<databaseId>` for databases, etc.
+ *
+ * This function strips those prefixes to get the actual ID to normalize them across the extension.
+ *
+ * The PDP Console application doesn't use these prefixes in their URLs either.
+ */
+function stripResourceIdentifierPrefix(identifier: string): string {
+  return identifier.slice(identifier.indexOf('_') + 1)
 }

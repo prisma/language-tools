@@ -1,6 +1,5 @@
 import chokidar from 'chokidar'
 import envPaths from 'env-paths'
-import { proxySignals } from 'foreground-child/proxy-signals'
 import { fork } from 'node:child_process'
 import { EventEmitter, ExtensionContext, Uri } from 'vscode'
 import { z } from 'zod'
@@ -26,7 +25,7 @@ export class PrismaDevRepository {
   public readonly refreshEventEmitter = new EventEmitter<void | DevInstance>()
 
   constructor(private readonly context: ExtensionContext) {
-    const watcher = chokidar.watch(STATE_FOLDER_PATH, { ignoreInitial: true })
+    const watcher = chokidar.watch(STATE_FOLDER_PATH, { ignoreInitial: true, usePolling: true })
 
     watcher.on('addDir', () => this.refreshEventEmitter.fire())
     watcher.on('unlinkDir', () => this.refreshEventEmitter.fire())
@@ -45,7 +44,7 @@ export class PrismaDevRepository {
         return
       }
 
-      const { path } = Uri.joinPath(
+      const { fsPath } = Uri.joinPath(
         this.context.extensionUri,
         ...['dist', 'src', 'plugins', 'prisma-postgres-manager', 'utils', 'spawnPpgDevServer.js'],
       )
@@ -56,29 +55,31 @@ export class PrismaDevRepository {
         failedStarting = reject
       })
 
-      const child = fork(path, [name], { detached: true, stdio: ['ignore', 'pipe', 'pipe', 'ipc'] })
-      child.once('error', failedStarting!)
-      child.stdout?.on('data', (data: string) => {
-        data = String(data)
+      const child = fork(fsPath, [name], { detached: true, stdio: ['ignore', 'ignore', 'ignore', 'ipc'] })
 
-        console.log(`[PPG Child ${name}] ${data.trim()}`)
+      child.once('error', (error) => failedStarting(error))
+      child.once('message', (message: unknown) => {
+        if (typeof message !== 'object' || message == null) {
+          return
+        }
 
-        if (data.includes('[PPG Dev] Server started')) {
-          succeededStarting!()
+        if ('type' in message && message.type === 'started') {
+          return succeededStarting()
+        }
+
+        if ('error' in message) {
+          const errorMsg = typeof message.error === 'string' ? message.error : 'Unknown error'
+          failedStarting(new Error(errorMsg))
         }
       })
-      child.stderr?.on('data', (data: string) => {
-        data = String(data)
 
-        console.error(`[PPG Child ${name}] ${data.trim()}`)
-
-        if (data.includes('[PPG Dev] Error starting')) {
-          failedStarting!(new Error(data))
-        }
-      })
-      proxySignals(child)
-
-      await startedPromise
+      try {
+        await startedPromise
+      } finally {
+        child.disconnect()
+        child.unref()
+        child.removeAllListeners()
+      }
     } finally {
       this.refreshEventEmitter.fire()
     }
@@ -110,12 +111,12 @@ export class PrismaDevRepository {
 
       const { ServerState } = await import('@prisma/dev/internal/state')
 
-      const state = await ServerState.createExclusively({ debug: true, name, persistenceMode: 'stateful' })
+      const state = await ServerState.createExclusively({ name, persistenceMode: 'stateful' })
 
       try {
         const { dumpDB } = await import('@prisma/dev/internal/db')
 
-        const dump = await dumpDB({ dataDir: state.pgliteDataDirPath, debug: true })
+        const dump = await dumpDB({ dataDir: state.pgliteDataDirPath })
 
         const { Client } = await import('@prisma/ppg')
 
@@ -159,7 +160,7 @@ export class PrismaDevRepository {
 
     const { isServerRunning, ServerState } = await import('@prisma/dev/internal/state')
 
-    const states = await ServerState.scan({ debug: true })
+    const states = await ServerState.scan()
 
     const instances = states.map((state) => ({
       id: state.name,

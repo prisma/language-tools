@@ -46,9 +46,9 @@ export async function deployPrismaDevInstance(options: DeployLocalDatabaseOption
         })
     }
 
-    const database = await prismaDevRepository.getInstance({ name })
+    const devInstance = await prismaDevRepository.getInstance({ name })
 
-    if (database?.running) {
+    if (devInstance?.running) {
       const confirmation = await window.showInformationMessage(
         'To deploy your Prisma Dev database, you will need to stop the database first. Proceed?',
         { modal: true },
@@ -62,14 +62,29 @@ export async function deployPrismaDevInstance(options: DeployLocalDatabaseOption
 
     const createdDb = await createRemoteDatabaseSafely(ppgRepository, undefined, { skipRefresh: true })
 
-    if (createdDb?.database === undefined) {
+    if (createdDb?.database == null) {
       throw new Error('Unexpected error, no database was returned')
     }
 
     const {
-      database: { connectionString },
+      database,
       project: { workspaceId, id: projectId },
     } = createdDb
+
+    if (!database.connectionString) {
+      database.connectionString = await window.withProgress(
+        {
+          location: ProgressLocation.Notification,
+          title: `Creating connection string...`,
+        },
+        () =>
+          ppgRepository.createRemoteDatabaseConnectionString({
+            databaseId: database.id,
+            projectId,
+            workspaceId,
+          }),
+      )
+    }
 
     await window.withProgress(
       {
@@ -77,7 +92,7 @@ export async function deployPrismaDevInstance(options: DeployLocalDatabaseOption
         title: `Deploying remote database...`,
       },
       async () => {
-        await prismaDevRepository.deployInstance({ name, url: connectionString })
+        await prismaDevRepository.deployInstance({ name, url: database.connectionString! })
         ppgRepository.triggerRefresh()
       },
     )
