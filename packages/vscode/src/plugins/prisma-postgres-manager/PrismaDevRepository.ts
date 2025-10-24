@@ -110,12 +110,12 @@ export class PrismaDevRepository {
 
       const { ServerState } = await import('@prisma/dev/internal/state')
 
-      const state = await ServerState.createExclusively({ debug: true, name, persistenceMode: 'stateful' })
+      const state = await ServerState.createExclusively({ name, persistenceMode: 'stateful' })
 
       try {
         const { dumpDB } = await import('@prisma/dev/internal/db')
 
-        const dump = await dumpDB({ dataDir: state.pgliteDataDirPath, debug: true })
+        const dump = await dumpDB({ dataDir: state.pgliteDataDirPath })
 
         const { Client } = await import('@prisma/ppg')
 
@@ -159,7 +159,7 @@ export class PrismaDevRepository {
 
     const { isServerRunning, ServerState } = await import('@prisma/dev/internal/state')
 
-    const states = await ServerState.scan({ debug: true })
+    const states = await ServerState.scan()
 
     const instances = states.map((state) => ({
       id: state.name,
