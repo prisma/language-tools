@@ -308,25 +308,6 @@ export const generatorSuggestions = (
   }
 
   /**
-   * Cases for `provider = "prisma-client-js"`
-   */
-
-  // engineType
-  if (line.startsWith('engineType')) {
-    const engineTypesCompletion: CompletionItem[] = engineTypes
-    if (isInsideQuotation) {
-      return {
-        items: engineTypesCompletion,
-        isIncomplete: true,
-      }
-    }
-    return {
-      items: engineTypeArguments,
-      isIncomplete: true,
-    }
-  }
-
-  /**
    * Cases for `provider = "prisma-client"`
    */
 
