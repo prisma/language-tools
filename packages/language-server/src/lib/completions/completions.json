@@ -133,18 +133,6 @@
       "insertText": "output = \"$0\"",
       "documentation": "Determines the location for the generated client. Default: `node_modules/.prisma/client`. [Learn more](https://pris.ly/d/generator-fields).",
       "fullSignature": "output = \"String\""
-    },
-    {
-      "label": "engineType",
-      "insertText": "engineType = \"$0\"",
-      "documentation": "Defines the query engine type for Prisma Client. Default: `library`. [Learn more](https://pris.ly/d/client-engine-type).",
-      "fullSignature": "engineType = \"library\" | \"binary\" | \"client\""
-    },
-    {
-      "label": "binaryTargets",
-      "insertText": "binaryTargets = \"$0\"",
-      "documentation": "Specifies the OS on which the Prisma Client will run to ensure compatibility of the query engine. [Learn more](https://pris.ly/d/generator-fields).",
-      "fullSignature": "binaryTargets = BinaryTargets[] | env(\"ENVIRONMENT_VARIABLE\")"
     }
   ],
   "blockAttributes": [
@@ -452,20 +440,6 @@
       "documentation": "Specifies a single provider."
     }
   ],
-  "engineTypes": [
-    {
-      "label": "library",
-      "documentation": "Node-API library. (Default)"
-    },
-    {
-      "label": "binary",
-      "documentation": "Executable binary."
-    },
-    {
-      "label": "client",
-      "documentation": "TypeScript based query execution. WebAssembly library for query compilation."
-    }
-  ],
   "runtimes": [
     {
       "label": "nodejs",
@@ -543,13 +517,6 @@
     {
       "label": "",
       "documentation": "For bare imports."
-    }
-  ],
-  "engineTypeArguments": [
-    {
-      "label": "\"\"",
-      "insertText": "\"$0\"",
-      "documentation": "Specifies the engine type."
     }
   ],
   "runtimeArguments": [
