@@ -11,11 +11,37 @@ export interface OpenNewStudioTabArgs {
   dbUrl: string
 }
 
+const openPanels = new Map<string, ReturnType<typeof window.createWebviewPanel>>()
+
+function getPanelKey(args: OpenNewStudioTabArgs): string {
+  if (!args.database) {
+    return `manual:${args.dbUrl}`
+  }
+
+  const { database } = args
+
+  if (database.type === 'local') {
+    return `local:${database.name}`
+  }
+
+  const nameKey = database.name || `${database.workspaceId}/${database.projectId}/${database.databaseId}`
+
+  return `remote:${nameKey}`
+}
+
 /**
  * Opens Prisma Studio in a webview panel.
  * @param args - An object containing the database URL and extension context.
  */
 export async function openNewStudioTab(args: OpenNewStudioTabArgs) {
+  const panelKey = getPanelKey(args)
+
+  const existingPanel = openPanels.get(panelKey)
+  if (existingPanel) {
+    existingPanel.reveal(existingPanel.viewColumn ?? ViewColumn.One, false)
+    return
+  }
+
   const { context } = args
 
   const packageJSON = getPackageJSON(context)
@@ -34,11 +60,17 @@ export async function openNewStudioTab(args: OpenNewStudioTabArgs) {
     retainContextWhenHidden: true,
   })
 
+  openPanels.set(panelKey, panel)
+
   panel.iconPath = Uri.joinPath(context.extensionUri, 'prisma_icon.svg')
 
   panel.webview.html = getStudioPageHtml({ serverUrl: url })
 
   panel.onDidDispose(() => {
+    const registeredPanel = openPanels.get(panelKey)
+    if (registeredPanel === panel) {
+      openPanels.delete(panelKey)
+    }
     server.close()
     console.log(`Studio server has been closed (${url})`)
     telemetryReporter.dispose()
