@@ -74,7 +74,7 @@ export async function startStudioServer(args: StartStudioServerArgs) {
           }
         : {
             databaseId: database.databaseId,
-            name: null,
+            name: database.name,
             projectId: database.projectId,
             type: 'remote',
             workspaceId: database.workspaceId,

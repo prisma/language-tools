@@ -15,6 +15,7 @@ export const LaunchArgRemoteSchema = z.object({
   workspaceId: z.string(),
   projectId: z.string(),
   databaseId: z.string(),
+  name: z.string(),
 })
 export type LaunchArgRemote = z.infer<typeof LaunchArgRemoteSchema>
 

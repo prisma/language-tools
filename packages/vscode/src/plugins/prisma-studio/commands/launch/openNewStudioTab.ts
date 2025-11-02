@@ -1,4 +1,4 @@
-import { ExtensionContext, ViewColumn, window } from 'vscode'
+import { ExtensionContext, Uri, ViewColumn, window } from 'vscode'
 import { getStudioPageHtml } from './getStudioPageHtml'
 import { startStudioServer } from './startStudioServer'
 import TelemetryReporter from '../../../../telemetryReporter'
@@ -27,10 +27,14 @@ export async function openNewStudioTab(args: OpenNewStudioTabArgs) {
 
   const { server, url } = await startStudioServer({ ...args, telemetryReporter })
 
-  const panel = window.createWebviewPanel('studio', 'Studio', ViewColumn.One, {
+  const panelTitle = args.database?.name ?? 'Studio'
+
+  const panel = window.createWebviewPanel('studio', panelTitle, ViewColumn.One, {
     enableScripts: true,
     retainContextWhenHidden: true,
   })
+
+  panel.iconPath = Uri.joinPath(context.extensionUri, 'prisma_icon.svg')
 
   panel.webview.html = getStudioPageHtml({ serverUrl: url })
 
