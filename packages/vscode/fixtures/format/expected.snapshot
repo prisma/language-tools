@@ -26,6 +26,6 @@ model User {
 model PostTitle {
   id     Int    @id @default(autoincrement())
   title  String
-  Post   Post?  @relation(fields: [postId], references: [id])
+  post   Post?  @relation(fields: [postId], references: [id])
   postId Int?
 }
