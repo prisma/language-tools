@@ -1,4 +1,4 @@
-import { ExtensionContext, Uri, ViewColumn, window } from 'vscode'
+import { ExtensionContext, Uri, ViewColumn, WebviewPanel, window } from 'vscode'
 import { getStudioPageHtml } from './getStudioPageHtml'
 import { startStudioServer } from './startStudioServer'
 import TelemetryReporter from '../../../../telemetryReporter'
@@ -11,7 +11,7 @@ export interface OpenNewStudioTabArgs {
   dbUrl: string
 }
 
-const openPanels = new Map<string, ReturnType<typeof window.createWebviewPanel>>()
+const openPanels = new Map<string, WebviewPanel>()
 
 function getPanelKey(args: OpenNewStudioTabArgs): string {
   if (!args.database) {
@@ -24,7 +24,7 @@ function getPanelKey(args: OpenNewStudioTabArgs): string {
     return `local:${database.name}`
   }
 
-  const nameKey = database.name || `${database.workspaceId}/${database.projectId}/${database.databaseId}`
+  const nameKey = `${database.workspaceId}/${database.projectId}/${database.databaseId}`
 
   return `remote:${nameKey}`
 }
