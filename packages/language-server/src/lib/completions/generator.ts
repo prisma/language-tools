@@ -38,22 +38,6 @@ const generatorProviderArguments: CompletionItem[] = convertToCompletionItems(
   CompletionItemKind.Property,
 )
 
-// generator.engineType
-const engineTypes: CompletionItem[] = convertToCompletionItems(completions.engineTypes, CompletionItemKind.Constant)
-
-/**
- * ```prisma
- * generator client {
- *   provider = "prisma-client-js"
- *   engineType = "|"
- * }
- * ```
- */
-const engineTypeArguments: CompletionItem[] = convertToCompletionItems(
-  completions.engineTypeArguments,
-  CompletionItemKind.Property,
-)
-
 // generator.previewFeatures
 const previewFeaturesArguments: CompletionItem[] = convertToCompletionItems(
   completions.previewFeaturesArguments,
