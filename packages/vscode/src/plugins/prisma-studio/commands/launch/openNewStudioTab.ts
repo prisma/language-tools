@@ -1,4 +1,4 @@
-import { ExtensionContext, ViewColumn, window } from 'vscode'
+import { ExtensionContext, Uri, ViewColumn, WebviewPanel, window } from 'vscode'
 import { getStudioPageHtml } from './getStudioPageHtml'
 import { startStudioServer } from './startStudioServer'
 import TelemetryReporter from '../../../../telemetryReporter'
@@ -11,11 +11,37 @@ export interface OpenNewStudioTabArgs {
   dbUrl: string
 }
 
+const openPanels = new Map<string, WebviewPanel>()
+
+function getPanelKey(args: OpenNewStudioTabArgs): string {
+  if (!args.database) {
+    return `manual:${args.dbUrl}`
+  }
+
+  const { database } = args
+
+  if (database.type === 'local') {
+    return `local:${database.name}`
+  }
+
+  const nameKey = `${database.workspaceId}/${database.projectId}/${database.databaseId}`
+
+  return `remote:${nameKey}`
+}
+
 /**
  * Opens Prisma Studio in a webview panel.
  * @param args - An object containing the database URL and extension context.
  */
 export async function openNewStudioTab(args: OpenNewStudioTabArgs) {
+  const panelKey = getPanelKey(args)
+
+  const existingPanel = openPanels.get(panelKey)
+  if (existingPanel) {
+    existingPanel.reveal(existingPanel.viewColumn ?? ViewColumn.One, false)
+    return
+  }
+
   const { context } = args
 
   const packageJSON = getPackageJSON(context)
@@ -27,14 +53,24 @@ export async function openNewStudioTab(args: OpenNewStudioTabArgs) {
 
   const { server, url } = await startStudioServer({ ...args, telemetryReporter })
 
-  const panel = window.createWebviewPanel('studio', 'Studio', ViewColumn.One, {
+  const panelTitle = args.database?.name ?? 'Studio'
+
+  const panel = window.createWebviewPanel('studio', panelTitle, ViewColumn.One, {
     enableScripts: true,
     retainContextWhenHidden: true,
   })
 
+  openPanels.set(panelKey, panel)
+
+  panel.iconPath = Uri.joinPath(context.extensionUri, 'prisma_icon.svg')
+
   panel.webview.html = getStudioPageHtml({ serverUrl: url })
 
   panel.onDidDispose(() => {
+    const registeredPanel = openPanels.get(panelKey)
+    if (registeredPanel === panel) {
+      openPanels.delete(panelKey)
+    }
     server.close()
     console.log(`Studio server has been closed (${url})`)
     telemetryReporter.dispose()
