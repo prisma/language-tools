@@ -1,4 +1,12 @@
-import { CompletionItem, CompletionItemKind, CompletionList, Position } from 'vscode-languageserver'
+import {
+  CompletionItem,
+  CompletionItemKind,
+  CompletionList,
+  Position,
+  TextEdit,
+  InsertTextMode,
+  InsertTextFormat,
+} from 'vscode-languageserver'
 
 import * as completions from './completions.json'
 import { Block, getValuesInsideSquareBrackets, isInsideAttribute } from '../ast'
@@ -192,24 +200,49 @@ function handlePreviewFeatures(
   currentLineUntrimmed: string,
   isInsideQuotation: boolean,
 ): CompletionList {
-  let previewFeatures: CompletionItem[] = previewFeaturesArray.map((pf) => CompletionItem.create(pf))
+  const previewFeatures: CompletionItem[] = previewFeaturesArray.map((pf) => CompletionItem.create(pf))
+
   if (isInsideAttribute(currentLineUntrimmed, position, '[]')) {
     if (isInsideQuotation) {
       const usedValues = getValuesInsideSquareBrackets(currentLineUntrimmed)
-      previewFeatures = previewFeatures.filter((t) => !usedValues.includes(t.label))
+
       return {
-        items: previewFeatures,
-        isIncomplete: true,
-      }
-    } else {
-      return {
-        items: previewFeaturesArguments.filter((arg) => !arg.label.includes('[')),
+        items: previewFeatures.filter((t) => !usedValues.includes(t.label)),
         isIncomplete: true,
       }
     }
-  } else {
+
     return {
-      items: previewFeaturesArguments.filter((arg) => !arg.label.includes('"')),
+      items: previewFeaturesArguments.filter((arg) => !arg.label.includes('[')),
+      isIncomplete: true,
+    }
+  } else {
+    if (!isInsideQuotation) {
+      return {
+        items: previewFeaturesArguments.filter((arg) => !arg.label.includes('"')),
+        isIncomplete: true,
+      }
+    }
+
+    const firstQuoteIndex = currentLineUntrimmed.indexOf('"')
+    const lastQuoteIndex = currentLineUntrimmed.lastIndexOf('"')
+
+    const convertToListAndSuggestMore: CompletionItem = {
+      additionalTextEdits: [TextEdit.insert(Position.create(position.line, lastQuoteIndex + 1), ']')],
+      command: {
+        command: 'editor.action.triggerSuggest',
+        title: 'Trigger Suggest',
+      },
+      kind: CompletionItemKind.Value,
+      label: '[""] (convert to list)',
+      insertTextFormat: InsertTextFormat.Snippet,
+      insertTextMode: InsertTextMode.asIs,
+      preselect: true,
+      textEdit: TextEdit.insert(Position.create(position.line, firstQuoteIndex - 1), ' ["'),
+    }
+
+    return {
+      items: [convertToListAndSuggestMore],
       isIncomplete: true,
     }
   }
