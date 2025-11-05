@@ -171,15 +171,6 @@ export const startSequenceDefaultCompletion = (items: CompletionItem[]) =>
   })
 //#endregion
 
-export const scalarListDefaultCompletion = (items: CompletionItem[]) =>
-  items.unshift({
-    label: '[]',
-    insertText: '[$0]',
-    insertTextFormat: InsertTextFormat.Snippet,
-    documentation: 'Set a default value on the list field',
-    kind: CompletionItemKind.Value,
-  })
-
 export const booleanDefaultCompletions = (items: CompletionItem[]) =>
   items.push({ label: 'true', kind: CompletionItemKind.Value }, { label: 'false', kind: CompletionItemKind.Value })
 
