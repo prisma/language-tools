@@ -3089,7 +3089,7 @@ describe('Completions', function () {
     describe('@default([|])', function () {
       const scalarTypes = ['String', 'color', 'Int', 'Float', 'Boolean', 'DateTime'] as const
 
-      const scalarTypesToExpectedCompletionItems = {
+      const scalarTypesToExpectedCompletionItems: Record<(typeof scalarTypes)[number], CompletionItem[]> = {
         Boolean: [
           { label: 'true', kind: CompletionItemKind.Value },
           { label: 'false', kind: CompletionItemKind.Value },
@@ -3103,7 +3103,7 @@ describe('Completions', function () {
         Float: [],
         DateTime: [],
         String: [],
-      } as const satisfies Record<(typeof scalarTypes)[number], CompletionItem[]>
+      }
 
       test.each(scalarTypes)('%s', (scalarType) => {
         assertCompletion({
