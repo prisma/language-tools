@@ -137,7 +137,7 @@ function getDefaultValueSuggestions({
       wordsBeforePosition,
     })
       // functions are currently not supported for list defaults
-      .filter((item) => !item.label.trim().endsWith(')'))
+      .filter((item) => item.kind !== CompletionItemKind.Function)
 
     if (isDefaultEmpty) {
       suggestions.unshift({
