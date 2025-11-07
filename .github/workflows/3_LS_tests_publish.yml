@@ -62,8 +62,8 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          # Setup .npmrc file to publish to npm
-          registry-url: 'https://registry.npmjs.org'
+      - name: Update npm to support Trusted Publishers
+        run: npm install -g npm@^11.5
       - name: Print inputs
         run: |
           echo ${{github.event.inputs.npm_channel}}
