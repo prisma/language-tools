@@ -17,6 +17,9 @@ on:
         description: 'Information about what caused the publishing process in the first place.'
         required: true
 
+permissions:
+  id-token: write # required for OIDC / Trusted Publishers
+
 env:
   PRISMA_TELEMETRY_INFORMATION: 'language-tools 3_LS_unit_tests_publish.yml'
 
@@ -59,8 +62,8 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          # Setup .npmrc file to publish to npm
-          registry-url: 'https://registry.npmjs.org'
+      - name: Update npm to support Trusted Publishers
+        run: npm install -g npm@^11.5
       - name: Print inputs
         run: |
           echo ${{github.event.inputs.npm_channel}}
@@ -73,9 +76,6 @@ jobs:
         run: npx lerna run build --scope @prisma/language-server
       - name: Publish Language Server to npm
         run: npx lerna exec --scope @prisma/language-server -- npm publish --tag ${{ github.event.inputs.npm_channel }} --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - name: Trigger next workflow for bumping Language Server in extension
         uses: benc-uk/workflow-dispatch@v1
         with:
