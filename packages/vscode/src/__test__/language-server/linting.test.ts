@@ -24,7 +24,7 @@ suite('Should get linting', () => {
     await testDiagnostics(docUri, [
       {
         message: 'Argument "provider" is missing in data source block "db".',
-        range: toRange(0, 0, 2, 1),
+        range: toRange(0, 0, 1, 1),
         severity: vscode.DiagnosticSeverity.Error,
         source: '',
       },

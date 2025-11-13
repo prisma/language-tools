@@ -18,6 +18,6 @@ suite('Should show /// documentation comments for', () => {
 
   test('model', async () => {
     await activate(docUri)
-    await testHover(docUri, new vscode.Position(23, 10), expectedHover)
+    await testHover(docUri, new vscode.Position(22, 10), expectedHover)
   })
 })

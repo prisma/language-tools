@@ -25,8 +25,8 @@ suite('Jump-to-definition', () => {
 
     await testJumpToDefinition(
       fixturePathSqlite,
-      new vscode.Position(11, 16),
-      new vscode.Location(fixturePathSqlite, toRange(26, 0, 31, 1)),
+      new vscode.Position(10, 16),
+      new vscode.Location(fixturePathSqlite, toRange(25, 0, 30, 1)),
     )
   })
 })

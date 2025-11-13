@@ -55,32 +55,6 @@ export const dataSourceSuggestions = (
       }
     }
   }
-  // // url or shadowDatabaseUrl or directUrl
-  // else if (
-  //   currentLine.startsWith('url') ||
-  //   currentLine.startsWith('shadowDatabaseUrl') ||
-  //   currentLine.startsWith('directUrl')
-  // ) {
-  //   // check if inside env
-  //   if (isInsideAttribute(currentLineUntrimmed, position, '()')) {
-  //     if (currentLine.startsWith('url')) {
-  //       return {
-  //         items: [{ label: 'DATABASE_URL' }],
-  //         isIncomplete: false,
-  //       }
-  //     } else if (currentLine.startsWith('shadowDatabaseUrl')) {
-  //       return {
-  //         items: [{ label: 'SHADOW_DATABASE_URL' }],
-  //         isIncomplete: false,
-  //       }
-  //     } else if (currentLine.startsWith('directUrl')) {
-  //       return {
-  //         items: [{ label: 'DIRECT_URL' }],
-  //         isIncomplete: false,
-  //       }
-  //     }
-  //   }
-  // }
   // `relationMode` can only be set for SQL databases
   else if (currentLine.startsWith('relationMode') && datasourceProvider !== 'mongodb') {
     const relationModeValuesSuggestion: CompletionItem[] = relationModeValues
