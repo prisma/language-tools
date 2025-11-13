@@ -14,6 +14,7 @@ import {
   window,
   workspace,
   languages,
+  WorkspaceConfiguration,
 } from 'vscode'
 import {
   CodeAction as lsCodeAction,
@@ -48,12 +49,10 @@ let fileWatcher: FileWatcher.type | undefined
 const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
 const isE2ETestOnPullRequest = () => process.env.PRISMA_USE_LOCAL_LS === 'true'
 
-const activateClient = (
-  context: ExtensionContext,
-  serverOptions: ServerOptions,
-  clientOptions: LanguageClientOptions,
-) => {
+const activateClient = (context: ExtensionContext, clientOptions: LanguageClientOptions) => {
+  const prismaConfig = workspace.getConfiguration('prisma')
   // Create the language client
+  const serverOptions = getServerOptions(prismaConfig, context)
   client = createLanguageServer(serverOptions, clientOptions)
 
   const disposable = client.start()
@@ -124,39 +123,6 @@ const plugin: PrismaVSCodePlugin = {
 
     setGenerateWatcher(!!workspace.getConfiguration('prisma').get('fileWatcher'))
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (packageJson.name === 'prisma-insider-pr-build') {
-      console.log('Using local Language Server for prisma-insider-pr-build')
-      serverModule = context.asAbsolutePath(path.join('./language-server/dist/bin'))
-    } else if (isDebugMode() || isE2ETestOnPullRequest()) {
-      // use Language Server from folder for debugging
-      console.log('Using local Language Server from filesystem')
-      serverModule = context.asAbsolutePath(path.join('../../packages/language-server/dist/bin'))
-    } else {
-      console.log('Using published Language Server (npm)')
-      // use published npm package for production
-      serverModule = require.resolve('@prisma/language-server/dist/bin')
-    }
-    console.log(`serverModule: ${serverModule}`)
-
-    // The debug options for the server
-    // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
-    const debugOptions = {
-      execArgv: ['--nolazy', '--inspect=6009'],
-      env: { DEBUG: true },
-    }
-
-    // If the extension is launched in debug mode then the debug server options are used
-    // Otherwise the run options are used
-    const serverOptions: ServerOptions = {
-      run: { module: serverModule, transport: TransportKind.ipc },
-      debug: {
-        module: serverModule,
-        transport: TransportKind.ipc,
-        options: debugOptions,
-      },
-    }
-
     // Options to control the language client
     const clientOptions: LanguageClientOptions = {
       // Register the server for prisma documents
@@ -210,6 +176,11 @@ const plugin: PrismaVSCodePlugin = {
       } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
     }
 
+    const restartLanguageServer = async () => {
+      const serverOptions = getServerOptions(workspace.getConfiguration('prisma'), context)
+      client = await restartClient(context, client, serverOptions, clientOptions)
+    }
+
     context.subscriptions.push(
       // when the file watcher settings change, we need to ensure they are applied
       workspace.onDidChangeConfiguration((event) => {
@@ -221,7 +192,7 @@ const plugin: PrismaVSCodePlugin = {
       commands.registerCommand('prisma.generate', (args: string) => generateClient(args)),
 
       commands.registerCommand('prisma.restartLanguageServer', async () => {
-        client = await restartClient(context, client, serverOptions, clientOptions)
+        await restartLanguageServer()
         window.showInformationMessage('Prisma language server restarted.') // eslint-disable-line @typescript-eslint/no-floating-promises
       }),
 
@@ -245,9 +216,21 @@ const plugin: PrismaVSCodePlugin = {
         const prismaConfig = workspace.getConfiguration('prisma')
         await prismaConfig.update('fileWatcher', false /* value */, false /* workspace */)
       }),
+
+      commands.registerCommand('prisma.pinWorkspaceToPrisma6', async () => {
+        await workspace.getConfiguration('prisma').update('pinToPrisma6', true, false)
+        await restartLanguageServer()
+        window.showInformationMessage('Pinned workspace to Prisma 6.') // eslint-disable-line @typescript-eslint/no-floating-promises
+      }),
+
+      commands.registerCommand('prisma.unpinWorkspaceFromPrisma6', async () => {
+        await workspace.getConfiguration('prisma').update('pinToPrisma6', false, false)
+        await restartLanguageServer()
+        window.showInformationMessage('Unpinned workspace from Prisma 6.') // eslint-disable-line @typescript-eslint/no-floating-promises
+      }),
     )
 
-    activateClient(context, serverOptions, clientOptions)
+    activateClient(context, clientOptions)
 
     if (!isDebugOrTest) {
       // eslint-disable-next-line
@@ -280,4 +263,45 @@ const plugin: PrismaVSCodePlugin = {
     return client.stop()
   },
 }
+
+function getServerOptions(prismaConfig: WorkspaceConfiguration, context: ExtensionContext): ServerOptions {
+  const pinToPrisma6 = prismaConfig.get<boolean>('pinToPrisma6')
+
+  if (pinToPrisma6) {
+    console.log('Using published Prisma 6 Language Server (npm)')
+    serverModule = require.resolve('prisma-6-language-server/dist/bin')
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  } else if (packageJson.name === 'prisma-insider-pr-build') {
+    console.log('Using local Language Server for prisma-insider-pr-build')
+    serverModule = context.asAbsolutePath(path.join('./language-server/dist/bin'))
+  } else if (isDebugMode() || isE2ETestOnPullRequest()) {
+    // use Language Server from folder for debugging
+    console.log('Using local Language Server from filesystem')
+    serverModule = context.asAbsolutePath(path.join('../../packages/language-server/dist/bin'))
+  } else {
+    console.log('Using published Language Server (npm)')
+    // use published npm package for production
+    serverModule = require.resolve('@prisma/language-server/dist/bin')
+  }
+  console.log(`serverModule: ${serverModule}`)
+
+  // The debug options for the server
+  // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
+  const debugOptions = {
+    execArgv: ['--nolazy', '--inspect=6009'],
+    env: { DEBUG: true },
+  }
+
+  // If the extension is launched in debug mode then the debug server options are used
+  // Otherwise the run options are used
+  return {
+    run: { module: serverModule, transport: TransportKind.ipc },
+    debug: {
+      module: serverModule,
+      transport: TransportKind.ipc,
+      options: debugOptions,
+    },
+  }
+}
+
 export default plugin

@@ -17,6 +17,7 @@
     "@prisma/credentials-store": "6.9.0-dev.18",
     "@prisma/dev": "0.11.1",
     "@prisma/language-server": "31.0.7986",
+    "prisma-6-language-server": "npm:@prisma/language-server@6.19.0",
     "@prisma/ppg": "0.5.2",
     "@prisma/studio-core-licensed": "^0.6.0",
     "checkpoint-client": "1.1.33",
@@ -161,6 +162,11 @@
             "/path/to/your/schema.prisma"
           ],
           "description": "If you have a Prisma schema file in a custom path, you will need to provide said path `/path/to/your/schema.prisma` to run generate"
+        },
+        "prisma.pinToPrisma6": {
+          "type": "boolean",
+          "default": false,
+          "description": "When enabled, the extension will use the Prisma 6 language server for the current workspace."
         }
       }
     },
@@ -193,6 +199,16 @@
       {
         "command": "prisma.generate",
         "title": "Generate",
+        "category": "Prisma"
+      },
+      {
+        "command": "prisma.pinWorkspaceToPrisma6",
+        "title": "Pin the current workspace to Prisma 6",
+        "category": "Prisma"
+      },
+      {
+        "command": "prisma.unpinWorkspaceFromPrisma6",
+        "title": "Unpin the current workspace from Prisma 6",
         "category": "Prisma"
       },
       {
