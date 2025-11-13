@@ -167,6 +167,11 @@
           "type": "boolean",
           "default": false,
           "description": "When enabled, the extension will use the Prisma 6 language server for the current workspace."
+        },
+        "prisma.hidePrisma6Prompts": {
+          "type": "boolean",
+          "default": false,
+          "description": "When enabled, the extension will not show prompts related to Prisma 6."
         }
       }
     },

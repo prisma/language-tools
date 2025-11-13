@@ -38,6 +38,7 @@ import { PrismaVSCodePlugin } from '../types'
 import paths from 'env-paths'
 import FileWatcher from 'watcher'
 import { CodelensProvider, generateClient } from '../../CodeLensProvider'
+import * as prisma6Handling from '../../prisma6Handling'
 
 const packageJson = require('../../../../package.json') // eslint-disable-line
 
@@ -173,7 +174,13 @@ const plugin: PrismaVSCodePlugin = {
             (_) => undefined,
           )
         },
-      } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+        handleDiagnostics: (uri, diagnostics, next) => {
+          for (const diagnostic of diagnostics) {
+            prisma6Handling.handleDiagnostic(diagnostic.message)
+          }
+          next(uri, diagnostics)
+        },
+      },
     }
 
     const restartLanguageServer = async () => {
