@@ -32,7 +32,7 @@ describe('Linting', () => {
           message: 'Argument "provider" is missing in data source block "db".',
           range: {
             start: { line: 0, character: 0 },
-            end: { line: 2, character: 1 },
+            end: { line: 1, character: 1 },
           },
           severity: DiagnosticSeverity.Error,
         },
