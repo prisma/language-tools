@@ -1,7 +1,10 @@
 import { commands, ExtensionContext, window, workspace } from 'vscode'
 
 const hidePrisma6PromptsConfigKey = 'hidePrisma6Prompts'
-const prisma6PromptStateKey = 'wasPrisma6PromptShown'
+const pinToPrisma6ConfigKey = 'pinToPrisma6'
+
+const prisma6UnpinPromptStateKey = 'wasPrisma6UnpinPromptShown'
+const prisma6PinPromptStateKey = 'wasPrisma6PinPromptShown'
 
 /**
  * Handles diagnostics related to Prisma 6 and Prisma 7 datasource URL issues.
@@ -14,14 +17,19 @@ export async function handleDiagnostic(message: string, context: ExtensionContex
 
   // Avoid showing the prompt multiple times per workspace.
   // Also respect the user's preference to hide the prompts.
-  if (
-    context.workspaceState.get<boolean>(prisma6PromptStateKey, false) ||
-    prismaConfig.get(hidePrisma6PromptsConfigKey)
-  ) {
+  if (prismaConfig.get(hidePrisma6PromptsConfigKey)) {
     return
   }
 
-  if (isPrisma6MissingDatasourceUrl(message) && prismaConfig.get('pinToPrisma6')) {
+  if (isPrisma6MissingDatasourceUrl(message)) {
+    // Exit if not pinned to Prisma 6 or if we've already shown the unpin prompt.
+    if (
+      !prismaConfig.get(pinToPrisma6ConfigKey) ||
+      context.workspaceState.get<boolean>(prisma6UnpinPromptStateKey, false)
+    ) {
+      return
+    }
+
     const selection = await window.showInformationMessage(
       'Your Prisma schema file is missing the datasource URL and the current workspace is ' +
         'pinned to Prisma 6. The datasource URL is required in Prisma 6, but no longer expected ' +
@@ -36,8 +44,13 @@ export async function handleDiagnostic(message: string, context: ExtensionContex
     } else if (selection === 'Do not ask me again') {
       await prismaConfig.update(hidePrisma6PromptsConfigKey, true, true)
     }
-    await context.workspaceState.update(prisma6PromptStateKey, true)
+    await context.workspaceState.update(prisma6UnpinPromptStateKey, true)
   } else if (isPrisma7UnexpectedDatasourceUrl(message)) {
+    // Exit if we've already shown the pin prompt.
+    if (context.workspaceState.get<boolean>(prisma6PinPromptStateKey, false)) {
+      return
+    }
+
     const selection = await window.showInformationMessage(
       'Your Prisma schema file contains a datasource URL, which is not supported in Prisma 7. ' +
         'If you intend to use Prisma 6, press the button below to pin the current workspace to ' +
@@ -50,7 +63,7 @@ export async function handleDiagnostic(message: string, context: ExtensionContex
     } else if (selection === 'Do not ask me again') {
       await prismaConfig.update(hidePrisma6PromptsConfigKey, true, true)
     }
-    await context.workspaceState.update(prisma6PromptStateKey, true)
+    await context.workspaceState.update(prisma6PinPromptStateKey, true)
   }
 }
 

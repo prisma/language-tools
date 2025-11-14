@@ -50,7 +50,8 @@ suite('Prisma 6 Handling Tests', () => {
     configUpdateStub.resolves()
     executeCommandStub.resolves()
     showInformationMessageStub.resolves(undefined)
-    workspaceStateGetStub.withArgs('wasPrisma6PromptShown', false).returns(false)
+    workspaceStateGetStub.withArgs('wasPrisma6UnpinPromptShown', false).returns(false)
+    workspaceStateGetStub.withArgs('wasPrisma6PinPromptShown', false).returns(false)
     workspaceStateUpdateStub.resolves()
   })
 
@@ -72,7 +73,7 @@ suite('Prisma 6 Handling Tests', () => {
       assert.strictEqual(button2, doNotAskAgainButton)
 
       sinon.assert.calledOnceWithExactly(executeCommandStub, 'prisma.unpinWorkspaceFromPrisma6')
-      sinon.assert.calledOnceWithExactly(workspaceStateUpdateStub, 'wasPrisma6PromptShown', true)
+      sinon.assert.calledOnceWithExactly(workspaceStateUpdateStub, 'wasPrisma6UnpinPromptShown', true)
     })
 
     test('updates config when "Do not ask me again" is selected', async () => {
@@ -84,7 +85,7 @@ suite('Prisma 6 Handling Tests', () => {
 
       sinon.assert.calledOnceWithExactly(configUpdateStub, 'hidePrisma6Prompts', true, true)
       sinon.assert.notCalled(executeCommandStub)
-      sinon.assert.calledOnceWithExactly(workspaceStateUpdateStub, 'wasPrisma6PromptShown', true)
+      sinon.assert.calledOnceWithExactly(workspaceStateUpdateStub, 'wasPrisma6UnpinPromptShown', true)
     })
 
     test('does not show prompt when not pinned to Prisma 6', async () => {
@@ -120,7 +121,7 @@ suite('Prisma 6 Handling Tests', () => {
     test('does not show prompt when already shown (workspace state)', async () => {
       configGetStub.withArgs('pinToPrisma6').returns(true)
       configGetStub.withArgs('hidePrisma6Prompts').returns(false)
-      workspaceStateGetStub.withArgs('wasPrisma6PromptShown', false).returns(true)
+      workspaceStateGetStub.withArgs('wasPrisma6UnpinPromptShown', false).returns(true)
 
       await handleDiagnostic(prisma6MissingDatasourceUrlMessage, mockContext)
 
@@ -137,7 +138,7 @@ suite('Prisma 6 Handling Tests', () => {
 
       sinon.assert.notCalled(executeCommandStub)
       sinon.assert.notCalled(configUpdateStub)
-      sinon.assert.calledOnceWithExactly(workspaceStateUpdateStub, 'wasPrisma6PromptShown', true)
+      sinon.assert.calledOnceWithExactly(workspaceStateUpdateStub, 'wasPrisma6UnpinPromptShown', true)
     })
   })
 
@@ -154,7 +155,7 @@ suite('Prisma 6 Handling Tests', () => {
       assert.strictEqual(button2, doNotAskAgainButton)
 
       sinon.assert.calledOnceWithExactly(executeCommandStub, 'prisma.pinWorkspaceToPrisma6')
-      sinon.assert.calledOnceWithExactly(workspaceStateUpdateStub, 'wasPrisma6PromptShown', true)
+      sinon.assert.calledOnceWithExactly(workspaceStateUpdateStub, 'wasPrisma6PinPromptShown', true)
     })
 
     test('updates config when "Do not ask me again" is selected', async () => {
@@ -165,7 +166,7 @@ suite('Prisma 6 Handling Tests', () => {
 
       sinon.assert.calledOnceWithExactly(configUpdateStub, 'hidePrisma6Prompts', true, true)
       sinon.assert.notCalled(executeCommandStub)
-      sinon.assert.calledOnceWithExactly(workspaceStateUpdateStub, 'wasPrisma6PromptShown', true)
+      sinon.assert.calledOnceWithExactly(workspaceStateUpdateStub, 'wasPrisma6PinPromptShown', true)
     })
 
     test('does not show prompt when prompts are hidden', async () => {
@@ -179,7 +180,7 @@ suite('Prisma 6 Handling Tests', () => {
 
     test('does not show prompt when already shown (workspace state)', async () => {
       configGetStub.withArgs('hidePrisma6Prompts').returns(false)
-      workspaceStateGetStub.withArgs('wasPrisma6PromptShown', false).returns(true)
+      workspaceStateGetStub.withArgs('wasPrisma6PinPromptShown', false).returns(true)
 
       await handleDiagnostic(prisma7UnexpectedDatasourceUrlMessage, mockContext)
 
@@ -195,7 +196,7 @@ suite('Prisma 6 Handling Tests', () => {
 
       sinon.assert.notCalled(executeCommandStub)
       sinon.assert.notCalled(configUpdateStub)
-      sinon.assert.calledOnceWithExactly(workspaceStateUpdateStub, 'wasPrisma6PromptShown', true)
+      sinon.assert.calledOnceWithExactly(workspaceStateUpdateStub, 'wasPrisma6PinPromptShown', true)
     })
   })
 
