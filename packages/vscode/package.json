@@ -17,7 +17,6 @@
     "@prisma/credentials-store": "6.9.0-dev.18",
     "@prisma/dev": "0.11.1",
     "@prisma/language-server": "31.0.7986",
-    "prisma-6-language-server": "npm:@prisma/language-server@6.19.0",
     "@prisma/ppg": "0.5.2",
     "@prisma/studio-core-licensed": "^0.6.0",
     "checkpoint-client": "1.1.33",
@@ -29,6 +28,7 @@
     "hono": "4.7.10",
     "minimatch": "6.2.0",
     "openapi-fetch": "0.14.0",
+    "prisma-6-language-server": "npm:@prisma/language-server@6.19.0",
     "vscode-languageclient": "7.0.0",
     "watcher": "1.2.0",
     "zod": "3.24.3"
@@ -681,6 +681,7 @@
     "@types/glob": "8.1.0",
     "@types/mocha": "10.0.10",
     "@types/node": "20.14.8",
+    "@types/sinon": "^20.0.0",
     "@types/vscode": "1.96.0",
     "@vscode/test-electron": "2.4.1",
     "@vscode/vsce": "2.29.0",
@@ -689,6 +690,7 @@
     "openapi-typescript": "7.8.0",
     "ovsx": "0.10.1",
     "pkg-types": "2.2.0",
+    "sinon": "^21.0.0",
     "typescript": "5.7.3"
   },
   "gitHead": "7d51b157647fe1705813a30d1a77b8ccf136b8d4",

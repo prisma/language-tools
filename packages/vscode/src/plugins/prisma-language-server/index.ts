@@ -176,7 +176,7 @@ const plugin: PrismaVSCodePlugin = {
         },
         handleDiagnostics: (uri, diagnostics, next) => {
           for (const diagnostic of diagnostics) {
-            prisma6Handling.handleDiagnostic(diagnostic.message)
+            void prisma6Handling.handleDiagnostic(diagnostic.message, context)
           }
           next(uri, diagnostics)
         },
