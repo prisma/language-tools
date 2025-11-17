@@ -3,7 +3,7 @@
 .envrc
 *.vsix
 *.exe
-language-server
+/language-server
 /tests/tmp
 /tests/playwright/tmp
 /test-results
