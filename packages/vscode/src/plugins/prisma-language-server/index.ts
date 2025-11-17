@@ -200,7 +200,7 @@ const plugin: PrismaVSCodePlugin = {
 
       commands.registerCommand('prisma.restartLanguageServer', async () => {
         await restartLanguageServer()
-        window.showInformationMessage('Prisma language server restarted.') // eslint-disable-line @typescript-eslint/no-floating-promises
+        void window.showInformationMessage('Prisma language server restarted.')
       }),
 
       commands.registerCommand('prisma.enableCodeLens', async () => {
@@ -227,13 +227,13 @@ const plugin: PrismaVSCodePlugin = {
       commands.registerCommand('prisma.pinWorkspaceToPrisma6', async () => {
         await workspace.getConfiguration('prisma').update('pinToPrisma6', true, false)
         await restartLanguageServer()
-        window.showInformationMessage('Pinned workspace to Prisma 6.') // eslint-disable-line @typescript-eslint/no-floating-promises
+        void window.showInformationMessage('Pinned workspace to Prisma 6.')
       }),
 
       commands.registerCommand('prisma.unpinWorkspaceFromPrisma6', async () => {
         await workspace.getConfiguration('prisma').update('pinToPrisma6', false, false)
         await restartLanguageServer()
-        window.showInformationMessage('Unpinned workspace from Prisma 6.') // eslint-disable-line @typescript-eslint/no-floating-promises
+        void window.showInformationMessage('Unpinned workspace from Prisma 6.')
       }),
     )
 
