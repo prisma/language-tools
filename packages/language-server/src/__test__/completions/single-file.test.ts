@@ -405,16 +405,8 @@ describe('Completions', function () {
     // fieldProvider defined above already
     //#region types
     const fieldOutput = { label: 'output', kind: CompletionItemKind.Field }
-    const fieldBinaryTargets = {
-      label: 'binaryTargets',
-      kind: CompletionItemKind.Field,
-    }
     const fieldPreviewFeatures = {
       label: 'previewFeatures',
-      kind: CompletionItemKind.Field,
-    }
-    const fieldEngineType = {
-      label: 'engineType',
       kind: CompletionItemKind.Field,
     }
     const fieldRuntime = {
@@ -727,53 +719,7 @@ describe('Completions', function () {
             }`,
           expected: {
             isIncomplete: false,
-            items: [fieldPreviewFeatures, fieldOutput, fieldEngineType, fieldBinaryTargets],
-          },
-        })
-      })
-
-      test('engineType = |', () => {
-        assertCompletion({
-          schema: /* Prisma */ `
-            generator gen {
-              provider = "prisma-client-js"
-              engineType = |
-            }`,
-          expected: {
-            isIncomplete: true,
-            items: [
-              {
-                label: '""',
-                kind: CompletionItemKind.Property,
-              },
-            ],
-          },
-        })
-      })
-
-      test('engineType = "|"', () => {
-        assertCompletion({
-          schema: /* Prisma */ `
-            generator gen {
-              provider = "prisma-client-js"
-              engineType = "|"
-            }`,
-          expected: {
-            isIncomplete: true,
-            items: [
-              {
-                label: 'library',
-                kind: CompletionItemKind.Constant,
-              },
-              {
-                label: 'binary',
-                kind: CompletionItemKind.Constant,
-              },
-              {
-                label: 'client',
-                kind: CompletionItemKind.Constant,
-              },
-            ],
+            items: [fieldPreviewFeatures, fieldOutput],
           },
         })
       })

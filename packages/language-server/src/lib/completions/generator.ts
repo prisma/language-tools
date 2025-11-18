@@ -46,22 +46,6 @@ const generatorProviderArguments: CompletionItem[] = convertToCompletionItems(
   CompletionItemKind.Property,
 )
 
-// generator.engineType
-const engineTypes: CompletionItem[] = convertToCompletionItems(completions.engineTypes, CompletionItemKind.Constant)
-
-/**
- * ```prisma
- * generator client {
- *   provider = "prisma-client-js"
- *   engineType = "|"
- * }
- * ```
- */
-const engineTypeArguments: CompletionItem[] = convertToCompletionItems(
-  completions.engineTypeArguments,
-  CompletionItemKind.Property,
-)
-
 // generator.previewFeatures
 const previewFeaturesArguments: CompletionItem[] = convertToCompletionItems(
   completions.previewFeaturesArguments,
@@ -338,25 +322,6 @@ export const generatorSuggestions = (
       return handlePreviewFeatures(generatorPreviewFeatures, position, untrimmedLine, isInsideQuotation)
     }
     return undefined
-  }
-
-  /**
-   * Cases for `provider = "prisma-client-js"`
-   */
-
-  // engineType
-  if (line.startsWith('engineType')) {
-    const engineTypesCompletion: CompletionItem[] = engineTypes
-    if (isInsideQuotation) {
-      return {
-        items: engineTypesCompletion,
-        isIncomplete: true,
-      }
-    }
-    return {
-      items: engineTypeArguments,
-      isIncomplete: true,
-    }
   }
 
   /**
