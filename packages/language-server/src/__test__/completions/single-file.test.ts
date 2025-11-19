@@ -1,6 +1,12 @@
 import dedent from 'ts-dedent'
 import { expect, describe, test } from 'vitest'
-import { CompletionList, CompletionParams, CompletionTriggerKind, CompletionItemKind } from 'vscode-languageserver'
+import {
+  CompletionList,
+  CompletionParams,
+  CompletionTriggerKind,
+  CompletionItemKind,
+  CompletionItem,
+} from 'vscode-languageserver'
 import { handleCompletionRequest } from '../../lib/MessageHandler'
 import { PrismaSchema } from '../../lib/Schema'
 import { findCursorPosition, CURSOR_CHARACTER } from '../helper'
@@ -2721,10 +2727,9 @@ describe('Completions', function () {
     })
 
     describe('@default()', function () {
-      test('Scalar lists', () => {
-        const scalarTypes = ['String', 'color', 'Int', 'Float', 'Boolean', 'DateTime'] as const
-
-        for (const scalarType of scalarTypes) {
+      test.each(['String', 'color', 'Int', 'Float', 'Boolean', 'DateTime'] as const)(
+        'Scalar lists: %s',
+        (scalarType) => {
           assertCompletion({
             schema: /* Prisma */ `
               model Test {
@@ -2743,8 +2748,8 @@ describe('Completions', function () {
               items: [staticValueEmptyList, functionDbGenerated],
             },
           })
-        }
-      })
+        },
+      )
 
       describe('No provider', function () {
         test('Int @id @default(|)', () => {
@@ -3077,6 +3082,47 @@ describe('Completions', function () {
               },
             })
           })
+        })
+      })
+    })
+
+    describe('@default([|])', function () {
+      const scalarTypes = ['String', 'color', 'Int', 'Float', 'Boolean', 'DateTime'] as const
+
+      const scalarTypesToExpectedCompletionItems: Record<(typeof scalarTypes)[number], CompletionItem[]> = {
+        Boolean: [
+          { label: 'true', kind: CompletionItemKind.Value },
+          { label: 'false', kind: CompletionItemKind.Value },
+        ],
+        color: [
+          { label: 'RED', kind: CompletionItemKind.Value },
+          { label: 'GREEN', kind: CompletionItemKind.Value },
+          { label: 'BLUE', kind: CompletionItemKind.Value },
+        ],
+        Int: [],
+        Float: [],
+        DateTime: [],
+        String: [],
+      }
+
+      test.each(scalarTypes)('%s', (scalarType) => {
+        assertCompletion({
+          schema: /* Prisma */ `
+              model Test {
+                id    Int             @id
+                lists ${scalarType}[] @default([|])
+              }
+              
+              enum color {
+                RED
+                GREEN
+                BLUE
+              }
+              `,
+          expected: {
+            isIncomplete: false,
+            items: scalarTypesToExpectedCompletionItems[scalarType],
+          },
         })
       })
     })

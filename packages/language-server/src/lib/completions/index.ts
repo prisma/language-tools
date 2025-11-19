@@ -5,6 +5,7 @@ import {
   CompletionTriggerKind,
   Position,
   CompletionItemKind,
+  InsertTextFormat,
 } from 'vscode-languageserver'
 import type { TextDocument } from 'vscode-languageserver-textdocument'
 
@@ -48,7 +49,6 @@ import {
   incrementSequenceDefaultCompletion,
   maxValueSequenceDefaultCompletion,
   minValueSequenceDefaultCompletion,
-  scalarListDefaultCompletion,
   startSequenceDefaultCompletion,
   virtualSequenceDefaultCompletion,
 } from './arguments'
@@ -66,7 +66,7 @@ import {
 import { BlockType } from '../types'
 import { PrismaSchema } from '../Schema'
 
-function getDefaultValues({
+function getDefaultValueSuggestions({
   currentLine,
   schema,
   wordsBeforePosition,
@@ -112,7 +112,6 @@ function getDefaultValues({
     }
   }
 
-  // MongoDB only
   if (datasourceProvider === 'mongodb') {
     autoDefaultCompletion(suggestions)
   } else {
@@ -120,9 +119,45 @@ function getDefaultValues({
   }
 
   const fieldType = getFieldType(currentLine)
-  // If we don't find a field type (e.g. String, Int...), return no suggestion
+
   if (!fieldType) {
     return []
+  }
+
+  const isScalarList = fieldType.endsWith('[]')
+
+  if (isScalarList) {
+    const isDefaultEmpty = wordsBeforePosition.at(-1)?.trim().endsWith('(')
+
+    const listItemFieldType = fieldType.slice(0, -2)
+
+    const listItemSuggestions = getDefaultValueSuggestions({
+      currentLine: currentLine.replace(fieldType, listItemFieldType),
+      schema,
+      wordsBeforePosition,
+    })
+      // functions are currently not supported for list defaults
+      .filter((item) => item.kind !== CompletionItemKind.Function)
+
+    if (isDefaultEmpty) {
+      suggestions.unshift({
+        command: listItemSuggestions.length
+          ? {
+              command: 'editor.action.triggerSuggest',
+              title: 'triggerSuggest',
+            }
+          : undefined,
+        documentation: 'Set a default value on the list field',
+        insertText: '[$0]',
+        insertTextFormat: InsertTextFormat.Snippet,
+        kind: CompletionItemKind.Value,
+        label: '[]',
+      })
+
+      return suggestions
+    }
+
+    return listItemSuggestions
   }
 
   switch (fieldType) {
@@ -151,11 +186,6 @@ function getDefaultValues({
     case 'Boolean':
       booleanDefaultCompletions(suggestions)
       break
-  }
-
-  const isScalarList = fieldType.endsWith('[]')
-  if (isScalarList) {
-    scalarListDefaultCompletion(suggestions)
   }
 
   const dataBlock = getDatamodelBlock(fieldType, schema)
@@ -491,28 +521,31 @@ function getSuggestionsForInsideRoundBrackets(
   position: Position,
   block: Block,
 ): CompletionList | undefined {
-  const wordsBeforePosition = untrimmedCurrentLine.slice(0, position.character).trimLeft().split(/\s+/)
+  const wordsBeforePosition = untrimmedCurrentLine.slice(0, position.character).trimStart().split(/\s+/)
 
   if (wordsBeforePosition.some((a) => a.includes('@default'))) {
     return {
-      items: getDefaultValues({
+      items: getDefaultValueSuggestions({
         currentLine: block.definingDocument.getLineContent(position.line),
         schema,
         wordsBeforePosition,
       }),
       isIncomplete: false,
     }
-  } else if (wordsBeforePosition.some((a) => a.includes('@relation'))) {
+  }
+
+  if (wordsBeforePosition.some((a) => a.includes('@relation'))) {
     return getSuggestionsForAttribute({
       attribute: '@relation',
       wordsBeforePosition,
       untrimmedCurrentLine,
       schema,
-      // document,
       block,
       position,
     })
-  } else if (
+  }
+
+  if (
     // matches
     // @id, @unique
     // @@id, @@unique, @@index, @@fulltext
@@ -524,15 +557,14 @@ function getSuggestionsForInsideRoundBrackets(
       wordsBeforePosition,
       untrimmedCurrentLine,
       schema,
-      // document,
       block,
       position,
     })
-  } else {
-    return {
-      items: toCompletionItems([], CompletionItemKind.Field),
-      isIncomplete: false,
-    }
+  }
+
+  return {
+    items: toCompletionItems([], CompletionItemKind.Field),
+    isIncomplete: false,
   }
 }
 
