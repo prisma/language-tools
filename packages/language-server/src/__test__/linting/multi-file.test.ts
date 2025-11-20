@@ -100,3 +100,16 @@ test('external tables and enums', async () => {
     }
   `)
 })
+
+test('config with an unresolved import doesn not crash the language server', async () => {
+  const helper = await getMultifileHelper('config-with-broken-import')
+
+  const response = handleDiagnosticsRequest(helper.schema)
+  expect(response).toMatchInlineSnapshot(`
+      DiagnosticMap {
+        "_map": Map {
+          "file:///config-with-broken-import/schema.prisma" => [],
+        },
+      }
+    `)
+})
