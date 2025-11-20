@@ -17,5 +17,5 @@
     "skipLibCheck": true
   },
   "include": ["src/**/*", "src/lib/**/*", "src/**/*.json"],
-  "exclude": ["node_modules", ".vscode-test"]
+  "exclude": ["node_modules", ".vscode-test", "**/__fixtures__"]
 }
