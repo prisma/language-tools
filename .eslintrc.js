@@ -11,6 +11,7 @@ module.exports = {
     ecmaVersion: 2020,
     sourceType: 'module',
   },
+  ignorePatterns: ['**/__fixtures__'],
   overrides: [
     {
       files: ['*.ts'],

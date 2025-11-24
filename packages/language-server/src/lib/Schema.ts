@@ -7,7 +7,7 @@ import {
   CaseSensitivityOptions,
 } from '@prisma/schema-files-loader'
 import { loadConfigFromFile, type PrismaConfigInternal } from '@prisma/config'
-import { Position, TextDocuments } from 'vscode-languageserver'
+import { Position } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { URI } from 'vscode-uri'
 import { getCurrentLine } from './ast'
@@ -58,8 +58,8 @@ type FindRegexpResult = {
 /**
  * Will try to load the prisma config file from the given path, default path or create a default config.
  */
-async function loadConfig(): Promise<PrismaConfigInternal> {
-  const { config, error, resolvedPath } = await loadConfigFromFile({})
+export async function loadConfig(configRoot?: string): Promise<PrismaConfigInternal> {
+  const { config, error, resolvedPath } = await loadConfigFromFile({ configRoot })
 
   if (error) {
     switch (error._tag) {
@@ -81,28 +81,16 @@ async function loadConfig(): Promise<PrismaConfigInternal> {
   return config
 }
 
-async function loadPrismaSchema(
-  fsPath: string,
-  allDocuments: TextDocuments<TextDocument>,
-  config?: PrismaConfigInternal,
-): Promise<PrismaSchema> {
+async function loadSchemaDocumentsFromPath(fsPath: string, allDocuments: TextDocument[]): Promise<SchemaDocument[]> {
   // `loadRelatedSchemaFiles` locates and returns either a single schema files, or a set of related schema files.
   const schemaFiles = await loadRelatedSchemaFiles(fsPath, createFilesResolver(allDocuments))
   const documents = schemaFiles.map(([filePath, content]) => {
     return new SchemaDocument(TextDocument.create(URI.file(filePath).toString(), 'prisma', 1, content))
   })
-  return new PrismaSchema(documents, config)
+  return documents
 }
 
-function loadPrismaSchemaWithConfig(
-  currentDocument: TextDocument,
-  allDocuments: TextDocuments<TextDocument>,
-  config: PrismaConfigInternal,
-): Promise<PrismaSchema> {
-  const fsPath: string = config.schema ?? URI.parse(currentDocument.uri).fsPath
-
-  return loadPrismaSchema(fsPath, allDocuments, config)
-}
+type PrismaSchemaInput = { currentDocument: TextDocument; allDocuments: TextDocument[] } | SchemaDocument[]
 
 export class PrismaSchema {
   // TODO: remove, use `PrismaSchema.load` directly
@@ -110,16 +98,23 @@ export class PrismaSchema {
     return new PrismaSchema([new SchemaDocument(textDocument)])
   }
 
-  static async load(currentDocument: TextDocument, allDocuments: TextDocuments<TextDocument>): Promise<PrismaSchema> {
-    const config = await loadConfig()
-    if (config instanceof Error) {
-      console.debug('Failed to load Prisma config file', config)
+  static async load(input: PrismaSchemaInput, configRoot?: string): Promise<PrismaSchema> {
+    let config: PrismaConfigInternal | undefined
+    try {
+      config = await loadConfig(configRoot)
+    } catch (error) {
+      console.debug('Failed to load Prisma config file', error)
       console.log('Continuing without Prisma config file')
-      const fsPath = URI.parse(currentDocument.uri).fsPath
-      return loadPrismaSchema(fsPath, allDocuments)
     }
 
-    return loadPrismaSchemaWithConfig(currentDocument, allDocuments, config)
+    let schemaDocs: SchemaDocument[]
+    if (Array.isArray(input)) {
+      schemaDocs = input
+    } else {
+      const fsPath = config?.schema ?? URI.parse(input.currentDocument.uri).fsPath
+      schemaDocs = await loadSchemaDocumentsFromPath(fsPath, input.allDocuments)
+    }
+    return new PrismaSchema(schemaDocs, config)
   }
 
   constructor(
@@ -167,7 +162,7 @@ export class PrismaSchema {
   }
 }
 
-function createFilesResolver(allDocuments: TextDocuments<TextDocument>): FilesResolver {
+function createFilesResolver(allDocuments: TextDocument[]): FilesResolver {
   const options = {
     // Technically, macos and Windows can use case-sensitive file systems
     // too, however, VSCode does not support this at the moment, so there is
@@ -181,12 +176,9 @@ function createFilesResolver(allDocuments: TextDocuments<TextDocument>): FilesRe
   return new CompositeFilesResolver(createInMemoryResolver(allDocuments, options), realFsResolver, options)
 }
 
-function createInMemoryResolver(
-  allDocuments: TextDocuments<TextDocument>,
-  options: CaseSensitivityOptions,
-): InMemoryFilesResolver {
+function createInMemoryResolver(allDocuments: TextDocument[], options: CaseSensitivityOptions): InMemoryFilesResolver {
   const resolver = new InMemoryFilesResolver(options)
-  for (const doc of allDocuments.all()) {
+  for (const doc of allDocuments) {
     const filePath = URI.parse(doc.uri).fsPath
     const content = doc.getText()
     resolver.addFile(filePath, content)

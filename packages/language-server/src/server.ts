@@ -159,7 +159,7 @@ export function startServer(options?: LSOptions): void {
       return
     }
 
-    const schema = await PrismaSchema.load(textDocument, documents)
+    const schema = await PrismaSchema.load({ currentDocument: textDocument, allDocuments: documents.all() })
     const diagnostics = MessageHandler.handleDiagnosticsRequest(schema, showErrorToast)
     for (const [uri, fileDiagnostics] of diagnostics.entries()) {
       await connection.sendDiagnostics({ uri, diagnostics: fileDiagnostics })
@@ -177,7 +177,7 @@ export function startServer(options?: LSOptions): void {
   connection.onDefinition(async (params: DeclarationParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      const schema = await PrismaSchema.load(doc, documents)
+      const schema = await PrismaSchema.load({ currentDocument: doc, allDocuments: documents.all() })
       return MessageHandler.handleDefinitionRequest(schema, doc, params)
     }
   })
@@ -185,7 +185,7 @@ export function startServer(options?: LSOptions): void {
   connection.onCompletion(async (params: CompletionParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      const schema = await PrismaSchema.load(doc, documents)
+      const schema = await PrismaSchema.load({ currentDocument: doc, allDocuments: documents.all() })
       return MessageHandler.handleCompletionRequest(schema, doc, params, showErrorToast)
     }
   })
@@ -194,7 +194,7 @@ export function startServer(options?: LSOptions): void {
     const doc = getDocument(params.textDocument.uri)
 
     if (doc) {
-      const schema = await PrismaSchema.load(doc, documents)
+      const schema = await PrismaSchema.load({ currentDocument: doc, allDocuments: documents.all() })
 
       return MessageHandler.handleReferencesRequest(schema, params, showErrorToast)
     }
@@ -217,7 +217,7 @@ export function startServer(options?: LSOptions): void {
   connection.onHover(async (params: HoverParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      const schema = await PrismaSchema.load(doc, documents)
+      const schema = await PrismaSchema.load({ currentDocument: doc, allDocuments: documents.all() })
       return MessageHandler.handleHoverRequest(schema, doc, params, showErrorToast)
     }
   })
@@ -225,7 +225,7 @@ export function startServer(options?: LSOptions): void {
   connection.onDocumentFormatting(async (params: DocumentFormattingParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      const schema = await PrismaSchema.load(doc, documents)
+      const schema = await PrismaSchema.load({ currentDocument: doc, allDocuments: documents.all() })
       return MessageHandler.handleDocumentFormatting(schema, doc, params, showErrorToast)
     }
   })
@@ -233,7 +233,7 @@ export function startServer(options?: LSOptions): void {
   connection.onCodeAction(async (params: CodeActionParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      const schema = await PrismaSchema.load(doc, documents)
+      const schema = await PrismaSchema.load({ currentDocument: doc, allDocuments: documents.all() })
       return MessageHandler.handleCodeActions(schema, doc, params, showErrorToast)
     }
   })
@@ -241,7 +241,7 @@ export function startServer(options?: LSOptions): void {
   connection.onRenameRequest(async (params: RenameParams) => {
     const doc = getDocument(params.textDocument.uri)
     if (doc) {
-      const schema = await PrismaSchema.load(doc, documents)
+      const schema = await PrismaSchema.load({ currentDocument: doc, allDocuments: documents.all() })
       return MessageHandler.handleRenameRequest(schema, doc, params)
     }
   })

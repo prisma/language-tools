@@ -5,7 +5,6 @@ import { fixturePathToUri } from './helper'
 import { Position, TextEdit } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { loadSchemaFiles } from '@prisma/schema-files-loader'
-import { loadConfigFromFile } from '@prisma/config'
 
 const multifileFixturesDir = path.join(__dirname, '__fixtures__/multi-file')
 
@@ -22,9 +21,10 @@ class MultfileHelper {
   ) {}
 
   file(filePath: string) {
-    const doc = this.schema.findDocByUri(URI.file(path.join(this.baseDir, filePath)).toString())
+    const fullPath = path.join(this.baseDir, filePath)
+    const doc = this.schema.findDocByUri(URI.file(fullPath).toString())
     if (!doc) {
-      throw new Error(`${filePath} is not found fixture`)
+      throw new Error(`${fullPath} is not found fixture`)
     }
 
     return new File(doc)
@@ -86,16 +86,13 @@ class Line {
   }
 }
 
-// TODO: this should use `PrismaSchema.load` instead.
 async function getMultifileSchema(folderPath: string): Promise<PrismaSchema> {
   const fullPath = path.join(multifileFixturesDir, folderPath)
   const files = await loadSchemaFiles(fullPath)
-  const config = await loadConfigFromFile({ configRoot: fullPath })
   const schemaDocs = files.map(([filePath, content]) => {
     const uri = fixturePathToUri(filePath, multifileFixturesDir)
     const doc = TextDocument.create(uri, 'prisma', 1, content)
     return new SchemaDocument(doc)
   })
-
-  return new PrismaSchema(schemaDocs, config.config)
+  return PrismaSchema.load(schemaDocs, fullPath)
 }
