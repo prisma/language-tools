@@ -113,3 +113,16 @@ test('config with an unresolved import doesn not crash the language server', asy
       }
     `)
 })
+
+test('config with an unresolved env var doesn not crash the language server', async () => {
+  const helper = await getMultifileHelper('config-with-unresolved-env-var')
+
+  const response = handleDiagnosticsRequest(helper.schema)
+  expect(response).toMatchInlineSnapshot(`
+      DiagnosticMap {
+        "_map": Map {
+          "file:///config-with-unresolved-env-var/schema.prisma" => [],
+        },
+      }
+    `)
+})
