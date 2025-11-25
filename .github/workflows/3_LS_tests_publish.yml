@@ -7,15 +7,13 @@ on:
       npm_channel:
         description: 'Prisma CLI NPM Channel'
         required: true
-      extension_version:
-        description: 'VS Code extension version'
-        required: true
       branch:
         description: 'Branch to run run this workflow on'
         required: true
+      extension_version:
+        description: 'VS Code extension version. When provided, it will trigger the next workflow to bump the LS version in the extension.'
       trigger_reason:
         description: 'Information about what caused the publishing process in the first place.'
-        required: true
 
 permissions:
   id-token: write # required for OIDC / Trusted Publishers
@@ -67,9 +65,9 @@ jobs:
       - name: Print inputs
         run: |
           echo ${{github.event.inputs.npm_channel}}
-          echo ${{github.event.inputs.extension_version}}
+          echo ${{github.event.inputs.extension_version || 'not provided'}}
           echo ${{github.event.inputs.branch}}
-          echo ${{github.event.inputs.trigger_reason}}
+          echo ${{github.event.inputs.trigger_reason || 'not provided'}}
       - name: Install Dependencies
         run: npm install && npm run bootstrap
       - name: Build Language Server
@@ -77,6 +75,7 @@ jobs:
       - name: Publish Language Server to npm
         run: npx lerna exec --scope @prisma/language-server -- npm publish --tag ${{ github.event.inputs.npm_channel }} --access public
       - name: Trigger next workflow for bumping Language Server in extension
+        if: ${{ github.event.inputs.extension_version != '' }}
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: 4. Bump LS in VSCode extension
