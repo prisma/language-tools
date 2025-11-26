@@ -566,6 +566,11 @@
       ],
       "view/title": [
         {
+          "command": "prisma.login",
+          "when": "view == prismaPostgresDatabases",
+          "group": "navigation"
+        },
+        {
           "command": "prisma.refresh",
           "when": "view == prismaPostgresDatabases",
           "group": "navigation"
@@ -577,11 +582,6 @@
         }
       ],
       "view/item/context": [
-        {
-          "command": "prisma.login",
-          "when": "viewItem == prismaRemoteDatabasesItem",
-          "group": "inline"
-        },
         {
           "command": "prisma.logout",
           "when": "viewItem == prismaWorkspaceItem"
