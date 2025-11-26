@@ -6,10 +6,17 @@ const CLIENT_ID = 'cmamnw2go00005812nlbzb4pi'
 const LOGIN_URL = 'https://auth.prisma.io/authorize'
 const TOKEN_URL = 'https://auth.prisma.io/token'
 
-export type AuthResult = {
-  token: string
-  refreshToken: string
-}
+export type AuthResult =
+  | {
+      status: 'success'
+      token: string
+      refreshToken: string
+    }
+  | {
+      status: 'error'
+      error: string
+      refreshTokenInvalid: boolean
+    }
 
 export class AuthError extends Error {
   constructor(message: string) {
@@ -44,7 +51,7 @@ export class Auth {
     await env.openExternal(Uri.parse(authUrl.toString()))
   }
 
-  async handleCallback(uri: Uri): Promise<AuthResult | null> {
+  async handleCallback(uri: Uri): Promise<{ token: string; refreshToken: string } | null> {
     console.log('handleCallback', uri)
 
     if (uri.path !== '/auth/callback') return null
@@ -73,7 +80,11 @@ export class Auth {
       body: body,
     })
 
-    return this.parseTokenResponse(response)
+    const tokenResult = await this.parseTokenResponse(response)
+
+    if (tokenResult.status === 'error') throw new AuthError(tokenResult.error)
+
+    return { token: tokenResult.token, refreshToken: tokenResult.refreshToken }
   }
 
   async refreshToken(refreshToken: string): Promise<AuthResult> {
@@ -96,15 +107,30 @@ export class Auth {
   private async parseTokenResponse(response: Response): Promise<AuthResult> {
     const data = await response.json()
 
-    if (response.status !== 200) throw new AuthError(`Failed to get token. Status code ${response.status}.`)
+    if (response.status >= 400 && response.status < 500)
+      return { status: 'error', error: 'Invalid refresh token', refreshTokenInvalid: true }
+    if (response.status !== 200)
+      return {
+        status: 'error',
+        error: `Failed to get token. Status code ${response.status}.`,
+        refreshTokenInvalid: false,
+      }
+
     const parsed = z
       .object({
         access_token: z.string(),
         refresh_token: z.string(),
       })
-      .parse(data)
+      .safeParse(data)
 
-    return { token: parsed.access_token, refreshToken: parsed.refresh_token }
+    if (!parsed.success)
+      return {
+        status: 'error',
+        error: `Failed to parse token response. ${parsed.error.message}`,
+        refreshTokenInvalid: false,
+      }
+
+    return { status: 'success', token: parsed.data.access_token, refreshToken: parsed.data.refresh_token }
   }
 
   private getRedirectUri(): string {
