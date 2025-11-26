@@ -6,6 +6,7 @@ import { type ExtensionContext, ProgressLocation, window } from 'vscode'
 import { getPackageJSON } from '../../../getPackageJSON'
 import { isDebugOrTestSession } from '../../../util'
 import { DevInstanceSchema, PrismaDevRepository } from '../PrismaDevRepository'
+import { ensureLoggedIn } from '../utils/ensureLoggedIn'
 
 export interface DeployLocalDatabaseOptions {
   args: unknown
@@ -26,6 +27,8 @@ export async function deployPrismaDevInstance(options: DeployLocalDatabaseOption
 
   try {
     const { name } = DevInstanceSchema.parse(args)
+
+    await ensureLoggedIn(ppgRepository)
 
     const attemptEventId = randomUUID()
 
