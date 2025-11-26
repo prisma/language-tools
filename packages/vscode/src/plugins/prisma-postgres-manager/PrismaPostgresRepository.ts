@@ -57,7 +57,7 @@ export function isRemoteDatabase(item: unknown): item is Database {
 
 export type NewRemoteDatabase = Database & { connectionString: string | null }
 
-export type PrismaPostgresItem = { type: 'remoteRoot' } | Workspace | Project | Database
+export type PrismaPostgresItem = Workspace | Project | Database
 
 // Simple cache manager to handle all caching logic
 class CacheManager {
