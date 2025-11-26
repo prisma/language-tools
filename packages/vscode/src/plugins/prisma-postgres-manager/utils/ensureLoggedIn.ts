@@ -1,6 +1,7 @@
 import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
 import { commands, ProgressLocation, window } from 'vscode'
 import { CommandAbortError } from '../shared-ui/handleCommandError'
+import { Disposable } from 'vscode'
 
 const LOGIN_TIMEOUT_MS = 2 * 60 * 1000
 
@@ -15,49 +16,40 @@ async function waitForWorkspaceAccess(ppgRepository: PrismaPostgresRepository): 
       title: 'Waiting for Prisma login to finish...',
       cancellable: true,
     },
-    (_, cancelToken) =>
-      new Promise<void>((resolve, reject) => {
-        const cleanup = () => {
-          clearTimeout(timeout)
-          listener.dispose()
-          cancellation.dispose()
-        }
+    (_, cancelToken) => {
+      let listener: Disposable | undefined
+      let cancellation: Disposable | undefined
+      let timeout: NodeJS.Timeout | undefined
 
-        const listener = ppgRepository.refreshEventEmitter.event(async () => {
-          if (await hasWorkspaces()) {
-            cleanup()
-            resolve()
-          }
+      return new Promise<void>((resolve, reject) => {
+        listener = ppgRepository.refreshEventEmitter.event(async () => {
+          if (await hasWorkspaces()) return resolve()
         })
 
-        const cancellation = cancelToken.onCancellationRequested(() => {
-          cleanup()
+        cancellation = cancelToken.onCancellationRequested(() => {
           reject(new CommandAbortError('Login cancelled.'))
         })
 
-        const timeout = setTimeout(() => {
-          cleanup()
+        timeout = setTimeout(() => {
           reject(new CommandAbortError('Login timed out. Please try again.'))
         }, LOGIN_TIMEOUT_MS)
 
         if (cancelToken.isCancellationRequested) {
-          cleanup()
           reject(new CommandAbortError('Login cancelled.'))
           return
         }
 
         void hasWorkspaces()
           .then((hasAccess) => {
-            if (hasAccess) {
-              cleanup()
-              resolve()
-            }
+            if (hasAccess) resolve()
           })
-          .catch((error) => {
-            cleanup()
-            reject(error)
-          })
-      }),
+          .catch((error) => reject(error))
+      }).finally(() => {
+        clearTimeout(timeout)
+        listener?.dispose()
+        cancellation?.dispose()
+      })
+    },
   )
 }
 
