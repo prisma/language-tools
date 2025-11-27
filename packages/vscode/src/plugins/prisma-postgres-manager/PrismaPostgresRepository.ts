@@ -251,16 +251,24 @@ export class PrismaPostgresRepository {
           throw new Error(`Workspace '${strippedWorkspaceId}' not found`)
         }
 
-        const { token, refreshToken } = await this.auth.refreshToken(credentials.refreshToken)
+        const refreshTokenResult = await this.auth.refreshToken(credentials.refreshToken)
 
-        await this.credentialsStore.storeCredentials({
-          ...credentials,
-          token,
-          refreshToken,
-          workspaceId: strippedWorkspaceId,
-        })
+        if (refreshTokenResult.status === 'success') {
+          await this.credentialsStore.storeCredentials({
+            workspaceId: strippedWorkspaceId,
+            token: refreshTokenResult.token,
+            refreshToken: refreshTokenResult.refreshToken,
+          })
 
-        return { token }
+          return { token: refreshTokenResult.token }
+        } else if (refreshTokenResult.refreshTokenInvalid) {
+          await this.credentialsStore.deleteCredentials(strippedWorkspaceId)
+          throw new Error(
+            `Refresh token was invalid for workspace ${strippedWorkspaceId}. Credentials have been removed.`,
+          )
+        } else {
+          throw new Error(`Failed to refresh token. Please try again.`)
+        }
       }
 
       const client = createManagementAPIClient(credentials.token, refreshTokenHandler)
