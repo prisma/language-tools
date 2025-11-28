@@ -25,13 +25,24 @@ export class AuthError extends Error {
   }
 }
 
+const DEFAULT_UTM_MEDIUM = 'ppg-cloud-list'
+
+export const LoginOptionsSchema = z
+  .object({
+    utmMedium: z.string().optional().default(DEFAULT_UTM_MEDIUM),
+  })
+  .optional()
+  .default({ utmMedium: DEFAULT_UTM_MEDIUM })
+
+export type LoginOptions = z.infer<typeof LoginOptionsSchema>
+
 export class Auth {
   private latestVerifier?: string
   private latestState?: string
 
   constructor(private readonly extensionId: string) {}
 
-  async login() {
+  async login(options: LoginOptions) {
     this.latestState = this.generateState()
     this.latestVerifier = this.generateVerifier()
     const challenge = this.generateChallenge(this.latestVerifier)
@@ -45,8 +56,7 @@ export class Auth {
     authUrl.searchParams.set('code_challenge', challenge)
     authUrl.searchParams.set('code_challenge_method', 'S256')
     authUrl.searchParams.set('utm_source', 'vscode')
-    authUrl.searchParams.set('utm_medium', 'extension')
-    authUrl.searchParams.set('utm_campaign', 'oauth')
+    authUrl.searchParams.set('utm_medium', options.utmMedium)
 
     await env.openExternal(Uri.parse(authUrl.toString()))
   }

@@ -42,8 +42,8 @@ export default {
       commands.registerCommand('prisma.refresh', () => {
         ppgRepository.triggerRefresh()
       }),
-      commands.registerCommand('prisma.login', async () => {
-        await handleCommandError('Login', () => login(ppgRepository, auth))
+      commands.registerCommand('prisma.login', async (args: unknown) => {
+        await handleCommandError('Login', () => login(ppgRepository, auth, args))
       }),
       commands.registerCommand('prisma.logout', async (args: unknown) => {
         await handleCommandError('Logout', () => logout(ppgRepository, args))

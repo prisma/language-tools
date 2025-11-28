@@ -2,6 +2,7 @@ import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
 import { commands, ProgressLocation, window } from 'vscode'
 import { CommandAbortError } from '../shared-ui/handleCommandError'
 import { Disposable } from 'vscode'
+import { LoginOptions } from '../management-api/auth'
 
 const LOGIN_TIMEOUT_MS = 2 * 60 * 1000
 
@@ -53,7 +54,10 @@ async function waitForWorkspaceAccess(ppgRepository: PrismaPostgresRepository): 
   )
 }
 
-export async function ensureLoggedIn(ppgRepository: PrismaPostgresRepository): Promise<void> {
+export async function ensureLoggedIn(
+  ppgRepository: PrismaPostgresRepository,
+  loginOptions: LoginOptions,
+): Promise<void> {
   const hasWorkspaces = (await ppgRepository.getWorkspaces()).length > 0
 
   if (hasWorkspaces) {
@@ -70,7 +74,7 @@ export async function ensureLoggedIn(ppgRepository: PrismaPostgresRepository): P
     return
   }
 
-  await commands.executeCommand('prisma.login')
+  await commands.executeCommand('prisma.login', loginOptions)
 
   await waitForWorkspaceAccess(ppgRepository)
 

@@ -1,15 +1,17 @@
 import { commands, ProgressLocation, Uri, window } from 'vscode'
 import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
-import { Auth } from '../management-api/auth'
+import { Auth, LoginOptionsSchema } from '../management-api/auth'
 
 /**
  * This function triggers the OAuth login flow by creating the necessary URL and opening the users browser.
  */
-export const login = async (ppgRepository: PrismaPostgresRepository, auth: Auth) => {
+export const login = async (ppgRepository: PrismaPostgresRepository, auth: Auth, args: unknown = {}) => {
+  const options = LoginOptionsSchema.parse(args)
+
   if ((await ppgRepository.getWorkspaces()).length === 0) {
     await commands.executeCommand('setContext', 'prisma.initialLoginInProgress', true)
   }
-  await auth.login()
+  await auth.login(options)
   await commands.executeCommand('setContext', 'prisma.initialLoginInProgress', false)
 }
 

@@ -28,7 +28,7 @@ export async function deployPrismaDevInstance(options: DeployLocalDatabaseOption
   try {
     const { name } = DevInstanceSchema.parse(args)
 
-    await ensureLoggedIn(ppgRepository)
+    await ensureLoggedIn(ppgRepository, { utmMedium: 'local-ppg-deploy' })
 
     const attemptEventId = randomUUID()
 
