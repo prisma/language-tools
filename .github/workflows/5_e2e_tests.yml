@@ -4,9 +4,13 @@ run-name: 5. Integration tests in VS Code folder with published LS - ${{ inputs.
 on:
   workflow_dispatch:
     inputs:
-      npm_channel:
-        description: 'Prisma CLI NPM Channel'
+      trigger:
+        description: 'The trigger name identifying the kind of release we are doing'
         required: true
+        type: choice
+        options:
+          - insider-release
+          - stable-release
       extension_version:
         description: 'VS Code extension version'
         required: true
@@ -59,7 +63,7 @@ jobs:
           node-version: '20'
       - name: Print inputs
         run: |
-          echo ${{github.event.inputs.npm_channel}}
+          echo ${{github.event.inputs.trigger}}
           echo ${{github.event.inputs.extension_version}}
           echo ${{github.event.inputs.branch}}
           echo ${{github.event.inputs.trigger_reason}}
@@ -69,4 +73,4 @@ jobs:
         with:
           workflow: 6. Build extension
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
-          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{github.event.inputs.branch}}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'
+          inputs: '{ "trigger": "${{ github.event.inputs.trigger }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{github.event.inputs.branch}}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'

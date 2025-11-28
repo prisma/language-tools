@@ -1,14 +1,26 @@
-name: 1/2c. Bump versions for extension only (promotes patch branch to stable release)
+name: 1/2. Bump and release a stable extension version
 
 # This workflow covers both '1_check_for_updates' and '2_bump_versions' workflows, therefore it is another variant of the same, but specifically for extension only, without any Prisma CLI updates that would need to be handled.
-# This is used to manually promote the patch branch to stable and release a new stable version.
 
 on:
   workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Type of release to perform'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+concurrency:
+  group: version-management
+  cancel-in-progress: false
 
 env:
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
-  PRISMA_TELEMETRY_INFORMATION: 'language-tools 1_2_c_promote_patch_to_stable.yml'
+  PRISMA_TELEMETRY_INFORMATION: 'language-tools 1_2_stable_extension_release.yml'
 
 jobs:
   bump:
@@ -23,24 +35,18 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-      - name: Checkout main
-        run: git fetch && git checkout main
       - name: Install Dependencies
         run: npm install && npm run bootstrap
+        shell: bash
       - name: Setup Git
         run: |
           sh scripts/set_git_credentials.sh
       - name: Update extension version in scripts folder
         id: update
-        run: node scripts/bump_extension_version.js "latest"
+        run: node scripts/bump_extension_version.js extension-${{ github.event.inputs.release_type }}-release
       - name: Commit and Push
         run: |
           sh scripts/commit_and_push.sh "[skip ci] bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}."
-
-      - name: Switch branch
-        id: setup_branch
-        run: |
-          sh scripts/setup_branch.sh "promote_patch-dev"
       - name: Update VS Code extension version
         run: |
           node scripts/update_package_json_files.js latest ${{ steps.update.outputs.next_extension_version }} ""
@@ -55,4 +61,4 @@ jobs:
         with:
           workflow: 3. Test Language Server and publish
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
-          inputs: '{ "npm_channel": "latest", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "stable", "trigger_reason": "Manual trigger promoting patch branch to stable" }'
+          inputs: '{ "trigger": "stable-release", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "main", "trigger_reason": "Manual ${{ github.event.inputs.release_type }} stable extension release" }'

@@ -4,9 +4,13 @@ run-name: 6. Build extension + upload - ${{ inputs.trigger_reason }}
 on:
   workflow_dispatch:
     inputs:
-      npm_channel:
-        description: 'Prisma CLI NPM Channel'
+      trigger:
+        description: 'The trigger name identifying the kind of release we are doing'
         required: true
+        type: choice
+        options:
+          - insider-release
+          - stable-release
       extension_version:
         description: 'VS Code extension version'
         required: true
@@ -40,7 +44,7 @@ jobs:
           cache: 'npm'
       - name: Print inputs
         run: |
-          echo ${{github.event.inputs.npm_channel}}
+          echo ${{github.event.inputs.trigger}}
           echo ${{github.event.inputs.extension_version}}
           echo ${{github.event.inputs.branch}}
           echo ${{github.event.inputs.trigger_reason}}
@@ -51,14 +55,14 @@ jobs:
       - name: Build all packages
         run: npm run compile
       - name: Replace Readme for marketplace
-        run: node scripts/change_readme.js ${{ github.event.inputs.npm_channel }}
+        run: node scripts/change_readme.js ${{ github.event.inputs.trigger }}
       - name: Build vsix
         run: cd packages/vscode && npm run package --
 
       # Create GitHub Release and upload built result as asset
       - name: Get git tag and asset name
         id: names
-        run: node scripts/get_tag_name.js ${{ github.event.inputs.npm_channel }} ${{ github.event.inputs.extension_version }}
+        run: node scripts/get_tag_name.js ${{ github.event.inputs.trigger }} ${{ github.event.inputs.extension_version }}
       - name: create a GitHub release
         id: create_release
         # This action is not maintained since 3+ years!

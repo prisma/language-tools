@@ -2,10 +2,10 @@ const core = require('@actions/core')
 
 if (require.main === module) {
   const args = process.argv.slice(2)
-  const releaseChannel = args[0]
+  const trigger = args[0]
   const vscodeVersion = args[1]
 
-  if (releaseChannel === 'latest') {
+  if (trigger === 'stable-release') {
     core.setOutput('tag_name', vscodeVersion)
     core.setOutput('asset_name', 'prisma')
   } else {
