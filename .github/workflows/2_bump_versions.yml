@@ -91,4 +91,4 @@ jobs:
         with:
           workflow: 3. Test Language Server and publish
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
-          inputs: '{ "release_channel": ${{ env.RELEASE_CHANNEL }}, "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}", "trigger_reason": "Prisma CLI version ${{github.event.inputs.version}}" }'
+          inputs: '{ "release_channel": "${{ env.RELEASE_CHANNEL }}", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}", "trigger_reason": "Prisma CLI version ${{github.event.inputs.version}}" }'
