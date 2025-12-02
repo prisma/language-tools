@@ -23,7 +23,7 @@ function nextVersion({ currentVersion, trigger, prismaLatest }) {
       }
     default:
       throw new Error(
-        "This function needs to be called with a known channel (dev, latest or patch-dev) or the current patch branch name ending with '.x'.",
+        'This function needs to be called with a known trigger: extension-(patch|minor|major)-release or prisma-(latest|dev|patch-dev)-release.',
       )
   }
 }

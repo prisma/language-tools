@@ -5,7 +5,7 @@ describe('changeReadme', () => {
     expect(
       getNewReadMeContent({
         trigger: 'insider-release',
-        npmVersion: '2.5.0-dev.4',
+        cliVersion: '2.5.0-dev.4',
       }),
     ).toMatchSnapshot()
   })
@@ -14,7 +14,7 @@ describe('changeReadme', () => {
     expect(
       getNewReadMeContent({
         trigger: 'stable-release',
-        npmVersion: '2.4.0',
+        cliVersion: '2.4.0',
       }),
     ).toMatchSnapshot()
   })
