@@ -4,13 +4,13 @@ run-name: 3. Test Language Server and publish - ${{ inputs.trigger_reason }}
 on:
   workflow_dispatch:
     inputs:
-      trigger:
-        description: 'The trigger name identifying the kind of release we are doing'
+      release_channel:
+        description: "Identifies whether we're publishing an insider or stable release of the extension"
         required: true
         type: choice
         options:
-          - insider-release
-          - stable-release
+          - insider
+          - stable
       branch:
         description: 'Branch to run run this workflow on'
         required: true
@@ -24,7 +24,7 @@ permissions:
 
 env:
   PRISMA_TELEMETRY_INFORMATION: 'language-tools 3_LS_unit_tests_publish.yml'
-  LS_NPM_CHANNEL: ${{ github.event.inputs.trigger == 'stable-release' && 'latest' || 'dev' }}
+  LS_NPM_CHANNEL: ${{ github.event.inputs.release_channel == 'stable' && 'latest' || 'dev' }}
 
 jobs:
   tests:
@@ -69,7 +69,7 @@ jobs:
         run: npm install -g npm@^11.5
       - name: Print inputs
         run: |
-          echo ${{github.event.inputs.trigger}}
+          echo ${{github.event.inputs.release_channel}}
           echo ${{github.event.inputs.extension_version || 'not provided'}}
           echo ${{github.event.inputs.branch}}
           echo ${{github.event.inputs.trigger_reason || 'not provided'}}
@@ -85,4 +85,4 @@ jobs:
         with:
           workflow: 4. Bump LS in VSCode extension
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
-          inputs: '{ "trigger": "${{ github.event.inputs.trigger }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'
+          inputs: '{ "release_channel": "${{ github.event.inputs.release_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'

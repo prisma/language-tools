@@ -4,13 +4,13 @@ run-name: 4. Bump LS in VS Code extension - ${{ inputs.trigger_reason }}
 on:
   workflow_dispatch:
     inputs:
-      trigger:
-        description: 'The trigger name identifying the kind of release we are doing'
+      release_channel:
+        description: "Identifies whether we're publishing an insider or stable release of the extension"
         required: true
         type: choice
         options:
-          - insider-release
-          - stable-release
+          - insider
+          - stable
       extension_version:
         description: 'VS Code extension version'
         required: true
@@ -41,7 +41,7 @@ jobs:
           node-version: '20'
       - name: Print inputs
         run: |
-          echo ${{github.event.inputs.trigger}}
+          echo ${{github.event.inputs.release_channel}}
           echo ${{github.event.inputs.extension_version}}
           echo ${{github.event.inputs.branch}}
           echo ${{github.event.inputs.trigger_reason}}
@@ -73,4 +73,4 @@ jobs:
         with:
           workflow: 5. Integration tests in VSCode folder with published LS
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
-          inputs: '{ "trigger": "${{ github.event.inputs.trigger }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'
+          inputs: '{ "release_channel": "${{ github.event.inputs.release_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'

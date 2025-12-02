@@ -1,4 +1,4 @@
-name: 1/2. Bump and release a stable extension version
+name: 1/2. Bump and release a stable version of the extension, meant for manual releases
 
 # This workflow covers both '1_check_for_updates' and '2_bump_versions' workflows, therefore it is another variant of the same, but specifically for extension only, without any Prisma CLI updates that would need to be handled.
 
@@ -61,4 +61,4 @@ jobs:
         with:
           workflow: 3. Test Language Server and publish
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
-          inputs: '{ "trigger": "stable-release", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "main", "trigger_reason": "Manual ${{ github.event.inputs.release_type }} stable extension release" }'
+          inputs: '{ "release_channel": "stable", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "main", "trigger_reason": "Manual ${{ github.event.inputs.release_type }} stable extension release" }'

@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       npm_channel:
-        description: 'Prisma CLI NPM Channel'
+        description: 'Prisma CLI NPM Channel to bump'
         required: true
         type: choice
         options:
@@ -23,7 +23,7 @@ concurrency:
 env:
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
   PRISMA_TELEMETRY_INFORMATION: 'language-tools 2_bump_versions.yml'
-  TRIGGER: ${{ github.event.inputs.npm_channel == 'latest' && 'stable-release' || 'insider-release' }}
+  RELEASE_CHANNEL: ${{ github.event.inputs.npm_channel == 'latest' && 'stable' || 'insider' }}
 
 jobs:
   bump:
@@ -91,4 +91,4 @@ jobs:
         with:
           workflow: 3. Test Language Server and publish
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
-          inputs: '{ "trigger": ${{ env.TRIGGER }}, "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}", "trigger_reason": "Prisma CLI version ${{github.event.inputs.version}}" }'
+          inputs: '{ "release_channel": ${{ env.RELEASE_CHANNEL }}, "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{steps.setup_branch.outputs.branch}}", "trigger_reason": "Prisma CLI version ${{github.event.inputs.version}}" }'

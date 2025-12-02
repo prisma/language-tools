@@ -3,8 +3,8 @@ const githubAction = require('@actions/github')
 const path = require('path')
 const lsPackageJson = require(path.join(__dirname, '../packages/language-server/package.json')) // eslint-disable-line
 
-function getNewReadMeContent({ trigger, cliVersion, githubActionContextSha }) {
-  if (trigger === 'stable-release') {
+function getNewReadMeContent({ releaseChannel, cliVersion, githubActionContextSha }) {
+  if (releaseChannel === 'stable') {
     content = fs.readFileSync(path.join(__dirname, './README_STABLE_BUILD.md'), {
       encoding: 'utf-8',
     })
@@ -18,10 +18,10 @@ function getNewReadMeContent({ trigger, cliVersion, githubActionContextSha }) {
   }
 }
 
-function changeReadme({ trigger }) {
+function changeReadme({ releaseChannel }) {
   const sha = githubAction.context.sha
   const content = getNewReadMeContent({
-    trigger,
+    releaseChannel,
     cliVersion: lsPackageJson.prisma.cliVersion,
     githubActionContextSha: sha,
   })
@@ -33,6 +33,6 @@ module.exports = { changeReadme, getNewReadMeContent }
 if (require.main === module) {
   const args = process.argv.slice(2)
   changeReadme({
-    trigger: args[0],
+    releaseChannel: args[0],
   })
 }

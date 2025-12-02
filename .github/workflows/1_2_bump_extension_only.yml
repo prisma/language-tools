@@ -67,4 +67,4 @@ jobs:
         with:
           workflow: 3. Test Language Server and publish
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
-          inputs: '{ "trigger": "insider-release", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "main", "trigger_reason": "Commit from ${{ github.ref_name }}" }'
+          inputs: '{ "release_channel": "insider", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "main", "trigger_reason": "Commit from ${{ github.ref_name }}" }'
