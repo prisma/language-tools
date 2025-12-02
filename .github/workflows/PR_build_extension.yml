@@ -39,7 +39,7 @@ jobs:
       - name: Build all packages
         run: npm run compile
       - name: Replace Readme for marketplace
-        run: node scripts/change_readme.js dev
+        run: node scripts/change_readme.js insider
       - name: Update VS Code extension name
         run: |
           node scripts/update_package_json_file_PR_build.js
