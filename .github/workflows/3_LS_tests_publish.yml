@@ -4,9 +4,13 @@ run-name: 3. Test Language Server and publish - ${{ inputs.trigger_reason }}
 on:
   workflow_dispatch:
     inputs:
-      npm_channel:
-        description: 'Prisma CLI NPM Channel'
+      release_channel:
+        description: "Identifies whether we're publishing an insider or stable release of the extension"
         required: true
+        type: choice
+        options:
+          - insider
+          - stable
       branch:
         description: 'Branch to run run this workflow on'
         required: true
@@ -20,6 +24,7 @@ permissions:
 
 env:
   PRISMA_TELEMETRY_INFORMATION: 'language-tools 3_LS_unit_tests_publish.yml'
+  LS_NPM_CHANNEL: ${{ github.event.inputs.release_channel == 'stable' && 'latest' || 'dev' }}
 
 jobs:
   tests:
@@ -64,7 +69,7 @@ jobs:
         run: npm install -g npm@^11.5
       - name: Print inputs
         run: |
-          echo ${{github.event.inputs.npm_channel}}
+          echo ${{github.event.inputs.release_channel}}
           echo ${{github.event.inputs.extension_version || 'not provided'}}
           echo ${{github.event.inputs.branch}}
           echo ${{github.event.inputs.trigger_reason || 'not provided'}}
@@ -73,11 +78,11 @@ jobs:
       - name: Build Language Server
         run: npx lerna run build --scope @prisma/language-server
       - name: Publish Language Server to npm
-        run: npx lerna exec --scope @prisma/language-server -- npm publish --tag ${{ github.event.inputs.npm_channel }} --access public
+        run: npx lerna exec --scope @prisma/language-server -- npm publish --tag ${{ env.LS_NPM_CHANNEL }} --access public
       - name: Trigger next workflow for bumping Language Server in extension
         if: ${{ github.event.inputs.extension_version != '' }}
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: 4. Bump LS in VSCode extension
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
-          inputs: '{ "npm_channel": "${{ github.event.inputs.npm_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'
+          inputs: '{ "release_channel": "${{ github.event.inputs.release_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'

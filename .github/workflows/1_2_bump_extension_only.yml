@@ -1,4 +1,4 @@
-name: 1/2b. Bump versions for extension only (on push to main and patch branch)
+name: 1/2. Bump versions for extension only (on push to main and patch branch)
 
 # This workflow covers both '1_check_for_updates' and '2_bump_versions' workflows, therefore it is another variant of the same, but specifically for extension only, without any Prisma CLI updates that would need to be handled.
 
@@ -12,9 +12,13 @@ on:
       - '.github/**'
   workflow_dispatch:
 
+concurrency:
+  group: version-management
+  cancel-in-progress: false
+
 env:
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
-  PRISMA_TELEMETRY_INFORMATION: 'language-tools 1_2_b_bump_extension_only.yml'
+  PRISMA_TELEMETRY_INFORMATION: 'language-tools 1_2_bump_extension_only.yml'
 
 jobs:
   bump:
@@ -40,7 +44,7 @@ jobs:
           sh scripts/set_git_credentials.sh
       - name: Update extension version in scripts folder
         id: update
-        run: node scripts/bump_extension_version.js dev
+        run: node scripts/bump_extension_version.js extension-patch-release
       - name: Commit and Push
         run: |
           sh scripts/commit_and_push.sh "[skip ci] bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}."
@@ -63,11 +67,4 @@ jobs:
         with:
           workflow: 3. Test Language Server and publish
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
-          inputs: '{ "npm_channel": "dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "main", "trigger_reason": "Commit from ${{ github.ref_name }}" }'
-      - name: Trigger next workflow for Language Server tests
-        if: endsWith(github.ref, '/main') == false
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: 3. Test Language Server and publish
-          token: ${{ secrets.PRISMA_BOT_TOKEN }}
-          inputs: '{ "npm_channel": "patch-dev", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "${{ github.ref_name }}", "trigger_reason": "Commit from ${{ github.ref_name }}" }'
+          inputs: '{ "release_channel": "insider", "extension_version": "${{ steps.update.outputs.next_extension_version }}", "branch": "main", "trigger_reason": "Commit from ${{ github.ref_name }}" }'

@@ -7,151 +7,86 @@ describe('next extension version', () => {
   it('insider release triggered by Prisma CLI', () => {
     expect(
       nextVersion({
-        currentVersion: '5.0.1',
-        branch_channel: 'dev',
-        prisma_latest: '2.4.0',
-        prisma_dev: '2.5.0-dev.2',
-        prisma_patch: '2.4.1-dev.3',
+        currentVersion: '35.0.1',
+        trigger: 'prisma-dev-release',
+        prismaLatest: '2.4.0',
       }),
-    ).toEqual('5.0.2')
+    ).toEqual('35.0.2')
   })
 
   it('insider release triggered by Prisma CLI after an extension only release', () => {
     expect(
       nextVersion({
-        currentVersion: '5.0.2',
-        branch_channel: 'dev',
-        prisma_latest: '2.4.0',
-        prisma_dev: '2.5.0-dev.2',
-        prisma_patch: '2.4.1-dev.3',
+        currentVersion: '35.0.2',
+        trigger: 'prisma-dev-release',
+        prismaLatest: '2.4.0',
       }),
-    ).toEqual('5.0.3')
+    ).toEqual('35.0.3')
   })
 
-  // patches
-  it('first patch release after Prisma CLI stable on Insider', () => {
+  it('a first Prisma CLI patch on stable', () => {
     expect(
       nextVersion({
-        currentVersion: '2.2.1',
-        branch_channel: '2.3.x',
-        prisma_latest: '2.3.0',
-        prisma_dev: '2.4.0-dev.2',
-        prisma_patch: '2.2.1-dev.3',
+        currentVersion: '32.5.0',
+        trigger: 'prisma-latest-release',
+        prismaLatest: '2.5.1',
       }),
-    ).toEqual('3.1.1')
+    ).toEqual('32.5.1')
   })
 
-  it('econd patch release after Prisma CLI stable on Insider', () => {
+  it('a Prisma CLI patch on stable', () => {
     expect(
       nextVersion({
-        currentVersion: '3.1.1',
-        branch_channel: '2.3.x',
-        prisma_latest: '2.3.0',
-        prisma_dev: '2.4.0-dev.2',
-        prisma_patch: '2.3.1-dev.3',
+        currentVersion: '32.5.1',
+        trigger: 'prisma-latest-release',
+        prismaLatest: '2.5.1',
       }),
-    ).toEqual('3.1.2')
-  })
-
-  it(' a first Prisma CLI patch on stable', () => {
-    expect(
-      nextVersion({
-        currentVersion: '2.5.0',
-        branch_channel: 'latest',
-        prisma_latest: '2.5.1',
-        prisma_dev: '2.6.0-dev.2',
-        prisma_patch: '2.4.1-dev.3',
-      }),
-    ).toEqual('2.5.1')
-  })
-
-  it(' a Prisma CLI patch on stable', () => {
-    expect(
-      nextVersion({
-        currentVersion: '2.5.1',
-        branch_channel: 'latest',
-        prisma_latest: '2.5.1',
-        prisma_dev: '2.6.0-dev.2',
-        prisma_patch: '2.4.1-dev.3',
-      }),
-    ).toEqual('2.5.2')
+    ).toEqual('32.5.2')
   })
 
   //
-  // first extension release after Prisma CLI minor update
+  // extension version bumps
   //
-  it('first extension release after a minor Prisma CLI update', () => {
+  it('patch version bump', () => {
     expect(
       nextVersion({
-        currentVersion: '5.1.3',
-        branch_channel: 'main',
-        prisma_latest: '2.5.0',
-        prisma_dev: '2.5.1-dev.2',
-        prisma_patch: '2.4.1-dev.3',
+        currentVersion: '35.1.3',
+        trigger: 'extension-patch-release',
+        prismaLatest: '2.5.0',
       }),
-    ).toEqual('6.0.1')
+    ).toEqual('35.1.4')
   })
 
-  it('second extension release after a minor Prisma CLI update', () => {
+  it('minor version bump', () => {
     expect(
       nextVersion({
-        currentVersion: '3.0.0',
-        branch_channel: 'main',
-        prisma_latest: '3.1.0',
-        prisma_dev: '',
-        prisma_patch: '',
+        currentVersion: '35.1.3',
+        trigger: 'extension-minor-release',
+        prismaLatest: '2.5.0',
       }),
-    ).toEqual('3.0.1')
+    ).toEqual('35.2.0')
   })
 
-  it('third extension release after a minor Prisma CLI update if latest = 3.1.0', () => {
+  it('major version bump', () => {
     expect(
       nextVersion({
-        currentVersion: '3.1.0',
-        branch_channel: 'main',
-        prisma_latest: '3.2.0',
-        prisma_dev: '',
-        prisma_patch: '',
+        currentVersion: '35.1.3',
+        trigger: 'extension-major-release',
+        prismaLatest: '2.5.0',
       }),
-    ).toEqual('3.1.1')
-  })
-
-  it('third extension release after a minor Prisma CLI update if latest = 3.1.1', () => {
-    expect(
-      nextVersion({
-        currentVersion: '3.1.1',
-        branch_channel: 'main',
-        prisma_latest: '3.2.0',
-        prisma_dev: '',
-        prisma_patch: '',
-      }),
-    ).toEqual('3.1.2')
+    ).toEqual('36.0.0')
   })
 
   //
   // first extension release after Prisma CLI major update
   //
-  it('first extension release after special major Prisma CLI update (3.0.1)', () => {
-    expect(
-      nextVersion({
-        currentVersion: '2.30.3',
-        branch_channel: 'latest',
-        prisma_latest: '3.0.1',
-        prisma_dev: '0.0.0-dev.0',
-        prisma_patch: '0.0.0-dev.0',
-      }),
-    ).toEqual('3.0.1')
-  })
-
   it('first extension release after a major Prisma CLI update (4.0.0)', () => {
     expect(
       nextVersion({
-        currentVersion: '3.15.9',
-        branch_channel: 'latest',
-        prisma_latest: '4.0.0',
-        prisma_dev: '0.0.0-dev.0',
-        prisma_patch: '0.0.0-dev.0',
+        currentVersion: '32.15.9',
+        trigger: 'prisma-latest-release',
+        prismaLatest: '4.0.0',
       }),
-    ).toEqual('4.0.0')
+    ).toEqual('33.0.0')
   })
 })

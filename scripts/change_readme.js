@@ -1,39 +1,28 @@
 const fs = require('fs')
 const githubAction = require('@actions/github')
 const path = require('path')
-const { readVersionFile } = require('./util')
+const lsPackageJson = require(path.join(__dirname, '../packages/language-server/package.json')) // eslint-disable-line
 
-function getNewReadMeContent({
-  releaseChannel,
-  npmVersion,
-  githubActionContextSha,
-}) {
-  if (releaseChannel === 'dev' || releaseChannel === 'patch-dev') {
-    let content = fs.readFileSync(
-      path.join(__dirname, './README_INSIDER_BUILD.md'),
-      {
-        encoding: 'utf-8',
-      },
-    )
-    content = content.replace(/\$commit-sha\$/g, githubActionContextSha)
-    return content.replace(/\$prisma-cli-version\$/g, npmVersion)
+function getNewReadMeContent({ releaseChannel, cliVersion, githubActionContextSha }) {
+  if (releaseChannel === 'stable') {
+    content = fs.readFileSync(path.join(__dirname, './README_STABLE_BUILD.md'), {
+      encoding: 'utf-8',
+    })
+    return content.replace(/\$prisma-cli-version\$/g, cliVersion)
   } else {
-    content = fs.readFileSync(
-      path.join(__dirname, './README_STABLE_BUILD.md'),
-      {
-        encoding: 'utf-8',
-      },
-    )
-    return content.replace(/\$prisma-cli-version\$/g, npmVersion)
+    let content = fs.readFileSync(path.join(__dirname, './README_INSIDER_BUILD.md'), {
+      encoding: 'utf-8',
+    })
+    content = content.replace(/\$commit-sha\$/g, githubActionContextSha)
+    return content.replace(/\$prisma-cli-version\$/g, cliVersion)
   }
 }
 
 function changeReadme({ releaseChannel }) {
-  const cliVersion = readVersionFile({ fileName: `prisma_${releaseChannel}` })
   const sha = githubAction.context.sha
   const content = getNewReadMeContent({
-    releaseChannel: releaseChannel,
-    npmVersion: cliVersion,
+    releaseChannel,
+    cliVersion: lsPackageJson.prisma.cliVersion,
     githubActionContextSha: sha,
   })
   fs.writeFileSync('./packages/vscode/README.md', content)

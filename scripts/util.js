@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 
-function writeToVersionFile({ fileName = '', content }) {
+function writeToVersionFile({ fileName, content }) {
   fs.writeFileSync(path.join(__dirname, 'versions', `./${fileName}`), content)
 }
 
