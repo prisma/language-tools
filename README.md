@@ -1,55 +1,55 @@
 # Prisma Language Tools
 
-Using the Language Server Protocol to improve Prisma's developer experience.
+VS Code extension and Language Server for [Prisma](https://www.prisma.io/) schema files.
 
-- [Prisma VS Code Extension](packages/vscode)
+- [**Prisma** (stable)][marketplace]
+  ![Version](https://img.shields.io/visual-studio-marketplace/v/Prisma.prisma)
+- [**Prisma Insider** (preview)][marketplace-insider]
+  ![Version](https://img.shields.io/visual-studio-marketplace/v/Prisma.prisma-insider)
 
-  - Install stable version (recommended) [Prisma](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma):
-    ![Prisma](https://img.shields.io/visual-studio-marketplace/v/Prisma.prisma)
-  - or install the insider version (for Prisma developers) [Prisma Insider](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider): ![Prisma Insider](https://img.shields.io/visual-studio-marketplace/v/Prisma.prisma-insider)
+[marketplace]: https://marketplace.visualstudio.com/items?itemName=Prisma.prisma
+[marketplace-insider]: https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider
 
-- [Language Server implementation](packages/language-server)
+## Packages
 
-## Repository Structure
+| Package                                                | Description                    |
+| ------------------------------------------------------ | ------------------------------ |
+| [`packages/vscode`](packages/vscode)                   | VS Code extension with plugins |
+| [`packages/language-server`](packages/language-server) | LSP implementation             |
 
+## Quick Start
+
+```bash
+npm install && npm run bootstrap
+npm run build
+npm run watch
 ```
-.
-├── packages
-│   └── vscode
-│       └── src
-|           └── extension.ts // Language Client entry point
-|   └── language-server      // Language Server
-│       └── src
-│           └── cli.ts    // Language Server CLI entry point
-└── package.json         // The extension manifest
-```
+
+Press `F5` in VS Code to launch the extension in debug mode.
+
+## Documentation
+
+| Document                                   | Description                           |
+| ------------------------------------------ | ------------------------------------- |
+| [AGENTS.md](./AGENTS.md)                   | Overview for AI agents                |
+| [Architecture](docs/architecture.md)       | System design and file organization   |
+| [Development](docs/development.md)         | Setup and debugging instructions      |
+| [Plugin System](docs/plugin-system.md)     | VS Code extension plugin architecture |
+| [Language Server](docs/language-server.md) | LSP implementation details            |
+| [Testing](docs/testing.md)                 | Test patterns and helpers             |
+| [Common Tasks](docs/common-tasks.md)       | How to add features                   |
+| [CI/CD](docs/ci-cd.md)                     | GitHub Actions workflows              |
+| [Gotchas](docs/gotchas.md)                 | Important tips and warnings           |
 
 ## Build Status
 
-- E2E Tests Status
-  - [![E2E tests after release on VSIX](https://github.com/prisma/language-tools/workflows/E2E%20tests%20after%20release%20on%20VSIX/badge.svg?branch=main)](https://github.com/prisma/language-tools/actions/workflows/e2e_published_vsix.yml?query=branch%3Amain)
-  - [![E2E tests before Insider release](https://github.com/prisma/language-tools/workflows/5.%20Integration%20tests%20in%20VSCode%20folder%20with%20published%20LS/badge.svg?branch=main)](https://github.com/prisma/language-tools/actions/workflows/5_e2e_tests.yml?query=branch%3Amain)
-- Language Server Tests Status
-  - [![Tests for Language Server on `main`](https://github.com/prisma/language-tools/workflows/3.%20Unit%20tests%20for%20LS%20and%20publish/badge.svg?branch=main)](https://github.com/prisma/language-tools/actions/workflows/3_LS_tests_publish.yml?query=branch%3Amain)
+[![E2E tests after release][e2e-vsix-badge]][e2e-vsix-action]
+[![E2E tests before Insider release][e2e-insider-badge]][e2e-insider-action]
+[![Language Server tests][ls-tests-badge]][ls-tests-action]
 
-## CI release pipeline
-
-```mermaid
-graph TD
-    A(Cron every 5 minutes) --> B[1. Check for Prisma CLI Update]
-    B -->|update available?| C[2. Bump versions]
-    C -->D{Which NPM channel was updated?}
-    D -->|dev or patch-dev| E((Our release_channel is insider))
-    D -->|latest| F((Our release_channel is stable))
-    E --> G[3. Test Language Server and publish]
-    F --> G
-    G -->|tests and publish successful?| H[4. Bump LS in VSCode extension]
-    H --> I[5. Integration tests in VSCode folder with published LS]
-    I -->|tests pass?| J[6. Build extension]
-    J --> K[7. Publish]
-
-    L(Commit in the extension) --> M[1/2. Bump versions for extension only]
-    M -->E
-    N(Manual workflow dispatch) --> O[1/2. Bump and release a stable version of the extension]
-    O -->F
-```
+[e2e-vsix-badge]: https://github.com/prisma/language-tools/workflows/E2E%20tests%20after%20release%20on%20VSIX/badge.svg?branch=main
+[e2e-vsix-action]: https://github.com/prisma/language-tools/actions/workflows/e2e_published_vsix.yml?query=branch%3Amain
+[e2e-insider-badge]: https://github.com/prisma/language-tools/workflows/5.%20Integration%20tests%20in%20VSCode%20folder%20with%20published%20LS/badge.svg?branch=main
+[e2e-insider-action]: https://github.com/prisma/language-tools/actions/workflows/5_e2e_tests.yml?query=branch%3Amain
+[ls-tests-badge]: https://github.com/prisma/language-tools/workflows/3.%20Unit%20tests%20for%20LS%20and%20publish/badge.svg?branch=main
+[ls-tests-action]: https://github.com/prisma/language-tools/actions/workflows/3_LS_tests_publish.yml?query=branch%3Amain
