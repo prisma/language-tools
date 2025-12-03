@@ -4,7 +4,7 @@
 
 ```bash
 cd packages/language-server
-npm test
+pnpm test
 ```
 
 Tests use [Vitest](https://vitest.dev/) and are in `src/__test__/`.
@@ -42,7 +42,7 @@ const userFile = helper.file('User.prisma')
 ## VS Code E2E Tests
 
 ```bash
-npm run test  # runs scripts/e2e.sh
+pnpm test  # runs scripts/e2e.sh
 ```
 
 Uses Playwright for browser-based E2E testing of the extension.

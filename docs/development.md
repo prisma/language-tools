@@ -3,15 +3,29 @@
 ## Quick Start
 
 ```bash
-# Install all dependencies (uses Lerna for monorepo)
-npm install && npm run bootstrap
+# Install all dependencies (uses pnpm workspaces)
+pnpm install
 
 # Build TypeScript
-npm run build
+pnpm build
 
 # Watch mode for development
-npm run watch
+pnpm watch
 ```
+
+## Available Commands
+
+| Command        | Description                |
+| -------------- | -------------------------- |
+| `pnpm install` | Install all dependencies   |
+| `pnpm build`   | Build all packages         |
+| `pnpm watch`   | Watch mode for development |
+| `pnpm test`    | Run E2E tests              |
+| `pnpm lint`    | Lint all packages          |
+| `pnpm format`  | Format code with Prettier  |
+
+Commands are orchestrated by [Turborepo](https://turbo.build/). See
+`turbo.json` for task dependencies.
 
 ## Running the Extension Locally
 

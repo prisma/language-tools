@@ -16,7 +16,7 @@
     "@hono/node-server": "1.14.2",
     "@prisma/credentials-store": "6.9.0-dev.18",
     "@prisma/dev": "0.11.1",
-    "@prisma/language-server": "31.1.1",
+    "@prisma/language-server": "workspace:*",
     "@prisma/ppg": "0.5.2",
     "@prisma/studio-core-licensed": "^0.6.0",
     "checkpoint-client": "1.1.33",
@@ -40,7 +40,7 @@
   },
   "scripts": {
     "build": "tsc -p ./",
-    "watch": "npm run build -- -w",
+    "watch": "tsc -p ./ -w",
     "generate-api-client": "openapi-typescript https://api.prisma.io/v1/doc --output ./src/plugins/prisma-postgres-manager/management-api/api.d.ts",
     "test": "rm -rf ./dist && npm run build && node dist/src/__test__/runTest true",
     "test:playwright": "playwright test",

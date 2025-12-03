@@ -7,8 +7,8 @@ See the [Development Guide](../../docs/development.md) for setup instructions.
 Quick start:
 
 ```bash
-npm install && npm run bootstrap
-npm run watch
+pnpm install
+pnpm watch
 ```
 
 Then press `F5` in VS Code → **Launch VS Code extension**.
@@ -36,7 +36,7 @@ Manual testing: see [TESTING.md](./TESTING.md).
 E2E tests (Playwright):
 
 ```bash
-npm run test  # from repository root
+pnpm test  # from repository root
 ```
 
 ## Pull Requests

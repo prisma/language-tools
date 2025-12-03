@@ -4,16 +4,16 @@
   "version": "31.1.1",
   "author": "Prisma",
   "license": "Apache-2.0",
+  "packageManager": "pnpm@10.0.0",
   "engines": {
     "node": ">=20",
-    "npm": ">=7"
+    "pnpm": ">=10"
   },
   "devDependencies": {
     "@actions/core": "1.11.1",
     "@actions/github": "6.0.0",
     "@commitlint/cli": "19.6.1",
     "@commitlint/config-conventional": "19.6.0",
-    "@commitlint/config-lerna-scopes": "19.7.0",
     "@types/node": "14.18.63",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
@@ -26,19 +26,17 @@
     "husky": "9.1.7",
     "is-ci": "3.0.1",
     "jest": "29.7.0",
-    "lerna": "6.6.2",
     "lint-staged": "15.3.0",
     "p-retry": "4.6.2",
     "prettier": "3.4.2",
     "semver": "7.6.3",
+    "turbo": "^2.3.3",
     "typescript": "5.7.3"
   },
   "scripts": {
-    "bootstrap": "lerna exec -- npm install",
-    "build": "tsc -b",
+    "build": "turbo run build",
     "format": "prettier \"packages/**/*.{ts,js,json,md}\" --write",
     "lint": "eslint \"packages/**/*.{js,ts}\" --fix",
-    "compile": "lerna run build",
     "watch": "tsc -b --watch",
     "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "sh scripts/e2e.sh",

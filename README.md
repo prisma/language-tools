@@ -20,12 +20,21 @@ VS Code extension and Language Server for [Prisma](https://www.prisma.io/) schem
 ## Quick Start
 
 ```bash
-npm install && npm run bootstrap
-npm run build
-npm run watch
+pnpm install
+pnpm build
+pnpm watch
 ```
 
 Press `F5` in VS Code to launch the extension in debug mode.
+
+### Available Commands
+
+| Command      | Description        |
+| ------------ | ------------------ |
+| `pnpm build` | Build all packages |
+| `pnpm watch` | Watch mode         |
+| `pnpm test`  | Run E2E tests      |
+| `pnpm lint`  | Lint all packages  |
 
 ## Documentation
 

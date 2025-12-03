@@ -23,3 +23,6 @@ dist/
 *.exe
 .pnpm-store
 *.tsbuildinfo
+
+# Turbo
+.turbo/

@@ -27,17 +27,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'pnpm'
 
       # Build the extension
       - name: Install Dependencies
-        run: npm install && npm run bootstrap
+        run: pnpm install
       - name: Build all packages
-        run: npm run compile
+        run: pnpm build
       - name: Replace Readme for marketplace
         run: node scripts/change_readme.js insider
       - name: Update VS Code extension name
@@ -52,7 +54,7 @@ jobs:
           cp -R packages/language-server packages/vscode
           rm -R packages/vscode/language-server/src
       - name: Build vsix
-        run: cd packages/vscode && npm run package -- --out=prisma.vsix
+        run: cd packages/vscode && pnpm package -- --out=prisma.vsix
 
       # Upload to the current job run
       # This is very limited: Only 90 days rentention and cannot get a link easily

@@ -34,17 +34,28 @@ information, go-to-definition, and more.
 ## Quick Start
 
 ```bash
-# Install all dependencies (uses Lerna for monorepo)
-npm install && npm run bootstrap
+# Install all dependencies (uses pnpm workspaces)
+pnpm install
 
 # Build TypeScript
-npm run build
+pnpm build
 
 # Watch mode for development
-npm run watch
+pnpm watch
 ```
 
 Then press `F5` in VS Code to launch the extension in debug mode.
+
+### Available Commands
+
+| Command      | Description        |
+| ------------ | ------------------ |
+| `pnpm build` | Build all packages |
+| `pnpm watch` | Watch mode         |
+| `pnpm test`  | Run E2E tests      |
+| `pnpm lint`  | Lint all packages  |
+
+Commands are orchestrated by Turborepo. See `turbo.json` for task dependencies.
 
 ## Key Points
 

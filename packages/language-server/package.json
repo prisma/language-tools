@@ -23,7 +23,7 @@
   },
   "scripts": {
     "build": "tsc -p ./",
-    "watch": "npm run build -- -w",
+    "watch": "tsc -p ./ -w",
     "test": "vitest"
   },
   "main": "./dist/index.js",
