@@ -685,6 +685,7 @@
     "@types/vscode": "1.96.0",
     "@vscode/test-electron": "2.4.1",
     "@vscode/vsce": "2.29.0",
+    "glob": "8.1.0",
     "is-ci": "3.0.1",
     "mocha": "10.8.2",
     "openapi-typescript": "7.8.0",
