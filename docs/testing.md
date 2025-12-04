@@ -1,8 +1,24 @@
 # Testing
 
+## Running All Tests
+
+```bash
+pnpm test  # runs unit tests in all packages (via Turborepo)
+```
+
+## Test Scripts Overview
+
+| Command              | Description                                    |
+| -------------------- | ---------------------------------------------- |
+| `pnpm test`          | Run unit tests in all packages (via Turborepo) |
+| `pnpm test:e2e`      | VS Code E2E tests (before publishing)          |
+| `pnpm test:e2e:vsix` | E2E tests on published VSIX                    |
+| `pnpm test:scripts`  | Tests for CI scripts in `/scripts`             |
+
 ## Language Server Unit Tests
 
 ```bash
+pnpm test  # from root, or:
 cd packages/language-server
 pnpm test
 ```
@@ -42,10 +58,10 @@ const userFile = helper.file('User.prisma')
 ## VS Code E2E Tests
 
 ```bash
-pnpm test  # runs scripts/e2e.sh
+pnpm test:e2e  # runs scripts/e2e.sh
 ```
 
-Uses Playwright for browser-based E2E testing of the extension.
+Uses the VS Code test framework for E2E testing of the extension.
 
 ### CI E2E Testing
 
@@ -54,11 +70,14 @@ executed. By default, the **published** Language Server is used. Adding the
 `useLocalLS` parameter runs tests with the local Language Server instead:
 
 ```bash
-sh scripts/e2e.sh useLocalLS
+pnpm test:e2e useLocalLS
 ```
 
 The E2E tests run **after** the extension is published use a different script:
-`scripts/e2eTestsOnVsix/test.sh`.
+
+```bash
+pnpm test:e2e:vsix <extension_type> <os> <version>
+```
 
 Both scripts use the same tests in `packages/vscode/src/__test__` with fixtures
 located in `packages/vscode/fixtures`.

@@ -50,12 +50,12 @@ jobs:
         run: pnpm build
       - name: Lint all packages
         run: pnpm lint
-      - name: Run Language Server tests
-        run: pnpm --filter @prisma/language-server test
-      - name: Run VS Code extension tests in headless mode
+      - name: Run unit tests in all packages
+        run: pnpm test
+      - name: Run VS Code extension E2E tests in headless mode
         uses: coactions/setup-xvfb@v1
         with:
-          run: pnpm test "useLocalLS"
+          run: pnpm test:e2e "useLocalLS"
 
       # Playwright testing
       - name: Install Playwright browsers
@@ -84,7 +84,7 @@ jobs:
         run: pnpm shell:lint
       - name: Catch version incompatibilities
         if: matrix.os == 'ubuntu-latest'
-        run: pnpm testScripts
+        run: pnpm test:scripts
       - uses: codecov/codecov-action@v4
         with:
           files: ./scripts/__tests__/coverage/clover.xml,./packages/language-server/coverage/clover.xml

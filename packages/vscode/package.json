@@ -42,7 +42,7 @@
     "build": "tsc -p ./",
     "watch": "tsc -p ./ -w",
     "generate-api-client": "openapi-typescript https://api.prisma.io/v1/doc --output ./src/plugins/prisma-postgres-manager/management-api/api.d.ts",
-    "test": "rm -rf ./dist && npm run build && node dist/src/__test__/runTest true",
+    "test:integration": "rm -rf ./dist && npm run build && node dist/src/__test__/runTest true",
     "test:playwright": "playwright test",
     "test:playwright:headless": "CI=true xvfb-run -a npm run test:playwright",
     "vscode:prepublish": "npm run build",

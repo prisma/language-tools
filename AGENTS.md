@@ -48,13 +48,14 @@ Then press `F5` in VS Code to launch the extension in debug mode.
 
 ### Available Commands
 
-| Command      | Description                            |
-| ------------ | -------------------------------------- |
-| `pnpm build` | Build all packages                     |
-| `pnpm watch` | Watch mode                             |
-| `pnpm test`  | Run E2E tests                          |
-| `pnpm lint`  | Lint all packages                      |
-| `pnpm clean` | Remove untracked files and directories |
+| Command         | Description                                    |
+| --------------- | ---------------------------------------------- |
+| `pnpm build`    | Build all packages                             |
+| `pnpm watch`    | Watch mode                                     |
+| `pnpm test`     | Run unit tests in all packages (via Turborepo) |
+| `pnpm test:e2e` | Run VS Code E2E tests                          |
+| `pnpm lint`     | Lint all packages                              |
+| `pnpm clean`    | Remove untracked files and directories         |
 
 Commands are orchestrated by Turborepo. See `turbo.json` for task dependencies.
 

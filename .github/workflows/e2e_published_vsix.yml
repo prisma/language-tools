@@ -48,7 +48,7 @@ jobs:
         if: ${{ steps.install.outputs.installed-extension }}
         uses: coactions/setup-xvfb@v1
         with:
-          run: pnpm test:e2e ${{ github.event.inputs.extension_type }} ${{ matrix.os }} ${{ github.event.inputs.extension_version }}
+          run: pnpm test:e2e:vsix ${{ github.event.inputs.extension_type }} ${{ matrix.os }} ${{ github.event.inputs.extension_version }}
 
   after-test:
     name: Bump tested version and commit # scripts/versions/tested_extension_stable & tested_extension_insider
@@ -63,6 +63,6 @@ jobs:
         run: echo ${{ needs.test.outputs.installed-extension }}
       - name: Bump version
         if: ${{needs.test.result == 'success' && needs.test.outputs.installed-extension }}
-        run: pnpm test:bump ${{ github.event.inputs.extension_type }} ${{ github.event.inputs.extension_version }}
+        run: pnpm test:e2e:bump ${{ github.event.inputs.extension_type }} ${{ github.event.inputs.extension_version }}
         env:
           GH_TOKEN: ${{ secrets.PRISMA_BOT_TOKEN }} # Needed and used in the shell script behind test:bump

@@ -33,10 +33,10 @@ Then press `F5` in VS Code → **Launch VS Code extension**.
 
 Manual testing: see [TESTING.md](./TESTING.md).
 
-E2E tests (Playwright):
+E2E tests:
 
 ```bash
-pnpm test  # from repository root
+pnpm test:e2e  # from repository root
 ```
 
 ## Pull Requests

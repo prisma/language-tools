@@ -47,10 +47,10 @@ jobs:
         run: pnpm install
       - name: Compile
         run: pnpm build
-      - name: Headless e2e tests
+      - name: Headless E2E tests
         uses: coactions/setup-xvfb@v1
         with:
-          run: pnpm test
+          run: pnpm test:e2e
 
   trigger:
     name: Trigger next workflow
