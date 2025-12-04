@@ -20,3 +20,7 @@
 6. **Extension variants** — There are two published extensions: `prisma`
    (stable) and `prisma-insider` (preview). The CI manages which gets
    published when.
+
+7. **Worker processes** — Long-running tasks (like the local Prisma Postgres
+   server) run in forked child processes to avoid blocking the extension host.
+   See [Local Prisma Postgres](local-prisma-postgres-handling.md) for details.

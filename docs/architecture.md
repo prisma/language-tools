@@ -34,10 +34,10 @@
 
 ## Build System
 
-The VS Code extension uses **esbuild** to bundle both the extension and the
-language server into optimized JavaScript bundles. See
-[Development - Build System](development.md#build-system-esbuild) for details
-on the bundling configuration and why certain assets cannot be bundled.
+The VS Code extension uses **esbuild** to bundle the extension, language server,
+and worker processes into optimized JavaScript bundles. See
+[Build System](build-system.md) for details on the bundling configuration and
+why certain assets cannot be bundled.
 
 ## Key Prisma Dependencies
 
@@ -49,7 +49,8 @@ These are **internal Prisma packages** that provide core functionality:
 | `@prisma/schema-files-loader`  | Handles loading multi-file Prisma schemas  | Yes      |
 | `@prisma/config`               | Loads `prisma.config.ts` configuration     | Yes      |
 | `@prisma/studio-core-licensed` | Prisma Studio UI (webview)                 | No²      |
-| `prisma-6-language-server`     | Pinned Prisma 6 language server            | No³      |
+| `@prisma/dev`                  | Local Prisma Postgres development server   | Partial³ |
+| `prisma-6-language-server`     | Pinned Prisma 6 language server            | No⁴      |
 
 ¹ JS is bundled; WASM binary is copied separately (loaded at runtime via
 `__dirname`)
@@ -57,7 +58,10 @@ These are **internal Prisma packages** that provide core functionality:
 ² Served as static files to the webview at runtime; cannot be inlined into
 a bundle
 
-³ Kept separate to support runtime switching between Prisma 6 and latest
+³ Bundled into separate worker (`dist/workers/ppgDevServer.js`); PGlite
+assets (`pglite.data`, `pglite.wasm`) are copied separately
+
+⁴ Kept separate to support runtime switching between Prisma 6 and latest
 language servers via the `prisma.pinToPrisma6` setting
 
 > **Note:** These dependencies are automatically updated via CI. A cron job
@@ -90,6 +94,8 @@ packages/
         │   ├── prisma-language-server/
         │   ├── prisma-postgres-manager/
         │   └── prisma-studio/
+        ├── workers/                 # Separate process entry points
+        │   └── ppgDevServer.ts      # Prisma Postgres local dev server
         ├── extension.ts             # Extension entry point
         └── util.ts                  # Shared utilities
 ```

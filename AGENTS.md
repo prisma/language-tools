@@ -20,16 +20,18 @@ information, go-to-definition, and more.
 
 ## Documentation
 
-| Document                                   | Description                           |
-| ------------------------------------------ | ------------------------------------- |
-| [Architecture](docs/architecture.md)       | System design and file organization   |
-| [Development](docs/development.md)         | Setup and debugging instructions      |
-| [Plugin System](docs/plugin-system.md)     | VS Code extension plugin architecture |
-| [Language Server](docs/language-server.md) | LSP implementation details            |
-| [Testing](docs/testing.md)                 | Test patterns and helpers             |
-| [Common Tasks](docs/common-tasks.md)       | How to add features                   |
-| [CI/CD](docs/ci-cd.md)                     | GitHub Actions workflows              |
-| [Gotchas](docs/gotchas.md)                 | Important tips and warnings           |
+| Document                                                        | Description                           |
+| --------------------------------------------------------------- | ------------------------------------- |
+| [Architecture](docs/architecture.md)                            | System design and file organization   |
+| [Development](docs/development.md)                              | Setup and debugging instructions      |
+| [Build System](docs/build-system.md)                            | esbuild bundling and static assets    |
+| [Plugin System](docs/plugin-system.md)                          | VS Code extension plugin architecture |
+| [Language Server](docs/language-server.md)                      | LSP implementation details            |
+| [Local Prisma Postgres](docs/local-prisma-postgres-handling.md) | Local dev server and worker process   |
+| [Testing](docs/testing.md)                                      | Test patterns and helpers             |
+| [Common Tasks](docs/common-tasks.md)                            | How to add features                   |
+| [CI/CD](docs/ci-cd.md)                                          | GitHub Actions workflows              |
+| [Gotchas](docs/gotchas.md)                                      | Important tips and warnings           |
 
 ## Quick Start
 
