@@ -8,28 +8,33 @@
 │  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐ ┌───────────┐ │
 │  │ Language Server │ │ Prisma Postgres │ │  Prisma Studio  │ │ AI Tools  │ │
 │  │     Plugin      │ │     Manager     │ │     Plugin      │ │  Plugin   │ │
-│  └────────┬────────┘ └─────────────────┘ └─────────────────┘ └───────────┘ │
-│           │                                                                │
-│           │ LSP over IPC                                                   │
-└───────────┼────────────────────────────────────────────────────────────────┘
-            │
-            ▼
-┌────────────────────────────────────────────────────────────────────────────┐
-│                           Language Server                                  │
-│  packages/language-server/src/server.ts                                    │
-│                                                                            │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │                         MessageHandler                               │  │
-│  │        Dispatches LSP requests to appropriate handlers               │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-│           │                                                                │
-│           ▼                                                                │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │                       prisma-schema-wasm                             │  │
-│  │      WebAssembly module for parsing/formatting .prisma files         │  │
-│  │      (from @prisma/prisma-schema-wasm npm package)                   │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
-└────────────────────────────────────────────────────────────────────────────┘
+│  └────────┬────────┘ └────────┬────────┘ └────────┬────────┘ └───────────┘ │
+│           │                   │                   │                        │
+│           │ LSP over IPC      │ fork()            │ HTTP (webview)         │
+└───────────┼───────────────────┼───────────────────┼────────────────────────┘
+            │                   │                   │
+            │                   │       ┌───────────┴───────────┐
+            ▼                   ▼       ▼                       ▼
+┌───────────────────────────┐  ┌─────────────────────────┐  ┌ ─ ─ ─ ─ ─ ─ ─ ┐
+│      Language Server      │  │   PPG Dev Server Worker │    Remote Prisma
+│  packages/language-server │  │   dist/workers/         │  │   Postgres    │
+│  /src/server.ts           │  │   ppgDevServer.js       │      (Cloud)
+│                           │  │                         │  │               │
+│  ┌─────────────────────┐  │  │  ┌───────────────────┐  │   api.prisma.io
+│  │    MessageHandler   │  │  │  │    @prisma/dev    │  │  └ ─ ─ ─ ─ ─ ─ ─ ┘
+│  │  Dispatches LSP     │  │  │  │  Local PPG server │  │
+│  │  requests           │  │  │  │                   │  │
+│  └──────────┬──────────┘  │  │  │  ┌─────────────┐  │  │
+│             │             │  │  │  │   pglite    │  │  │
+│             ▼             │  │  │  │  In-process │  │  │
+│  ┌─────────────────────┐  │  │  │  │  PostgreSQL │  │  │
+│  │ prisma-schema-wasm  │  │  │  │  └─────────────┘  │  │
+│  │  WASM module for    │  │  │  └───────────────────┘  │
+│  │  parsing/formatting │  │  │                         │
+│  └─────────────────────┘  │  │  • Detached process     │
+└───────────────────────────┘  │  • IPC communication    │
+                               │  • Survives restarts    │
+                               └─────────────────────────┘
 ```
 
 ## Build System
