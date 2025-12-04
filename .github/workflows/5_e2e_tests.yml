@@ -45,7 +45,7 @@ jobs:
           cache: 'pnpm'
       - name: Install Dependencies
         run: pnpm install
-      - name: Compile
+      - name: Build
         run: pnpm build
       - name: Headless E2E tests
         uses: coactions/setup-xvfb@v1
