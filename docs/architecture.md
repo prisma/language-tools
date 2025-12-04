@@ -32,15 +32,33 @@
 └────────────────────────────────────────────────────────────────────────────┘
 ```
 
+## Build System
+
+The VS Code extension uses **esbuild** to bundle both the extension and the
+language server into optimized JavaScript bundles. See
+[Development - Build System](development.md#build-system-esbuild) for details
+on the bundling configuration and why certain assets cannot be bundled.
+
 ## Key Prisma Dependencies
 
 These are **internal Prisma packages** that provide core functionality:
 
-| Package                       | Purpose                                      |
-| ----------------------------- | -------------------------------------------- |
-| `@prisma/prisma-schema-wasm`  | WASM module for parsing/formatting/linting   |
-| `@prisma/schema-files-loader` | Handles loading multi-file Prisma schemas    |
-| `@prisma/config`              | Loads `prisma.config.ts` configuration files |
+| Package                        | Purpose                                    | Bundled? |
+| ------------------------------ | ------------------------------------------ | -------- |
+| `@prisma/prisma-schema-wasm`   | WASM module for parsing/formatting/linting | Partial¹ |
+| `@prisma/schema-files-loader`  | Handles loading multi-file Prisma schemas  | Yes      |
+| `@prisma/config`               | Loads `prisma.config.ts` configuration     | Yes      |
+| `@prisma/studio-core-licensed` | Prisma Studio UI (webview)                 | No²      |
+| `prisma-6-language-server`     | Pinned Prisma 6 language server            | No³      |
+
+¹ JS is bundled; WASM binary is copied separately (loaded at runtime via
+`__dirname`)
+
+² Served as static files to the webview at runtime; cannot be inlined into
+a bundle
+
+³ Kept separate to support runtime switching between Prisma 6 and latest
+language servers via the `prisma.pinToPrisma6` setting
 
 > **Note:** These dependencies are automatically updated via CI. A cron job
 > runs every 5 minutes checking for new Prisma releases
