@@ -1,6 +1,7 @@
 import vscode from 'vscode'
 import path from 'path'
-const packageJson = require('../../../package.json') // eslint-disable-line
+// Path from dist-tests/__test__/helper.js to package.json
+const packageJson = require('../../package.json') // eslint-disable-line
 
 export let doc: vscode.TextDocument
 export let editor: vscode.TextEditor
@@ -40,8 +41,9 @@ export function toRange(sLine: number, sChar: number, eLine: number, eChar: numb
   return new vscode.Range(start, end)
 }
 
+// Path from dist-tests/__test__/helper.js to fixtures/
 export const getDocPath = (p: string): string => {
-  return path.join(__dirname, '../../../fixtures', p)
+  return path.join(__dirname, '../../fixtures', p)
 }
 export const getDocUri = (p: string): vscode.Uri => {
   return vscode.Uri.file(getDocPath(p))

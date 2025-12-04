@@ -1,12 +1,12 @@
 import path from 'path'
 import { runTests } from '@vscode/test-electron'
-// This is executed from dist like `node dist/src/__test__/runTest true`
-const packageJson = require('../../../package.json') // eslint-disable-line
+// This is executed from dist-tests like `node dist-tests/__test__/runTest true`
+const packageJson = require('../../package.json') // eslint-disable-line
 
 function test({ PRISMA_USE_LOCAL_LS, version }: { PRISMA_USE_LOCAL_LS: string; version?: string }) {
   // The folder containing the Extension Manifest package.json
   // Passed to `--extensionDevelopmentPath`
-  const extensionDevelopmentPath = path.resolve(__dirname, '../../../')
+  const extensionDevelopmentPath = path.resolve(__dirname, '../../')
 
   // The path to test runner
   // Passed to --extensionTestsPath

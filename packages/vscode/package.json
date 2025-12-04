@@ -44,7 +44,7 @@
     "build:types": "tsc -p ./ --emitDeclarationOnly",
     "watch": "node esbuild.mjs --watch",
     "generate-api-client": "openapi-typescript https://api.prisma.io/v1/doc --output ./src/plugins/prisma-postgres-manager/management-api/api.d.ts",
-    "test:integration": "rm -rf ./dist && tsc -p ./ && node dist/src/__test__/runTest true",
+    "test:integration": "rm -rf ./dist-tests && node esbuild.mjs && tsc -p tsconfig.test.json && node dist-tests/__test__/runTest true",
     "test:playwright": "playwright test",
     "test:playwright:headless": "CI=true xvfb-run -a npm run test:playwright",
     "vscode:prepublish": "pnpm run build",
