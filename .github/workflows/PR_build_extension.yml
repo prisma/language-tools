@@ -48,7 +48,7 @@ jobs:
         env:
           PR_NUMBER: ${{ github.event.number }}
       - name: Build vsix
-        run: cd packages/vscode && pnpm package -- --out=prisma.vsix
+        run: cd packages/vscode && pnpm package --out=prisma.vsix
 
       # Upload to the current job run
       # This is very limited: Only 90 days rentention and cannot get a link easily
