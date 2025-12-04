@@ -11,6 +11,10 @@
     },
     "lint": {
       "dependsOn": ["build"]
+    },
+    "watch": {
+      "cache": false,
+      "persistent": true
     }
   }
 }

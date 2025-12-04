@@ -37,7 +37,7 @@
     "build": "turbo run build",
     "format": "prettier \"packages/**/*.{ts,js,json,md}\" --write",
     "lint": "eslint \"packages/**/*.{js,ts}\" --fix",
-    "watch": "tsc -b --watch",
+    "watch": "turbo run watch",
     "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "turbo run test",
     "test:e2e": "sh scripts/e2e.sh",
