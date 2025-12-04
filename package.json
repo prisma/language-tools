@@ -43,7 +43,8 @@
     "test:e2e": "sh scripts/e2eTestsOnVsix/test.sh",
     "testScripts": "jest __tests__",
     "test:bump": "sh scripts/e2eTestsOnVsix/bump_version.sh",
-    "prepare": "is-ci || husky"
+    "prepare": "is-ci || husky",
+    "clean": "git clean -fdx -e /.jj"
   },
   "publishConfig": {
     "access": "public"
