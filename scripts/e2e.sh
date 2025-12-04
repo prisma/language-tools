@@ -4,7 +4,7 @@ USE_LOCAL=${1-false}
 
 # Build extension with esbuild and compile tests with tsc
 echo "Building extension and compiling tests..."
-cd packages/vscode
+cd packages/vscode || exit 1
 pnpm build:dev
 pnpm tsc -p tsconfig.test.json
 cd ../..
