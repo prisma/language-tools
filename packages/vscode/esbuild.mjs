@@ -1,5 +1,5 @@
 import * as esbuild from 'esbuild'
-import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs'
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'fs'
 import { dirname, join, resolve } from 'path'
 import { fileURLToPath } from 'url'
 import { createRequire } from 'module'
@@ -118,6 +118,28 @@ const languageServerConfig = {
   nodePaths: [join(__dirname, '..', 'language-server', 'node_modules'), ...nodeModulesPaths],
 }
 
+/**
+ * Configuration for the PPG Dev Server worker.
+ * This is a separate bundle that gets forked as a child process when starting
+ * a local Prisma Postgres instance.
+ * @type {import('esbuild').BuildOptions}
+ */
+const ppgDevServerConfig = {
+  entryPoints: ['src/workers/ppgDevServer.ts'],
+  bundle: true,
+  format: 'cjs',
+  platform: 'node',
+  target: 'node20',
+  outfile: 'dist/workers/ppgDevServer.js',
+  external: [],
+  minify: production,
+  sourcemap: !production,
+  plugins: [pnpmResolvePlugin, ...(watch ? [esbuildProblemMatcherPlugin] : [])],
+  metafile: true,
+  logLevel: 'info',
+  nodePaths: nodeModulesPaths,
+}
+
 async function build() {
   try {
     const distDir = join(__dirname, 'dist')
@@ -165,6 +187,16 @@ async function build() {
       console.log(text)
     }
 
+    // Build the PPG Dev Server worker
+    console.log('\nBuilding PPG Dev Server worker...')
+    const ppgDevServerResult = await esbuild.build(ppgDevServerConfig)
+
+    if (ppgDevServerResult.metafile) {
+      const text = await esbuild.analyzeMetafile(ppgDevServerResult.metafile)
+      console.log('PPG Dev Server worker bundle analysis:')
+      console.log(text)
+    }
+
     // Copy static assets that can't be bundled
     copyStaticAssets()
 
@@ -176,11 +208,12 @@ async function build() {
 }
 
 async function watchMode() {
-  // Start watch mode for both builds
+  // Start watch mode for all builds
   const extensionContext = await esbuild.context(extensionConfig)
   const lsContext = await esbuild.context(languageServerConfig)
+  const ppgDevServerContext = await esbuild.context(ppgDevServerConfig)
 
-  await Promise.all([extensionContext.watch(), lsContext.watch()])
+  await Promise.all([extensionContext.watch(), lsContext.watch(), ppgDevServerContext.watch()])
 
   // Copy static assets once at start
   copyStaticAssets()
@@ -236,6 +269,39 @@ function copyStaticAssets() {
     }
   } catch (err) {
     console.warn('Warning: Could not find @prisma/prisma-schema-wasm package:', err.message)
+  }
+
+  // Copy pglite assets for the PPG Dev Server worker
+  // PGlite requires these files at runtime and loads them via __dirname
+  const workersDistDir = join(__dirname, 'dist/workers')
+  mkdirSync(workersDistDir, { recursive: true })
+
+  try {
+    // @electric-sql/pglite is a transitive dependency through @prisma/dev
+    // pnpm's strict node_modules structure means we need to find it in the .pnpm store
+    const pnpmStore = join(__dirname, '../../node_modules/.pnpm')
+    const pglitePkgDir = readdirSync(pnpmStore).find(
+      (dir) => dir.startsWith('@electric-sql+pglite@') && !dir.includes('socket') && !dir.includes('tools'),
+    )
+
+    if (pglitePkgDir) {
+      const pgliteDistDir = join(pnpmStore, pglitePkgDir, 'node_modules/@electric-sql/pglite/dist')
+
+      const pgliteAssets = ['pglite.data', 'pglite.wasm']
+      for (const asset of pgliteAssets) {
+        const assetSrc = join(pgliteDistDir, asset)
+        if (existsSync(assetSrc)) {
+          console.log(`Copying pglite ${asset}...`)
+          cpSync(assetSrc, join(workersDistDir, asset))
+        } else {
+          console.warn(`Warning: ${asset} not found at`, assetSrc)
+        }
+      }
+    } else {
+      console.warn('Warning: Could not find @electric-sql/pglite package in pnpm store')
+    }
+  } catch (err) {
+    console.warn('Warning: Could not find @electric-sql/pglite package:', err.message)
   }
 }
 

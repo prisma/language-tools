@@ -1,3 +1,11 @@
+/**
+ * Worker entry point for spawning a @prisma/dev server in a separate process.
+ *
+ * This file is bundled separately by esbuild and forked from the main extension
+ * when starting a local Prisma Postgres instance.
+ *
+ * @see PrismaDevRepository.startInstance() for the fork call
+ */
 import { setTimeout } from 'node:timers/promises'
 import type { Server } from '@prisma/dev'
 
