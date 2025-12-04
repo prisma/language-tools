@@ -39,8 +39,7 @@ import paths from 'env-paths'
 import FileWatcher from 'watcher'
 import { CodelensProvider, generateClient } from '../../CodeLensProvider'
 import * as prisma6Handling from '../../prisma6Handling'
-
-const packageJson = require('../../../../package.json') // eslint-disable-line
+import { packageInfo } from '../../packageInfo'
 
 let client: LanguageClient
 let serverModule: string
@@ -240,10 +239,8 @@ const plugin: PrismaVSCodePlugin = {
     activateClient(context, clientOptions)
 
     if (!isDebugOrTest) {
-      // eslint-disable-next-line
-      const extensionId = 'prisma.' + packageJson.name
-      // eslint-disable-next-line
-      const extensionVersion: string = packageJson.version
+      const extensionId = 'prisma.' + packageInfo.name
+      const extensionVersion: string = packageInfo.version
 
       telemetry = new TelemetryReporter(extensionId, extensionVersion)
 
@@ -276,19 +273,16 @@ function getServerOptions(prismaConfig: WorkspaceConfiguration, context: Extensi
 
   if (pinToPrisma6) {
     console.log('Using published Prisma 6 Language Server (npm)')
-    serverModule = require.resolve('prisma-6-language-server/dist/bin')
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  } else if (packageJson.name === 'prisma-insider-pr-build') {
-    console.log('Using local Language Server for prisma-insider-pr-build')
-    serverModule = context.asAbsolutePath(path.join('./language-server/dist/bin'))
+    // prisma-6-language-server is kept as an external dependency
+    serverModule = context.asAbsolutePath(path.join('dist/node_modules/prisma-6-language-server/dist/bin'))
   } else if (isDebugMode() || isE2ETestOnPullRequest()) {
     // use Language Server from folder for debugging
     console.log('Using local Language Server from filesystem')
     serverModule = context.asAbsolutePath(path.join('../../packages/language-server/dist/bin'))
   } else {
-    console.log('Using published Language Server (npm)')
-    // use published npm package for production
-    serverModule = require.resolve('@prisma/language-server/dist/bin')
+    // use bundled language server for production
+    console.log('Using bundled Language Server')
+    serverModule = context.asAbsolutePath(path.join('dist/language-server/bin.js'))
   }
   console.log(`serverModule: ${serverModule}`)
 

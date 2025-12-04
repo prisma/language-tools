@@ -39,16 +39,18 @@
     "directory": "packages/vscode"
   },
   "scripts": {
-    "build": "tsc -p ./",
-    "watch": "tsc -p ./ -w",
+    "build": "node esbuild.mjs --production",
+    "build:dev": "node esbuild.mjs",
+    "build:types": "tsc -p ./ --emitDeclarationOnly",
+    "watch": "node esbuild.mjs --watch",
     "generate-api-client": "openapi-typescript https://api.prisma.io/v1/doc --output ./src/plugins/prisma-postgres-manager/management-api/api.d.ts",
-    "test:integration": "rm -rf ./dist && pnpm run build && node dist/src/__test__/runTest true",
+    "test:integration": "rm -rf ./dist && tsc -p ./ && node dist/src/__test__/runTest true",
     "test:playwright": "playwright test",
     "test:playwright:headless": "CI=true xvfb-run -a npm run test:playwright",
     "vscode:prepublish": "pnpm run build",
     "package": "vsce package --no-dependencies"
   },
-  "main": "./dist/src/extension.js",
+  "main": "./dist/extension.js",
   "activationEvents": [
     "onLanguage:prisma",
     "workspaceContains:**/*.prisma"
@@ -685,6 +687,7 @@
     "@types/vscode": "1.96.0",
     "@vscode/test-electron": "2.4.1",
     "@vscode/vsce": "2.29.0",
+    "esbuild": "^0.27.1",
     "glob": "8.1.0",
     "is-ci": "3.0.1",
     "mocha": "10.8.2",

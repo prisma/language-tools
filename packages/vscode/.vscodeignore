@@ -1,9 +1,42 @@
+# VS Code / IDE files
 .vscode/**
 .vscode-test/**
-.gitignore
+
+# Source files (bundled into dist/)
+src/**
+tests/**
+
+# Build configuration
 **/tsconfig.json
-src
+**/tsconfig.tsbuildinfo
+esbuild.mjs
+playwright.config.ts
+
+# Original node_modules (bundled assets copied to dist/node_modules/)
+node_modules/**
+
+# Old tsc build output (we now use esbuild bundled output)
+dist/src/**
+dist/tests/**
+dist/playwright.config.*
+
+# Development/test files
+.gitignore
 .eslintignore
 .eslintrc.js
 .prettierignore
 *.vsix
+TESTING.md
+CONTRIBUTING.md
+fixtures/**
+
+# Keep these files (not ignored):
+# - dist/extension.js (bundled extension)
+# - dist/language-server/** (bundled language server)
+# - dist/node_modules/** (copied static assets)
+# - syntaxes/** (TextMate grammars)
+# - language-configuration.json
+# - package.json
+# - README.md
+# - LICENSE
+# - *.png, *.svg (icons)

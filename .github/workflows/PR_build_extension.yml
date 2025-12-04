@@ -47,12 +47,6 @@ jobs:
           node scripts/update_package_json_file_PR_build.js
         env:
           PR_NUMBER: ${{ github.event.number }}
-      # So we can use the local language server and don't have to publish it to npm first
-      # Note that linked node_modules are not supported https://github.com/microsoft/vscode-vsce/issues/203
-      - name: Copy language-server dist directory inside vscode package
-        run: |
-          cp -R packages/language-server packages/vscode
-          rm -R packages/vscode/language-server/src
       - name: Build vsix
         run: cd packages/vscode && pnpm package -- --out=prisma.vsix
 
