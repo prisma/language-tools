@@ -1,193 +1,116 @@
-# Contributing
+# Contributing to Prisma VS Code Extension
 
-## About this repository
+## Getting Started
 
-The `main` branch of this repository contains the VS Code extension for Prisma schema files. Prisma package dependencies are kept up to date with [a GitHub Action workflow](/.github/workflows/1_check_for_updates.yml), that updates them every time a new version of them is released.
+See the [Development Guide](../../docs/development.md) for setup instructions.
 
-There is a stable version `prisma` and an unstable version `prisma-insider`. The stable one is published as ["Prisma" in the VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma), the unstable one as ["Prisma - Insider"](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider). An automated publish runs every 5 minutes calling the `check-update.sh` script.
-In the beginning of this run, the CI job checks for Prisma stable version and `scripts/prisma_version_stable` contents to be the same. If the Prisma stable version is a new minor release, it makes the required version changes and proceeds further in the job. `scripts/prisma_version_stable` is a file that is committed by the stable CI job. That enables the future runs to know if an extension version is already published for a specific Prisma CLI version.
+Quick start:
 
-If there is a new Prisma Patch, a new patch branch from the last stable release tag is created if it does not exist yet. It then makes the required version changes and releases a new Insider extension. This script also triggers the release of a new Stable extension, incrementing the version number each time.
-If the patch branch is created manually and something is pushed to it, another script runs, releasing what is on the patch branch to the Insider extension, incrementing the version number each time.
-On push to the `main` branch, a new Insider extension is released, with an incremented version number each time.
-
-## Structure
-
-```
-.
-├── packages
-│   └── vscode
-│       └── src
-|           └── extension.ts // VS Code Entry Point
-│           └── plugins
-│               └── prisma-language-server  // Language Client entry point
-|   └── language-server      // Language Server
-│       └── src
-│           └── cli.ts    // Language Server CLI entry point
-└── package.json         // The extension manifest
+```bash
+npm install && npm run bootstrap
+npm run watch
 ```
 
-## Resources
+Then press `F5` in VS Code → **Launch VS Code extension**.
 
-- [VS Code API reference](https://code.visualstudio.com/api/references/vscode-api)
-- [Types of completions (icons)](https://code.visualstudio.com/docs/editor/intellisense#_types-of-completions)
+## Documentation
 
-## Development
-
-- Run `npm install && npm run bootstrap` in the root folder. This installs all necessary npm modules in both the vscode and language-server folder.
-- Run `npm run watch`.
-- Open VS Code on this folder.
-- Switch to the debug viewlet.
-- Select `Launch VS Code extension` from the drop down.
-- Run the launch config. (This will always use the local Language Server, not the published one.)
-- If you want to debug the server as well use the launch configuration `Attach to Server` afterwards.
-- A new file should open in the [Extension Development Host] instance of VS Code.
-- Change the language to Prisma.
-- Make a change to the syntax
-- To reload, press the reload button in VS Code (**Developer: Inspect TM Scopes** is helpful for debugging syntax issues)
-
-### Dependencies
-
-- the version of `@types/vscode` must always be smaller or equal to the `engines.vscode` version. Otherwise the extension can not be packaged.
+- [Plugin System](../../docs/plugin-system.md) — Extension architecture
+- [Testing](../../docs/testing.md) — Test patterns and helpers
+- [Common Tasks](../../docs/common-tasks.md) — Adding features
+- [CI/CD](../../docs/ci-cd.md) — Automated workflows
 
 ## Debugging
 
-- Set `prisma.trace.server` to `messages` or `verbose` to trace the communication between VS Code and the language server.
-- There is a tool to visualize and filter the communication between Language Client / Server. All logs from the channel can be saved into a file, and loaded with the Language Server Protocol Inspector at https://microsoft.github.io/language-server-protocol/inspector
+- Set `"prisma.trace.server": "messages"` or `"verbose"` in VS Code settings
+  to trace communication between VS Code and the language server.
+- Use the [Language Server Protocol Inspector][lsp-inspector] to visualize
+  and filter LSP traffic (save logs from the output channel to a file).
+
+[lsp-inspector]: https://microsoft.github.io/language-server-protocol/inspector
 
 ## Testing
 
-Instructions on manual testing can be found [here](TESTING.md).
+Manual testing: see [TESTING.md](./TESTING.md).
 
-End-to-End tests:
+E2E tests (Playwright):
 
-- Run `npm install` in the root folder.
-- Open VS Code on this folder.
-- Switch to the debug viewlet.
-- Select `Integration Tests` from the drop down.
-- Run the launch config. (This will use the local Language Server.)
-- Open the debug console to view the test results.
-
-When running the End-to-End tests in GitHub Actions before publishing, the script `scripts/e2e.sh` is run. By default, the published Language Server is used. Adding the parameter `useLocalLS` will run the tests using the local Language Server.
-The End-to-End tests that are run after the publish of the extension are located in `scripts/e2eTestsOnVsix/test.sh`.
-In both cases the tests in `packages/vscode/src/__test__` with the schmeas located in `packages/vscode/fixtures` are used.
+```bash
+npm run test  # from repository root
+```
 
 ## Pull Requests
 
-When a PR is opened, the "PR Build extension" GitHub Action will build and upload a `pr<PR_NUMBER>-prisma.vsix` file and link to it in a comment (which will be updated for each commit).
+When you open a PR, the **PR Build extension** workflow automatically builds
+and uploads a `pr<NUMBER>-prisma.vsix` file linked in a comment.
 
-### How to install and use this PR Build version:
+### Installing a PR Build
 
-#### With the UI
+**Via UI:**
 
-- In the extensions tab, filter the Prisma extenions with `@installed prisma`
-- Disable all the Prisma extensions (Prisma & Prisma Insider)
-- From the ... menu or the command palette, click "Install from VSIX..."
+1. In Extensions, filter with `@installed prisma`
+2. Disable Prisma and Prisma Insider extensions
+3. **Extensions** → **...** → **Install from VSIX...**
 
-#### With the command line
+**Via command line:**
 
-Note: when `<PR_NUMBER>`, you will need to replace it with the PR number, like `1234`.
+```bash
+# Download the artifact (replace <NUMBER> with PR number)
+wget --content-disposition \
+  "https://github.com/prisma/language-tools/blob/artifacts/pull-request-artifacts/pr<NUMBER>-prisma.vsix?raw=true"
 
-<details>
-  <summary>For VS Code Stable version</summary>
-  
-    ```bash
-    # !! Important !! Close VS Code manually
-    # On macOS you can run the following command
-    osascript -e 'quit app "Visual Studio Code"'
+# Install it
+code --install-extension pr<NUMBER>-prisma.vsix
 
-    # Download the latest build artifact from GitHub
-    # Replace with the correct PR number
-    wget --content-disposition "https://github.com/prisma/language-tools/blob/artifacts/pull-request-artifacts/pr<PR_NUMBER>-prisma.vsix?raw=true"
+# Launch with marketplace extensions disabled
+code --disable-extension Prisma.prisma --disable-extension Prisma.prisma-insider
+```
 
-    # Install the PR Build extension
-    code --install-extension pr<PR_NUMBER>-prisma.vsix
+### Cleanup After Testing
 
-    # Launch VS Code with Prisma extensions disabled
-    # Note that VS Code needs to be closed or this will be a noop and won't do anything
-    code --disable-extension Prisma.prisma --disable-extension Prisma.prisma-insider
-    ```
-
-</details>
-
-<details>
-  <summary>For VS Code Insiders version</summary>
-
-    ```bash
-    # !! Important !! Close VS Code manually
-    # On macOS you can run the following command
-    osascript -e 'quit app "Visual Studio Code - Insiders"'
-
-    # Download the latest build artifact from GitHub
-    # Replace with the correct PR number
-    wget --content-disposition "https://github.com/prisma/language-tools/blob/artifacts/pull-request-artifacts/pr<PR_NUMBER>-prisma.vsix?raw=true"
-
-    # Install the PR Build extension
-    code-insiders --install-extension pr<PR_NUMBER>-prisma.vsix
-
-    # Launch VS Code with Prisma extensions disabled
-    # Note that VS Code needs to be closed or this will be a noop and won't do anything
-    code-insiders --disable-extension Prisma.prisma --disable-extension Prisma.prisma-insider
-    ```
-
-</details>
-
-Now the extension can be tested:
-
-- open a `schema.prisma` file.
-- For completions you can:
-  - Type in the schema
-  - Invoke suggestions with Ctrl + Space
-
-### After testing you might want to clean up things a bit
-
-#### With the UI
-
-- In the extensions tab, filter the Prisma extenions with `@installed prisma`
-- Right click the `Prisma - Insider - PR <PR_NUMBER> build` and click `Uninstall`
-- Enable the Prisma or Prisma Insider extension
-
-#### With the command line
-
-<details>
-  <summary>For VS Code Stable version</summary>
-
-    ```bash
-    # Delete the dowloaded artifact
-    rm pr<PR_NUMBER>-prisma.vsix
-
-    # Uninstall the PR build extension
-    code --uninstall-extension Prisma.prisma-insider-pr-build
-    ```
-
-</details>
-
-<details>
-  <summary>For VS Code Insiders version</summary>
-
-    ```bash
-    # Delete the dowloaded artifact
-    rm pr<PR_NUMBER>-prisma.vsix
-
-    # Uninstall the PR build extension
-    code-insiders --uninstall-extension Prisma.prisma-insider-pr-build
-    ```
-
-</details>
+```bash
+rm pr<NUMBER>-prisma.vsix
+code --uninstall-extension Prisma.prisma-insider-pr-build
+```
 
 ## Publishing
 
-The extension is automatically published using a [Azure Devops Personal Access Token](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token) via GitHub actions (see `.github/workflows/publish.yml`).
+The extension is automatically published via GitHub Actions using an
+[Azure DevOps Personal Access Token][pat-docs].
 
-Note that the personal access token is only valid for a year and will need to be renewed manually.
+> **Note:** The token expires yearly and must be renewed manually.
 
-### Manual Publishing
+[pat-docs]: https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token
 
-To do an extension only publish which does not coincide with a Prisma ORM release, please follow these steps:
+### Automatic Publishing
 
-1. Create a patch branch ending with `.x` (e.g. `6.7.x`) if it doesn't exist yet.
-2. Push to the patch branch with the changes.
-3. Step 2 will trigger the workflow [`1/2b. Bump versions for extension only (on push to main and patch branch)`](../../.github/workflows/1_2_b_bump_extension_only.yml). This will kickoff building an Insider release with only those changes - temporarily overwriting any prior Insider releases triggered from the main branch.
-4. Once you want to release to stable, manually trigger GH action workflow [`1/2c. Bump versions for extension only (promotes patch branch to stable release)`](../../.github/workflows/1_2_c_promote_patch_to_stable.yml). Choose your patch branch in `Use workflow from` in the GH action UI.
+Upon any Prisma `dev` release a new insiders release of the extension is automatically performed.
 
-Note: Best cherry-pick the changes you want to include from the main branch onto the patch branch. Do NOT merge the patch branch back into main or stable!
+Upon any Prisma `latest` release a new stable release of the extension is automatically performed.
+
+### Manual Publishing (Extension-Only Release)
+
+For releases that don't coincide with a Prisma ORM release:
+
+**Insider release:**
+
+- Push to `main` or a patch branch (e.g., `35.0.x`)
+- Automatically triggers [`1/2. Bump versions for extension only`][bump-workflow]
+
+**Stable release:**
+
+- Manually trigger [`1/2. Bump and release a stable version`][stable-workflow]
+- Select release type: `patch`, `minor`, or `major`
+
+[bump-workflow]: ../../.github/workflows/1_2_bump_extension_only.yml
+[stable-workflow]: ../../.github/workflows/1_2_stable_extension_release.yml
+
+## Dependencies
+
+The `@types/vscode` version must be ≤ the `engines.vscode` version in
+`package.json`, otherwise the extension cannot be packaged.
+
+## Resources
+
+- [VS Code API Reference](https://code.visualstudio.com/api/references/vscode-api)
+- [Completion Item Kinds (icons)](https://code.visualstudio.com/docs/editor/intellisense#_types-of-completions)
