@@ -1,6 +1,11 @@
 import type { ExtensionContext } from 'vscode'
 
-// @ts-expect-error don't worry about the type.
-export function getPackageJSON(context: ExtensionContext): import('pkg-types').PackageJson {
-  return context.extension.packageJSON as never
+export interface PackageJson {
+  name?: string
+  version?: string
+  [key: string]: unknown
+}
+
+export function getPackageJSON(context: ExtensionContext): PackageJson {
+  return context.extension.packageJSON as PackageJson
 }

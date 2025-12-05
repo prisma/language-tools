@@ -48,7 +48,7 @@ export async function openNewStudioTab(args: OpenNewStudioTabArgs) {
 
   const telemetryReporter = new TelemetryReporter(
     `prisma.${packageJSON.name || 'prisma-unknown'}.studio`,
-    (packageJSON as { version: string }).version || '0.0.0',
+    packageJSON.version || '0.0.0',
   )
 
   const { server, url } = await startStudioServer({ ...args, telemetryReporter })
