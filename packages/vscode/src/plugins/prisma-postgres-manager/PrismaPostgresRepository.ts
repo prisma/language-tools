@@ -1,17 +1,35 @@
-import { EventEmitter } from 'vscode'
-import { createManagementAPIClient } from './management-api/client'
+import { env, EventEmitter, Uri } from 'vscode'
+import {
+  createManagementAPI,
+  createManagementAPIClient,
+  type ManagementAPI,
+  type LoginResult,
+  type operations,
+} from '@prisma/management-api-sdk'
 import { CredentialsStore } from '@prisma/credentials-store'
 import type { ConnectionStringStorage } from './ConnectionStringStorage'
-import { Auth } from './management-api/auth'
-import type { paths } from './management-api/api.d'
 import { z } from 'zod'
-import type { FetchResponse } from 'openapi-fetch'
+import { WorkspaceTokenStorage, PendingTokenStorage } from './WorkspaceTokenStorage'
 
-export type RegionId = NonNullable<
-  NonNullable<
-    paths['/v1/projects/{projectId}/databases']['post']['requestBody']
-  >['content']['application/json']['region']
->
+const CLIENT_ID = 'cmamnw2go00005812nlbzb4pi'
+const DEFAULT_UTM_MEDIUM = 'ppg-cloud-list'
+
+// Response types from SDK operations
+type ProjectsResponse = operations['getV1Projects']['responses']['200']['content']['application/json']
+type ProjectsErrorResponse = operations['getV1Projects']['responses']['401']['content']['application/json']
+type DatabasesResponse =
+  operations['getV1ProjectsByProjectIdDatabases']['responses']['200']['content']['application/json']
+type DatabasesErrorResponse =
+  operations['getV1ProjectsByProjectIdDatabases']['responses']['401']['content']['application/json']
+
+// Generic API response type for type assertions
+type APIResponse<TData, TError> = { data?: TData; error?: TError; response: Response }
+
+export type LoginOptions = {
+  utmMedium?: string
+}
+
+export type RegionId = 'us-east-1' | 'us-west-1' | 'eu-west-3' | 'eu-central-1' | 'ap-northeast-1' | 'ap-southeast-1'
 export type Region = {
   id: string
   name: string
@@ -174,18 +192,90 @@ class CacheManager {
 
 export class PrismaPostgresRepository {
   private reloadPromise: Promise<void> | undefined = undefined
-  private clients = new Map<string, ReturnType<typeof createManagementAPIClient>>()
+  private managementAPIs = new Map<string, ManagementAPI>()
   private credentialsStore = new CredentialsStore()
   private cache = new CacheManager()
+
+  // Auth state
+  private authAPI: ManagementAPI | null = null
+  private pendingTokenStorage = new PendingTokenStorage()
+  private latestLoginResult: LoginResult | null = null
 
   public readonly refreshEventEmitter = new EventEmitter<void | PrismaPostgresItem>()
 
   constructor(
-    private readonly auth: Auth,
+    private readonly extensionId: string,
     private readonly connectionStringStorage: ConnectionStringStorage,
   ) {
     // Start preloading data in the background for better UX
     this.reloadPromise = this.reloadAllData()
+  }
+
+  private getRedirectUri(): string {
+    return `${env.uriScheme}://${this.extensionId.toLowerCase()}/auth/callback`
+  }
+
+  /**
+   * Get the cached auth API instance (used for login flows).
+   * Reuses a single instance instead of creating fresh ones each time.
+   */
+  private getAuthAPI(): ManagementAPI {
+    if (!this.authAPI) {
+      this.authAPI = createManagementAPI({
+        clientId: CLIENT_ID,
+        redirectUri: this.getRedirectUri(),
+        tokenStorage: this.pendingTokenStorage,
+      })
+    }
+    return this.authAPI
+  }
+
+  /**
+   * Initiates the OAuth login flow by opening the browser.
+   */
+  async login(options: LoginOptions = {}): Promise<void> {
+    const result = await this.getAuthAPI().getLoginUrl({
+      scope: 'workspace:admin offline_access',
+      additionalParams: {
+        utm_source: 'vscode',
+        utm_medium: options.utmMedium ?? DEFAULT_UTM_MEDIUM,
+      },
+    })
+
+    this.latestLoginResult = result
+    await env.openExternal(Uri.parse(result.url))
+  }
+
+  /**
+   * Handles the OAuth callback after browser authentication.
+   * Returns true if this was an auth callback that was handled, false otherwise.
+   */
+  async handleAuthCallback(uri: Uri): Promise<boolean> {
+    if (uri.path !== '/auth/callback') return false
+    if (!this.latestLoginResult) {
+      throw new Error('No login in progress')
+    }
+
+    const { state, verifier } = this.latestLoginResult
+
+    await this.getAuthAPI().handleCallback({
+      callbackUrl: `${this.getRedirectUri()}?${uri.query}`,
+      verifier,
+      expectedState: state,
+    })
+
+    // Tokens are now stored in pendingTokenStorage via handleCallback
+    const tokens = this.pendingTokenStorage.consumeTokens()
+    this.latestLoginResult = null
+
+    if (!tokens) {
+      throw new Error('No tokens received from callback')
+    }
+
+    // Discover workspaces and store credentials per workspace
+    await this.addWorkspace({ token: tokens.accessToken, refreshToken: tokens.refreshToken })
+
+    return true
   }
 
   private async reloadAllData(): Promise<void> {
@@ -228,55 +318,20 @@ export class PrismaPostgresRepository {
     }
   }
 
-  private async getClient(workspaceId: string) {
+  private getAPI(workspaceId: string): ManagementAPI {
     const strippedWorkspaceId = stripResourceIdentifierPrefix(workspaceId)
 
-    if (!this.clients.has(strippedWorkspaceId)) {
-      await this.credentialsStore.reloadCredentialsFromDisk()
+    if (!this.managementAPIs.has(strippedWorkspaceId)) {
+      const api = createManagementAPI({
+        clientId: CLIENT_ID,
+        redirectUri: this.getRedirectUri(),
+        tokenStorage: new WorkspaceTokenStorage(strippedWorkspaceId, this.credentialsStore),
+      })
 
-      const credentials =
-        (await this.credentialsStore.getCredentialsForWorkspace(strippedWorkspaceId)) ||
-        (await this.credentialsStore.getCredentialsForWorkspace(workspaceId))
-
-      if (!credentials) {
-        throw new Error(`Workspace '${strippedWorkspaceId}' not found`)
-      }
-
-      const refreshTokenHandler = async () => {
-        const credentials =
-          (await this.credentialsStore.getCredentialsForWorkspace(strippedWorkspaceId)) ||
-          (await this.credentialsStore.getCredentialsForWorkspace(workspaceId))
-
-        if (!credentials) {
-          throw new Error(`Workspace '${strippedWorkspaceId}' not found`)
-        }
-
-        const refreshTokenResult = await this.auth.refreshToken(credentials.refreshToken)
-
-        if (refreshTokenResult.status === 'success') {
-          await this.credentialsStore.storeCredentials({
-            workspaceId: strippedWorkspaceId,
-            token: refreshTokenResult.token,
-            refreshToken: refreshTokenResult.refreshToken,
-          })
-
-          return { token: refreshTokenResult.token }
-        } else if (refreshTokenResult.refreshTokenInvalid) {
-          await this.credentialsStore.deleteCredentials(strippedWorkspaceId)
-          throw new Error(
-            `Refresh token was invalid for workspace ${strippedWorkspaceId}. Credentials have been removed.`,
-          )
-        } else {
-          throw new Error(`Failed to refresh token. Please try again.`)
-        }
-      }
-
-      const client = createManagementAPIClient(credentials.token, refreshTokenHandler)
-
-      this.clients.set(strippedWorkspaceId, client)
+      this.managementAPIs.set(strippedWorkspaceId, api)
     }
 
-    return this.clients.get(strippedWorkspaceId)!
+    return this.managementAPIs.get(strippedWorkspaceId)!
   }
 
   private checkResponseOrThrow<T, E>(
@@ -330,8 +385,8 @@ export class PrismaPostgresRepository {
     const workspaceId = workspaces[0]?.id
     if (!workspaceId) return []
 
-    const client = await this.getClient(workspaceId)
-    const response = await client.GET('/v1/regions/postgres')
+    const api = this.getAPI(workspaceId)
+    const response = await api.client.GET('/v1/regions/postgres')
     this.checkResponseOrThrow(workspaceId, response)
 
     const regions = response.data.data
@@ -359,9 +414,9 @@ export class PrismaPostgresRepository {
 
     const results = await Promise.allSettled(
       credentials.map(async (cred) => {
-        const client = await this.getClient(cred.workspaceId)
+        const api = this.getAPI(cred.workspaceId)
 
-        const response = await client.GET('/v1/workspaces')
+        const response = await api.client.GET('/v1/workspaces')
 
         this.checkResponseOrThrow(cred.workspaceId, response)
 
@@ -389,8 +444,12 @@ export class PrismaPostgresRepository {
   }
 
   async addWorkspace({ token, refreshToken }: { token: string; refreshToken: string }): Promise<void> {
-    const client = createManagementAPIClient(token, () => {
-      throw new Error('Received token has to be instantly refreshed. Something is wrong.')
+    // Create a temporary client to fetch workspace info
+    const client = createManagementAPIClient({
+      baseUrl: 'https://api.prisma.io',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     })
 
     const response = await client.GET('/v1/workspaces')
@@ -399,14 +458,16 @@ export class PrismaPostgresRepository {
       throw new Error(`Failed to retrieve workspace information.`)
     }
 
-    const { data: workspaces } = response.data
+    const { data: workspaces } = response.data as {
+      data: Array<{ id: string; name: string; type: string; createdAt: string }>
+    }
 
     if (workspaces.length === 0) {
       throw new Error(`Received token does not grant access to any workspaces.`)
     }
 
     await Promise.all(
-      workspaces.map(async ({ id, name }) => {
+      workspaces.map(async ({ id, name }: { id: string; name: string }) => {
         const strippedWorkspaceId = stripResourceIdentifierPrefix(id)
 
         await this.credentialsStore.storeCredentials({
@@ -423,7 +484,7 @@ export class PrismaPostgresRepository {
   }
 
   async removeWorkspace({ workspaceId }: { workspaceId: string }): Promise<void> {
-    this.clients.delete(workspaceId)
+    this.managementAPIs.delete(workspaceId)
     await this.connectionStringStorage.removeConnectionString({ workspaceId })
     await this.credentialsStore.deleteCredentials(workspaceId)
     await this.credentialsStore.deleteCredentials(`wksp_${workspaceId}`)
@@ -440,22 +501,21 @@ export class PrismaPostgresRepository {
       return this.cache.getProjects(workspaceId)
     }
 
-    const client = await this.getClient(workspaceId)
+    const api = this.getAPI(workspaceId)
 
     const projects: Project[] = []
     let pagination: { hasMore: boolean; nextCursor: string | null | undefined } | undefined = undefined
 
     do {
-      const response = (await client.GET('/v1/projects', {
+      const response: APIResponse<ProjectsResponse, ProjectsErrorResponse> = await api.client.GET('/v1/projects', {
         params: {
           query: { cursor: pagination?.nextCursor || null, limit: 100 },
         },
-      })) as FetchResponse<paths['/v1/projects']['get'], undefined, `${string}/${string}`>
+      })
 
       this.checkResponseOrThrow(workspaceId, response)
 
-      const { data } = response
-
+      const data = response.data
       pagination = data.pagination
 
       projects.push(
@@ -486,9 +546,9 @@ export class PrismaPostgresRepository {
   }): Promise<{ project: Project; database: NewRemoteDatabase | null }> {
     this.ensureValidRegion(region)
 
-    const client = await this.getClient(workspaceId)
+    const api = this.getAPI(workspaceId)
 
-    const response = await client.POST('/v1/projects', {
+    const response = await api.client.POST('/v1/projects', {
       body: { name, region },
     })
 
@@ -543,9 +603,9 @@ export class PrismaPostgresRepository {
   }
 
   async deleteProject({ workspaceId, id }: { workspaceId: string; id: string }): Promise<void> {
-    const client = await this.getClient(workspaceId)
+    const api = this.getAPI(workspaceId)
 
-    const response = await client.DELETE('/v1/projects/{id}', {
+    const response = await api.client.DELETE('/v1/projects/{id}', {
       params: { path: { id } },
     })
 
@@ -574,23 +634,25 @@ export class PrismaPostgresRepository {
       return this.cache.getDatabases(workspaceId, projectId)
     }
 
-    const client = await this.getClient(workspaceId)
+    const api = this.getAPI(workspaceId)
 
     const databases: Database[] = []
     let pagination: { hasMore: boolean; nextCursor: string | null | undefined } | undefined = undefined
 
     do {
-      const response = (await client.GET('/v1/projects/{projectId}/databases', {
-        params: {
-          path: { projectId },
-          query: { cursor: pagination?.nextCursor || null, limit: 100 },
+      const response: APIResponse<DatabasesResponse, DatabasesErrorResponse> = await api.client.GET(
+        '/v1/projects/{projectId}/databases',
+        {
+          params: {
+            path: { projectId },
+            query: { cursor: pagination?.nextCursor || null, limit: 100 },
+          },
         },
-      })) as FetchResponse<paths['/v1/projects/{projectId}/databases']['get'], undefined, `${string}/${string}`>
+      )
 
       this.checkResponseOrThrow(workspaceId, response)
 
-      const { data } = response
-
+      const data = response.data
       pagination = data.pagination
 
       databases.push(
@@ -631,9 +693,9 @@ export class PrismaPostgresRepository {
     projectId: string
     databaseId: string
   }): Promise<string> {
-    const client = await this.getClient(workspaceId)
+    const api = this.getAPI(workspaceId)
 
-    const response = await client.POST('/v1/databases/{databaseId}/connections', {
+    const response = await api.client.POST('/v1/databases/{databaseId}/connections', {
       params: {
         path: { databaseId },
       },
@@ -666,9 +728,9 @@ export class PrismaPostgresRepository {
   }): Promise<NewRemoteDatabase> {
     this.ensureValidRegion(region)
 
-    const client = await this.getClient(workspaceId)
+    const api = this.getAPI(workspaceId)
 
-    const response = await client.POST('/v1/projects/{projectId}/databases', {
+    const response = await api.client.POST('/v1/projects/{projectId}/databases', {
       params: { path: { projectId } },
       body: { name, region },
     })
@@ -718,9 +780,9 @@ export class PrismaPostgresRepository {
     projectId: string
     id: string
   }): Promise<void> {
-    const client = await this.getClient(workspaceId)
+    const api = this.getAPI(workspaceId)
 
-    const response = await client.DELETE('/v1/databases/{databaseId}', {
+    const response = await api.client.DELETE('/v1/databases/{databaseId}', {
       params: { path: { databaseId: id } },
     })
 

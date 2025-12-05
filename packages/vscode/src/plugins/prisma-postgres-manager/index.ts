@@ -8,7 +8,6 @@ import { deleteRemoteDatabase } from './commands/deleteRemoteDatabase'
 import { handleCommandError } from './shared-ui/handleCommandError'
 import { logout } from './commands/logout'
 import { login, handleAuthCallback } from './commands/login'
-import { Auth } from './management-api/auth'
 import { ConnectionStringStorage } from './ConnectionStringStorage'
 import { getRemoteDatabaseConnectionString } from './commands/getRemoteDatabaseConnectionString'
 import { launchStudio } from './commands/launchStudio'
@@ -24,14 +23,13 @@ export default {
     return true
   },
   activate(context: ExtensionContext) {
-    const auth = new Auth(context.extension.id)
     const connectionStringStorage = new ConnectionStringStorage(context.secrets)
-    const ppgRepository = new PrismaPostgresRepository(auth, connectionStringStorage)
+    const ppgRepository = new PrismaPostgresRepository(context.extension.id, connectionStringStorage)
     const prismaDevRepository = new PrismaDevRepository(context)
 
     window.registerUriHandler({
       handleUri(uri: Uri) {
-        void handleAuthCallback({ uri, ppgRepository, auth })
+        void handleAuthCallback({ uri, ppgRepository })
       },
     })
 
@@ -43,7 +41,7 @@ export default {
         ppgRepository.triggerRefresh()
       }),
       commands.registerCommand('prisma.login', async (args: unknown) => {
-        await handleCommandError('Login', () => login(ppgRepository, auth, args))
+        await handleCommandError('Login', () => login(ppgRepository, args))
       }),
       commands.registerCommand('prisma.logout', async (args: unknown) => {
         await handleCommandError('Logout', () => logout(ppgRepository, args))
