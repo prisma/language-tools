@@ -690,7 +690,7 @@
     "@vscode/vsce": "2.29.0",
     "esbuild": "^0.27.1",
     "glob": "8.1.0",
-    "is-ci": "3.0.1",
+    "is-ci": "4.1.0",
     "mocha": "10.8.2",
     "openapi-typescript": "7.8.0",
     "ovsx": "0.10.1",
