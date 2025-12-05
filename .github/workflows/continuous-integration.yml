@@ -37,23 +37,27 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'pnpm'
       - name: Install Dependencies
-        run: npm install && npm run bootstrap
+        run: pnpm install
       - name: Build all packages
-        run: npm run compile
+        run: pnpm build
+      - name: Typecheck all packages
+        run: pnpm typecheck
       - name: Lint all packages
-        run: npm run lint
-      - name: Run Language Server tests
-        run: npx lerna run test --scope @prisma/language-server
-      - name: Run VS Code extension tests in headless mode
+        run: pnpm lint
+      - name: Run unit tests in all packages
+        run: pnpm test
+      - name: Run VS Code extension E2E tests in headless mode
         uses: coactions/setup-xvfb@v1
         with:
-          run: npm test "useLocalLS"
+          run: pnpm test:e2e "useLocalLS"
 
       # Playwright testing
       - name: Install Playwright browsers
@@ -64,7 +68,7 @@ jobs:
       - name: Run Playwright UI tests
         uses: coactions/setup-xvfb@v1
         with:
-          run: npm run test:playwright
+          run: pnpm test:playwright
           working-directory: packages/vscode
         env:
           CI: true
@@ -79,10 +83,10 @@ jobs:
 
       - name: Catch shell script issues
         if: matrix.os == 'ubuntu-latest'
-        run: npm run shell:lint
+        run: pnpm shell:lint
       - name: Catch version incompatibilities
         if: matrix.os == 'ubuntu-latest'
-        run: npm run testScripts
+        run: pnpm test:scripts
       - uses: codecov/codecov-action@v4
         with:
           files: ./scripts/__tests__/coverage/clover.xml,./packages/language-server/coverage/clover.xml

@@ -23,8 +23,9 @@
   },
   "scripts": {
     "build": "tsc -p ./",
-    "watch": "npm run build -- -w",
-    "test": "vitest"
+    "watch": "tsc -p ./ -w",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
   },
   "main": "./dist/index.js",
   "typings": "dist/src/index",

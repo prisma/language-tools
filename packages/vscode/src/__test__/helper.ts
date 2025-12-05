@@ -1,6 +1,9 @@
-import vscode from 'vscode'
 import path from 'path'
-const packageJson = require('../../../package.json') // eslint-disable-line
+import vscode from 'vscode'
+
+// Path from dist-tests/__test__/helper.js to package.json
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+const packageJson = require('../../package.json') as { publisher: string; name: string }
 
 export let doc: vscode.TextDocument
 export let editor: vscode.TextEditor
@@ -17,9 +20,7 @@ export async function sleep(ms: number): Promise<void> {
  */
 export async function activate(docUri: vscode.Uri): Promise<void> {
   // The extensionId is `publisher.name` from package.json
-  const ext = vscode.extensions.getExtension(
-    `${packageJson.publisher}.${packageJson.name}`, // eslint-disable-line
-  )
+  const ext = vscode.extensions.getExtension(`${packageJson.publisher}.${packageJson.name}`)
   if (!ext) {
     console.error('Failed to get extension.')
     return
@@ -40,8 +41,9 @@ export function toRange(sLine: number, sChar: number, eLine: number, eChar: numb
   return new vscode.Range(start, end)
 }
 
+// Path from dist-tests/__test__/helper.js to fixtures/
 export const getDocPath = (p: string): string => {
-  return path.join(__dirname, '../../../fixtures', p)
+  return path.join(__dirname, '../../fixtures', p)
 }
 export const getDocUri = (p: string): vscode.Uri => {
   return vscode.Uri.file(getDocPath(p))

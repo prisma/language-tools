@@ -20,31 +20,47 @@ information, go-to-definition, and more.
 
 ## Documentation
 
-| Document                                   | Description                           |
-| ------------------------------------------ | ------------------------------------- |
-| [Architecture](docs/architecture.md)       | System design and file organization   |
-| [Development](docs/development.md)         | Setup and debugging instructions      |
-| [Plugin System](docs/plugin-system.md)     | VS Code extension plugin architecture |
-| [Language Server](docs/language-server.md) | LSP implementation details            |
-| [Testing](docs/testing.md)                 | Test patterns and helpers             |
-| [Common Tasks](docs/common-tasks.md)       | How to add features                   |
-| [CI/CD](docs/ci-cd.md)                     | GitHub Actions workflows              |
-| [Gotchas](docs/gotchas.md)                 | Important tips and warnings           |
+| Document                                                        | Description                           |
+| --------------------------------------------------------------- | ------------------------------------- |
+| [Architecture](docs/architecture.md)                            | System design and file organization   |
+| [Development](docs/development.md)                              | Setup and debugging instructions      |
+| [Build System](docs/build-system.md)                            | esbuild bundling and static assets    |
+| [Plugin System](docs/plugin-system.md)                          | VS Code extension plugin architecture |
+| [Language Server](docs/language-server.md)                      | LSP implementation details            |
+| [Local Prisma Postgres](docs/local-prisma-postgres-handling.md) | Local dev server and worker process   |
+| [Testing](docs/testing.md)                                      | Test patterns and helpers             |
+| [Common Tasks](docs/common-tasks.md)                            | How to add features                   |
+| [CI/CD](docs/ci-cd.md)                                          | GitHub Actions workflows              |
+| [Gotchas](docs/gotchas.md)                                      | Important tips and warnings           |
 
 ## Quick Start
 
 ```bash
-# Install all dependencies (uses Lerna for monorepo)
-npm install && npm run bootstrap
+# Install all dependencies (uses pnpm workspaces)
+pnpm install
 
 # Build TypeScript
-npm run build
+pnpm build
 
 # Watch mode for development
-npm run watch
+pnpm watch
 ```
 
 Then press `F5` in VS Code to launch the extension in debug mode.
+
+### Available Commands
+
+| Command          | Description                                                |
+| ---------------- | ---------------------------------------------------------- |
+| `pnpm build`     | Build all packages                                         |
+| `pnpm watch`     | Watch mode                                                 |
+| `pnpm test`      | Run unit tests in all packages (via Turborepo)             |
+| `pnpm test:e2e`  | Run VS Code E2E tests                                      |
+| `pnpm lint`      | Lint all packages                                          |
+| `pnpm typecheck` | Type-check all packages with TypeScript                    |
+| `pnpm clean`     | Remove untracked files and directories (incl node_modules) |
+
+Commands are orchestrated by Turborepo. See `turbo.json` for task dependencies.
 
 ## Key Points
 

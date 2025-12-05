@@ -37,11 +37,13 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch }}
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'pnpm'
       - name: Print inputs
         run: |
           echo ${{github.event.inputs.release_channel}}
@@ -51,13 +53,15 @@ jobs:
 
       # Build the extension
       - name: Install Dependencies
-        run: npm install && npm run bootstrap
+        run: pnpm install
+      - name: Typecheck all packages
+        run: pnpm typecheck
       - name: Build all packages
-        run: npm run compile
+        run: pnpm build
       - name: Replace Readme for marketplace
         run: node scripts/change_readme.js ${{ github.event.inputs.release_channel }}
       - name: Build vsix
-        run: cd packages/vscode && npm run package --
+        run: cd packages/vscode && pnpm package
 
       # Create GitHub Release and upload built result as asset
       - name: Get git tag and asset name

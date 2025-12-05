@@ -7,8 +7,8 @@ See the [Development Guide](../../docs/development.md) for setup instructions.
 Quick start:
 
 ```bash
-npm install && npm run bootstrap
-npm run watch
+pnpm install
+pnpm watch
 ```
 
 Then press `F5` in VS Code → **Launch VS Code extension**.
@@ -21,7 +21,7 @@ See the [Testing Guide](../../docs/testing.md) for patterns and helpers.
 
 ```bash
 cd packages/language-server
-npm test
+pnpm test
 ```
 
 ## Publishing

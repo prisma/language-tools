@@ -44,10 +44,7 @@ export class PrismaDevRepository {
         return
       }
 
-      const { fsPath } = Uri.joinPath(
-        this.context.extensionUri,
-        ...['dist', 'src', 'plugins', 'prisma-postgres-manager', 'utils', 'spawnPpgDevServer.js'],
-      )
+      const { fsPath } = Uri.joinPath(this.context.extensionUri, ...['dist', 'workers', 'ppgDevServer.js'])
 
       let succeededStarting: () => void, failedStarting: (reason?: unknown) => void
       const startedPromise = new Promise<void>((resolve, reject) => {

@@ -35,10 +35,13 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch }}
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'pnpm'
       - name: Print inputs
         run: |
           echo ${{github.event.inputs.release_channel}}
@@ -46,12 +49,12 @@ jobs:
           echo ${{github.event.inputs.branch}}
           echo ${{github.event.inputs.trigger_reason}}
       - name: Install Dependencies
-        run: npm install && npm run bootstrap
+        run: pnpm install
       - name: Bump LS version in extension
         run: |
           node scripts/update_package_json_files.js ${{ github.event.inputs.extension_version }}
       - name: Install Dependencies
-        run: npm install && npm run bootstrap
+        run: pnpm install
       - name: Setup Git
         run: |
           sh scripts/set_git_credentials.sh

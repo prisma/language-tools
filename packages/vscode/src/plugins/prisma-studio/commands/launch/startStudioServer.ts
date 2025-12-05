@@ -28,7 +28,7 @@ export interface StartStudioServerArgs {
 export async function startStudioServer(args: StartStudioServerArgs) {
   const { database, dbUrl, context, telemetryReporter } = args
 
-  const staticFilesPath = ['node_modules', '@prisma', 'studio-core-licensed']
+  const staticFilesPath = ['dist', 'node_modules', '@prisma', 'studio-core-licensed']
   const staticFilesRoot = Uri.joinPath(context.extensionUri, ...staticFilesPath)
 
   const app = new Hono()

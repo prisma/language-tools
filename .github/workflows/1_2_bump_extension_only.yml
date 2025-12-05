@@ -28,16 +28,18 @@ jobs:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'pnpm'
       - name: checkout main if necessary
         if: endsWith(github.ref, '/main') == false
         run: git fetch && git checkout main
       - name: Install Dependencies
-        run: npm install && npm run bootstrap
+        run: pnpm install
         shell: bash
       - name: Setup Git
         run: |
@@ -56,7 +58,7 @@ jobs:
         run: |
           node scripts/update_package_json_files.js dev ${{ steps.update.outputs.next_extension_version }} ""
       - name: Install Dependencies
-        run: npm install && npm run bootstrap
+        run: pnpm install
       - name: Commit and Push
         run: |
           sh scripts/commit_and_push.sh "[skip ci] bump extension version in package.json to ${{ steps.update.outputs.next_extension_version }}." ${{ steps.setup_branch.outputs.new_branch }}
