@@ -2,7 +2,7 @@ import * as esbuild from 'esbuild'
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'fs'
 import { dirname, join, resolve } from 'path'
 import { fileURLToPath } from 'url'
-import { createRequire } from 'module'
+import { createRequire, builtinModules } from 'module'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const require = createRequire(import.meta.url)
@@ -15,9 +15,6 @@ const packageJson = JSON.parse(readFileSync(join(__dirname, 'package.json'), 'ut
 // Workaround for pnpm's symlinked node_modules structure
 // Resolve the actual paths that esbuild should search
 const nodeModulesPaths = [join(__dirname, 'node_modules'), join(__dirname, '..', '..', 'node_modules')]
-
-// Use Node.js built-in module list for detecting builtins
-import { builtinModules } from 'module'
 
 const nodeBuiltins = new Set(builtinModules)
 
