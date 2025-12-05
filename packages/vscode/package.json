@@ -48,7 +48,8 @@
     "test:playwright": "playwright test",
     "test:playwright:headless": "CI=true xvfb-run -a npm run test:playwright",
     "vscode:prepublish": "pnpm run build",
-    "package": "vsce package --no-dependencies"
+    "package": "vsce package --no-dependencies",
+    "typecheck": "tsc --noEmit"
   },
   "main": "./dist/extension.js",
   "activationEvents": [

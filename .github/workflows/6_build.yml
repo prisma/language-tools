@@ -54,6 +54,8 @@ jobs:
       # Build the extension
       - name: Install Dependencies
         run: pnpm install
+      - name: Typecheck all packages
+        run: pnpm typecheck
       - name: Build all packages
         run: pnpm build
       - name: Replace Readme for marketplace

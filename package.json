@@ -37,6 +37,7 @@
     "build": "turbo run build",
     "format": "prettier \"packages/**/*.{ts,js,json,md}\" --write",
     "lint": "eslint \"packages/**/*.{js,ts}\" --fix",
+    "typecheck": "turbo run typecheck",
     "watch": "turbo run watch",
     "shell:lint": "shellcheck -x scripts/*.sh",
     "test": "turbo run test",

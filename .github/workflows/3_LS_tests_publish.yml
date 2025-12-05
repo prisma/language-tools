@@ -79,6 +79,8 @@ jobs:
           echo ${{github.event.inputs.trigger_reason || 'not provided'}}
       - name: Install Dependencies
         run: pnpm install
+      - name: Typecheck Language Server
+        run: pnpm --filter @prisma/language-server typecheck
       - name: Build Language Server
         run: pnpm --filter @prisma/language-server build
       - name: Publish Language Server to npm

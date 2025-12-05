@@ -48,6 +48,8 @@ jobs:
         run: pnpm install
       - name: Build all packages
         run: pnpm build
+      - name: Typecheck all packages
+        run: pnpm typecheck
       - name: Lint all packages
         run: pnpm lint
       - name: Run unit tests in all packages
