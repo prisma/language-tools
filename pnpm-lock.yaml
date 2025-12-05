@@ -197,8 +197,8 @@ importers:
         specifier: ^20.0.0
         version: 20.0.0
       '@types/vscode':
-        specifier: 1.96.0
-        version: 1.96.0
+        specifier: 1.106.1
+        version: 1.106.1
       '@vscode/test-electron':
         specifier: 2.4.1
         version: 2.4.1
@@ -1425,8 +1425,8 @@ packages:
   '@types/stack-utils@2.0.3':
     resolution: {integrity: sha512-9aEbYZ3TbYMznPdcdr3SmIrLXwC/AKZXQeCf9Pgao5CKb8CyHuEX5jzWPTkvregvhRJHcpRO6BFoGW9ycaOkYw==}
 
-  '@types/vscode@1.96.0':
-    resolution: {integrity: sha512-qvZbSZo+K4ZYmmDuaodMbAa67Pl6VDQzLKFka6rq+3WUTY4Kro7Bwoi0CuZLO/wema0ygcmpwow7zZfPJTs5jg==}
+  '@types/vscode@1.106.1':
+    resolution: {integrity: sha512-R/HV8u2h8CAddSbX8cjpdd7B8/GnE4UjgjpuGuHcbp1xV6yh4OeqU4L1pKjlwujCrSFS0MOpwJAIs/NexMB1fQ==}
 
   '@types/yargs-parser@21.0.3':
     resolution: {integrity: sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ==}
@@ -5846,7 +5846,7 @@ snapshots:
 
   '@types/stack-utils@2.0.3': {}
 
-  '@types/vscode@1.96.0': {}
+  '@types/vscode@1.106.1': {}
 
   '@types/yargs-parser@21.0.3': {}
 
