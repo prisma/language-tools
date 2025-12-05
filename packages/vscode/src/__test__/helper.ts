@@ -1,7 +1,14 @@
-import vscode from 'vscode'
+import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
+import vscode from 'vscode'
+
 // Path from dist-tests/__test__/helper.js to package.json
-const packageJson = require('../../package.json') // eslint-disable-line
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../../package.json'), 'utf8')) as {
+  publisher: string
+  name: string
+}
 
 export let doc: vscode.TextDocument
 export let editor: vscode.TextEditor
@@ -18,9 +25,7 @@ export async function sleep(ms: number): Promise<void> {
  */
 export async function activate(docUri: vscode.Uri): Promise<void> {
   // The extensionId is `publisher.name` from package.json
-  const ext = vscode.extensions.getExtension(
-    `${packageJson.publisher}.${packageJson.name}`, // eslint-disable-line
-  )
+  const ext = vscode.extensions.getExtension(`${packageJson.publisher}.${packageJson.name}`)
   if (!ext) {
     console.error('Failed to get extension.')
     return

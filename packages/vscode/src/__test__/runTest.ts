@@ -1,7 +1,13 @@
+import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
 import { runTests } from '@vscode/test-electron'
+
 // This is executed from dist-tests like `node dist-tests/__test__/runTest true`
-const packageJson = require('../../package.json') // eslint-disable-line
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../../package.json'), 'utf8')) as {
+  engines: { vscode: string }
+}
 
 function test({ PRISMA_USE_LOCAL_LS, version }: { PRISMA_USE_LOCAL_LS: string; version?: string }) {
   // The folder containing the Extension Manifest package.json
