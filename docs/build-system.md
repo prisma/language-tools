@@ -21,6 +21,7 @@ The build produces three separate bundles:
    local Prisma Postgres instances
 
 All bundles are CommonJS format targeting Node.js 20.
+As of 2025 VSCode extensions must be provided as commonjs modules.
 
 ## pnpm Symlink Resolution
 

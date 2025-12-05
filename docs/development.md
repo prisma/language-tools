@@ -15,16 +15,17 @@ pnpm watch
 
 ## Available Commands
 
-| Command         | Description                                                |
-| --------------- | ---------------------------------------------------------- |
-| `pnpm install`  | Install all dependencies                                   |
-| `pnpm build`    | Build all packages                                         |
-| `pnpm watch`    | Watch mode for development                                 |
-| `pnpm test`     | Run unit tests in all packages (via Turborepo)             |
-| `pnpm test:e2e` | Run VS Code E2E tests                                      |
-| `pnpm lint`     | Lint all packages                                          |
-| `pnpm format`   | Format code with Prettier                                  |
-| `pnpm clean`    | Remove untracked files and directories (incl node_modules) |
+| Command          | Description                                                |
+| ---------------- | ---------------------------------------------------------- |
+| `pnpm install`   | Install all dependencies                                   |
+| `pnpm build`     | Build all packages                                         |
+| `pnpm watch`     | Watch mode for development                                 |
+| `pnpm test`      | Run unit tests in all packages (via Turborepo)             |
+| `pnpm test:e2e`  | Run VS Code E2E tests                                      |
+| `pnpm lint`      | Lint all packages                                          |
+| `pnpm typecheck` | Type-check all packages with TypeScript                    |
+| `pnpm format`    | Format code with Prettier                                  |
+| `pnpm clean`     | Remove untracked files and directories (incl node_modules) |
 
 Commands are orchestrated by [Turborepo](https://turbo.build/). See
 `turbo.json` for task dependencies.
