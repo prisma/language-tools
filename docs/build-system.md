@@ -91,23 +91,6 @@ Since the worker runs as a forked child process (separate from the main
 extension), these assets must be in the same directory as the worker bundle
 (`ppgDevServer.js`).
 
-## Package Info Injection
-
-The extension's `package.json` metadata (name, version) is injected at build
-time via esbuild's `define` option:
-
-```javascript
-define: {
-  __PACKAGE_JSON__: JSON.stringify({
-    name: packageJson.name,
-    version: packageJson.version,
-  }),
-}
-```
-
-This replaces `require('./package.json')` calls (which would fail in a bundle)
-with static values, enabling telemetry and version reporting.
-
 ## Build Output Structure
 
 ```

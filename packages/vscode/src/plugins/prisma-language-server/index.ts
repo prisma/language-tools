@@ -39,7 +39,7 @@ import paths from 'env-paths'
 import FileWatcher from 'watcher'
 import { CodelensProvider, generateClient } from '../../CodeLensProvider'
 import * as prisma6Handling from '../../prisma6Handling'
-import { packageInfo } from '../../packageInfo'
+import { getPackageJSON } from '../../getPackageJSON'
 
 let client: LanguageClient
 let serverModule: string
@@ -239,8 +239,9 @@ const plugin: PrismaVSCodePlugin = {
     activateClient(context, clientOptions)
 
     if (!isDebugOrTest) {
-      const extensionId = 'prisma.' + packageInfo.name
-      const extensionVersion: string = packageInfo.version
+      const packageJSON = getPackageJSON(context)
+      const extensionId = 'prisma.' + packageJSON.name
+      const extensionVersion = packageJSON.version ?? 'unknown'
 
       telemetry = new TelemetryReporter(extensionId, extensionVersion)
 

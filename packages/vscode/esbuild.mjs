@@ -9,9 +9,6 @@ const require = createRequire(import.meta.url)
 const production = process.argv.includes('--production')
 const watch = process.argv.includes('--watch')
 
-// Read package.json to inject version info
-const packageJson = JSON.parse(readFileSync(join(__dirname, 'package.json'), 'utf8'))
-
 // Workaround for pnpm's symlinked node_modules structure
 // Resolve the actual paths that esbuild should search
 const nodeModulesPaths = [join(__dirname, 'node_modules'), join(__dirname, '..', '..', 'node_modules')]
@@ -83,13 +80,6 @@ const extensionConfig = {
   external: ['vscode'],
   minify: production,
   sourcemap: !production,
-  // Inject package info that was previously loaded via require()
-  define: {
-    __PACKAGE_JSON__: JSON.stringify({
-      name: packageJson.name,
-      version: packageJson.version,
-    }),
-  },
   plugins: [pnpmResolvePlugin, ...(watch ? [esbuildProblemMatcherPlugin] : [])],
   metafile: true,
   logLevel: 'info',
