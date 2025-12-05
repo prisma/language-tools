@@ -1,13 +1,9 @@
-import fs from 'fs'
 import path from 'path'
-import { fileURLToPath } from 'url'
 import { runTests } from '@vscode/test-electron'
 
 // This is executed from dist-tests like `node dist-tests/__test__/runTest true`
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../../package.json'), 'utf8')) as {
-  engines: { vscode: string }
-}
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+const packageJson = require('../../package.json') as { engines: { vscode: string } }
 
 function test({ PRISMA_USE_LOCAL_LS, version }: { PRISMA_USE_LOCAL_LS: string; version?: string }) {
   // The folder containing the Extension Manifest package.json

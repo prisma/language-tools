@@ -1,14 +1,9 @@
-import fs from 'fs'
 import path from 'path'
-import { fileURLToPath } from 'url'
 import vscode from 'vscode'
 
 // Path from dist-tests/__test__/helper.js to package.json
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../../package.json'), 'utf8')) as {
-  publisher: string
-  name: string
-}
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+const packageJson = require('../../package.json') as { publisher: string; name: string }
 
 export let doc: vscode.TextDocument
 export let editor: vscode.TextEditor
