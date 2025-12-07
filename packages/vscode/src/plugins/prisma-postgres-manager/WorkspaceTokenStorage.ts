@@ -2,14 +2,19 @@ import type { TokenStorage, Tokens } from '@prisma/management-api-sdk'
 import type { CredentialsStore } from '@prisma/credentials-store'
 
 /**
- * Implements the Management API SDK's TokenStorage interface for a specific workspace.
+ * Implements the Management API SDK's TokenStorage interface.
  * Wraps the CredentialsStore to persist tokens per workspace.
+ * The workspace ID is derived from the tokens themselves (extracted from the JWT by the SDK).
  */
 export class WorkspaceTokenStorage implements TokenStorage {
+  private workspaceId: string
+
   constructor(
-    private readonly workspaceId: string,
+    initialWorkspaceId: string,
     private readonly credentialsStore: CredentialsStore,
-  ) {}
+  ) {
+    this.workspaceId = initialWorkspaceId
+  }
 
   async getTokens(): Promise<Tokens | null> {
     await this.credentialsStore.reloadCredentialsFromDisk()
@@ -23,10 +28,14 @@ export class WorkspaceTokenStorage implements TokenStorage {
     return {
       accessToken: credentials.token,
       refreshToken: credentials.refreshToken,
+      workspaceId: this.workspaceId,
     }
   }
 
   async setTokens(tokens: Tokens): Promise<void> {
+    // Use workspace ID from the token (source of truth from JWT)
+    this.workspaceId = stripResourceIdentifierPrefix(tokens.workspaceId)
+
     await this.credentialsStore.storeCredentials({
       workspaceId: this.workspaceId,
       token: tokens.accessToken,
@@ -41,30 +50,10 @@ export class WorkspaceTokenStorage implements TokenStorage {
 }
 
 /**
- * A temporary token storage used during the auth flow before we know the workspace.
- * Stores tokens in memory, then they're moved to workspace-specific storage after login.
+ * Strips resource identifier prefixes (e.g., `wksp_`, `proj_`, `db_`) from IDs.
+ * Management API returns resource identifiers with prefixes like `proj_<id>` for projects, `db_<id>` for databases, etc.
+ * This normalizes them to plain IDs as used in the PDP Console URLs.
  */
-export class PendingTokenStorage implements TokenStorage {
-  private tokens: Tokens | null = null
-
-  getTokens(): Promise<Tokens | null> {
-    return Promise.resolve(this.tokens)
-  }
-
-  setTokens(tokens: Tokens): Promise<void> {
-    this.tokens = tokens
-    return Promise.resolve()
-  }
-
-  clearTokens(): Promise<void> {
-    this.tokens = null
-    return Promise.resolve()
-  }
-
-  /** Get the pending tokens and clear them */
-  consumeTokens(): Tokens | null {
-    const tokens = this.tokens
-    this.tokens = null
-    return tokens
-  }
+export function stripResourceIdentifierPrefix(identifier: string): string {
+  return identifier.includes('_') ? identifier.slice(identifier.indexOf('_') + 1) : identifier
 }

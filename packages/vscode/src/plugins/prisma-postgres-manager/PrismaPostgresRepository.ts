@@ -1,15 +1,9 @@
 import { env, EventEmitter, Uri } from 'vscode'
-import {
-  createManagementAPI,
-  createManagementAPIClient,
-  type ManagementAPI,
-  type LoginResult,
-  type operations,
-} from '@prisma/management-api-sdk'
+import { createManagementAPI, type ManagementAPI, type LoginResult, type operations } from '@prisma/management-api-sdk'
 import { CredentialsStore } from '@prisma/credentials-store'
 import type { ConnectionStringStorage } from './ConnectionStringStorage'
 import { z } from 'zod'
-import { WorkspaceTokenStorage, PendingTokenStorage } from './WorkspaceTokenStorage'
+import { WorkspaceTokenStorage, stripResourceIdentifierPrefix } from './WorkspaceTokenStorage'
 
 const CLIENT_ID = 'cmamnw2go00005812nlbzb4pi'
 const DEFAULT_UTM_MEDIUM = 'ppg-cloud-list'
@@ -198,7 +192,7 @@ export class PrismaPostgresRepository {
 
   // Auth state
   private authAPI: ManagementAPI | null = null
-  private pendingTokenStorage = new PendingTokenStorage()
+  private authTokenStorage = new WorkspaceTokenStorage('', this.credentialsStore)
   private latestLoginResult: LoginResult | null = null
 
   public readonly refreshEventEmitter = new EventEmitter<void | PrismaPostgresItem>()
@@ -224,7 +218,7 @@ export class PrismaPostgresRepository {
       this.authAPI = createManagementAPI({
         clientId: CLIENT_ID,
         redirectUri: this.getRedirectUri(),
-        tokenStorage: this.pendingTokenStorage,
+        tokenStorage: this.authTokenStorage,
       })
     }
     return this.authAPI
@@ -258,22 +252,20 @@ export class PrismaPostgresRepository {
 
     const { state, verifier } = this.latestLoginResult
 
+    // SDK's handleCallback stores tokens directly to credentialsStore via authTokenStorage
     await this.getAuthAPI().handleCallback({
       callbackUrl: `${this.getRedirectUri()}?${uri.query}`,
       verifier,
       expectedState: state,
     })
-
-    // Tokens are now stored in pendingTokenStorage via handleCallback
-    const tokens = this.pendingTokenStorage.consumeTokens()
     this.latestLoginResult = null
 
+    const tokens = await this.authTokenStorage.getTokens()
     if (!tokens) {
       throw new Error('No tokens received from callback')
     }
 
-    // Discover workspaces and store credentials per workspace
-    await this.addWorkspace({ token: tokens.accessToken, refreshToken: tokens.refreshToken })
+    await this.addWorkspace({ workspaceId: tokens.workspaceId })
 
     return true
   }
@@ -443,42 +435,16 @@ export class PrismaPostgresRepository {
     return workspaces
   }
 
-  async addWorkspace({ token, refreshToken }: { token: string; refreshToken: string }): Promise<void> {
-    // Create a temporary client to fetch workspace info
-    const client = createManagementAPIClient({
-      baseUrl: 'https://api.prisma.io',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+  async addWorkspace({ workspaceId }: { workspaceId: string }): Promise<void> {
+    const api = this.getAPI(workspaceId)
+    const response = await api.client.GET('/v1/workspaces')
+    this.checkResponseOrThrow(workspaceId, response)
 
-    const response = await client.GET('/v1/workspaces')
-
-    if (response.error) {
-      throw new Error(`Failed to retrieve workspace information.`)
-    }
-
-    const { data: workspaces } = response.data as {
-      data: Array<{ id: string; name: string; type: string; createdAt: string }>
-    }
-
-    if (workspaces.length === 0) {
-      throw new Error(`Received token does not grant access to any workspaces.`)
-    }
-
-    await Promise.all(
-      workspaces.map(async ({ id, name }: { id: string; name: string }) => {
-        const strippedWorkspaceId = stripResourceIdentifierPrefix(id)
-
-        await this.credentialsStore.storeCredentials({
-          refreshToken,
-          token,
-          workspaceId: strippedWorkspaceId,
-        })
-
-        this.cache.setWorkspaces([...this.cache.getWorkspaces(), { id: strippedWorkspaceId, name, type: 'workspace' }])
-      }),
-    )
+    const [workspace] = response.data.data
+    this.cache.setWorkspaces([
+      ...this.cache.getWorkspaces(),
+      { id: workspaceId, name: workspace?.name ?? workspaceId, type: 'workspace' },
+    ])
 
     this.refreshEventEmitter.fire()
   }
@@ -794,15 +760,4 @@ export class PrismaPostgresRepository {
 
     this.refreshEventEmitter.fire()
   }
-}
-
-/**
- * Management API returns resource identifiers with prefixes like `proj_<projectId>` for projects, `db_<databaseId>` for databases, etc.
- *
- * This function strips those prefixes to get the actual ID to normalize them across the extension.
- *
- * The PDP Console application doesn't use these prefixes in their URLs either.
- */
-function stripResourceIdentifierPrefix(identifier: string): string {
-  return identifier.slice(identifier.indexOf('_') + 1)
 }
