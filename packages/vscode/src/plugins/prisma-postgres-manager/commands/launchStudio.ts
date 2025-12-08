@@ -38,7 +38,13 @@ export async function launchStudio({
   if (database.type === 'local') {
     await prismaDevRepository.startInstance(database)
 
-    const connectionString = await prismaDevRepository.getInstanceConnectionString(database)
+    // TODO: There is currently an issue of connecting Studio to a PPG Dev instance via regular `postgres://` TCP urls.
+    // This is a temporary workaround to use the HTTP aka `prisma+postgres://` URL instead.
+    // See https://linear.app/prisma-company/issue/TML-1670.
+    const connectionString = await prismaDevRepository.getInstanceConnectionString({
+      name: database.name,
+      type: 'http',
+    })
 
     return void (await launch({ database, dbUrl: connectionString, context }))
   }
