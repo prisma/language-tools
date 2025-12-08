@@ -44,7 +44,7 @@ else
                 git checkout -f -b "$BRANCH"
             else
                 # Patch branch
-                NPM_VERSION=$(cat scripts/versions/prisma_latest)
+                NPM_VERSION=$(cat scripts/versions/tested_extension_stable)
                 echo "NPM_VERSION to base new branch on: $NPM_VERSION"
                 git checkout -f -b "$BRANCH" "$NPM_VERSION"
             fi
