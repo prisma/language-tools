@@ -166,8 +166,8 @@ export class PrismaDevRepository {
       pid: state.pid != null && state.pid !== process.pid ? state.pid : undefined,
       ports: [state.port, state.databasePort, state.shadowDatabasePort],
       running: state.pid !== process.pid && isServerRunning(state),
-      httpUrl: state.exports?.ppg?.url || 'http://offline',
-      tcpUrl: state.exports?.database.connectionString || 'http://offline',
+      httpUrl: state.exports?.ppg?.url || 'http://offline.invalid',
+      tcpUrl: state.exports?.database.connectionString || 'postgres://offline.invalid',
     }))
 
     this.cache.setInstances(instances)
