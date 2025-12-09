@@ -14,10 +14,10 @@
   ],
   "dependencies": {
     "@hono/node-server": "1.14.2",
-    "@prisma/credentials-store": "6.9.0-dev.18",
+    "@prisma/credentials-store": "7.1.0",
     "@prisma/dev": "0.11.1",
     "@prisma/language-server": "workspace:*",
-    "@prisma/management-api-sdk": "link:/Users/flo/dev/pdp-control-plane/packages/management-api-sdk",
+    "@prisma/management-api-sdk": "0.2.0",
     "@prisma/ppg": "0.5.2",
     "@prisma/studio-core-licensed": "^0.6.0",
     "checkpoint-client": "1.1.33",

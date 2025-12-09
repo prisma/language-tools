@@ -127,8 +127,8 @@ importers:
         specifier: 1.14.2
         version: 1.14.2(hono@4.7.10)
       '@prisma/credentials-store':
-        specifier: 6.9.0-dev.18
-        version: 6.9.0-dev.18
+        specifier: 7.1.0
+        version: 7.1.0
       '@prisma/dev':
         specifier: 0.11.1
         version: 0.11.1(typescript@5.7.3)
@@ -136,8 +136,8 @@ importers:
         specifier: workspace:*
         version: link:../language-server
       '@prisma/management-api-sdk':
-        specifier: link:/Users/flo/dev/pdp-control-plane/packages/management-api-sdk
-        version: link:../../../pdp-control-plane/packages/management-api-sdk
+        specifier: 0.2.0
+        version: 0.2.0
       '@prisma/ppg':
         specifier: 0.5.2
         version: 0.5.2
@@ -1106,8 +1106,8 @@ packages:
   '@prisma/config@7.2.0-dev.3':
     resolution: {integrity: sha512-Z7a37ZIred5xF2+fy3bJcTx6xVJaDLx41a4wFnw2vGZScap5Gi4nMfabBzEhAIlBZqSgQJSq3c021T9axO3VJw==}
 
-  '@prisma/credentials-store@6.9.0-dev.18':
-    resolution: {integrity: sha512-s6IafRZGvO1S39DPmNQc+soihD44kMf8SXT3Vmkd8mzWNyjjR/nqUwRixB5fg2sgk8m1WxbIAG5h6mR7IPrhHQ==}
+  '@prisma/credentials-store@7.1.0':
+    resolution: {integrity: sha512-hQ5XKET/AHCeWuBISD9Y0d93Ja3ep6bpCRNox283IGV+IBUBjwVArb8Q5QwQWK1dniCLRynkE+fEMIfL3c6N5w==}
 
   '@prisma/debug@6.8.2':
     resolution: {integrity: sha512-4muBSSUwJJ9BYth5N8tqts8JtiLT8QI/RSAzEogwEfpbYGFo9mYsInsVo8dqXdPO2+Rm5OG5q0qWDDE3nyUbVg==}
@@ -1122,6 +1122,9 @@ packages:
     resolution: {integrity: sha512-3I5HiyEv5svyn5wZ+DJ0+Ht+mVVl58Q+YWzpCurZwi2QGDqAaD7vty4LDJ65iFWUMfQdFrQlSP0uZGOfrIngZw==}
     engines: {node: '>=20'}
     hasBin: true
+
+  '@prisma/management-api-sdk@0.2.0':
+    resolution: {integrity: sha512-ZFY5v3r2l4cx05zMNO4Wpu5ihW811xa9TytTS76Tal8oYHAPAUkSgNJZcRIPu5iYfs9LqOFegoonX1vIG0YVfw==}
 
   '@prisma/ppg@0.5.2':
     resolution: {integrity: sha512-WT5Kxj1gRLjcrnhMJfdTMsxs8RBhOHm4ZooCuaK0qhKP1ta1ukV3Ab11jEOSI2XeMWCRN6fvwO8+wqWzGmTXuQ==}
@@ -5447,7 +5450,7 @@ snapshots:
     transitivePeerDependencies:
       - magicast
 
-  '@prisma/credentials-store@6.9.0-dev.18':
+  '@prisma/credentials-store@7.1.0':
     dependencies:
       xdg-app-paths: 8.3.0
 
@@ -5492,6 +5495,10 @@ snapshots:
       vscode-uri: 3.1.0
     transitivePeerDependencies:
       - magicast
+
+  '@prisma/management-api-sdk@0.2.0':
+    dependencies:
+      openapi-fetch: 0.14.0
 
   '@prisma/ppg@0.5.2': {}
 

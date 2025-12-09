@@ -39,7 +39,7 @@ export class WorkspaceTokenStorage implements TokenStorage {
     await this.credentialsStore.storeCredentials({
       workspaceId: this.workspaceId,
       token: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
+      refreshToken: tokens.refreshToken!, // We always request with refresh tokens
     })
   }
 
