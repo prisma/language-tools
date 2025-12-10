@@ -1,8 +1,8 @@
-const semVer = require('semver')
-const core = require('@actions/core')
-const { readVersionFile, writeToVersionFile } = require('./util')
+import semVer from 'semver'
+import core from '@actions/core'
+import { readVersionFile, writeToVersionFile } from './util.mjs'
 
-function nextVersion({ currentVersion, trigger, prismaLatest }) {
+export function nextVersion({ currentVersion, trigger, prismaLatest }) {
   switch (trigger) {
     case 'extension-patch-release':
     case 'prisma-dev-release':
@@ -28,12 +28,12 @@ function nextVersion({ currentVersion, trigger, prismaLatest }) {
   }
 }
 
-function currentExtensionVersion() {
+export function currentExtensionVersion() {
   return readVersionFile({ fileName: 'extension_latest' })
 }
 
-function bumpExtensionVersionInScriptFiles({ nextVersion }) {
-  writeToVersionFile({ fileName: 'extension_latest', content: nextVersion })
+export function bumpExtensionVersionInScriptFiles({ nextVersion: nextVersionValue }) {
+  writeToVersionFile({ fileName: 'extension_latest', content: nextVersionValue })
 }
 
 function isMinorRelease(prismaVersion) {
@@ -46,35 +46,27 @@ function isMajorRelease(prismaVersion) {
   return minor === '0' && patch === '0'
 }
 
-function isMinorOrMajorRelease(prismaVersion) {
+export function isMinorOrMajorRelease(prismaVersion) {
   return isMinorRelease(prismaVersion) || isMajorRelease(prismaVersion)
 }
 
-module.exports = {
-  isMinorOrMajorRelease,
-  currentExtensionVersion,
-  nextVersion,
-  bumpExtensionVersionInScriptFiles,
-}
+const args = process.argv.slice(2)
+const trigger = args[0]
 
-if (require.main === module) {
-  const args = process.argv.slice(2)
-  const trigger = args[0]
+// Get the current extension version
+const currentVersionOfExtension = currentExtensionVersion()
+console.log(`Current extension version: ${currentVersionOfExtension}`)
 
-  // Get the current extension version
-  const currentVersionOfExtension = currentExtensionVersion()
-  console.log(`Current extension version: ${currentVersionOfExtension}`)
+// "Calculate" next version number
+const version = nextVersion({
+  currentVersion: currentVersionOfExtension,
+  trigger,
+  prismaLatest: readVersionFile({ fileName: 'prisma_latest' }),
+})
+console.log(`Next extension version ${version}.`)
+core.setOutput('next_extension_version', version)
 
-  // "Calculate" next version number
-  const version = nextVersion({
-    currentVersion: currentVersionOfExtension,
-    trigger,
-    prismaLatest: readVersionFile({ fileName: 'prisma_latest' }),
-  })
-  console.log(`Next extension version ${version}.`)
-  core.setOutput('next_extension_version', version)
+// Bump in file
+bumpExtensionVersionInScriptFiles({ nextVersion: version })
+console.log(`Bumped extension version in scripts/version folder.`)
 
-  // Bump in file
-  bumpExtensionVersionInScriptFiles({ nextVersion: version })
-  console.log(`Bumped extension version in scripts/version folder.`)
-}

@@ -61,7 +61,7 @@ jobs:
 
       - name: Update next extension version in scripts folder and output for later use
         id: update # Used to access the calculated next extension version in later steps
-        run: node scripts/bump_extension_version.js prisma-${{ github.event.inputs.npm_channel }}-release
+        run: node scripts/bump_extension_version.mjs prisma-${{ github.event.inputs.npm_channel }}-release
       - name: Commit and Push
         run: |
           sh scripts/commit_and_push.sh "[skip ci] bump Prisma CLI ${{ github.event.inputs.npm_channel }} version to ${{ github.event.inputs.version }} and extension version to ${{ steps.update.outputs.next_extension_version }} in scripts."
@@ -73,7 +73,7 @@ jobs:
       - name: Check for minor or major release
         id: is_minor_or_major
         run: |
-          node scripts/is_minor_or_major_release.js ${{ github.event.inputs.npm_channel }}
+          node scripts/is_minor_or_major_release.mjs ${{ github.event.inputs.npm_channel }}
       - name: Reset on 'main' branch if minor or major release
         if: ${{steps.is_minor_or_major.outputs.is_minor_or_major_release}}
         run: |
@@ -81,7 +81,7 @@ jobs:
           git push --force origin stable
       - name: Update Prisma CLI version and VS Code extension version
         run: |
-          node scripts/update_package_json_files.js ${{ github.event.inputs.npm_channel }} ${{ steps.update.outputs.next_extension_version }} ${{ github.event.inputs.version }}
+          node scripts/update_package_json_files.mjs ${{ github.event.inputs.npm_channel }} ${{ steps.update.outputs.next_extension_version }} ${{ github.event.inputs.version }}
       - name: Install Dependencies to update lock file
         run: pnpm install
       - name: Push to branch

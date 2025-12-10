@@ -1,6 +1,11 @@
-const { getNewReadMeContent } = require('./../change_readme.js')
-
 describe('changeReadme', () => {
+  let getNewReadMeContent
+
+  beforeAll(async () => {
+    const module = await import('./../change_readme.mjs')
+    getNewReadMeContent = module.getNewReadMeContent
+  })
+
   it('it should with an insider release', () => {
     expect(
       getNewReadMeContent({

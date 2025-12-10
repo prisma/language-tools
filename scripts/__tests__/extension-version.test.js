@@ -1,6 +1,10 @@
-const { nextVersion } = require('./../bump_extension_version')
-
 describe('next extension version', () => {
+  let nextVersion
+
+  beforeAll(async () => {
+    const module = await import('./../bump_extension_version.mjs')
+    nextVersion = module.nextVersion
+  })
   //
   // normal insider release
   //
