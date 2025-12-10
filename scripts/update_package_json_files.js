@@ -21,7 +21,7 @@ async function bumpLSVersionInExtension({ version }) {
   
   // Update pnpm-lock.yaml after package.json changes
   console.log('Running pnpm install to update pnpm-lock.yaml...')
-  await execa('pnpm', ['i'], { cwd: path.join(__dirname, '..'), stdio: 'inherit' })
+  await execa('pnpm', ['install'], { cwd: path.join(__dirname, '..'), stdio: 'inherit' })
 }
 
 async function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersion = '' }) {
@@ -96,7 +96,7 @@ async function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersi
 
   // Update pnpm-lock.yaml after package.json changes
   console.log('Running pnpm install to update pnpm-lock.yaml...')
-  await execa('pnpm', ['i'], { cwd: path.join(__dirname, '..'), stdio: 'inherit' })
+  await execa('pnpm', ['install'], { cwd: path.join(__dirname, '..'), stdio: 'inherit' })
 }
 
 module.exports = { bumpVersionsInRepo }
