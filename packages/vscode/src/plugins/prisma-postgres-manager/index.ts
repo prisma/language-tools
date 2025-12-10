@@ -115,7 +115,7 @@ export default {
         await handleCommandError('Copy Local Database URL', async () => {
           const { name } = DevInstanceSchema.parse(args)
 
-          const url = await prismaDevRepository.getInstanceConnectionString({ name })
+          const url = await prismaDevRepository.getInstanceConnectionString({ name, type: 'tcp' })
 
           await env.clipboard.writeText(url)
 

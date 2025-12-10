@@ -6,12 +6,80 @@ import { readFile } from 'fs/promises'
 import getPort from 'get-port'
 import { serve } from '@hono/node-server'
 import { createAccelerateHttpClient } from '@prisma/studio-core-licensed/data/accelerate'
-import { serializeError } from '@prisma/studio-core-licensed/data/bff'
-import type { Query } from '@prisma/studio-core-licensed/data'
+import { serializeError, type StudioBFFRequest } from '@prisma/studio-core-licensed/data/bff'
+import { createPostgresJSExecutor } from '@prisma/studio-core-licensed/data/postgresjs'
+import type { Executor } from '@prisma/studio-core-licensed/data'
 import type { StudioProps } from '@prisma/studio-core-licensed/ui'
 import type TelemetryReporter from '../../../../telemetryReporter'
 import type { LaunchArg } from '../../../prisma-postgres-manager/commands/launchStudio'
 import { isDebugOrTestSession } from '../../../../util'
+
+/**
+ * Prisma ORM specific query parameters that should be removed from the connection string
+ * before passing it to the database client to avoid errors.
+ */
+const PRISMA_ORM_SPECIFIC_QUERY_PARAMETERS = [
+  'schema',
+  'connection_limit',
+  'pool_timeout',
+  'sslidentity',
+  'sslaccept',
+  'pool', // Using connection pooling with `postgres` package is unable to connect to PPG. Disabling it for now by removing the param. See https://linear.app/prisma-company/issue/TML-1670.
+  'socket_timeout',
+  'pgbouncer',
+  'statement_cache_size',
+] as const
+
+type DatabaseType = 'accelerate' | 'postgres'
+
+interface DatabaseConfig {
+  type: DatabaseType
+  createExecutor: (connectionString: string) => Promise<Executor>
+}
+
+function getDatabaseConfig(dbUrl: string): DatabaseConfig | null {
+  const protocol = new URL(dbUrl).protocol.replace(':', '')
+
+  switch (protocol) {
+    case 'prisma+postgres':
+      return {
+        type: 'accelerate',
+        // eslint-disable-next-line @typescript-eslint/require-await
+        async createExecutor(connectionString: string) {
+          const url = new URL(connectionString)
+          return createAccelerateHttpClient({
+            host: url.host,
+            apiKey: url.searchParams.get('api_key') ?? '',
+            // TODO: these should be dynamic based on the vscode build
+            engineHash: '9b628578b3b7cae625e8c927178f15a170e74a9c',
+            clientVersion: '6.10.1',
+            provider: 'postgres',
+          })
+        },
+      }
+    // TODO: postgres TCP protocol does not work for PPG Dev instances yet. We need to use the HTTP URL aka `prisma+postgres://` instead.
+    // See https://linear.app/prisma-company/issue/TML-1670.
+    case 'postgres':
+    case 'postgresql':
+      return {
+        type: 'postgres',
+        async createExecutor(connectionString: string) {
+          const postgresModule = await import('postgres')
+          const connectionURL = new URL(connectionString)
+
+          for (const queryParameter of PRISMA_ORM_SPECIFIC_QUERY_PARAMETERS) {
+            connectionURL.searchParams.delete(queryParameter)
+          }
+
+          const postgres = postgresModule.default(connectionURL.toString())
+          return createPostgresJSExecutor(postgres)
+        },
+      }
+
+    default:
+      return null
+  }
+}
 
 export interface StartStudioServerArgs {
   context: ExtensionContext
@@ -28,6 +96,14 @@ export interface StartStudioServerArgs {
 export async function startStudioServer(args: StartStudioServerArgs) {
   const { database, dbUrl, context, telemetryReporter } = args
 
+  const databaseConfig = getDatabaseConfig(dbUrl)
+  if (!databaseConfig) {
+    const protocol = URL.canParse(dbUrl) ? new URL(dbUrl).protocol.replace(':', '') : 'unknown'
+    throw new Error(`Prisma Studio is not supported for the "${protocol}" protocol.`)
+  }
+
+  const executor = await databaseConfig.createExecutor(dbUrl)
+
   const staticFilesPath = ['dist', 'node_modules', '@prisma', 'studio-core-licensed']
   const staticFilesRoot = Uri.joinPath(context.extensionUri, ...staticFilesPath)
 
@@ -35,27 +111,28 @@ export async function startStudioServer(args: StartStudioServerArgs) {
 
   app.use('*', cors())
 
-  // gives access to accelerate (and more soon) via bff client
+  // BFF endpoint for database queries
   app.post('/bff', async (ctx) => {
-    const { query } = (await ctx.req.json()) as unknown as { query: Query }
+    const request = await ctx.req.json<StudioBFFRequest>()
 
-    const [error, results] = await createAccelerateHttpClient({
-      host: new URL(dbUrl).host,
-      apiKey: new URL(dbUrl).searchParams.get('api_key') ?? '',
-      // TODO: these need to be dynamic based on the vscode build
-      engineHash: '9b628578b3b7cae625e8c927178f15a170e74a9c',
-      clientVersion: '6.10.1',
-      provider: 'postgres',
-    }).execute(query)
+    const { procedure } = request
 
-    if (error) {
-      return ctx.json([serializeError(error)])
+    if (procedure === 'query') {
+      const [error, results] = await executor.execute(request.query)
+
+      if (error) {
+        return ctx.json([serializeError(error)])
+      }
+
+      return ctx.json([null, results])
+    } else {
+      return ctx.text('Unknown procedure', { status: 500 })
     }
-
-    return ctx.json([null, results])
   })
 
   const commonInformation = {
+    databaseType: databaseConfig.type,
+    protocol: URL.canParse(dbUrl) ? new URL(dbUrl).protocol.replace(':', '') : 'unknown',
     ppg: !database
       ? {
           databaseId: null,

@@ -12,7 +12,8 @@ const STATE_FOLDER_PATH = envPaths('prisma-dev').data
 export const DevInstanceSchema = z.object({
   id: z.string(),
   name: z.string(),
-  url: z.string().url(),
+  tcpUrl: z.string().url(),
+  httpUrl: z.string().url(),
   pid: z.number().nullish(),
   running: z.boolean(),
   ports: z.array(z.number().int().min(1).max(65535)).length(3),
@@ -134,8 +135,8 @@ export class PrismaDevRepository {
     return instances.find((instance) => instance.name === name)
   }
 
-  async getInstanceConnectionString(args: { name: string }): Promise<string> {
-    const { name } = args
+  async getInstanceConnectionString(args: { name: string; type: 'tcp' | 'http' }): Promise<string> {
+    const { name, type } = args
 
     const instance = await this.getInstance({ name })
 
@@ -145,7 +146,7 @@ export class PrismaDevRepository {
       throw new Error('This database has been deleted or stopped')
     }
 
-    return instance.url
+    return type === 'tcp' ? instance.tcpUrl : instance.httpUrl
   }
 
   async getInstances(): Promise<DevInstance[]> {
@@ -165,7 +166,8 @@ export class PrismaDevRepository {
       pid: state.pid != null && state.pid !== process.pid ? state.pid : undefined,
       ports: [state.port, state.databasePort, state.shadowDatabasePort],
       running: state.pid !== process.pid && isServerRunning(state),
-      url: state.exports?.database.connectionString || 'http://offline',
+      httpUrl: state.exports?.ppg?.url || 'http://offline.invalid',
+      tcpUrl: state.exports?.database.connectionString || 'postgres://offline.invalid',
     }))
 
     this.cache.setInstances(instances)
