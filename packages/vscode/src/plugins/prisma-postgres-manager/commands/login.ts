@@ -1,17 +1,26 @@
 import { commands, ProgressLocation, Uri, window } from 'vscode'
 import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
-import { Auth, LoginOptionsSchema } from '../management-api/auth'
+import { z } from 'zod'
+
+const DEFAULT_UTM_MEDIUM = 'ppg-cloud-list'
+
+export const LoginOptionsSchema = z
+  .object({
+    utmMedium: z.string().optional().default(DEFAULT_UTM_MEDIUM),
+  })
+  .optional()
+  .default({ utmMedium: DEFAULT_UTM_MEDIUM })
 
 /**
  * This function triggers the OAuth login flow by creating the necessary URL and opening the users browser.
  */
-export const login = async (ppgRepository: PrismaPostgresRepository, auth: Auth, args: unknown = {}) => {
+export const login = async (ppgRepository: PrismaPostgresRepository, args: unknown = {}) => {
   const options = LoginOptionsSchema.parse(args)
 
   if ((await ppgRepository.getWorkspaces()).length === 0) {
     await commands.executeCommand('setContext', 'prisma.initialLoginInProgress', true)
   }
-  await auth.login(options)
+  await ppgRepository.login(options)
   await commands.executeCommand('setContext', 'prisma.initialLoginInProgress', false)
 }
 
@@ -21,23 +30,25 @@ export const login = async (ppgRepository: PrismaPostgresRepository, auth: Auth,
 export const handleAuthCallback = async ({
   uri,
   ppgRepository,
-  auth,
 }: {
   uri: Uri
   ppgRepository: PrismaPostgresRepository
-  auth: Auth
 }) => {
   try {
-    const result = await auth.handleCallback(uri)
+    const handled = await ppgRepository.handleAuthCallback(uri)
 
-    if (!result) return // received url was not an auth callback
+    if (!handled) return // received url was not an auth callback
 
     await window.withProgress(
       {
         location: ProgressLocation.Notification,
         title: 'Logging in to Prisma workspace...',
       },
-      () => ppgRepository.addWorkspace({ token: result.token, refreshToken: result.refreshToken }),
+      () => {
+        // Login is already complete at this point - just trigger a refresh
+        ppgRepository.triggerRefresh()
+        return Promise.resolve()
+      },
     )
     void window.showInformationMessage('Workspace connected!')
   } catch (error) {

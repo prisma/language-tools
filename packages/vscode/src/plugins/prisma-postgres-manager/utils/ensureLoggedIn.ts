@@ -1,8 +1,7 @@
-import { PrismaPostgresRepository } from '../PrismaPostgresRepository'
+import { PrismaPostgresRepository, type LoginOptions } from '../PrismaPostgresRepository'
 import { commands, ProgressLocation, window } from 'vscode'
 import { CommandAbortError } from '../shared-ui/handleCommandError'
 import { Disposable } from 'vscode'
-import { LoginOptions } from '../management-api/auth'
 
 const LOGIN_TIMEOUT_MS = 2 * 60 * 1000
 
