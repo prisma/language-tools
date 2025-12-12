@@ -1,5 +1,9 @@
-const fs = require('fs')
-const path = require('path')
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 function patchBranchName() {
   const prismaStableVersion = fs
@@ -8,7 +12,7 @@ function patchBranchName() {
   const tokens = prismaStableVersion.split('.')
   if (tokens.length !== 3) {
     throw new Error(
-      `Version ${version} must have 3 tokens separated by "." character.`,
+      `Version ${prismaStableVersion} must have 3 tokens separated by "." character.`,
     )
   }
   // remove last digit
@@ -18,7 +22,7 @@ function patchBranchName() {
   return patchName
 }
 
-function getBranchName({ branch_channel = '' }) {
+export function getBranchName({ branch_channel = '' }) {
   switch (branch_channel) {
     case 'latest':
       return 'stable'
@@ -31,12 +35,9 @@ function getBranchName({ branch_channel = '' }) {
   }
 }
 
-module.exports = { getBranchName }
+const args = process.argv.slice(2)
+const branchName = getBranchName({
+  branch_channel: args[0],
+})
+console.log(branchName)
 
-if (require.main === module) {
-  const args = process.argv.slice(2)
-  const branchName = getBranchName({
-    branch_channel: args[0],
-  })
-  console.log(branchName)
-}

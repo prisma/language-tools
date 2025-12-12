@@ -31,7 +31,7 @@ jobs:
       # First it runs this
       - name: Check for Prisma CLI update
         id: check_update
-        run: node scripts/check_for_update.js
+        run: node scripts/check_for_update.mjs
 
       # ... and depending on the output any (or none) of these 3:
       - name: Invoke bump workflow with inputs for dev

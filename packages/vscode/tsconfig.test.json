@@ -5,7 +5,8 @@
     "composite": false,
     "declaration": false,
     "module": "CommonJS",
-    "moduleResolution": "node"
+    "moduleResolution": "bundler",
+    "skipLibCheck": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", ".vscode-test", "src/workers/**/*"]

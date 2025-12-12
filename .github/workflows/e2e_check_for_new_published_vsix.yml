@@ -25,11 +25,11 @@ jobs:
       - name: Get version of published extensions on the VS Code marketplace
         id: versions
         run: |
-          node scripts/e2eTestsOnVsix/check_marketplace_version.js
+          node scripts/e2eTestsOnVsix/check_marketplace_version.mjs
       - name: Check new release of stable and Insider
         id: check_published_version
         run: |
-          node scripts/e2eTestsOnVsix/check_for_new_release.js ${{ steps.versions.outputs.insider_version }} ${{ steps.versions.outputs.stable_version }}
+          node scripts/e2eTestsOnVsix/check_for_new_release.mjs ${{ steps.versions.outputs.insider_version }} ${{ steps.versions.outputs.stable_version }}
       - name: Trigger e2e tests for Insider
         if: ${{ steps.check_published_version.outputs.new_insider_version }}
         uses: benc-uk/workflow-dispatch@v1

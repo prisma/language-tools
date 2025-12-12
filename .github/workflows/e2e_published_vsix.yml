@@ -43,7 +43,7 @@ jobs:
       - name: Install extension via CLI
         id: install
         run: |
-          node scripts/e2eTestsOnVsix/install_extension.js ${{ github.event.inputs.extension_type }} ${{ github.event.inputs.extension_version }}
+          node scripts/e2eTestsOnVsix/install_extension.mjs ${{ github.event.inputs.extension_type }} ${{ github.event.inputs.extension_version }}
       - name: Run test
         if: ${{ steps.install.outputs.installed-extension }}
         uses: coactions/setup-xvfb@v1

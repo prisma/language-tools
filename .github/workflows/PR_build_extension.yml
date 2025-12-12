@@ -41,10 +41,10 @@ jobs:
       - name: Build all packages
         run: pnpm build
       - name: Replace Readme for marketplace
-        run: node scripts/change_readme.js insider
+        run: node scripts/change_readme.mjs insider
       - name: Update VS Code extension name
         run: |
-          node scripts/update_package_json_file_PR_build.js
+          node scripts/update_package_json_file_PR_build.mjs
         env:
           PR_NUMBER: ${{ github.event.number }}
       - name: Build vsix

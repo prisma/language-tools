@@ -1,8 +1,10 @@
-const semVer = require('semver')
-const core = require('@actions/core')
-const { readVersionFile, writeToVersionFile } = require('./util')
+import semVer from 'semver'
+import core from '@actions/core'
+import { fileURLToPath } from 'url'
+import { argv } from 'process'
+import { readVersionFile, writeToVersionFile } from './util.mjs'
 
-function nextVersion({ currentVersion, trigger, prismaLatest }) {
+export function nextVersion({ currentVersion, trigger, prismaLatest }) {
   switch (trigger) {
     case 'extension-patch-release':
     case 'prisma-dev-release':
@@ -28,12 +30,12 @@ function nextVersion({ currentVersion, trigger, prismaLatest }) {
   }
 }
 
-function currentExtensionVersion() {
+export function currentExtensionVersion() {
   return readVersionFile({ fileName: 'extension_latest' })
 }
 
-function bumpExtensionVersionInScriptFiles({ nextVersion }) {
-  writeToVersionFile({ fileName: 'extension_latest', content: nextVersion })
+export function bumpExtensionVersionInScriptFiles({ nextVersion: nextVersionValue }) {
+  writeToVersionFile({ fileName: 'extension_latest', content: nextVersionValue })
 }
 
 function isMinorRelease(prismaVersion) {
@@ -46,18 +48,12 @@ function isMajorRelease(prismaVersion) {
   return minor === '0' && patch === '0'
 }
 
-function isMinorOrMajorRelease(prismaVersion) {
+export function isMinorOrMajorRelease(prismaVersion) {
   return isMinorRelease(prismaVersion) || isMajorRelease(prismaVersion)
 }
 
-module.exports = {
-  isMinorOrMajorRelease,
-  currentExtensionVersion,
-  nextVersion,
-  bumpExtensionVersionInScriptFiles,
-}
-
-if (require.main === module) {
+// Only run top-level code if this file is being executed directly (not imported)
+if (fileURLToPath(import.meta.url) === argv[1]) {
   const args = process.argv.slice(2)
   const trigger = args[0]
 
@@ -78,3 +74,4 @@ if (require.main === module) {
   bumpExtensionVersionInScriptFiles({ nextVersion: version })
   console.log(`Bumped extension version in scripts/version folder.`)
 }
+
