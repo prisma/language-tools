@@ -2,6 +2,7 @@ import fs from 'fs'
 import githubAction from '@actions/github'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { argv } from 'process'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -44,8 +45,11 @@ export function changeReadme({ releaseChannel }) {
   fs.writeFileSync('./packages/vscode/README.md', content)
 }
 
-const args = process.argv.slice(2)
-changeReadme({
-  releaseChannel: args[0],
-})
+// Only run top-level code if this file is being executed directly (not imported)
+if (fileURLToPath(import.meta.url) === argv[1]) {
+  const args = process.argv.slice(2)
+  changeReadme({
+    releaseChannel: args[0],
+  })
+}
 

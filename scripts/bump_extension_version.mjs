@@ -1,5 +1,7 @@
 import semVer from 'semver'
 import core from '@actions/core'
+import { fileURLToPath } from 'url'
+import { argv } from 'process'
 import { readVersionFile, writeToVersionFile } from './util.mjs'
 
 export function nextVersion({ currentVersion, trigger, prismaLatest }) {
@@ -50,23 +52,26 @@ export function isMinorOrMajorRelease(prismaVersion) {
   return isMinorRelease(prismaVersion) || isMajorRelease(prismaVersion)
 }
 
-const args = process.argv.slice(2)
-const trigger = args[0]
+// Only run top-level code if this file is being executed directly (not imported)
+if (fileURLToPath(import.meta.url) === argv[1]) {
+  const args = process.argv.slice(2)
+  const trigger = args[0]
 
-// Get the current extension version
-const currentVersionOfExtension = currentExtensionVersion()
-console.log(`Current extension version: ${currentVersionOfExtension}`)
+  // Get the current extension version
+  const currentVersionOfExtension = currentExtensionVersion()
+  console.log(`Current extension version: ${currentVersionOfExtension}`)
 
-// "Calculate" next version number
-const version = nextVersion({
-  currentVersion: currentVersionOfExtension,
-  trigger,
-  prismaLatest: readVersionFile({ fileName: 'prisma_latest' }),
-})
-console.log(`Next extension version ${version}.`)
-core.setOutput('next_extension_version', version)
+  // "Calculate" next version number
+  const version = nextVersion({
+    currentVersion: currentVersionOfExtension,
+    trigger,
+    prismaLatest: readVersionFile({ fileName: 'prisma_latest' }),
+  })
+  console.log(`Next extension version ${version}.`)
+  core.setOutput('next_extension_version', version)
 
-// Bump in file
-bumpExtensionVersionInScriptFiles({ nextVersion: version })
-console.log(`Bumped extension version in scripts/version folder.`)
+  // Bump in file
+  bumpExtensionVersionInScriptFiles({ nextVersion: version })
+  console.log(`Bumped extension version in scripts/version folder.`)
+}
 
