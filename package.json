@@ -19,6 +19,7 @@
     "@typescript-eslint/parser": "7.18.0",
     "@vscode/test-electron": "2.4.1",
     "@vscode/vsce": "2.29.0",
+    "@vitest/coverage-v8": "^2.1.0",
     "eslint": "8.57.1",
     "eslint-config-prettier": "10.0.1",
     "eslint-plugin-prettier": "5.2.1",

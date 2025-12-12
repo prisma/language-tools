@@ -5,6 +5,7 @@ export default defineConfig({
     include: ['**/__tests__/**/*.test.mjs'],
     coverage: {
       enabled: !!process.env.CI,
+      provider: 'v8',
       reporter: ['clover'],
       reportsDirectory: 'scripts/__tests__/coverage',
       include: ['scripts/**/*.{js,mjs}'],
