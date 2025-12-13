@@ -99,8 +99,8 @@ importers:
         specifier: 8.1.0
         version: 8.1.0
       vscode-languageserver-textdocument:
-        specifier: 1.0.11
-        version: 1.0.11
+        specifier: 1.0.12
+        version: 1.0.12
       vscode-uri:
         specifier: ^3.0.8
         version: 3.1.0
@@ -124,14 +124,14 @@ importers:
   packages/vscode:
     dependencies:
       '@hono/node-server':
-        specifier: 1.14.2
-        version: 1.14.2(hono@4.7.10)
+        specifier: 1.19.7
+        version: 1.19.7(hono@4.11.0)
       '@prisma/credentials-store':
         specifier: 7.1.0
         version: 7.1.0
       '@prisma/dev':
-        specifier: 0.11.1
-        version: 0.11.1(typescript@5.7.3)
+        specifier: 0.16.0
+        version: 0.16.0(typescript@5.7.3)
       '@prisma/language-server':
         specifier: workspace:*
         version: link:../language-server
@@ -163,14 +163,14 @@ importers:
         specifier: 5.1.1
         version: 5.1.1
       hono:
-        specifier: 4.7.10
-        version: 4.7.10
+        specifier: 4.11.0
+        version: 4.11.0
       minimatch:
         specifier: 6.2.0
         version: 6.2.0
       openapi-fetch:
-        specifier: 0.14.0
-        version: 0.14.0
+        specifier: 0.15.0
+        version: 0.15.0
       postgres:
         specifier: 3.4.7
         version: 3.4.7
@@ -184,8 +184,8 @@ importers:
         specifier: 1.2.0
         version: 1.2.0
       zod:
-        specifier: 3.24.3
-        version: 3.24.3
+        specifier: 3.25.76
+        version: 3.25.76
     devDependencies:
       '@playwright/test':
         specifier: ^1.48.0
@@ -905,8 +905,14 @@ packages:
     resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
     engines: {node: '>=14'}
 
-  '@hono/node-server@1.14.2':
-    resolution: {integrity: sha512-GHjpOeHYbr9d1vkID2sNUYkl5IxumyhDrUJB7wBp7jvqYwPFt+oNKsAPBRcdSbV7kIrXhouLE199ks1QcK4r7A==}
+  '@hono/node-server@1.19.6':
+    resolution: {integrity: sha512-Shz/KjlIeAhfiuE93NDKVdZ7HdBVLQAfdbaXEaoAVO3ic9ibRSLGIQGkcBbFyuLr+7/1D5ZCINM8B+6IvXeMtw==}
+    engines: {node: '>=18.14.1'}
+    peerDependencies:
+      hono: ^4
+
+  '@hono/node-server@1.19.7':
+    resolution: {integrity: sha512-vUcD0uauS7EU2caukW8z5lJKtoGMokxNbJtBiwHgpqxEXokaHCBkQUmCHhjFB1VUTWdqj25QoMkMKzgjq+uhrw==}
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: ^4
@@ -1115,8 +1121,8 @@ packages:
   '@prisma/debug@6.8.2':
     resolution: {integrity: sha512-4muBSSUwJJ9BYth5N8tqts8JtiLT8QI/RSAzEogwEfpbYGFo9mYsInsVo8dqXdPO2+Rm5OG5q0qWDDE3nyUbVg==}
 
-  '@prisma/dev@0.11.1':
-    resolution: {integrity: sha512-02Z0rQokqPRVW5TiC2oSIqHFoj1RKS/OvxjgnvNhIN//J/pYMfTfMxwEiVH19090XNn1V4ow0jYMcJO95wDK/w==}
+  '@prisma/dev@0.16.0':
+    resolution: {integrity: sha512-bIpe2qrQBRqcn7GeI8+0dXvESLPf36LAwo24TQddaq2Fc7QrdNUYUg8VpcTERRNk8mghbfbALkn1IfpEvE3M0Q==}
 
   '@prisma/get-platform@6.8.2':
     resolution: {integrity: sha512-vXSxyUgX3vm1Q70QwzwkjeYfRryIvKno1SXbIqwSptKwqKzskINnDUcx85oX+ys6ooN2ATGSD0xN2UTfg6Zcow==}
@@ -1137,6 +1143,9 @@ packages:
 
   '@prisma/prisma-schema-wasm@7.2.0-1.3f298657b368429158ee75de33d3dc7ca4b307a5':
     resolution: {integrity: sha512-IypzeOLVpvrG6kL/nPWHRs8U+AZ1KAcY68TkCxhbfYW9PjnuFwo5eIoYn6NTtsBLDxyKJQU/055UYU5bdcWJMQ==}
+
+  '@prisma/query-plan-executor@6.18.0':
+    resolution: {integrity: sha512-jZ8cfzFgL0jReE1R10gT8JLHtQxjWYLiQ//wHmVYZ2rVkFHoh0DT8IXsxcKcFlfKN7ak7k6j0XMNn2xVNyr5cA==}
 
   '@prisma/schema-files-loader@6.19.0-dev.10':
     resolution: {integrity: sha512-FpjL53iN1ApEUyNbbaBJ2Yn575SMYiwplEeMpeSS4249DSf4O9B1l+RB6wLnXQ6Gk415GX4Y6+MWS3DAZfw4Ow==}
@@ -2601,8 +2610,12 @@ packages:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
 
-  hono@4.7.10:
-    resolution: {integrity: sha512-QkACju9MiN59CKSY5JsGZCYmPZkA6sIW6OFCUp7qDjZu6S6KHtJHhAc9Uy9mV9F8PJ1/HQ3ybZF2yjCa/73fvQ==}
+  hono@4.10.6:
+    resolution: {integrity: sha512-BIdolzGpDO9MQ4nu3AUuDwHZZ+KViNm+EZ75Ae55eMXMqLVhDFqEMXxtUe9Qh8hjL+pIna/frs2j6Y2yD5Ua/g==}
+    engines: {node: '>=16.9.0'}
+
+  hono@4.11.0:
+    resolution: {integrity: sha512-Jg8uZzN2ul8/qlyid5FO8O624F3AK0wKtkgoeEON1qBum1rM1itYBxoMKu/1SPJC7F1+xlIZsJMmc4HHhJ1AWg==}
     engines: {node: '>=16.9.0'}
 
   hosted-git-info@4.1.0:
@@ -3391,6 +3404,9 @@ packages:
   openapi-fetch@0.14.0:
     resolution: {integrity: sha512-PshIdm1NgdLvb05zp8LqRQMNSKzIlPkyMxYFxwyHR+UlKD4t2nUjkDhNxeRbhRSEd3x5EUNh2w5sJYwkhOH4fg==}
 
+  openapi-fetch@0.15.0:
+    resolution: {integrity: sha512-OjQUdi61WO4HYhr9+byCPMj0+bgste/LtSBEcV6FzDdONTs7x0fWn8/ndoYwzqCsKWIxEZwo4FN/TG1c1rI8IQ==}
+
   openapi-typescript-helpers@0.0.15:
     resolution: {integrity: sha512-opyTPaunsklCBpTK8JGef6mfPhLSnyy5a0IN9vKtx3+4aExf+KxEqYwIy3hqkedXIB97u357uLMJsOnm3GVjsw==}
 
@@ -3751,10 +3767,6 @@ packages:
     deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
-  rimraf@5.0.10:
-    resolution: {integrity: sha512-l0OE8wL34P4nJH/H2ffoaniAokM2qSmrtXHmlpvYr5AVVX8msAyW0l8NVJFDxlSK4u3Uh/f41cQheDVdnYijwQ==}
-    hasBin: true
-
   ripstat@1.1.1:
     resolution: {integrity: sha512-O+KrJUwY3Q8cArNraH136svsDlNmRh6mnJ9TogkpcGWBvd2Kks5d5HGsZRnWt9h3kh8D4uq62kdlYihONjgj5w==}
 
@@ -3874,13 +3886,6 @@ packages:
   slice-ansi@7.1.2:
     resolution: {integrity: sha512-iOBWFgUX7caIZiuutICxVgX1SdxwAVFFKwt1EvMYYec/NWO5meOJ6K5uQxhrYBdQJne4KxiqZc+KptFOWFSI9w==}
     engines: {node: '>=18'}
-
-  sock-daemon@1.4.2:
-    resolution: {integrity: sha512-IzbegWshWWR+UzQ7487mbdYNmfJ1jXUXQBUHooqtpylO+aW0vMVbFN2d2ug3CSPZ0wbG7ZTTGwpUuthIDFIOGg==}
-    engines: {node: 16 >=16.17.0 || 18 >= 18.6.0 || >=20}
-
-  socket-post-message@1.0.3:
-    resolution: {integrity: sha512-UhJaB3xR2oF+HvddFOq2cBZi4zVKOHvdiBo+BaScNxsEUg3TLWSP8BkweKfe07kfH1thjn1hJR0af/w1EtBFjg==}
 
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
@@ -4249,8 +4254,8 @@ packages:
     resolution: {integrity: sha512-kiGUalWN+rgBJ/1OHZsBtU4rXZOfj/7rKQxULKlIzwzQSvMJUUNgPwJEEh7gU6xEVxC0ahoOBvN2YI8GH6FNgA==}
     engines: {node: '>=10.12.0'}
 
-  valibot@1.1.0:
-    resolution: {integrity: sha512-Nk8lX30Qhu+9txPYTwM0cFlWLdPFsFr6LblzqIySfbZph9+BFsAHsNvHOymEviUepeIW6KFHzpX8TKhbptBXXw==}
+  valibot@1.2.0:
+    resolution: {integrity: sha512-mm1rxUsmOxzrwnX5arGS+U4T25RdvpPjPN4yR0u9pUBov9+zGVtO84tif1eY4r6zWxVxu3KzIyknJy3rxfRZZg==}
     peerDependencies:
       typescript: '>=5'
     peerDependenciesMeta:
@@ -4357,6 +4362,9 @@ packages:
 
   vscode-languageserver-textdocument@1.0.11:
     resolution: {integrity: sha512-X+8T3GoiwTVlJbicx/sIAF+yuJAqz8VvwJyoMVhwEMoEKE/fkDmrqUgDMyBECcM2A2frVZIUj5HI/ErRXCfOeA==}
+
+  vscode-languageserver-textdocument@1.0.12:
+    resolution: {integrity: sha512-cxWNPesCnQCcMPeenjKKsOCKQZ/L6Tv19DTRIGuLWe32lyzWhihGVJ/rcckZXJxfdKCFvRLS3fpBIsV/ZGX4zA==}
 
   vscode-languageserver-types@3.16.0:
     resolution: {integrity: sha512-k8luDIWJWyenLc5ToFQQMaSrqCHiLwyKPHKPQZ5zz21vM+vIVUSvsRpcbiECH4WR88K2XZqc4ScRcZ7nk/jbeA==}
@@ -4504,8 +4512,8 @@ packages:
   zeptomatch@2.0.2:
     resolution: {integrity: sha512-H33jtSKf8Ijtb5BW6wua3G5DhnFjbFML36eFu+VdOoVY4HD9e7ggjqdM6639B+L87rjnR6Y+XeRzBXZdy52B/g==}
 
-  zod@3.24.3:
-    resolution: {integrity: sha512-HhY1oqzWCQWuUqvBFnsyrtZRhyPeR7SUGv+C4+MsisMuVfSPx8HpwWqH8tRahSlt6M3PiFAcoeFhZAqIXTxoSg==}
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
 snapshots:
 
@@ -5133,9 +5141,13 @@ snapshots:
 
   '@fastify/busboy@2.1.1': {}
 
-  '@hono/node-server@1.14.2(hono@4.7.10)':
+  '@hono/node-server@1.19.6(hono@4.10.6)':
     dependencies:
-      hono: 4.7.10
+      hono: 4.10.6
+
+  '@hono/node-server@1.19.7(hono@4.11.0)':
+    dependencies:
+      hono: 4.11.0
 
   '@humanwhocodes/config-array@0.13.0':
     dependencies:
@@ -5463,24 +5475,24 @@ snapshots:
 
   '@prisma/debug@6.8.2': {}
 
-  '@prisma/dev@0.11.1(typescript@5.7.3)':
+  '@prisma/dev@0.16.0(typescript@5.7.3)':
     dependencies:
       '@electric-sql/pglite': 0.3.2
       '@electric-sql/pglite-socket': 0.0.6(@electric-sql/pglite@0.3.2)
       '@electric-sql/pglite-tools': 0.2.7(@electric-sql/pglite@0.3.2)
-      '@hono/node-server': 1.14.2(hono@4.7.10)
+      '@hono/node-server': 1.19.6(hono@4.10.6)
       '@mrleebo/prisma-ast': 0.12.1
       '@prisma/get-platform': 6.8.2
+      '@prisma/query-plan-executor': 6.18.0
       foreground-child: 3.3.1
       get-port-please: 3.1.2
-      hono: 4.7.10
+      hono: 4.10.6
       http-status-codes: 2.3.0
       pathe: 2.0.3
       proper-lockfile: 4.1.2
       remeda: 2.21.3
-      sock-daemon: 1.4.2
       std-env: 3.9.0
-      valibot: 1.1.0(typescript@5.7.3)
+      valibot: 1.2.0(typescript@5.7.3)
       zeptomatch: 2.0.2
     transitivePeerDependencies:
       - typescript
@@ -5512,6 +5524,8 @@ snapshots:
   '@prisma/prisma-schema-wasm@6.19.0-26.2ba551f319ab1df4bc874a89965d8b3641056773': {}
 
   '@prisma/prisma-schema-wasm@7.2.0-1.3f298657b368429158ee75de33d3dc7ca4b307a5': {}
+
+  '@prisma/query-plan-executor@6.18.0': {}
 
   '@prisma/schema-files-loader@6.19.0-dev.10':
     dependencies:
@@ -7193,7 +7207,9 @@ snapshots:
 
   he@1.2.0: {}
 
-  hono@4.7.10: {}
+  hono@4.10.6: {}
+
+  hono@4.11.0: {}
 
   hosted-git-info@4.1.0:
     dependencies:
@@ -8174,6 +8190,10 @@ snapshots:
     dependencies:
       openapi-typescript-helpers: 0.0.15
 
+  openapi-fetch@0.15.0:
+    dependencies:
+      openapi-typescript-helpers: 0.0.15
+
   openapi-typescript-helpers@0.0.15: {}
 
   optionator@0.9.4:
@@ -8546,10 +8566,6 @@ snapshots:
     dependencies:
       glob: 7.2.3
 
-  rimraf@5.0.10:
-    dependencies:
-      glob: 10.5.0
-
   ripstat@1.1.1:
     dependencies:
       atomically: 1.7.0
@@ -8701,14 +8717,6 @@ snapshots:
     dependencies:
       ansi-styles: 6.2.3
       is-fullwidth-code-point: 5.1.0
-
-  sock-daemon@1.4.2:
-    dependencies:
-      rimraf: 5.0.10
-      signal-exit: 4.1.0
-      socket-post-message: 1.0.3
-
-  socket-post-message@1.0.3: {}
 
   source-map-js@1.2.1: {}
 
@@ -9036,7 +9044,7 @@ snapshots:
       '@types/istanbul-lib-coverage': 2.0.6
       convert-source-map: 2.0.0
 
-  valibot@1.1.0(typescript@5.7.3):
+  valibot@1.2.0(typescript@5.7.3):
     optionalDependencies:
       typescript: 5.7.3
 
@@ -9144,6 +9152,8 @@ snapshots:
       vscode-languageserver-types: 3.17.3
 
   vscode-languageserver-textdocument@1.0.11: {}
+
+  vscode-languageserver-textdocument@1.0.12: {}
 
   vscode-languageserver-types@3.16.0: {}
 
@@ -9303,4 +9313,4 @@ snapshots:
     dependencies:
       grammex: 3.1.12
 
-  zod@3.24.3: {}
+  zod@3.25.76: {}
