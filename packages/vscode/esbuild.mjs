@@ -1,8 +1,8 @@
 import * as esbuild from 'esbuild'
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'fs'
-import { dirname, join, resolve } from 'path'
-import { fileURLToPath } from 'url'
-import { createRequire, builtinModules } from 'module'
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { createRequire, builtinModules } from 'node:module'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const require = createRequire(import.meta.url)
@@ -77,7 +77,7 @@ const extensionConfig = {
   platform: 'node',
   target: 'node20',
   outfile: 'dist/extension.js',
-  external: ['vscode'],
+  external: ['vscode', '@prisma/dev/internal/daemon'],
   minify: production,
   sourcemap: !production,
   plugins: [pnpmResolvePlugin, ...(watch ? [esbuildProblemMatcherPlugin] : [])],
@@ -103,28 +103,6 @@ const languageServerConfig = {
   logLevel: 'info',
   // Help esbuild find modules in pnpm's symlinked structure
   nodePaths: [join(__dirname, '..', 'language-server', 'node_modules'), ...nodeModulesPaths],
-}
-
-/**
- * Configuration for the PPG Dev Server worker.
- * This is a separate bundle that gets forked as a child process when starting
- * a local Prisma Postgres instance.
- * @type {import('esbuild').BuildOptions}
- */
-const ppgDevServerConfig = {
-  entryPoints: ['src/workers/ppgDevServer.ts'],
-  bundle: true,
-  format: 'cjs',
-  platform: 'node',
-  target: 'node20',
-  outfile: 'dist/workers/ppgDevServer.js',
-  external: [],
-  minify: production,
-  sourcemap: !production,
-  plugins: [pnpmResolvePlugin, ...(watch ? [esbuildProblemMatcherPlugin] : [])],
-  metafile: true,
-  logLevel: 'info',
-  nodePaths: nodeModulesPaths,
 }
 
 async function build() {
@@ -174,16 +152,6 @@ async function build() {
       console.log(text)
     }
 
-    // Build the PPG Dev Server worker
-    console.log('\nBuilding PPG Dev Server worker...')
-    const ppgDevServerResult = await esbuild.build(ppgDevServerConfig)
-
-    if (ppgDevServerResult.metafile) {
-      const text = await esbuild.analyzeMetafile(ppgDevServerResult.metafile)
-      console.log('PPG Dev Server worker bundle analysis:')
-      console.log(text)
-    }
-
     // Copy static assets that can't be bundled
     copyStaticAssets()
 
@@ -198,9 +166,8 @@ async function watchMode() {
   // Start watch mode for all builds
   const extensionContext = await esbuild.context(extensionConfig)
   const lsContext = await esbuild.context(languageServerConfig)
-  const ppgDevServerContext = await esbuild.context(ppgDevServerConfig)
 
-  await Promise.all([extensionContext.watch(), lsContext.watch(), ppgDevServerContext.watch()])
+  await Promise.all([extensionContext.watch(), lsContext.watch()])
 
   // Copy static assets once at start
   copyStaticAssets()

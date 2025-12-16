@@ -1,7 +1,8 @@
+import type { DaemonMessage } from '@prisma/dev/internal/daemon'
 import chokidar from 'chokidar'
 import envPaths from 'env-paths'
 import { fork } from 'node:child_process'
-import { EventEmitter, ExtensionContext, Uri } from 'vscode'
+import { EventEmitter, ExtensionContext } from 'vscode'
 import { z } from 'zod'
 
 /**
@@ -21,11 +22,13 @@ export const DevInstanceSchema = z.object({
 
 export type DevInstance = z.infer<typeof DevInstanceSchema>
 
+const DAEMON_PATH = require.resolve('@prisma/dev/internal/daemon')
+
 export class PrismaDevRepository {
   private cache = new CacheManager()
   public readonly refreshEventEmitter = new EventEmitter<void | DevInstance>()
 
-  constructor(private readonly context: ExtensionContext) {
+  constructor(readonly context: ExtensionContext) {
     const watcher = chokidar.watch(STATE_FOLDER_PATH, { ignoreInitial: true, usePolling: true })
 
     watcher.on('addDir', () => this.refreshEventEmitter.fire())
@@ -45,30 +48,35 @@ export class PrismaDevRepository {
         return
       }
 
-      const { fsPath } = Uri.joinPath(this.context.extensionUri, ...['dist', 'workers', 'ppgDevServer.js'])
-
       let succeededStarting: () => void, failedStarting: (reason?: unknown) => void
       const startedPromise = new Promise<void>((resolve, reject) => {
         succeededStarting = resolve
         failedStarting = reject
       })
 
-      const child = fork(fsPath, [name], { detached: true, stdio: ['ignore', 'ignore', 'ignore', 'ipc'] })
+      const child = fork(DAEMON_PATH, [name], { detached: true, stdio: 'ignore' })
 
-      child.once('error', (error) => failedStarting(error))
-      child.once('message', (message: unknown) => {
-        if (typeof message !== 'object' || message == null) {
-          return
+      child.once('error', (error) => {
+        console.error(error)
+      })
+      child.once('message', (message: DaemonMessage) => {
+        const { type } = message
+
+        if (type === 'error') {
+          const { error } = message
+
+          if (error.includes('is already running')) {
+            return succeededStarting()
+          }
+
+          return failedStarting(message.error)
         }
 
-        if ('type' in message && message.type === 'started') {
+        if (type === 'started') {
           return succeededStarting()
         }
 
-        if ('error' in message) {
-          const errorMsg = typeof message.error === 'string' ? message.error : 'Unknown error'
-          failedStarting(new Error(errorMsg))
-        }
+        failedStarting(`Unknown message type: "${type satisfies never as string}"`)
       })
 
       try {
