@@ -136,8 +136,8 @@ importers:
         specifier: 0.11.1
         version: 0.11.1(typescript@5.7.3)
       '@prisma/language-server':
-        specifier: workspace:*
-        version: link:../language-server
+        specifier: 31.1.35
+        version: 31.1.35(magicast@0.3.5)
       '@prisma/management-api-sdk':
         specifier: 0.2.0
         version: 0.2.0
@@ -1047,6 +1047,11 @@ packages:
 
   '@prisma/get-platform@6.8.2':
     resolution: {integrity: sha512-vXSxyUgX3vm1Q70QwzwkjeYfRryIvKno1SXbIqwSptKwqKzskINnDUcx85oX+ys6ooN2ATGSD0xN2UTfg6Zcow==}
+
+  '@prisma/language-server@31.1.35':
+    resolution: {integrity: sha512-q9A+raONggjrZgunNaT/Q9Q3zfJqDLb0mUvuJqOiFAU/aNs+4uq37tSL2cRrHMpfkOOCqXD2Gv8VV3MuLKdMtA==}
+    engines: {node: '>=20'}
+    hasBin: true
 
   '@prisma/language-server@6.19.0-hotfix.1':
     resolution: {integrity: sha512-3I5HiyEv5svyn5wZ+DJ0+Ht+mVVl58Q+YWzpCurZwi2QGDqAaD7vty4LDJ65iFWUMfQdFrQlSP0uZGOfrIngZw==}
@@ -4784,6 +4789,20 @@ snapshots:
   '@prisma/get-platform@6.8.2':
     dependencies:
       '@prisma/debug': 6.8.2
+
+  '@prisma/language-server@31.1.35(magicast@0.3.5)':
+    dependencies:
+      '@prisma/config': 7.2.0-dev.27(magicast@0.3.5)
+      '@prisma/prisma-schema-wasm': 7.2.0-4.0c8ef2ce45c83248ab3df073180d5eda9e8be7a3
+      '@prisma/schema-files-loader': 7.2.0-dev.27
+      '@types/js-levenshtein': 1.1.3
+      js-levenshtein: 1.1.6
+      klona: 2.0.6
+      vscode-languageserver: 8.1.0
+      vscode-languageserver-textdocument: 1.0.11
+      vscode-uri: 3.1.0
+    transitivePeerDependencies:
+      - magicast
 
   '@prisma/language-server@6.19.0-hotfix.1(magicast@0.3.5)':
     dependencies:
