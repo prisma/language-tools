@@ -105,6 +105,23 @@ const languageServerConfig = {
   nodePaths: [join(__dirname, '..', 'language-server', 'node_modules'), ...nodeModulesPaths],
 }
 
+/** @type {import('esbuild').BuildOptions} */
+const prismaDevDaemonConfig = {
+  entryPoints: ['@prisma/dev/internal/daemon'],
+  bundle: true,
+  format: 'cjs',
+  platform: 'node',
+  target: 'node20',
+  outfile: 'dist/workers/prisma-dev-daemon.js',
+  external: [],
+  minify: production,
+  sourcemap: !production,
+  plugins: [pnpmResolvePlugin, ...(watch ? [esbuildProblemMatcherPlugin] : [])],
+  metafile: true,
+  logLevel: 'info',
+  nodePaths: nodeModulesPaths,
+}
+
 async function build() {
   try {
     const distDir = join(__dirname, 'dist')
@@ -149,6 +166,16 @@ async function build() {
     if (lsResult.metafile) {
       const text = await esbuild.analyzeMetafile(lsResult.metafile)
       console.log('Language server bundle analysis:')
+      console.log(text)
+    }
+
+    // Build the PPG Dev Server worker
+    console.log('\nBuilding prisma dev daemon...')
+    const prismaDevDaemonResult = await esbuild.build(prismaDevDaemonConfig)
+
+    if (prismaDevDaemonResult.metafile) {
+      const text = await esbuild.analyzeMetafile(prismaDevDaemonResult.metafile)
+      console.log('prisma dev daemon bundle analysis:')
       console.log(text)
     }
 

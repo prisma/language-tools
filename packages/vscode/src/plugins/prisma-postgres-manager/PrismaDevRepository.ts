@@ -2,7 +2,7 @@ import type { DaemonMessage } from '@prisma/dev/internal/daemon'
 import chokidar from 'chokidar'
 import envPaths from 'env-paths'
 import { fork } from 'node:child_process'
-import { EventEmitter, ExtensionContext } from 'vscode'
+import { EventEmitter, type ExtensionContext, Uri } from 'vscode'
 import { z } from 'zod'
 
 /**
@@ -21,8 +21,6 @@ export const DevInstanceSchema = z.object({
 })
 
 export type DevInstance = z.infer<typeof DevInstanceSchema>
-
-const DAEMON_PATH = require.resolve('@prisma/dev/internal/daemon')
 
 export class PrismaDevRepository {
   private cache = new CacheManager()
@@ -54,7 +52,9 @@ export class PrismaDevRepository {
         failedStarting = reject
       })
 
-      const child = fork(DAEMON_PATH, [name], { detached: true, stdio: 'ignore' })
+      const { fsPath } = Uri.joinPath(this.context.extensionUri, ...['dist', 'workers', 'prisma-dev-daemon.js'])
+
+      const child = fork(fsPath, [name], { detached: true, stdio: 'ignore' })
 
       child.once('error', (error) => {
         console.error(error)
