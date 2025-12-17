@@ -73,7 +73,8 @@ jobs:
       - name: Check for minor or major release
         id: is_minor_or_major
         run: |
-          node scripts/is_minor_or_major_release.mjs ${{ github.event.inputs.npm_channel }}
+          VERSION_SCRIPT=$([ -f scripts/is_minor_or_major_release.mjs ] && echo "is_minor_or_major_release.mjs" || echo "is_minor_or_major_release.js")
+          node "scripts/$VERSION_SCRIPT" ${{ github.event.inputs.npm_channel }}
       - name: Reset on 'main' branch if minor or major release
         if: ${{steps.is_minor_or_major.outputs.is_minor_or_major_release}}
         run: |
