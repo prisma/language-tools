@@ -25,17 +25,14 @@ async function bumpLSVersionInExtension({ version }) {
 
   // Update pnpm-lock.yaml after package.json changes
   console.log('Running pnpm install to update pnpm-lock.yaml...')
-  await execa('pnpm', ['install'], {
+  await execa('pnpm', ['install', '--no-frozen-lockfile'], {
     cwd: path.join(__dirname, '..'),
     stdio: 'inherit',
   })
 }
 
 async function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersion = '' }) {
-  const languageServerPackageJsonPath = path.join(
-    __dirname,
-    '../packages/language-server/package.json',
-  )
+  const languageServerPackageJsonPath = path.join(__dirname, '../packages/language-server/package.json')
   const rootPackageJsonPath = path.join(__dirname, '../package.json')
 
   // update version in packages/vscode folder
@@ -65,12 +62,7 @@ async function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersi
     // Find the version needed for `@prisma/prisma-schema-wasm`
     // Let's look into the `package.json` of the `@prisma/engines` package
     // and get the version of `@prisma/engines-version` it uses
-    const { stdout } = await execa('npm', [
-      'show',
-      `@prisma/engines@${newPrismaVersion}`,
-      'dependencies',
-      '--json',
-    ])
+    const { stdout } = await execa('pnpm', ['show', `@prisma/engines@${newPrismaVersion}`, 'dependencies', '--json'])
     console.debug(stdout)
     const npmInfoOutput = JSON.parse(stdout)
     const engineVersion = npmInfoOutput['@prisma/engines-version'] // 2.26.0-23.9b816b3aa13cc270074f172f30d6eda8a8ce867d
@@ -111,7 +103,7 @@ async function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersi
 
   // Update pnpm-lock.yaml after package.json changes
   console.log('Running pnpm install to update pnpm-lock.yaml...')
-  await execa('pnpm', ['install'], { cwd: path.join(__dirname, '..'), stdio: 'inherit' })
+  await execa('pnpm', ['install', '--no-frozen-lockfile'], { cwd: path.join(__dirname, '..'), stdio: 'inherit' })
 }
 
 export { bumpVersionsInRepo }
@@ -139,4 +131,3 @@ if (args.length === 3) {
 } else {
   throw new Error(`Expected 1, 2 or 3 arguments, but received ${args.length}.`)
 }
-
