@@ -55,7 +55,7 @@ These are **internal Prisma packages** that provide core functionality:
 | `@prisma/config`               | Loads `prisma.config.ts` configuration     | Yes      |
 | `@prisma/studio-core-licensed` | Prisma Studio UI (webview)                 | No²      |
 | `@prisma/dev`                  | Local Prisma Postgres development server   | Partial³ |
-| `prisma-6-language-server`     | Pinned Prisma 6 language server            | No⁴      |
+| `prisma-6-language-server`     | Pinned Prisma 6 language server            | Yes⁴     |
 
 ¹ JS is bundled; WASM binary is copied separately (loaded at runtime via
 `__dirname`)
@@ -66,8 +66,9 @@ a bundle
 ³ Bundled into separate worker (`dist/workers/ppgDevServer.js`); PGlite
 assets (`pglite.data`, `pglite.wasm`) are copied separately
 
-⁴ Kept separate to support runtime switching between Prisma 6 and latest
-language servers via the `prisma.pinToPrisma6` setting
+⁴ Bundled separately from the main language server to support runtime
+switching via the `prisma.pinToPrisma6` setting; metadata files (package.json,
+LICENSE) are copied for version detection
 
 > **Note:** These dependencies are automatically updated via CI. A cron job
 > runs every 5 minutes checking for new Prisma releases

@@ -13,12 +13,14 @@ production while supporting fast rebuilds during development.
 
 ## What Gets Bundled
 
-The build produces three separate bundles:
+The build produces four separate bundles:
 
 1. **Extension bundle** (`dist/extension.js`) — The main VS Code extension code
 2. **Language Server bundle** (`dist/language-server/bin.js`) — The LSP server
 3. **PPG Dev Server worker** (`dist/workers/ppgDevServer.js`) — Forked process for
    local Prisma Postgres instances
+4. **Prisma 6 Language Server** (`dist/prisma-6-language-server/bin.js`) —
+   Pinned language server for Prisma 6 compatibility (kept separate for runtime switching)
 
 All bundles are CommonJS format targeting Node.js 20.
 As of 2025 VSCode extensions must be provided as commonjs modules.
@@ -53,18 +55,17 @@ Since these assets are loaded dynamically by the browser (not imported by
 Node.js), they must exist as physical files on disk that the HTTP server can
 read and serve.
 
-### 2. Prisma 6 Language Server (`prisma-6-language-server`)
+### 2. Prisma 6 Language Server Metadata (`prisma-6-language-server`)
 
-**Location:** `dist/node_modules/prisma-6-language-server/`
+**Location:** `dist/prisma-6-language-server/`
 
-**Why it can't be bundled:** The extension supports a `prisma.pinToPrisma6`
-setting that switches between the bundled (latest) language server and a
-pinned Prisma 6 version. This allows users working on Prisma 6 projects to
-get accurate language support.
+The Prisma 6 language server code is bundled (see "What Gets Bundled" above),
+but metadata files (`package.json`, `LICENSE`, `README.md`) are copied separately
+for version detection and licensing compliance.
 
-Since users can switch between language servers at runtime via VS Code
-settings, the Prisma 6 server must be kept as a separate, loadable module
-rather than bundled into the main language server.
+The extension supports a `prisma.pinToPrisma6` setting that switches between
+the main language server and this pinned Prisma 6 version, allowing users
+working on Prisma 6 projects to get accurate language support.
 
 ### 3. WASM Module (`prisma_schema_build_bg.wasm`)
 
@@ -102,13 +103,19 @@ packages/vscode/dist/
 │   ├── bin.js                # Language server bundle
 │   ├── bin.js.map            # Source map (dev only)
 │   └── prisma_schema_build_bg.wasm  # WASM module
+├── prisma-6-language-server/
+│   ├── bin.js                # Prisma 6 LS bundle
+│   ├── bin.js.map            # Source map (dev only)
+│   ├── prisma_schema_build_bg.wasm  # WASM module
+│   ├── package.json          # Metadata (copied)
+│   ├── LICENSE               # License file (copied)
+│   └── README.md             # Readme (copied)
 ├── workers/
 │   ├── ppgDevServer.js       # PPG Dev Server worker bundle
 │   ├── ppgDevServer.js.map   # Source map (dev only)
 │   ├── pglite.data           # PGlite data file
 │   └── pglite.wasm           # PGlite WASM module
 └── node_modules/
-    ├── @prisma/
-    │   └── studio-core-licensed/    # Studio UI assets
-    └── prisma-6-language-server/    # Pinned LS for Prisma 6
+    └── @prisma/
+        └── studio-core-licensed/    # Studio UI assets (not bundled)
 ```

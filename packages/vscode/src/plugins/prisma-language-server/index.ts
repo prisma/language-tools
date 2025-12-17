@@ -273,9 +273,8 @@ function getServerOptions(prismaConfig: WorkspaceConfiguration, context: Extensi
   const pinToPrisma6 = prismaConfig.get<boolean>('pinToPrisma6')
 
   if (pinToPrisma6) {
-    console.log('Using published Prisma 6 Language Server (npm)')
-    // prisma-6-language-server is kept as an external dependency
-    serverModule = context.asAbsolutePath(path.join('dist/node_modules/prisma-6-language-server/dist/bin'))
+    console.log('Using Prisma 6 Language Server')
+    serverModule = context.asAbsolutePath(path.join('dist/prisma-6-language-server/bin.js'))
   } else if (isDebugMode() || isE2ETestOnPullRequest()) {
     // use Language Server from folder for debugging
     console.log('Using local Language Server from filesystem')

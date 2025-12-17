@@ -127,6 +127,29 @@ const ppgDevServerConfig = {
   nodePaths: nodeModulesPaths,
 }
 
+/**
+ * Configuration for prisma-6-language-server bundle.
+ * This bundles the npm package with all its dependencies so it works
+ * correctly with pnpm's symlinked node_modules structure.
+ * Used when pinToPrisma6 is enabled for backwards compatibility.
+ * @type {import('esbuild').BuildOptions}
+ */
+const prisma6LanguageServerConfig = {
+  entryPoints: ['node_modules/prisma-6-language-server/dist/bin.js'],
+  bundle: true,
+  format: 'cjs',
+  platform: 'node',
+  target: 'node20',
+  outfile: 'dist/prisma-6-language-server/bin.js',
+  external: [],
+  minify: production,
+  sourcemap: !production,
+  plugins: [pnpmResolvePlugin, ...(watch ? [esbuildProblemMatcherPlugin] : [])],
+  metafile: true,
+  logLevel: 'info',
+  nodePaths: nodeModulesPaths,
+}
+
 async function build() {
   try {
     const distDir = join(__dirname, 'dist')
@@ -184,6 +207,19 @@ async function build() {
       console.log(text)
     }
 
+    // Build prisma-6-language-server bundle (for pinToPrisma6 compatibility)
+    const prisma6LsSrc = join(__dirname, 'node_modules/prisma-6-language-server')
+    if (existsSync(prisma6LsSrc)) {
+      console.log('\nBuilding prisma-6-language-server bundle...')
+      const prisma6LsResult = await esbuild.build(prisma6LanguageServerConfig)
+
+      if (prisma6LsResult.metafile) {
+        const text = await esbuild.analyzeMetafile(prisma6LsResult.metafile)
+        console.log('prisma-6-language-server bundle analysis:')
+        console.log(text)
+      }
+    }
+
     // Copy static assets that can't be bundled
     copyStaticAssets()
 
@@ -222,14 +258,26 @@ function copyStaticAssets() {
     cpSync(studioSrc, studioDest, { recursive: true, dereference: true })
   }
 
-  // Copy prisma-6-language-server (used when pinToPrisma6 is enabled)
+  // Copy prisma-6-language-server metadata files (used when pinToPrisma6 is enabled)
+  // Note: The actual code is bundled with esbuild in prisma6LanguageServerConfig
   const prisma6LsSrc = join(__dirname, 'node_modules/prisma-6-language-server')
-  const prisma6LsDest = join(nodeModulesDest, 'prisma-6-language-server')
+  const prisma6LsDest = join(__dirname, 'dist/prisma-6-language-server')
 
   if (existsSync(prisma6LsSrc)) {
-    console.log('Copying prisma-6-language-server...')
-    // Use dereference to resolve symlinks (important for pnpm)
-    cpSync(prisma6LsSrc, prisma6LsDest, { recursive: true, dereference: true })
+    console.log('Copying prisma-6-language-server metadata...')
+    mkdirSync(prisma6LsDest, { recursive: true })
+    // Copy package.json for version info
+    const pkgJsonSrc = join(prisma6LsSrc, 'package.json')
+    if (existsSync(pkgJsonSrc)) {
+      cpSync(pkgJsonSrc, join(prisma6LsDest, 'package.json'))
+    }
+    // Copy LICENSE and README if present
+    for (const file of ['LICENSE', 'README.md']) {
+      const fileSrc = join(prisma6LsSrc, file)
+      if (existsSync(fileSrc)) {
+        cpSync(fileSrc, join(prisma6LsDest, file))
+      }
+    }
   }
 
   // Copy prisma-schema-wasm WASM file to language server directory
@@ -251,6 +299,13 @@ function copyStaticAssets() {
     if (existsSync(wasmSrc)) {
       console.log('Copying prisma-schema-wasm WASM file...')
       cpSync(wasmSrc, join(lsDistDir, 'prisma_schema_build_bg.wasm'))
+
+      // Also copy to prisma-6-language-server bundle directory
+      const prisma6LsDistDir = join(__dirname, 'dist/prisma-6-language-server')
+      if (existsSync(prisma6LsDistDir)) {
+        console.log('Copying prisma-schema-wasm WASM file to prisma-6-language-server...')
+        cpSync(wasmSrc, join(prisma6LsDistDir, 'prisma_schema_build_bg.wasm'))
+      }
     } else {
       console.warn('Warning: prisma_schema_build_bg.wasm not found at', wasmSrc)
     }
