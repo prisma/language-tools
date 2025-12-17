@@ -81,14 +81,14 @@ importers:
   packages/language-server:
     dependencies:
       '@prisma/config':
-        specifier: 7.2.0-dev.3
-        version: 7.2.0-dev.3(magicast@0.3.5)
+        specifier: 7.2.0-dev.27
+        version: 7.2.0-dev.27(magicast@0.3.5)
       '@prisma/prisma-schema-wasm':
-        specifier: 7.2.0-1.3f298657b368429158ee75de33d3dc7ca4b307a5
-        version: 7.2.0-1.3f298657b368429158ee75de33d3dc7ca4b307a5
+        specifier: 7.2.0-4.0c8ef2ce45c83248ab3df073180d5eda9e8be7a3
+        version: 7.2.0-4.0c8ef2ce45c83248ab3df073180d5eda9e8be7a3
       '@prisma/schema-files-loader':
-        specifier: 7.2.0-dev.3
-        version: 7.2.0-dev.3
+        specifier: 7.2.0-dev.27
+        version: 7.2.0-dev.27
       '@types/js-levenshtein':
         specifier: 1.1.3
         version: 1.1.3
@@ -1033,8 +1033,8 @@ packages:
   '@prisma/config@6.19.0-dev.10':
     resolution: {integrity: sha512-y3jJxFpPw8shOW+h1bpKIbEMrVOLOupcgzAxI+ixMOLzHH7041BYrotftRvAz/edQhEAeG2nAVDOyKS45o+H8A==}
 
-  '@prisma/config@7.2.0-dev.3':
-    resolution: {integrity: sha512-Z7a37ZIred5xF2+fy3bJcTx6xVJaDLx41a4wFnw2vGZScap5Gi4nMfabBzEhAIlBZqSgQJSq3c021T9axO3VJw==}
+  '@prisma/config@7.2.0-dev.27':
+    resolution: {integrity: sha512-0FHTmjNiKwzsLBXlt4xPElQnlVSSC9gzAQ8pHtFChHR9by7AsY4IIuYxd2c3TniTAs4jWXLhBrdFegdhVi+KaA==}
 
   '@prisma/credentials-store@7.1.0':
     resolution: {integrity: sha512-hQ5XKET/AHCeWuBISD9Y0d93Ja3ep6bpCRNox283IGV+IBUBjwVArb8Q5QwQWK1dniCLRynkE+fEMIfL3c6N5w==}
@@ -1062,14 +1062,14 @@ packages:
   '@prisma/prisma-schema-wasm@6.19.0-26.2ba551f319ab1df4bc874a89965d8b3641056773':
     resolution: {integrity: sha512-5au1UH9+jky4TtIdgxDUA9Mk+40R2hDwZnhjjzR1io7WFtIKP6e5DI7yQ5QVysY8Ves8KWDsvwzDOn6gYNY4iA==}
 
-  '@prisma/prisma-schema-wasm@7.2.0-1.3f298657b368429158ee75de33d3dc7ca4b307a5':
-    resolution: {integrity: sha512-IypzeOLVpvrG6kL/nPWHRs8U+AZ1KAcY68TkCxhbfYW9PjnuFwo5eIoYn6NTtsBLDxyKJQU/055UYU5bdcWJMQ==}
+  '@prisma/prisma-schema-wasm@7.2.0-4.0c8ef2ce45c83248ab3df073180d5eda9e8be7a3':
+    resolution: {integrity: sha512-rniY+d+pqkH1vmnM+rGH3nxf0Z50uC27Yqo9eUsWkkosJ/jyUSFa/lTiPl4CyCOlk6AtJ6ycxjzQnJcMLYaptA==}
 
   '@prisma/schema-files-loader@6.19.0-dev.10':
     resolution: {integrity: sha512-FpjL53iN1ApEUyNbbaBJ2Yn575SMYiwplEeMpeSS4249DSf4O9B1l+RB6wLnXQ6Gk415GX4Y6+MWS3DAZfw4Ow==}
 
-  '@prisma/schema-files-loader@7.2.0-dev.3':
-    resolution: {integrity: sha512-+UKwFXb16sP7c6utS1fPjwUP54XYXIns5uA5TNQiVMQ+kTw5S/dVjqURUp44fJlZnGVQVbyL+Ljo+jp9/ChzQg==}
+  '@prisma/schema-files-loader@7.2.0-dev.27':
+    resolution: {integrity: sha512-CXbhORi1IJHBJI0QZNtYymbBzotYuwJz2h+JIVCxamhStK0Z1tYPPfM5t0PfPHoA8LVZ2eQvQGooshUTXWyxzA==}
 
   '@prisma/studio-core-licensed@0.8.2':
     resolution: {integrity: sha512-l9V574/5yu/s79Ml7ZVIU692XyyYLmt3JJG9nF4jLKbb7ONEwmO9WxVNgo6NYwvSezvRwQ4uNG9cSm2RFNVzSA==}
@@ -4744,7 +4744,7 @@ snapshots:
     transitivePeerDependencies:
       - magicast
 
-  '@prisma/config@7.2.0-dev.3(magicast@0.3.5)':
+  '@prisma/config@7.2.0-dev.27(magicast@0.3.5)':
     dependencies:
       c12: 3.1.0(magicast@0.3.5)
       deepmerge-ts: 7.1.5
@@ -4807,16 +4807,16 @@ snapshots:
 
   '@prisma/prisma-schema-wasm@6.19.0-26.2ba551f319ab1df4bc874a89965d8b3641056773': {}
 
-  '@prisma/prisma-schema-wasm@7.2.0-1.3f298657b368429158ee75de33d3dc7ca4b307a5': {}
+  '@prisma/prisma-schema-wasm@7.2.0-4.0c8ef2ce45c83248ab3df073180d5eda9e8be7a3': {}
 
   '@prisma/schema-files-loader@6.19.0-dev.10':
     dependencies:
       '@prisma/prisma-schema-wasm': 6.19.0-26.2ba551f319ab1df4bc874a89965d8b3641056773
       fs-extra: 11.3.0
 
-  '@prisma/schema-files-loader@7.2.0-dev.3':
+  '@prisma/schema-files-loader@7.2.0-dev.27':
     dependencies:
-      '@prisma/prisma-schema-wasm': 7.2.0-1.3f298657b368429158ee75de33d3dc7ca4b307a5
+      '@prisma/prisma-schema-wasm': 7.2.0-4.0c8ef2ce45c83248ab3df073180d5eda9e8be7a3
       fs-extra: 11.3.0
 
   '@prisma/studio-core-licensed@0.8.2(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
