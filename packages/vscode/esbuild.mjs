@@ -77,7 +77,7 @@ const extensionConfig = {
   platform: 'node',
   target: 'node20',
   outfile: 'dist/extension.js',
-  external: ['vscode', '@prisma/dev/internal/daemon'],
+  external: ['vscode'],
   minify: production,
   sourcemap: !production,
   plugins: [pnpmResolvePlugin, ...(watch ? [esbuildProblemMatcherPlugin] : [])],
