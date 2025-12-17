@@ -45,13 +45,13 @@ jobs:
           sh scripts/set_git_credentials.sh
       - name: Update extension version in scripts folder
         id: update
-        run: node scripts/bump_extension_version.js extension-${{ github.event.inputs.release_type }}-release
+        run: node scripts/bump_extension_version.mjs extension-${{ github.event.inputs.release_type }}-release
       - name: Commit and Push
         run: |
           sh scripts/commit_and_push.sh "[skip ci] bump extension version in scripts to ${{ steps.update.outputs.next_extension_version }}."
       - name: Update VS Code extension version
         run: |
-          node scripts/update_package_json_files.js latest ${{ steps.update.outputs.next_extension_version }} ""
+          node scripts/update_package_json_files.mjs latest ${{ steps.update.outputs.next_extension_version }} ""
       - name: Install Dependencies
         run: pnpm install
       - name: Commit and Push

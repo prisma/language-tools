@@ -24,7 +24,7 @@
   "scripts": {
     "build": "tsc -p ./",
     "watch": "tsc -p ./ -w",
-    "test": "vitest",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "main": "./dist/index.js",

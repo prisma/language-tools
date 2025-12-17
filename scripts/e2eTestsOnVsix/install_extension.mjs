@@ -1,7 +1,6 @@
-'use strict'
-const core = require('@actions/core')
-const vscodeTest = require('@vscode/test-electron')
-const childProcess = require('child_process')
+import core from '@actions/core'
+import * as vscodeTest from '@vscode/test-electron'
+import { spawnSync } from 'child_process'
 
 async function installExtension({ extensionType, extensionVersion }) {
   try {
@@ -17,7 +16,8 @@ async function installExtension({ extensionType, extensionVersion }) {
     console.debug({ vscodeExecutablePath })
 
     // Install VS Code extension
-    let [cli, ...args] = vscodeTest.resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath)
+    const [cli, ...args] =
+      vscodeTest.resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath)
 
     console.debug({ cli })
     console.debug({ args })
@@ -44,20 +44,18 @@ function spawnVscode(cmd, args) {
     cmd = 'cmd.exe'
   }
 
-  return childProcess.spawnSync(cmd, args, {
+  return spawnSync(cmd, args, {
     encoding: 'utf-8',
     stdio: 'pipe',
   })
 }
 
-module.exports = { installExtension }
+export { installExtension }
 
-if (require.main === module) {
-  const args = process.argv.slice(2)
-  installExtension({
-    extensionType: args[0],
-    extensionVersion: args[1],
-  }).then((res) => {
-    console.log(res)
-  })
-}
+const args = process.argv.slice(2)
+const result = await installExtension({
+  extensionType: args[0],
+  extensionVersion: args[1],
+})
+console.log(result)
+
