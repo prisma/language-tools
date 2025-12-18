@@ -1,5 +1,5 @@
-name: 7. Publish
-run-name: 7. Publish - ${{ inputs.trigger_reason }}
+name: 6. Publish
+run-name: 6. Publish - ${{ inputs.trigger_reason }}
 
 on:
   workflow_dispatch:
@@ -16,7 +16,7 @@ on:
 
 env:
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
-  PRISMA_TELEMETRY_INFORMATION: 'language-tools 7_publish.yml'
+  PRISMA_TELEMETRY_INFORMATION: 'language-tools 6_publish.yml'
 
 jobs:
   marketplace:

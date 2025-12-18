@@ -1,5 +1,5 @@
-name: 5. Integration tests in VSCode folder with published LS
-run-name: 5. Integration tests in VS Code folder with published LS - ${{ inputs.trigger_reason }}
+name: 4. E2E tests VS Code Extension
+run-name: 4. E2E tests VS Code Extension - ${{ inputs.trigger_reason }}
 
 on:
   workflow_dispatch:
@@ -22,11 +22,11 @@ on:
         required: true
 env:
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
-  PRISMA_TELEMETRY_INFORMATION: 'language-tools 5_e2e_tests.yml'
+  PRISMA_TELEMETRY_INFORMATION: 'language-tools 4_e2e_tests.yml'
 
 jobs:
   tests:
-    name: Integration tests in VS Code folder with published LS
+    name: E2E tests VS Code Extension
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
@@ -74,6 +74,6 @@ jobs:
         if: ${{ needs.tests.result == 'success' }}
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: 6. Build extension
+          workflow: 5. Build extension
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
           inputs: '{ "release_channel": "${{ github.event.inputs.release_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{github.event.inputs.branch}}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'
