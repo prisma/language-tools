@@ -84,7 +84,7 @@ jobs:
         run: |
           node scripts/update_package_json_files.mjs ${{ github.event.inputs.npm_channel }} ${{ steps.update.outputs.next_extension_version }} ${{ github.event.inputs.version }}
       - name: Install Dependencies to update lock file
-        run: pnpm install
+        run: pnpm install --frozen-lockfile=false
       - name: Push to branch
         run: |
           sh scripts/commit_and_push.sh "[skip ci] bump extension version to ${{ steps.update.outputs.next_extension_version }} in package.json" ${{ steps.setup_branch.outputs.branch}} ${{ steps.setup_branch.outputs.new_branch }}
