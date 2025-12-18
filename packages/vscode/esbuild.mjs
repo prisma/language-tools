@@ -284,13 +284,13 @@ function copyStaticAssets() {
         console.log('Copying prisma-schema-wasm WASM file for Prisma 6 Language Server...')
         cpSync(prisma6WasmSrc, join(prisma6LsDistDir, 'prisma_schema_build_bg.wasm'))
       } else {
-        console.warn('Warning: prisma_schema_build_bg.wasm not found at', prisma6WasmSrc)
+        throw new Error(`prisma_schema_build_bg.wasm not found at ${prisma6WasmSrc}`)
       }
     } else {
-      console.warn('Warning: Could not find @prisma/prisma-schema-wasm@6.x in pnpm store')
+      throw new Error('Could not find @prisma/prisma-schema-wasm@6.x in pnpm store')
     }
   } catch (err) {
-    console.warn('Warning: Could not find @prisma/prisma-schema-wasm for Prisma 6 Language Server:', err.message)
+    throw new Error(`Could not find @prisma/prisma-schema-wasm for Prisma 6 Language Server: ${err.message}`)
   }
 
   // Copy prisma-schema-wasm WASM file to language server directory
@@ -313,10 +313,10 @@ function copyStaticAssets() {
       console.log('Copying prisma-schema-wasm WASM file...')
       cpSync(wasmSrc, join(lsDistDir, 'prisma_schema_build_bg.wasm'))
     } else {
-      console.warn('Warning: prisma_schema_build_bg.wasm not found at', wasmSrc)
+      throw new Error(`prisma_schema_build_bg.wasm not found at ${wasmSrc}`)
     }
   } catch (err) {
-    console.warn('Warning: Could not find @prisma/prisma-schema-wasm package:', err.message)
+    throw new Error(`Could not find @prisma/prisma-schema-wasm package: ${err.message}`)
   }
 
   // Copy pglite assets for the PPG Dev Server worker
@@ -342,14 +342,14 @@ function copyStaticAssets() {
           console.log(`Copying pglite ${asset}...`)
           cpSync(assetSrc, join(workersDistDir, asset))
         } else {
-          console.warn(`Warning: ${asset} not found at`, assetSrc)
+          throw new Error(`${asset} not found at ${assetSrc}`)
         }
       }
     } else {
-      console.warn('Warning: Could not find @electric-sql/pglite package in pnpm store')
+      throw new Error('Could not find @electric-sql/pglite package in pnpm store')
     }
   } catch (err) {
-    console.warn('Warning: Could not find @electric-sql/pglite package:', err.message)
+    throw new Error(`Could not find @electric-sql/pglite package: ${err.message}`)
   }
 }
 
