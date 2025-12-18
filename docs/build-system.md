@@ -72,9 +72,10 @@ same directory as the bundled `bin.js` so that the relative path resolution
 still works.
 
 Note: There are two different versions of the WASM file—one for Prisma 6 and
-one for the latest Prisma version. The build script explicitly looks for
-`@prisma/prisma-schema-wasm@6.x` in the pnpm store to ensure the correct
-version is copied for each language server bundle.
+one for the latest Prisma version. The build script uses Node's module
+resolution to find each version: the Prisma 6 WASM is resolved from the
+`prisma-6-language-server` package's context, while the latest version is
+resolved from the main `@prisma/language-server` package's context.
 
 ### 3. PGlite Assets (`pglite.data`, `pglite.wasm`)
 

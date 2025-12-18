@@ -268,26 +268,25 @@ function copyStaticAssets() {
   mkdirSync(prisma6LsDistDir, { recursive: true })
 
   try {
-    // Find the Prisma 6 version of prisma-schema-wasm in the pnpm store
-    // We look for the 6.x version specifically to avoid picking up the 7.x version
-    const pnpmStore = join(__dirname, '../../node_modules/.pnpm')
-    const prisma6WasmPkgDir = readdirSync(pnpmStore).find((dir) => dir.startsWith('@prisma+prisma-schema-wasm@6.'))
+    // Resolve @prisma/prisma-schema-wasm from prisma-6-language-server's context
+    // This ensures we get the correct version (6.x) that prisma-6-language-server depends on
+    const prisma6LsPackagePath = dirname(
+      require.resolve('prisma-6-language-server/package.json', {
+        paths: nodeModulesPaths,
+      }),
+    )
+    const prisma6WasmPackagePath = dirname(
+      require.resolve('@prisma/prisma-schema-wasm/package.json', {
+        paths: [join(prisma6LsPackagePath, 'node_modules'), ...nodeModulesPaths],
+      }),
+    )
+    const prisma6WasmSrc = join(prisma6WasmPackagePath, 'src/prisma_schema_build_bg.wasm')
 
-    if (prisma6WasmPkgDir) {
-      const prisma6WasmSrc = join(
-        pnpmStore,
-        prisma6WasmPkgDir,
-        'node_modules/@prisma/prisma-schema-wasm/src/prisma_schema_build_bg.wasm',
-      )
-
-      if (existsSync(prisma6WasmSrc)) {
-        console.log('Copying prisma-schema-wasm WASM file for Prisma 6 Language Server...')
-        cpSync(prisma6WasmSrc, join(prisma6LsDistDir, 'prisma_schema_build_bg.wasm'))
-      } else {
-        throw new Error(`prisma_schema_build_bg.wasm not found at ${prisma6WasmSrc}`)
-      }
+    if (existsSync(prisma6WasmSrc)) {
+      console.log('Copying prisma-schema-wasm WASM file for Prisma 6 Language Server...')
+      cpSync(prisma6WasmSrc, join(prisma6LsDistDir, 'prisma_schema_build_bg.wasm'))
     } else {
-      throw new Error('Could not find @prisma/prisma-schema-wasm@6.x in pnpm store')
+      throw new Error(`prisma_schema_build_bg.wasm not found at ${prisma6WasmSrc}`)
     }
   } catch (err) {
     throw new Error(`Could not find @prisma/prisma-schema-wasm for Prisma 6 Language Server: ${err.message}`)
