@@ -106,6 +106,27 @@ const languageServerConfig = {
 }
 
 /**
+ * Configuration for the Prisma 6 Language Server.
+ * This is bundled separately and used when pinToPrisma6 is enabled.
+ * @type {import('esbuild').BuildOptions}
+ */
+const prisma6LanguageServerConfig = {
+  entryPoints: ['src/workers/prisma6-language-server.ts'],
+  bundle: true,
+  format: 'cjs',
+  platform: 'node',
+  target: 'node20',
+  outfile: 'dist/prisma6-language-server/bin.js',
+  external: [],
+  minify: production,
+  sourcemap: !production,
+  plugins: [pnpmResolvePlugin, ...(watch ? [esbuildProblemMatcherPlugin] : [])],
+  metafile: true,
+  logLevel: 'info',
+  nodePaths: nodeModulesPaths,
+}
+
+/**
  * Configuration for the PPG Dev Server worker.
  * This is a separate bundle that gets forked as a child process when starting
  * a local Prisma Postgres instance.
@@ -174,6 +195,16 @@ async function build() {
       console.log(text)
     }
 
+    // Build the Prisma 6 Language Server
+    console.log('\nBuilding Prisma 6 Language Server...')
+    const prisma6LsResult = await esbuild.build(prisma6LanguageServerConfig)
+
+    if (prisma6LsResult.metafile) {
+      const text = await esbuild.analyzeMetafile(prisma6LsResult.metafile)
+      console.log('Prisma 6 Language Server bundle analysis:')
+      console.log(text)
+    }
+
     // Build the PPG Dev Server worker
     console.log('\nBuilding PPG Dev Server worker...')
     const ppgDevServerResult = await esbuild.build(ppgDevServerConfig)
@@ -198,9 +229,15 @@ async function watchMode() {
   // Start watch mode for all builds
   const extensionContext = await esbuild.context(extensionConfig)
   const lsContext = await esbuild.context(languageServerConfig)
+  const prisma6LsContext = await esbuild.context(prisma6LanguageServerConfig)
   const ppgDevServerContext = await esbuild.context(ppgDevServerConfig)
 
-  await Promise.all([extensionContext.watch(), lsContext.watch(), ppgDevServerContext.watch()])
+  await Promise.all([
+    extensionContext.watch(),
+    lsContext.watch(),
+    prisma6LsContext.watch(),
+    ppgDevServerContext.watch(),
+  ])
 
   // Copy static assets once at start
   copyStaticAssets()
@@ -222,14 +259,38 @@ function copyStaticAssets() {
     cpSync(studioSrc, studioDest, { recursive: true, dereference: true })
   }
 
-  // Copy prisma-6-language-server (used when pinToPrisma6 is enabled)
-  const prisma6LsSrc = join(__dirname, 'node_modules/prisma-6-language-server')
-  const prisma6LsDest = join(nodeModulesDest, 'prisma-6-language-server')
+  // Copy prisma-schema-wasm WASM file to Prisma 6 language server directory
+  // The WASM is loaded via __dirname in the bundled code, so it needs to be
+  // in the same directory as the bundled Prisma 6 language server bin.js
+  // Note: We need to find the Prisma 6 version specifically since there are
+  // two versions (Prisma 6 and Prisma 7) of @prisma/prisma-schema-wasm
+  const prisma6LsDistDir = join(__dirname, 'dist/prisma6-language-server')
+  mkdirSync(prisma6LsDistDir, { recursive: true })
 
-  if (existsSync(prisma6LsSrc)) {
-    console.log('Copying prisma-6-language-server...')
-    // Use dereference to resolve symlinks (important for pnpm)
-    cpSync(prisma6LsSrc, prisma6LsDest, { recursive: true, dereference: true })
+  try {
+    // Find the Prisma 6 version of prisma-schema-wasm in the pnpm store
+    // We look for the 6.x version specifically to avoid picking up the 7.x version
+    const pnpmStore = join(__dirname, '../../node_modules/.pnpm')
+    const prisma6WasmPkgDir = readdirSync(pnpmStore).find((dir) => dir.startsWith('@prisma+prisma-schema-wasm@6.'))
+
+    if (prisma6WasmPkgDir) {
+      const prisma6WasmSrc = join(
+        pnpmStore,
+        prisma6WasmPkgDir,
+        'node_modules/@prisma/prisma-schema-wasm/src/prisma_schema_build_bg.wasm',
+      )
+
+      if (existsSync(prisma6WasmSrc)) {
+        console.log('Copying prisma-schema-wasm WASM file for Prisma 6 Language Server...')
+        cpSync(prisma6WasmSrc, join(prisma6LsDistDir, 'prisma_schema_build_bg.wasm'))
+      } else {
+        console.warn('Warning: prisma_schema_build_bg.wasm not found at', prisma6WasmSrc)
+      }
+    } else {
+      console.warn('Warning: Could not find @prisma/prisma-schema-wasm@6.x in pnpm store')
+    }
+  } catch (err) {
+    console.warn('Warning: Could not find @prisma/prisma-schema-wasm for Prisma 6 Language Server:', err.message)
   }
 
   // Copy prisma-schema-wasm WASM file to language server directory
