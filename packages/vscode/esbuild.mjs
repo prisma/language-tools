@@ -1,8 +1,8 @@
 import * as esbuild from 'esbuild'
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'fs'
-import { dirname, join, resolve } from 'path'
-import { fileURLToPath } from 'url'
-import { createRequire, builtinModules } from 'module'
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { createRequire, builtinModules } from 'node:module'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const require = createRequire(import.meta.url)
@@ -253,11 +253,13 @@ function copyStaticAssets() {
   const studioSrc = join(__dirname, 'node_modules/@prisma/studio-core-licensed')
   const studioDest = join(nodeModulesDest, '@prisma/studio-core-licensed')
 
-  if (existsSync(studioSrc)) {
-    console.log('Copying @prisma/studio-core-licensed static assets...')
-    // Use dereference to resolve symlinks (important for pnpm)
-    cpSync(studioSrc, studioDest, { recursive: true, dereference: true })
+  if (!existsSync(studioSrc)) {
+    throw new Error(`@prisma/studio-core-licensed not found at ${studioSrc}`)
   }
+
+  console.log('Copying @prisma/studio-core-licensed static assets...')
+  // Use dereference to resolve symlinks (important for pnpm)
+  cpSync(studioSrc, studioDest, { recursive: true, dereference: true })
 
   // Copy prisma-schema-wasm WASM file to Prisma 6 language server directory
   // The WASM is loaded via __dirname in the bundled code, so it needs to be
@@ -267,30 +269,26 @@ function copyStaticAssets() {
   const prisma6LsDistDir = join(__dirname, 'dist/prisma6-language-server')
   mkdirSync(prisma6LsDistDir, { recursive: true })
 
-  try {
-    // Resolve @prisma/prisma-schema-wasm from prisma-6-language-server's context
-    // This ensures we get the correct version (6.x) that prisma-6-language-server depends on
-    const prisma6LsPackagePath = dirname(
-      require.resolve('prisma-6-language-server/package.json', {
-        paths: nodeModulesPaths,
-      }),
-    )
-    const prisma6WasmPackagePath = dirname(
-      require.resolve('@prisma/prisma-schema-wasm/package.json', {
-        paths: [join(prisma6LsPackagePath, 'node_modules'), ...nodeModulesPaths],
-      }),
-    )
-    const prisma6WasmSrc = join(prisma6WasmPackagePath, 'src/prisma_schema_build_bg.wasm')
+  // Resolve @prisma/prisma-schema-wasm from prisma-6-language-server's context
+  // This ensures we get the correct version (6.x) that prisma-6-language-server depends on
+  const prisma6LsPackagePath = dirname(
+    require.resolve('prisma-6-language-server/package.json', {
+      paths: nodeModulesPaths,
+    }),
+  )
+  const prisma6WasmPackagePath = dirname(
+    require.resolve('@prisma/prisma-schema-wasm/package.json', {
+      paths: [join(prisma6LsPackagePath, 'node_modules'), ...nodeModulesPaths],
+    }),
+  )
+  const prisma6WasmSrc = join(prisma6WasmPackagePath, 'src/prisma_schema_build_bg.wasm')
 
-    if (existsSync(prisma6WasmSrc)) {
-      console.log('Copying prisma-schema-wasm WASM file for Prisma 6 Language Server...')
-      cpSync(prisma6WasmSrc, join(prisma6LsDistDir, 'prisma_schema_build_bg.wasm'))
-    } else {
-      throw new Error(`prisma_schema_build_bg.wasm not found at ${prisma6WasmSrc}`)
-    }
-  } catch (err) {
-    throw new Error(`Could not find @prisma/prisma-schema-wasm for Prisma 6 Language Server: ${err.message}`)
+  if (!existsSync(prisma6WasmSrc)) {
+    throw new Error(`prisma_schema_build_bg.wasm not found at ${prisma6WasmSrc}`)
   }
+
+  console.log('Copying prisma-schema-wasm WASM file for Prisma 6 Language Server...')
+  cpSync(prisma6WasmSrc, join(prisma6LsDistDir, 'prisma_schema_build_bg.wasm'))
 
   // Copy prisma-schema-wasm WASM file to language server directory
   // The WASM is loaded via __dirname in the bundled code, so it needs to be
@@ -298,57 +296,97 @@ function copyStaticAssets() {
   const lsDistDir = join(__dirname, 'dist/language-server')
   mkdirSync(lsDistDir, { recursive: true })
 
-  try {
-    // Find the prisma-schema-wasm package - resolve from language-server's context
-    const lsNodeModules = join(__dirname, '..', 'language-server', 'node_modules')
-    const wasmPackagePath = dirname(
-      require.resolve('@prisma/prisma-schema-wasm/package.json', {
-        paths: [lsNodeModules, ...nodeModulesPaths],
-      }),
-    )
-    const wasmSrc = join(wasmPackagePath, 'src/prisma_schema_build_bg.wasm')
+  // Find the prisma-schema-wasm package - resolve from language-server's context
+  const lsNodeModules = join(__dirname, '..', 'language-server', 'node_modules')
+  const wasmPackagePath = dirname(
+    require.resolve('@prisma/prisma-schema-wasm/package.json', {
+      paths: [lsNodeModules, ...nodeModulesPaths],
+    }),
+  )
+  const wasmSrc = join(wasmPackagePath, 'src/prisma_schema_build_bg.wasm')
 
-    if (existsSync(wasmSrc)) {
-      console.log('Copying prisma-schema-wasm WASM file...')
-      cpSync(wasmSrc, join(lsDistDir, 'prisma_schema_build_bg.wasm'))
-    } else {
-      throw new Error(`prisma_schema_build_bg.wasm not found at ${wasmSrc}`)
-    }
-  } catch (err) {
-    throw new Error(`Could not find @prisma/prisma-schema-wasm package: ${err.message}`)
+  if (!existsSync(wasmSrc)) {
+    throw new Error(`prisma_schema_build_bg.wasm not found at ${wasmSrc}`)
   }
+
+  console.log('Copying prisma-schema-wasm WASM file...')
+  cpSync(wasmSrc, join(lsDistDir, 'prisma_schema_build_bg.wasm'))
 
   // Copy pglite assets for the PPG Dev Server worker
   // PGlite requires these files at runtime and loads them via __dirname
   const workersDistDir = join(__dirname, 'dist/workers')
   mkdirSync(workersDistDir, { recursive: true })
 
-  try {
-    // @electric-sql/pglite is a transitive dependency through @prisma/dev
-    // pnpm's strict node_modules structure means we need to find it in the .pnpm store
-    const pnpmStore = join(__dirname, '../../node_modules/.pnpm')
-    const pglitePkgDir = readdirSync(pnpmStore).find(
-      (dir) => dir.startsWith('@electric-sql+pglite@') && !dir.includes('socket') && !dir.includes('tools'),
-    )
+  // @electric-sql/pglite is a transitive dependency through @prisma/dev
+  // pnpm's strict node_modules structure means we need to find it in the .pnpm store
+  const pnpmStore = join(__dirname, '../../node_modules/.pnpm')
+  const pglitePkgDir = readdirSync(pnpmStore).find(
+    (dir) => dir.startsWith('@electric-sql+pglite@') && !dir.includes('socket') && !dir.includes('tools'),
+  )
 
-    if (pglitePkgDir) {
-      const pgliteDistDir = join(pnpmStore, pglitePkgDir, 'node_modules/@electric-sql/pglite/dist')
+  if (!pglitePkgDir) {
+    throw new Error('Could not find @electric-sql/pglite package in pnpm store')
+  }
 
-      const pgliteAssets = ['pglite.data', 'pglite.wasm']
-      for (const asset of pgliteAssets) {
-        const assetSrc = join(pgliteDistDir, asset)
-        if (existsSync(assetSrc)) {
-          console.log(`Copying pglite ${asset}...`)
-          cpSync(assetSrc, join(workersDistDir, asset))
-        } else {
-          throw new Error(`${asset} not found at ${assetSrc}`)
-        }
-      }
-    } else {
-      throw new Error('Could not find @electric-sql/pglite package in pnpm store')
+  const pgliteDistDir = join(pnpmStore, pglitePkgDir, 'node_modules/@electric-sql/pglite/dist')
+
+  const pgliteAssets = ['pglite.data', 'pglite.wasm']
+  for (const asset of pgliteAssets) {
+    const assetSrc = join(pgliteDistDir, asset)
+
+    if (!existsSync(assetSrc)) {
+      throw new Error(`${asset} not found at ${assetSrc}`)
     }
-  } catch (err) {
-    throw new Error(`Could not find @electric-sql/pglite package: ${err.message}`)
+
+    console.log(`Copying pglite ${asset}...`)
+    cpSync(assetSrc, join(workersDistDir, asset))
+  }
+
+  const pgExtensions = [
+    'amcheck',
+    'bloom',
+    'btree_gin',
+    'btree_gist',
+    'citext',
+    'cube',
+    'dict_int',
+    'dict_xsyn',
+    'earthdistance',
+    'file_fdw',
+    'fuzzystrmatch',
+    'hstore',
+    'intarray',
+    'isn',
+    'lo',
+    'ltree',
+    'pageinspect',
+    'pg_buffercache',
+    'pg_freespacemap',
+    'pg_surgery',
+    'pg_trgm',
+    'pg_visibility',
+    'pg_walinspect',
+    'seg',
+    'tablefunc',
+    'tcn',
+    'tsm_system_rows',
+    'tsm_system_time',
+    'unaccent',
+    'uuid-ossp',
+    'vector',
+  ]
+
+  for (const extension of pgExtensions) {
+    const extensionGzip = `${extension}.tar.gz`
+
+    const gzipSrc = join(pgliteDistDir, extensionGzip)
+
+    if (!existsSync(gzipSrc)) {
+      throw new Error(`${extension} not found at ${gzipSrc}`)
+    }
+
+    console.log(`Copying pglite ${extension}...`)
+    cpSync(gzipSrc, join(workersDistDir, '..', extensionGzip))
   }
 }
 

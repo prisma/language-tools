@@ -30,9 +30,9 @@ async function main() {
   }
 
   try {
-    const { unstable_startServer } = await import('@prisma/dev')
+    const { startPrismaDevServer } = await import('@prisma/dev')
 
-    server = await unstable_startServer({ debug: true, persistenceMode: 'stateful', name })
+    server = await startPrismaDevServer({ debug: true, persistenceMode: 'stateful', name })
 
     process.send?.({ type: 'started' })
   } catch (error) {
