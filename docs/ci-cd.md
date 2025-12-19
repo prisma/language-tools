@@ -21,7 +21,7 @@ graph TD
     D -->|latest| F((Our release_channel is stable))
     E --> G[3. Test Language Server and publish]
     F --> G
-    G -->|tests and publish successful?| I[4. Integration tests in VSCode folder with published LS]
+    G -->|tests and publish successful?| I[4. E2E tests VS Code Extension]
     I -->|tests pass?| J[5. Build extension]
     J --> K[6. Publish]
 
