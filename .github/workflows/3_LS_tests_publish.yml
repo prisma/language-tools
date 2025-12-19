@@ -89,6 +89,6 @@ jobs:
         if: ${{ github.event.inputs.extension_version != '' }}
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: 4. Integration tests in VSCode folder with published LS
+          workflow: 4. E2E tests VS Code Extension
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
           inputs: '{ "release_channel": "${{ github.event.inputs.release_channel }}", "extension_version": "${{ github.event.inputs.extension_version }}", "branch": "${{ github.event.inputs.branch }}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'
