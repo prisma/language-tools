@@ -133,13 +133,13 @@ const prisma6LanguageServerConfig = {
  * @type {import('esbuild').BuildOptions}
  */
 const ppgDevServerConfig = {
-  entryPoints: ['src/workers/ppgDevServer.ts'],
+  entryPoints: [join(__dirname, 'node_modules/@prisma/dev/dist/daemon.cjs')],
   bundle: true,
   format: 'cjs',
   platform: 'node',
   target: 'node20',
-  outfile: 'dist/workers/ppgDevServer.js',
-  external: [],
+  outfile: 'dist/workers/prisma-dev.js',
+  external: ['@electric-sql/pglite'],
   minify: production,
   sourcemap: !production,
   plugins: [pnpmResolvePlugin, ...(watch ? [esbuildProblemMatcherPlugin] : [])],
