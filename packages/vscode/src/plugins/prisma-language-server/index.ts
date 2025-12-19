@@ -47,7 +47,6 @@ let telemetry: TelemetryReporter
 let fileWatcher: FileWatcher.type | undefined
 
 const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
-const isE2ETestOnPullRequest = () => process.env.PRISMA_USE_LOCAL_LS === 'true'
 
 const activateClient = (context: ExtensionContext, clientOptions: LanguageClientOptions) => {
   const prismaConfig = workspace.getConfiguration('prisma')
@@ -273,15 +272,14 @@ function getServerOptions(prismaConfig: WorkspaceConfiguration, context: Extensi
   const pinToPrisma6 = prismaConfig.get<boolean>('pinToPrisma6')
 
   if (pinToPrisma6) {
-    console.log('Using published Prisma 6 Language Server (npm)')
-    // prisma-6-language-server is kept as an external dependency
-    serverModule = context.asAbsolutePath(path.join('dist/node_modules/prisma-6-language-server/dist/bin'))
-  } else if (isDebugMode() || isE2ETestOnPullRequest()) {
+    console.log('Using bundled Prisma 6 Language Server')
+    serverModule = context.asAbsolutePath(path.join('dist/prisma6-language-server/bin.js'))
+  } else if (isDebugMode()) {
     // use Language Server from folder for debugging
     console.log('Using local Language Server from filesystem')
     serverModule = context.asAbsolutePath(path.join('../../packages/language-server/dist/bin'))
   } else {
-    // use bundled language server for production
+    // use bundled language server
     console.log('Using bundled Language Server')
     serverModule = context.asAbsolutePath(path.join('dist/language-server/bin.js'))
   }

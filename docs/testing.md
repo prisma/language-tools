@@ -61,19 +61,12 @@ const userFile = helper.file('User.prisma')
 pnpm test:e2e  # runs scripts/e2e.sh
 ```
 
-Uses the VS Code test framework for E2E testing of the extension.
+Uses the VS Code test framework for E2E testing of the extension. The language
+server is bundled with the extension, so tests always use the local version.
 
-### CI E2E Testing
+### Post-Publish E2E Testing
 
-When running E2E tests in GitHub Actions before publishing, `scripts/e2e.sh` is
-executed. By default, the **published** Language Server is used. Adding the
-`useLocalLS` parameter runs tests with the local Language Server instead:
-
-```bash
-pnpm test:e2e useLocalLS
-```
-
-The E2E tests run **after** the extension is published use a different script:
+E2E tests run **after** the extension is published use a different script:
 
 ```bash
 pnpm test:e2e:vsix <extension_type> <os> <version>

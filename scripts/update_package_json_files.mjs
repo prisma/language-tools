@@ -17,20 +17,6 @@ function bumpVersionInVSCodeRepo({ version, name, displayName, description, prev
   writeJsonToPackageJson({ content: content, path: vscodePackageJsonPath })
 }
 
-async function bumpLSVersionInExtension({ version }) {
-  const vscodePackageJsonPath = path.join(__dirname, '../packages/vscode/package.json')
-  const content = getPackageJsonContent({ path: vscodePackageJsonPath })
-  content['dependencies']['@prisma/language-server'] = version
-  writeJsonToPackageJson({ content: content, path: vscodePackageJsonPath })
-
-  // Update pnpm-lock.yaml after package.json changes
-  console.log('Running pnpm install to update pnpm-lock.yaml...')
-  await execa('pnpm', ['install', '--no-frozen-lockfile'], {
-    cwd: path.join(__dirname, '..'),
-    stdio: 'inherit',
-  })
-}
-
 async function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersion = '' }) {
   const languageServerPackageJsonPath = path.join(__dirname, '../packages/language-server/package.json')
   const rootPackageJsonPath = path.join(__dirname, '../package.json')
@@ -122,12 +108,6 @@ if (args.length === 3) {
     channel: args[0],
     newExtensionVersion: args[1],
   })
-} else if (args.length === 1) {
-  // only bump Language Server version in extension
-  console.log('Bumping Language Server version in extension.')
-  await bumpLSVersionInExtension({
-    version: args[0],
-  })
 } else {
-  throw new Error(`Expected 1, 2 or 3 arguments, but received ${args.length}.`)
+  throw new Error(`Expected 2 or 3 arguments, but received ${args.length}.`)
 }

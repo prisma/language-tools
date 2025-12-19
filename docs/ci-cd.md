@@ -7,8 +7,9 @@ The repository has extensive GitHub Actions workflows:
 | `1_check_for_updates.yml` | Every 5 min (cron) | Checks for new Prisma releases |
 | `2_bump_versions.yml`     | Triggered by #1    | Bumps Prisma dependencies      |
 | `3_LS_tests_publish.yml`  | On version bump    | Tests and publishes LS to npm  |
-| `5_e2e_tests.yml`         | Before releases    | Runs E2E tests                 |
-| `7_publish.yml`           | After E2E pass     | Publishes VS Code extension    |
+| `4_e2e_tests.yml`         | Before releases    | Runs E2E tests                 |
+| `5_build.yml`             | After E2E pass     | Builds extension               |
+| `6_publish.yml`           | After build        | Publishes VS Code extension    |
 | `PR_build_extension.yml`  | On PRs             | Builds `.vsix` for testing     |
 
 ```mermaid
@@ -20,10 +21,9 @@ graph TD
     D -->|latest| F((Our release_channel is stable))
     E --> G[3. Test Language Server and publish]
     F --> G
-    G -->|tests and publish successful?| H[4. Bump LS in VSCode extension]
-    H --> I[5. Integration tests in VSCode folder with published LS]
-    I -->|tests pass?| J[6. Build extension]
-    J --> K[7. Publish]
+    G -->|tests and publish successful?| I[4. Integration tests in VSCode folder with published LS]
+    I -->|tests pass?| J[5. Build extension]
+    J --> K[6. Publish]
 
     L(Commit in the extension) --> M[1/2. Bump versions for extension only]
     M -->E

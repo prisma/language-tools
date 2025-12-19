@@ -57,7 +57,7 @@ jobs:
       - name: Run VS Code extension E2E tests in headless mode
         uses: coactions/setup-xvfb@v1
         with:
-          run: pnpm test:e2e "useLocalLS"
+          run: pnpm test:e2e
 
       # Playwright testing
       - name: Install Playwright browsers

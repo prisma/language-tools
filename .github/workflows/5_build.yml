@@ -1,5 +1,5 @@
-name: 6. Build extension # and upload as release to GitHub
-run-name: 6. Build extension + upload - ${{ inputs.trigger_reason }}
+name: 5. Build extension # and upload as release to GitHub
+run-name: 5. Build extension + upload - ${{ inputs.trigger_reason }}
 
 on:
   workflow_dispatch:
@@ -23,7 +23,7 @@ on:
 
 env:
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
-  PRISMA_TELEMETRY_INFORMATION: 'language-tools 6_build.yml'
+  PRISMA_TELEMETRY_INFORMATION: 'language-tools 5_build.yml'
 
 jobs:
   build:
@@ -98,6 +98,6 @@ jobs:
       - name: Trigger next workflow to publish extension
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: 7. Publish
+          workflow: 6. Publish
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
           inputs: '{ "asset_name": "${{ steps.get_asset_name.outputs.asset_name }}", "tag_name": "${{ steps.names.outputs.tag_name }}", "trigger_reason": "${{github.event.inputs.trigger_reason}}" }'

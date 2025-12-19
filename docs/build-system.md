@@ -13,11 +13,13 @@ production while supporting fast rebuilds during development.
 
 ## What Gets Bundled
 
-The build produces three separate bundles:
+The build produces four separate bundles:
 
 1. **Extension bundle** (`dist/extension.js`) — The main VS Code extension code
-2. **Language Server bundle** (`dist/language-server/bin.js`) — The LSP server
-3. **PPG Dev Server worker** (`dist/workers/ppgDevServer.js`) — Forked process for
+2. **Language Server bundle** (`dist/language-server/bin.js`) — The LSP server (latest Prisma version)
+3. **Prisma 6 Language Server bundle** (`dist/prisma6-language-server/bin.js`) — The LSP server
+   pinned to Prisma 6, used when `prisma.pinToPrisma6` setting is enabled
+4. **PPG Dev Server worker** (`dist/workers/ppgDevServer.js`) — Forked process for
    local Prisma Postgres instances
 
 All bundles are CommonJS format targeting Node.js 20.
@@ -53,24 +55,14 @@ Since these assets are loaded dynamically by the browser (not imported by
 Node.js), they must exist as physical files on disk that the HTTP server can
 read and serve.
 
-### 2. Prisma 6 Language Server (`prisma-6-language-server`)
+### 2. WASM Modules (`prisma_schema_build_bg.wasm`)
 
-**Location:** `dist/node_modules/prisma-6-language-server/`
+**Locations:**
 
-**Why it can't be bundled:** The extension supports a `prisma.pinToPrisma6`
-setting that switches between the bundled (latest) language server and a
-pinned Prisma 6 version. This allows users working on Prisma 6 projects to
-get accurate language support.
+- `dist/language-server/prisma_schema_build_bg.wasm` (latest Prisma version)
+- `dist/prisma6-language-server/prisma_schema_build_bg.wasm` (Prisma 6 version)
 
-Since users can switch between language servers at runtime via VS Code
-settings, the Prisma 6 server must be kept as a separate, loadable module
-rather than bundled into the main language server.
-
-### 3. WASM Module (`prisma_schema_build_bg.wasm`)
-
-**Location:** `dist/language-server/prisma_schema_build_bg.wasm`
-
-**Why it can't be bundled:** The `@prisma/prisma-schema-wasm` package uses
+**Why they can't be bundled:** The `@prisma/prisma-schema-wasm` package uses
 WebAssembly for parsing, formatting, and linting Prisma schemas. The WASM
 binary is loaded at runtime using `__dirname`-relative paths.
 
@@ -79,7 +71,13 @@ a single file, but the WASM file cannot be inlined. It must be placed in the
 same directory as the bundled `bin.js` so that the relative path resolution
 still works.
 
-### 4. PGlite Assets (`pglite.data`, `pglite.wasm`)
+Note: There are two different versions of the WASM file—one for Prisma 6 and
+one for the latest Prisma version. The build script uses Node's module
+resolution to find each version: the Prisma 6 WASM is resolved from the
+`prisma-6-language-server` package's context, while the latest version is
+resolved from the main `@prisma/language-server` package's context.
+
+### 3. PGlite Assets (`pglite.data`, `pglite.wasm`)
 
 **Location:** `dist/workers/pglite.data` and `dist/workers/pglite.wasm`
 
@@ -99,16 +97,19 @@ packages/vscode/dist/
 ├── extension.js              # Main extension bundle
 ├── extension.js.map          # Source map (dev only)
 ├── language-server/
-│   ├── bin.js                # Language server bundle
+│   ├── bin.js                # Language server bundle (latest Prisma)
 │   ├── bin.js.map            # Source map (dev only)
-│   └── prisma_schema_build_bg.wasm  # WASM module
+│   └── prisma_schema_build_bg.wasm  # WASM module (latest version)
+├── prisma6-language-server/
+│   ├── bin.js                # Prisma 6 language server bundle
+│   ├── bin.js.map            # Source map (dev only)
+│   └── prisma_schema_build_bg.wasm  # WASM module (Prisma 6 version)
 ├── workers/
 │   ├── ppgDevServer.js       # PPG Dev Server worker bundle
 │   ├── ppgDevServer.js.map   # Source map (dev only)
 │   ├── pglite.data           # PGlite data file
 │   └── pglite.wasm           # PGlite WASM module
 └── node_modules/
-    ├── @prisma/
-    │   └── studio-core-licensed/    # Studio UI assets
-    └── prisma-6-language-server/    # Pinned LS for Prisma 6
+    └── @prisma/
+        └── studio-core-licensed/    # Studio UI assets
 ```
