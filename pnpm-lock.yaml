@@ -169,8 +169,8 @@ importers:
         specifier: 4.7.10
         version: 4.7.10
       minimatch:
-        specifier: 6.2.0
-        version: 6.2.0
+        specifier: 10.1.1
+        version: 10.1.1
       openapi-fetch:
         specifier: 0.14.0
         version: 0.14.0
@@ -2898,10 +2898,6 @@ packages:
 
   minimatch@5.1.6:
     resolution: {integrity: sha512-lKwV/1brpG6mBUFHtb7NUmtABCb2WZZmm2wNiOA5hAb8VdCS4B3dtMWyvcoViccwAW/COERjXLt0zP1zXUN26g==}
-    engines: {node: '>=10'}
-
-  minimatch@6.2.0:
-    resolution: {integrity: sha512-sauLxniAmvnhhRjFwPNnJKaPFYyddAgbYdeUpHULtCT/GhzdCx/MDNy+Y40lBxTQUrMzDE8e0S43Z5uqfO0REg==}
     engines: {node: '>=10'}
 
   minimatch@9.0.5:
@@ -6836,10 +6832,6 @@ snapshots:
       brace-expansion: 1.1.12
 
   minimatch@5.1.6:
-    dependencies:
-      brace-expansion: 2.0.2
-
-  minimatch@6.2.0:
     dependencies:
       brace-expansion: 2.0.2
 
