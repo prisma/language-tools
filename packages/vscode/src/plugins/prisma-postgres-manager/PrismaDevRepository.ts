@@ -3,6 +3,7 @@ import envPaths from 'env-paths'
 import { fork } from 'node:child_process'
 import { EventEmitter, ExtensionContext, Uri } from 'vscode'
 import { z } from 'zod'
+import type { DaemonMessage } from '@prisma/dev/internal/daemon'
 
 /**
  * FIXME: SHOULD BE EXPOSED BY `@prisma/dev/internal/state` IN THE FUTURE
@@ -45,7 +46,7 @@ export class PrismaDevRepository {
         return
       }
 
-      const { fsPath } = Uri.joinPath(this.context.extensionUri, ...['dist', 'workers', 'ppgDevServer.js'])
+      const { fsPath } = Uri.joinPath(this.context.extensionUri, 'dist', 'workers', 'prisma-dev.js')
 
       let succeededStarting: () => void, failedStarting: (reason?: unknown) => void
       const startedPromise = new Promise<void>((resolve, reject) => {
@@ -53,22 +54,21 @@ export class PrismaDevRepository {
         failedStarting = reject
       })
 
-      const child = fork(fsPath, [name], { detached: true, stdio: ['ignore', 'ignore', 'ignore', 'ipc'] })
+      const child = fork(fsPath, [name], { detached: true, stdio: 'ignore' })
 
       child.once('error', (error) => failedStarting(error))
-      child.once('message', (message: unknown) => {
-        if (typeof message !== 'object' || message == null) {
-          return
+      child.once('message', (message: DaemonMessage) => {
+        const { type } = message
+
+        if (type === 'error') {
+          return failedStarting(new Error(message.error))
         }
 
-        if ('type' in message && message.type === 'started') {
+        if (type === 'started') {
           return succeededStarting()
         }
 
-        if ('error' in message) {
-          const errorMsg = typeof message.error === 'string' ? message.error : 'Unknown error'
-          failedStarting(new Error(errorMsg))
-        }
+        console.debug('Unknown message from prisma dev daemon:', message satisfies never)
       })
 
       try {
