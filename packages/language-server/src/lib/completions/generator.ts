@@ -150,6 +150,16 @@ const importFileExtensions: CompletionItem[] = convertToCompletionItems(
   CompletionItemKind.Constant,
 )
 
+const compilerBuildArguments: CompletionItem[] = convertToCompletionItems(
+  completions.compilerBuildArguments,
+  CompletionItemKind.Property,
+)
+
+const compilerBuilds: CompletionItem[] = convertToCompletionItems(
+  completions.compilerBuild,
+  CompletionItemKind.Constant,
+)
+
 // Fields for prisma-client generator
 const prismaClientFields: CompletionItem[] = convertToCompletionItems(
   completions.generatorPrismaClientFields,
@@ -380,6 +390,20 @@ export const generatorSuggestions = (
     }
     return {
       items: importFileExtensionArguments,
+      isIncomplete: true,
+    }
+  }
+
+  // compilerBuild
+  if (line.startsWith('compilerBuild')) {
+    if (isInsideQuotation) {
+      return {
+        items: compilerBuilds,
+        isIncomplete: true,
+      }
+    }
+    return {
+      items: compilerBuildArguments,
       isIncomplete: true,
     }
   }
