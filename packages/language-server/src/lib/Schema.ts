@@ -92,13 +92,39 @@ async function loadSchemaDocumentsFromPath(fsPath: string, allDocuments: TextDoc
 
 type PrismaSchemaInput = { currentDocument: TextDocument; allDocuments: TextDocument[] } | SchemaDocument[]
 
+export interface PrismaSchemaLoadOptions {
+  /**
+   * Optional path to the schema file or directory.
+   * This corresponds to the VS Code `prisma.schemaPath` setting.
+   */
+  schemaPath?: string
+  /**
+   * Optional path to the directory containing prisma.config.ts
+   * Used for testing purposes.
+   */
+  configRoot?: string
+}
+
 export class PrismaSchema {
   // TODO: remove, use `PrismaSchema.load` directly
   static singleFile(textDocument: TextDocument) {
     return new PrismaSchema([new SchemaDocument(textDocument)])
   }
 
-  static async load(input: PrismaSchemaInput, configRoot?: string): Promise<PrismaSchema> {
+  static async load(input: PrismaSchemaInput, options?: PrismaSchemaLoadOptions | string): Promise<PrismaSchema> {
+    // Support both old signature (configRoot as string) and new signature (options object)
+    // for backward compatibility with tests
+    const opts: PrismaSchemaLoadOptions = typeof options === 'string' ? { configRoot: options } : (options ?? {})
+
+    // Determine the configRoot for finding prisma.config.ts
+    // Priority: explicit configRoot > schemaPath directory > current document directory
+    let configRoot = opts.configRoot
+    if (!configRoot && opts.schemaPath) {
+      // If schemaPath is provided, use its directory as configRoot
+      const schemaUri = URI.file(opts.schemaPath)
+      configRoot = schemaUri.fsPath
+    }
+
     let config: PrismaConfigInternal | undefined
     try {
       config = await loadConfig(configRoot)
@@ -111,7 +137,11 @@ export class PrismaSchema {
     if (Array.isArray(input)) {
       schemaDocs = input
     } else {
-      const fsPath = config?.schema ?? URI.parse(input.currentDocument.uri).fsPath
+      // Priority for determining schema path:
+      // 1. schemaPath from VS Code settings
+      // 2. schema path from prisma.config.ts
+      // 3. Current document's path (fallback)
+      const fsPath = opts.schemaPath ?? config?.schema ?? URI.parse(input.currentDocument.uri).fsPath
       schemaDocs = await loadSchemaDocumentsFromPath(fsPath, input.allDocuments)
     }
     return new PrismaSchema(schemaDocs, config)

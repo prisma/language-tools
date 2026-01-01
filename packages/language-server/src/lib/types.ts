@@ -23,4 +23,16 @@ export interface LSSettings {
    * Whether to show diagnostics
    */
   enableDiagnostics?: boolean
+  /**
+   * Path to the Prisma schema file or directory containing schema files.
+   * Can be:
+   * - A path to a single .prisma file
+   * - A path to a directory containing multiple .prisma files
+   * - Relative to the workspace root or absolute
+   *
+   * If not provided, the language server will:
+   * 1. Try to find prisma.config.ts and use its schema path
+   * 2. Fall back to the currently opened document's directory
+   */
+  schemaPath?: string
 }
