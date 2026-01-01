@@ -431,6 +431,10 @@ describe('Completions', function () {
       label: 'importFileExtension',
       kind: CompletionItemKind.Field,
     }
+    const fieldCompilerBuild = {
+      label: 'compilerBuild',
+      kind: CompletionItemKind.Field,
+    }
     //#endregion
 
     test('Diagnoses generator field suggestions in empty block', () => {
@@ -493,6 +497,7 @@ describe('Completions', function () {
               fieldModuleFormat,
               fieldGeneratedFileExtension,
               fieldImportFileExtension,
+              fieldCompilerBuild,
             ],
           },
         })
@@ -713,6 +718,29 @@ describe('Completions', function () {
           },
         })
       })
+
+      test('compilerBuild = "|"', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            generator gen {
+              provider = "prisma-client"
+              compilerBuild = "|"
+            }`,
+          expected: {
+            isIncomplete: true,
+            items: [
+              {
+                label: 'fast',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'small',
+                kind: CompletionItemKind.Constant,
+              },
+            ],
+          },
+        })
+      })
     })
 
     describe('prisma-client-js', () => {
@@ -725,7 +753,30 @@ describe('Completions', function () {
             }`,
           expected: {
             isIncomplete: false,
-            items: [fieldPreviewFeatures, fieldOutput],
+            items: [fieldPreviewFeatures, fieldOutput, fieldCompilerBuild],
+          },
+        })
+      })
+
+      test('compilerBuild = "|"', () => {
+        assertCompletion({
+          schema: /* Prisma */ `
+            generator gen {
+              provider = "prisma-client-js"
+              compilerBuild = "|"
+            }`,
+          expected: {
+            isIncomplete: true,
+            items: [
+              {
+                label: 'fast',
+                kind: CompletionItemKind.Constant,
+              },
+              {
+                label: 'small',
+                kind: CompletionItemKind.Constant,
+              },
+            ],
           },
         })
       })
@@ -3112,7 +3163,7 @@ describe('Completions', function () {
                 id    Int             @id
                 lists ${scalarType}[] @default([|])
               }
-              
+
               enum color {
                 RED
                 GREEN

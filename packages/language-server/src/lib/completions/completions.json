@@ -119,6 +119,12 @@
       "insertText": "importFileExtension = \"$0\"",
       "documentation": "File extension used in import statements. Can be ts, mts, cts, js, mjs, cjs, or empty (for bare imports).",
       "fullSignature": "importFileExtension = \"ts\" | \"mts\" | \"cts\" | \"js\" | \"mjs\" | \"cjs\" | \"\""
+    },
+    {
+      "label": "compilerBuild",
+      "insertText": "compilerBuild = \"$0\"",
+      "documentation": "The build of the query compiler to use. Can be 'fast' or 'small'.",
+      "fullSignature": "compilerBuild = \"fast\" | \"small\""
     }
   ],
   "generatorPrismaClientJSFields": [
@@ -133,6 +139,12 @@
       "insertText": "output = \"$0\"",
       "documentation": "Determines the location for the generated client. Default: `node_modules/.prisma/client`. [Learn more](https://pris.ly/d/generator-fields).",
       "fullSignature": "output = \"String\""
+    },
+    {
+      "label": "compilerBuild",
+      "insertText": "compilerBuild = \"$0\"",
+      "documentation": "The build of the query compiler to use. Can be 'fast' or 'small'.",
+      "fullSignature": "compilerBuild = \"fast\" | \"small\""
     }
   ],
   "blockAttributes": [
@@ -519,6 +531,16 @@
       "documentation": "For bare imports."
     }
   ],
+  "compilerBuild": [
+    {
+      "label": "fast",
+      "documentation": "Faster query execution. Larger bundle size."
+    },
+    {
+      "label": "small",
+      "documentation": "Smaller bundle size. Slower query execution."
+    }
+  ],
   "runtimeArguments": [
     {
       "label": "\"\"",
@@ -545,6 +567,13 @@
       "label": "\"\"",
       "insertText": "\"$0\"",
       "documentation": "File extension used in import statements."
+    }
+  ],
+  "compilerBuildArguments": [
+    {
+      "label": "\"\"",
+      "insertText": "\"$0\"",
+      "documentation": "The build of the query compiler to use."
     }
   ],
   "datasourceProviders": [
