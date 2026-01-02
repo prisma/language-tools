@@ -145,8 +145,8 @@ importers:
         specifier: 0.5.2
         version: 0.5.2
       '@prisma/studio-core-licensed':
-        specifier: 0.8.2
-        version: 0.8.2(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+        specifier: 0.12.0
+        version: 0.12.0(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       checkpoint-client:
         specifier: 1.1.33
         version: 1.1.33
@@ -1080,8 +1080,8 @@ packages:
   '@prisma/schema-files-loader@7.3.0-dev.5':
     resolution: {integrity: sha512-UANmwi40m6FKUx0reFf7955wrCtBdjxFKhknQhZ42+Sovp8M3iQ0tQ/D0PwLNaUK9Lqk0iXXTwYeiW3h32HsBA==}
 
-  '@prisma/studio-core-licensed@0.8.2':
-    resolution: {integrity: sha512-l9V574/5yu/s79Ml7ZVIU692XyyYLmt3JJG9nF4jLKbb7ONEwmO9WxVNgo6NYwvSezvRwQ4uNG9cSm2RFNVzSA==}
+  '@prisma/studio-core-licensed@0.12.0':
+    resolution: {integrity: sha512-5dyhz9N8A5GvEv4OpF97QKNVFn3A+U/TDlAq1K5zjKBHuCvARGGfJ22xQ4UqsdX8H3HHabOb0VuN9J6RO7nzuA==}
     peerDependencies:
       '@types/react': ^18.0.0 || ^19.0.0
       react: ^18.0.0 || ^19.0.0
@@ -4827,7 +4827,7 @@ snapshots:
       '@prisma/prisma-schema-wasm': 7.3.0-8.aee8f579c2872ad0cedd6fd7e9070704fdb3610e
       fs-extra: 11.3.0
 
-  '@prisma/studio-core-licensed@0.8.2(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+  '@prisma/studio-core-licensed@0.12.0(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
       '@types/react': 19.2.7
       react: 19.2.1
