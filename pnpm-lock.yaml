@@ -102,8 +102,8 @@ importers:
         specifier: 8.1.0
         version: 8.1.0
       vscode-languageserver-textdocument:
-        specifier: 1.0.11
-        version: 1.0.11
+        specifier: 1.0.12
+        version: 1.0.12
       vscode-uri:
         specifier: ^3.0.8
         version: 3.1.0
@@ -127,14 +127,14 @@ importers:
   packages/vscode:
     dependencies:
       '@hono/node-server':
-        specifier: 1.14.2
-        version: 1.14.2(hono@4.7.10)
+        specifier: 1.19.7
+        version: 1.19.7(hono@4.11.3)
       '@prisma/credentials-store':
-        specifier: 7.1.0
-        version: 7.1.0
+        specifier: 7.2.0
+        version: 7.2.0
       '@prisma/dev':
-        specifier: 0.18.0
-        version: 0.18.0(typescript@5.7.3)
+        specifier: 0.19.1
+        version: 0.19.1(typescript@5.7.3)
       '@prisma/language-server':
         specifier: workspace:*
         version: link:../language-server
@@ -145,8 +145,8 @@ importers:
         specifier: 0.5.2
         version: 0.5.2
       '@prisma/studio-core-licensed':
-        specifier: 0.8.2
-        version: 0.8.2(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+        specifier: 0.12.0
+        version: 0.12.0(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       checkpoint-client:
         specifier: 1.1.33
         version: 1.1.33
@@ -166,14 +166,14 @@ importers:
         specifier: 5.1.1
         version: 5.1.1
       hono:
-        specifier: 4.7.10
-        version: 4.7.10
+        specifier: 4.11.3
+        version: 4.11.3
       minimatch:
         specifier: 6.2.0
         version: 6.2.0
       openapi-fetch:
-        specifier: 0.14.0
-        version: 0.14.0
+        specifier: 0.15.0
+        version: 0.15.0
       postgres:
         specifier: 3.4.7
         version: 3.4.7
@@ -187,8 +187,8 @@ importers:
         specifier: 1.2.0
         version: 1.2.0
       zod:
-        specifier: 3.24.3
-        version: 3.24.3
+        specifier: 3.25.76
+        version: 3.25.76
     devDependencies:
       '@playwright/test':
         specifier: ^1.48.0
@@ -905,12 +905,6 @@ packages:
     resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
     engines: {node: '>=14'}
 
-  '@hono/node-server@1.14.2':
-    resolution: {integrity: sha512-GHjpOeHYbr9d1vkID2sNUYkl5IxumyhDrUJB7wBp7jvqYwPFt+oNKsAPBRcdSbV7kIrXhouLE199ks1QcK4r7A==}
-    engines: {node: '>=18.14.1'}
-    peerDependencies:
-      hono: ^4
-
   '@hono/node-server@1.19.7':
     resolution: {integrity: sha512-vUcD0uauS7EU2caukW8z5lJKtoGMokxNbJtBiwHgpqxEXokaHCBkQUmCHhjFB1VUTWdqj25QoMkMKzgjq+uhrw==}
     engines: {node: '>=18.14.1'}
@@ -1042,14 +1036,14 @@ packages:
   '@prisma/config@7.3.0-dev.5':
     resolution: {integrity: sha512-5Cnn9n2OXeEAMEgDdE89P0r2MNW7zBNURqX6AwXSImTFgH3UNec2vlbVkXOjsri0mcYXPkDL8iGkSnSERXE/Pw==}
 
-  '@prisma/credentials-store@7.1.0':
-    resolution: {integrity: sha512-hQ5XKET/AHCeWuBISD9Y0d93Ja3ep6bpCRNox283IGV+IBUBjwVArb8Q5QwQWK1dniCLRynkE+fEMIfL3c6N5w==}
+  '@prisma/credentials-store@7.2.0':
+    resolution: {integrity: sha512-jfGaqOgQQykRQtAW7rSMkVi1JK94qMtYXnEeZF2qchPZ1UhXYjaTNrNZLkeEdnJm5vMQkFpBs/pyTqDov3A3aw==}
 
   '@prisma/debug@7.1.0':
     resolution: {integrity: sha512-pPAckG6etgAsEBusmZiFwM9bldLSNkn++YuC4jCTJACdK5hLOVnOzX7eSL2FgaU6Gomd6wIw21snUX2dYroMZQ==}
 
-  '@prisma/dev@0.18.0':
-    resolution: {integrity: sha512-bZZxOkqprTj9CGNIZ5V57GDIGATg+JSRxAYuS3iHZq8eDimzQQhaGJoTk1UszGMSKLgmTBYlptDAmRvQpuCx1w==}
+  '@prisma/dev@0.19.1':
+    resolution: {integrity: sha512-auWLpOrUO7u8MMQS5/oxAC8cdli3In4QveUyng+WS0BeWCpPiPFr5HLQCmcchuHPb4MqLY8POAX9sHjjnQI0BA==}
 
   '@prisma/get-platform@7.1.0':
     resolution: {integrity: sha512-lq8hMdjKiZftuT5SssYB3EtQj8+YjL24/ZTLflQqzFquArKxBcyp6Xrblto+4lzIKJqnpOjfMiBjMvl7YuD7+Q==}
@@ -1080,8 +1074,8 @@ packages:
   '@prisma/schema-files-loader@7.3.0-dev.5':
     resolution: {integrity: sha512-UANmwi40m6FKUx0reFf7955wrCtBdjxFKhknQhZ42+Sovp8M3iQ0tQ/D0PwLNaUK9Lqk0iXXTwYeiW3h32HsBA==}
 
-  '@prisma/studio-core-licensed@0.8.2':
-    resolution: {integrity: sha512-l9V574/5yu/s79Ml7ZVIU692XyyYLmt3JJG9nF4jLKbb7ONEwmO9WxVNgo6NYwvSezvRwQ4uNG9cSm2RFNVzSA==}
+  '@prisma/studio-core-licensed@0.12.0':
+    resolution: {integrity: sha512-5dyhz9N8A5GvEv4OpF97QKNVFn3A+U/TDlAq1K5zjKBHuCvARGGfJ22xQ4UqsdX8H3HHabOb0VuN9J6RO7nzuA==}
     peerDependencies:
       '@types/react': ^18.0.0 || ^19.0.0
       react: ^18.0.0 || ^19.0.0
@@ -2409,8 +2403,8 @@ packages:
     resolution: {integrity: sha512-KsFcH0xxHes0J4zaQgWbYwmz3UPOOskdqZmItstUG93+Wk1ePBLkLGwbP9zlmh1BFUiL8Qp+Xfu9P7feJWpGNg==}
     engines: {node: '>=16.9.0'}
 
-  hono@4.7.10:
-    resolution: {integrity: sha512-QkACju9MiN59CKSY5JsGZCYmPZkA6sIW6OFCUp7qDjZu6S6KHtJHhAc9Uy9mV9F8PJ1/HQ3ybZF2yjCa/73fvQ==}
+  hono@4.11.3:
+    resolution: {integrity: sha512-PmQi306+M/ct/m5s66Hrg+adPnkD5jiO6IjA7WhWw0gSBSo1EcRegwuI1deZ+wd5pzCGynCcn2DprnE4/yEV4w==}
     engines: {node: '>=16.9.0'}
 
   hosted-git-info@4.1.0:
@@ -3015,6 +3009,9 @@ packages:
 
   openapi-fetch@0.14.0:
     resolution: {integrity: sha512-PshIdm1NgdLvb05zp8LqRQMNSKzIlPkyMxYFxwyHR+UlKD4t2nUjkDhNxeRbhRSEd3x5EUNh2w5sJYwkhOH4fg==}
+
+  openapi-fetch@0.15.0:
+    resolution: {integrity: sha512-OjQUdi61WO4HYhr9+byCPMj0+bgste/LtSBEcV6FzDdONTs7x0fWn8/ndoYwzqCsKWIxEZwo4FN/TG1c1rI8IQ==}
 
   openapi-typescript-helpers@0.0.15:
     resolution: {integrity: sha512-opyTPaunsklCBpTK8JGef6mfPhLSnyy5a0IN9vKtx3+4aExf+KxEqYwIy3hqkedXIB97u357uLMJsOnm3GVjsw==}
@@ -3940,6 +3937,9 @@ packages:
   vscode-languageserver-textdocument@1.0.11:
     resolution: {integrity: sha512-X+8T3GoiwTVlJbicx/sIAF+yuJAqz8VvwJyoMVhwEMoEKE/fkDmrqUgDMyBECcM2A2frVZIUj5HI/ErRXCfOeA==}
 
+  vscode-languageserver-textdocument@1.0.12:
+    resolution: {integrity: sha512-cxWNPesCnQCcMPeenjKKsOCKQZ/L6Tv19DTRIGuLWe32lyzWhihGVJ/rcckZXJxfdKCFvRLS3fpBIsV/ZGX4zA==}
+
   vscode-languageserver-types@3.16.0:
     resolution: {integrity: sha512-k8luDIWJWyenLc5ToFQQMaSrqCHiLwyKPHKPQZ5zz21vM+vIVUSvsRpcbiECH4WR88K2XZqc4ScRcZ7nk/jbeA==}
 
@@ -3963,6 +3963,7 @@ packages:
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
+    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-mimetype@4.0.0:
     resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
@@ -4076,8 +4077,8 @@ packages:
   zeptomatch@2.1.0:
     resolution: {integrity: sha512-KiGErG2J0G82LSpniV0CtIzjlJ10E04j02VOudJsPyPwNZgGnRKQy7I1R7GMyg/QswnE4l7ohSGrQbQbjXPPDA==}
 
-  zod@3.24.3:
-    resolution: {integrity: sha512-HhY1oqzWCQWuUqvBFnsyrtZRhyPeR7SUGv+C4+MsisMuVfSPx8HpwWqH8tRahSlt6M3PiFAcoeFhZAqIXTxoSg==}
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
 snapshots:
 
@@ -4606,13 +4607,13 @@ snapshots:
 
   '@fastify/busboy@2.1.1': {}
 
-  '@hono/node-server@1.14.2(hono@4.7.10)':
-    dependencies:
-      hono: 4.7.10
-
   '@hono/node-server@1.19.7(hono@4.11.1)':
     dependencies:
       hono: 4.11.1
+
+  '@hono/node-server@1.19.7(hono@4.11.3)':
+    dependencies:
+      hono: 4.11.3
 
   '@humanwhocodes/config-array@0.13.0':
     dependencies:
@@ -4759,13 +4760,13 @@ snapshots:
     transitivePeerDependencies:
       - magicast
 
-  '@prisma/credentials-store@7.1.0':
+  '@prisma/credentials-store@7.2.0':
     dependencies:
       xdg-app-paths: 8.3.0
 
   '@prisma/debug@7.1.0': {}
 
-  '@prisma/dev@0.18.0(typescript@5.7.3)':
+  '@prisma/dev@0.19.1(typescript@5.7.3)':
     dependencies:
       '@electric-sql/pglite': 0.3.14
       '@electric-sql/pglite-socket': 0.0.19(@electric-sql/pglite@0.3.14)
@@ -4827,7 +4828,7 @@ snapshots:
       '@prisma/prisma-schema-wasm': 7.3.0-8.aee8f579c2872ad0cedd6fd7e9070704fdb3610e
       fs-extra: 11.3.0
 
-  '@prisma/studio-core-licensed@0.8.2(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+  '@prisma/studio-core-licensed@0.12.0(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
       '@types/react': 19.2.7
       react: 19.2.1
@@ -6387,7 +6388,7 @@ snapshots:
 
   hono@4.11.1: {}
 
-  hono@4.7.10: {}
+  hono@4.11.3: {}
 
   hosted-git-info@4.1.0:
     dependencies:
@@ -6963,6 +6964,10 @@ snapshots:
       wsl-utils: 0.1.0
 
   openapi-fetch@0.14.0:
+    dependencies:
+      openapi-typescript-helpers: 0.0.15
+
+  openapi-fetch@0.15.0:
     dependencies:
       openapi-typescript-helpers: 0.0.15
 
@@ -7900,6 +7905,8 @@ snapshots:
 
   vscode-languageserver-textdocument@1.0.11: {}
 
+  vscode-languageserver-textdocument@1.0.12: {}
+
   vscode-languageserver-types@3.16.0: {}
 
   vscode-languageserver-types@3.17.3: {}
@@ -8048,4 +8055,4 @@ snapshots:
       grammex: 3.1.12
       graphmatch: 1.1.0
 
-  zod@3.24.3: {}
+  zod@3.25.76: {}
