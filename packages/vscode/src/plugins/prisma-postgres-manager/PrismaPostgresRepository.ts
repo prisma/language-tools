@@ -1,5 +1,10 @@
 import { env, EventEmitter, Uri } from 'vscode'
-import { createManagementAPI, type ManagementAPI, type LoginResult, type operations } from '@prisma/management-api-sdk'
+import {
+  createManagementApiSdk,
+  type ManagementApiSdk,
+  type LoginResult,
+  type operations,
+} from '@prisma/management-api-sdk'
 import { CredentialsStore } from '@prisma/credentials-store'
 import type { ConnectionStringStorage } from './ConnectionStringStorage'
 import { z } from 'zod'
@@ -7,6 +12,45 @@ import { WorkspaceTokenStorage, stripResourceIdentifierPrefix } from './Workspac
 
 const CLIENT_ID = 'cmamnw2go00005812nlbzb4pi'
 const DEFAULT_UTM_MEDIUM = 'ppg-cloud-list'
+
+type CreateDatabaseResponse =
+  operations['postV1ProjectsByProjectIdDatabases']['responses']['201']['content']['application/json']
+type DatabaseConnection = CreateDatabaseResponse['data']['connections'][number]
+type ConnectionEndpoints = DatabaseConnection['endpoints']
+type ConnectionWithEndpoints = Pick<DatabaseConnection, 'endpoints'>
+
+/**
+ * Extracts the best available connection string from a connection's endpoints.
+ *
+ * Priority: direct > pooled > accelerate.
+ *
+ * The extension uses the stored connection string primarily for Prisma Studio
+ * and admin tooling. Per the Prisma Postgres connection guidance (see
+ * prisma/ignite docs/product/products/postgres.mdx § Connection Usage Guidance),
+ * Studio and admin tooling should use the direct connection string, while
+ * pooled connections (PgBouncer, transactional mode) are intended for
+ * application traffic.
+ *
+ * - Prisma Postgres databases expose `direct` and `pooled` endpoints.
+ * - Accelerate-only databases expose only an `accelerate` endpoint, so the
+ *   fallback covers that case.
+ */
+function extractConnectionStringFromEndpoints(endpoints?: ConnectionEndpoints): string | null {
+  return (
+    endpoints?.direct?.connectionString ??
+    endpoints?.pooled?.connectionString ??
+    endpoints?.accelerate?.connectionString ??
+    null
+  )
+}
+
+function extractConnectionStringFromConnections(connections?: ConnectionWithEndpoints[]): string | null {
+  for (const connection of connections ?? []) {
+    const connectionString = extractConnectionStringFromEndpoints(connection.endpoints)
+    if (connectionString) return connectionString
+  }
+  return null
+}
 
 // Response types from SDK operations
 type ProjectsResponse = operations['getV1Projects']['responses']['200']['content']['application/json']
@@ -186,12 +230,12 @@ class CacheManager {
 
 export class PrismaPostgresRepository {
   private reloadPromise: Promise<void> | undefined = undefined
-  private managementAPIs = new Map<string, ManagementAPI>()
+  private managementAPIs = new Map<string, ManagementApiSdk>()
   private credentialsStore = new CredentialsStore()
   private cache = new CacheManager()
 
   // Auth state
-  private authAPI: ManagementAPI | null = null
+  private authAPI: ManagementApiSdk | null = null
   private authTokenStorage = new WorkspaceTokenStorage('', this.credentialsStore)
   private latestLoginResult: LoginResult | null = null
 
@@ -213,9 +257,9 @@ export class PrismaPostgresRepository {
    * Get the cached auth API instance (used for login flows).
    * Reuses a single instance instead of creating fresh ones each time.
    */
-  private getAuthAPI(): ManagementAPI {
+  private getAuthAPI(): ManagementApiSdk {
     if (!this.authAPI) {
-      this.authAPI = createManagementAPI({
+      this.authAPI = createManagementApiSdk({
         clientId: CLIENT_ID,
         redirectUri: this.getRedirectUri(),
         tokenStorage: this.authTokenStorage,
@@ -310,11 +354,11 @@ export class PrismaPostgresRepository {
     }
   }
 
-  private getAPI(workspaceId: string): ManagementAPI {
+  private getAPI(workspaceId: string): ManagementApiSdk {
     const strippedWorkspaceId = stripResourceIdentifierPrefix(workspaceId)
 
     if (!this.managementAPIs.has(strippedWorkspaceId)) {
-      const api = createManagementAPI({
+      const api = createManagementApiSdk({
         clientId: CLIENT_ID,
         redirectUri: this.getRedirectUri(),
         tokenStorage: new WorkspaceTokenStorage(strippedWorkspaceId, this.credentialsStore),
@@ -535,9 +579,9 @@ export class PrismaPostgresRepository {
       return { database: null, project: simplifiedProject }
     }
 
-    const { connectionString } = database
-
     const strippedDatabaseId = stripResourceIdentifierPrefix(database.id)
+
+    const connectionString = extractConnectionStringFromConnections(database.connections)
 
     if (connectionString) {
       await this.connectionStringStorage.storeConnectionString({
@@ -672,7 +716,11 @@ export class PrismaPostgresRepository {
 
     this.checkResponseOrThrow(workspaceId, response)
 
-    const { connectionString } = response.data.data
+    const connectionString = extractConnectionStringFromEndpoints(response.data.data.endpoints)
+
+    if (!connectionString) {
+      throw new Error('No connection string returned from API')
+    }
 
     await this.connectionStringStorage.storeConnectionString({ connectionString, databaseId, projectId, workspaceId })
 
@@ -705,9 +753,9 @@ export class PrismaPostgresRepository {
 
     const { data: database } = response.data
 
-    const { connectionString, id } = database
+    const connectionString = extractConnectionStringFromConnections(database.connections)
 
-    const strippedDatabaseId = stripResourceIdentifierPrefix(id)
+    const strippedDatabaseId = stripResourceIdentifierPrefix(database.id)
 
     if (connectionString) {
       await this.connectionStringStorage.storeConnectionString({
