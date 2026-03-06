@@ -19,16 +19,23 @@ type Endpoints = { direct?: EndpointDetail; pooled?: EndpointDetail; accelerate?
 /**
  * Extracts the best available connection string from a connection's endpoints.
  *
- * Priority: pooled > direct > accelerate.
- * - Prisma Postgres databases expose `pooled` and `direct` endpoints (no `accelerate`).
- *   Pooled is preferred because it routes through PgBouncer for connection pooling.
+ * Priority: direct > pooled > accelerate.
+ *
+ * The extension uses the stored connection string primarily for Prisma Studio
+ * and admin tooling. Per the Prisma Postgres connection guidance (see
+ * prisma/ignite docs/product/products/postgres.mdx § Connection Usage Guidance),
+ * Studio and admin tooling should use the direct connection string, while
+ * pooled connections (PgBouncer, transactional mode) are intended for
+ * application traffic.
+ *
+ * - Prisma Postgres databases expose `direct` and `pooled` endpoints.
  * - Accelerate-only databases expose only an `accelerate` endpoint, so the
  *   fallback covers that case.
  */
 function extractConnectionStringFromEndpoints(endpoints?: Endpoints): string | null {
   return (
-    endpoints?.pooled?.connectionString ??
     endpoints?.direct?.connectionString ??
+    endpoints?.pooled?.connectionString ??
     endpoints?.accelerate?.connectionString ??
     null
   )
