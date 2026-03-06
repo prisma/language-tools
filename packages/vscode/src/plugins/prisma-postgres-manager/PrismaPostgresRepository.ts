@@ -13,8 +13,11 @@ import { WorkspaceTokenStorage, stripResourceIdentifierPrefix } from './Workspac
 const CLIENT_ID = 'cmamnw2go00005812nlbzb4pi'
 const DEFAULT_UTM_MEDIUM = 'ppg-cloud-list'
 
-type EndpointDetail = { connectionString?: string }
-type Endpoints = { direct?: EndpointDetail; pooled?: EndpointDetail; accelerate?: EndpointDetail }
+type CreateDatabaseResponse =
+  operations['postV1ProjectsByProjectIdDatabases']['responses']['201']['content']['application/json']
+type DatabaseConnection = CreateDatabaseResponse['data']['connections'][number]
+type ConnectionEndpoints = DatabaseConnection['endpoints']
+type ConnectionWithEndpoints = Pick<DatabaseConnection, 'endpoints'>
 
 /**
  * Extracts the best available connection string from a connection's endpoints.
@@ -32,13 +35,21 @@ type Endpoints = { direct?: EndpointDetail; pooled?: EndpointDetail; accelerate?
  * - Accelerate-only databases expose only an `accelerate` endpoint, so the
  *   fallback covers that case.
  */
-function extractConnectionStringFromEndpoints(endpoints?: Endpoints): string | null {
+function extractConnectionStringFromEndpoints(endpoints?: ConnectionEndpoints): string | null {
   return (
     endpoints?.direct?.connectionString ??
     endpoints?.pooled?.connectionString ??
     endpoints?.accelerate?.connectionString ??
     null
   )
+}
+
+function extractConnectionStringFromConnections(connections?: ConnectionWithEndpoints[]): string | null {
+  for (const connection of connections ?? []) {
+    const connectionString = extractConnectionStringFromEndpoints(connection.endpoints)
+    if (connectionString) return connectionString
+  }
+  return null
 }
 
 // Response types from SDK operations
@@ -570,7 +581,7 @@ export class PrismaPostgresRepository {
 
     const strippedDatabaseId = stripResourceIdentifierPrefix(database.id)
 
-    const connectionString = extractConnectionStringFromEndpoints(database.connections?.[0]?.endpoints)
+    const connectionString = extractConnectionStringFromConnections(database.connections)
 
     if (connectionString) {
       await this.connectionStringStorage.storeConnectionString({
@@ -742,7 +753,7 @@ export class PrismaPostgresRepository {
 
     const { data: database } = response.data
 
-    const connectionString = extractConnectionStringFromEndpoints(database.connections?.[0]?.endpoints)
+    const connectionString = extractConnectionStringFromConnections(database.connections)
 
     const strippedDatabaseId = stripResourceIdentifierPrefix(database.id)
 
