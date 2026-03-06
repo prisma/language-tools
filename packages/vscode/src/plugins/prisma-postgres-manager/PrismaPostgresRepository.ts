@@ -16,6 +16,15 @@ const DEFAULT_UTM_MEDIUM = 'ppg-cloud-list'
 type EndpointDetail = { connectionString?: string }
 type Endpoints = { direct?: EndpointDetail; pooled?: EndpointDetail; accelerate?: EndpointDetail }
 
+/**
+ * Extracts the best available connection string from a connection's endpoints.
+ *
+ * Priority: pooled > direct > accelerate.
+ * - Prisma Postgres databases expose `pooled` and `direct` endpoints (no `accelerate`).
+ *   Pooled is preferred because it routes through PgBouncer for connection pooling.
+ * - Accelerate-only databases expose only an `accelerate` endpoint, so the
+ *   fallback covers that case.
+ */
 function extractConnectionStringFromEndpoints(endpoints?: Endpoints): string | null {
   return (
     endpoints?.pooled?.connectionString ??
