@@ -1,5 +1,10 @@
 import { env, EventEmitter, Uri } from 'vscode'
-import { createManagementApiSdk, type ManagementApiSdk, type LoginResult, type operations } from '@prisma/management-api-sdk'
+import {
+  createManagementApiSdk,
+  type ManagementApiSdk,
+  type LoginResult,
+  type operations,
+} from '@prisma/management-api-sdk'
 import { CredentialsStore } from '@prisma/credentials-store'
 import type { ConnectionStringStorage } from './ConnectionStringStorage'
 import { z } from 'zod'
