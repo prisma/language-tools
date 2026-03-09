@@ -139,8 +139,8 @@ importers:
         specifier: workspace:*
         version: link:../language-server
       '@prisma/management-api-sdk':
-        specifier: 0.2.0
-        version: 0.2.0
+        specifier: 1.13.0
+        version: 1.13.0
       '@prisma/ppg':
         specifier: 0.5.2
         version: 0.5.2
@@ -1059,8 +1059,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@prisma/management-api-sdk@0.2.0':
-    resolution: {integrity: sha512-ZFY5v3r2l4cx05zMNO4Wpu5ihW811xa9TytTS76Tal8oYHAPAUkSgNJZcRIPu5iYfs9LqOFegoonX1vIG0YVfw==}
+  '@prisma/management-api-sdk@1.13.0':
+    resolution: {integrity: sha512-Ba6BBmsKLn9TBWAPfXNcyAVI5mkyP7Z/L650D9Paxz/pxuuOj4xbhgOTS4k3l/S+eNYUYUkJGYQqWTF8jCdK0w==}
 
   '@prisma/ppg@0.5.2':
     resolution: {integrity: sha512-WT5Kxj1gRLjcrnhMJfdTMsxs8RBhOHm4ZooCuaK0qhKP1ta1ukV3Ab11jEOSI2XeMWCRN6fvwO8+wqWzGmTXuQ==}
@@ -4805,7 +4805,7 @@ snapshots:
     transitivePeerDependencies:
       - magicast
 
-  '@prisma/management-api-sdk@0.2.0':
+  '@prisma/management-api-sdk@1.13.0':
     dependencies:
       openapi-fetch: 0.14.0
 
