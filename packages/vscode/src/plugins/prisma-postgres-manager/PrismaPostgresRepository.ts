@@ -45,11 +45,19 @@ function extractConnectionStringFromEndpoints(endpoints?: ConnectionEndpoints): 
 }
 
 function extractConnectionStringFromConnections(connections?: ConnectionWithEndpoints[]): string | null {
+  let pooled: string | undefined
+  let accelerate: string | undefined
+
   for (const connection of connections ?? []) {
-    const connectionString = extractConnectionStringFromEndpoints(connection.endpoints)
-    if (connectionString) return connectionString
+    const endpoints = connection.endpoints
+    const direct = endpoints?.direct?.connectionString
+    if (direct) return direct
+
+    pooled ??= endpoints?.pooled?.connectionString
+    accelerate ??= endpoints?.accelerate?.connectionString
   }
-  return null
+
+  return pooled ?? accelerate ?? null
 }
 
 // Response types from SDK operations
