@@ -591,14 +591,16 @@ export class PrismaPostgresRepository {
 
     const connectionString = extractConnectionStringFromConnections(database.connections)
 
-    if (connectionString) {
-      await this.connectionStringStorage.storeConnectionString({
-        connectionString,
-        databaseId: strippedDatabaseId,
-        projectId: strippedProjectId,
-        workspaceId,
-      })
+    if (!connectionString) {
+      throw new Error('No connection string returned from API')
     }
+
+    await this.connectionStringStorage.storeConnectionString({
+      connectionString,
+      databaseId: strippedDatabaseId,
+      projectId: strippedProjectId,
+      workspaceId,
+    })
 
     const simplifiedDatabase: NewRemoteDatabase = {
       connectionString,
@@ -765,14 +767,16 @@ export class PrismaPostgresRepository {
 
     const strippedDatabaseId = stripResourceIdentifierPrefix(database.id)
 
-    if (connectionString) {
-      await this.connectionStringStorage.storeConnectionString({
-        connectionString,
-        databaseId: strippedDatabaseId,
-        projectId,
-        workspaceId,
-      })
+    if (!connectionString) {
+      throw new Error('No connection string returned from API')
     }
+
+    await this.connectionStringStorage.storeConnectionString({
+      connectionString,
+      databaseId: strippedDatabaseId,
+      projectId,
+      workspaceId,
+    })
 
     const simplifiedDatabase: NewRemoteDatabase = {
       connectionString,
