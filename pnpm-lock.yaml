@@ -102,8 +102,8 @@ importers:
         specifier: 8.1.0
         version: 8.1.0
       vscode-languageserver-textdocument:
-        specifier: 1.0.11
-        version: 1.0.11
+        specifier: 1.0.12
+        version: 1.0.12
       vscode-uri:
         specifier: ^3.0.8
         version: 3.1.0
@@ -127,26 +127,26 @@ importers:
   packages/vscode:
     dependencies:
       '@hono/node-server':
-        specifier: 1.14.2
-        version: 1.14.2(hono@4.7.10)
+        specifier: 1.19.11
+        version: 1.19.11(hono@4.12.8)
       '@prisma/credentials-store':
-        specifier: 7.1.0
-        version: 7.1.0
+        specifier: 7.5.0
+        version: 7.5.0
       '@prisma/dev':
-        specifier: 0.18.0
-        version: 0.18.0(typescript@5.7.3)
+        specifier: 0.23.1
+        version: 0.23.1(typescript@5.7.3)
       '@prisma/language-server':
         specifier: workspace:*
         version: link:../language-server
       '@prisma/management-api-sdk':
-        specifier: 1.13.0
-        version: 1.13.0
+        specifier: 1.21.0
+        version: 1.21.0
       '@prisma/ppg':
         specifier: 0.5.2
         version: 0.5.2
       '@prisma/studio-core-licensed':
-        specifier: 0.12.0
-        version: 0.12.0(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+        specifier: 0.14.0
+        version: 0.14.0(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       checkpoint-client:
         specifier: 1.1.33
         version: 1.1.33
@@ -166,17 +166,17 @@ importers:
         specifier: 5.1.1
         version: 5.1.1
       hono:
-        specifier: 4.7.10
-        version: 4.7.10
+        specifier: 4.12.8
+        version: 4.12.8
       minimatch:
-        specifier: 6.2.0
-        version: 6.2.0
+        specifier: 6.2.3
+        version: 6.2.3
       openapi-fetch:
-        specifier: 0.14.0
-        version: 0.14.0
+        specifier: 0.17.0
+        version: 0.17.0
       postgres:
-        specifier: 3.4.7
-        version: 3.4.7
+        specifier: 3.4.8
+        version: 3.4.8
       prisma-6-language-server:
         specifier: npm:@prisma/language-server@6.19.0-hotfix.1
         version: '@prisma/language-server@6.19.0-hotfix.1(magicast@0.3.5)'
@@ -187,8 +187,8 @@ importers:
         specifier: 1.2.0
         version: 1.2.0
       zod:
-        specifier: 3.24.3
-        version: 3.24.3
+        specifier: 3.25.76
+        version: 3.25.76
     devDependencies:
       '@playwright/test':
         specifier: ^1.48.0
@@ -338,17 +338,20 @@ packages:
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
 
-  '@chevrotain/cst-dts-gen@10.5.0':
-    resolution: {integrity: sha512-lhmC/FyqQ2o7pGK4Om+hzuDrm9rhFYIJ/AXoQBeongmn870Xeb0L6oGEiuR8nohFNL5sMaQEJWCxr1oIVIVXrw==}
+  '@chevrotain/cst-dts-gen@11.2.0':
+    resolution: {integrity: sha512-ssJFvn/UXhQQeICw3SR/fZPmYVj+JM2mP+Lx7bZ51cOeHaMWOKp3AUMuyM3QR82aFFXTfcAp67P5GpPjGmbZWQ==}
 
-  '@chevrotain/gast@10.5.0':
-    resolution: {integrity: sha512-pXdMJ9XeDAbgOWKuD1Fldz4ieCs6+nLNmyVhe2gZVqoO7v8HXuHYs5OV2EzUtbuai37TlOAQHrTDvxMnvMJz3A==}
+  '@chevrotain/gast@11.2.0':
+    resolution: {integrity: sha512-c+KoD6eSI1xjAZZoNUW+V0l13UEn+a4ShmUrjIKs1BeEWCji0Kwhmqn5FSx1K4BhWL7IQKlV7wLR4r8lLArORQ==}
 
-  '@chevrotain/types@10.5.0':
-    resolution: {integrity: sha512-f1MAia0x/pAVPWH/T73BJVyO2XU5tI4/iE7cnxb7tqdNTNhQI3Uq3XkqcoteTmD4t1aM0LbHCJOhgIDn07kl2A==}
+  '@chevrotain/regexp-to-ast@11.2.0':
+    resolution: {integrity: sha512-lG73pBFqbXODTbXhdZwv0oyUaI+3Irm+uOv5/W79lI3g5hasYaJnVJOm3H2NkhA0Ef4XLBU4Scr7TJDJwgFkAw==}
 
-  '@chevrotain/utils@10.5.0':
-    resolution: {integrity: sha512-hBzuU5+JjB2cqNZyszkDHZgOSrUUT8V3dhgRl8Q9Gp6dAj/H5+KILGjbhDpc3Iy9qmqlm/akuOI2ut9VUtzJxQ==}
+  '@chevrotain/types@11.2.0':
+    resolution: {integrity: sha512-vBMSj/lz/LqolbGQEHB0tlpW5BnljHVtp+kzjQfQU+5BtGMTuZCPVgaAjtKvQYXnHb/8i/02Kii00y0tsuwfsw==}
+
+  '@chevrotain/utils@11.2.0':
+    resolution: {integrity: sha512-+7whECg4yNWHottjvr2To2BRxL4XJVjIyyv5J4+bJ0iMOVU8j/8n1qPDLZS/90W/BObDR8VNL46lFbzY/Hosmw==}
 
   '@commitlint/cli@19.6.1':
     resolution: {integrity: sha512-8hcyA6ZoHwWXC76BoC8qVOSr8xHy00LZhZpauiD0iO0VYbVhMnED0da85lTfIULxl7Lj4c6vZgF0Wu/ed1+jlQ==}
@@ -419,19 +422,19 @@ packages:
     resolution: {integrity: sha512-/yCrWGCoA1SVKOks25EGadP9Pnj0oAIHGpl2wH2M2Y46dPM2ueb8wyCVOD7O3WCTkaJ0IkKvzhl1JY7+uCT2Dw==}
     engines: {node: '>=v18'}
 
-  '@electric-sql/pglite-socket@0.0.19':
-    resolution: {integrity: sha512-9Uq0aXJyfeQMQCk9OiX3dfjdKCKurjGPkhHemDo+sA5QeYPuH48Bxfue4sfA+dBXZGe9cUCjwrnZ351E3wPPIA==}
+  '@electric-sql/pglite-socket@0.1.1':
+    resolution: {integrity: sha512-p2hoXw3Z3LQHwTeikdZNsFBOvXGqKY2hk51BBw+8NKND8eoH+8LFOtW9Z8CQKmTJ2qqGYu82ipqiyFZOTTXNfw==}
     hasBin: true
     peerDependencies:
-      '@electric-sql/pglite': 0.3.14
+      '@electric-sql/pglite': 0.4.1
 
-  '@electric-sql/pglite-tools@0.2.19':
-    resolution: {integrity: sha512-Ls4ZcSymnFRlEHtDyO3k9qPXLg7awfRAE3YnXk4WLsint17JBsU4UEX8le9YE8SgPkWNnQC898SqbFGGU/5JUA==}
+  '@electric-sql/pglite-tools@0.3.1':
+    resolution: {integrity: sha512-C+T3oivmy9bpQvSxVqXA1UDY8cB9Eb9vZHL9zxWwEUfDixbXv4G3r2LjoTdR33LD8aomR3O9ZXEO3XEwr/cUCA==}
     peerDependencies:
-      '@electric-sql/pglite': 0.3.14
+      '@electric-sql/pglite': 0.4.1
 
-  '@electric-sql/pglite@0.3.14':
-    resolution: {integrity: sha512-3DB258dhqdsArOI1fIt7cb9RpUOgcDg5hXWVgVHAeqVQ/qxtFy605QKs4gx6mFq3jWsSPqDN8TgSEsqC3OfV9Q==}
+  '@electric-sql/pglite@0.4.1':
+    resolution: {integrity: sha512-mZ9NzzUSYPOCnxHH1oAHPRzoMFJHY472raDKwXl/+6oPbpdJ7g8LsCN4FSaIIfkiCKHhb3iF/Zqo3NYxaIhU7Q==}
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -905,14 +908,8 @@ packages:
     resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
     engines: {node: '>=14'}
 
-  '@hono/node-server@1.14.2':
-    resolution: {integrity: sha512-GHjpOeHYbr9d1vkID2sNUYkl5IxumyhDrUJB7wBp7jvqYwPFt+oNKsAPBRcdSbV7kIrXhouLE199ks1QcK4r7A==}
-    engines: {node: '>=18.14.1'}
-    peerDependencies:
-      hono: ^4
-
-  '@hono/node-server@1.19.7':
-    resolution: {integrity: sha512-vUcD0uauS7EU2caukW8z5lJKtoGMokxNbJtBiwHgpqxEXokaHCBkQUmCHhjFB1VUTWdqj25QoMkMKzgjq+uhrw==}
+  '@hono/node-server@1.19.11':
+    resolution: {integrity: sha512-dr8/3zEaB+p0D2n/IUrlPF1HZm586qgJNXK1a9fhg/PzdtkK7Ksd5l312tJX2yBuALqDYBlG20QEbayqPyxn+g==}
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: ^4
@@ -959,9 +956,9 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@mrleebo/prisma-ast@0.13.1':
-    resolution: {integrity: sha512-XyroGQXcHrZdvmrGJvsA9KNeOOgGMg1Vg9OlheUsBOSKznLMDl+YChxbkboRHvtFYJEMRYmlV3uoo/njCw05iw==}
-    engines: {node: '>=16'}
+  '@mrleebo/prisma-ast@0.15.0':
+    resolution: {integrity: sha512-EZv5j5BeaVF/tAByFPwGRddaW3C+ZoSyuDBFfho0d0ed7vE6Hbp/oktI8gmDRgkIGrQrZ3XjA+XcUOoC33PnHA==}
+    engines: {node: '>=20.19.0'}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -1042,25 +1039,25 @@ packages:
   '@prisma/config@7.6.0-dev.6':
     resolution: {integrity: sha512-3evio/zqQ0NoeYIDdFhngJEHIhe29RoiqogIFzP3Y9R67tmCegB1ky4wadNXsR73ypbteMKWOxLuIz5ssXGBKw==}
 
-  '@prisma/credentials-store@7.1.0':
-    resolution: {integrity: sha512-hQ5XKET/AHCeWuBISD9Y0d93Ja3ep6bpCRNox283IGV+IBUBjwVArb8Q5QwQWK1dniCLRynkE+fEMIfL3c6N5w==}
+  '@prisma/credentials-store@7.5.0':
+    resolution: {integrity: sha512-aV/Ym+h0YOmpmDigp9XLEb7a1eEs9KyKhMuqbxbpFx1b7ac7WF0Jyp7WvsaVmu5obpgj7wQ06YRD8kRbK67B+Q==}
 
-  '@prisma/debug@7.1.0':
-    resolution: {integrity: sha512-pPAckG6etgAsEBusmZiFwM9bldLSNkn++YuC4jCTJACdK5hLOVnOzX7eSL2FgaU6Gomd6wIw21snUX2dYroMZQ==}
+  '@prisma/debug@7.2.0':
+    resolution: {integrity: sha512-YSGTiSlBAVJPzX4ONZmMotL+ozJwQjRmZweQNIq/ER0tQJKJynNkRB3kyvt37eOfsbMCXk3gnLF6J9OJ4QWftw==}
 
-  '@prisma/dev@0.18.0':
-    resolution: {integrity: sha512-bZZxOkqprTj9CGNIZ5V57GDIGATg+JSRxAYuS3iHZq8eDimzQQhaGJoTk1UszGMSKLgmTBYlptDAmRvQpuCx1w==}
+  '@prisma/dev@0.23.1':
+    resolution: {integrity: sha512-+pmWJAkZno5SO/yYCpErHB2F5uEshDgg2A5KVMvMtXe65Z+0ra6kGm3m9RxB9eoIgH4yr62s7sk7zbTFaD+XEw==}
 
-  '@prisma/get-platform@7.1.0':
-    resolution: {integrity: sha512-lq8hMdjKiZftuT5SssYB3EtQj8+YjL24/ZTLflQqzFquArKxBcyp6Xrblto+4lzIKJqnpOjfMiBjMvl7YuD7+Q==}
+  '@prisma/get-platform@7.2.0':
+    resolution: {integrity: sha512-k1V0l0Td1732EHpAfi2eySTezyllok9dXb6UQanajkJQzPUGi3vO2z7jdkz67SypFTdmbnyGYxvEvYZdZsMAVA==}
 
   '@prisma/language-server@6.19.0-hotfix.1':
     resolution: {integrity: sha512-3I5HiyEv5svyn5wZ+DJ0+Ht+mVVl58Q+YWzpCurZwi2QGDqAaD7vty4LDJ65iFWUMfQdFrQlSP0uZGOfrIngZw==}
     engines: {node: '>=20'}
     hasBin: true
 
-  '@prisma/management-api-sdk@1.13.0':
-    resolution: {integrity: sha512-Ba6BBmsKLn9TBWAPfXNcyAVI5mkyP7Z/L650D9Paxz/pxuuOj4xbhgOTS4k3l/S+eNYUYUkJGYQqWTF8jCdK0w==}
+  '@prisma/management-api-sdk@1.21.0':
+    resolution: {integrity: sha512-1KHhr8nOuaZq+yhCuJbwb9RELs1j5Zf2IDAeVmmq6GdylDSjm7r0HqZ9qigg573sC3aP7SOg1LvnSBpRZUXCSA==}
 
   '@prisma/ppg@0.5.2':
     resolution: {integrity: sha512-WT5Kxj1gRLjcrnhMJfdTMsxs8RBhOHm4ZooCuaK0qhKP1ta1ukV3Ab11jEOSI2XeMWCRN6fvwO8+wqWzGmTXuQ==}
@@ -1071,8 +1068,8 @@ packages:
   '@prisma/prisma-schema-wasm@7.5.0-15.280c870be64f457428992c43c1f6d557fab6e29e':
     resolution: {integrity: sha512-d96xJBWAC/NcnoducHu+vW0C+00C9ZKEeA9Ly5oUBr40nO865nOzG9cyJ1O0N97tDUj+S2AbzTyrkFWAWYy3rQ==}
 
-  '@prisma/query-plan-executor@7.1.0':
-    resolution: {integrity: sha512-NUtqMOPXZsIlnKAGGC/SZpRMZVjYMgnMC5QI0lqQ8Cjm23w89ZO7gaP9Wz78pKLFfC9pS2xa4BX6AUucCBkyVQ==}
+  '@prisma/query-plan-executor@7.2.0':
+    resolution: {integrity: sha512-EOZmNzcV8uJ0mae3DhTsiHgoNCuu1J9mULQpGCh62zN3PxPTd+qI9tJvk5jOst8WHKQNwJWR3b39t0XvfBB0WQ==}
 
   '@prisma/schema-files-loader@6.19.0-dev.10':
     resolution: {integrity: sha512-FpjL53iN1ApEUyNbbaBJ2Yn575SMYiwplEeMpeSS4249DSf4O9B1l+RB6wLnXQ6Gk415GX4Y6+MWS3DAZfw4Ow==}
@@ -1080,8 +1077,8 @@ packages:
   '@prisma/schema-files-loader@7.6.0-dev.6':
     resolution: {integrity: sha512-/vX0N+ABg7xwcUTG30ktTO3A52OUHgtXvr4C0VrpQeOPuq55XTUyDkFJBbq4n41pf6zVK8vbU09cfNPHnOKKog==}
 
-  '@prisma/studio-core-licensed@0.12.0':
-    resolution: {integrity: sha512-5dyhz9N8A5GvEv4OpF97QKNVFn3A+U/TDlAq1K5zjKBHuCvARGGfJ22xQ4UqsdX8H3HHabOb0VuN9J6RO7nzuA==}
+  '@prisma/studio-core-licensed@0.14.0':
+    resolution: {integrity: sha512-0/JoCRzCjGAAA91aXK4kEc5XpIEdBHNPcca9uQipN/RkeMBOrvq6ehx2Xinx42BeKrR/I62sbzFo85PaCChmTg==}
     peerDependencies:
       '@types/react': ^18.0.0 || ^19.0.0
       react: ^18.0.0 || ^19.0.0
@@ -1740,8 +1737,8 @@ packages:
     resolution: {integrity: sha512-IkxPpb5rS/d1IiLbHMgfPuS0FgiWTtFIm/Nj+2woXDLTZ7fOT2eqzgYbdMlLweqlHbsZjxEChoVK+7iph7jyQg==}
     engines: {node: '>=20.18.1'}
 
-  chevrotain@10.5.0:
-    resolution: {integrity: sha512-Pkv5rBY3+CsHOYfV5g/Vs5JY9WTHHDEKOlohI2XeygaZhUeqhAlldZ8Hz9cRmxu709bvS08YzxHdTPHhffc13A==}
+  chevrotain@11.2.0:
+    resolution: {integrity: sha512-mHCHTxM51nCklUw9RzRVc0DLjAh/SAUPM4k/zMInlTIo25ldWXOZoPt7XEIk/LwoT4lFVmJcu9g5MHtx371x3A==}
 
   chokidar@3.6.0:
     resolution: {integrity: sha512-7VT13fmjotKpGipCW9JEQAusEPE+Ei8nl6/g4FBAmIm0GOOLMua9NDDo/DWp0ZAxCr3cPq5ZpBqmPAQgDda2Pw==}
@@ -2318,6 +2315,7 @@ packages:
   git-raw-commits@4.0.0:
     resolution: {integrity: sha512-ICsMM1Wk8xSGMowkOmPrzo2Fgmfo4bMHLNX6ytHjajRJUqvHOw/TFapQ+QG75c3X/tTDDhOSRPGC52dDbNM8FQ==}
     engines: {node: '>=16'}
+    deprecated: This package is no longer maintained. For the JavaScript API, please use @conventional-changelog/git-client instead.
     hasBin: true
 
   github-from-package@0.0.0:
@@ -2333,21 +2331,23 @@ packages:
 
   glob@10.5.0:
     resolution: {integrity: sha512-DfXN8DfhJ7NH3Oe7cFmu3NCu1wKbkReJ8TorzSAFbSKrlNaQSKfIzqYqVY8zlbs2NLBbWpRiU52GX2PbaBVNkg==}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   glob@11.1.0:
     resolution: {integrity: sha512-vuNwKSaKiqm7g0THUBu2x7ckSs3XJLXE+2ssL7/MfTGPLLcrJQ/4Uq1CjPTtO5cCIiRxqvN6Twy1qOwhL0Xjcw==}
     engines: {node: 20 || >=22}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Glob versions prior to v9 are no longer supported
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   glob@8.1.0:
     resolution: {integrity: sha512-r8hpEjiQEYlF2QU0df3dS+nxxSIreXQS1qRhMJM0Q5NDdR386C7jb7Hwwod8Fgiuex+k0GFjgft18yvxm5XoCQ==}
     engines: {node: '>=12'}
-    deprecated: Glob versions prior to v9 are no longer supported
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   global-directory@4.0.1:
     resolution: {integrity: sha512-wHTUcDUoZ1H5/0iVqEudYW4/kAlN5cZ3j/bXn0Dpbizl9iaUVeWSHqiOjsgk6OW2bkLclbBjzewBz6weQ1zA2Q==}
@@ -2405,12 +2405,8 @@ packages:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
 
-  hono@4.11.1:
-    resolution: {integrity: sha512-KsFcH0xxHes0J4zaQgWbYwmz3UPOOskdqZmItstUG93+Wk1ePBLkLGwbP9zlmh1BFUiL8Qp+Xfu9P7feJWpGNg==}
-    engines: {node: '>=16.9.0'}
-
-  hono@4.7.10:
-    resolution: {integrity: sha512-QkACju9MiN59CKSY5JsGZCYmPZkA6sIW6OFCUp7qDjZu6S6KHtJHhAc9Uy9mV9F8PJ1/HQ3ybZF2yjCa/73fvQ==}
+  hono@4.12.8:
+    resolution: {integrity: sha512-VJCEvtrezO1IAR+kqEYnxUOoStaQPGrCmX3j4wDTNOcD1uRPFpGlwQUIW8niPuvHXaTUxeOUl5MMDGrl+tmO9A==}
     engines: {node: '>=16.9.0'}
 
   hosted-git-info@4.1.0:
@@ -2740,6 +2736,9 @@ packages:
     resolution: {integrity: sha512-gvVijfZvn7R+2qyPX8mAuKcFGDf6Nc61GdvGafQsHL0sBIxfKzA+usWn4GFC/bk+QdwPUD4kWFJLhElipq+0VA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
+  lodash-es@4.17.23:
+    resolution: {integrity: sha512-kVI48u3PZr38HdYz98UmfPnXl2DXrpdctLrFLCd3kOx1xUkOmpFPx7gCWWM5MPkL/fD8zb+Ph0QzjGFs4+hHWg==}
+
   lodash.camelcase@4.3.0:
     resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
 
@@ -2900,8 +2899,8 @@ packages:
     resolution: {integrity: sha512-lKwV/1brpG6mBUFHtb7NUmtABCb2WZZmm2wNiOA5hAb8VdCS4B3dtMWyvcoViccwAW/COERjXLt0zP1zXUN26g==}
     engines: {node: '>=10'}
 
-  minimatch@6.2.0:
-    resolution: {integrity: sha512-sauLxniAmvnhhRjFwPNnJKaPFYyddAgbYdeUpHULtCT/GhzdCx/MDNy+Y40lBxTQUrMzDE8e0S43Z5uqfO0REg==}
+  minimatch@6.2.3:
+    resolution: {integrity: sha512-5rvZbDy5y2k40rre/0OBbYnl03en25XPU3gOVO7532beGMjAipq88VdS9OeLOZNrD+Tb0lDhBJHZ7Gcd8qKlPg==}
     engines: {node: '>=10'}
 
   minimatch@9.0.5:
@@ -3016,8 +3015,14 @@ packages:
   openapi-fetch@0.14.0:
     resolution: {integrity: sha512-PshIdm1NgdLvb05zp8LqRQMNSKzIlPkyMxYFxwyHR+UlKD4t2nUjkDhNxeRbhRSEd3x5EUNh2w5sJYwkhOH4fg==}
 
+  openapi-fetch@0.17.0:
+    resolution: {integrity: sha512-PsbZR1wAPcG91eEthKhN+Zn92FMHxv+/faECIwjXdxfTODGSGegYv0sc1Olz+HYPvKOuoXfp+0pA2XVt2cI0Ig==}
+
   openapi-typescript-helpers@0.0.15:
     resolution: {integrity: sha512-opyTPaunsklCBpTK8JGef6mfPhLSnyy5a0IN9vKtx3+4aExf+KxEqYwIy3hqkedXIB97u357uLMJsOnm3GVjsw==}
+
+  openapi-typescript-helpers@0.1.0:
+    resolution: {integrity: sha512-OKTGPthhivLw/fHz6c3OPtg72vi86qaMlqbJuVJ23qOvQ+53uw1n7HdmkJFibloF7QEjDrDkzJiOJuockM/ljw==}
 
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
@@ -3185,13 +3190,14 @@ packages:
     resolution: {integrity: sha512-3Ybi1tAuwAP9s0r1UQ2J4n5Y0G05bJkpUIO0/bI9MhwmD70S5aTWbXGBwxHrelT+XM1k6dM0pk+SwNkpTRN7Pg==}
     engines: {node: ^10 || ^12 || >=14}
 
-  postgres@3.4.7:
-    resolution: {integrity: sha512-Jtc2612XINuBjIl/QTWsV5UvE8UHuNblcO3vVADSrKsrc6RqGX6lOW1cEo3CM2v0XG4Nat8nI+YM7/f26VxXLw==}
+  postgres@3.4.8:
+    resolution: {integrity: sha512-d+JFcLM17njZaOLkv6SCev7uoLaBtfK86vMUXhW1Z4glPWh4jozno9APvW/XKFJ3CCxVoC7OL38BqRydtu5nGg==}
     engines: {node: '>=12'}
 
   prebuild-install@7.1.3:
     resolution: {integrity: sha512-8Mf2cbV7x1cXPUILADGI3wuhfqWvtiLA1iclTDbFRZkgRQS0NqsPZphna9V+HyTEadheuPmjaJMsbzKQFOzLug==}
     engines: {node: '>=10'}
+    deprecated: No longer maintained. Please contact the author of the relevant native addon; alternatives are available.
     hasBin: true
 
   prelude-ls@1.2.1:
@@ -3282,11 +3288,8 @@ packages:
     resolution: {integrity: sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==}
     engines: {node: '>= 14.18.0'}
 
-  regexp-to-ast@0.5.0:
-    resolution: {integrity: sha512-tlbJqcMHnPKI9zSrystikWKwHkBqu2a/Sgw01h3zFjvYrMxEDYHzzoMZnUrbIfpTFEsoRnnviOXNCzFiSc54Qw==}
-
-  remeda@2.32.0:
-    resolution: {integrity: sha512-BZx9DsT4FAgXDTOdgJIc5eY6ECIXMwtlSPQoPglF20ycSWigttDDe88AozEsPPT4OWk5NujroGSBC1phw5uU+w==}
+  remeda@2.33.4:
+    resolution: {integrity: sha512-ygHswjlc/opg2VrtiYvUOPLjxjtdKvjGz1/plDhkG66hjNjFr1xmfrs2ClNFo/E6TyUFiwYNh53bKV26oBoMGQ==}
 
   require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
@@ -3940,6 +3943,9 @@ packages:
   vscode-languageserver-textdocument@1.0.11:
     resolution: {integrity: sha512-X+8T3GoiwTVlJbicx/sIAF+yuJAqz8VvwJyoMVhwEMoEKE/fkDmrqUgDMyBECcM2A2frVZIUj5HI/ErRXCfOeA==}
 
+  vscode-languageserver-textdocument@1.0.12:
+    resolution: {integrity: sha512-cxWNPesCnQCcMPeenjKKsOCKQZ/L6Tv19DTRIGuLWe32lyzWhihGVJ/rcckZXJxfdKCFvRLS3fpBIsV/ZGX4zA==}
+
   vscode-languageserver-types@3.16.0:
     resolution: {integrity: sha512-k8luDIWJWyenLc5ToFQQMaSrqCHiLwyKPHKPQZ5zz21vM+vIVUSvsRpcbiECH4WR88K2XZqc4ScRcZ7nk/jbeA==}
 
@@ -3963,6 +3969,7 @@ packages:
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
+    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-mimetype@4.0.0:
     resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
@@ -4076,8 +4083,8 @@ packages:
   zeptomatch@2.1.0:
     resolution: {integrity: sha512-KiGErG2J0G82LSpniV0CtIzjlJ10E04j02VOudJsPyPwNZgGnRKQy7I1R7GMyg/QswnE4l7ohSGrQbQbjXPPDA==}
 
-  zod@3.24.3:
-    resolution: {integrity: sha512-HhY1oqzWCQWuUqvBFnsyrtZRhyPeR7SUGv+C4+MsisMuVfSPx8HpwWqH8tRahSlt6M3PiFAcoeFhZAqIXTxoSg==}
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
 snapshots:
 
@@ -4221,20 +4228,22 @@ snapshots:
 
   '@bcoe/v8-coverage@1.0.2': {}
 
-  '@chevrotain/cst-dts-gen@10.5.0':
+  '@chevrotain/cst-dts-gen@11.2.0':
     dependencies:
-      '@chevrotain/gast': 10.5.0
-      '@chevrotain/types': 10.5.0
-      lodash: 4.17.21
+      '@chevrotain/gast': 11.2.0
+      '@chevrotain/types': 11.2.0
+      lodash-es: 4.17.23
 
-  '@chevrotain/gast@10.5.0':
+  '@chevrotain/gast@11.2.0':
     dependencies:
-      '@chevrotain/types': 10.5.0
-      lodash: 4.17.21
+      '@chevrotain/types': 11.2.0
+      lodash-es: 4.17.23
 
-  '@chevrotain/types@10.5.0': {}
+  '@chevrotain/regexp-to-ast@11.2.0': {}
 
-  '@chevrotain/utils@10.5.0': {}
+  '@chevrotain/types@11.2.0': {}
+
+  '@chevrotain/utils@11.2.0': {}
 
   '@commitlint/cli@19.6.1(@types/node@14.18.63)(typescript@5.7.3)':
     dependencies:
@@ -4346,15 +4355,15 @@ snapshots:
       '@types/conventional-commits-parser': 5.0.2
       chalk: 5.6.2
 
-  '@electric-sql/pglite-socket@0.0.19(@electric-sql/pglite@0.3.14)':
+  '@electric-sql/pglite-socket@0.1.1(@electric-sql/pglite@0.4.1)':
     dependencies:
-      '@electric-sql/pglite': 0.3.14
+      '@electric-sql/pglite': 0.4.1
 
-  '@electric-sql/pglite-tools@0.2.19(@electric-sql/pglite@0.3.14)':
+  '@electric-sql/pglite-tools@0.3.1(@electric-sql/pglite@0.4.1)':
     dependencies:
-      '@electric-sql/pglite': 0.3.14
+      '@electric-sql/pglite': 0.4.1
 
-  '@electric-sql/pglite@0.3.14': {}
+  '@electric-sql/pglite@0.4.1': {}
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
@@ -4606,13 +4615,9 @@ snapshots:
 
   '@fastify/busboy@2.1.1': {}
 
-  '@hono/node-server@1.14.2(hono@4.7.10)':
+  '@hono/node-server@1.19.11(hono@4.12.8)':
     dependencies:
-      hono: 4.7.10
-
-  '@hono/node-server@1.19.7(hono@4.11.1)':
-    dependencies:
-      hono: 4.11.1
+      hono: 4.12.8
 
   '@humanwhocodes/config-array@0.13.0':
     dependencies:
@@ -4657,9 +4662,9 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@mrleebo/prisma-ast@0.13.1':
+  '@mrleebo/prisma-ast@0.15.0':
     dependencies:
-      chevrotain: 10.5.0
+      chevrotain: 11.2.0
       lilconfig: 2.1.0
 
   '@nodelib/fs.scandir@2.1.5':
@@ -4759,37 +4764,37 @@ snapshots:
     transitivePeerDependencies:
       - magicast
 
-  '@prisma/credentials-store@7.1.0':
+  '@prisma/credentials-store@7.5.0':
     dependencies:
       xdg-app-paths: 8.3.0
 
-  '@prisma/debug@7.1.0': {}
+  '@prisma/debug@7.2.0': {}
 
-  '@prisma/dev@0.18.0(typescript@5.7.3)':
+  '@prisma/dev@0.23.1(typescript@5.7.3)':
     dependencies:
-      '@electric-sql/pglite': 0.3.14
-      '@electric-sql/pglite-socket': 0.0.19(@electric-sql/pglite@0.3.14)
-      '@electric-sql/pglite-tools': 0.2.19(@electric-sql/pglite@0.3.14)
-      '@hono/node-server': 1.19.7(hono@4.11.1)
-      '@mrleebo/prisma-ast': 0.13.1
-      '@prisma/get-platform': 7.1.0
-      '@prisma/query-plan-executor': 7.1.0
+      '@electric-sql/pglite': 0.4.1
+      '@electric-sql/pglite-socket': 0.1.1(@electric-sql/pglite@0.4.1)
+      '@electric-sql/pglite-tools': 0.3.1(@electric-sql/pglite@0.4.1)
+      '@hono/node-server': 1.19.11(hono@4.12.8)
+      '@mrleebo/prisma-ast': 0.15.0
+      '@prisma/get-platform': 7.2.0
+      '@prisma/query-plan-executor': 7.2.0
       foreground-child: 3.3.1
       get-port-please: 3.2.0
-      hono: 4.11.1
+      hono: 4.12.8
       http-status-codes: 2.3.0
       pathe: 2.0.3
       proper-lockfile: 4.1.2
-      remeda: 2.32.0
+      remeda: 2.33.4
       std-env: 3.10.0
       valibot: 1.2.0(typescript@5.7.3)
       zeptomatch: 2.1.0
     transitivePeerDependencies:
       - typescript
 
-  '@prisma/get-platform@7.1.0':
+  '@prisma/get-platform@7.2.0':
     dependencies:
-      '@prisma/debug': 7.1.0
+      '@prisma/debug': 7.2.0
 
   '@prisma/language-server@6.19.0-hotfix.1(magicast@0.3.5)':
     dependencies:
@@ -4805,7 +4810,7 @@ snapshots:
     transitivePeerDependencies:
       - magicast
 
-  '@prisma/management-api-sdk@1.13.0':
+  '@prisma/management-api-sdk@1.21.0':
     dependencies:
       openapi-fetch: 0.14.0
 
@@ -4815,7 +4820,7 @@ snapshots:
 
   '@prisma/prisma-schema-wasm@7.5.0-15.280c870be64f457428992c43c1f6d557fab6e29e': {}
 
-  '@prisma/query-plan-executor@7.1.0': {}
+  '@prisma/query-plan-executor@7.2.0': {}
 
   '@prisma/schema-files-loader@6.19.0-dev.10':
     dependencies:
@@ -4827,7 +4832,7 @@ snapshots:
       '@prisma/prisma-schema-wasm': 7.5.0-15.280c870be64f457428992c43c1f6d557fab6e29e
       fs-extra: 11.3.0
 
-  '@prisma/studio-core-licensed@0.12.0(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+  '@prisma/studio-core-licensed@0.14.0(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
       '@types/react': 19.2.7
       react: 19.2.1
@@ -5628,14 +5633,14 @@ snapshots:
       undici: 7.16.0
       whatwg-mimetype: 4.0.0
 
-  chevrotain@10.5.0:
+  chevrotain@11.2.0:
     dependencies:
-      '@chevrotain/cst-dts-gen': 10.5.0
-      '@chevrotain/gast': 10.5.0
-      '@chevrotain/types': 10.5.0
-      '@chevrotain/utils': 10.5.0
-      lodash: 4.17.21
-      regexp-to-ast: 0.5.0
+      '@chevrotain/cst-dts-gen': 11.2.0
+      '@chevrotain/gast': 11.2.0
+      '@chevrotain/regexp-to-ast': 11.2.0
+      '@chevrotain/types': 11.2.0
+      '@chevrotain/utils': 11.2.0
+      lodash-es: 4.17.23
 
   chokidar@3.6.0:
     dependencies:
@@ -6385,9 +6390,7 @@ snapshots:
 
   he@1.2.0: {}
 
-  hono@4.11.1: {}
-
-  hono@4.7.10: {}
+  hono@4.12.8: {}
 
   hosted-git-info@4.1.0:
     dependencies:
@@ -6700,6 +6703,8 @@ snapshots:
     dependencies:
       p-locate: 6.0.0
 
+  lodash-es@4.17.23: {}
+
   lodash.camelcase@4.3.0: {}
 
   lodash.includes@4.3.0: {}
@@ -6839,7 +6844,7 @@ snapshots:
     dependencies:
       brace-expansion: 2.0.2
 
-  minimatch@6.2.0:
+  minimatch@6.2.3:
     dependencies:
       brace-expansion: 2.0.2
 
@@ -6966,7 +6971,13 @@ snapshots:
     dependencies:
       openapi-typescript-helpers: 0.0.15
 
+  openapi-fetch@0.17.0:
+    dependencies:
+      openapi-typescript-helpers: 0.1.0
+
   openapi-typescript-helpers@0.0.15: {}
+
+  openapi-typescript-helpers@0.1.0: {}
 
   optionator@0.9.4:
     dependencies:
@@ -7140,7 +7151,7 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  postgres@3.4.7: {}
+  postgres@3.4.8: {}
 
   prebuild-install@7.1.3:
     dependencies:
@@ -7261,11 +7272,7 @@ snapshots:
 
   readdirp@4.1.2: {}
 
-  regexp-to-ast@0.5.0: {}
-
-  remeda@2.32.0:
-    dependencies:
-      type-fest: 4.41.0
+  remeda@2.33.4: {}
 
   require-directory@2.1.1: {}
 
@@ -7900,6 +7907,8 @@ snapshots:
 
   vscode-languageserver-textdocument@1.0.11: {}
 
+  vscode-languageserver-textdocument@1.0.12: {}
+
   vscode-languageserver-types@3.16.0: {}
 
   vscode-languageserver-types@3.17.3: {}
@@ -8048,4 +8057,4 @@ snapshots:
       grammex: 3.1.12
       graphmatch: 1.1.0
 
-  zod@3.24.3: {}
+  zod@3.25.76: {}
