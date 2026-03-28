@@ -163,9 +163,10 @@
         "prisma.schemaPath": {
           "type": "string",
           "examples": [
-            "/path/to/your/schema.prisma"
+            "/path/to/your/schema.prisma",
+            "/path/to/your/prisma/directory"
           ],
-          "description": "If you have a Prisma schema file in a custom path, you will need to provide said path `/path/to/your/schema.prisma` to run generate"
+          "description": "If you have a Prisma schema file in a custom path, you will need to provide said path `/path/to/your/schema.prisma` to run generate and enable language server features."
         },
         "prisma.pinToPrisma6": {
           "type": "boolean",
