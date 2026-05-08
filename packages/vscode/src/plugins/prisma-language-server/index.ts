@@ -214,7 +214,9 @@ const plugin: PrismaVSCodePlugin = {
 
       commands.registerCommand('prisma.restartLanguageServer', async () => {
         await restartLanguageServer()
-        void window.showInformationMessage('Prisma language server restarted.')
+        if (started) {
+          void window.showInformationMessage('Prisma language server restarted.')
+        }
       }),
 
       commands.registerCommand('prisma.enableCodeLens', async () => {
