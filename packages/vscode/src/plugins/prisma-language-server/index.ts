@@ -30,6 +30,7 @@ import {
   checkForMinimalColorTheme,
   checkForOtherPrismaExtension,
   isDebugOrTestSession,
+  isPrismaNextSchema,
   isSnippetEdit,
   restartClient,
   createLanguageServer,
@@ -181,7 +182,22 @@ const plugin: PrismaVSCodePlugin = {
       },
     }
 
+    let started = false
+    const needsLanguageServer = (doc: TextDocument): boolean =>
+      doc.languageId === 'prisma' && !isPrismaNextSchema(doc.getText())
+
+    const maybeStart = () => {
+      if (started) return
+      if (!workspace.textDocuments.some(needsLanguageServer)) return
+      started = true
+      activateClient(context, clientOptions)
+    }
+
     const restartLanguageServer = async () => {
+      if (!started) {
+        maybeStart()
+        return
+      }
       const serverOptions = getServerOptions(workspace.getConfiguration('prisma'), context)
       client = await restartClient(context, client, serverOptions, clientOptions)
     }
@@ -198,7 +214,9 @@ const plugin: PrismaVSCodePlugin = {
 
       commands.registerCommand('prisma.restartLanguageServer', async () => {
         await restartLanguageServer()
-        void window.showInformationMessage('Prisma language server restarted.')
+        if (started) {
+          void window.showInformationMessage('Prisma language server restarted.')
+        }
       }),
 
       commands.registerCommand('prisma.enableCodeLens', async () => {
@@ -233,9 +251,12 @@ const plugin: PrismaVSCodePlugin = {
         await restartLanguageServer()
         void window.showInformationMessage('Unpinned workspace from Prisma 6.')
       }),
+
+      workspace.onDidOpenTextDocument(() => maybeStart()),
+      workspace.onDidChangeTextDocument(() => maybeStart()),
     )
 
-    activateClient(context, clientOptions)
+    maybeStart()
 
     if (!isDebugOrTest) {
       const packageJSON = getPackageJSON(context)

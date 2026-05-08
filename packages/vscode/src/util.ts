@@ -10,6 +10,7 @@ import {
 } from 'vscode'
 import { CodeAction, TextDocumentIdentifier, LanguageClientOptions } from 'vscode-languageclient'
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node'
+import { isPrismaNextSchema } from '@prisma/language-server/prisma-next'
 import { denyListDarkColorThemes, denyListLightColorThemes } from './denyListColorThemes'
 import { homedir } from 'os'
 import { readdirSync } from 'fs'
@@ -17,6 +18,8 @@ import path from 'path'
 export function isDebugOrTestSession(): boolean {
   return env.sessionId === 'someValue.sessionId'
 }
+
+export { isPrismaNextSchema }
 
 export function checkForOtherPrismaExtension(): void {
   const files = readdirSync(path.join(homedir(), '.vscode/extensions')).filter(

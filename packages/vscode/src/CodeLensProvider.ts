@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import * as cp from 'child_process'
+import { isPrismaNextSchema } from './util'
 
 /**
  * CodelensProvider
@@ -22,6 +23,10 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 
   public provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.CodeLens[] {
     if (!this.enabled) {
+      return []
+    }
+
+    if (isPrismaNextSchema(document.getText())) {
       return []
     }
 

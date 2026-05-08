@@ -1,0 +1,7 @@
+// use prisma-next
+
+types {
+  Alias  = ExistingType @attribute
+  UserId = String       @id @default(cuid())
+  Email  = String       @unique
+}
