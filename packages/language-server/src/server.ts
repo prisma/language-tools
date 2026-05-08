@@ -22,6 +22,7 @@ import * as MessageHandler from './lib/MessageHandler'
 import type { LSOptions, LSSettings } from './lib/types'
 import { getVersion, getEnginesVersion, getCliVersion } from './lib/prisma-schema-wasm/internals'
 import { PrismaSchema } from './lib/Schema'
+import { isPrismaNextSchema } from './lib/prismaNext'
 
 const packageJson = require('../package.json') // eslint-disable-line
 
@@ -152,6 +153,11 @@ export function startServer(options?: LSOptions): void {
   }
 
   async function validateTextDocument(textDocument: TextDocument) {
+    if (isPrismaNextSchema(textDocument.getText())) {
+      await connection.sendDiagnostics({ uri: textDocument.uri, diagnostics: [] })
+      return
+    }
+
     const settings = await getDocumentSettings(textDocument.uri)
 
     if (settings.enableDiagnostics === false) {
@@ -171,7 +177,11 @@ export function startServer(options?: LSOptions): void {
   })
 
   function getDocument(uri: string): TextDocument | undefined {
-    return documents.get(uri)
+    const doc = documents.get(uri)
+    if (doc && isPrismaNextSchema(doc.getText())) {
+      return undefined
+    }
+    return doc
   }
 
   connection.onDefinition(async (params: DeclarationParams) => {
