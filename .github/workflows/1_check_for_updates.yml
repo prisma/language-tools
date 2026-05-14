@@ -1,8 +1,10 @@
 name: 1. Check for Prisma CLI Update
 
 on:
-  schedule:
-    - cron: '*/5 * * * *'
+  # Scheduled trigger disabled: ORM iteration is paused; CLI-update polling
+  # runs on demand. Restore the `schedule:` block below to re-enable.
+  # schedule:
+  #   - cron: '*/5 * * * *'
   workflow_dispatch:
 
 env:

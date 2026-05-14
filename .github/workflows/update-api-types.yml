@@ -1,8 +1,10 @@
 name: Update API Types
 
 on:
-  schedule:
-    - cron: '0 0 * * *' # Run at midnight UTC every day
+  # Scheduled trigger disabled: ORM iteration is paused; API-type bumps
+  # run on demand. Restore the `schedule:` block below to re-enable.
+  # schedule:
+  #   - cron: '0 0 * * *' # Run at midnight UTC every day
   workflow_dispatch: # Allow manual triggering
 
 jobs:

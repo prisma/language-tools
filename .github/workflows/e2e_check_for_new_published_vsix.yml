@@ -1,8 +1,12 @@
 name: Check for new release on Marketplace
 
 on:
-  schedule:
-    - cron: '*/10 * * * *'
+  # Scheduled trigger disabled: ORM iteration is paused; post-publish
+  # VSIX checks run on demand. Restore the `schedule:` block below to
+  # re-enable.
+  # schedule:
+  #   - cron: '*/10 * * * *'
+  workflow_dispatch:
 
 jobs:
   check-version:

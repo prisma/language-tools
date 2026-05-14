@@ -56,12 +56,11 @@ Press `F5` in VS Code to launch the extension in debug mode.
 
 ## Build Status
 
-[![E2E tests after release][e2e-vsix-badge]][e2e-vsix-action]
 [![E2E tests before Insider release][e2e-insider-badge]][e2e-insider-action]
 [![Language Server tests][ls-tests-badge]][ls-tests-action]
 
-[e2e-vsix-badge]: https://github.com/prisma/language-tools/workflows/E2E%20tests%20after%20release%20on%20VSIX/badge.svg?branch=main
-[e2e-vsix-action]: https://github.com/prisma/language-tools/actions/workflows/e2e_published_vsix.yml?query=branch%3Amain
+Scheduled CI is currently disabled across the ORM repos; the post-release VSIX E2E run, which used to be triggered automatically when a new VSIX hit the Marketplace, can be invoked manually from the [Actions tab](https://github.com/prisma/language-tools/actions) or via `gh workflow run`.
+
 [e2e-insider-badge]: https://github.com/prisma/language-tools/workflows/5.%20Integration%20tests%20in%20VSCode%20folder%20with%20published%20LS/badge.svg?branch=main
 [e2e-insider-action]: https://github.com/prisma/language-tools/actions/workflows/5_e2e_tests.yml?query=branch%3Amain
 [ls-tests-badge]: https://github.com/prisma/language-tools/workflows/3.%20Unit%20tests%20for%20LS%20and%20publish/badge.svg?branch=main
