@@ -17,6 +17,9 @@
       "include": "#types_block_definition"
     },
     {
+      "include": "#namespace_block_definition"
+    },
+    {
       "include": "#model_block_definition"
     },
     {
@@ -30,6 +33,47 @@
     }
   ],
   "repository": {
+    "namespace_block_definition": {
+      "begin": "^\\s*(namespace)\\s+([A-Za-z][\\w]*)\\s*({)",
+      "name": "source.prisma.embedded.source",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.namespace.prisma"
+        },
+        "2": {
+          "name": "entity.name.type.namespace.prisma"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.prisma"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#triple_comment"
+        },
+        {
+          "include": "#double_comment"
+        },
+        {
+          "include": "#multi_line_comment"
+        },
+        {
+          "include": "#model_block_definition"
+        },
+        {
+          "include": "#enum_block_definition"
+        },
+        {
+          "include": "#type_definition"
+        }
+      ],
+      "end": "\\s*\\}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.tag.prisma"
+        }
+      }
+    },
     "model_block_definition": {
       "begin": "^\\s*(model|type|view)\\s+([A-Za-z][\\w]*)\\s*({)",
       "name": "source.prisma.embedded.source",
