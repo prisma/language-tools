@@ -179,9 +179,9 @@ function createFilesResolver(allDocuments: TextDocument[]): FilesResolver {
 function createInMemoryResolver(allDocuments: TextDocument[], options: CaseSensitivityOptions): InMemoryFilesResolver {
   const resolver = new InMemoryFilesResolver(options)
   for (const doc of allDocuments) {
-    const filePath = URI.parse(doc.uri).toString()
+    const fileUri = URI.parse(doc.uri).toString()
     const content = doc.getText()
-    resolver.addFile(filePath, content)
+    resolver.addFile(fileUri, content)
   }
 
   return resolver

@@ -1,13 +1,19 @@
 import { describe, it, expect } from 'vitest'
 import { URI } from 'vscode-uri'
+import { TextDocument } from 'vscode-languageserver-textdocument'
+import { PrismaSchema } from '../lib/Schema'
 
 describe('Path normalization for Windows compatibility (#1985)', () => {
-  it('old code: fsPath produces backslashes on Windows-style paths', () => {
+  it('old code: fsPath is platform-dependent', () => {
     const docUri = 'file:///C:/Users/juan/prisma/schema/user.prisma'
 
     const storedPath = URI.parse(docUri).fsPath
 
-    expect(typeof storedPath).toBe('string')
+    if (process.platform === 'win32') {
+      expect(storedPath).toContain('\\')
+    } else {
+      expect(storedPath).not.toContain('\\')
+    }
   })
 
   it('new code: toString() never produces backslashes', () => {
@@ -19,25 +25,51 @@ describe('Path normalization for Windows compatibility (#1985)', () => {
     expect(storedPath).toMatch(/^file:\/\//)
   })
 
-  it('Windows path with backslashes should produce forward slashes after normalization', () => {
+  it('URI.file() normalizes Windows backslash paths to forward-slash URIs', () => {
     const windowsPath = 'C:\\Users\\juan\\prisma\\schema\\user.prisma'
 
-    const normalized = windowsPath.replace(/\\/g, '/')
-
-    expect(windowsPath).toContain('\\')
+    const normalized = URI.file(windowsPath).toString()
 
     expect(normalized).not.toContain('\\')
-    expect(normalized).toBe('C:/Users/juan/prisma/schema/user.prisma')
+    expect(normalized).toMatch(/^file:\/\//)
   })
 
-  it('two URIs parsed and stringified should both lack backslashes', () => {
-    const uri1 = 'file:///C:/Users/juan/prisma/schema/user.prisma'
-    const uri2 = 'file:///C:/Users/juan/prisma/schema/user.prisma'
+  it('PrismaSchema preserves URI format when loading multi-file schema', async () => {
+    const baseUri = 'file:///C:/Users/juan/prisma/schema'
 
-    const normalized1 = URI.parse(uri1).toString()
-    const normalized2 = URI.parse(uri2).toString()
+    const userDoc = TextDocument.create(
+      `${baseUri}/User.prisma`,
+      'prisma',
+      1,
+      `model User {
+  id    String @id
+  name  String
+  posts Post[]
+}`,
+    )
 
-    expect(normalized1).not.toContain('\\')
-    expect(normalized2).not.toContain('\\')
+    const postDoc = TextDocument.create(
+      `${baseUri}/Post.prisma`,
+      'prisma',
+      1,
+      `model Post {
+  id       String @id
+  title    String
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+}`,
+    )
+
+    const schema = await PrismaSchema.load([userDoc, postDoc])
+
+    expect(schema.documents).toHaveLength(2)
+
+    for (const doc of schema.documents) {
+      expect(doc.uri).not.toContain('\\')
+      expect(doc.uri).toMatch(/^file:\/\//)
+    }
+
+    expect(schema.findDocByUri(userDoc.uri)).toBeDefined()
+    expect(schema.findDocByUri(postDoc.uri)).toBeDefined()
   })
 })
