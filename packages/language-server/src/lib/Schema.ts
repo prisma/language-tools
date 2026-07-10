@@ -111,8 +111,8 @@ export class PrismaSchema {
     if (Array.isArray(input)) {
       schemaDocs = input
     } else {
-      const fsPath = config?.schema ?? URI.parse(input.currentDocument.uri).toString()
-      schemaDocs = await loadSchemaDocumentsFromPath(fsPath, input.allDocuments)
+      const schemaUri = config?.schema ?? URI.parse(input.currentDocument.uri).toString()
+      schemaDocs = await loadSchemaDocumentsFromPath(schemaUri, input.allDocuments)
     }
     return new PrismaSchema(schemaDocs, config)
   }

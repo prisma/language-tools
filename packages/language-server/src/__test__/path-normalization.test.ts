@@ -60,6 +60,10 @@ describe('Path normalization for Windows compatibility (#1985)', () => {
 }`,
     )
 
+    // Note: Using array form because object form requires actual files on disk.
+    // The fix in createInMemoryResolver is exercised when loading from file paths,
+    // but we cannot test that here because Windows-style paths don't exist on Linux.
+    // The other tests in this file verify that toString() produces correct URIs.
     const schema = await PrismaSchema.load([userDoc, postDoc])
 
     expect(schema.documents).toHaveLength(2)
