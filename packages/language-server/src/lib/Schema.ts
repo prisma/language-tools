@@ -111,7 +111,7 @@ export class PrismaSchema {
     if (Array.isArray(input)) {
       schemaDocs = input
     } else {
-      const fsPath = config?.schema ?? URI.parse(input.currentDocument.uri).fsPath
+      const fsPath = config?.schema ?? URI.parse(input.currentDocument.uri).toString()
       schemaDocs = await loadSchemaDocumentsFromPath(fsPath, input.allDocuments)
     }
     return new PrismaSchema(schemaDocs, config)
@@ -179,7 +179,7 @@ function createFilesResolver(allDocuments: TextDocument[]): FilesResolver {
 function createInMemoryResolver(allDocuments: TextDocument[], options: CaseSensitivityOptions): InMemoryFilesResolver {
   const resolver = new InMemoryFilesResolver(options)
   for (const doc of allDocuments) {
-    const filePath = URI.parse(doc.uri).fsPath
+    const filePath = URI.parse(doc.uri).toString()
     const content = doc.getText()
     resolver.addFile(filePath, content)
   }
