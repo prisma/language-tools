@@ -1,0 +1,12 @@
+{
+  "folders": [
+    {
+      "name": "integration-root-a",
+      "path": "integration-workspace/root-a",
+    },
+    {
+      "name": "integration-root-b",
+      "path": "integration-workspace/root-b",
+    },
+  ],
+}

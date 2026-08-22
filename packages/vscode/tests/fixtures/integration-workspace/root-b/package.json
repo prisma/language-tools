@@ -1,0 +1,8 @@
+{
+  "name": "prisma-vscode-integration-root-b",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "prisma": "8.0.0-rc.7"
+  }
+}

@@ -49,6 +49,22 @@ export const getDocUri = (p: string): vscode.Uri => {
   return vscode.Uri.file(getDocPath(p))
 }
 
+export function getWorkspaceFolder(name: string): vscode.WorkspaceFolder {
+  const workspaceFolder = vscode.workspace.workspaceFolders?.find((folder) => folder.name === name)
+  if (!workspaceFolder) {
+    throw new Error(`Workspace folder not found: ${name}`)
+  }
+  return workspaceFolder
+}
+
+export function getWorkspaceDocUri(workspaceFolder: vscode.WorkspaceFolder, relativePath: string): vscode.Uri {
+  return vscode.Uri.joinPath(workspaceFolder.uri, relativePath)
+}
+
+export function getPrismaCliEntrypoint(workspaceFolder: vscode.WorkspaceFolder): vscode.Uri {
+  return vscode.Uri.joinPath(workspaceFolder.uri, 'node_modules', 'prisma', 'dist', 'prisma.js')
+}
+
 export async function setTestContent(content: string): Promise<boolean> {
   const all = new vscode.Range(doc.positionAt(0), doc.positionAt(doc.getText().length))
   return editor.edit((eb) => eb.replace(all, content))

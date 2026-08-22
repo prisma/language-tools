@@ -1,2 +1,3 @@
 packages:
   - 'packages/*'
+  - 'packages/vscode/tests/fixtures/integration-workspace/*'

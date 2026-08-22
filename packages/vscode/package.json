@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "icon": "logo_white.png",
   "engines": {
-    "vscode": "^1.96.0"
+    "vscode": "^1.104.0"
   },
   "publisher": "Prisma",
   "categories": [
@@ -46,6 +46,7 @@
     "build:types": "tsc -p ./ --emitDeclarationOnly",
     "watch": "node esbuild.mjs --watch",
     "test:integration": "rm -rf ./dist-tests && node esbuild.mjs && tsc -p tsconfig.test.json && node dist-tests/__test__/runTest true",
+    "test:integration:workspace": "rm -rf ./dist-tests && node esbuild.mjs && tsc -p tsconfig.test.json && node dist-tests/__test__/runTest --minimum-only --test-pattern workspace.test.js",
     "test:playwright": "playwright test",
     "test:playwright:headless": "CI=true xvfb-run -a npm run test:playwright",
     "vscode:prepublish": "pnpm run build",
@@ -686,7 +687,7 @@
     "@types/mocha": "10.0.10",
     "@types/node": "20.14.8",
     "@types/sinon": "^20.0.0",
-    "@types/vscode": "1.96.0",
+    "@types/vscode": "1.104.0",
     "@vscode/test-electron": "2.4.1",
     "@vscode/vsce": "2.29.0",
     "esbuild": "^0.27.1",
