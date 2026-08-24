@@ -6,6 +6,21 @@ export interface BundledClientStartupOptions<T> {
   readonly logError: (error: unknown) => void
 }
 
+export async function deactivateBundledClient<T>(
+  startup: BundledClientStartup<T> | undefined,
+  stop: (() => Promise<unknown>) | undefined,
+  logError: (error: unknown) => void,
+): Promise<void> {
+  startup?.dispose()
+  if (!stop) return
+
+  try {
+    await stop()
+  } catch (error) {
+    reportError(logError, error)
+  }
+}
+
 export class BundledClientStartup<T> {
   private generation = 0
   private readiness: Promise<boolean> = Promise.resolve(false)
@@ -74,10 +89,14 @@ export class BundledClientStartup<T> {
   }
 
   private report(error: unknown): void {
-    try {
-      this.options.logError(error)
-    } catch {
-      // Logging must never turn handled startup failures back into detached rejections.
-    }
+    reportError(this.options.logError, error)
+  }
+}
+
+function reportError(logError: (error: unknown) => void, error: unknown): void {
+  try {
+    logError(error)
+  } catch {
+    // Logging must never turn handled lifecycle failures back into detached rejections.
   }
 }

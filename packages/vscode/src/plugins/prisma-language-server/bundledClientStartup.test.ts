@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
-import { BundledClientStartup } from './bundledClientStartup'
+import { BundledClientStartup, deactivateBundledClient } from './bundledClientStartup'
 
 interface TestDocument {
   readonly uri: string
@@ -130,6 +130,38 @@ describe('BundledClientStartup', () => {
 
     expect(subject.startup.status).toBe('disposed')
     expect(subject.synchronized).toHaveLength(1)
+    expect(subject.logError).not.toHaveBeenCalled()
+  })
+
+  test('deactivation contains stop rejection and absorbs late startup rejection', async () => {
+    const subject = createSubject()
+    const readiness = deferred()
+    const document = { uri: 'file:///schema.prisma', text: 'model Current {}' }
+    const stopError = new Error('shutdown failed')
+    subject.currentDocuments.set(document.uri, document)
+    subject.startup.start(() => readiness.promise)
+    subject.startup.schedule(document)
+
+    const deactivation = deactivateBundledClient(subject.startup, () => Promise.reject(stopError), subject.logError)
+    void deactivation
+    readiness.reject(new Error('late startup failure'))
+
+    await expect(deactivation).resolves.toBeUndefined()
+    await Promise.resolve()
+    expect(subject.startup.status).toBe('disposed')
+    expect(subject.synchronized).toEqual([])
+    expect(subject.logError).toHaveBeenCalledOnce()
+    expect(subject.logError).toHaveBeenCalledWith(stopError)
+  })
+
+  test('deactivation preserves one successful graceful stop', async () => {
+    const subject = createSubject()
+    const stop = vi.fn(() => Promise.resolve())
+
+    await expect(deactivateBundledClient(subject.startup, stop, subject.logError)).resolves.toBeUndefined()
+
+    expect(stop).toHaveBeenCalledOnce()
+    expect(subject.startup.status).toBe('disposed')
     expect(subject.logError).not.toHaveBeenCalled()
   })
 })

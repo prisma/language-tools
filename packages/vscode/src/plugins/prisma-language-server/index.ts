@@ -26,7 +26,7 @@ import { createBundledClientMiddleware, type BundledClientMiddleware } from './b
 import { createPrepareDocumentRoutingCommit } from './documentRouting'
 import { LocalPrismaNextClientRegistry, localPrismaNextClientTestStateCommand } from './localPrismaNextClientRegistry'
 import { LanguageServerTestStateCollector, languageServerTestStateCommand } from './languageServerTestState'
-import { BundledClientStartup } from './bundledClientStartup'
+import { BundledClientStartup, deactivateBundledClient } from './bundledClientStartup'
 
 let client: LanguageClient
 let serverModule: string
@@ -35,6 +35,9 @@ let fileWatcher: FileWatcher.type | undefined
 let bundledClientStartup: BundledClientStartup<TextDocument> | undefined
 
 const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
+const logBundledClientError = (error: unknown): void => {
+  console.error('Bundled Prisma Language Server failed', error)
+}
 
 const activateClient = async (context: ExtensionContext, clientOptions: LanguageClientOptions): Promise<void> => {
   const prismaConfig = workspace.getConfiguration('prisma')
@@ -157,9 +160,6 @@ const plugin: PrismaVSCodePlugin = {
     }
 
     let started = false
-    const logBundledClientError = (error: unknown): void => {
-      console.error('Bundled Prisma Language Server failed', error)
-    }
     bundledClientStartup?.dispose()
     const startup = new BundledClientStartup<TextDocument>({
       isCurrent: (document) => workspace.textDocuments.includes(document),
@@ -296,18 +296,20 @@ const plugin: PrismaVSCodePlugin = {
 
     checkForMinimalColorTheme()
   },
-  deactivate: async () => {
-    bundledClientStartup?.dispose()
+  deactivate: () => {
+    const startup = bundledClientStartup
+    const activeClient = client
     bundledClientStartup = undefined
-    if (!client) {
-      return undefined
-    }
+    const deactivation = deactivateBundledClient(
+      startup,
+      activeClient ? () => activeClient.stop() : undefined,
+      logBundledClientError,
+    )
 
-    if (!isDebugOrTestSession()) {
+    if (activeClient && !isDebugOrTestSession()) {
       telemetry.dispose() // eslint-disable-line @typescript-eslint/no-floating-promises
     }
-
-    return client.stop()
+    return deactivation
   },
 }
 
