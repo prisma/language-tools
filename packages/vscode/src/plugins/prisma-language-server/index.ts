@@ -26,11 +26,13 @@ import { createBundledClientMiddleware, type BundledClientMiddleware } from './b
 import { createPrepareDocumentRoutingCommit } from './documentRouting'
 import { LocalPrismaNextClientRegistry, localPrismaNextClientTestStateCommand } from './localPrismaNextClientRegistry'
 import { LanguageServerTestStateCollector, languageServerTestStateCommand } from './languageServerTestState'
+import { BundledClientStartup } from './bundledClientStartup'
 
 let client: LanguageClient
 let serverModule: string
 let telemetry: TelemetryReporter
 let fileWatcher: FileWatcher.type | undefined
+let bundledClientStartup: BundledClientStartup<TextDocument> | undefined
 
 const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
 
@@ -155,12 +157,24 @@ const plugin: PrismaVSCodePlugin = {
     }
 
     let started = false
-    let clientReady = Promise.resolve()
+    const logBundledClientError = (error: unknown): void => {
+      console.error('Bundled Prisma Language Server failed', error)
+    }
+    bundledClientStartup?.dispose()
+    const startup = new BundledClientStartup<TextDocument>({
+      isCurrent: (document) => workspace.textDocuments.includes(document),
+      synchronize: (document) => ownership.synchronize(document),
+      logError: logBundledClientError,
+    })
+    bundledClientStartup = startup
     const needsLanguageServer = (doc: TextDocument): boolean =>
       doc.languageId === 'prisma' && ownership.classify(doc).kind === 'bundled'
     const synchronizeDocument = (document: TextDocument): void => {
-      if (document.languageId === 'prisma') {
-        void clientReady.then(() => ownership.synchronize(document))
+      if (document.languageId !== 'prisma') return
+      if (ownership.classify(document).kind === 'bundled') {
+        startup.schedule(document)
+      } else {
+        void ownership.synchronize(document).catch(logBundledClientError)
       }
     }
 
@@ -168,7 +182,7 @@ const plugin: PrismaVSCodePlugin = {
       if (started) return
       if (document ? !needsLanguageServer(document) : !workspace.textDocuments.some(needsLanguageServer)) return
       started = true
-      clientReady = activateClient(context, clientOptions)
+      startup.start(() => activateClient(context, clientOptions))
     }
 
     const restartLanguageServer = async () => {
@@ -177,12 +191,14 @@ const plugin: PrismaVSCodePlugin = {
         return
       }
       const serverOptions = getServerOptions(workspace.getConfiguration('prisma'), context)
-      client = await restartClient(context, client, serverOptions, clientOptions, {
+      const replacement = restartClient(context, client, serverOptions, clientOptions, {
         onClientStopped: () => bundledClientMiddleware.resetClientState(),
         onClientCreated: (replacementClient) => {
           client = replacementClient
         },
       })
+      startup.replace(replacement.then(() => undefined))
+      client = await replacement
     }
 
     context.subscriptions.push(
@@ -245,7 +261,7 @@ const plugin: PrismaVSCodePlugin = {
       }),
       workspace.onDidCloseTextDocument((document) => {
         if (document.languageId === 'prisma') {
-          void ownership.close(document)
+          void ownership.close(document).catch(logBundledClientError)
         }
       }),
     )
@@ -281,6 +297,8 @@ const plugin: PrismaVSCodePlugin = {
     checkForMinimalColorTheme()
   },
   deactivate: async () => {
+    bundledClientStartup?.dispose()
+    bundledClientStartup = undefined
     if (!client) {
       return undefined
     }
