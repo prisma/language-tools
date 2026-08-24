@@ -149,16 +149,8 @@ export class DocumentOwnershipCoordinator {
         continue
       }
 
-      await commitOwner?.()
-
-      if (revision !== state.revision) {
-        this.options.testObserver?.({
-          type: 'staleTransitionDiscarded',
-          documentUri,
-          revision,
-          owner: state.owner,
-        })
-        return state.owner
+      if (commitOwner) {
+        await commitOwner()
       }
 
       const previousOwner = state.owner

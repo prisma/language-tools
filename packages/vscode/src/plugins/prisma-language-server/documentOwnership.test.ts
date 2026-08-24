@@ -227,6 +227,42 @@ describe('DocumentOwnershipCoordinator', () => {
     expect(subject.getOwner(schema.uri)).toEqual({ kind: 'bundled' })
   })
 
+  test('records a completed commit before the queued successor transitions', async () => {
+    const firstCommitStarted = deferred()
+    const releaseFirstCommit = deferred()
+    const previousOwners: DocumentOwner[] = []
+    let externalOwner: DocumentOwner = { kind: 'unowned' }
+    let activeCommits = 0
+    let maximumActiveCommits = 0
+    const subject = coordinator({
+      prepareOwner: (transition) => async () => {
+        activeCommits += 1
+        maximumActiveCommits = Math.max(maximumActiveCommits, activeCommits)
+        previousOwners.push(transition.previousOwner)
+        if (transition.revision === 1) {
+          firstCommitStarted.resolve()
+          await releaseFirstCommit.promise
+        }
+        externalOwner = transition.nextOwner
+        activeCommits -= 1
+      },
+    })
+    const schema = document('file:///workspace-a/schema.prisma', '// use prisma-next')
+
+    const firstTransition = subject.synchronize(schema)
+    await firstCommitStarted.promise
+    schema.setText('model User { id Int @id }')
+    const survivingTransition = subject.synchronize(schema)
+    releaseFirstCommit.resolve()
+
+    await Promise.all([firstTransition, survivingTransition])
+
+    expect(previousOwners).toEqual([{ kind: 'unowned' }, { kind: 'local', workspaceFolderUri: rootA.uri.toString() }])
+    expect(externalOwner).toEqual({ kind: 'bundled' })
+    expect(subject.getOwner(schema.uri)).toEqual(externalOwner)
+    expect(maximumActiveCommits).toBe(1)
+  })
+
   test('discards stale asynchronous work after a newer transition', async () => {
     const gate = deferred()
     const events: DocumentOwnershipTestEvent[] = []
