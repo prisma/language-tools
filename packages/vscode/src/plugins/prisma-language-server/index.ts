@@ -22,7 +22,8 @@ import { CodelensProvider, generateClient } from '../../CodeLensProvider'
 import * as prisma6Handling from '../../prisma6Handling'
 import { getPackageJSON } from '../../getPackageJSON'
 import { DocumentOwnershipCoordinator } from './documentOwnership'
-import { createBundledClientMiddleware } from './bundledClientMiddleware'
+import { createBundledClientMiddleware, type BundledClientMiddleware } from './bundledClientMiddleware'
+import { createPrepareDocumentRoutingCommit } from './documentRouting'
 import { LocalPrismaNextClientRegistry, localPrismaNextClientTestStateCommand } from './localPrismaNextClientRegistry'
 
 let client: LanguageClient
@@ -106,8 +107,21 @@ const plugin: PrismaVSCodePlugin = {
 
     setGenerateWatcher(!!workspace.getConfiguration('prisma').get('fileWatcher'))
 
+    const ownership: DocumentOwnershipCoordinator = new DocumentOwnershipCoordinator({
+      workspace,
+      policy: {
+        isPinnedToPrisma6: () => !!workspace.getConfiguration('prisma').get<boolean>('pinToPrisma6'),
+      },
+      prepareOwner: createPrepareDocumentRoutingCommit({
+        getOwnership: (): DocumentOwnershipCoordinator => ownership,
+        getBundled: () => bundledClientMiddleware,
+        getLocal: () => localClients,
+      }),
+    })
     const localClients = new LocalPrismaNextClientRegistry({
       workspace,
+      ownership,
+      getDocument: (uri) => workspace.textDocuments.find((document) => document.uri.toString() === uri.toString()),
       createClient: (id, name, serverOptions, localClientOptions) =>
         new LanguageClient(id, name, serverOptions, localClientOptions),
       registerDisposable: (disposable) => context.subscriptions.push(disposable),
@@ -115,19 +129,8 @@ const plugin: PrismaVSCodePlugin = {
         console.error(`Failed to start Prisma Next Language Server for ${workspaceFolder.uri.toString()}`, error)
       },
     })
-    const ownership = new DocumentOwnershipCoordinator({
-      workspace,
-      policy: {
-        isPinnedToPrisma6: () => !!workspace.getConfiguration('prisma').get<boolean>('pinToPrisma6'),
-      },
-      prepareOwner: async ({ document, nextOwner }) => {
-        if (nextOwner.kind === 'local') {
-          await localClients.ensureClientForDocument(document)
-        }
-      },
-    })
 
-    const bundledClientMiddleware = createBundledClientMiddleware({
+    const bundledClientMiddleware: BundledClientMiddleware = createBundledClientMiddleware({
       ownership,
       getClient: () => client,
       getDocument: (uri) => workspace.textDocuments.find((document) => document.uri.toString() === uri.toString()),
@@ -147,8 +150,8 @@ const plugin: PrismaVSCodePlugin = {
     let started = false
     const needsLanguageServer = (doc: TextDocument): boolean =>
       doc.languageId === 'prisma' && ownership.classify(doc).kind === 'bundled'
-    const prepareLocalClient = (document: TextDocument): void => {
-      if (document.languageId === 'prisma' && ownership.classify(document).kind === 'local') {
+    const synchronizeDocument = (document: TextDocument): void => {
+      if (document.languageId === 'prisma') {
         void ownership.synchronize(document)
       }
     }
@@ -226,17 +229,17 @@ const plugin: PrismaVSCodePlugin = {
 
       workspace.onDidOpenTextDocument((document) => {
         maybeStart()
-        prepareLocalClient(document)
+        synchronizeDocument(document)
       }),
       workspace.onDidChangeTextDocument((event) => {
         maybeStart()
-        prepareLocalClient(event.document)
+        synchronizeDocument(event.document)
       }),
     )
 
     maybeStart()
     for (const document of workspace.textDocuments) {
-      prepareLocalClient(document)
+      synchronizeDocument(document)
     }
 
     if (isDebugOrTest) {

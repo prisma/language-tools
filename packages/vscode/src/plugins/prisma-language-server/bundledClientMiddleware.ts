@@ -5,7 +5,7 @@ import type {
   TextDocumentIdentifier,
 } from 'vscode-languageclient'
 import type { LanguageClient, Middleware } from 'vscode-languageclient/node'
-import { DocumentOwnershipCoordinator, type DocumentOwner } from './documentOwnership'
+import { DocumentOwnershipCoordinator } from './documentOwnership'
 
 export interface BundledClientMiddlewareOptions {
   readonly ownership: DocumentOwnershipCoordinator
@@ -16,6 +16,9 @@ export interface BundledClientMiddlewareOptions {
 }
 
 export interface BundledClientMiddleware extends Middleware {
+  openDocument(document: TextDocument): void
+  closeDocument(document: TextDocument): void
+  clearDiagnostics(uri: Uri): void
   resetClientState(): void
 }
 
@@ -23,12 +26,11 @@ export function createBundledClientMiddleware(options: BundledClientMiddlewareOp
   let completionDocuments = new WeakMap<CompletionItem, TextDocument>()
   const bundledDocuments = new Set<string>()
 
-  const ownerForDocument = (document: TextDocument): DocumentOwner => {
-    void options.ownership.synchronize(document)
-    return options.ownership.classify(document)
+  const isBundledDocument = (document: TextDocument): boolean => {
+    const committedOwner = options.ownership.getOwner(document.uri)
+    const currentOwner = options.ownership.classify(document)
+    return committedOwner.kind === 'bundled' && currentOwner.kind === 'bundled'
   }
-
-  const isBundledDocument = (document: TextDocument): boolean => ownerForDocument(document).kind === 'bundled'
 
   const clearDiagnostics = (uri: Uri): void => {
     options.getClient().diagnostics?.delete(uri)
@@ -40,10 +42,12 @@ export function createBundledClientMiddleware(options: BundledClientMiddlewareOp
 
     bundledDocuments.add(documentUri)
     const client = options.getClient()
-    void client.sendNotification(
-      'textDocument/didOpen',
-      client.code2ProtocolConverter.asOpenTextDocumentParams(document),
-    )
+    try {
+      client.sendNotification('textDocument/didOpen', client.code2ProtocolConverter.asOpenTextDocumentParams(document))
+    } catch (error) {
+      bundledDocuments.delete(documentUri)
+      throw error
+    }
   }
 
   const closeBundledDocument = (document: TextDocument): void => {
@@ -51,41 +55,36 @@ export function createBundledClientMiddleware(options: BundledClientMiddlewareOp
     if (!bundledDocuments.delete(documentUri)) return
 
     const client = options.getClient()
-    void client.sendNotification(
-      'textDocument/didClose',
-      client.code2ProtocolConverter.asCloseTextDocumentParams(document),
-    )
+    try {
+      client.sendNotification(
+        'textDocument/didClose',
+        client.code2ProtocolConverter.asCloseTextDocumentParams(document),
+      )
+    } catch (error) {
+      bundledDocuments.add(documentUri)
+      throw error
+    }
   }
 
   const middleware: BundledClientMiddleware = {
+    openDocument: openBundledDocument,
+    closeDocument: closeBundledDocument,
+    clearDiagnostics,
     resetClientState: () => {
       bundledDocuments.clear()
       completionDocuments = new WeakMap()
     },
     didOpen: (document, next) => {
       const documentUri = document.uri.toString()
-      if (isBundledDocument(document)) {
-        if (!bundledDocuments.has(documentUri)) {
-          bundledDocuments.add(documentUri)
-          next(document)
-        }
-      } else {
-        closeBundledDocument(document)
-        clearDiagnostics(document.uri)
+      if (isBundledDocument(document) && !bundledDocuments.has(documentUri)) {
+        bundledDocuments.add(documentUri)
+        next(document)
       }
     },
     didChange: (event, next) => {
       const document = event.document
-      const documentUri = document.uri.toString()
-      if (isBundledDocument(document)) {
-        if (bundledDocuments.has(documentUri)) {
-          next(event)
-        } else {
-          openBundledDocument(document)
-        }
-      } else {
-        closeBundledDocument(document)
-        clearDiagnostics(document.uri)
+      if (isBundledDocument(document) && bundledDocuments.has(document.uri.toString())) {
+        next(event)
       }
     },
     didClose: (document, next) => {
@@ -97,8 +96,8 @@ export function createBundledClientMiddleware(options: BundledClientMiddlewareOp
     },
     handleDiagnostics: (uri, diagnostics, next) => {
       const document = options.getDocument(uri)
-      const owner = document ? ownerForDocument(document) : options.ownership.getOwner(uri)
-      if (owner.kind !== 'bundled') {
+      const isOwned = document ? isBundledDocument(document) : options.ownership.getOwner(uri).kind === 'bundled'
+      if (!isOwned) {
         next(uri, [])
         return
       }

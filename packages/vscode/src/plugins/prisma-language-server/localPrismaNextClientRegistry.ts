@@ -4,6 +4,8 @@ import { spawn, type ChildProcessWithoutNullStreams, type SpawnOptionsWithoutStd
 import type { Disposable, TextDocument, Uri, WorkspaceFolder } from 'vscode'
 import type { LanguageClientOptions } from 'vscode-languageclient'
 import type { ChildProcessInfo, LanguageClient, ServerOptions } from 'vscode-languageclient/node'
+import type { DocumentOwnershipCoordinator } from './documentOwnership'
+import { createLocalClientMiddleware, type LocalClientMiddleware } from './localClientMiddleware'
 
 const prismaCliRelativePath = ['node_modules', 'prisma', 'dist', 'prisma.js'] as const
 
@@ -29,6 +31,8 @@ export interface LocalPrismaNextLauncherOptions {
 
 export interface LocalPrismaNextClientRegistryOptions {
   readonly workspace: LocalPrismaNextClientRegistryWorkspace
+  readonly ownership: DocumentOwnershipCoordinator
+  readonly getDocument: (uri: Uri) => TextDocument | undefined
   readonly createClient: (
     id: string,
     name: string,
@@ -45,9 +49,14 @@ export interface LocalPrismaNextClientTestState {
   readonly startedWorkspaceFolderUris: readonly string[]
 }
 
+interface LocalPrismaNextClientEntry {
+  readonly client: LanguageClient
+  readonly middleware: LocalClientMiddleware
+}
+
 export class LocalPrismaNextClientRegistry {
-  private readonly clients = new Map<string, Promise<LanguageClient | undefined>>()
-  private readonly startedClients = new Map<string, LanguageClient>()
+  private readonly clients = new Map<string, Promise<LocalPrismaNextClientEntry | undefined>>()
+  private readonly startedClients = new Map<string, LocalPrismaNextClientEntry>()
 
   constructor(private readonly options: LocalPrismaNextClientRegistryOptions) {}
 
@@ -61,7 +70,22 @@ export class LocalPrismaNextClientRegistry {
       return Promise.resolve(undefined)
     }
 
-    return this.ensureClient(workspaceFolder)
+    return this.ensureClient(workspaceFolder).then((entry) => entry?.client)
+  }
+
+  async openDocument(workspaceFolderUri: string, document: TextDocument): Promise<void> {
+    const entry = await this.clients.get(workspaceFolderUri)
+    entry?.middleware.openDocument(document)
+  }
+
+  async closeDocument(workspaceFolderUri: string, document: TextDocument): Promise<void> {
+    const entry = await this.clients.get(workspaceFolderUri)
+    entry?.middleware.closeDocument(document)
+  }
+
+  async clearDiagnostics(workspaceFolderUri: string, uri: Uri): Promise<void> {
+    const entry = await this.clients.get(workspaceFolderUri)
+    entry?.middleware.clearDiagnostics(uri)
   }
 
   getTestState(): LocalPrismaNextClientTestState {
@@ -70,7 +94,7 @@ export class LocalPrismaNextClientRegistry {
     }
   }
 
-  private ensureClient(workspaceFolder: WorkspaceFolder): Promise<LanguageClient | undefined> {
+  private ensureClient(workspaceFolder: WorkspaceFolder): Promise<LocalPrismaNextClientEntry | undefined> {
     const workspaceFolderUri = workspaceFolder.uri.toString()
     const existing = this.clients.get(workspaceFolderUri)
     if (existing) {
@@ -82,7 +106,7 @@ export class LocalPrismaNextClientRegistry {
     return pending
   }
 
-  private async discoverAndStart(workspaceFolder: WorkspaceFolder): Promise<LanguageClient | undefined> {
+  private async discoverAndStart(workspaceFolder: WorkspaceFolder): Promise<LocalPrismaNextClientEntry | undefined> {
     const entrypoint = getLocalPrismaNextEntrypoint(workspaceFolder)
 
     try {
@@ -92,6 +116,12 @@ export class LocalPrismaNextClientRegistry {
       }
 
       const workspaceFolderUri = workspaceFolder.uri.toString()
+      const middleware = createLocalClientMiddleware({
+        workspaceFolderUri,
+        ownership: this.options.ownership,
+        getClient: () => client,
+        getDocument: this.options.getDocument,
+      })
       const client = this.options.createClient(
         `prisma-next:${workspaceFolderUri}`,
         `Prisma Next Language Server (${workspaceFolder.name})`,
@@ -99,12 +129,13 @@ export class LocalPrismaNextClientRegistry {
           ...this.options.launcher,
           handleProcessError: (error) => this.options.handleStartError?.(workspaceFolder, error),
         }),
-        createLocalPrismaNextClientOptions(workspaceFolder),
+        createLocalPrismaNextClientOptions(workspaceFolder, middleware),
       )
       this.options.registerDisposable(client.start())
       await client.onReady()
-      this.startedClients.set(workspaceFolderUri, client)
-      return client
+      const entry = { client, middleware }
+      this.startedClients.set(workspaceFolderUri, entry)
+      return entry
     } catch (error) {
       this.options.handleStartError?.(workspaceFolder, error)
       return undefined
@@ -195,11 +226,16 @@ function destroyProcessStreams(child: ChildProcessWithoutNullStreams): void {
   child.stderr.destroy()
 }
 
-export function createLocalPrismaNextClientOptions(workspaceFolder: WorkspaceFolder): LanguageClientOptions {
+export function createLocalPrismaNextClientOptions(
+  workspaceFolder: WorkspaceFolder,
+  middleware: LocalClientMiddleware,
+): LanguageClientOptions {
+  const rootPath = workspaceFolder.uri.fsPath.split('\\').join('/')
+  const normalizedRoot = rootPath.endsWith('/') ? rootPath.slice(0, -1) : rootPath
   return {
-    // Synchronization stays disabled until owner-filtered local middleware is attached.
-    documentSelector: [],
+    documentSelector: [{ language: 'prisma', scheme: 'file', pattern: `${normalizedRoot}/**/*` }],
     workspaceFolder,
+    middleware,
   }
 }
 

@@ -6,6 +6,8 @@ import { describe, expect, test, vi } from 'vitest'
 import type { Disposable, TextDocument, Uri, WorkspaceFolder } from 'vscode'
 import type { LanguageClientOptions } from 'vscode-languageclient'
 import type { ChildProcessInfo, LanguageClient, ServerOptions } from 'vscode-languageclient/node'
+import { DocumentOwnershipCoordinator } from './documentOwnership'
+import type { LocalClientMiddleware } from './localClientMiddleware'
 import {
   createExtensionHostNodeEnvironment,
   createLocalPrismaNextClientOptions,
@@ -17,6 +19,14 @@ import {
 
 const rootA = workspaceFolder('file:///workspace-a', '/workspace-a', 'workspace-a')
 const rootB = workspaceFolder('file:///workspace-b', '/workspace-b', 'workspace-b')
+const ownership = new DocumentOwnershipCoordinator({
+  workspace: { isTrusted: true, getWorkspaceFolder: matchingWorkspaceFolder },
+  policy: { isPinnedToPrisma6: () => false },
+})
+const registryRoutingOptions = {
+  ownership,
+  getDocument: () => undefined,
+}
 
 function uri(value: string, fsPath = value): Uri {
   return {
@@ -158,8 +168,22 @@ describe('LocalPrismaNextClientRegistry', () => {
     expect(child.listenerCount('spawn')).toBe(0)
   })
 
-  test('keeps local document synchronization disabled until owner middleware is attached', () => {
-    expect(createLocalPrismaNextClientOptions(rootA)).toEqual({ documentSelector: [], workspaceFolder: rootA })
+  test('constrains provider registration to the matching root', () => {
+    const middleware = {} as LocalClientMiddleware
+    expect(createLocalPrismaNextClientOptions(rootA, middleware)).toEqual({
+      documentSelector: [{ language: 'prisma', scheme: 'file', pattern: '/workspace-a/**/*' }],
+      workspaceFolder: rootA,
+      middleware,
+    })
+  })
+
+  test('uses a relative root selector for Windows workspace paths', () => {
+    const windowsRoot = workspaceFolder('file:///C:/workspace-a', 'C:\\workspace-a', 'workspace-a')
+    const middleware = {} as LocalClientMiddleware
+
+    expect(createLocalPrismaNextClientOptions(windowsRoot, middleware).documentSelector).toEqual([
+      { language: 'prisma', scheme: 'file', pattern: 'C:/workspace-a/**/*' },
+    ])
   })
 
   test('publishes pending startup per root and starts independent clients', async () => {
@@ -183,6 +207,7 @@ describe('LocalPrismaNextClientRegistry', () => {
     )
     const registerDisposable = vi.fn()
     const registry = new LocalPrismaNextClientRegistry({
+      ...registryRoutingOptions,
       workspace: { isTrusted: true, getWorkspaceFolder: matchingWorkspaceFolder },
       entrypointExists,
       createClient,
@@ -236,6 +261,7 @@ describe('LocalPrismaNextClientRegistry', () => {
     const createClient = vi.fn()
     const handleStartError = vi.fn()
     const registry = new LocalPrismaNextClientRegistry({
+      ...registryRoutingOptions,
       workspace: { isTrusted: true, getWorkspaceFolder: matchingWorkspaceFolder },
       entrypointExists,
       createClient,
@@ -266,6 +292,7 @@ describe('LocalPrismaNextClientRegistry', () => {
     const entrypointExists = vi.fn().mockResolvedValue(true)
     const createClient = vi.fn()
     const registry = new LocalPrismaNextClientRegistry({
+      ...registryRoutingOptions,
       workspace: { isTrusted: trusted, getWorkspaceFolder: matchingWorkspaceFolder },
       entrypointExists,
       createClient,
@@ -284,6 +311,7 @@ describe('LocalPrismaNextClientRegistry', () => {
     const handleStartError = vi.fn()
     const createClient = vi.fn().mockReturnValue(client)
     const registry = new LocalPrismaNextClientRegistry({
+      ...registryRoutingOptions,
       workspace: { isTrusted: true, getWorkspaceFolder: matchingWorkspaceFolder },
       entrypointExists: vi.fn().mockResolvedValue(true),
       createClient,
