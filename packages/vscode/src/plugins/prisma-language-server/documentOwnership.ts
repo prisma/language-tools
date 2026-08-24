@@ -22,7 +22,11 @@ export interface DocumentOwnershipTransition {
   readonly revision: number
 }
 
-export type BeforeDocumentOwnerCommit = (transition: DocumentOwnershipTransition) => Promise<void> | void
+export type PreparedDocumentOwnerCommit = () => Promise<void> | void
+
+export type PrepareDocumentOwnerCommit = (
+  transition: DocumentOwnershipTransition,
+) => Promise<PreparedDocumentOwnerCommit | void> | PreparedDocumentOwnerCommit | void
 
 export type DocumentOwnershipTestEvent =
   | {
@@ -42,7 +46,7 @@ export type DocumentOwnershipTestEvent =
 export interface DocumentOwnershipCoordinatorOptions {
   readonly workspace: DocumentOwnershipWorkspace
   readonly policy: DocumentOwnershipPolicy
-  readonly beforeCommit?: BeforeDocumentOwnerCommit
+  readonly prepareOwner?: PrepareDocumentOwnerCommit
   readonly testObserver?: (event: DocumentOwnershipTestEvent) => void
 }
 
@@ -123,7 +127,7 @@ export class DocumentOwnershipCoordinator {
 
     while (revision === state.revision) {
       const nextOwner = this.classify(document)
-      await this.options.beforeCommit?.({
+      const commitOwner = await this.options.prepareOwner?.({
         document,
         previousOwner: state.owner,
         nextOwner,
@@ -143,6 +147,18 @@ export class DocumentOwnershipCoordinator {
       const currentOwner = this.classify(document)
       if (!ownersEqual(currentOwner, nextOwner)) {
         continue
+      }
+
+      await commitOwner?.()
+
+      if (revision !== state.revision) {
+        this.options.testObserver?.({
+          type: 'staleTransitionDiscarded',
+          documentUri,
+          revision,
+          owner: state.owner,
+        })
+        return state.owner
       }
 
       const previousOwner = state.owner

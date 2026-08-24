@@ -121,7 +121,7 @@ describe('DocumentOwnershipCoordinator', () => {
     const secondGate = deferred()
     const gates = [firstGate, secondGate]
     const subject = coordinator({
-      beforeCommit: async () => {
+      prepareOwner: async () => {
         const gate = gates.shift()
         activeTransitions += 1
         maximumActiveTransitions = Math.max(maximumActiveTransitions, activeTransitions)
@@ -149,7 +149,7 @@ describe('DocumentOwnershipCoordinator', () => {
     const gate = deferred()
     let calls = 0
     const subject = coordinator({
-      beforeCommit: async () => {
+      prepareOwner: async () => {
         calls += 1
         if (calls === 1) {
           await gate.promise
@@ -174,7 +174,7 @@ describe('DocumentOwnershipCoordinator', () => {
     let calls = 0
     const subject = coordinator({
       policy: { isPinnedToPrisma6: () => pinnedToPrisma6 },
-      beforeCommit: async () => {
+      prepareOwner: async () => {
         calls += 1
         if (calls === 1) {
           await gate.promise
@@ -193,12 +193,46 @@ describe('DocumentOwnershipCoordinator', () => {
     expect(subject.getOwner(schema.uri)).toEqual({ kind: 'bundled' })
   })
 
+  test('guards ownership side effects from superseded transitions', async () => {
+    const firstPreparation = deferred()
+    const committedOwners: DocumentOwner[] = []
+    let activeCommits = 0
+    let maximumActiveCommits = 0
+    const subject = coordinator({
+      prepareOwner: async (transition) => {
+        if (transition.revision === 1) {
+          await firstPreparation.promise
+        }
+        return async () => {
+          activeCommits += 1
+          maximumActiveCommits = Math.max(maximumActiveCommits, activeCommits)
+          committedOwners.push(transition.nextOwner)
+          await Promise.resolve()
+          activeCommits -= 1
+        }
+      },
+    })
+    const schema = document('file:///workspace-a/schema.prisma', '// use prisma-next')
+
+    const supersededTransition = subject.synchronize(schema)
+    await Promise.resolve()
+    schema.setText('model User { id Int @id }')
+    const survivingTransition = subject.synchronize(schema)
+    firstPreparation.resolve()
+
+    await Promise.all([supersededTransition, survivingTransition])
+
+    expect(committedOwners).toEqual([{ kind: 'bundled' }])
+    expect(maximumActiveCommits).toBe(1)
+    expect(subject.getOwner(schema.uri)).toEqual({ kind: 'bundled' })
+  })
+
   test('discards stale asynchronous work after a newer transition', async () => {
     const gate = deferred()
     const events: DocumentOwnershipTestEvent[] = []
     let calls = 0
     const subject = coordinator({
-      beforeCommit: async () => {
+      prepareOwner: async () => {
         calls += 1
         if (calls === 1) {
           await gate.promise
