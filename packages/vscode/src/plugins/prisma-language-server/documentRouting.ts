@@ -9,7 +9,7 @@ export interface BundledDocumentSynchronization {
 
 export interface LocalDocumentSynchronization {
   ensureClientForDocument(document: TextDocument): Promise<unknown>
-  openDocument(workspaceFolderUri: string, document: TextDocument): Promise<void>
+  openDocument(workspaceFolderUri: string, document: TextDocument): Promise<boolean>
   closeDocument(workspaceFolderUri: string, document: TextDocument): Promise<void>
   clearDiagnostics(workspaceFolderUri: string, uri: Uri): Promise<void>
 }
@@ -21,6 +21,7 @@ export type DocumentRoutingEvent =
 
 export interface DocumentRoutingOptions {
   readonly getOwnership: () => DocumentOwnershipCoordinator
+  readonly isDocumentOpen: (document: TextDocument) => boolean
   readonly getBundled: () => BundledDocumentSynchronization
   readonly getLocal: () => LocalDocumentSynchronization
   readonly observer?: (event: DocumentRoutingEvent) => void
@@ -33,7 +34,7 @@ export function createPrepareDocumentRoutingCommit(options: DocumentRoutingOptio
     return async () => {
       await closePreviousOwner(options, previousOwner, document)
 
-      if (!documentOwnersEqual(options.getOwnership().classify(document), nextOwner)) return
+      if (!isCurrentOpenCandidate(options, document, nextOwner)) return
 
       if (nextOwner.kind === 'bundled') {
         options.getBundled().openDocument(document)
@@ -41,9 +42,11 @@ export function createPrepareDocumentRoutingCommit(options: DocumentRoutingOptio
       } else if (nextOwner.kind === 'local') {
         const local = options.getLocal()
         const client = await local.ensureClientForDocument(document)
-        if (client && documentOwnersEqual(options.getOwnership().classify(document), nextOwner)) {
-          await local.openDocument(nextOwner.workspaceFolderUri, document)
-          options.observer?.({ type: 'opened', owner: nextOwner, documentUri: document.uri.toString() })
+        if (client && isCurrentOpenCandidate(options, document, nextOwner)) {
+          const opened = await local.openDocument(nextOwner.workspaceFolderUri, document)
+          if (opened && isCurrentOpenCandidate(options, document, nextOwner)) {
+            options.observer?.({ type: 'opened', owner: nextOwner, documentUri: document.uri.toString() })
+          }
         }
       }
     }
@@ -67,6 +70,14 @@ async function closePreviousOwner(
     await local.clearDiagnostics(previousOwner.workspaceFolderUri, document.uri)
     options.observer?.({ type: 'diagnosticsCleared', owner: previousOwner, documentUri: document.uri.toString() })
   }
+}
+
+function isCurrentOpenCandidate(
+  options: DocumentRoutingOptions,
+  document: TextDocument,
+  candidate: DocumentOwner,
+): boolean {
+  return options.isDocumentOpen(document) && documentOwnersEqual(options.getOwnership().classify(document), candidate)
 }
 
 export function documentOwnersEqual(left: DocumentOwner, right: DocumentOwner): boolean {

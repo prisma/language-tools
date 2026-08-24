@@ -88,7 +88,6 @@ export function createBundledClientMiddleware(options: BundledClientMiddlewareOp
       }
     },
     didClose: (document, next) => {
-      void options.ownership.synchronize(document)
       if (bundledDocuments.delete(document.uri.toString())) {
         next(document)
       }
@@ -96,8 +95,7 @@ export function createBundledClientMiddleware(options: BundledClientMiddlewareOp
     },
     handleDiagnostics: (uri, diagnostics, next) => {
       const document = options.getDocument(uri)
-      const isOwned = document ? isBundledDocument(document) : options.ownership.getOwner(uri).kind === 'bundled'
-      if (!isOwned) {
+      if (!document || !isBundledDocument(document)) {
         next(uri, [])
         return
       }

@@ -263,6 +263,36 @@ describe('DocumentOwnershipCoordinator', () => {
     expect(maximumActiveCommits).toBe(1)
   })
 
+  test('close invalidates pending preparation and serializes final unowned cleanup', async () => {
+    const preparation = deferred()
+    const committedOwners: DocumentOwner[] = []
+    let blockLocalPreparation = false
+    const subject = coordinator({
+      prepareOwner: async (transition) => {
+        if (blockLocalPreparation && transition.nextOwner.kind === 'local') {
+          await preparation.promise
+        }
+        return () => {
+          committedOwners.push(transition.nextOwner)
+        }
+      },
+    })
+    const schema = document('file:///workspace-a/schema.prisma', 'model User { id Int @id }')
+    await subject.synchronize(schema)
+    committedOwners.length = 0
+
+    blockLocalPreparation = true
+    schema.setText('// use prisma-next')
+    const transfer = subject.synchronize(schema)
+    await Promise.resolve()
+    const closing = subject.close(schema)
+    preparation.resolve()
+    await Promise.all([transfer, closing])
+
+    expect(committedOwners).toEqual([{ kind: 'unowned' }])
+    expect(subject.getOwner(schema.uri)).toEqual({ kind: 'unowned' })
+  })
+
   test('discards stale asynchronous work after a newer transition', async () => {
     const gate = deferred()
     const events: DocumentOwnershipTestEvent[] = []

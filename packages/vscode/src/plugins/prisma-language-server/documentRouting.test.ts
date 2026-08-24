@@ -41,6 +41,8 @@ function deferred(): { promise: Promise<void>; resolve(): void } {
 
 function createSubject(options: { localClose?: Promise<void>; localStartup?: Promise<void> } = {}) {
   const active = new Set<string>()
+  const closedDocumentUris = new Set<string>()
+  const protocolCloses: { owner: 'bundled' | 'local'; uri: string }[] = []
   const opens: { owner: string; uri: string; text: string }[] = []
   const activeOwnerCountsAfterOpen: number[] = []
   const events: DocumentRoutingEvent[] = []
@@ -53,7 +55,9 @@ function createSubject(options: { localClose?: Promise<void>; localStartup?: Pro
       opens.push({ owner: 'bundled', uri: schema.uri.toString(), text: schema.getText() })
     },
     closeDocument: (schema) => {
-      active.delete(`bundled:${schema.uri.toString()}`)
+      if (active.delete(`bundled:${schema.uri.toString()}`)) {
+        protocolCloses.push({ owner: 'bundled', uri: schema.uri.toString() })
+      }
     },
     clearDiagnostics: clearBundledDiagnostics,
   }
@@ -61,18 +65,22 @@ function createSubject(options: { localClose?: Promise<void>; localStartup?: Pro
     await options.localStartup
     return {}
   })
+  const closeLocalDocument = vi.fn((root: string, schema: TextDocument) =>
+    (options.localClose ?? Promise.resolve()).then(() => {
+      if (active.delete(`local:${root}:${schema.uri.toString()}`)) {
+        protocolCloses.push({ owner: 'local', uri: schema.uri.toString() })
+      }
+    }),
+  )
   const local: LocalDocumentSynchronization = {
     ensureClientForDocument,
     openDocument: (root, schema) => {
       active.add(`local:${root}:${schema.uri.toString()}`)
       activeOwnerCountsAfterOpen.push([...active].filter((key) => key.endsWith(`:${schema.uri.toString()}`)).length)
       opens.push({ owner: root, uri: schema.uri.toString(), text: schema.getText() })
-      return Promise.resolve()
+      return Promise.resolve(true)
     },
-    closeDocument: (root, schema) =>
-      (options.localClose ?? Promise.resolve()).then(() => {
-        active.delete(`local:${root}:${schema.uri.toString()}`)
-      }),
+    closeDocument: closeLocalDocument,
     clearDiagnostics: clearLocalDiagnostics,
   }
   const ownership: DocumentOwnershipCoordinator = new DocumentOwnershipCoordinator({
@@ -88,16 +96,34 @@ function createSubject(options: { localClose?: Promise<void>; localStartup?: Pro
     policy: { isPinnedToPrisma6: () => false },
     prepareOwner: createPrepareDocumentRoutingCommit({
       getOwnership: (): DocumentOwnershipCoordinator => ownership,
+      isDocumentOpen: (schema) => !closedDocumentUris.has(schema.uri.toString()),
       getBundled: () => bundled,
       getLocal: () => local,
       observer: (event) => events.push(event),
     }),
   })
+  const closeEditorDocument = (schema: TextDocument): void => {
+    const documentUri = schema.uri.toString()
+    closedDocumentUris.add(documentUri)
+    if (active.delete(`bundled:${documentUri}`)) {
+      protocolCloses.push({ owner: 'bundled', uri: documentUri })
+      clearBundledDiagnostics(schema.uri)
+    }
+    const root = documentUri.includes('workspace-a') ? rootA : rootB
+    if (active.delete(`local:${root.uri.toString()}:${documentUri}`)) {
+      protocolCloses.push({ owner: 'local', uri: documentUri })
+      clearLocalDiagnostics(root.uri.toString(), schema.uri)
+    }
+  }
+
   return {
     ownership,
     bundled,
     local,
     ensureClientForDocument,
+    closeLocalDocument,
+    closeEditorDocument,
+    protocolCloses,
     clearBundledDiagnostics,
     clearLocalDiagnostics,
     active,
@@ -161,6 +187,54 @@ describe('document routing commits', () => {
     await transfer
 
     expect(subject.events.map((event) => event.type)).toEqual(['closed', 'diagnosticsCleared', 'opened'])
+  })
+
+  test('does not reopen locally when the editor closes during local startup', async () => {
+    const startup = deferred()
+    const subject = createSubject({ localStartup: startup.promise })
+    const schema = document('file:///workspace-a/schema.prisma', 'model User { id Int @id }')
+    await subject.ownership.synchronize(schema)
+    subject.opens.length = 0
+
+    schema.setText('// use prisma-next\nmodel User { id Int @id }')
+    const transfer = subject.ownership.synchronize(schema)
+    await vi.waitFor(() => expect(subject.ensureClientForDocument).toHaveBeenCalledOnce())
+
+    subject.closeEditorDocument(schema)
+    const closing = subject.ownership.close(schema)
+    startup.resolve()
+    await Promise.all([transfer, closing])
+
+    expect(subject.opens).toEqual([])
+    expect(subject.active).toEqual(new Set())
+    expect(subject.protocolCloses).toEqual([{ owner: 'bundled', uri: schema.uri.toString() }])
+    expect(subject.clearBundledDiagnostics).toHaveBeenCalledWith(schema.uri)
+    expect(subject.clearLocalDiagnostics).toHaveBeenCalledWith(rootA.uri.toString(), schema.uri)
+    expect(subject.ownership.getOwner(schema.uri)).toEqual({ kind: 'unowned' })
+  })
+
+  test('does not reopen bundled when the editor closes during a delayed prior-owner close', async () => {
+    const close = deferred()
+    const subject = createSubject({ localClose: close.promise })
+    const schema = document('file:///workspace-a/schema.prisma', '// use prisma-next\nmodel User { id Int @id }')
+    await subject.ownership.synchronize(schema)
+    subject.opens.length = 0
+
+    schema.setText('model User { id Int @id }')
+    const transfer = subject.ownership.synchronize(schema)
+    await vi.waitFor(() => expect(subject.closeLocalDocument).toHaveBeenCalledOnce())
+
+    subject.closeEditorDocument(schema)
+    const closing = subject.ownership.close(schema)
+    close.resolve()
+    await Promise.all([transfer, closing])
+
+    expect(subject.opens).toEqual([])
+    expect(subject.active).toEqual(new Set())
+    expect(subject.protocolCloses).toEqual([{ owner: 'local', uri: schema.uri.toString() }])
+    expect(subject.clearLocalDiagnostics).toHaveBeenCalledWith(rootA.uri.toString(), schema.uri)
+    expect(subject.clearBundledDiagnostics).toHaveBeenCalledWith(schema.uri)
+    expect(subject.ownership.getOwner(schema.uri)).toEqual({ kind: 'unowned' })
   })
 
   test('does not open a stale local candidate when text changes during startup', async () => {

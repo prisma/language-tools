@@ -90,16 +90,24 @@ export class DocumentOwnershipCoordinator {
   }
 
   synchronize(document: TextDocument): Promise<DocumentOwner> {
-    const documentUri = document.uri.toString()
-    const state = this.getOrCreateState(documentUri)
-    const revision = ++state.revision
+    return this.enqueue(document, (state, revision) => this.commitCurrentOwner(document, state, revision))
+  }
 
-    const operation = state.pending.then(() => this.commitCurrentOwner(document, state, revision))
+  close(document: TextDocument): Promise<DocumentOwner> {
+    return this.enqueue(document, (state, revision) => this.commitClosedOwner(document, state, revision))
+  }
+
+  private enqueue(
+    document: TextDocument,
+    commit: (state: DocumentOwnershipState, revision: number) => Promise<DocumentOwner>,
+  ): Promise<DocumentOwner> {
+    const state = this.getOrCreateState(document.uri.toString())
+    const revision = ++state.revision
+    const operation = state.pending.then(() => commit(state, revision))
     state.pending = operation.then(
       () => undefined,
       () => undefined,
     )
-
     return operation
   }
 
@@ -116,6 +124,38 @@ export class DocumentOwnershipCoordinator {
     }
     this.states.set(documentUri, state)
     return state
+  }
+
+  private async commitClosedOwner(
+    document: TextDocument,
+    state: DocumentOwnershipState,
+    revision: number,
+  ): Promise<DocumentOwner> {
+    const documentUri = document.uri.toString()
+    if (revision !== state.revision) {
+      this.observeStaleTransition(documentUri, revision, state.owner)
+      return state.owner
+    }
+
+    const commitOwner = await this.options.prepareOwner?.({
+      document,
+      previousOwner: state.owner,
+      nextOwner: unownedOwner,
+      revision,
+    })
+    if (revision !== state.revision) {
+      this.observeStaleTransition(documentUri, revision, state.owner)
+      return state.owner
+    }
+
+    if (commitOwner) {
+      await commitOwner()
+    }
+
+    const previousOwner = state.owner
+    state.owner = unownedOwner
+    this.observeOwnerChange(documentUri, revision, previousOwner, unownedOwner)
+    return unownedOwner
   }
 
   private async commitCurrentOwner(
@@ -135,12 +175,7 @@ export class DocumentOwnershipCoordinator {
       })
 
       if (revision !== state.revision) {
-        this.options.testObserver?.({
-          type: 'staleTransitionDiscarded',
-          documentUri,
-          revision,
-          owner: state.owner,
-        })
+        this.observeStaleTransition(documentUri, revision, state.owner)
         return state.owner
       }
 
@@ -155,25 +190,27 @@ export class DocumentOwnershipCoordinator {
 
       const previousOwner = state.owner
       state.owner = currentOwner
-      if (!ownersEqual(previousOwner, currentOwner)) {
-        this.options.testObserver?.({
-          type: 'ownerChanged',
-          documentUri,
-          revision,
-          previousOwner,
-          owner: currentOwner,
-        })
-      }
+      this.observeOwnerChange(documentUri, revision, previousOwner, currentOwner)
       return currentOwner
     }
 
-    this.options.testObserver?.({
-      type: 'staleTransitionDiscarded',
-      documentUri,
-      revision,
-      owner: state.owner,
-    })
+    this.observeStaleTransition(documentUri, revision, state.owner)
     return state.owner
+  }
+
+  private observeOwnerChange(
+    documentUri: string,
+    revision: number,
+    previousOwner: DocumentOwner,
+    owner: DocumentOwner,
+  ): void {
+    if (!ownersEqual(previousOwner, owner)) {
+      this.options.testObserver?.({ type: 'ownerChanged', documentUri, revision, previousOwner, owner })
+    }
+  }
+
+  private observeStaleTransition(documentUri: string, revision: number, owner: DocumentOwner): void {
+    this.options.testObserver?.({ type: 'staleTransitionDiscarded', documentUri, revision, owner })
   }
 }
 

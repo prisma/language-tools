@@ -186,6 +186,32 @@ describe('LocalPrismaNextClientRegistry', () => {
     ])
   })
 
+  test('does not synchronize a document that closes while its client entry is pending', async () => {
+    const ready = deferred<void>()
+    const schema = document('file:///workspace-a/schema.prisma')
+    const documents = new Map([[schema.uri.toString(), schema]])
+    const client = fakeClient(
+      'root-a',
+      vi.fn(() => ready.promise),
+    )
+    const registry = new LocalPrismaNextClientRegistry({
+      ownership,
+      getDocument: (documentUri) => documents.get(documentUri.toString()),
+      workspace: { isTrusted: true, getWorkspaceFolder: matchingWorkspaceFolder },
+      entrypointExists: vi.fn().mockResolvedValue(true),
+      createClient: vi.fn().mockReturnValue(client),
+      registerDisposable: vi.fn(),
+    })
+
+    const startup = registry.ensureClientForDocument(schema)
+    const open = registry.openDocument(rootA.uri.toString(), schema)
+    documents.delete(schema.uri.toString())
+    ready.resolve(undefined)
+
+    await expect(startup).resolves.toBe(client)
+    await expect(open).resolves.toBe(false)
+  })
+
   test('publishes pending startup per root and starts independent clients', async () => {
     const discovery = deferred<boolean>()
     const entrypointExists = vi.fn().mockReturnValue(discovery.promise)

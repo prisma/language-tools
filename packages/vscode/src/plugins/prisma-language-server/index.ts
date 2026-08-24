@@ -114,6 +114,7 @@ const plugin: PrismaVSCodePlugin = {
       },
       prepareOwner: createPrepareDocumentRoutingCommit({
         getOwnership: (): DocumentOwnershipCoordinator => ownership,
+        isDocumentOpen: (document) => workspace.textDocuments.includes(document),
         getBundled: () => bundledClientMiddleware,
         getLocal: () => localClients,
       }),
@@ -234,6 +235,11 @@ const plugin: PrismaVSCodePlugin = {
       workspace.onDidChangeTextDocument((event) => {
         maybeStart()
         synchronizeDocument(event.document)
+      }),
+      workspace.onDidCloseTextDocument((document) => {
+        if (document.languageId === 'prisma') {
+          void ownership.close(document)
+        }
       }),
     )
 

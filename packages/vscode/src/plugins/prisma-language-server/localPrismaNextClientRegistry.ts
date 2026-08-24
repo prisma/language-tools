@@ -73,9 +73,13 @@ export class LocalPrismaNextClientRegistry {
     return this.ensureClient(workspaceFolder).then((entry) => entry?.client)
   }
 
-  async openDocument(workspaceFolderUri: string, document: TextDocument): Promise<void> {
+  async openDocument(workspaceFolderUri: string, document: TextDocument): Promise<boolean> {
     const entry = await this.clients.get(workspaceFolderUri)
-    entry?.middleware.openDocument(document)
+    if (!entry || this.options.getDocument(document.uri) !== document) {
+      return false
+    }
+    entry.middleware.openDocument(document)
+    return true
   }
 
   async closeDocument(workspaceFolderUri: string, document: TextDocument): Promise<void> {

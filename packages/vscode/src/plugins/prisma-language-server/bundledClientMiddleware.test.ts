@@ -324,9 +324,13 @@ describe('bundled client ownership middleware', () => {
     middleware.handleDiagnostics?.(schema.uri, diagnostics, next)
     schema.setText('// use prisma-next')
     middleware.handleDiagnostics?.(schema.uri, diagnostics, next)
+    schema.setText('model User { id Int @id }')
+    documents.delete(schema.uri.toString())
+    middleware.handleDiagnostics?.(schema.uri, diagnostics, next)
 
     expect(next.mock.calls).toEqual([
       [schema.uri, diagnostics],
+      [schema.uri, []],
       [schema.uri, []],
     ])
     expect(diagnosticMessages).toEqual(['bundled diagnostic'])
