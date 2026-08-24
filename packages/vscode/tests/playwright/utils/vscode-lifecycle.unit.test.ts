@@ -3,12 +3,12 @@ import { EventEmitter } from 'node:events'
 import { access, mkdtemp, mkdir, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { PassThrough } from 'node:stream'
-import { afterEach, describe, expect, test } from 'vitest'
+import { afterEach, describe, expect, test, vi } from 'vitest'
 import {
   cleanupVSCodeTempDirectories,
   createVSCodeTempDirectories,
   formatProcessExit,
+  getVSCodeTempBase,
   ProcessDiagnostics,
   VSCodeTempDirectoryLease,
 } from './vscode-lifecycle'
@@ -20,23 +20,34 @@ afterEach(async () => {
 })
 
 describe('VS Code Playwright lifecycle', () => {
-  test('creates collision-free user data and extensions directories per attempt', async () => {
+  test('creates collision-free short user data and extensions directories', async () => {
     const parent = await createTemporaryParent()
     const [first, second] = await Promise.all([
-      createVSCodeTempDirectories(2, 1, parent),
-      createVSCodeTempDirectories(2, 1, parent),
+      createVSCodeTempDirectories(parent),
+      createVSCodeTempDirectories(parent),
     ])
 
     expect(first.root).not.toBe(second.root)
-    expect(first.userData).toBe(path.join(first.root, 'user-data'))
-    expect(first.extensions).toBe(path.join(first.root, 'extensions'))
+    expect(path.basename(first.root)).toMatch(/^pv-.{6}$/)
+    expect(first.userData).toBe(path.join(first.root, 'u'))
+    expect(first.extensions).toBe(path.join(first.root, 'e'))
     await expect(access(first.userData)).resolves.toBeUndefined()
     await expect(access(first.extensions)).resolves.toBeUndefined()
   })
 
+  test('keeps the expected macOS VS Code IPC path comfortably below the socket limit', () => {
+    const simulatedRoot = '/tmp/pv-XXXXXX'
+    const socketPath = path.posix.join(simulatedRoot, 'u', '1.13-main.sock')
+
+    expect(getVSCodeTempBase('darwin')).toBe('/tmp')
+    expect(Buffer.byteLength(simulatedRoot)).toBe(14)
+    expect(Buffer.byteLength(socketPath)).toBe(31)
+    expect(Buffer.byteLength(socketPath)).toBeLessThan(104)
+  })
+
   test('cleans only the isolated attempt root', async () => {
     const parent = await createTemporaryParent()
-    const directories = await createVSCodeTempDirectories(0, 0, parent)
+    const directories = await createVSCodeTempDirectories(parent)
     const sibling = path.join(parent, 'keep-me')
     await mkdir(sibling)
 
@@ -46,9 +57,24 @@ describe('VS Code Playwright lifecycle', () => {
     await expect(access(sibling)).resolves.toBeUndefined()
   })
 
+  test('configures retries for transient locked-file cleanup', async () => {
+    const parent = await createTemporaryParent()
+    const directories = await createVSCodeTempDirectories(parent)
+    const remove = vi.fn().mockResolvedValue(undefined)
+
+    await cleanupVSCodeTempDirectories(directories, remove)
+
+    expect(remove).toHaveBeenCalledWith(directories.root, {
+      recursive: true,
+      force: true,
+      maxRetries: 3,
+      retryDelay: 100,
+    })
+  })
+
   test('registers process-exit cleanup only for the lifetime of an attempt', async () => {
     const parent = await createTemporaryParent()
-    const directories = await createVSCodeTempDirectories(0, 0, parent)
+    const directories = await createVSCodeTempDirectories(parent)
     const initialListeners = process.listenerCount('exit')
     const lease = new VSCodeTempDirectoryLease(directories)
 
@@ -59,57 +85,33 @@ describe('VS Code Playwright lifecycle', () => {
     await expect(access(directories.root)).rejects.toThrow()
   })
 
-  test('formats exit code, signal, bounded output labels, and redacts secrets', () => {
-    const byCode = formatProcessExit({
-      code: 9,
-      signal: null,
-      stdout: 'server ready',
-      stderr: 'DATABASE_URL=postgres://user:password@example.test/db token=do-not-print',
-    })
-    const bySignal = formatProcessExit({ code: null, signal: 'SIGTERM', stdout: '', stderr: '' })
-
-    expect(byCode).toContain('exited with code 9')
-    expect(byCode).toContain('stdout (last 16384 bytes):\nserver ready')
-    expect(byCode).toContain('postgres://user:[REDACTED]@example.test/db')
-    expect(byCode).toContain('token=[REDACTED]')
-    expect(byCode).not.toContain('do-not-print')
-    expect(bySignal).toBe('VS Code process exited with signal SIGTERM.')
+  test('formats only structural process exit data', () => {
+    expect(formatProcessExit({ code: 9, signal: null })).toBe('exitCode=9 signal=none')
+    expect(formatProcessExit({ code: null, signal: 'SIGTERM' })).toBe('exitCode=unknown signal=SIGTERM')
   })
 
-  test('bounds child output and removes all diagnostic listeners', () => {
-    const stdout = new PassThrough()
-    const stderr = new PassThrough()
+  test('tracks process exit and removes its listener', () => {
     const child = Object.assign(new EventEmitter(), {
-      stdout,
-      stderr,
       exitCode: null,
       signalCode: null,
       kill: () => true,
     }) as unknown as ChildProcess
     const diagnostics = new ProcessDiagnostics(child)
 
-    stdout.write('discarded-output'.repeat(2000))
-    stdout.write('final-output')
     child.emit('exit', 7, null)
 
-    const formatted = diagnostics.format()
-    expect(formatted).toContain('exited with code 7')
-    expect(formatted).toContain('final-output')
-    expect(Buffer.byteLength(formatted)).toBeLessThan(17 * 1024)
-    expect(stdout.listenerCount('data')).toBe(1)
-    expect(stderr.listenerCount('data')).toBe(1)
+    expect(diagnostics.hasExited()).toBe(true)
+    expect(diagnostics.format()).toBe('exitCode=7 signal=none')
     expect(child.listenerCount('exit')).toBe(1)
 
     diagnostics.dispose()
 
-    expect(stdout.listenerCount('data')).toBe(0)
-    expect(stderr.listenerCount('data')).toBe(0)
     expect(child.listenerCount('exit')).toBe(0)
   })
 })
 
 async function createTemporaryParent(): Promise<string> {
-  const parent = await mkdtemp(path.join(tmpdir(), 'prisma-vscode-lifecycle-test-'))
+  const parent = await mkdtemp(path.join(tmpdir(), 'pv-test-'))
   temporaryParents.push(parent)
   return parent
 }

@@ -1,4 +1,5 @@
 import type { ChildProcess } from 'node:child_process'
+import { randomUUID } from 'node:crypto'
 import path from 'node:path'
 import { downloadAndUnzipVSCode } from '@vscode/test-electron'
 import { _electron as electron } from '@playwright/test'
@@ -6,10 +7,8 @@ import type { ElectronApplication, Page } from '@playwright/test'
 import {
   createVSCodeTempDirectories,
   ProcessDiagnostics,
-  sanitizeDiagnosticText,
   terminateChildProcess,
   VSCodeTempDirectoryLease,
-  type VSCodeTempDirectories,
 } from './vscode-lifecycle'
 
 export interface VSCodeSetupOptions {
@@ -28,13 +27,16 @@ export interface VSCodeTestSession {
 
 export async function setupVSCode(options: VSCodeSetupOptions): Promise<VSCodeTestSession> {
   const { rootPath, testWorkspace, disableExtensions = true, timeout = 30000, workerIndex, retry } = options
-  const directories = await createVSCodeTempDirectories(workerIndex, retry)
+  const directories = await createVSCodeTempDirectories()
   const directoryLease = new VSCodeTempDirectoryLease(directories)
+  const attemptId = `w${workerIndex}-r${retry}-${randomUUID()}`
   let electronApp: ElectronApplication | undefined
   let diagnostics: ProcessDiagnostics | undefined
+  let executableName = 'unknown'
 
   try {
     const executablePath = await downloadAndUnzipVSCode()
+    executableName = path.basename(executablePath)
     const args = [
       '--extensionDevelopmentPath=' + rootPath,
       ...(disableExtensions ? ['--disable-extensions'] : []),
@@ -63,33 +65,40 @@ export async function setupVSCode(options: VSCodeSetupOptions): Promise<VSCodeTe
         page,
         close: () => closeVSCodeSession(electronApp, diagnostics, directoryLease),
       }
-    } catch (error) {
-      throw createLifecycleError('waiting for its first window', error, directories, diagnostics)
+    } catch {
+      throw createLifecycleError('first-window', attemptId, executableName, diagnostics)
     }
   } catch (error) {
-    await closeVSCodeSession(electronApp, diagnostics, directoryLease)
+    const primaryError =
+      error instanceof VSCodeLifecycleError
+        ? error
+        : createLifecycleError('launch', attemptId, executableName, diagnostics)
 
-    if (error instanceof VSCodeLifecycleError) {
-      throw error
+    try {
+      await closeVSCodeSession(electronApp, diagnostics, directoryLease)
+    } catch {
+      primaryError.noteCleanupFailure()
     }
 
-    throw createLifecycleError('launching', error, directories, diagnostics)
+    throw primaryError
   }
 }
 
-class VSCodeLifecycleError extends Error {}
+class VSCodeLifecycleError extends Error {
+  noteCleanupFailure(): void {
+    this.message += ' cleanup=failed'
+  }
+}
 
 function createLifecycleError(
-  stage: string,
-  error: unknown,
-  directories: VSCodeTempDirectories,
+  phase: 'launch' | 'first-window',
+  attemptId: string,
+  executableName: string,
   diagnostics?: ProcessDiagnostics,
 ): VSCodeLifecycleError {
-  const cause = sanitizeDiagnosticText(error instanceof Error ? error.message : String(error))
-  const processContext = diagnostics?.hasExited() ? `\n${diagnostics.format()}` : ''
-
+  const processState = diagnostics?.format() ?? 'exitCode=unknown signal=none'
   return new VSCodeLifecycleError(
-    `VS Code failed while ${stage} (isolated attempt ${path.basename(directories.root)}): ${cause}${processContext}`,
+    `VS Code lifecycle failure: phase=${phase} attempt=${attemptId} executable=${executableName} ${processState}`,
   )
 }
 
