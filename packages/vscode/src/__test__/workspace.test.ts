@@ -75,7 +75,7 @@ suite('Multi-root integration workspace', () => {
       assert.deepStrictEqual(initialState.localClients.startCountsByWorkspaceFolderUri, {})
       assertExclusiveOwners(initialState)
 
-      const invalidSchema = 'model Broken {\n  id Missing\n}\n'
+      const invalidSchema = withDocumentEol(documentA, 'model Broken {\n  id Missing\n}\n')
       await replaceDocument(documentA, invalidSchema)
       await waitForDiagnostics(
         documentA.uri,
@@ -83,7 +83,7 @@ suite('Multi-root integration workspace', () => {
         'bundled diagnostics before adding the directive',
       )
 
-      const markedInvalidSchema = `// use prisma-next\n${invalidSchema}`
+      const markedInvalidSchema = withDocumentEol(documentA, `// use prisma-next\n${invalidSchema}`)
       const addDirectiveEventIndex = initialState.routingEvents.length
       await replaceDocument(documentA, markedInvalidSchema)
       const localAState = await waitForState(
@@ -112,7 +112,10 @@ suite('Multi-root integration workspace', () => {
       )
       assertExclusiveOwners(localAState)
 
-      const markedSecondSchema = '// use prisma-next\nmodel RootASecondRecord {\n  id Int @id\n}\n'
+      const markedSecondSchema = withDocumentEol(
+        secondDocumentA,
+        '// use prisma-next\nmodel RootASecondRecord {\n  id Int @id\n}\n',
+      )
       const secondAEventIndex = localAState.routingEvents.length
       await replaceDocument(secondDocumentA, markedSecondSchema)
       const reusedAState = await waitForState(
@@ -126,7 +129,7 @@ suite('Multi-root integration workspace', () => {
       )
       assertExclusiveOwners(reusedAState)
 
-      const markedRootBSchema = '// use prisma-next\nmodel RootBRecord {\n  id Int @id\n}\n'
+      const markedRootBSchema = withDocumentEol(documentB, '// use prisma-next\nmodel RootBRecord {\n  id Int @id\n}\n')
       const rootBEventIndex = reusedAState.routingEvents.length
       await replaceDocument(documentB, markedRootBSchema)
       const independentRootsState = await waitForState(
@@ -146,7 +149,10 @@ suite('Multi-root integration workspace', () => {
       )
       assertExclusiveOwners(independentRootsState)
 
-      const markedMissingSchema = '// use prisma-next\nmodel MissingCliRecord {\n  id Int @id\n}\n'
+      const markedMissingSchema = withDocumentEol(
+        missingDocument,
+        '// use prisma-next\nmodel MissingCliRecord {\n  id Int @id\n}\n',
+      )
       const missingEventIndex = independentRootsState.routingEvents.length
       const missingOwnershipEventIndex = independentRootsState.ownershipEvents.length
       await replaceDocument(missingDocument, markedMissingSchema)
@@ -168,7 +174,7 @@ suite('Multi-root integration workspace', () => {
       assert.strictEqual(lastOpenedAfter(missingState, missingDocument.uri, missingEventIndex), undefined)
       assertExclusiveOwners(missingState)
 
-      const restoredBundledSchema = 'model RootARestored {\n  id Int @id\n}\n'
+      const restoredBundledSchema = withDocumentEol(documentA, 'model RootARestored {\n  id Int @id\n}\n')
       const removeDirectiveEventIndex = missingState.routingEvents.length
       await replaceDocument(documentA, restoredBundledSchema)
       const restoredState = await waitForState(
@@ -236,6 +242,11 @@ async function waitForDiagnostics(
 async function replaceDocument(document: vscode.TextDocument, text: string): Promise<void> {
   await replaceDocumentText(document, text)
   assert.strictEqual(document.isDirty, true)
+}
+
+function withDocumentEol(document: vscode.TextDocument, text: string): string {
+  const eol = document.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n'
+  return text.split('\r\n').join('\n').split('\n').join(eol)
 }
 
 interface FixtureSnapshot {
