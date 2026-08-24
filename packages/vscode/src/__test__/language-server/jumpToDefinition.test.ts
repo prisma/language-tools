@@ -21,7 +21,7 @@ suite('Jump-to-definition', () => {
   const fixturePathSqlite = getDocUri('jump-to-definition/schema.prisma')
 
   test('SQLite: from attribute to model', async function () {
-    await activate(fixturePathSqlite)
+    await activate(fixturePathSqlite, { waitForBundledRouting: true })
 
     await testJumpToDefinition(
       fixturePathSqlite,

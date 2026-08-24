@@ -22,7 +22,11 @@ export async function sleep(ms: number): Promise<void> {
  * Activates the vscode.prisma extension
  * @todo check readiness of the server instead of timeout
  */
-export async function activate(docUri: vscode.Uri): Promise<void> {
+export interface ActivateOptions {
+  readonly waitForBundledRouting?: boolean
+}
+
+export async function activate(docUri: vscode.Uri, options: ActivateOptions = {}): Promise<void> {
   // The extensionId is `publisher.name` from package.json
   const ext = vscode.extensions.getExtension(`${packageJson.publisher}.${packageJson.name}`)
   if (!ext) {
@@ -33,11 +37,15 @@ export async function activate(docUri: vscode.Uri): Promise<void> {
   try {
     doc = await vscode.workspace.openTextDocument(docUri)
     editor = await vscode.window.showTextDocument(doc)
-    await waitForBundledRouting(doc)
-    await sleep(2500) // Wait for server activation
   } catch (e) {
     console.error(e)
+    return
   }
+
+  if (options.waitForBundledRouting) {
+    await waitForBundledRouting(doc)
+  }
+  await sleep(2500) // Wait for server activation
 }
 
 async function waitForBundledRouting(document: vscode.TextDocument): Promise<void> {

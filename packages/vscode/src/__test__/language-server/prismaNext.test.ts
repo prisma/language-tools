@@ -49,7 +49,7 @@ suite('Prisma-next directive', () => {
 
   test('Sibling file without directive still gets diagnostics', async () => {
     const docUri = getDocUri('linting/missingArgument.prisma')
-    await activate(docUri)
+    await activate(docUri, { waitForBundledRouting: true })
     const diagnostics = await waitForDiagnostics(docUri, (d) => d.length > 0)
     assert.ok(diagnostics.length > 0, 'expected diagnostics on regular file with errors')
   })

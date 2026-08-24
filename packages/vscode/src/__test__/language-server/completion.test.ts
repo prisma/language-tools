@@ -12,7 +12,7 @@ async function testCompletion(
   triggerCharacter?: string,
 ): Promise<void> {
   if (!isActivated) {
-    await activate(docUri)
+    await activate(docUri, { waitForBundledRouting: true })
   }
 
   const actualCompletions: vscode.CompletionList = await vscode.commands.executeCommand(
