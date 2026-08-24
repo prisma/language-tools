@@ -104,14 +104,14 @@ The tests use the following VS Code launch arguments for reliable testing:
 - `--disable-workspace-trust`: Skips workspace trust prompts
 - `--skip-welcome` / `--skip-release-notes`: Skips intro screens
 - `--no-sandbox`, `--disable-dev-shm-usage`, `--disable-gpu`: Stability flags for headless environments
-- `--user-data-dir`: Uses a temporary user data directory
+- `--user-data-dir` / `--extensions-dir`: Use isolated temporary directories for every test attempt, retry, and worker
 - `--wait`: Prevents VS Code from exiting immediately
 
 ## Key Implementation Details
 
 ### Window Detection
 
-The tests wait for VS Code windows to appear and use `electronApp.firstWindow()` to get the main window.
+The test session waits for the first VS Code window before handing the page to test helpers. If VS Code exits first, the launch error includes its exit code or signal and bounded, redacted stdout/stderr. Teardown remains bounded when Electron has already exited and removes only the current attempt's temporary root.
 
 ### Workbench Loading
 

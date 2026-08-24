@@ -1,4 +1,4 @@
-import type { Page, ElectronApplication } from '@playwright/test'
+import type { Page } from '@playwright/test'
 import { TIMEOUTS, SELECTORS, KEYBOARD_SHORTCUTS, WAIT_TIMES } from './constants'
 
 export interface PageHelperTimeouts {
@@ -22,9 +22,7 @@ export class VSCodePageHelper {
     }
   }
 
-  static async create(electronApp: ElectronApplication, timeouts?: PageHelperTimeouts): Promise<VSCodePageHelper> {
-    const page = await electronApp.firstWindow()
-
+  static async create(page: Page, timeouts?: PageHelperTimeouts): Promise<VSCodePageHelper> {
     const helper = new VSCodePageHelper(page, timeouts)
     await helper.waitForWorkbench()
 
