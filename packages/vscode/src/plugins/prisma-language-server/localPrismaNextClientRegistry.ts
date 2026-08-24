@@ -1,8 +1,9 @@
 import path from 'node:path'
 import { stat } from 'node:fs/promises'
+import { spawn, type ChildProcessWithoutNullStreams, type SpawnOptionsWithoutStdio } from 'node:child_process'
 import type { Disposable, TextDocument, Uri, WorkspaceFolder } from 'vscode'
 import type { LanguageClientOptions } from 'vscode-languageclient'
-import { TransportKind, type LanguageClient, type ServerOptions } from 'vscode-languageclient/node'
+import type { ChildProcessInfo, LanguageClient, ServerOptions } from 'vscode-languageclient/node'
 
 const prismaCliRelativePath = ['node_modules', 'prisma', 'dist', 'prisma.js'] as const
 
@@ -11,6 +12,19 @@ export const localPrismaNextClientTestStateCommand = 'prisma.test.localPrismaNex
 export interface LocalPrismaNextClientRegistryWorkspace {
   readonly isTrusted: boolean
   getWorkspaceFolder(uri: Uri): WorkspaceFolder | undefined
+}
+
+export type SpawnLocalPrismaNextProcess = (
+  executable: string,
+  args: string[],
+  options: SpawnOptionsWithoutStdio,
+) => ChildProcessWithoutNullStreams
+
+export interface LocalPrismaNextLauncherOptions {
+  readonly executable?: string
+  readonly environment?: NodeJS.ProcessEnv
+  readonly spawnProcess?: SpawnLocalPrismaNextProcess
+  readonly handleProcessError?: (error: Error) => void
 }
 
 export interface LocalPrismaNextClientRegistryOptions {
@@ -24,6 +38,7 @@ export interface LocalPrismaNextClientRegistryOptions {
   readonly registerDisposable: (disposable: Disposable) => void
   readonly entrypointExists?: (entrypoint: string) => Promise<boolean>
   readonly handleStartError?: (workspaceFolder: WorkspaceFolder, error: unknown) => void
+  readonly launcher?: Omit<LocalPrismaNextLauncherOptions, 'handleProcessError'>
 }
 
 export interface LocalPrismaNextClientTestState {
@@ -80,7 +95,10 @@ export class LocalPrismaNextClientRegistry {
       const client = this.options.createClient(
         `prisma-next:${workspaceFolderUri}`,
         `Prisma Next Language Server (${workspaceFolder.name})`,
-        createLocalPrismaNextServerOptions(workspaceFolder, entrypoint),
+        createLocalPrismaNextServerOptions(workspaceFolder, entrypoint, {
+          ...this.options.launcher,
+          handleProcessError: (error) => this.options.handleStartError?.(workspaceFolder, error),
+        }),
         createLocalPrismaNextClientOptions(workspaceFolder),
       )
       this.options.registerDisposable(client.start())
@@ -101,14 +119,80 @@ export function getLocalPrismaNextEntrypoint(workspaceFolder: WorkspaceFolder): 
 export function createLocalPrismaNextServerOptions(
   workspaceFolder: WorkspaceFolder,
   entrypoint = getLocalPrismaNextEntrypoint(workspaceFolder),
+  launcher: LocalPrismaNextLauncherOptions = {},
 ): ServerOptions {
+  return () =>
+    launchLocalPrismaNextServer({
+      executable: launcher.executable ?? process.execPath,
+      entrypoint,
+      cwd: workspaceFolder.uri.fsPath,
+      environment: createExtensionHostNodeEnvironment(launcher.environment ?? process.env),
+      spawnProcess: launcher.spawnProcess ?? spawn,
+      handleProcessError: launcher.handleProcessError,
+    })
+}
+
+export interface LaunchLocalPrismaNextServerOptions {
+  readonly executable: string
+  readonly entrypoint: string
+  readonly cwd: string
+  readonly environment: NodeJS.ProcessEnv
+  readonly spawnProcess: SpawnLocalPrismaNextProcess
+  readonly handleProcessError?: (error: Error) => void
+}
+
+export function launchLocalPrismaNextServer(options: LaunchLocalPrismaNextServerOptions): Promise<ChildProcessInfo> {
+  return new Promise((resolve, reject) => {
+    const child = options.spawnProcess(options.executable, [options.entrypoint, 'lsp'], {
+      cwd: options.cwd,
+      env: options.environment,
+      shell: false,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    })
+
+    const cleanupStartupListeners = (): void => {
+      child.removeListener('error', handleStartupError)
+      child.removeListener('spawn', handleSpawn)
+    }
+    const handleStartupError = (error: Error): void => {
+      cleanupStartupListeners()
+      destroyProcessStreams(child)
+      if (child.pid !== undefined && !child.killed) {
+        child.kill()
+      }
+      reject(error)
+    }
+    const handleSpawn = (): void => {
+      cleanupStartupListeners()
+      const handleProcessError = (error: Error): void => {
+        child.removeListener('close', handleClose)
+        options.handleProcessError?.(error)
+      }
+      const handleClose = (): void => {
+        child.removeListener('error', handleProcessError)
+      }
+      child.once('error', handleProcessError)
+      child.once('close', handleClose)
+      resolve({ process: child, detached: false })
+    }
+
+    child.once('error', handleStartupError)
+    child.once('spawn', handleSpawn)
+  })
+}
+
+export function createExtensionHostNodeEnvironment(environment: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return {
-    module: entrypoint,
-    args: ['lsp'],
-    transport: TransportKind.stdio,
-    // No runtime is specified: vscode-languageclient forks the module with the extension-host Node runtime.
-    options: { cwd: workspaceFolder.uri.fsPath },
+    ...environment,
+    ELECTRON_RUN_AS_NODE: '1',
+    ELECTRON_NO_ASAR: '1',
   }
+}
+
+function destroyProcessStreams(child: ChildProcessWithoutNullStreams): void {
+  child.stdin.destroy()
+  child.stdout.destroy()
+  child.stderr.destroy()
 }
 
 export function createLocalPrismaNextClientOptions(workspaceFolder: WorkspaceFolder): LanguageClientOptions {
