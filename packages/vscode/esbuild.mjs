@@ -258,7 +258,8 @@ function copyStaticAssets() {
   }
 
   console.log('Copying @prisma/studio-core-licensed static assets...')
-  // Use dereference to resolve symlinks (important for pnpm)
+  // Replace the previous copy so repeated builds work with pnpm's symlinked package directory.
+  rmSync(studioDest, { recursive: true, force: true })
   cpSync(studioSrc, studioDest, { recursive: true, dereference: true })
 
   // Copy prisma-schema-wasm WASM file to Prisma 6 language server directory
