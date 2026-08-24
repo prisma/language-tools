@@ -2,27 +2,8 @@ import path from 'path'
 import os from 'os'
 import minimatch from 'minimatch'
 
-import {
-  CancellationToken,
-  CodeAction,
-  CodeActionContext,
-  Command,
-  commands,
-  ExtensionContext,
-  Range,
-  TextDocument,
-  window,
-  workspace,
-  languages,
-  WorkspaceConfiguration,
-} from 'vscode'
-import {
-  CodeAction as lsCodeAction,
-  CodeActionParams,
-  CodeActionRequest,
-  LanguageClientOptions,
-  ProvideCodeActionsSignature,
-} from 'vscode-languageclient'
+import { commands, ExtensionContext, TextDocument, window, workspace, languages, WorkspaceConfiguration } from 'vscode'
+import { LanguageClientOptions } from 'vscode-languageclient'
 import { LanguageClient, ServerOptions, TransportKind } from 'vscode-languageclient/node'
 import TelemetryReporter from '../../telemetryReporter'
 import {
@@ -30,7 +11,6 @@ import {
   checkForMinimalColorTheme,
   checkForOtherPrismaExtension,
   isDebugOrTestSession,
-  isPrismaNextSchema,
   isSnippetEdit,
   restartClient,
   createLanguageServer,
@@ -41,6 +21,8 @@ import FileWatcher from 'watcher'
 import { CodelensProvider, generateClient } from '../../CodeLensProvider'
 import * as prisma6Handling from '../../prisma6Handling'
 import { getPackageJSON } from '../../getPackageJSON'
+import { DocumentOwnershipCoordinator } from './documentOwnership'
+import { createBundledClientMiddleware } from './bundledClientMiddleware'
 
 let client: LanguageClient
 let serverModule: string
@@ -123,68 +105,31 @@ const plugin: PrismaVSCodePlugin = {
 
     setGenerateWatcher(!!workspace.getConfiguration('prisma').get('fileWatcher'))
 
+    const ownership = new DocumentOwnershipCoordinator({
+      workspace,
+      policy: {
+        isPinnedToPrisma6: () => !!workspace.getConfiguration('prisma').get<boolean>('pinToPrisma6'),
+      },
+    })
+
     // Options to control the language client
     const clientOptions: LanguageClientOptions = {
       // Register the server for prisma documents
       documentSelector: [{ scheme: 'file', language: 'prisma' }],
-
-      /* This middleware is part of the workaround for https://github.com/prisma/language-tools/issues/311 */
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      middleware: {
-        async provideCodeActions(
-          document: TextDocument,
-          range: Range,
-          context: CodeActionContext,
-          token: CancellationToken,
-          _: ProvideCodeActionsSignature,
-        ) {
-          const params: CodeActionParams = {
-            textDocument: client.code2ProtocolConverter.asTextDocumentIdentifier(document),
-            range: client.code2ProtocolConverter.asRange(range),
-            context: client.code2ProtocolConverter.asCodeActionContext(context),
-          }
-
-          return client.sendRequest(CodeActionRequest.type, params, token).then(
-            (values) => {
-              if (values === null) return undefined
-              const result: (CodeAction | Command)[] = []
-              for (const item of values) {
-                if (lsCodeAction.is(item)) {
-                  const action = client.protocol2CodeConverter.asCodeAction(item)
-                  if (
-                    isSnippetEdit(item, client.code2ProtocolConverter.asTextDocumentIdentifier(document)) &&
-                    item.edit !== undefined
-                  ) {
-                    action.command = {
-                      command: 'prisma.applySnippetWorkspaceEdit',
-                      title: '',
-                      arguments: [action.edit],
-                    }
-                    action.edit = undefined
-                  }
-                  result.push(action)
-                } else {
-                  const command = client.protocol2CodeConverter.asCommand(item)
-                  result.push(command)
-                }
-              }
-              return result
-            },
-            (_) => undefined,
-          )
+      middleware: createBundledClientMiddleware({
+        ownership,
+        getClient: () => client,
+        getDocument: (uri) => workspace.textDocuments.find((document) => document.uri.toString() === uri.toString()),
+        handleDiagnosticMessage: (message) => {
+          void prisma6Handling.handleDiagnostic(message, context)
         },
-        handleDiagnostics: (uri, diagnostics, next) => {
-          for (const diagnostic of diagnostics) {
-            void prisma6Handling.handleDiagnostic(diagnostic.message, context)
-          }
-          next(uri, diagnostics)
-        },
-      },
+        isSnippetEdit,
+      }),
     }
 
     let started = false
     const needsLanguageServer = (doc: TextDocument): boolean =>
-      doc.languageId === 'prisma' && !isPrismaNextSchema(doc.getText())
+      doc.languageId === 'prisma' && ownership.classify(doc).kind === 'bundled'
 
     const maybeStart = () => {
       if (started) return
