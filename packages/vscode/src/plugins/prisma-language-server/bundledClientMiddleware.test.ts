@@ -14,8 +14,8 @@ import type {
   Uri,
   WorkspaceFolder,
 } from 'vscode'
-import type { LanguageClient, Middleware } from 'vscode-languageclient/node'
-import { createBundledClientMiddleware } from './bundledClientMiddleware'
+import type { LanguageClient } from 'vscode-languageclient/node'
+import { createBundledClientMiddleware, type BundledClientMiddleware } from './bundledClientMiddleware'
 import { DocumentOwnershipCoordinator } from './documentOwnership'
 
 const position = {} as Position
@@ -50,7 +50,7 @@ function document(value: string, text: string): TextDocument & { setText(nextTex
 }
 
 function createSubject(options: { pinned?: boolean } = {}): {
-  middleware: Middleware
+  middleware: BundledClientMiddleware
   client: LanguageClient
   documents: Map<string, TextDocument>
   diagnosticMessages: string[]
@@ -141,6 +141,52 @@ describe('bundled client ownership middleware', () => {
     expect(didClose).toHaveBeenCalledWith(schema)
     expect(sendNotification).not.toHaveBeenCalled()
     expect(deleteDiagnostics).toHaveBeenCalledWith(schema.uri)
+  })
+
+  test('resynchronizes an open document exactly once after the bundled client restarts', async () => {
+    const { middleware, client, sendNotification } = createSubject()
+    const schema = document('file:///workspace/schema.prisma', 'model User { id Int @id }')
+    const oldDidOpen = vi.fn()
+    const oldCompletion = { label: 'id' } as CompletionItem
+
+    middleware.didOpen?.(schema, oldDidOpen)
+    await middleware.provideCompletionItem?.(schema, position, completionContext, token, () => [oldCompletion])
+    schema.setText('model User {\n  id Int @id\n  name String\n}')
+    middleware.resetClientState()
+
+    expect(middleware.resolveCompletionItem?.(oldCompletion, token, vi.fn())).toBeUndefined()
+
+    const replacementOpenParams: unknown[] = []
+    const replacementDidOpen = vi.fn((textDocument: TextDocument) => {
+      replacementOpenParams.push(client.code2ProtocolConverter.asOpenTextDocumentParams(textDocument))
+    })
+    const replacementDidChange = vi.fn()
+    const replacementDidClose = vi.fn()
+    const change = { document: schema } as unknown as TextDocumentChangeEvent
+
+    middleware.didOpen?.(schema, replacementDidOpen)
+    middleware.didOpen?.(schema, replacementDidOpen)
+    middleware.didChange?.(change, replacementDidChange)
+    middleware.didClose?.(schema, replacementDidClose)
+    middleware.didClose?.(schema, replacementDidClose)
+
+    expect(oldDidOpen).toHaveBeenCalledOnce()
+    expect(replacementDidOpen).toHaveBeenCalledOnce()
+    expect(replacementOpenParams).toEqual([
+      {
+        textDocument: {
+          uri: schema.uri.toString(),
+          languageId: 'prisma',
+          version: 1,
+          text: schema.getText(),
+        },
+      },
+    ])
+    expect(replacementDidChange).toHaveBeenCalledOnce()
+    expect(replacementDidChange).toHaveBeenCalledWith(change)
+    expect(replacementDidClose).toHaveBeenCalledOnce()
+    expect(replacementDidClose).toHaveBeenCalledWith(schema)
+    expect(sendNotification).not.toHaveBeenCalled()
   })
 
   test('closes and clears a bundled document immediately when it becomes marked', () => {

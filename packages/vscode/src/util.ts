@@ -112,15 +112,23 @@ export function createLanguageServer(
 ): LanguageClient {
   return new LanguageClient('prisma', 'Prisma Language Server', serverOptions, clientOptions)
 }
+export interface RestartClientLifecycle {
+  onClientStopped(): void
+  onClientCreated(client: LanguageClient): void
+}
+
 export const restartClient = async (
   context: ExtensionContext,
   client: LanguageClient,
   serverOptions: ServerOptions,
   clientOptions: LanguageClientOptions,
+  lifecycle?: RestartClientLifecycle,
 ): Promise<LanguageClient> => {
   client?.diagnostics?.dispose()
   if (client) await client.stop()
+  lifecycle?.onClientStopped()
   client = createLanguageServer(serverOptions, clientOptions)
+  lifecycle?.onClientCreated(client)
   context.subscriptions.push(client.start())
   await client.onReady()
   return client

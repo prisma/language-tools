@@ -112,19 +112,21 @@ const plugin: PrismaVSCodePlugin = {
       },
     })
 
+    const bundledClientMiddleware = createBundledClientMiddleware({
+      ownership,
+      getClient: () => client,
+      getDocument: (uri) => workspace.textDocuments.find((document) => document.uri.toString() === uri.toString()),
+      handleDiagnosticMessage: (message) => {
+        void prisma6Handling.handleDiagnostic(message, context)
+      },
+      isSnippetEdit,
+    })
+
     // Options to control the language client
     const clientOptions: LanguageClientOptions = {
       // Register the server for prisma documents
       documentSelector: [{ scheme: 'file', language: 'prisma' }],
-      middleware: createBundledClientMiddleware({
-        ownership,
-        getClient: () => client,
-        getDocument: (uri) => workspace.textDocuments.find((document) => document.uri.toString() === uri.toString()),
-        handleDiagnosticMessage: (message) => {
-          void prisma6Handling.handleDiagnostic(message, context)
-        },
-        isSnippetEdit,
-      }),
+      middleware: bundledClientMiddleware,
     }
 
     let started = false
@@ -144,7 +146,12 @@ const plugin: PrismaVSCodePlugin = {
         return
       }
       const serverOptions = getServerOptions(workspace.getConfiguration('prisma'), context)
-      client = await restartClient(context, client, serverOptions, clientOptions)
+      client = await restartClient(context, client, serverOptions, clientOptions, {
+        onClientStopped: () => bundledClientMiddleware.resetClientState(),
+        onClientCreated: (replacementClient) => {
+          client = replacementClient
+        },
+      })
     }
 
     context.subscriptions.push(

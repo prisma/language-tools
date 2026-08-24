@@ -15,8 +15,12 @@ export interface BundledClientMiddlewareOptions {
   readonly isSnippetEdit: (action: ProtocolCodeAction, document: TextDocumentIdentifier) => boolean
 }
 
-export function createBundledClientMiddleware(options: BundledClientMiddlewareOptions): Middleware {
-  const completionDocuments = new WeakMap<CompletionItem, TextDocument>()
+export interface BundledClientMiddleware extends Middleware {
+  resetClientState(): void
+}
+
+export function createBundledClientMiddleware(options: BundledClientMiddlewareOptions): BundledClientMiddleware {
+  let completionDocuments = new WeakMap<CompletionItem, TextDocument>()
   const bundledDocuments = new Set<string>()
 
   const ownerForDocument = (document: TextDocument): DocumentOwner => {
@@ -53,7 +57,11 @@ export function createBundledClientMiddleware(options: BundledClientMiddlewareOp
     )
   }
 
-  const middleware: Middleware = {
+  const middleware: BundledClientMiddleware = {
+    resetClientState: () => {
+      bundledDocuments.clear()
+      completionDocuments = new WeakMap()
+    },
     didOpen: (document, next) => {
       const documentUri = document.uri.toString()
       if (isBundledDocument(document)) {
