@@ -77,7 +77,11 @@ suite('Multi-root integration workspace', () => {
 
       const invalidSchema = 'model Broken {\n  id Missing\n}\n'
       await replaceDocument(documentA, invalidSchema)
-      await waitForDiagnostics(documentA.uri, (diagnostics) => diagnostics.length > 0)
+      await waitForDiagnostics(
+        documentA.uri,
+        (diagnostics) => diagnostics.length > 0,
+        'bundled diagnostics before adding the directive',
+      )
 
       const markedInvalidSchema = `// use prisma-next\n${invalidSchema}`
       const addDirectiveEventIndex = initialState.routingEvents.length
@@ -87,6 +91,11 @@ suite('Multi-root integration workspace', () => {
           state.localClients.startCountsByWorkspaceFolderUri[rootA.uri.toString()] === 1 &&
           lastOpenedAfter(state, documentA.uri, addDirectiveEventIndex)?.owner.kind === 'local',
         'root A local client and marked document synchronization',
+      )
+      assert.strictEqual(
+        localAState.localClients.startCountsByWorkspaceFolderUri[rootA.uri.toString()],
+        1,
+        'expected the real root A client to complete its initialization handshake',
       )
       const localAOpen = lastOpenedAfter(localAState, documentA.uri, addDirectiveEventIndex)
       assert.ok(localAOpen)
@@ -102,8 +111,6 @@ suite('Multi-root integration workspace', () => {
         'expected bundled diagnostics to clear before local ownership',
       )
       assertExclusiveOwners(localAState)
-
-      await waitForDiagnostics(documentA.uri, (diagnostics) => diagnostics.length > 0)
 
       const markedSecondSchema = '// use prisma-next\nmodel RootASecondRecord {\n  id Int @id\n}\n'
       const secondAEventIndex = localAState.routingEvents.length
@@ -180,7 +187,11 @@ suite('Multi-root integration workspace', () => {
       assert.deepStrictEqual(activeOwnerKeys(restoredState, documentA.uri), new Set(['bundled']))
       assert.strictEqual(restoredState.localClients.startCountsByWorkspaceFolderUri[rootA.uri.toString()], 1)
       assertExclusiveOwners(restoredState)
-      await waitForDiagnostics(documentA.uri, (diagnostics) => diagnostics.length === 0)
+      await waitForDiagnostics(
+        documentA.uri,
+        (diagnostics) => diagnostics.length === 0,
+        'bundled diagnostics to clear after restoring valid text',
+      )
     } finally {
       await restoreFixtures(fixtures)
     }
@@ -210,6 +221,7 @@ async function waitForState(
 async function waitForDiagnostics(
   uri: vscode.Uri,
   predicate: (diagnostics: readonly vscode.Diagnostic[]) => boolean,
+  description: string,
 ): Promise<readonly vscode.Diagnostic[]> {
   const deadline = Date.now() + diagnosticTimeoutMs
   let diagnostics = vscode.languages.getDiagnostics(uri)
@@ -217,7 +229,7 @@ async function waitForDiagnostics(
     await sleep(100)
     diagnostics = vscode.languages.getDiagnostics(uri)
   }
-  assert.ok(predicate(diagnostics), `Timed out waiting for diagnostics for ${uri.toString()}`)
+  assert.ok(predicate(diagnostics), `Timed out waiting for ${description} for ${uri.toString()}`)
   return diagnostics
 }
 

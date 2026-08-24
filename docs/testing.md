@@ -88,7 +88,7 @@ Run the focused minimum-runtime workspace suite with:
 pnpm --filter prisma test:integration:workspace
 ```
 
-This command rebuilds the extension, compiles the integration tests, launches the minimum supported VS Code version, and runs `workspace.test.js`. The test uses the real Prisma CLI process; no mock language-server executable is part of the fixture. It covers lazy activation, one client per root, root reuse and independence, exclusive bundled/local ownership, complete-text unsaved directive transfers, diagnostics clearing, and missing-entrypoint behavior.
+This command rebuilds the extension, compiles the integration tests, launches the minimum supported VS Code version, and runs `workspace.test.js`. The test uses the real Prisma CLI process; no mock language-server executable is part of the fixture. It covers lazy activation, successful real-client initialization per root, root reuse and independence, exclusive bundled/local ownership, complete-text unsaved directive transfers, bundled diagnostic production and transfer-time clearing, and missing-entrypoint behavior. The current Prisma Next CLI does not publish schema diagnostics.
 
 The runner's installed `@vscode/test-electron` version always adds `--disable-workspace-trust`, so the Electron workspace is deterministically trusted. It cannot represent Restricted Mode without replacing or bypassing the runner's launch contract. Trust rejection is therefore covered at the production classifier and registry boundaries by focused unit tests; a manual Restricted Mode check remains necessary when validating trust behavior end to end.
 

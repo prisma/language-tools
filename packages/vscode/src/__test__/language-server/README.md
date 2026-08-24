@@ -11,7 +11,7 @@ Run the full minimum-and-latest integration suite with `pnpm test:integration`. 
 pnpm --filter prisma test:integration:workspace
 ```
 
-The focused suite verifies that activation and unmarked documents start no local process, each eligible marked root starts exactly one real client, additional documents reuse their root client, roots remain independent, and the missing-entrypoint root has no fallback process. It also observes exclusive bundled/local synchronization, both unsaved directive transfer directions, complete current text/version, URI-scoped diagnostics clearing, and real local diagnostics.
+The focused suite verifies that activation and unmarked documents start no local process, each eligible marked root completes exactly one real client initialization handshake, additional documents reuse their root client, roots remain independent, and the missing-entrypoint root has no fallback process. It also observes exclusive bundled/local synchronization, both unsaved directive transfer directions, complete current text/version, and URI-scoped diagnostics clearing. The current Prisma Next CLI does not publish schema diagnostics, so diagnostic production is asserted only while the document is bundled; routing-state observations prove that those diagnostics are cleared during ownership transfers.
 
 Test-only routing state is exposed through `prisma.test.languageServerRoutingState`. The command is registered only when `isDebugOrTestSession()` is true; production sessions do not install the observer or retain observed document contents. The state contains no process handles.
 
