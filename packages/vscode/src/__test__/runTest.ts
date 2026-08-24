@@ -22,7 +22,10 @@ function test(version?: string, testPattern?: string) {
     version, // optional, default = latest
     extensionDevelopmentPath,
     extensionTestsPath,
-    extensionTestsEnv: testPattern ? { VSCODE_TEST_PATTERN: testPattern } : undefined,
+    extensionTestsEnv: {
+      PRISMA_VSCODE_TEST: '1',
+      ...(testPattern ? { VSCODE_TEST_PATTERN: testPattern } : {}),
+    },
     launchArgs: [
       workspacePath,
       // This disables all extensions except the one being testing

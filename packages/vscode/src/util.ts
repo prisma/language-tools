@@ -16,7 +16,7 @@ import { homedir } from 'os'
 import { readdirSync } from 'fs'
 import path from 'path'
 export function isDebugOrTestSession(): boolean {
-  return env.sessionId === 'someValue.sessionId'
+  return env.sessionId === 'someValue.sessionId' || process.env.PRISMA_VSCODE_TEST === '1'
 }
 
 export { isPrismaNextSchema }

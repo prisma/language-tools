@@ -1,5 +1,9 @@
 import path from 'path'
 import vscode from 'vscode'
+import {
+  languageServerTestStateCommand,
+  type LanguageServerTestState,
+} from '../plugins/prisma-language-server/languageServerTestState'
 
 // Path from dist-tests/__test__/helper.js to package.json
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
@@ -29,10 +33,27 @@ export async function activate(docUri: vscode.Uri): Promise<void> {
   try {
     doc = await vscode.workspace.openTextDocument(docUri)
     editor = await vscode.window.showTextDocument(doc)
+    await waitForBundledRouting(doc)
     await sleep(2500) // Wait for server activation
   } catch (e) {
     console.error(e)
   }
+}
+
+async function waitForBundledRouting(document: vscode.TextDocument): Promise<void> {
+  const documentUri = document.uri.toString()
+  const deadline = Date.now() + 10_000
+
+  while (Date.now() < deadline) {
+    const state = await vscode.commands.executeCommand<LanguageServerTestState>(languageServerTestStateCommand)
+    const latestOpen = [...state.routingEvents]
+      .reverse()
+      .find((event) => event.type === 'opened' && event.documentUri === documentUri)
+    if (latestOpen?.owner.kind === 'bundled') return
+    await sleep(100)
+  }
+
+  throw new Error(`Timed out waiting for bundled language-server routing for ${documentUri}`)
 }
 
 export function toRange(sLine: number, sChar: number, eLine: number, eChar: number): vscode.Range {
