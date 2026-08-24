@@ -17,6 +17,7 @@ export interface BundledClientMiddlewareOptions {
 
 export function createBundledClientMiddleware(options: BundledClientMiddlewareOptions): Middleware {
   const completionDocuments = new WeakMap<CompletionItem, TextDocument>()
+  const bundledDocuments = new Set<string>()
 
   const ownerForDocument = (document: TextDocument): DocumentOwner => {
     void options.ownership.synchronize(document)
@@ -25,21 +26,66 @@ export function createBundledClientMiddleware(options: BundledClientMiddlewareOp
 
   const isBundledDocument = (document: TextDocument): boolean => ownerForDocument(document).kind === 'bundled'
 
+  const clearDiagnostics = (uri: Uri): void => {
+    options.getClient().diagnostics?.delete(uri)
+  }
+
+  const openBundledDocument = (document: TextDocument): void => {
+    const documentUri = document.uri.toString()
+    if (bundledDocuments.has(documentUri)) return
+
+    bundledDocuments.add(documentUri)
+    const client = options.getClient()
+    void client.sendNotification(
+      'textDocument/didOpen',
+      client.code2ProtocolConverter.asOpenTextDocumentParams(document),
+    )
+  }
+
+  const closeBundledDocument = (document: TextDocument): void => {
+    const documentUri = document.uri.toString()
+    if (!bundledDocuments.delete(documentUri)) return
+
+    const client = options.getClient()
+    void client.sendNotification(
+      'textDocument/didClose',
+      client.code2ProtocolConverter.asCloseTextDocumentParams(document),
+    )
+  }
+
   const middleware: Middleware = {
     didOpen: (document, next) => {
+      const documentUri = document.uri.toString()
       if (isBundledDocument(document)) {
-        next(document)
+        if (!bundledDocuments.has(documentUri)) {
+          bundledDocuments.add(documentUri)
+          next(document)
+        }
+      } else {
+        closeBundledDocument(document)
+        clearDiagnostics(document.uri)
       }
     },
     didChange: (event, next) => {
-      if (isBundledDocument(event.document)) {
-        next(event)
+      const document = event.document
+      const documentUri = document.uri.toString()
+      if (isBundledDocument(document)) {
+        if (bundledDocuments.has(documentUri)) {
+          next(event)
+        } else {
+          openBundledDocument(document)
+        }
+      } else {
+        closeBundledDocument(document)
+        clearDiagnostics(document.uri)
       }
     },
     didClose: (document, next) => {
-      if (isBundledDocument(document)) {
+      void options.ownership.synchronize(document)
+      if (bundledDocuments.delete(document.uri.toString())) {
         next(document)
       }
+      clearDiagnostics(document.uri)
     },
     handleDiagnostics: (uri, diagnostics, next) => {
       const document = options.getDocument(uri)

@@ -56,14 +56,29 @@ function createSubject(options: { pinned?: boolean } = {}): {
   diagnosticMessages: string[]
   isSnippetEdit: ReturnType<typeof vi.fn>
   sendRequest: ReturnType<typeof vi.fn>
+  sendNotification: ReturnType<typeof vi.fn>
+  deleteDiagnostics: ReturnType<typeof vi.fn>
 } {
   const documents = new Map<string, TextDocument>()
   const diagnosticMessages: string[] = []
   const isSnippetEdit = vi.fn().mockReturnValue(true)
   const sendRequest = vi.fn()
+  const sendNotification = vi.fn().mockResolvedValue(undefined)
+  const deleteDiagnostics = vi.fn()
   const client = {
     code2ProtocolConverter: {
       asTextDocumentIdentifier: (textDocument: TextDocument) => ({ uri: textDocument.uri.toString() }),
+      asOpenTextDocumentParams: (textDocument: TextDocument) => ({
+        textDocument: {
+          uri: textDocument.uri.toString(),
+          languageId: textDocument.languageId,
+          version: 1,
+          text: textDocument.getText(),
+        },
+      }),
+      asCloseTextDocumentParams: (textDocument: TextDocument) => ({
+        textDocument: { uri: textDocument.uri.toString() },
+      }),
       asRange: () => ({ start: { line: 0, character: 0 }, end: { line: 0, character: 1 } }),
       asCodeActionContext: () => ({ diagnostics: [] }),
     },
@@ -71,6 +86,8 @@ function createSubject(options: { pinned?: boolean } = {}): {
       asCodeAction: (action: { title: string }) => ({ title: action.title, edit: { changes: {} } }),
       asCommand: (command: { title: string; command: string }) => command,
     },
+    diagnostics: { delete: deleteDiagnostics },
+    sendNotification,
     sendRequest,
   } as unknown as LanguageClient
   const ownership = new DocumentOwnershipCoordinator({
@@ -94,24 +111,14 @@ function createSubject(options: { pinned?: boolean } = {}): {
     diagnosticMessages,
     isSnippetEdit,
     sendRequest,
+    sendNotification,
+    deleteDiagnostics,
   }
 }
 
 describe('bundled client ownership middleware', () => {
-  test('does not forward marked document lifecycle notifications', () => {
-    const { middleware } = createSubject()
-    const schema = document('file:///workspace/schema.prisma', '// use prisma-next')
-    const next = vi.fn()
-
-    middleware.didOpen?.(schema, next)
-    middleware.didChange?.({ document: schema } as unknown as TextDocumentChangeEvent, next)
-    middleware.didClose?.(schema, next)
-
-    expect(next).not.toHaveBeenCalled()
-  })
-
-  test('forwards unmarked document lifecycle notifications', () => {
-    const { middleware } = createSubject()
+  test('balances bundled lifecycle notifications without duplicate opens or closes', () => {
+    const { middleware, sendNotification, deleteDiagnostics } = createSubject()
     const schema = document('file:///workspace/schema.prisma', 'model User { id Int @id }')
     const didOpen = vi.fn()
     const didChange = vi.fn()
@@ -119,12 +126,98 @@ describe('bundled client ownership middleware', () => {
     const change = { document: schema } as unknown as TextDocumentChangeEvent
 
     middleware.didOpen?.(schema, didOpen)
+    middleware.didOpen?.(schema, didOpen)
     middleware.didChange?.(change, didChange)
     middleware.didClose?.(schema, didClose)
+    middleware.didClose?.(schema, didClose)
+    middleware.didOpen?.(schema, didOpen)
+    middleware.didClose?.(schema, didClose)
 
+    expect(didOpen).toHaveBeenCalledTimes(2)
     expect(didOpen).toHaveBeenCalledWith(schema)
+    expect(didChange).toHaveBeenCalledOnce()
     expect(didChange).toHaveBeenCalledWith(change)
+    expect(didClose).toHaveBeenCalledTimes(2)
     expect(didClose).toHaveBeenCalledWith(schema)
+    expect(sendNotification).not.toHaveBeenCalled()
+    expect(deleteDiagnostics).toHaveBeenCalledWith(schema.uri)
+  })
+
+  test('closes and clears a bundled document immediately when it becomes marked', () => {
+    const { middleware, sendNotification, deleteDiagnostics } = createSubject()
+    const schema = document('file:///workspace/schema.prisma', 'model User { id Int @id }')
+    const didOpen = vi.fn()
+    const didChange = vi.fn()
+
+    middleware.didOpen?.(schema, didOpen)
+    schema.setText('// use prisma-next\nmodel User { id Int @id }')
+    const markedChange = { document: schema } as unknown as TextDocumentChangeEvent
+    middleware.didChange?.(markedChange, didChange)
+    middleware.didChange?.(markedChange, didChange)
+
+    expect(didChange).not.toHaveBeenCalled()
+    expect(sendNotification).toHaveBeenCalledOnce()
+    expect(sendNotification).toHaveBeenCalledWith('textDocument/didClose', {
+      textDocument: { uri: schema.uri.toString() },
+    })
+    expect(deleteDiagnostics).toHaveBeenCalledWith(schema.uri)
+  })
+
+  test('reopens a reacquired bundled document with complete current text', () => {
+    const { middleware, sendNotification } = createSubject()
+    const schema = document('file:///workspace/schema.prisma', '// use prisma-next')
+    const didOpen = vi.fn()
+    const didChange = vi.fn()
+
+    middleware.didOpen?.(schema, didOpen)
+    schema.setText('model User {\n  id Int @id\n  name String\n}')
+    const unmarkedChange = { document: schema } as unknown as TextDocumentChangeEvent
+    middleware.didChange?.(unmarkedChange, didChange)
+
+    expect(didOpen).not.toHaveBeenCalled()
+    expect(didChange).not.toHaveBeenCalled()
+    expect(sendNotification).toHaveBeenCalledOnce()
+    expect(sendNotification).toHaveBeenCalledWith('textDocument/didOpen', {
+      textDocument: {
+        uri: schema.uri.toString(),
+        languageId: 'prisma',
+        version: 1,
+        text: schema.getText(),
+      },
+    })
+
+    middleware.didChange?.(unmarkedChange, didChange)
+    expect(didChange).toHaveBeenCalledOnce()
+    expect(sendNotification).toHaveBeenCalledOnce()
+  })
+
+  test('forwards a real close for every URI still tracked by the bundled server', () => {
+    const { middleware, sendNotification, deleteDiagnostics } = createSubject()
+    const schema = document('file:///workspace/schema.prisma', 'model User { id Int @id }')
+    const didOpen = vi.fn()
+    const didChange = vi.fn()
+    const didClose = vi.fn()
+
+    middleware.didOpen?.(schema, didOpen)
+    schema.setText('// use prisma-next')
+    middleware.didClose?.(schema, didClose)
+
+    expect(didClose).toHaveBeenCalledOnce()
+    expect(didClose).toHaveBeenCalledWith(schema)
+    expect(sendNotification).not.toHaveBeenCalled()
+    expect(deleteDiagnostics).toHaveBeenCalledWith(schema.uri)
+
+    const reopened = document('file:///workspace/reopened.prisma', 'model User { id Int @id }')
+    middleware.didOpen?.(reopened, didOpen)
+    reopened.setText('// use prisma-next')
+    middleware.didChange?.({ document: reopened } as unknown as TextDocumentChangeEvent, didChange)
+    middleware.didClose?.(reopened, didClose)
+
+    expect(sendNotification).toHaveBeenCalledOnce()
+    expect(sendNotification).toHaveBeenCalledWith('textDocument/didClose', {
+      textDocument: { uri: reopened.uri.toString() },
+    })
+    expect(didClose).toHaveBeenCalledOnce()
   })
 
   test('gates every advertised document request while preserving unmarked forwarding', async () => {
@@ -222,13 +315,17 @@ describe('bundled client ownership middleware', () => {
     expect(sendRequest).toHaveBeenCalledOnce()
   })
 
-  test('allows pinned marked documents to use the bundled client', () => {
+  test('allows pinned marked documents to stay synchronized with the bundled client', () => {
     const { middleware } = createSubject({ pinned: true })
     const schema = document('file:///workspace/schema.prisma', '// use prisma-next')
-    const next = vi.fn()
+    const didOpen = vi.fn()
+    const didChange = vi.fn()
+    const change = { document: schema } as unknown as TextDocumentChangeEvent
 
-    middleware.didOpen?.(schema, next)
+    middleware.didOpen?.(schema, didOpen)
+    middleware.didChange?.(change, didChange)
 
-    expect(next).toHaveBeenCalledWith(schema)
+    expect(didOpen).toHaveBeenCalledWith(schema)
+    expect(didChange).toHaveBeenCalledWith(change)
   })
 })
