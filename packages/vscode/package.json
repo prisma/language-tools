@@ -47,7 +47,7 @@
     "watch": "node esbuild.mjs --watch",
     "test:integration": "rm -rf ./dist-tests && node esbuild.mjs && tsc -p tsconfig.test.json && node dist-tests/__test__/runTest true",
     "test:integration:workspace": "rm -rf ./dist-tests && node esbuild.mjs && tsc -p tsconfig.test.json && node dist-tests/__test__/runTest --minimum-only --test-pattern workspace.test.js",
-    "test:ownership": "vitest run src/plugins/prisma-language-server/documentOwnership.test.ts src/plugins/prisma-language-server/bundledClientMiddleware.test.ts",
+    "test:ownership": "vitest run src/plugins/prisma-language-server/documentOwnership.test.ts src/plugins/prisma-language-server/bundledClientMiddleware.test.ts src/plugins/prisma-language-server/localPrismaNextClientRegistry.test.ts",
     "test:playwright": "playwright test",
     "test:playwright:headless": "CI=true xvfb-run -a npm run test:playwright",
     "vscode:prepublish": "pnpm run build",

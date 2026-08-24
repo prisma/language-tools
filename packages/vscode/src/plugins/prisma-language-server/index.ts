@@ -23,6 +23,7 @@ import * as prisma6Handling from '../../prisma6Handling'
 import { getPackageJSON } from '../../getPackageJSON'
 import { DocumentOwnershipCoordinator } from './documentOwnership'
 import { createBundledClientMiddleware } from './bundledClientMiddleware'
+import { LocalPrismaNextClientRegistry, localPrismaNextClientTestStateCommand } from './localPrismaNextClientRegistry'
 
 let client: LanguageClient
 let serverModule: string
@@ -105,10 +106,24 @@ const plugin: PrismaVSCodePlugin = {
 
     setGenerateWatcher(!!workspace.getConfiguration('prisma').get('fileWatcher'))
 
+    const localClients = new LocalPrismaNextClientRegistry({
+      workspace,
+      createClient: (id, name, serverOptions, localClientOptions) =>
+        new LanguageClient(id, name, serverOptions, localClientOptions),
+      registerDisposable: (disposable) => context.subscriptions.push(disposable),
+      handleStartError: (workspaceFolder, error) => {
+        console.error(`Failed to start Prisma Next Language Server for ${workspaceFolder.uri.toString()}`, error)
+      },
+    })
     const ownership = new DocumentOwnershipCoordinator({
       workspace,
       policy: {
         isPinnedToPrisma6: () => !!workspace.getConfiguration('prisma').get<boolean>('pinToPrisma6'),
+      },
+      prepareOwner: async ({ document, nextOwner }) => {
+        if (nextOwner.kind === 'local') {
+          await localClients.ensureClientForDocument(document)
+        }
       },
     })
 
@@ -132,6 +147,11 @@ const plugin: PrismaVSCodePlugin = {
     let started = false
     const needsLanguageServer = (doc: TextDocument): boolean =>
       doc.languageId === 'prisma' && ownership.classify(doc).kind === 'bundled'
+    const prepareLocalClient = (document: TextDocument): void => {
+      if (document.languageId === 'prisma' && ownership.classify(document).kind === 'local') {
+        void ownership.synchronize(document)
+      }
+    }
 
     const maybeStart = () => {
       if (started) return
@@ -204,13 +224,26 @@ const plugin: PrismaVSCodePlugin = {
         void window.showInformationMessage('Unpinned workspace from Prisma 6.')
       }),
 
-      workspace.onDidOpenTextDocument(() => maybeStart()),
-      workspace.onDidChangeTextDocument(() => maybeStart()),
+      workspace.onDidOpenTextDocument((document) => {
+        maybeStart()
+        prepareLocalClient(document)
+      }),
+      workspace.onDidChangeTextDocument((event) => {
+        maybeStart()
+        prepareLocalClient(event.document)
+      }),
     )
 
     maybeStart()
+    for (const document of workspace.textDocuments) {
+      prepareLocalClient(document)
+    }
 
-    if (!isDebugOrTest) {
+    if (isDebugOrTest) {
+      context.subscriptions.push(
+        commands.registerCommand(localPrismaNextClientTestStateCommand, () => localClients.getTestState()),
+      )
+    } else {
       const packageJSON = getPackageJSON(context)
       const extensionId = 'prisma.' + packageJSON.name
       const extensionVersion = packageJSON.version ?? 'unknown'
