@@ -75,7 +75,7 @@ suite('Multi-root integration workspace', () => {
       assert.deepStrictEqual(initialState.localClients.startCountsByWorkspaceFolderUri, {})
       assertExclusiveOwners(initialState)
 
-      const invalidSchema = 'model Broken {\n  id\n}\n'
+      const invalidSchema = 'model Broken {\n  id Missing\n}\n'
       await replaceDocument(documentA, invalidSchema)
       await waitForDiagnostics(documentA.uri, (diagnostics) => diagnostics.length > 0)
 

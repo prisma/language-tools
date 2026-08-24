@@ -34,7 +34,7 @@ let fileWatcher: FileWatcher.type | undefined
 
 const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
 
-const activateClient = (context: ExtensionContext, clientOptions: LanguageClientOptions) => {
+const activateClient = async (context: ExtensionContext, clientOptions: LanguageClientOptions): Promise<void> => {
   const prismaConfig = workspace.getConfiguration('prisma')
   // Create the language client
   const serverOptions = getServerOptions(prismaConfig, context)
@@ -44,6 +44,7 @@ const activateClient = (context: ExtensionContext, clientOptions: LanguageClient
 
   // Start the client. This will also launch the server
   context.subscriptions.push(disposable)
+  await client.onReady()
 }
 
 const onFileChange = (filepath: string) => {
@@ -154,19 +155,20 @@ const plugin: PrismaVSCodePlugin = {
     }
 
     let started = false
+    let clientReady = Promise.resolve()
     const needsLanguageServer = (doc: TextDocument): boolean =>
       doc.languageId === 'prisma' && ownership.classify(doc).kind === 'bundled'
     const synchronizeDocument = (document: TextDocument): void => {
       if (document.languageId === 'prisma') {
-        void ownership.synchronize(document)
+        void clientReady.then(() => ownership.synchronize(document))
       }
     }
 
-    const maybeStart = () => {
+    const maybeStart = (document?: TextDocument) => {
       if (started) return
-      if (!workspace.textDocuments.some(needsLanguageServer)) return
+      if (document ? !needsLanguageServer(document) : !workspace.textDocuments.some(needsLanguageServer)) return
       started = true
-      activateClient(context, clientOptions)
+      clientReady = activateClient(context, clientOptions)
     }
 
     const restartLanguageServer = async () => {
@@ -234,11 +236,11 @@ const plugin: PrismaVSCodePlugin = {
       }),
 
       workspace.onDidOpenTextDocument((document) => {
-        maybeStart()
+        maybeStart(document)
         synchronizeDocument(document)
       }),
       workspace.onDidChangeTextDocument((event) => {
-        maybeStart()
+        maybeStart(event.document)
         synchronizeDocument(event.document)
       }),
       workspace.onDidCloseTextDocument((document) => {
