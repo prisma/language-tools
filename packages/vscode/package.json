@@ -689,7 +689,7 @@
     "@types/node": "20.14.8",
     "@types/sinon": "^20.0.0",
     "@types/vscode": "1.104.0",
-    "@vscode/test-electron": "2.4.1",
+    "@vscode/test-electron": "3.1.0",
     "@vscode/vsce": "2.29.0",
     "esbuild": "^0.27.1",
     "glob": "8.1.0",
