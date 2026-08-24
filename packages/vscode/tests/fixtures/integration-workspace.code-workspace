@@ -8,5 +8,9 @@
       "name": "integration-root-b",
       "path": "integration-workspace/root-b",
     },
+    {
+      "name": "integration-root-missing",
+      "path": "integration-workspace/root-missing",
+    },
   ],
 }

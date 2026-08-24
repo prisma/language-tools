@@ -43,10 +43,12 @@ export interface LocalPrismaNextClientRegistryOptions {
   readonly entrypointExists?: (entrypoint: string) => Promise<boolean>
   readonly handleStartError?: (workspaceFolder: WorkspaceFolder, error: unknown) => void
   readonly launcher?: Omit<LocalPrismaNextLauncherOptions, 'handleProcessError'>
+  readonly collectTestState?: boolean
 }
 
 export interface LocalPrismaNextClientTestState {
   readonly startedWorkspaceFolderUris: readonly string[]
+  readonly startCountsByWorkspaceFolderUri: Readonly<Record<string, number>>
 }
 
 interface LocalPrismaNextClientEntry {
@@ -57,8 +59,11 @@ interface LocalPrismaNextClientEntry {
 export class LocalPrismaNextClientRegistry {
   private readonly clients = new Map<string, Promise<LocalPrismaNextClientEntry | undefined>>()
   private readonly startedClients = new Map<string, LocalPrismaNextClientEntry>()
+  private readonly startCounts: Map<string, number> | undefined
 
-  constructor(private readonly options: LocalPrismaNextClientRegistryOptions) {}
+  constructor(private readonly options: LocalPrismaNextClientRegistryOptions) {
+    this.startCounts = options.collectTestState ? new Map() : undefined
+  }
 
   ensureClientForDocument(document: TextDocument): Promise<LanguageClient | undefined> {
     if (!this.options.workspace.isTrusted || document.uri.scheme !== 'file') {
@@ -95,6 +100,9 @@ export class LocalPrismaNextClientRegistry {
   getTestState(): LocalPrismaNextClientTestState {
     return {
       startedWorkspaceFolderUris: [...this.startedClients.keys()].sort(),
+      startCountsByWorkspaceFolderUri: Object.fromEntries(
+        [...(this.startCounts?.entries() ?? [])].sort(([left], [right]) => left.localeCompare(right)),
+      ),
     }
   }
 
@@ -139,6 +147,9 @@ export class LocalPrismaNextClientRegistry {
       await client.onReady()
       const entry = { client, middleware }
       this.startedClients.set(workspaceFolderUri, entry)
+      if (this.startCounts) {
+        this.startCounts.set(workspaceFolderUri, (this.startCounts.get(workspaceFolderUri) ?? 0) + 1)
+      }
       return entry
     } catch (error) {
       this.options.handleStartError?.(workspaceFolder, error)

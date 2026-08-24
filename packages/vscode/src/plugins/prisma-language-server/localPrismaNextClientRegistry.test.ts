@@ -210,6 +210,10 @@ describe('LocalPrismaNextClientRegistry', () => {
 
     await expect(startup).resolves.toBe(client)
     await expect(open).resolves.toBe(false)
+    expect(registry.getTestState()).toEqual({
+      startedWorkspaceFolderUris: [rootA.uri.toString()],
+      startCountsByWorkspaceFolderUri: {},
+    })
   })
 
   test('publishes pending startup per root and starts independent clients', async () => {
@@ -238,6 +242,7 @@ describe('LocalPrismaNextClientRegistry', () => {
       entrypointExists,
       createClient,
       registerDisposable,
+      collectTestState: true,
       launcher: {
         executable: '/extension-host',
         environment: {},
@@ -279,6 +284,10 @@ describe('LocalPrismaNextClientRegistry', () => {
     ])
     expect(registry.getTestState()).toEqual({
       startedWorkspaceFolderUris: [rootA.uri.toString(), rootB.uri.toString()],
+      startCountsByWorkspaceFolderUri: {
+        [rootA.uri.toString()]: 1,
+        [rootB.uri.toString()]: 1,
+      },
     })
   })
 
@@ -352,6 +361,9 @@ describe('LocalPrismaNextClientRegistry', () => {
     expect(createClient).toHaveBeenCalledOnce()
     expect(handleStartError).toHaveBeenCalledOnce()
     expect(handleStartError).toHaveBeenCalledWith(rootA, startError)
-    expect(registry.getTestState()).toEqual({ startedWorkspaceFolderUris: [] })
+    expect(registry.getTestState()).toEqual({
+      startedWorkspaceFolderUris: [],
+      startCountsByWorkspaceFolderUri: {},
+    })
   })
 })

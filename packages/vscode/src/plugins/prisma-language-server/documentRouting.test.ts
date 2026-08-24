@@ -21,12 +21,17 @@ function workspaceFolder(value: string): WorkspaceFolder {
 
 function document(value: string, text: string): TextDocument & { setText(value: string): void } {
   let currentText = text
+  let version = 1
   return {
     uri: uri(value),
     languageId: 'prisma',
+    get version() {
+      return version
+    },
     getText: () => currentText,
     setText: (value) => {
       currentText = value
+      version += 1
     },
   } as TextDocument & { setText(value: string): void }
 }
@@ -153,6 +158,11 @@ describe('document routing commits', () => {
       },
     ])
     expect(subject.active).toEqual(new Set([`local:${rootA.uri.toString()}:${schema.uri.toString()}`]))
+    expect(subject.events.at(-1)).toMatchObject({
+      type: 'opened',
+      documentText: schema.getText(),
+      documentVersion: schema.version,
+    })
     expect(subject.activeOwnerCountsAfterOpen).toEqual([1, 1])
     expect(subject.clearBundledDiagnostics).toHaveBeenCalledWith(schema.uri)
 
@@ -164,6 +174,11 @@ describe('document routing commits', () => {
     expect(subject.events.map((event) => event.type)).toEqual(['closed', 'diagnosticsCleared', 'opened'])
     expect(subject.opens).toEqual([{ owner: 'bundled', uri: schema.uri.toString(), text: schema.getText() }])
     expect(subject.active).toEqual(new Set([`bundled:${schema.uri.toString()}`]))
+    expect(subject.events.at(-1)).toMatchObject({
+      type: 'opened',
+      documentText: schema.getText(),
+      documentVersion: schema.version,
+    })
     expect(subject.activeOwnerCountsAfterOpen).toEqual([1, 1, 1])
     expect(subject.clearLocalDiagnostics).toHaveBeenCalledWith(rootA.uri.toString(), schema.uri)
   })

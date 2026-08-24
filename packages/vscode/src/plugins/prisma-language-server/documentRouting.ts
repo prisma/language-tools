@@ -17,7 +17,13 @@ export interface LocalDocumentSynchronization {
 export type DocumentRoutingEvent =
   | { readonly type: 'closed'; readonly owner: DocumentOwner; readonly documentUri: string }
   | { readonly type: 'diagnosticsCleared'; readonly owner: DocumentOwner; readonly documentUri: string }
-  | { readonly type: 'opened'; readonly owner: DocumentOwner; readonly documentUri: string }
+  | {
+      readonly type: 'opened'
+      readonly owner: DocumentOwner
+      readonly documentUri: string
+      readonly documentText: string
+      readonly documentVersion: number
+    }
 
 export interface DocumentRoutingOptions {
   readonly getOwnership: () => DocumentOwnershipCoordinator
@@ -38,14 +44,14 @@ export function createPrepareDocumentRoutingCommit(options: DocumentRoutingOptio
 
       if (nextOwner.kind === 'bundled') {
         options.getBundled().openDocument(document)
-        options.observer?.({ type: 'opened', owner: nextOwner, documentUri: document.uri.toString() })
+        observeOpened(options, nextOwner, document)
       } else if (nextOwner.kind === 'local') {
         const local = options.getLocal()
         const client = await local.ensureClientForDocument(document)
         if (client && isCurrentOpenCandidate(options, document, nextOwner)) {
           const opened = await local.openDocument(nextOwner.workspaceFolderUri, document)
           if (opened && isCurrentOpenCandidate(options, document, nextOwner)) {
-            options.observer?.({ type: 'opened', owner: nextOwner, documentUri: document.uri.toString() })
+            observeOpened(options, nextOwner, document)
           }
         }
       }
@@ -70,6 +76,17 @@ async function closePreviousOwner(
     await local.clearDiagnostics(previousOwner.workspaceFolderUri, document.uri)
     options.observer?.({ type: 'diagnosticsCleared', owner: previousOwner, documentUri: document.uri.toString() })
   }
+}
+
+function observeOpened(options: DocumentRoutingOptions, owner: DocumentOwner, document: TextDocument): void {
+  if (!options.observer) return
+  options.observer({
+    type: 'opened',
+    owner,
+    documentUri: document.uri.toString(),
+    documentText: document.getText(),
+    documentVersion: document.version,
+  })
 }
 
 function isCurrentOpenCandidate(
