@@ -1,5 +1,6 @@
-import { defineConfig } from '@prisma/orm-postgres/config'
+import { definePrismaConfig } from '@prisma/cli-engine'
+import { defineConfig as ormConfig } from '@prisma/orm-postgres/config'
 
-export default defineConfig({
-  contract: './next.prisma',
+export default definePrismaConfig({
+  orm: ormConfig({ contract: './next.prisma' }),
 })
