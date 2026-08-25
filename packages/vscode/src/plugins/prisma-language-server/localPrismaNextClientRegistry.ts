@@ -219,10 +219,8 @@ export function createLocalPrismaNextClientOptions(
   workspaceFolder: WorkspaceFolder,
   middleware: LocalClientMiddleware,
 ): LanguageClientOptions {
-  const rootPath = workspaceFolder.uri.fsPath.split('\\').join('/')
-  const normalizedRoot = rootPath.endsWith('/') ? rootPath.slice(0, -1) : rootPath
   return {
-    documentSelector: [{ language: 'prisma', scheme: 'file', pattern: `${normalizedRoot}/**/*` }],
+    documentSelector: [{ language: 'prisma', scheme: 'file' }],
     workspaceFolder,
     middleware,
   }
