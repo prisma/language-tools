@@ -1,9 +1,10 @@
 import type { TextDocument, Uri } from 'vscode'
-import type {
-  DocumentOwner,
-  DocumentOwnerCommitOutcome,
-  DocumentOwnershipCoordinator,
-  PrepareDocumentOwnerCommit,
+import {
+  ownersEqual,
+  type DocumentOwner,
+  type DocumentOwnerCommitOutcome,
+  type DocumentOwnershipCoordinator,
+  type PrepareDocumentOwnerCommit,
 } from './documentOwnership'
 
 export interface LegacyDocumentSynchronization {
@@ -29,7 +30,7 @@ export interface DocumentRoutingOptions {
 
 export function createPrepareDocumentRoutingCommit(options: DocumentRoutingOptions): PrepareDocumentOwnerCommit {
   return ({ document, previousSettledOwner, nextDesiredOwner }) => {
-    if (documentOwnersEqual(previousSettledOwner, nextDesiredOwner)) return undefined
+    if (ownersEqual(previousSettledOwner, nextDesiredOwner)) return undefined
 
     return async () => {
       if (!options.isActive()) return commitOutcome(previousSettledOwner)
@@ -115,14 +116,6 @@ function isDesiredOpenCandidate(
   return (
     options.isActive() &&
     options.isDocumentOpen(document) &&
-    documentOwnersEqual(options.getOwnership().getDesiredOwner(document), candidate)
-  )
-}
-
-export function documentOwnersEqual(left: DocumentOwner, right: DocumentOwner): boolean {
-  if (left.kind !== right.kind) return false
-  return (
-    left.kind !== 'prisma-next' ||
-    (right.kind === 'prisma-next' && left.workspaceFolderUri === right.workspaceFolderUri)
+    ownersEqual(options.getOwnership().getDesiredOwner(document), candidate)
   )
 }

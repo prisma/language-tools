@@ -174,7 +174,7 @@ export class DocumentOwnershipCoordinator {
   }
 }
 
-function ownersEqual(left: DocumentOwner, right: DocumentOwner): boolean {
+export function ownersEqual(left: DocumentOwner, right: DocumentOwner): boolean {
   if (left.kind !== right.kind) {
     return false
   }
