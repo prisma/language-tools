@@ -33,3 +33,25 @@ for (const line of schema.iterLines()) {
 See [Prisma Multi-File Schema Documentation][multi-file-docs] for details.
 
 [multi-file-docs]: https://www.prisma.io/docs/orm/prisma-schema/overview/location#multi-file-prisma-schema
+
+## VS Code document routing
+
+When `prisma.pinToPrisma6` is disabled, the VS Code extension routes each open Prisma document independently:
+
+| Document                                                                          | Owner                                      |
+| --------------------------------------------------------------------------------- | ------------------------------------------ |
+| No `// use prisma-next` directive                                                 | Legacy language server                     |
+| Directive present, trusted file workspace, matching root, and Prisma Next CLI available | Prisma Next client for that workspace root |
+| Directive present but Prisma Next execution is ineligible or unavailable                | No active language-server synchronization  |
+
+The directive is content-based and applies per file. A marked file does not opt sibling files or the rest of a multi-file schema into Prisma Next tooling.
+
+For marked files, the extension uses only the Prisma CLI installed at:
+
+```text
+<workspace-root>/node_modules/prisma/dist/prisma.js
+```
+
+The workspace must be trusted. The extension does not invoke a package manager, search parent directories, or fall back to a global installation. If the CLI is unavailable, the marked file has no language-server features until a suitable Prisma Next server can be started.
+
+The extension starts at most one Prisma Next language server per workspace root. Adding or removing the directive in an open file transfers that file between the legacy and Prisma Next servers without requiring a save or restart. Prisma Next servers do not restart automatically after a failure; use **Prisma: Restart Language Server** to retry. Pinning the workspace to Prisma 6 routes every Prisma document to the legacy Prisma 6 server.

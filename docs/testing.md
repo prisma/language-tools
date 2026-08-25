@@ -61,8 +61,8 @@ const userFile = helper.file('User.prisma')
 pnpm test:e2e  # runs scripts/e2e.sh
 ```
 
-Uses the VS Code test framework for E2E testing of the extension. The language
-server is bundled with the extension, so tests always use the local version.
+Uses the VS Code test framework for E2E testing of the extension. The legacy
+language server ships with the extension, so tests exercise the workspace build.
 
 ### Post-Publish E2E Testing
 
@@ -74,3 +74,17 @@ pnpm test:e2e:vsix <extension_type> <os> <version>
 
 Both scripts use the same tests in `packages/vscode/src/__test__` with fixtures
 located in `packages/vscode/fixtures`.
+
+## VS Code Electron integration tests
+
+The Electron runner opens `packages/vscode/tests/fixtures/integration-workspace.code-workspace`. Its single workspace root is a pnpm importer with the lockfile-resolved `prisma@8.0.0-rc.10-dev.82` CLI at `node_modules/prisma/dist/prisma.js`. The fixture uses `@prisma/cli-engine@0.2.3` and `@prisma/orm-postgres@8.0.0-rc.7-dev.1` (which resolves `@prisma/orm-toolchain@8.0.0-rc.7-dev.1`) plus a valid `prisma.config.ts` whose contract is only `next.prisma`.
+
+Run the focused minimum-runtime workspace suite with:
+
+```bash
+pnpm --filter prisma test:integration:workspace
+```
+
+This command rebuilds the extension, compiles the integration tests, launches the minimum supported VS Code version, and runs `workspace.test.js`. The test uses the legacy language server and the real Prisma Next server launched from the workspace-local Prisma CLI side by side; no mock language-server executable is part of the fixture.
+
+The test opens an empty, unmarked `legacy.prisma` and a marked `next.prisma` in separate editor columns, then polls only the public `vscode.executeCompletionItemProvider` command with a fixed timeout. At `(0, 0)`, the legacy Prisma 7 server must offer `datasource`, `generator`, and `model`, classify `datasource` as `CompletionItemKind.Class`, and omit `namespace`. At `(1, 0)`, the Prisma Next server from the workspace-local Prisma 8 CLI must offer `namespace` as `CompletionItemKind.Keyword` with detail `PSL declaration keyword`, and omit `datasource`. These assertions verify observable routing behavior without extension-private commands, owner state, events, or process start counts.

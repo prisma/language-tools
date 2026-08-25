@@ -16,7 +16,11 @@ module.exports = {
     {
       files: ['*.ts'],
       parserOptions: {
-        project: ['./tsconfig.json', './packages/*/tsconfig.json'],
+        project: [
+          './tsconfig.json',
+          './packages/*/tsconfig.json',
+          './packages/vscode/tests/fixtures/integration-workspace/root-a/tsconfig.eslint.json',
+        ],
       },
       extends: [
         'plugin:@typescript-eslint/recommended',

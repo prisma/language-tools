@@ -5,7 +5,7 @@ import { runTests } from '@vscode/test-electron'
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 const packageJson = require('../../package.json') as { engines: { vscode: string } }
 
-function test(version?: string) {
+function test(version?: string, testPattern?: string) {
   // The folder containing the Extension Manifest package.json
   // Passed to `--extensionDevelopmentPath`
   const extensionDevelopmentPath = path.resolve(__dirname, '../../')
@@ -14,12 +14,17 @@ function test(version?: string) {
   // Passed to --extensionTestsPath
   const extensionTestsPath = path.resolve(__dirname, './index')
 
+  // The explicit multi-root workspace opened by every integration test run.
+  const workspacePath = path.resolve(__dirname, '../../tests/fixtures/integration-workspace.code-workspace')
+
   // Downloads VS Code, unzip it and run the integration test
   return runTests({
     version, // optional, default = latest
     extensionDevelopmentPath,
     extensionTestsPath,
+    extensionTestsEnv: testPattern ? { VSCODE_TEST_PATTERN: testPattern } : undefined,
     launchArgs: [
+      workspacePath,
       // This disables all extensions except the one being testing
       '--disable-extensions',
       // ? This may or may not be necessary?
@@ -41,15 +46,24 @@ function test(version?: string) {
 
 async function main(): Promise<void> {
   try {
+    const minimumOnly = process.argv.includes('--minimum-only')
+    const testPatternFlag = process.argv.indexOf('--test-pattern')
+    const testPattern = testPatternFlag === -1 ? undefined : process.argv[testPatternFlag + 1]
+    if (testPatternFlag !== -1 && !testPattern) {
+      throw new Error('--test-pattern requires a glob pattern')
+    }
+
     // 1 - Run on our minimum supported version from package.json
     // eslint-disable-next-line
     const minimumSupportedVersion: string = packageJson.engines.vscode.replace('~', '').replace('^', '') // remove semver chars
     console.log(`*** Testing on minimum supported version of VS Code: ${minimumSupportedVersion} ***`)
-    await test(minimumSupportedVersion)
+    await test(minimumSupportedVersion, testPattern)
 
     // 2 - Run again on latest version
-    console.log(`*** Testing on latest version of VS Code ***`)
-    await test()
+    if (!minimumOnly) {
+      console.log(`*** Testing on latest version of VS Code ***`)
+      await test(undefined, testPattern)
+    }
   } catch (err) {
     const errMsg = err instanceof Error ? ` ${err.message}` : ''
 

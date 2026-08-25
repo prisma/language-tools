@@ -4,8 +4,8 @@
     "outDir": "dist-tests",
     "composite": false,
     "declaration": false,
-    "module": "CommonJS",
-    "moduleResolution": "bundler",
+    "module": "Node16",
+    "moduleResolution": "Node16",
     "skipLibCheck": true
   },
   "include": ["src/**/*"],

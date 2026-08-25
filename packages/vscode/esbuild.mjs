@@ -107,7 +107,7 @@ const languageServerConfig = {
 
 /**
  * Configuration for the Prisma 6 Language Server.
- * This is bundled separately and used when pinToPrisma6 is enabled.
+ * This legacy server is built separately and used when pinToPrisma6 is enabled.
  * @type {import('esbuild').BuildOptions}
  */
 const prisma6LanguageServerConfig = {
@@ -258,12 +258,13 @@ function copyStaticAssets() {
   }
 
   console.log('Copying @prisma/studio-core-licensed static assets...')
-  // Use dereference to resolve symlinks (important for pnpm)
+  // Replace the previous copy so repeated builds work with pnpm's symlinked package directory.
+  rmSync(studioDest, { recursive: true, force: true })
   cpSync(studioSrc, studioDest, { recursive: true, dereference: true })
 
   // Copy prisma-schema-wasm WASM file to Prisma 6 language server directory
-  // The WASM is loaded via __dirname in the bundled code, so it needs to be
-  // in the same directory as the bundled Prisma 6 language server bin.js
+  // The WASM is loaded via __dirname in the legacy server code, so it needs to be
+  // in the same directory as the legacy Prisma 6 language server bin.js.
   // Note: We need to find the Prisma 6 version specifically since there are
   // two versions (Prisma 6 and Prisma 7) of @prisma/prisma-schema-wasm
   const prisma6LsDistDir = join(__dirname, 'dist/prisma6-language-server')
@@ -291,8 +292,8 @@ function copyStaticAssets() {
   cpSync(prisma6WasmSrc, join(prisma6LsDistDir, 'prisma_schema_build_bg.wasm'))
 
   // Copy prisma-schema-wasm WASM file to language server directory
-  // The WASM is loaded via __dirname in the bundled code, so it needs to be
-  // in the same directory as the bundled language server bin.js
+  // The WASM is loaded via __dirname in the legacy server code, so it needs to be
+  // in the same directory as the legacy language server bin.js.
   const lsDistDir = join(__dirname, 'dist/language-server')
   mkdirSync(lsDistDir, { recursive: true })
 

@@ -12,7 +12,8 @@ export function run(): Promise<void> {
   const testsRoot = __dirname
 
   return new Promise((resolve, reject) => {
-    glob('**/**.test.js', { cwd: testsRoot }, (err, files) => {
+    const testPattern = process.env.VSCODE_TEST_PATTERN ?? '**/**.test.js'
+    glob(testPattern, { cwd: testsRoot }, (err, files) => {
       if (err) {
         return reject(err)
       }

@@ -29,10 +29,12 @@ export async function activate(docUri: vscode.Uri): Promise<void> {
   try {
     doc = await vscode.workspace.openTextDocument(docUri)
     editor = await vscode.window.showTextDocument(doc)
-    await sleep(2500) // Wait for server activation
   } catch (e) {
     console.error(e)
+    return
   }
+
+  await sleep(2500) // Wait for server activation
 }
 
 export function toRange(sLine: number, sChar: number, eLine: number, eChar: number): vscode.Range {
@@ -47,6 +49,22 @@ export const getDocPath = (p: string): string => {
 }
 export const getDocUri = (p: string): vscode.Uri => {
   return vscode.Uri.file(getDocPath(p))
+}
+
+export function getWorkspaceFolder(name: string): vscode.WorkspaceFolder {
+  const workspaceFolder = vscode.workspace.workspaceFolders?.find((folder) => folder.name === name)
+  if (!workspaceFolder) {
+    throw new Error(`Workspace folder not found: ${name}`)
+  }
+  return workspaceFolder
+}
+
+export function getWorkspaceDocUri(workspaceFolder: vscode.WorkspaceFolder, relativePath: string): vscode.Uri {
+  return vscode.Uri.joinPath(workspaceFolder.uri, relativePath)
+}
+
+export function getPrismaCliEntrypoint(workspaceFolder: vscode.WorkspaceFolder): vscode.Uri {
+  return vscode.Uri.joinPath(workspaceFolder.uri, 'node_modules', 'prisma', 'dist', 'prisma.js')
 }
 
 export async function setTestContent(content: string): Promise<boolean> {

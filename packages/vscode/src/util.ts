@@ -106,22 +106,43 @@ export function applySnippetWorkspaceEdit(): (edit: WorkspaceEdit) => Promise<vo
   }
 }
 
-export function createLanguageServer(
+export function createLegacyLanguageServer(
   serverOptions: ServerOptions,
   clientOptions: LanguageClientOptions,
 ): LanguageClient {
-  return new LanguageClient('prisma', 'Prisma Language Server', serverOptions, clientOptions)
+  return new LanguageClient('prisma', 'Prisma Legacy Language Server', serverOptions, {
+    ...clientOptions,
+    outputChannelName: 'Prisma Legacy Language Server',
+  })
 }
+export interface RestartClientLifecycle {
+  assertActive?(): void
+  waitFor?<T>(operation: Promise<T>): Promise<T>
+  onClientStopped(): void
+  onClientCreated(client: LanguageClient): void
+}
+
 export const restartClient = async (
   context: ExtensionContext,
   client: LanguageClient,
   serverOptions: ServerOptions,
   clientOptions: LanguageClientOptions,
+  lifecycle?: RestartClientLifecycle,
 ): Promise<LanguageClient> => {
   client?.diagnostics?.dispose()
-  if (client) await client.stop()
-  client = createLanguageServer(serverOptions, clientOptions)
+  if (client) {
+    const stopping = client.stop()
+    await (lifecycle?.waitFor?.(stopping) ?? stopping)
+  }
+  lifecycle?.onClientStopped()
+  lifecycle?.assertActive?.()
+  client = createLegacyLanguageServer(serverOptions, clientOptions)
+  lifecycle?.assertActive?.()
+  lifecycle?.onClientCreated(client)
+  lifecycle?.assertActive?.()
   context.subscriptions.push(client.start())
-  await client.onReady()
+  const readiness = client.onReady()
+  await (lifecycle?.waitFor?.(readiness) ?? readiness)
+  lifecycle?.assertActive?.()
   return client
 }
