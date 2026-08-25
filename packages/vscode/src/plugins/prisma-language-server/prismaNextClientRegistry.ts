@@ -277,8 +277,9 @@ export function createPrismaNextClientOptions(
 ): LanguageClientOptions {
   const rootPath = workspaceFolder.uri.fsPath.split('\\').join('/')
   const normalizedRoot = rootPath.endsWith('/') ? rootPath.slice(0, -1) : rootPath
+  const escapedRoot = normalizedRoot.replace(/([?*[\]])/g, '[$1]')
   return {
-    documentSelector: [{ language: 'prisma', scheme: 'file', pattern: `${normalizedRoot}/**/*` }],
+    documentSelector: [{ language: 'prisma', scheme: 'file', pattern: `${escapedRoot}/**/*` }],
     workspaceFolder,
     middleware,
     initializationFailedHandler: () => false,
