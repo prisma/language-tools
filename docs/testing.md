@@ -77,7 +77,7 @@ located in `packages/vscode/fixtures`.
 
 ## VS Code Electron integration tests
 
-The Electron runner opens `packages/vscode/tests/fixtures/integration-workspace.code-workspace`. Its single workspace root is a pnpm importer with the lockfile-resolved `prisma@8.0.0-rc.7` CLI at `node_modules/prisma/dist/prisma.js`. The fixture uses `@prisma/cli-engine@0.2.3` and `@prisma/orm-postgres@8.0.0-rc.7-dev.1` (which resolves `@prisma/orm-toolchain@8.0.0-rc.7-dev.1`) plus a valid `prisma.config.ts` whose contract is only `next.prisma`.
+The Electron runner opens `packages/vscode/tests/fixtures/integration-workspace.code-workspace`. Its single workspace root is a pnpm importer with the lockfile-resolved `prisma@8.0.0-rc.10-dev.82` CLI at `node_modules/prisma/dist/prisma.js`. The fixture uses `@prisma/cli-engine@0.2.3` and `@prisma/orm-postgres@8.0.0-rc.7-dev.1` (which resolves `@prisma/orm-toolchain@8.0.0-rc.7-dev.1`) plus a valid `prisma.config.ts` whose contract is only `next.prisma`.
 
 Run the focused minimum-runtime workspace suite with:
 

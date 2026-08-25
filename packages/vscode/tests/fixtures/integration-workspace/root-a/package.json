@@ -5,7 +5,7 @@
   "devDependencies": {
     "@prisma/cli-engine": "0.2.3",
     "@prisma/orm-postgres": "8.0.0-rc.7-dev.1",
-    "prisma": "8.0.0-rc.7",
+    "prisma": "8.0.0-rc.10-dev.82",
     "typescript": "5.9.3"
   }
 }
