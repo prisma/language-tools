@@ -17,7 +17,7 @@ suite('Should show /// documentation comments for', () => {
   const expectedHover = `\`\`\`prisma\nmodel Post {\n\t...\n\tauthor User? @relation(name: "PostToUser", fields: [authorId], references: [id])\n}\n\`\`\`\n___\none-to-many\n___\nPost including an author and content.`
 
   test('model', async () => {
-    await activate(docUri, { waitForBundledRouting: true })
+    await activate(docUri)
     await testHover(docUri, new vscode.Position(22, 10), expectedHover)
   })
 })

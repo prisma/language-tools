@@ -9,8 +9,6 @@ import { createLocalClientMiddleware, type LocalClientMiddleware } from './local
 
 const prismaCliRelativePath = ['node_modules', 'prisma', 'dist', 'prisma.js'] as const
 
-export const localPrismaNextClientTestStateCommand = 'prisma.test.localPrismaNextClientState'
-
 export interface LocalPrismaNextClientRegistryWorkspace {
   readonly isTrusted: boolean
   getWorkspaceFolder(uri: Uri): WorkspaceFolder | undefined
@@ -43,12 +41,6 @@ export interface LocalPrismaNextClientRegistryOptions {
   readonly entrypointExists?: (entrypoint: string) => Promise<boolean>
   readonly handleStartError?: (workspaceFolder: WorkspaceFolder, error: unknown) => void
   readonly launcher?: Omit<LocalPrismaNextLauncherOptions, 'handleProcessError'>
-  readonly collectTestState?: boolean
-}
-
-export interface LocalPrismaNextClientTestState {
-  readonly startedWorkspaceFolderUris: readonly string[]
-  readonly startCountsByWorkspaceFolderUri: Readonly<Record<string, number>>
 }
 
 interface LocalPrismaNextClientEntry {
@@ -58,12 +50,8 @@ interface LocalPrismaNextClientEntry {
 
 export class LocalPrismaNextClientRegistry {
   private readonly clients = new Map<string, Promise<LocalPrismaNextClientEntry | undefined>>()
-  private readonly startedClients = new Map<string, LocalPrismaNextClientEntry>()
-  private readonly startCounts: Map<string, number> | undefined
 
-  constructor(private readonly options: LocalPrismaNextClientRegistryOptions) {
-    this.startCounts = options.collectTestState ? new Map() : undefined
-  }
+  constructor(private readonly options: LocalPrismaNextClientRegistryOptions) {}
 
   ensureClientForDocument(document: TextDocument): Promise<LanguageClient | undefined> {
     if (!this.options.workspace.isTrusted || document.uri.scheme !== 'file') {
@@ -95,15 +83,6 @@ export class LocalPrismaNextClientRegistry {
   async clearDiagnostics(workspaceFolderUri: string, uri: Uri): Promise<void> {
     const entry = await this.clients.get(workspaceFolderUri)
     entry?.middleware.clearDiagnostics(uri)
-  }
-
-  getTestState(): LocalPrismaNextClientTestState {
-    return {
-      startedWorkspaceFolderUris: [...this.startedClients.keys()].sort(),
-      startCountsByWorkspaceFolderUri: Object.fromEntries(
-        [...(this.startCounts?.entries() ?? [])].sort(([left], [right]) => left.localeCompare(right)),
-      ),
-    }
   }
 
   private ensureClient(workspaceFolder: WorkspaceFolder): Promise<LocalPrismaNextClientEntry | undefined> {
@@ -145,12 +124,7 @@ export class LocalPrismaNextClientRegistry {
       )
       this.options.registerDisposable(client.start())
       await client.onReady()
-      const entry = { client, middleware }
-      this.startedClients.set(workspaceFolderUri, entry)
-      if (this.startCounts) {
-        this.startCounts.set(workspaceFolderUri, (this.startCounts.get(workspaceFolderUri) ?? 0) + 1)
-      }
-      return entry
+      return { client, middleware }
     } catch (error) {
       this.options.handleStartError?.(workspaceFolder, error)
       return undefined

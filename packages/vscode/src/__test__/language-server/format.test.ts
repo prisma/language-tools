@@ -4,7 +4,7 @@ import { getDocUri, activate } from '../helper'
 import fs from 'fs'
 
 async function testAutoFormat(docUri: vscode.Uri, expectedFormatted: string): Promise<void> {
-  await activate(docUri, { waitForBundledRouting: true })
+  await activate(docUri)
 
   const actualFormatted = (await vscode.commands.executeCommand('vscode.executeFormatDocumentProvider', docUri, {
     insertSpaces: true,

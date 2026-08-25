@@ -24,8 +24,7 @@ import { getPackageJSON } from '../../getPackageJSON'
 import { DocumentOwnershipCoordinator } from './documentOwnership'
 import { createBundledClientMiddleware, type BundledClientMiddleware } from './bundledClientMiddleware'
 import { createPrepareDocumentRoutingCommit } from './documentRouting'
-import { LocalPrismaNextClientRegistry, localPrismaNextClientTestStateCommand } from './localPrismaNextClientRegistry'
-import { LanguageServerTestStateCollector, languageServerTestStateCommand } from './languageServerTestState'
+import { LocalPrismaNextClientRegistry } from './localPrismaNextClientRegistry'
 import { BundledClientStartup, deactivateBundledClient } from './bundledClientStartup'
 
 let client: LanguageClient
@@ -108,7 +107,6 @@ const plugin: PrismaVSCodePlugin = {
   enabled: () => true,
   activate: async (context) => {
     const isDebugOrTest = isDebugOrTestSession()
-    const testState = isDebugOrTest ? new LanguageServerTestStateCollector() : undefined
     const codelensProvider = new CodelensProvider()
 
     languages.registerCodeLensProvider('*', codelensProvider)
@@ -120,13 +118,11 @@ const plugin: PrismaVSCodePlugin = {
       policy: {
         isPinnedToPrisma6: () => !!workspace.getConfiguration('prisma').get<boolean>('pinToPrisma6'),
       },
-      testObserver: testState?.observeOwnership,
       prepareOwner: createPrepareDocumentRoutingCommit({
         getOwnership: (): DocumentOwnershipCoordinator => ownership,
         isDocumentOpen: (document) => workspace.textDocuments.includes(document),
         getBundled: () => bundledClientMiddleware,
         getLocal: () => localClients,
-        observer: testState?.observeRouting,
       }),
     })
     const localClients = new LocalPrismaNextClientRegistry({
@@ -136,7 +132,6 @@ const plugin: PrismaVSCodePlugin = {
       createClient: (id, name, serverOptions, localClientOptions) =>
         new LanguageClient(id, name, serverOptions, localClientOptions),
       registerDisposable: (disposable) => context.subscriptions.push(disposable),
-      collectTestState: isDebugOrTest,
       handleStartError: (workspaceFolder, error) => {
         console.error(`Failed to start Prisma Next Language Server for ${workspaceFolder.uri.toString()}`, error)
       },
@@ -271,14 +266,7 @@ const plugin: PrismaVSCodePlugin = {
       synchronizeDocument(document)
     }
 
-    if (isDebugOrTest) {
-      context.subscriptions.push(
-        commands.registerCommand(localPrismaNextClientTestStateCommand, () => localClients.getTestState()),
-        commands.registerCommand(languageServerTestStateCommand, () =>
-          testState?.snapshot(workspace.isTrusted, localClients.getTestState()),
-        ),
-      )
-    } else {
+    if (!isDebugOrTest) {
       const packageJSON = getPackageJSON(context)
       const extensionId = 'prisma.' + packageJSON.name
       const extensionVersion = packageJSON.version ?? 'unknown'

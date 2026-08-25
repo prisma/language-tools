@@ -28,26 +28,10 @@ export type PrepareDocumentOwnerCommit = (
   transition: DocumentOwnershipTransition,
 ) => Promise<PreparedDocumentOwnerCommit | void> | PreparedDocumentOwnerCommit | void
 
-export type DocumentOwnershipTestEvent =
-  | {
-      readonly type: 'ownerChanged'
-      readonly documentUri: string
-      readonly revision: number
-      readonly previousOwner: DocumentOwner
-      readonly owner: DocumentOwner
-    }
-  | {
-      readonly type: 'staleTransitionDiscarded'
-      readonly documentUri: string
-      readonly revision: number
-      readonly owner: DocumentOwner
-    }
-
 export interface DocumentOwnershipCoordinatorOptions {
   readonly workspace: DocumentOwnershipWorkspace
   readonly policy: DocumentOwnershipPolicy
   readonly prepareOwner?: PrepareDocumentOwnerCommit
-  readonly testObserver?: (event: DocumentOwnershipTestEvent) => void
 }
 
 interface DocumentOwnershipState {
@@ -131,9 +115,7 @@ export class DocumentOwnershipCoordinator {
     state: DocumentOwnershipState,
     revision: number,
   ): Promise<DocumentOwner> {
-    const documentUri = document.uri.toString()
     if (revision !== state.revision) {
-      this.observeStaleTransition(documentUri, revision, state.owner)
       return state.owner
     }
 
@@ -144,7 +126,6 @@ export class DocumentOwnershipCoordinator {
       revision,
     })
     if (revision !== state.revision) {
-      this.observeStaleTransition(documentUri, revision, state.owner)
       return state.owner
     }
 
@@ -152,9 +133,7 @@ export class DocumentOwnershipCoordinator {
       await commitOwner()
     }
 
-    const previousOwner = state.owner
     state.owner = unownedOwner
-    this.observeOwnerChange(documentUri, revision, previousOwner, unownedOwner)
     return unownedOwner
   }
 
@@ -163,8 +142,6 @@ export class DocumentOwnershipCoordinator {
     state: DocumentOwnershipState,
     revision: number,
   ): Promise<DocumentOwner> {
-    const documentUri = document.uri.toString()
-
     while (revision === state.revision) {
       const nextOwner = this.classify(document)
       const commitOwner = await this.options.prepareOwner?.({
@@ -175,7 +152,6 @@ export class DocumentOwnershipCoordinator {
       })
 
       if (revision !== state.revision) {
-        this.observeStaleTransition(documentUri, revision, state.owner)
         return state.owner
       }
 
@@ -188,29 +164,11 @@ export class DocumentOwnershipCoordinator {
         await commitOwner()
       }
 
-      const previousOwner = state.owner
       state.owner = currentOwner
-      this.observeOwnerChange(documentUri, revision, previousOwner, currentOwner)
       return currentOwner
     }
 
-    this.observeStaleTransition(documentUri, revision, state.owner)
     return state.owner
-  }
-
-  private observeOwnerChange(
-    documentUri: string,
-    revision: number,
-    previousOwner: DocumentOwner,
-    owner: DocumentOwner,
-  ): void {
-    if (!ownersEqual(previousOwner, owner)) {
-      this.options.testObserver?.({ type: 'ownerChanged', documentUri, revision, previousOwner, owner })
-    }
-  }
-
-  private observeStaleTransition(documentUri: string, revision: number, owner: DocumentOwner): void {
-    this.options.testObserver?.({ type: 'staleTransitionDiscarded', documentUri, revision, owner })
   }
 }
 

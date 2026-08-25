@@ -1,3 +1,0 @@
-model MissingCliRecord {
-  id Int @id
-}

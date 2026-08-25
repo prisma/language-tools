@@ -3,7 +3,7 @@ import * as assert from 'assert'
 import { getDocUri, activate, toRange } from '../helper'
 
 async function testDiagnostics(docUri: vscode.Uri, expectedDiagnostics: vscode.Diagnostic[]): Promise<void> {
-  await activate(docUri, { waitForBundledRouting: true })
+  await activate(docUri)
 
   const actualDiagnostics = vscode.languages.getDiagnostics(docUri)
 

@@ -14,23 +14,11 @@ export interface LocalDocumentSynchronization {
   clearDiagnostics(workspaceFolderUri: string, uri: Uri): Promise<void>
 }
 
-export type DocumentRoutingEvent =
-  | { readonly type: 'closed'; readonly owner: DocumentOwner; readonly documentUri: string }
-  | { readonly type: 'diagnosticsCleared'; readonly owner: DocumentOwner; readonly documentUri: string }
-  | {
-      readonly type: 'opened'
-      readonly owner: DocumentOwner
-      readonly documentUri: string
-      readonly documentText: string
-      readonly documentVersion: number
-    }
-
 export interface DocumentRoutingOptions {
   readonly getOwnership: () => DocumentOwnershipCoordinator
   readonly isDocumentOpen: (document: TextDocument) => boolean
   readonly getBundled: () => BundledDocumentSynchronization
   readonly getLocal: () => LocalDocumentSynchronization
-  readonly observer?: (event: DocumentRoutingEvent) => void
 }
 
 export function createPrepareDocumentRoutingCommit(options: DocumentRoutingOptions): PrepareDocumentOwnerCommit {
@@ -44,15 +32,11 @@ export function createPrepareDocumentRoutingCommit(options: DocumentRoutingOptio
 
       if (nextOwner.kind === 'bundled') {
         options.getBundled().openDocument(document)
-        observeOpened(options, nextOwner, document)
       } else if (nextOwner.kind === 'local') {
         const local = options.getLocal()
         const client = await local.ensureClientForDocument(document)
         if (client && isCurrentOpenCandidate(options, document, nextOwner)) {
-          const opened = await local.openDocument(nextOwner.workspaceFolderUri, document)
-          if (opened && isCurrentOpenCandidate(options, document, nextOwner)) {
-            observeOpened(options, nextOwner, document)
-          }
+          await local.openDocument(nextOwner.workspaceFolderUri, document)
         }
       }
     }
@@ -66,27 +50,12 @@ async function closePreviousOwner(
 ): Promise<void> {
   if (previousOwner.kind === 'bundled') {
     options.getBundled().closeDocument(document)
-    options.observer?.({ type: 'closed', owner: previousOwner, documentUri: document.uri.toString() })
     options.getBundled().clearDiagnostics(document.uri)
-    options.observer?.({ type: 'diagnosticsCleared', owner: previousOwner, documentUri: document.uri.toString() })
   } else if (previousOwner.kind === 'local') {
     const local = options.getLocal()
     await local.closeDocument(previousOwner.workspaceFolderUri, document)
-    options.observer?.({ type: 'closed', owner: previousOwner, documentUri: document.uri.toString() })
     await local.clearDiagnostics(previousOwner.workspaceFolderUri, document.uri)
-    options.observer?.({ type: 'diagnosticsCleared', owner: previousOwner, documentUri: document.uri.toString() })
   }
-}
-
-function observeOpened(options: DocumentRoutingOptions, owner: DocumentOwner, document: TextDocument): void {
-  if (!options.observer) return
-  options.observer({
-    type: 'opened',
-    owner,
-    documentUri: document.uri.toString(),
-    documentText: document.getText(),
-    documentVersion: document.version,
-  })
 }
 
 function isCurrentOpenCandidate(

@@ -1,9 +1,5 @@
 import path from 'path'
 import vscode from 'vscode'
-import {
-  languageServerTestStateCommand,
-  type LanguageServerTestState,
-} from '../plugins/prisma-language-server/languageServerTestState'
 
 // Path from dist-tests/__test__/helper.js to package.json
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
@@ -22,11 +18,7 @@ export async function sleep(ms: number): Promise<void> {
  * Activates the vscode.prisma extension
  * @todo check readiness of the server instead of timeout
  */
-export interface ActivateOptions {
-  readonly waitForBundledRouting?: boolean
-}
-
-export async function activate(docUri: vscode.Uri, options: ActivateOptions = {}): Promise<void> {
+export async function activate(docUri: vscode.Uri): Promise<void> {
   // The extensionId is `publisher.name` from package.json
   const ext = vscode.extensions.getExtension(`${packageJson.publisher}.${packageJson.name}`)
   if (!ext) {
@@ -42,26 +34,7 @@ export async function activate(docUri: vscode.Uri, options: ActivateOptions = {}
     return
   }
 
-  if (options.waitForBundledRouting) {
-    await waitForBundledRouting(doc)
-  }
   await sleep(2500) // Wait for server activation
-}
-
-async function waitForBundledRouting(document: vscode.TextDocument): Promise<void> {
-  const documentUri = document.uri.toString()
-  const deadline = Date.now() + 10_000
-
-  while (Date.now() < deadline) {
-    const state = await vscode.commands.executeCommand<LanguageServerTestState>(languageServerTestStateCommand)
-    const latestOpen = [...state.routingEvents]
-      .reverse()
-      .find((event) => event.type === 'opened' && event.documentUri === documentUri)
-    if (latestOpen?.owner.kind === 'bundled') return
-    await sleep(100)
-  }
-
-  throw new Error(`Timed out waiting for bundled language-server routing for ${documentUri}`)
 }
 
 export function toRange(sLine: number, sChar: number, eLine: number, eChar: number): vscode.Range {
