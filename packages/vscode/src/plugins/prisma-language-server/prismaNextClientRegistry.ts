@@ -2,7 +2,7 @@ import path from 'node:path'
 import { stat } from 'node:fs/promises'
 import { spawn, type ChildProcessWithoutNullStreams, type SpawnOptionsWithoutStdio } from 'node:child_process'
 import type { Disposable, TextDocument, Uri, WorkspaceFolder } from 'vscode'
-import type { LanguageClientOptions } from 'vscode-languageclient'
+import { CloseAction, ErrorAction, type LanguageClientOptions } from 'vscode-languageclient'
 import type { ChildProcessInfo, LanguageClient, ServerOptions } from 'vscode-languageclient/node'
 import type { DocumentOwnershipCoordinator } from './documentOwnership'
 import { createPrismaNextClientMiddleware, type PrismaNextClientMiddleware } from './prismaNextClientMiddleware'
@@ -68,7 +68,7 @@ export class PrismaNextClientRegistry {
     }
 
     const workspaceFolder = this.options.workspace.getWorkspaceFolder(document.uri)
-    if (!workspaceFolder || workspaceFolder.uri.scheme !== 'file') {
+    if (workspaceFolder?.uri.scheme !== 'file') {
       return Promise.resolve(undefined)
     }
 
@@ -121,11 +121,21 @@ export class PrismaNextClientRegistry {
 
     const pending = Promise.resolve().then(() => this.discoverAndStart(workspaceFolder))
     this.clients.set(workspaceFolderUri, pending)
+    void pending.then((entry) => {
+      if (!entry && this.clients.get(workspaceFolderUri) === pending) {
+        this.clients.delete(workspaceFolderUri)
+      }
+    })
     return pending
   }
 
   private async discoverAndStart(workspaceFolder: WorkspaceFolder): Promise<PrismaNextClientEntry | undefined> {
     const entrypoint = getPrismaNextEntrypoint(workspaceFolder)
+    let client: LanguageClient | undefined
+    const getClient = (): LanguageClient => {
+      if (!client) throw new Error('Prisma Next language client is not initialized')
+      return client
+    }
 
     try {
       const exists = await (this.options.entrypointExists ?? isFile)(entrypoint)
@@ -138,12 +148,12 @@ export class PrismaNextClientRegistry {
         workspaceFolderUri,
         ownership: this.options.ownership,
         isActive: this.options.isActive,
-        getClient: () => client,
+        getClient,
         getDocument: this.options.getDocument,
       })
       if (this.disposed || !this.options.isActive()) return undefined
 
-      const client = this.options.createClient(
+      client = this.options.createClient(
         `prisma-next:${workspaceFolderUri}`,
         `Prisma Next Language Server (${workspaceFolder.name})`,
         createPrismaNextServerOptions(workspaceFolder, entrypoint, {
@@ -162,6 +172,14 @@ export class PrismaNextClientRegistry {
       if (this.disposed || !this.options.isActive()) return undefined
       return { client, middleware }
     } catch (error) {
+      if (client) {
+        try {
+          await client.stop()
+          this.startedClients.delete(client)
+        } catch {
+          // Deactivation retries cleanup for clients that could not be stopped here.
+        }
+      }
       if (!this.disposed && this.options.isActive()) {
         this.options.handleStartError?.(workspaceFolder, error)
       }
@@ -263,6 +281,11 @@ export function createPrismaNextClientOptions(
     documentSelector: [{ language: 'prisma', scheme: 'file', pattern: `${normalizedRoot}/**/*` }],
     workspaceFolder,
     middleware,
+    initializationFailedHandler: () => false,
+    errorHandler: {
+      error: () => ErrorAction.Shutdown,
+      closed: () => CloseAction.DoNotRestart,
+    },
   }
 }
 
