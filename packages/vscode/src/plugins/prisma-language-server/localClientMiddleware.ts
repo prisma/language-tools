@@ -116,14 +116,6 @@ export function createLocalClientMiddleware(options: LocalClientMiddlewareOption
     provideDocumentSymbols: (document, token, next) => (isOwnedDocument(document) ? next(document, token) : undefined),
     provideDocumentFormattingEdits: (document, formattingOptions, token, next) =>
       isOwnedDocument(document) ? next(document, formattingOptions, token) : undefined,
-    provideFoldingRanges: (document, context, token, next) =>
-      isOwnedDocument(document) ? next(document, context, token) : undefined,
-    provideDocumentSemanticTokens: (document, token, next) =>
-      isOwnedDocument(document) ? next(document, token) : undefined,
-    provideDocumentSemanticTokensEdits: (document, previousResultId, token, next) =>
-      isOwnedDocument(document) ? next(document, previousResultId, token) : undefined,
-    provideDocumentRangeSemanticTokens: (document, range, token, next) =>
-      isOwnedDocument(document) ? next(document, range, token) : undefined,
     provideRenameEdits: (document, position, newName, token, next) =>
       isOwnedDocument(document) ? next(document, position, newName, token) : undefined,
     provideCodeActions: (document, range, context, token, next) =>
