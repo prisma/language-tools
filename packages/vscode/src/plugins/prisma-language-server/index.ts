@@ -13,7 +13,7 @@ import {
   isDebugOrTestSession,
   isSnippetEdit,
   restartClient,
-  createLanguageServer,
+  createLegacyLanguageServer,
 } from '../../util'
 import { PrismaVSCodePlugin } from '../types'
 import paths from 'env-paths'
@@ -43,7 +43,7 @@ const activateLegacyClient = async (
   legacyClientOptions: LanguageClientOptions,
 ): Promise<void> => {
   const prismaConfig = workspace.getConfiguration('prisma')
-  legacyClient = createLanguageServer(getLegacyServerOptions(prismaConfig, context), legacyClientOptions)
+  legacyClient = createLegacyLanguageServer(getLegacyServerOptions(prismaConfig, context), legacyClientOptions)
 
   const disposable = legacyClient.start()
 
@@ -113,10 +113,13 @@ const plugin: PrismaVSCodePlugin = {
 
     setGenerateWatcher(!!workspace.getConfiguration('prisma').get('fileWatcher'))
 
+    let legacyUnavailable = false
+    let restarting = false
     const ownership: DocumentOwnershipCoordinator = new DocumentOwnershipCoordinator({
       workspace,
       policy: {
         isPinnedToPrisma6: () => !!workspace.getConfiguration('prisma').get<boolean>('pinToPrisma6'),
+        isLegacyUnavailable: () => legacyUnavailable,
       },
       prepareTransition: createPrepareDocumentRoutingCommit({
         getOwnership: (): DocumentOwnershipCoordinator => ownership,
@@ -164,7 +167,7 @@ const plugin: PrismaVSCodePlugin = {
     const needsLegacyLanguageServer = (document: TextDocument): boolean =>
       document.languageId === 'prisma' && ownership.getDesiredOwner(document).kind === 'legacy'
     const synchronizeDocument = (document: TextDocument): void => {
-      if (document.languageId !== 'prisma') return
+      if (restarting || document.languageId !== 'prisma') return
       if (ownership.getDesiredOwner(document).kind === 'legacy') {
         startup.schedule(document)
       } else {
@@ -180,20 +183,64 @@ const plugin: PrismaVSCodePlugin = {
       startup.start(() => activateLegacyClient(context, legacyClientOptions))
     }
 
+    const getOpenPrismaDocuments = (): TextDocument[] =>
+      workspace.textDocuments.filter((document) => document.languageId === 'prisma')
+
+    const waitForOwnershipOperations = async (operations: readonly Promise<unknown>[]): Promise<void> => {
+      const results = await Promise.allSettled(operations)
+      const failure = results.find((result): result is PromiseRejectedResult => result.status === 'rejected')
+      if (failure) throw failure.reason
+    }
+
+    const synchronizeDocuments = (documents: readonly TextDocument[]): Promise<void> =>
+      waitForOwnershipOperations(documents.map((document) => ownership.synchronize(document)))
+
+    const invalidateLegacyDocuments = (): Promise<void> => {
+      const legacyDocuments = getOpenPrismaDocuments().filter(
+        (document) => ownership.getSettledOwner(document.uri).kind === 'legacy',
+      )
+      return waitForOwnershipOperations(legacyDocuments.map((document) => ownership.close(document)))
+    }
+
     const restartLanguageServer = async () => {
       if (!started) {
         maybeStart()
+        for (const document of getOpenPrismaDocuments()) synchronizeDocument(document)
         return
       }
-      const serverOptions = getLegacyServerOptions(workspace.getConfiguration('prisma'), context)
-      const replacement = restartClient(context, legacyClient, serverOptions, legacyClientOptions, {
-        onClientStopped: () => legacyClientMiddleware.resetClientState(),
-        onClientCreated: (replacementClient) => {
-          legacyClient = replacementClient
-        },
-      })
-      startup.replace(replacement.then(() => undefined))
-      legacyClient = await replacement
+
+      restarting = true
+      legacyUnavailable = true
+      try {
+        try {
+          await invalidateLegacyDocuments()
+        } catch (error) {
+          legacyUnavailable = false
+          try {
+            await synchronizeDocuments(getOpenPrismaDocuments())
+          } catch (restoreError) {
+            logLegacyClientError(restoreError)
+          }
+          throw error
+        }
+
+        const serverOptions = getLegacyServerOptions(workspace.getConfiguration('prisma'), context)
+        const replacement = restartClient(context, legacyClient, serverOptions, legacyClientOptions, {
+          onClientStopped: () => legacyClientMiddleware.resetClientState(),
+          onClientCreated: (replacementClient) => {
+            legacyClient = replacementClient
+          },
+        }).then(async (replacementClient) => {
+          legacyUnavailable = false
+          await synchronizeDocuments(getOpenPrismaDocuments())
+          return replacementClient
+        })
+        startup.replace(replacement.then(() => undefined))
+        legacyClient = await replacement
+      } finally {
+        legacyUnavailable = false
+        restarting = false
+      }
     }
 
     context.subscriptions.push(

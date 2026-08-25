@@ -8,6 +8,7 @@ export type DocumentOwner =
 
 export interface DocumentOwnershipPolicy {
   isPinnedToPrisma6(): boolean
+  isLegacyUnavailable?(): boolean
 }
 
 export interface DocumentOwnershipWorkspace {
@@ -22,7 +23,12 @@ export interface DocumentOwnershipTransition {
   readonly revision: number
 }
 
-export type PreparedDocumentOwnerCommit = () => Promise<DocumentOwner> | DocumentOwner
+export interface DocumentOwnerCommitOutcome {
+  readonly settledOwner: DocumentOwner
+  readonly error?: unknown
+}
+
+export type PreparedDocumentOwnerCommit = () => Promise<DocumentOwnerCommitOutcome> | DocumentOwnerCommitOutcome
 
 export type PrepareDocumentOwnerCommit = (
   transition: DocumentOwnershipTransition,
@@ -49,12 +55,8 @@ export class DocumentOwnershipCoordinator {
   constructor(private readonly options: DocumentOwnershipCoordinatorOptions) {}
 
   getDesiredOwner(document: TextDocument): DocumentOwner {
-    if (this.options.policy.isPinnedToPrisma6()) {
-      return legacyOwner
-    }
-
-    if (!isPrismaNextSchema(document.getText())) {
-      return legacyOwner
+    if (this.options.policy.isPinnedToPrisma6() || !isPrismaNextSchema(document.getText())) {
+      return this.options.policy.isLegacyUnavailable?.() ? unownedOwner : legacyOwner
     }
 
     if (document.uri.scheme !== 'file' || !this.options.workspace.isTrusted) {
@@ -119,7 +121,7 @@ export class DocumentOwnershipCoordinator {
       return state.settledOwner
     }
 
-    const commitOwner = await this.options.prepareTransition?.({
+    const commitTransition = await this.options.prepareTransition?.({
       document,
       previousSettledOwner: state.settledOwner,
       nextDesiredOwner: unownedOwner,
@@ -129,9 +131,8 @@ export class DocumentOwnershipCoordinator {
       return state.settledOwner
     }
 
-    const settledOwner = commitOwner ? await commitOwner() : unownedOwner
-    state.settledOwner = settledOwner
-    return settledOwner
+    const outcome = commitTransition ? await commitTransition() : { settledOwner: unownedOwner }
+    return this.recordCommitOutcome(state, outcome)
   }
 
   private async commitDesiredOwner(
@@ -141,7 +142,7 @@ export class DocumentOwnershipCoordinator {
   ): Promise<DocumentOwner> {
     while (revision === state.revision) {
       const nextDesiredOwner = this.getDesiredOwner(document)
-      const commitOwner = await this.options.prepareTransition?.({
+      const commitTransition = await this.options.prepareTransition?.({
         document,
         previousSettledOwner: state.settledOwner,
         nextDesiredOwner,
@@ -157,12 +158,19 @@ export class DocumentOwnershipCoordinator {
         continue
       }
 
-      const settledOwner = commitOwner ? await commitOwner() : desiredOwner
-      state.settledOwner = settledOwner
-      return settledOwner
+      const outcome = commitTransition ? await commitTransition() : { settledOwner: desiredOwner }
+      return this.recordCommitOutcome(state, outcome)
     }
 
     return state.settledOwner
+  }
+
+  private recordCommitOutcome(state: DocumentOwnershipState, outcome: DocumentOwnerCommitOutcome): DocumentOwner {
+    state.settledOwner = outcome.settledOwner
+    if (outcome.error !== undefined) {
+      throw outcome.error
+    }
+    return outcome.settledOwner
   }
 }
 

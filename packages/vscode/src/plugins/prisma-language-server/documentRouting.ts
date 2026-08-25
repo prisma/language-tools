@@ -1,5 +1,10 @@
 import type { TextDocument, Uri } from 'vscode'
-import type { DocumentOwner, DocumentOwnershipCoordinator, PrepareDocumentOwnerCommit } from './documentOwnership'
+import type {
+  DocumentOwner,
+  DocumentOwnerCommitOutcome,
+  DocumentOwnershipCoordinator,
+  PrepareDocumentOwnerCommit,
+} from './documentOwnership'
 
 export interface LegacyDocumentSynchronization {
   openDocument(document: TextDocument): void
@@ -26,28 +31,48 @@ export function createPrepareDocumentRoutingCommit(options: DocumentRoutingOptio
     if (documentOwnersEqual(previousSettledOwner, nextDesiredOwner)) return undefined
 
     return async () => {
-      await closePreviousSettledOwner(options, previousSettledOwner, document)
-
-      if (!isDesiredOpenCandidate(options, document, nextDesiredOwner)) return { kind: 'unowned' }
-
-      if (nextDesiredOwner.kind === 'legacy') {
-        options.getLegacy().openDocument(document)
-        return nextDesiredOwner
+      try {
+        await closePreviousSettledOwner(options, previousSettledOwner, document)
+      } catch (error) {
+        return commitOutcome(previousSettledOwner, error)
       }
 
-      if (nextDesiredOwner.kind === 'prisma-next') {
-        const prismaNext = options.getPrismaNext()
-        const client = await prismaNext.ensureClientForDocument(document)
-        if (
-          client &&
-          isDesiredOpenCandidate(options, document, nextDesiredOwner) &&
-          (await prismaNext.openDocument(nextDesiredOwner.workspaceFolderUri, document))
-        ) {
-          return nextDesiredOwner
+      try {
+        await clearPreviousSettledOwnerDiagnostics(options, previousSettledOwner, document.uri)
+      } catch (error) {
+        return commitOutcome({ kind: 'unowned' }, error)
+      }
+
+      if (!isDesiredOpenCandidate(options, document, nextDesiredOwner)) {
+        return commitOutcome({ kind: 'unowned' })
+      }
+
+      if (nextDesiredOwner.kind === 'legacy') {
+        try {
+          options.getLegacy().openDocument(document)
+          return commitOutcome(nextDesiredOwner)
+        } catch (error) {
+          return commitOutcome({ kind: 'unowned' }, error)
         }
       }
 
-      return { kind: 'unowned' }
+      if (nextDesiredOwner.kind === 'prisma-next') {
+        try {
+          const prismaNext = options.getPrismaNext()
+          const client = await prismaNext.ensureClientForDocument(document)
+          if (
+            client &&
+            isDesiredOpenCandidate(options, document, nextDesiredOwner) &&
+            (await prismaNext.openDocument(nextDesiredOwner.workspaceFolderUri, document))
+          ) {
+            return commitOutcome(nextDesiredOwner)
+          }
+        } catch (error) {
+          return commitOutcome({ kind: 'unowned' }, error)
+        }
+      }
+
+      return commitOutcome({ kind: 'unowned' })
     }
   }
 }
@@ -59,12 +84,25 @@ async function closePreviousSettledOwner(
 ): Promise<void> {
   if (previousSettledOwner.kind === 'legacy') {
     options.getLegacy().closeDocument(document)
-    options.getLegacy().clearDiagnostics(document.uri)
   } else if (previousSettledOwner.kind === 'prisma-next') {
-    const prismaNext = options.getPrismaNext()
-    await prismaNext.closeDocument(previousSettledOwner.workspaceFolderUri, document)
-    await prismaNext.clearDiagnostics(previousSettledOwner.workspaceFolderUri, document.uri)
+    await options.getPrismaNext().closeDocument(previousSettledOwner.workspaceFolderUri, document)
   }
+}
+
+async function clearPreviousSettledOwnerDiagnostics(
+  options: DocumentRoutingOptions,
+  previousSettledOwner: DocumentOwner,
+  documentUri: Uri,
+): Promise<void> {
+  if (previousSettledOwner.kind === 'legacy') {
+    options.getLegacy().clearDiagnostics(documentUri)
+  } else if (previousSettledOwner.kind === 'prisma-next') {
+    await options.getPrismaNext().clearDiagnostics(previousSettledOwner.workspaceFolderUri, documentUri)
+  }
+}
+
+function commitOutcome(settledOwner: DocumentOwner, error?: unknown): DocumentOwnerCommitOutcome {
+  return error === undefined ? { settledOwner } : { settledOwner, error }
 }
 
 function isDesiredOpenCandidate(

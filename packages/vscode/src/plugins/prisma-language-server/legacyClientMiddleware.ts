@@ -78,7 +78,12 @@ export function createLegacyClientMiddleware(options: LegacyClientMiddlewareOpti
       const documentUri = document.uri.toString()
       if (isLegacyDocument(document) && !legacyDocuments.has(documentUri)) {
         legacyDocuments.add(documentUri)
-        next(document)
+        try {
+          next(document)
+        } catch (error) {
+          legacyDocuments.delete(documentUri)
+          throw error
+        }
       }
     },
     didChange: (event, next) => {
@@ -88,8 +93,14 @@ export function createLegacyClientMiddleware(options: LegacyClientMiddlewareOpti
       }
     },
     didClose: (document, next) => {
-      if (legacyDocuments.delete(document.uri.toString())) {
-        next(document)
+      const documentUri = document.uri.toString()
+      if (legacyDocuments.delete(documentUri)) {
+        try {
+          next(document)
+        } catch (error) {
+          legacyDocuments.add(documentUri)
+          throw error
+        }
       }
       clearDiagnostics(document.uri)
     },

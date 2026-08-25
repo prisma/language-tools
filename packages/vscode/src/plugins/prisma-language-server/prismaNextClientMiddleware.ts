@@ -74,7 +74,12 @@ export function createPrismaNextClientMiddleware(
       const documentUri = document.uri.toString()
       if (isOwnedDocument(document) && !synchronizedDocuments.has(documentUri)) {
         synchronizedDocuments.add(documentUri)
-        next(document)
+        try {
+          next(document)
+        } catch (error) {
+          synchronizedDocuments.delete(documentUri)
+          throw error
+        }
       }
     },
     didChange: (event, next) => {
@@ -83,8 +88,14 @@ export function createPrismaNextClientMiddleware(
       }
     },
     didClose: (document, next) => {
-      if (synchronizedDocuments.delete(document.uri.toString())) {
-        next(document)
+      const documentUri = document.uri.toString()
+      if (synchronizedDocuments.delete(documentUri)) {
+        try {
+          next(document)
+        } catch (error) {
+          synchronizedDocuments.add(documentUri)
+          throw error
+        }
       }
       clearDiagnostics(document.uri)
     },

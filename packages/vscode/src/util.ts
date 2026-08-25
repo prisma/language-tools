@@ -106,11 +106,14 @@ export function applySnippetWorkspaceEdit(): (edit: WorkspaceEdit) => Promise<vo
   }
 }
 
-export function createLanguageServer(
+export function createLegacyLanguageServer(
   serverOptions: ServerOptions,
   clientOptions: LanguageClientOptions,
 ): LanguageClient {
-  return new LanguageClient('prisma', 'Prisma Language Server', serverOptions, clientOptions)
+  return new LanguageClient('prisma-legacy', 'Prisma Legacy Language Server', serverOptions, {
+    ...clientOptions,
+    outputChannelName: 'Prisma Legacy Language Server',
+  })
 }
 export interface RestartClientLifecycle {
   onClientStopped(): void
@@ -127,7 +130,7 @@ export const restartClient = async (
   client?.diagnostics?.dispose()
   if (client) await client.stop()
   lifecycle?.onClientStopped()
-  client = createLanguageServer(serverOptions, clientOptions)
+  client = createLegacyLanguageServer(serverOptions, clientOptions)
   lifecycle?.onClientCreated(client)
   context.subscriptions.push(client.start())
   await client.onReady()
