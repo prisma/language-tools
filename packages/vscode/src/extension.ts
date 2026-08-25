@@ -15,10 +15,12 @@ export function activate(context: ExtensionContext): void {
   })
 }
 
-export function deactivate(): void {
-  plugins.forEach((plugin) => {
-    if (plugin.deactivate) {
-      void plugin.deactivate()
+export async function deactivate(): Promise<void> {
+  const results = await Promise.allSettled(plugins.map((plugin) => Promise.resolve().then(() => plugin.deactivate?.())))
+
+  for (const [index, result] of results.entries()) {
+    if (result.status === 'rejected') {
+      console.error(`Failed to deactivate ${plugins[index].name}`, result.reason)
     }
-  })
+  }
 }
