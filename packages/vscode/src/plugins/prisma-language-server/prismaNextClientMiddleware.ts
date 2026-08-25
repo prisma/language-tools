@@ -2,31 +2,33 @@ import type { CompletionItem, CompletionList, ProviderResult, TextDocument, Uri 
 import type { LanguageClient, Middleware } from 'vscode-languageclient/node'
 import type { DocumentOwnershipCoordinator } from './documentOwnership'
 
-export interface LocalClientMiddlewareOptions {
+export interface PrismaNextClientMiddlewareOptions {
   readonly workspaceFolderUri: string
   readonly ownership: DocumentOwnershipCoordinator
   readonly getClient: () => LanguageClient
   readonly getDocument: (uri: Uri) => TextDocument | undefined
 }
 
-export interface LocalClientMiddleware extends Middleware {
+export interface PrismaNextClientMiddleware extends Middleware {
   openDocument(document: TextDocument): void
   closeDocument(document: TextDocument): void
   clearDiagnostics(uri: Uri): void
 }
 
-export function createLocalClientMiddleware(options: LocalClientMiddlewareOptions): LocalClientMiddleware {
+export function createPrismaNextClientMiddleware(
+  options: PrismaNextClientMiddlewareOptions,
+): PrismaNextClientMiddleware {
   const synchronizedDocuments = new Set<string>()
   const completionDocuments = new WeakMap<CompletionItem, TextDocument>()
 
   const isOwnedDocument = (document: TextDocument): boolean => {
-    const committedOwner = options.ownership.getOwner(document.uri)
-    const currentOwner = options.ownership.classify(document)
+    const settledOwner = options.ownership.getSettledOwner(document.uri)
+    const desiredOwner = options.ownership.getDesiredOwner(document)
     return (
-      committedOwner.kind === 'local' &&
-      currentOwner.kind === 'local' &&
-      committedOwner.workspaceFolderUri === options.workspaceFolderUri &&
-      currentOwner.workspaceFolderUri === options.workspaceFolderUri
+      settledOwner.kind === 'prisma-next' &&
+      desiredOwner.kind === 'prisma-next' &&
+      settledOwner.workspaceFolderUri === options.workspaceFolderUri &&
+      desiredOwner.workspaceFolderUri === options.workspaceFolderUri
     )
   }
 
@@ -64,7 +66,7 @@ export function createLocalClientMiddleware(options: LocalClientMiddlewareOption
     }
   }
 
-  const middleware: LocalClientMiddleware = {
+  const middleware: PrismaNextClientMiddleware = {
     openDocument,
     closeDocument,
     clearDiagnostics,

@@ -10,6 +10,6 @@ Run the full minimum-and-latest integration suite with `pnpm test:integration`. 
 pnpm --filter prisma test:integration:workspace
 ```
 
-The focused suite opens an empty, unmarked `bundled.prisma` and a marked `next.prisma` in separate editor columns. It polls only the public `vscode.executeCompletionItemProvider` command with a fixed timeout. The bundled Prisma 7 language server must offer `datasource`, `generator`, and `model`, classify `datasource` as `CompletionItemKind.Class`, and omit `namespace`. The real workspace-local Prisma 8 language server must offer `namespace` as `CompletionItemKind.Keyword` with detail `PSL declaration keyword`, and omit `datasource`.
+The focused suite opens an empty, unmarked `legacy.prisma` and a marked `next.prisma` in separate editor columns. It polls only the public `vscode.executeCompletionItemProvider` command with a fixed timeout. The legacy Prisma 7 language server must offer `datasource`, `generator`, and `model`, classify `datasource` as `CompletionItemKind.Class`, and omit `namespace`. The real Prisma Next server launched from the workspace-local Prisma 8 CLI must offer `namespace` as `CompletionItemKind.Keyword` with detail `PSL declaration keyword`, and omit `datasource`.
 
 No mock language server or extension-private routing state is used. The test asserts observable editor behavior rather than owners, routing events, document synchronization bookkeeping, or process start counts.

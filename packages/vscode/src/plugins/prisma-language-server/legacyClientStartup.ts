@@ -1,13 +1,13 @@
-export type BundledClientStartupStatus = 'idle' | 'starting' | 'ready' | 'failed' | 'disposed'
+export type LegacyClientStartupStatus = 'idle' | 'starting' | 'ready' | 'failed' | 'disposed'
 
-export interface BundledClientStartupOptions<T> {
+export interface LegacyClientStartupOptions<T> {
   readonly isCurrent: (value: T) => boolean
   readonly synchronize: (value: T) => Promise<unknown>
   readonly logError: (error: unknown) => void
 }
 
-export async function deactivateBundledClient<T>(
-  startup: BundledClientStartup<T> | undefined,
+export async function deactivateLegacyClient<T>(
+  startup: LegacyClientStartup<T> | undefined,
   stop: (() => Promise<unknown>) | undefined,
   logError: (error: unknown) => void,
 ): Promise<void> {
@@ -21,15 +21,15 @@ export async function deactivateBundledClient<T>(
   }
 }
 
-export class BundledClientStartup<T> {
+export class LegacyClientStartup<T> {
   private generation = 0
   private readiness: Promise<boolean> = Promise.resolve(false)
   private readonly pending = new Map<T, number>()
-  private currentStatus: BundledClientStartupStatus = 'idle'
+  private currentStatus: LegacyClientStartupStatus = 'idle'
 
-  constructor(private readonly options: BundledClientStartupOptions<T>) {}
+  constructor(private readonly options: LegacyClientStartupOptions<T>) {}
 
-  get status(): BundledClientStartupStatus {
+  get status(): LegacyClientStartupStatus {
     return this.currentStatus
   }
 

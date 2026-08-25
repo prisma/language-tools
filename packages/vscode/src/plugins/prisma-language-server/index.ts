@@ -22,33 +22,33 @@ import { CodelensProvider, generateClient } from '../../CodeLensProvider'
 import * as prisma6Handling from '../../prisma6Handling'
 import { getPackageJSON } from '../../getPackageJSON'
 import { DocumentOwnershipCoordinator } from './documentOwnership'
-import { createBundledClientMiddleware, type BundledClientMiddleware } from './bundledClientMiddleware'
+import { createLegacyClientMiddleware, type LegacyClientMiddleware } from './legacyClientMiddleware'
 import { createPrepareDocumentRoutingCommit } from './documentRouting'
-import { LocalPrismaNextClientRegistry } from './localPrismaNextClientRegistry'
-import { BundledClientStartup, deactivateBundledClient } from './bundledClientStartup'
+import { PrismaNextClientRegistry } from './prismaNextClientRegistry'
+import { LegacyClientStartup, deactivateLegacyClient } from './legacyClientStartup'
 
-let client: LanguageClient
-let serverModule: string
+let legacyClient: LanguageClient
+let legacyServerModule: string
 let telemetry: TelemetryReporter
 let fileWatcher: FileWatcher.type | undefined
-let bundledClientStartup: BundledClientStartup<TextDocument> | undefined
+let legacyClientStartup: LegacyClientStartup<TextDocument> | undefined
 
 const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
-const logBundledClientError = (error: unknown): void => {
-  console.error('Bundled Prisma Language Server failed', error)
+const logLegacyClientError = (error: unknown): void => {
+  console.error('Legacy Prisma Language Server failed', error)
 }
 
-const activateClient = async (context: ExtensionContext, clientOptions: LanguageClientOptions): Promise<void> => {
+const activateLegacyClient = async (
+  context: ExtensionContext,
+  legacyClientOptions: LanguageClientOptions,
+): Promise<void> => {
   const prismaConfig = workspace.getConfiguration('prisma')
-  // Create the language client
-  const serverOptions = getServerOptions(prismaConfig, context)
-  client = createLanguageServer(serverOptions, clientOptions)
+  legacyClient = createLanguageServer(getLegacyServerOptions(prismaConfig, context), legacyClientOptions)
 
-  const disposable = client.start()
+  const disposable = legacyClient.start()
 
-  // Start the client. This will also launch the server
   context.subscriptions.push(disposable)
-  await client.onReady()
+  await legacyClient.onReady()
 }
 
 const onFileChange = (filepath: string) => {
@@ -118,28 +118,28 @@ const plugin: PrismaVSCodePlugin = {
       policy: {
         isPinnedToPrisma6: () => !!workspace.getConfiguration('prisma').get<boolean>('pinToPrisma6'),
       },
-      prepareOwner: createPrepareDocumentRoutingCommit({
+      prepareTransition: createPrepareDocumentRoutingCommit({
         getOwnership: (): DocumentOwnershipCoordinator => ownership,
         isDocumentOpen: (document) => workspace.textDocuments.includes(document),
-        getBundled: () => bundledClientMiddleware,
-        getLocal: () => localClients,
+        getLegacy: () => legacyClientMiddleware,
+        getPrismaNext: () => prismaNextClients,
       }),
     })
-    const localClients = new LocalPrismaNextClientRegistry({
+    const prismaNextClients = new PrismaNextClientRegistry({
       workspace,
       ownership,
       getDocument: (uri) => workspace.textDocuments.find((document) => document.uri.toString() === uri.toString()),
-      createClient: (id, name, serverOptions, localClientOptions) =>
-        new LanguageClient(id, name, serverOptions, localClientOptions),
+      createClient: (id, name, serverOptions, prismaNextClientOptions) =>
+        new LanguageClient(id, name, serverOptions, prismaNextClientOptions),
       registerDisposable: (disposable) => context.subscriptions.push(disposable),
       handleStartError: (workspaceFolder, error) => {
         console.error(`Failed to start Prisma Next Language Server for ${workspaceFolder.uri.toString()}`, error)
       },
     })
 
-    const bundledClientMiddleware: BundledClientMiddleware = createBundledClientMiddleware({
+    const legacyClientMiddleware: LegacyClientMiddleware = createLegacyClientMiddleware({
       ownership,
-      getClient: () => client,
+      getClient: () => legacyClient,
       getDocument: (uri) => workspace.textDocuments.find((document) => document.uri.toString() === uri.toString()),
       handleDiagnosticMessage: (message) => {
         void prisma6Handling.handleDiagnostic(message, context)
@@ -148,36 +148,36 @@ const plugin: PrismaVSCodePlugin = {
     })
 
     // Options to control the language client
-    const clientOptions: LanguageClientOptions = {
-      // Register the server for prisma documents
+    const legacyClientOptions: LanguageClientOptions = {
       documentSelector: [{ scheme: 'file', language: 'prisma' }],
-      middleware: bundledClientMiddleware,
+      middleware: legacyClientMiddleware,
     }
 
     let started = false
-    bundledClientStartup?.dispose()
-    const startup = new BundledClientStartup<TextDocument>({
+    legacyClientStartup?.dispose()
+    const startup = new LegacyClientStartup<TextDocument>({
       isCurrent: (document) => workspace.textDocuments.includes(document),
       synchronize: (document) => ownership.synchronize(document),
-      logError: logBundledClientError,
+      logError: logLegacyClientError,
     })
-    bundledClientStartup = startup
-    const needsLanguageServer = (doc: TextDocument): boolean =>
-      doc.languageId === 'prisma' && ownership.classify(doc).kind === 'bundled'
+    legacyClientStartup = startup
+    const needsLegacyLanguageServer = (document: TextDocument): boolean =>
+      document.languageId === 'prisma' && ownership.getDesiredOwner(document).kind === 'legacy'
     const synchronizeDocument = (document: TextDocument): void => {
       if (document.languageId !== 'prisma') return
-      if (ownership.classify(document).kind === 'bundled') {
+      if (ownership.getDesiredOwner(document).kind === 'legacy') {
         startup.schedule(document)
       } else {
-        void ownership.synchronize(document).catch(logBundledClientError)
+        void ownership.synchronize(document).catch(logLegacyClientError)
       }
     }
 
     const maybeStart = (document?: TextDocument) => {
       if (started) return
-      if (document ? !needsLanguageServer(document) : !workspace.textDocuments.some(needsLanguageServer)) return
+      if (document ? !needsLegacyLanguageServer(document) : !workspace.textDocuments.some(needsLegacyLanguageServer))
+        return
       started = true
-      startup.start(() => activateClient(context, clientOptions))
+      startup.start(() => activateLegacyClient(context, legacyClientOptions))
     }
 
     const restartLanguageServer = async () => {
@@ -185,15 +185,15 @@ const plugin: PrismaVSCodePlugin = {
         maybeStart()
         return
       }
-      const serverOptions = getServerOptions(workspace.getConfiguration('prisma'), context)
-      const replacement = restartClient(context, client, serverOptions, clientOptions, {
-        onClientStopped: () => bundledClientMiddleware.resetClientState(),
+      const serverOptions = getLegacyServerOptions(workspace.getConfiguration('prisma'), context)
+      const replacement = restartClient(context, legacyClient, serverOptions, legacyClientOptions, {
+        onClientStopped: () => legacyClientMiddleware.resetClientState(),
         onClientCreated: (replacementClient) => {
-          client = replacementClient
+          legacyClient = replacementClient
         },
       })
       startup.replace(replacement.then(() => undefined))
-      client = await replacement
+      legacyClient = await replacement
     }
 
     context.subscriptions.push(
@@ -256,7 +256,7 @@ const plugin: PrismaVSCodePlugin = {
       }),
       workspace.onDidCloseTextDocument((document) => {
         if (document.languageId === 'prisma') {
-          void ownership.close(document).catch(logBundledClientError)
+          void ownership.close(document).catch(logLegacyClientError)
         }
       }),
     )
@@ -285,13 +285,13 @@ const plugin: PrismaVSCodePlugin = {
     checkForMinimalColorTheme()
   },
   deactivate: () => {
-    const startup = bundledClientStartup
-    const activeClient = client
-    bundledClientStartup = undefined
-    const deactivation = deactivateBundledClient(
+    const startup = legacyClientStartup
+    const activeClient = legacyClient
+    legacyClientStartup = undefined
+    const deactivation = deactivateLegacyClient(
       startup,
       activeClient ? () => activeClient.stop() : undefined,
-      logBundledClientError,
+      logLegacyClientError,
     )
 
     if (activeClient && !isDebugOrTestSession()) {
@@ -301,22 +301,21 @@ const plugin: PrismaVSCodePlugin = {
   },
 }
 
-function getServerOptions(prismaConfig: WorkspaceConfiguration, context: ExtensionContext): ServerOptions {
+function getLegacyServerOptions(prismaConfig: WorkspaceConfiguration, context: ExtensionContext): ServerOptions {
   const pinToPrisma6 = prismaConfig.get<boolean>('pinToPrisma6')
 
   if (pinToPrisma6) {
-    console.log('Using bundled Prisma 6 Language Server')
-    serverModule = context.asAbsolutePath(path.join('dist/prisma6-language-server/bin.js'))
+    console.log('Using legacy Prisma 6 Language Server')
+    legacyServerModule = context.asAbsolutePath(path.join('dist/prisma6-language-server/bin.js'))
   } else if (isDebugMode()) {
-    // use Language Server from folder for debugging
-    console.log('Using local Language Server from filesystem')
-    serverModule = context.asAbsolutePath(path.join('../../packages/language-server/dist/bin'))
+    // Use the legacy Language Server from the source tree for debugging.
+    console.log('Using legacy Language Server from filesystem')
+    legacyServerModule = context.asAbsolutePath(path.join('../../packages/language-server/dist/bin'))
   } else {
-    // use bundled language server
-    console.log('Using bundled Language Server')
-    serverModule = context.asAbsolutePath(path.join('dist/language-server/bin.js'))
+    console.log('Using legacy Language Server')
+    legacyServerModule = context.asAbsolutePath(path.join('dist/language-server/bin.js'))
   }
-  console.log(`serverModule: ${serverModule}`)
+  console.log(`legacyServerModule: ${legacyServerModule}`)
 
   // The debug options for the server
   // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
@@ -328,9 +327,9 @@ function getServerOptions(prismaConfig: WorkspaceConfiguration, context: Extensi
   // If the extension is launched in debug mode then the debug server options are used
   // Otherwise the run options are used
   return {
-    run: { module: serverModule, transport: TransportKind.ipc },
+    run: { module: legacyServerModule, transport: TransportKind.ipc },
     debug: {
-      module: serverModule,
+      module: legacyServerModule,
       transport: TransportKind.ipc,
       options: debugOptions,
     },

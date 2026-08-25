@@ -61,8 +61,8 @@ const userFile = helper.file('User.prisma')
 pnpm test:e2e  # runs scripts/e2e.sh
 ```
 
-Uses the VS Code test framework for E2E testing of the extension. The language
-server is bundled with the extension, so tests always use the local version.
+Uses the VS Code test framework for E2E testing of the extension. The legacy
+language server ships with the extension, so tests exercise the workspace build.
 
 ### Post-Publish E2E Testing
 
@@ -85,6 +85,6 @@ Run the focused minimum-runtime workspace suite with:
 pnpm --filter prisma test:integration:workspace
 ```
 
-This command rebuilds the extension, compiles the integration tests, launches the minimum supported VS Code version, and runs `workspace.test.js`. The test uses the bundled language server and the real workspace-local Prisma CLI process side by side; no mock language-server executable is part of the fixture.
+This command rebuilds the extension, compiles the integration tests, launches the minimum supported VS Code version, and runs `workspace.test.js`. The test uses the legacy language server and the real Prisma Next server launched from the workspace-local Prisma CLI side by side; no mock language-server executable is part of the fixture.
 
-The test opens an empty, unmarked `bundled.prisma` and a marked `next.prisma` in separate editor columns, then polls only the public `vscode.executeCompletionItemProvider` command with a fixed timeout. At `(0, 0)`, the bundled server must offer `datasource`, `generator`, and `model`, classify `datasource` as `CompletionItemKind.Class`, and omit `namespace`. At `(1, 0)`, the local Prisma 8 server must offer `namespace` as `CompletionItemKind.Keyword` with detail `PSL declaration keyword`, and omit `datasource`. These assertions verify observable routing behavior without extension-private commands, owner state, events, or process start counts.
+The test opens an empty, unmarked `legacy.prisma` and a marked `next.prisma` in separate editor columns, then polls only the public `vscode.executeCompletionItemProvider` command with a fixed timeout. At `(0, 0)`, the legacy Prisma 7 server must offer `datasource`, `generator`, and `model`, classify `datasource` as `CompletionItemKind.Class`, and omit `namespace`. At `(1, 0)`, the Prisma Next server from the workspace-local Prisma 8 CLI must offer `namespace` as `CompletionItemKind.Keyword` with detail `PSL declaration keyword`, and omit `datasource`. These assertions verify observable routing behavior without extension-private commands, owner state, events, or process start counts.

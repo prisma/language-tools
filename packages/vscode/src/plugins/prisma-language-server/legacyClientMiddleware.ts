@@ -7,7 +7,7 @@ import type {
 import type { LanguageClient, Middleware } from 'vscode-languageclient/node'
 import { DocumentOwnershipCoordinator } from './documentOwnership'
 
-export interface BundledClientMiddlewareOptions {
+export interface LegacyClientMiddlewareOptions {
   readonly ownership: DocumentOwnershipCoordinator
   readonly getClient: () => LanguageClient
   readonly getDocument: (uri: Uri) => TextDocument | undefined
@@ -15,44 +15,44 @@ export interface BundledClientMiddlewareOptions {
   readonly isSnippetEdit: (action: ProtocolCodeAction, document: TextDocumentIdentifier) => boolean
 }
 
-export interface BundledClientMiddleware extends Middleware {
+export interface LegacyClientMiddleware extends Middleware {
   openDocument(document: TextDocument): void
   closeDocument(document: TextDocument): void
   clearDiagnostics(uri: Uri): void
   resetClientState(): void
 }
 
-export function createBundledClientMiddleware(options: BundledClientMiddlewareOptions): BundledClientMiddleware {
+export function createLegacyClientMiddleware(options: LegacyClientMiddlewareOptions): LegacyClientMiddleware {
   let completionDocuments = new WeakMap<CompletionItem, TextDocument>()
-  const bundledDocuments = new Set<string>()
+  const legacyDocuments = new Set<string>()
 
-  const isBundledDocument = (document: TextDocument): boolean => {
-    const committedOwner = options.ownership.getOwner(document.uri)
-    const currentOwner = options.ownership.classify(document)
-    return committedOwner.kind === 'bundled' && currentOwner.kind === 'bundled'
+  const isLegacyDocument = (document: TextDocument): boolean => {
+    const settledOwner = options.ownership.getSettledOwner(document.uri)
+    const desiredOwner = options.ownership.getDesiredOwner(document)
+    return settledOwner.kind === 'legacy' && desiredOwner.kind === 'legacy'
   }
 
   const clearDiagnostics = (uri: Uri): void => {
     options.getClient().diagnostics?.delete(uri)
   }
 
-  const openBundledDocument = (document: TextDocument): void => {
+  const openLegacyDocument = (document: TextDocument): void => {
     const documentUri = document.uri.toString()
-    if (bundledDocuments.has(documentUri)) return
+    if (legacyDocuments.has(documentUri)) return
 
-    bundledDocuments.add(documentUri)
+    legacyDocuments.add(documentUri)
     const client = options.getClient()
     try {
       client.sendNotification('textDocument/didOpen', client.code2ProtocolConverter.asOpenTextDocumentParams(document))
     } catch (error) {
-      bundledDocuments.delete(documentUri)
+      legacyDocuments.delete(documentUri)
       throw error
     }
   }
 
-  const closeBundledDocument = (document: TextDocument): void => {
+  const closeLegacyDocument = (document: TextDocument): void => {
     const documentUri = document.uri.toString()
-    if (!bundledDocuments.delete(documentUri)) return
+    if (!legacyDocuments.delete(documentUri)) return
 
     const client = options.getClient()
     try {
@@ -61,41 +61,41 @@ export function createBundledClientMiddleware(options: BundledClientMiddlewareOp
         client.code2ProtocolConverter.asCloseTextDocumentParams(document),
       )
     } catch (error) {
-      bundledDocuments.add(documentUri)
+      legacyDocuments.add(documentUri)
       throw error
     }
   }
 
-  const middleware: BundledClientMiddleware = {
-    openDocument: openBundledDocument,
-    closeDocument: closeBundledDocument,
+  const middleware: LegacyClientMiddleware = {
+    openDocument: openLegacyDocument,
+    closeDocument: closeLegacyDocument,
     clearDiagnostics,
     resetClientState: () => {
-      bundledDocuments.clear()
+      legacyDocuments.clear()
       completionDocuments = new WeakMap()
     },
     didOpen: (document, next) => {
       const documentUri = document.uri.toString()
-      if (isBundledDocument(document) && !bundledDocuments.has(documentUri)) {
-        bundledDocuments.add(documentUri)
+      if (isLegacyDocument(document) && !legacyDocuments.has(documentUri)) {
+        legacyDocuments.add(documentUri)
         next(document)
       }
     },
     didChange: (event, next) => {
       const document = event.document
-      if (isBundledDocument(document) && bundledDocuments.has(document.uri.toString())) {
+      if (isLegacyDocument(document) && legacyDocuments.has(document.uri.toString())) {
         next(event)
       }
     },
     didClose: (document, next) => {
-      if (bundledDocuments.delete(document.uri.toString())) {
+      if (legacyDocuments.delete(document.uri.toString())) {
         next(document)
       }
       clearDiagnostics(document.uri)
     },
     handleDiagnostics: (uri, diagnostics, next) => {
       const document = options.getDocument(uri)
-      if (!document || !isBundledDocument(document)) {
+      if (!document || !isLegacyDocument(document)) {
         next(uri, [])
         return
       }
@@ -106,7 +106,7 @@ export function createBundledClientMiddleware(options: BundledClientMiddlewareOp
       next(uri, diagnostics)
     },
     provideCompletionItem: (document, position, context, token, next) => {
-      if (!isBundledDocument(document)) {
+      if (!isLegacyDocument(document)) {
         return undefined
       }
 
@@ -119,25 +119,24 @@ export function createBundledClientMiddleware(options: BundledClientMiddlewareOp
     },
     resolveCompletionItem: (item, token, next) => {
       const document = completionDocuments.get(item)
-      if (!document || !isBundledDocument(document)) {
+      if (!document || !isLegacyDocument(document)) {
         return undefined
       }
       return next(item, token)
     },
     provideHover: (document, position, token, next) =>
-      isBundledDocument(document) ? next(document, position, token) : undefined,
+      isLegacyDocument(document) ? next(document, position, token) : undefined,
     provideDefinition: (document, position, token, next) =>
-      isBundledDocument(document) ? next(document, position, token) : undefined,
+      isLegacyDocument(document) ? next(document, position, token) : undefined,
     provideReferences: (document, position, referenceContext, token, next) =>
-      isBundledDocument(document) ? next(document, position, referenceContext, token) : undefined,
-    provideDocumentSymbols: (document, token, next) =>
-      isBundledDocument(document) ? next(document, token) : undefined,
+      isLegacyDocument(document) ? next(document, position, referenceContext, token) : undefined,
+    provideDocumentSymbols: (document, token, next) => (isLegacyDocument(document) ? next(document, token) : undefined),
     provideDocumentFormattingEdits: (document, formattingOptions, token, next) =>
-      isBundledDocument(document) ? next(document, formattingOptions, token) : undefined,
+      isLegacyDocument(document) ? next(document, formattingOptions, token) : undefined,
     provideRenameEdits: (document, position, newName, token, next) =>
-      isBundledDocument(document) ? next(document, position, newName, token) : undefined,
+      isLegacyDocument(document) ? next(document, position, newName, token) : undefined,
     provideCodeActions: async (document, range, context, token) => {
-      if (!isBundledDocument(document)) {
+      if (!isLegacyDocument(document)) {
         return undefined
       }
 

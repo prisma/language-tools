@@ -2,8 +2,8 @@ import { isPrismaNextSchema } from '@prisma/language-server/prisma-next'
 import type { TextDocument, Uri, WorkspaceFolder } from 'vscode'
 
 export type DocumentOwner =
-  | { readonly kind: 'bundled' }
-  | { readonly kind: 'local'; readonly workspaceFolderUri: string }
+  | { readonly kind: 'legacy' }
+  | { readonly kind: 'prisma-next'; readonly workspaceFolderUri: string }
   | { readonly kind: 'unowned' }
 
 export interface DocumentOwnershipPolicy {
@@ -17,12 +17,12 @@ export interface DocumentOwnershipWorkspace {
 
 export interface DocumentOwnershipTransition {
   readonly document: TextDocument
-  readonly previousOwner: DocumentOwner
-  readonly nextOwner: DocumentOwner
+  readonly previousSettledOwner: DocumentOwner
+  readonly nextDesiredOwner: DocumentOwner
   readonly revision: number
 }
 
-export type PreparedDocumentOwnerCommit = () => Promise<void> | void
+export type PreparedDocumentOwnerCommit = () => Promise<DocumentOwner> | DocumentOwner
 
 export type PrepareDocumentOwnerCommit = (
   transition: DocumentOwnershipTransition,
@@ -31,16 +31,16 @@ export type PrepareDocumentOwnerCommit = (
 export interface DocumentOwnershipCoordinatorOptions {
   readonly workspace: DocumentOwnershipWorkspace
   readonly policy: DocumentOwnershipPolicy
-  readonly prepareOwner?: PrepareDocumentOwnerCommit
+  readonly prepareTransition?: PrepareDocumentOwnerCommit
 }
 
 interface DocumentOwnershipState {
   revision: number
-  owner: DocumentOwner
+  settledOwner: DocumentOwner
   pending: Promise<void>
 }
 
-const bundledOwner: DocumentOwner = { kind: 'bundled' }
+const legacyOwner: DocumentOwner = { kind: 'legacy' }
 const unownedOwner: DocumentOwner = { kind: 'unowned' }
 
 export class DocumentOwnershipCoordinator {
@@ -48,13 +48,13 @@ export class DocumentOwnershipCoordinator {
 
   constructor(private readonly options: DocumentOwnershipCoordinatorOptions) {}
 
-  classify(document: TextDocument): DocumentOwner {
+  getDesiredOwner(document: TextDocument): DocumentOwner {
     if (this.options.policy.isPinnedToPrisma6()) {
-      return bundledOwner
+      return legacyOwner
     }
 
     if (!isPrismaNextSchema(document.getText())) {
-      return bundledOwner
+      return legacyOwner
     }
 
     if (document.uri.scheme !== 'file' || !this.options.workspace.isTrusted) {
@@ -66,15 +66,15 @@ export class DocumentOwnershipCoordinator {
       return unownedOwner
     }
 
-    return { kind: 'local', workspaceFolderUri: workspaceFolder.uri.toString() }
+    return { kind: 'prisma-next', workspaceFolderUri: workspaceFolder.uri.toString() }
   }
 
-  getOwner(documentUri: Uri): DocumentOwner {
-    return this.states.get(documentUri.toString())?.owner ?? unownedOwner
+  getSettledOwner(documentUri: Uri): DocumentOwner {
+    return this.states.get(documentUri.toString())?.settledOwner ?? unownedOwner
   }
 
   synchronize(document: TextDocument): Promise<DocumentOwner> {
-    return this.enqueue(document, (state, revision) => this.commitCurrentOwner(document, state, revision))
+    return this.enqueue(document, (state, revision) => this.commitDesiredOwner(document, state, revision))
   }
 
   close(document: TextDocument): Promise<DocumentOwner> {
@@ -103,7 +103,7 @@ export class DocumentOwnershipCoordinator {
 
     const state: DocumentOwnershipState = {
       revision: 0,
-      owner: unownedOwner,
+      settledOwner: unownedOwner,
       pending: Promise.resolve(),
     }
     this.states.set(documentUri, state)
@@ -116,59 +116,53 @@ export class DocumentOwnershipCoordinator {
     revision: number,
   ): Promise<DocumentOwner> {
     if (revision !== state.revision) {
-      return state.owner
+      return state.settledOwner
     }
 
-    const commitOwner = await this.options.prepareOwner?.({
+    const commitOwner = await this.options.prepareTransition?.({
       document,
-      previousOwner: state.owner,
-      nextOwner: unownedOwner,
+      previousSettledOwner: state.settledOwner,
+      nextDesiredOwner: unownedOwner,
       revision,
     })
     if (revision !== state.revision) {
-      return state.owner
+      return state.settledOwner
     }
 
-    if (commitOwner) {
-      await commitOwner()
-    }
-
-    state.owner = unownedOwner
-    return unownedOwner
+    const settledOwner = commitOwner ? await commitOwner() : unownedOwner
+    state.settledOwner = settledOwner
+    return settledOwner
   }
 
-  private async commitCurrentOwner(
+  private async commitDesiredOwner(
     document: TextDocument,
     state: DocumentOwnershipState,
     revision: number,
   ): Promise<DocumentOwner> {
     while (revision === state.revision) {
-      const nextOwner = this.classify(document)
-      const commitOwner = await this.options.prepareOwner?.({
+      const nextDesiredOwner = this.getDesiredOwner(document)
+      const commitOwner = await this.options.prepareTransition?.({
         document,
-        previousOwner: state.owner,
-        nextOwner,
+        previousSettledOwner: state.settledOwner,
+        nextDesiredOwner,
         revision,
       })
 
       if (revision !== state.revision) {
-        return state.owner
+        return state.settledOwner
       }
 
-      const currentOwner = this.classify(document)
-      if (!ownersEqual(currentOwner, nextOwner)) {
+      const desiredOwner = this.getDesiredOwner(document)
+      if (!ownersEqual(desiredOwner, nextDesiredOwner)) {
         continue
       }
 
-      if (commitOwner) {
-        await commitOwner()
-      }
-
-      state.owner = currentOwner
-      return currentOwner
+      const settledOwner = commitOwner ? await commitOwner() : desiredOwner
+      state.settledOwner = settledOwner
+      return settledOwner
     }
 
-    return state.owner
+    return state.settledOwner
   }
 }
 
@@ -176,5 +170,8 @@ function ownersEqual(left: DocumentOwner, right: DocumentOwner): boolean {
   if (left.kind !== right.kind) {
     return false
   }
-  return left.kind !== 'local' || (right.kind === 'local' && left.workspaceFolderUri === right.workspaceFolderUri)
+  return (
+    left.kind !== 'prisma-next' ||
+    (right.kind === 'prisma-next' && left.workspaceFolderUri === right.workspaceFolderUri)
+  )
 }

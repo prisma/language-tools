@@ -5,16 +5,16 @@ const completionTimeoutMs = 30_000
 const completionPollIntervalMs = 100
 
 suite('Prisma language server routing', () => {
-  test('provides bundled Prisma 7 and workspace-local Prisma 8 completions side by side', async () => {
+  test('provides legacy Prisma 7 and Prisma Next completions side by side', async () => {
     const workspaceFolders = vscode.workspace.workspaceFolders
     assert.ok(workspaceFolders)
     assert.strictEqual(workspaceFolders.length, 1)
     const root = workspaceFolders[0]
 
-    const bundledUri = vscode.Uri.joinPath(root.uri, 'bundled.prisma')
+    const legacyUri = vscode.Uri.joinPath(root.uri, 'legacy.prisma')
     const nextUri = vscode.Uri.joinPath(root.uri, 'next.prisma')
-    const bundledDocument = await vscode.workspace.openTextDocument(bundledUri)
-    await vscode.window.showTextDocument(bundledDocument, { viewColumn: vscode.ViewColumn.One })
+    const legacyDocument = await vscode.workspace.openTextDocument(legacyUri)
+    await vscode.window.showTextDocument(legacyDocument, { viewColumn: vscode.ViewColumn.One })
     const nextDocument = await vscode.workspace.openTextDocument(nextUri)
     await vscode.window.showTextDocument(nextDocument, { viewColumn: vscode.ViewColumn.Two })
 
@@ -22,20 +22,20 @@ suite('Prisma language server routing', () => {
     assert.ok(extension)
     await extension.activate()
 
-    const bundledCompletions = await waitForCompletions(
-      bundledUri,
+    const legacyCompletions = await waitForCompletions(
+      legacyUri,
       new vscode.Position(0, 0),
       (completions) =>
         ['datasource', 'generator', 'model'].every((label) => hasLabel(completions, label)) &&
         findCompletion(completions, 'datasource')?.kind === vscode.CompletionItemKind.Class,
-      'bundled Prisma 7 declaration completions',
+      'legacy Prisma 7 declaration completions',
     )
-    const bundledDatasource = findCompletion(bundledCompletions, 'datasource')
-    assert.ok(bundledDatasource)
-    assert.strictEqual(bundledDatasource.kind, vscode.CompletionItemKind.Class)
-    assert.ok(hasLabel(bundledCompletions, 'generator'))
-    assert.ok(hasLabel(bundledCompletions, 'model'))
-    assert.ok(!hasLabel(bundledCompletions, 'namespace'))
+    const legacyDatasource = findCompletion(legacyCompletions, 'datasource')
+    assert.ok(legacyDatasource)
+    assert.strictEqual(legacyDatasource.kind, vscode.CompletionItemKind.Class)
+    assert.ok(hasLabel(legacyCompletions, 'generator'))
+    assert.ok(hasLabel(legacyCompletions, 'model'))
+    assert.ok(!hasLabel(legacyCompletions, 'namespace'))
 
     const nextCompletions = await waitForCompletions(
       nextUri,
@@ -44,7 +44,7 @@ suite('Prisma language server routing', () => {
         const namespace = findCompletion(completions, 'namespace')
         return namespace?.kind === vscode.CompletionItemKind.Keyword && namespace.detail === 'PSL declaration keyword'
       },
-      'workspace-local Prisma 8 declaration completions',
+      'Prisma Next declaration completions',
     )
     const namespace = findCompletion(nextCompletions, 'namespace')
     assert.ok(namespace)
