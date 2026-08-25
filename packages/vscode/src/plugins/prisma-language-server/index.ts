@@ -157,6 +157,7 @@ const plugin: PrismaVSCodePlugin = {
     }
 
     let started = false
+    let legacyReadiness: Promise<void> | undefined
     legacyClientStartup?.dispose()
     const startup = new LegacyClientStartup<TextDocument>({
       isCurrent: (document) => workspace.textDocuments.includes(document),
@@ -175,12 +176,14 @@ const plugin: PrismaVSCodePlugin = {
       }
     }
 
-    const maybeStart = (document?: TextDocument) => {
+    const maybeStart = (document?: TextDocument): void => {
       if (started) return
       if (document ? !needsLegacyLanguageServer(document) : !workspace.textDocuments.some(needsLegacyLanguageServer))
         return
       started = true
-      startup.start(() => activateLegacyClient(context, legacyClientOptions))
+      const readiness = activateLegacyClient(context, legacyClientOptions)
+      legacyReadiness = readiness
+      startup.start(() => readiness)
     }
 
     const getOpenPrismaDocuments = (): TextDocument[] =>
@@ -202,10 +205,11 @@ const plugin: PrismaVSCodePlugin = {
       return waitForOwnershipOperations(legacyDocuments.map((document) => ownership.close(document)))
     }
 
-    const restartLanguageServer = async () => {
+    const restartLanguageServerNow = async (): Promise<void> => {
       if (!started) {
         maybeStart()
-        for (const document of getOpenPrismaDocuments()) synchronizeDocument(document)
+        await legacyReadiness
+        await synchronizeDocuments(getOpenPrismaDocuments())
         return
       }
 
@@ -242,6 +246,17 @@ const plugin: PrismaVSCodePlugin = {
         restarting = false
       }
     }
+
+    let restartQueue: Promise<void> = Promise.resolve()
+    const enqueueLanguageServerOperation = <T>(operation: () => Promise<T>): Promise<T> => {
+      const queued = restartQueue.then(operation, operation)
+      restartQueue = queued.then(
+        () => undefined,
+        () => undefined,
+      )
+      return queued
+    }
+    const restartLanguageServer = (): Promise<void> => enqueueLanguageServerOperation(restartLanguageServerNow)
 
     context.subscriptions.push(
       // when the file watcher settings change, we need to ensure they are applied
@@ -281,17 +296,21 @@ const plugin: PrismaVSCodePlugin = {
         await prismaConfig.update('fileWatcher', false /* value */, false /* workspace */)
       }),
 
-      commands.registerCommand('prisma.pinWorkspaceToPrisma6', async () => {
-        await workspace.getConfiguration('prisma').update('pinToPrisma6', true, false)
-        await restartLanguageServer()
-        void window.showInformationMessage('Pinned workspace to Prisma 6.')
-      }),
+      commands.registerCommand('prisma.pinWorkspaceToPrisma6', () =>
+        enqueueLanguageServerOperation(async () => {
+          await workspace.getConfiguration('prisma').update('pinToPrisma6', true, false)
+          await restartLanguageServerNow()
+          void window.showInformationMessage('Pinned workspace to Prisma 6.')
+        }),
+      ),
 
-      commands.registerCommand('prisma.unpinWorkspaceFromPrisma6', async () => {
-        await workspace.getConfiguration('prisma').update('pinToPrisma6', false, false)
-        await restartLanguageServer()
-        void window.showInformationMessage('Unpinned workspace from Prisma 6.')
-      }),
+      commands.registerCommand('prisma.unpinWorkspaceFromPrisma6', () =>
+        enqueueLanguageServerOperation(async () => {
+          await workspace.getConfiguration('prisma').update('pinToPrisma6', false, false)
+          await restartLanguageServerNow()
+          void window.showInformationMessage('Unpinned workspace from Prisma 6.')
+        }),
+      ),
 
       workspace.onDidOpenTextDocument((document) => {
         maybeStart(document)

@@ -110,7 +110,7 @@ export function createLegacyLanguageServer(
   serverOptions: ServerOptions,
   clientOptions: LanguageClientOptions,
 ): LanguageClient {
-  return new LanguageClient('prisma-legacy', 'Prisma Legacy Language Server', serverOptions, {
+  return new LanguageClient('prisma', 'Prisma Legacy Language Server', serverOptions, {
     ...clientOptions,
     outputChannelName: 'Prisma Legacy Language Server',
   })

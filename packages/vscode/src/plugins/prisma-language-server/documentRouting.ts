@@ -39,25 +39,17 @@ export function createPrepareDocumentRoutingCommit(options: DocumentRoutingOptio
 
       try {
         await clearPreviousSettledOwnerDiagnostics(options, previousSettledOwner, document.uri)
-      } catch (error) {
-        return commitOutcome({ kind: 'unowned' }, error)
-      }
 
-      if (!isDesiredOpenCandidate(options, document, nextDesiredOwner)) {
-        return commitOutcome({ kind: 'unowned' })
-      }
+        if (!isDesiredOpenCandidate(options, document, nextDesiredOwner)) {
+          return commitOutcome({ kind: 'unowned' })
+        }
 
-      if (nextDesiredOwner.kind === 'legacy') {
-        try {
+        if (nextDesiredOwner.kind === 'legacy') {
           options.getLegacy().openDocument(document)
           return commitOutcome(nextDesiredOwner)
-        } catch (error) {
-          return commitOutcome({ kind: 'unowned' }, error)
         }
-      }
 
-      if (nextDesiredOwner.kind === 'prisma-next') {
-        try {
+        if (nextDesiredOwner.kind === 'prisma-next') {
           const prismaNext = options.getPrismaNext()
           const client = await prismaNext.ensureClientForDocument(document)
           if (
@@ -67,12 +59,12 @@ export function createPrepareDocumentRoutingCommit(options: DocumentRoutingOptio
           ) {
             return commitOutcome(nextDesiredOwner)
           }
-        } catch (error) {
-          return commitOutcome({ kind: 'unowned' }, error)
         }
-      }
 
-      return commitOutcome({ kind: 'unowned' })
+        return commitOutcome({ kind: 'unowned' })
+      } catch (error) {
+        return commitOutcome({ kind: 'unowned' }, error)
+      }
     }
   }
 }
