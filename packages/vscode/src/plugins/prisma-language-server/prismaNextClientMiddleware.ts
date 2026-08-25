@@ -5,6 +5,7 @@ import type { DocumentOwnershipCoordinator } from './documentOwnership'
 export interface PrismaNextClientMiddlewareOptions {
   readonly workspaceFolderUri: string
   readonly ownership: DocumentOwnershipCoordinator
+  readonly isActive: () => boolean
   readonly getClient: () => LanguageClient
   readonly getDocument: (uri: Uri) => TextDocument | undefined
 }
@@ -22,6 +23,8 @@ export function createPrismaNextClientMiddleware(
   const completionDocuments = new WeakMap<CompletionItem, TextDocument>()
 
   const isOwnedDocument = (document: TextDocument): boolean => {
+    if (!options.isActive()) return false
+
     const settledOwner = options.ownership.getSettledOwner(document.uri)
     const desiredOwner = options.ownership.getDesiredOwner(document)
     return (
@@ -33,10 +36,13 @@ export function createPrismaNextClientMiddleware(
   }
 
   const clearDiagnostics = (uri: Uri): void => {
+    if (!options.isActive()) return
     options.getClient().diagnostics?.delete(uri)
   }
 
   const openDocument = (document: TextDocument): void => {
+    if (!options.isActive()) return
+
     const documentUri = document.uri.toString()
     if (synchronizedDocuments.has(documentUri)) return
 
@@ -51,6 +57,8 @@ export function createPrismaNextClientMiddleware(
   }
 
   const closeDocument = (document: TextDocument): void => {
+    if (!options.isActive()) return
+
     const documentUri = document.uri.toString()
     if (!synchronizedDocuments.delete(documentUri)) return
 

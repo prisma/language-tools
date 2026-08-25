@@ -30,6 +30,7 @@ export interface PrismaNextLauncherOptions {
 export interface PrismaNextClientRegistryOptions {
   readonly workspace: PrismaNextClientRegistryWorkspace
   readonly ownership: DocumentOwnershipCoordinator
+  readonly isActive: () => boolean
   readonly getDocument: (uri: Uri) => TextDocument | undefined
   readonly createClient: (
     id: string,
@@ -50,11 +51,19 @@ interface PrismaNextClientEntry {
 
 export class PrismaNextClientRegistry {
   private readonly clients = new Map<string, Promise<PrismaNextClientEntry | undefined>>()
+  private readonly startedClients = new Set<LanguageClient>()
+  private disposed = false
+  private deactivation: Promise<void> | undefined
 
   constructor(private readonly options: PrismaNextClientRegistryOptions) {}
 
   ensureClientForDocument(document: TextDocument): Promise<LanguageClient | undefined> {
-    if (!this.options.workspace.isTrusted || document.uri.scheme !== 'file') {
+    if (
+      this.disposed ||
+      !this.options.isActive() ||
+      !this.options.workspace.isTrusted ||
+      document.uri.scheme !== 'file'
+    ) {
       return Promise.resolve(undefined)
     }
 
@@ -67,8 +76,10 @@ export class PrismaNextClientRegistry {
   }
 
   async openDocument(workspaceFolderUri: string, document: TextDocument): Promise<boolean> {
+    if (this.disposed || !this.options.isActive()) return false
+
     const entry = await this.clients.get(workspaceFolderUri)
-    if (!entry || this.options.getDocument(document.uri) !== document) {
+    if (this.disposed || !this.options.isActive() || !entry || this.options.getDocument(document.uri) !== document) {
       return false
     }
     entry.middleware.openDocument(document)
@@ -76,16 +87,32 @@ export class PrismaNextClientRegistry {
   }
 
   async closeDocument(workspaceFolderUri: string, document: TextDocument): Promise<void> {
+    if (this.disposed || !this.options.isActive()) return
+
     const entry = await this.clients.get(workspaceFolderUri)
-    entry?.middleware.closeDocument(document)
+    if (!this.disposed && this.options.isActive()) entry?.middleware.closeDocument(document)
   }
 
   async clearDiagnostics(workspaceFolderUri: string, uri: Uri): Promise<void> {
+    if (this.disposed || !this.options.isActive()) return
+
     const entry = await this.clients.get(workspaceFolderUri)
-    entry?.middleware.clearDiagnostics(uri)
+    if (!this.disposed && this.options.isActive()) entry?.middleware.clearDiagnostics(uri)
+  }
+
+  dispose(): Promise<void> {
+    if (this.deactivation) return this.deactivation
+
+    this.disposed = true
+    this.deactivation = Promise.allSettled([...this.startedClients].map((client) => client.stop())).then(
+      () => undefined,
+    )
+    return this.deactivation
   }
 
   private ensureClient(workspaceFolder: WorkspaceFolder): Promise<PrismaNextClientEntry | undefined> {
+    if (this.disposed || !this.options.isActive()) return Promise.resolve(undefined)
+
     const workspaceFolderUri = workspaceFolder.uri.toString()
     const existing = this.clients.get(workspaceFolderUri)
     if (existing) {
@@ -102,7 +129,7 @@ export class PrismaNextClientRegistry {
 
     try {
       const exists = await (this.options.entrypointExists ?? isFile)(entrypoint)
-      if (!exists) {
+      if (!exists || this.disposed || !this.options.isActive()) {
         return undefined
       }
 
@@ -110,9 +137,12 @@ export class PrismaNextClientRegistry {
       const middleware = createPrismaNextClientMiddleware({
         workspaceFolderUri,
         ownership: this.options.ownership,
+        isActive: this.options.isActive,
         getClient: () => client,
         getDocument: this.options.getDocument,
       })
+      if (this.disposed || !this.options.isActive()) return undefined
+
       const client = this.options.createClient(
         `prisma-next:${workspaceFolderUri}`,
         `Prisma Next Language Server (${workspaceFolder.name})`,
@@ -122,11 +152,19 @@ export class PrismaNextClientRegistry {
         }),
         createPrismaNextClientOptions(workspaceFolder, middleware),
       )
+      this.startedClients.add(client)
+      if (this.disposed || !this.options.isActive()) {
+        await client.stop()
+        return undefined
+      }
       this.options.registerDisposable(client.start())
       await client.onReady()
+      if (this.disposed || !this.options.isActive()) return undefined
       return { client, middleware }
     } catch (error) {
-      this.options.handleStartError?.(workspaceFolder, error)
+      if (!this.disposed && this.options.isActive()) {
+        this.options.handleStartError?.(workspaceFolder, error)
+      }
       return undefined
     }
   }

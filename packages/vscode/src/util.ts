@@ -116,6 +116,8 @@ export function createLegacyLanguageServer(
   })
 }
 export interface RestartClientLifecycle {
+  assertActive?(): void
+  waitFor?<T>(operation: Promise<T>): Promise<T>
   onClientStopped(): void
   onClientCreated(client: LanguageClient): void
 }
@@ -128,11 +130,19 @@ export const restartClient = async (
   lifecycle?: RestartClientLifecycle,
 ): Promise<LanguageClient> => {
   client?.diagnostics?.dispose()
-  if (client) await client.stop()
+  if (client) {
+    const stopping = client.stop()
+    await (lifecycle?.waitFor?.(stopping) ?? stopping)
+  }
   lifecycle?.onClientStopped()
+  lifecycle?.assertActive?.()
   client = createLegacyLanguageServer(serverOptions, clientOptions)
+  lifecycle?.assertActive?.()
   lifecycle?.onClientCreated(client)
+  lifecycle?.assertActive?.()
   context.subscriptions.push(client.start())
-  await client.onReady()
+  const readiness = client.onReady()
+  await (lifecycle?.waitFor?.(readiness) ?? readiness)
+  lifecycle?.assertActive?.()
   return client
 }

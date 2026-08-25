@@ -21,6 +21,7 @@ export interface PrismaNextDocumentSynchronization {
 
 export interface DocumentRoutingOptions {
   readonly getOwnership: () => DocumentOwnershipCoordinator
+  readonly isActive: () => boolean
   readonly isDocumentOpen: (document: TextDocument) => boolean
   readonly getLegacy: () => LegacyDocumentSynchronization
   readonly getPrismaNext: () => PrismaNextDocumentSynchronization
@@ -31,6 +32,8 @@ export function createPrepareDocumentRoutingCommit(options: DocumentRoutingOptio
     if (documentOwnersEqual(previousSettledOwner, nextDesiredOwner)) return undefined
 
     return async () => {
+      if (!options.isActive()) return commitOutcome(previousSettledOwner)
+
       try {
         await closePreviousSettledOwner(options, previousSettledOwner, document)
       } catch (error) {
@@ -38,6 +41,7 @@ export function createPrepareDocumentRoutingCommit(options: DocumentRoutingOptio
       }
 
       try {
+        if (!options.isActive()) return commitOutcome(previousSettledOwner)
         await clearPreviousSettledOwnerDiagnostics(options, previousSettledOwner, document.uri)
 
         if (!isDesiredOpenCandidate(options, document, nextDesiredOwner)) {
@@ -45,6 +49,7 @@ export function createPrepareDocumentRoutingCommit(options: DocumentRoutingOptio
         }
 
         if (nextDesiredOwner.kind === 'legacy') {
+          if (!options.isActive()) return commitOutcome({ kind: 'unowned' })
           options.getLegacy().openDocument(document)
           return commitOutcome(nextDesiredOwner)
         }
@@ -55,6 +60,7 @@ export function createPrepareDocumentRoutingCommit(options: DocumentRoutingOptio
           if (
             client &&
             isDesiredOpenCandidate(options, document, nextDesiredOwner) &&
+            options.isActive() &&
             (await prismaNext.openDocument(nextDesiredOwner.workspaceFolderUri, document))
           ) {
             return commitOutcome(nextDesiredOwner)
@@ -74,6 +80,8 @@ async function closePreviousSettledOwner(
   previousSettledOwner: DocumentOwner,
   document: TextDocument,
 ): Promise<void> {
+  if (!options.isActive()) return
+
   if (previousSettledOwner.kind === 'legacy') {
     options.getLegacy().closeDocument(document)
   } else if (previousSettledOwner.kind === 'prisma-next') {
@@ -86,6 +94,8 @@ async function clearPreviousSettledOwnerDiagnostics(
   previousSettledOwner: DocumentOwner,
   documentUri: Uri,
 ): Promise<void> {
+  if (!options.isActive()) return
+
   if (previousSettledOwner.kind === 'legacy') {
     options.getLegacy().clearDiagnostics(documentUri)
   } else if (previousSettledOwner.kind === 'prisma-next') {
@@ -103,7 +113,9 @@ function isDesiredOpenCandidate(
   candidate: DocumentOwner,
 ): boolean {
   return (
-    options.isDocumentOpen(document) && documentOwnersEqual(options.getOwnership().getDesiredOwner(document), candidate)
+    options.isActive() &&
+    options.isDocumentOpen(document) &&
+    documentOwnersEqual(options.getOwnership().getDesiredOwner(document), candidate)
   )
 }
 

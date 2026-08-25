@@ -25,30 +25,36 @@ import { DocumentOwnershipCoordinator } from './documentOwnership'
 import { createLegacyClientMiddleware, type LegacyClientMiddleware } from './legacyClientMiddleware'
 import { createPrepareDocumentRoutingCommit } from './documentRouting'
 import { PrismaNextClientRegistry } from './prismaNextClientRegistry'
-import { LegacyClientStartup, deactivateLegacyClient } from './legacyClientStartup'
+import { LanguageServerLifecycleController } from './languageServerLifecycle'
 
 let legacyClient: LanguageClient
 let legacyServerModule: string
 let telemetry: TelemetryReporter
 let fileWatcher: FileWatcher.type | undefined
-let legacyClientStartup: LegacyClientStartup<TextDocument> | undefined
+let languageServerLifecycle: LanguageServerLifecycleController | undefined
+let prismaNextClientRegistry: PrismaNextClientRegistry | undefined
 
 const isDebugMode = () => process.env.VSCODE_DEBUG_MODE === 'true'
 const logLegacyClientError = (error: unknown): void => {
   console.error('Legacy Prisma Language Server failed', error)
 }
 
-const activateLegacyClient = async (
+const activateLegacyClientNow = async (
   context: ExtensionContext,
   legacyClientOptions: LanguageClientOptions,
+  lifecycle: LanguageServerLifecycleController,
 ): Promise<void> => {
+  lifecycle.assertActive()
   const prismaConfig = workspace.getConfiguration('prisma')
-  legacyClient = createLegacyLanguageServer(getLegacyServerOptions(prismaConfig, context), legacyClientOptions)
+  lifecycle.assertActive()
+  const client = createLegacyLanguageServer(getLegacyServerOptions(prismaConfig, context), legacyClientOptions)
+  lifecycle.publishLegacyClient(client)
+  legacyClient = client
 
-  const disposable = legacyClient.start()
-
-  context.subscriptions.push(disposable)
-  await legacyClient.onReady()
+  lifecycle.assertActive()
+  context.subscriptions.push(client.start())
+  await lifecycle.waitFor(client.onReady())
+  lifecycle.assertActive()
 }
 
 const onFileChange = (filepath: string) => {
@@ -115,6 +121,9 @@ const plugin: PrismaVSCodePlugin = {
 
     let legacyUnavailable = false
     let restarting = false
+    languageServerLifecycle?.dispose().catch(logLegacyClientError)
+    const lifecycle = new LanguageServerLifecycleController()
+    languageServerLifecycle = lifecycle
     const ownership: DocumentOwnershipCoordinator = new DocumentOwnershipCoordinator({
       workspace,
       policy: {
@@ -123,6 +132,7 @@ const plugin: PrismaVSCodePlugin = {
       },
       prepareTransition: createPrepareDocumentRoutingCommit({
         getOwnership: (): DocumentOwnershipCoordinator => ownership,
+        isActive: () => lifecycle.isActive,
         isDocumentOpen: (document) => workspace.textDocuments.includes(document),
         getLegacy: () => legacyClientMiddleware,
         getPrismaNext: () => prismaNextClients,
@@ -131,6 +141,7 @@ const plugin: PrismaVSCodePlugin = {
     const prismaNextClients = new PrismaNextClientRegistry({
       workspace,
       ownership,
+      isActive: () => lifecycle.isActive,
       getDocument: (uri) => workspace.textDocuments.find((document) => document.uri.toString() === uri.toString()),
       createClient: (id, name, serverOptions, prismaNextClientOptions) =>
         new LanguageClient(id, name, serverOptions, prismaNextClientOptions),
@@ -139,9 +150,11 @@ const plugin: PrismaVSCodePlugin = {
         console.error(`Failed to start Prisma Next Language Server for ${workspaceFolder.uri.toString()}`, error)
       },
     })
+    prismaNextClientRegistry = prismaNextClients
 
     const legacyClientMiddleware: LegacyClientMiddleware = createLegacyClientMiddleware({
       ownership,
+      isActive: () => lifecycle.isActive,
       getClient: () => legacyClient,
       getDocument: (uri) => workspace.textDocuments.find((document) => document.uri.toString() === uri.toString()),
       handleDiagnosticMessage: (message) => {
@@ -156,36 +169,11 @@ const plugin: PrismaVSCodePlugin = {
       middleware: legacyClientMiddleware,
     }
 
+    let startRequested = false
     let started = false
-    let legacyReadiness: Promise<void> | undefined
-    legacyClientStartup?.dispose()
-    const startup = new LegacyClientStartup<TextDocument>({
-      isCurrent: (document) => workspace.textDocuments.includes(document),
-      synchronize: (document) => ownership.synchronize(document),
-      logError: logLegacyClientError,
-    })
-    legacyClientStartup = startup
+    let ready = false
     const needsLegacyLanguageServer = (document: TextDocument): boolean =>
       document.languageId === 'prisma' && ownership.getDesiredOwner(document).kind === 'legacy'
-    const synchronizeDocument = (document: TextDocument): void => {
-      if (restarting || document.languageId !== 'prisma') return
-      if (ownership.getDesiredOwner(document).kind === 'legacy') {
-        startup.schedule(document)
-      } else {
-        void ownership.synchronize(document).catch(logLegacyClientError)
-      }
-    }
-
-    const maybeStart = (document?: TextDocument): void => {
-      if (started) return
-      if (document ? !needsLegacyLanguageServer(document) : !workspace.textDocuments.some(needsLegacyLanguageServer))
-        return
-      started = true
-      const readiness = activateLegacyClient(context, legacyClientOptions)
-      legacyReadiness = readiness
-      startup.start(() => readiness)
-    }
-
     const getOpenPrismaDocuments = (): TextDocument[] =>
       workspace.textDocuments.filter((document) => document.languageId === 'prisma')
 
@@ -195,68 +183,100 @@ const plugin: PrismaVSCodePlugin = {
       if (failure) throw failure.reason
     }
 
-    const synchronizeDocuments = (documents: readonly TextDocument[]): Promise<void> =>
-      waitForOwnershipOperations(documents.map((document) => ownership.synchronize(document)))
+    const synchronizeDocuments = (documents: readonly TextDocument[]): Promise<void> => {
+      lifecycle.assertActive()
+      return waitForOwnershipOperations(documents.map((document) => ownership.synchronize(document)))
+    }
 
     const invalidateLegacyDocuments = (): Promise<void> => {
+      lifecycle.assertActive()
       const legacyDocuments = getOpenPrismaDocuments().filter(
         (document) => ownership.getSettledOwner(document.uri).kind === 'legacy',
       )
       return waitForOwnershipOperations(legacyDocuments.map((document) => ownership.close(document)))
     }
 
+    const startLegacyLanguageServerNow = async (): Promise<void> => {
+      lifecycle.assertActive()
+      if (started) return
+
+      started = true
+      await activateLegacyClientNow(context, legacyClientOptions, lifecycle)
+      ready = true
+      lifecycle.assertActive()
+      await synchronizeDocuments(getOpenPrismaDocuments())
+    }
+
+    const maybeStart = (document?: TextDocument): void => {
+      if (!lifecycle.isActive || startRequested || started) return
+      if (document ? !needsLegacyLanguageServer(document) : !workspace.textDocuments.some(needsLegacyLanguageServer))
+        return
+
+      startRequested = true
+      void lifecycle.enqueue(startLegacyLanguageServerNow).catch(logLegacyClientError)
+    }
+
+    const synchronizeDocument = (document: TextDocument): void => {
+      if (!lifecycle.isActive || restarting || document.languageId !== 'prisma') return
+      if (ownership.getDesiredOwner(document).kind === 'legacy') {
+        if (!started) maybeStart(document)
+        if (!ready) return
+      }
+      void ownership.synchronize(document).catch(logLegacyClientError)
+    }
+
     const restartLanguageServerNow = async (): Promise<void> => {
+      lifecycle.assertActive()
       if (!started) {
-        maybeStart()
-        await legacyReadiness
-        await synchronizeDocuments(getOpenPrismaDocuments())
+        if (getOpenPrismaDocuments().some(needsLegacyLanguageServer)) {
+          await startLegacyLanguageServerNow()
+        } else {
+          await synchronizeDocuments(getOpenPrismaDocuments())
+        }
         return
       }
 
       restarting = true
+      ready = false
       legacyUnavailable = true
       try {
         try {
           await invalidateLegacyDocuments()
         } catch (error) {
           legacyUnavailable = false
-          try {
-            await synchronizeDocuments(getOpenPrismaDocuments())
-          } catch (restoreError) {
-            logLegacyClientError(restoreError)
+          if (lifecycle.isActive) {
+            try {
+              await synchronizeDocuments(getOpenPrismaDocuments())
+            } catch (restoreError) {
+              logLegacyClientError(restoreError)
+            }
           }
           throw error
         }
 
+        lifecycle.assertActive()
         const serverOptions = getLegacyServerOptions(workspace.getConfiguration('prisma'), context)
-        const replacement = restartClient(context, legacyClient, serverOptions, legacyClientOptions, {
+        const replacement = await restartClient(context, legacyClient, serverOptions, legacyClientOptions, {
+          assertActive: () => lifecycle.assertActive(),
+          waitFor: (operation) => lifecycle.waitFor(operation),
           onClientStopped: () => legacyClientMiddleware.resetClientState(),
           onClientCreated: (replacementClient) => {
+            lifecycle.publishLegacyClient(replacementClient)
             legacyClient = replacementClient
           },
-        }).then(async (replacementClient) => {
-          legacyUnavailable = false
-          await synchronizeDocuments(getOpenPrismaDocuments())
-          return replacementClient
         })
-        startup.replace(replacement.then(() => undefined))
-        legacyClient = await replacement
+        lifecycle.assertActive()
+        legacyClient = replacement
+        ready = true
+        legacyUnavailable = false
+        await synchronizeDocuments(getOpenPrismaDocuments())
       } finally {
         legacyUnavailable = false
         restarting = false
       }
     }
 
-    let restartQueue: Promise<void> = Promise.resolve()
-    const enqueueLanguageServerOperation = <T>(operation: () => Promise<T>): Promise<T> => {
-      const queued = restartQueue.then(operation, operation)
-      restartQueue = queued.then(
-        () => undefined,
-        () => undefined,
-      )
-      return queued
-    }
-    const restartLanguageServer = (): Promise<void> => enqueueLanguageServerOperation(restartLanguageServerNow)
+    const restartLanguageServer = (): Promise<void> => lifecycle.enqueue(restartLanguageServerNow)
 
     context.subscriptions.push(
       // when the file watcher settings change, we need to ensure they are applied
@@ -297,17 +317,23 @@ const plugin: PrismaVSCodePlugin = {
       }),
 
       commands.registerCommand('prisma.pinWorkspaceToPrisma6', () =>
-        enqueueLanguageServerOperation(async () => {
+        lifecycle.enqueue(async () => {
+          lifecycle.assertActive()
           await workspace.getConfiguration('prisma').update('pinToPrisma6', true, false)
+          lifecycle.assertActive()
           await restartLanguageServerNow()
+          lifecycle.assertActive()
           void window.showInformationMessage('Pinned workspace to Prisma 6.')
         }),
       ),
 
       commands.registerCommand('prisma.unpinWorkspaceFromPrisma6', () =>
-        enqueueLanguageServerOperation(async () => {
+        lifecycle.enqueue(async () => {
+          lifecycle.assertActive()
           await workspace.getConfiguration('prisma').update('pinToPrisma6', false, false)
+          lifecycle.assertActive()
           await restartLanguageServerNow()
+          lifecycle.assertActive()
           void window.showInformationMessage('Unpinned workspace from Prisma 6.')
         }),
       ),
@@ -321,7 +347,7 @@ const plugin: PrismaVSCodePlugin = {
         synchronizeDocument(event.document)
       }),
       workspace.onDidCloseTextDocument((document) => {
-        if (document.languageId === 'prisma') {
+        if (lifecycle.isActive && document.languageId === 'prisma') {
           void ownership.close(document).catch(logLegacyClientError)
         }
       }),
@@ -350,20 +376,23 @@ const plugin: PrismaVSCodePlugin = {
 
     checkForMinimalColorTheme()
   },
-  deactivate: () => {
-    const startup = legacyClientStartup
-    const activeClient = legacyClient
-    legacyClientStartup = undefined
-    const deactivation = deactivateLegacyClient(
-      startup,
-      activeClient ? () => activeClient.stop() : undefined,
-      logLegacyClientError,
-    )
+  deactivate: async () => {
+    const lifecycle = languageServerLifecycle
+    const prismaNextClients = prismaNextClientRegistry
+    languageServerLifecycle = undefined
+    prismaNextClientRegistry = undefined
 
-    if (activeClient && !isDebugOrTestSession()) {
+    const deactivations = [lifecycle?.dispose(), prismaNextClients?.dispose()].filter(
+      (deactivation): deactivation is Promise<void> => deactivation !== undefined,
+    )
+    const results = await Promise.allSettled(deactivations)
+    for (const result of results) {
+      if (result.status === 'rejected') logLegacyClientError(result.reason)
+    }
+
+    if (legacyClient && !isDebugOrTestSession()) {
       telemetry.dispose() // eslint-disable-line @typescript-eslint/no-floating-promises
     }
-    return deactivation
   },
 }
 

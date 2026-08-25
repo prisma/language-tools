@@ -9,6 +9,7 @@ import { DocumentOwnershipCoordinator } from './documentOwnership'
 
 export interface LegacyClientMiddlewareOptions {
   readonly ownership: DocumentOwnershipCoordinator
+  readonly isActive: () => boolean
   readonly getClient: () => LanguageClient
   readonly getDocument: (uri: Uri) => TextDocument | undefined
   readonly handleDiagnosticMessage: (message: string) => void
@@ -27,16 +28,21 @@ export function createLegacyClientMiddleware(options: LegacyClientMiddlewareOpti
   const legacyDocuments = new Set<string>()
 
   const isLegacyDocument = (document: TextDocument): boolean => {
+    if (!options.isActive()) return false
+
     const settledOwner = options.ownership.getSettledOwner(document.uri)
     const desiredOwner = options.ownership.getDesiredOwner(document)
     return settledOwner.kind === 'legacy' && desiredOwner.kind === 'legacy'
   }
 
   const clearDiagnostics = (uri: Uri): void => {
+    if (!options.isActive()) return
     options.getClient().diagnostics?.delete(uri)
   }
 
   const openLegacyDocument = (document: TextDocument): void => {
+    if (!options.isActive()) return
+
     const documentUri = document.uri.toString()
     if (legacyDocuments.has(documentUri)) return
 
@@ -51,6 +57,8 @@ export function createLegacyClientMiddleware(options: LegacyClientMiddlewareOpti
   }
 
   const closeLegacyDocument = (document: TextDocument): void => {
+    if (!options.isActive()) return
+
     const documentUri = document.uri.toString()
     if (!legacyDocuments.delete(documentUri)) return
 
