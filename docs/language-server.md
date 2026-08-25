@@ -41,62 +41,17 @@ When `prisma.pinToPrisma6` is disabled, the VS Code extension routes each open P
 | Document                                                                          | Owner                                      |
 | --------------------------------------------------------------------------------- | ------------------------------------------ |
 | No `// use prisma-next` directive                                                 | Legacy language server                     |
-| Directive present, trusted file workspace, matching root, and local CLI available | Prisma Next client for that workspace root |
-| Directive present but local execution is ineligible or unavailable                | No active language-server synchronization  |
+| Directive present, trusted file workspace, matching root, and Prisma Next CLI available | Prisma Next client for that workspace root |
+| Directive present but Prisma Next execution is ineligible or unavailable                | No active language-server synchronization  |
 
-The directive is content based and applies per file. A marked file does not opt sibling files or the rest of a multi-file schema into Prisma Next tooling.
+The directive is content-based and applies per file. A marked file does not opt sibling files or the rest of a multi-file schema into Prisma Next tooling.
 
-### Coordinator and synchronization boundary
-
-`DocumentOwnershipCoordinator` is the authoritative per-URI state machine. `desiredOwner` is computed from the document's current text and workspace policy; `settledOwner` records the server synchronized only after a serialized transition's commit closure completes. Open and change events are serialized per document. A transfer performs these operations in order:
-
-1. Close the prior synchronized owner.
-2. Clear that owner's diagnostics for only the transferred URI.
-3. Reclassify current unsaved text.
-4. Lazily ensure the candidate Prisma Next client for the exact workspace root when needed.
-5. Reclassify after asynchronous startup.
-6. Open the complete current document on the surviving owner.
-7. Record the successfully synchronized candidate as the settled owner, or `unowned` if no candidate opened.
-
-A close event invalidates pending revisions immediately and queues final cleanup. Its settled owner becomes `unowned` only after the cleanup commit closure completes. Commit closures return a structured outcome containing the owner established by their completed stages and an optional operational error. A failed prior-owner close keeps the prior settled owner because middleware restores its ledger. Once close succeeds, diagnostic clearing, desired-owner validation, ownership lookup, client startup, and candidate open share one outcome-producing error boundary: any failure settles `unowned` before the coordinator surfaces the error. Later per-URI work therefore observes the established state and the queue continues. Candidate opens also check that the exact `TextDocument` remains in `workspace.textDocuments`. These checks prevent delayed startup or close operations from reopening an editor document that has already closed.
-
-Legacy and Prisma Next middleware maintain ledgers of documents actually synchronized to their client. Ledger insertion and removal are rolled back when notification dispatch throws synchronously. Raw editor notifications, feature requests, and diagnostics are forwarded only when `getSettledOwner(document.uri)` and `getDesiredOwner(document)` agree on the middleware's expected identity and, for Prisma Next, the exact workspace root. Completion and completion resolve, hover, definition, references, document symbols, formatting, rename, code actions, and diagnostics use this same gate. Automatic Prisma Next client initial synchronization is suppressed until the coordinator explicitly opens an owned document, so unmarked contents are never sent to Prisma Next over LSP.
-
-Restart, pin, and unpin operations enter one shared promise queue before reading or changing Prisma pin configuration. Each caller receives its own operation result, while a failure is absorbed only by the queue tail so later operations still run. This serialization prevents one operation from resetting another's restart or legacy-availability flags.
-
-Within its queue slot, a legacy-client restart first marks legacy service temporarily unavailable, making legacy documents desired `unowned` so requests are gated immediately. It then serializes every document settled to legacy through coordinator close and cleanup, stops the old client, resets middleware state, and publishes and starts the replacement. Once the replacement is ready, legacy availability is restored and every currently open Prisma document is explicitly reconciled. Legacy ownership settles only after its explicit replacement-client open succeeds. Unaffected Prisma Next documents remain settled to their existing exact-root client; policy changes are applied during the all-document reconciliation. Replacement clients retain the stable `prisma` client ID for `prisma.trace.server` compatibility while using `Prisma Legacy Language Server` as their display and output-channel identity.
-
-### Workspace-root Prisma Next launch contract
-
-The Prisma Next client registry is keyed by `WorkspaceFolder.uri.toString()` and coalesces concurrent startup for one root. Discovery checks only:
+For marked files, the extension uses only the Prisma CLI installed at:
 
 ```text
 <workspace-root>/node_modules/prisma/dist/prisma.js
 ```
 
-The registry does not invoke a package manager, search parent directories, inspect package boundaries, or fall back to a global executable. Local execution requires `workspace.isTrusted` and a file-backed document in a file-backed workspace folder.
+The workspace must be trusted. The extension does not invoke a package manager, search parent directories, or fall back to a global installation. If the CLI is unavailable, the marked file has no language-server features until a suitable Prisma Next server can be started.
 
-The extension launches the module with the extension-host runtime using the exact process shape:
-
-```text
-executable: process.execPath
-argv:       [<workspace-root>/node_modules/prisma/dist/prisma.js, "lsp"]
-cwd:        <workspace-root>
-stdio:      piped
-shell:      false
-```
-
-Electron extension hosts receive `ELECTRON_RUN_AS_NODE=1` and `ELECTRON_NO_ASAR=1`. The custom server-options launcher avoids transport arguments that `vscode-languageclient` would otherwise append.
-
-### Registry lifecycle contract
-
-The registry exposes a narrow lifecycle API used by routing and later workspace lifecycle handling:
-
-- `ensureClientForDocument(document)` — trust/root checks, exact discovery, and coalesced lazy startup.
-- `openDocument(rootUri, document)` — verifies the document is still open before inserting it into the Prisma Next middleware ledger.
-- `closeDocument(rootUri, document)` — idempotently balances an actually synchronized Prisma Next document.
-- `clearDiagnostics(rootUri, uri)` — clears only the requested URI.
-
-A started Prisma Next client currently remains alive after its final marked document closes. Workspace-wide restart and rediscovery, runtime-failure recovery, workspace-folder removal, comprehensive deactivation, and live Prisma 6 pin transitions are separate lifecycle responsibilities that should build on this API rather than bypass the coordinator or middleware ledgers.
-
-Routing is covered end to end through public completion behavior. In one workspace root, the Electron integration test opens an unmarked document served by the legacy Prisma 7 language server beside a marked document served by the real Prisma Next server from the workspace-local Prisma 8 CLI. The legacy document offers `datasource`, `generator`, and `model` but not `namespace`; the marked document offers the Prisma 8 `namespace` keyword but not `datasource`. The test does not expose or inspect coordinator ownership, routing events, or client startup counts.
+The extension starts at most one Prisma Next language server per workspace root. Adding or removing the directive in an open file transfers that file between the legacy and Prisma Next servers without requiring a save or restart. Prisma Next servers do not restart automatically after a failure; use **Prisma: Restart Language Server** to retry. Pinning the workspace to Prisma 6 routes every Prisma document to the legacy Prisma 6 server.
