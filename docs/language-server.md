@@ -91,6 +91,7 @@ The registry exposes a narrow lifecycle API used by routing and later workspace 
 - `openDocument(rootUri, document)` — verifies the document is still open before inserting it into the local middleware ledger.
 - `closeDocument(rootUri, document)` — idempotently balances an actually synchronized local document.
 - `clearDiagnostics(rootUri, uri)` — clears only the requested URI.
-- `getTestState()` — reports successful root starts without exposing process handles; it is reachable through a command only in debug/test sessions.
 
 A started local client currently remains alive after its final marked document closes. Workspace-wide restart and rediscovery, runtime-failure recovery, workspace-folder removal, comprehensive deactivation, and live Prisma 6 pin transitions are separate lifecycle responsibilities that should build on this API rather than bypass the coordinator or middleware ledgers.
+
+Routing is covered end to end through public completion behavior. In one workspace root, the Electron integration test opens an unmarked document served by the bundled Prisma 7 language server beside a marked document served by the real workspace-local Prisma 8 CLI. The bundled document offers `datasource`, `generator`, and `model` but not `namespace`; the marked document offers the Prisma 8 `namespace` keyword but not `datasource`. The test does not expose or inspect coordinator ownership, routing events, or client startup counts.

@@ -77,10 +77,7 @@ located in `packages/vscode/fixtures`.
 
 ## VS Code Electron integration tests
 
-The Electron runner opens `packages/vscode/tests/fixtures/integration-workspace.code-workspace`. Its roots include:
-
-- Two pnpm importers with the lockfile-resolved real Prisma Next CLI at `node_modules/prisma/dist/prisma.js`.
-- An additional marked-document fixture without that exact entrypoint, used to verify silent no-fallback behavior.
+The Electron runner opens `packages/vscode/tests/fixtures/integration-workspace.code-workspace`. Its single workspace root is a pnpm importer with the lockfile-resolved `prisma@8.0.0-rc.7` CLI at `node_modules/prisma/dist/prisma.js`. The fixture also includes the matching Prisma 8 engine and Postgres ORM packages plus a valid `prisma.config.ts` whose contract is only `next.prisma`.
 
 Run the focused minimum-runtime workspace suite with:
 
@@ -88,8 +85,6 @@ Run the focused minimum-runtime workspace suite with:
 pnpm --filter prisma test:integration:workspace
 ```
 
-This command rebuilds the extension, compiles the integration tests, launches the minimum supported VS Code version, and runs `workspace.test.js`. The test uses the real Prisma CLI process; no mock language-server executable is part of the fixture. It covers lazy activation, successful real-client initialization per root, root reuse and independence, exclusive bundled/local ownership, complete-text unsaved directive transfers, bundled diagnostic production and transfer-time clearing, and missing-entrypoint behavior. The current Prisma Next CLI does not publish schema diagnostics.
+This command rebuilds the extension, compiles the integration tests, launches the minimum supported VS Code version, and runs `workspace.test.js`. The test uses the bundled language server and the real workspace-local Prisma CLI process side by side; no mock language-server executable is part of the fixture.
 
-The runner's installed `@vscode/test-electron` version always adds `--disable-workspace-trust`, so the Electron workspace is deterministically trusted. It cannot represent Restricted Mode without replacing or bypassing the runner's launch contract. Trust rejection is therefore covered at the production classifier and registry boundaries by focused unit tests; a manual Restricted Mode check remains necessary when validating trust behavior end to end.
-
-Routing observations are available only when `isDebugOrTestSession()` is true. The test command reports ownership/routing events and successful start counts. Complete document text and version are captured only by the optional test observer; production activation installs neither the collector nor the command, and no process handles are exposed.
+The test opens an empty, unmarked `bundled.prisma` and a marked `next.prisma` in separate editor columns, then polls only the public `vscode.executeCompletionItemProvider` command with a fixed timeout. At `(0, 0)`, the bundled server must offer `datasource`, `generator`, and `model`, classify `datasource` as `CompletionItemKind.Class`, and omit `namespace`. At `(1, 0)`, the local Prisma 8 server must offer `namespace` as `CompletionItemKind.Keyword` with detail `PSL declaration keyword`, and omit `datasource`. These assertions verify observable routing behavior without extension-private commands, owner state, events, or process start counts.
