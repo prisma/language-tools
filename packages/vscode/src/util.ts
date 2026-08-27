@@ -71,6 +71,12 @@ export const restartClient = async (
   }
   client = createLegacyLanguageServer(serverOptions, clientOptions)
   context.subscriptions.push(client.start())
-  await client.onReady()
+  try {
+    await client.onReady()
+  } catch (error) {
+    // Still return the new client so the caller replaces its stopped predecessor and a
+    // later restart can stop this one.
+    console.error('Prisma Legacy Language Server failed to start', error)
+  }
   return client
 }

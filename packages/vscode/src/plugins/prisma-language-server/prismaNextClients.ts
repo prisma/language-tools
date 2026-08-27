@@ -29,7 +29,10 @@ export interface PrismaNextLauncherOptions {
  * Prisma documents under that folder.
  */
 export class PrismaNextClients {
+  private static readonly retryCooldownMs = 30_000
+
   private readonly clients = new Map<string, Promise<LanguageClient | undefined>>()
+  private readonly failedAt = new Map<string, number>()
   private disposed = false
 
   constructor(private readonly registerDisposable: (disposable: Disposable) => void) {}
@@ -44,20 +47,31 @@ export class PrismaNextClients {
     const key = workspaceFolder.uri.toString()
     if (this.clients.has(key)) return
 
+    // Retry failed startups so a later edit (e.g. after `npm install`) recovers, but with a
+    // cooldown — this runs on every change event and must not spawn a process per keystroke.
+    const failedAt = this.failedAt.get(key)
+    if (failedAt !== undefined && Date.now() - failedAt < PrismaNextClients.retryCooldownMs) return
+
     const pending = this.start(workspaceFolder)
     this.clients.set(key, pending)
-    // Forget failed startups so a later edit (e.g. after `npm install`) retries.
     void pending.then((client) => {
-      if (!client && this.clients.get(key) === pending) {
+      if (client) {
+        this.failedAt.delete(key)
+      } else if (this.clients.get(key) === pending) {
+        this.failedAt.set(key, Date.now())
         this.clients.delete(key)
       }
     })
   }
 
-  /** Stops all clients. The registry stays usable; new clients can be started afterwards. */
+  /**
+   * Stops all clients. The registry stays usable; new clients can be started afterwards
+   * without a cooldown, so an explicit restart command retries failed folders immediately.
+   */
   async stopAll(): Promise<void> {
     const pending = [...this.clients.values()]
     this.clients.clear()
+    this.failedAt.clear()
     await Promise.allSettled(pending.map(async (client) => (await client)?.stop()))
   }
 
@@ -191,7 +205,7 @@ function destroyProcessStreams(child: ChildProcessWithoutNullStreams): void {
 export function createPrismaNextClientOptions(workspaceFolder: WorkspaceFolder): LanguageClientOptions {
   const rootPath = workspaceFolder.uri.fsPath.split('\\').join('/')
   const normalizedRoot = rootPath.endsWith('/') ? rootPath.slice(0, -1) : rootPath
-  const escapedRoot = normalizedRoot.replace(/([?*[\]])/g, '[$1]')
+  const escapedRoot = normalizedRoot.replace(/([?*{}[\]])/g, '[$1]')
   return {
     documentSelector: [{ language: 'prisma', scheme: 'file', pattern: `${escapedRoot}/**/*` }],
     workspaceFolder,

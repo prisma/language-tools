@@ -36,42 +36,22 @@ See [Prisma Multi-File Schema Documentation][multi-file-docs] for details.
 
 ## VS Code document routing
 
-Both the legacy language server and the Prisma Next language server (`prisma lsp`) receive every
-open Prisma document through standard LSP document synchronization. The extension does not route
-individual documents; each server decides locally, from current document content, whether to
-respond:
+When `prisma.pinToPrisma6` is disabled, each open Prisma document is handled independently:
 
-- The legacy server ignores documents whose text starts with the `// use prisma-next` directive:
-  it publishes empty diagnostics for them, returns empty results for feature requests, and
-  excludes them from multi-file schema composition (see `isPrismaNextSchema` in
-  `src/lib/prismaNext.ts`).
-- The Prisma Next server applies the mirror-image filter and ignores documents without the
-  directive. This requires `prisma@8.0.0-rc.8-dev.2` or later. The two servers share only this
-  directive convention — neither depends on the other.
+| Document                                                                                | Handled by                                 |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------ |
+| No `// use prisma-next` directive                                                        | Legacy language server                     |
+| Directive present, trusted file workspace, matching root, and Prisma Next CLI available  | Prisma Next server for that workspace root |
+| Directive present but Prisma Next execution is ineligible or unavailable                 | No language-server features                |
 
-The directive is content-based and applies per file. A marked file does not opt sibling files or
-the rest of a multi-file schema into Prisma Next tooling. Adding or removing the directive in an
-open file switches which server responds without requiring a save or restart, because both
-servers already track the document.
+The directive is content-based and applies per file. A marked file does not opt sibling files or the rest of a multi-file schema into Prisma Next tooling.
 
-The extension only decides which servers to start. The two server kinds run side by side and
-are counted independently:
+For marked files, the extension uses only the Prisma CLI installed at:
 
-- **At most one legacy server per window**, shared by all workspace folders. It starts once any
-  open Prisma document needs it (no directive, or the workspace is pinned to Prisma 6).
-- **At most one Prisma Next server per workspace folder.** It starts the first time an open
-  document under that folder contains the directive. The workspace must be trusted, and the
-  extension uses only the Prisma CLI installed at
-  `<workspace-root>/node_modules/prisma/dist/prisma.js` — it does not invoke a package manager,
-  search parent directories, or fall back to a global installation. If the CLI is unavailable,
-  marked files have no language-server features until a suitable Prisma Next server can be
-  started.
+```text
+<workspace-root>/node_modules/prisma/dist/prisma.js
+```
 
-Either server may also not start at all, so a window runs between zero and `1 + <number of
-workspace folders>` language-server processes. In the common case — a single-folder project
-using Prisma 7 and Prisma Next schemas side by side — that means two processes: one legacy
-server and one Prisma Next server.
+The CLI must be `prisma@8.0.0-rc.8-dev.2` or later. The workspace must be trusted. The extension does not invoke a package manager, search parent directories, or fall back to a global installation. If the CLI is unavailable, the marked file has no language-server features until a suitable Prisma Next server can be started.
 
-Prisma Next servers do not restart automatically after a failure; use **Prisma: Restart Language
-Server** to retry. Pinning the workspace to Prisma 6 (`prisma.pinToPrisma6`) starts the bundled
-Prisma 6 server, which handles every Prisma document, and stops any Prisma Next servers.
+The extension starts at most one Prisma Next language server per workspace root, in addition to the single legacy server shared by the whole window. Adding or removing the directive in an open file switches which server handles it without requiring a save or restart. Prisma Next servers do not restart automatically after a failure; use **Prisma: Restart Language Server** to retry. Pinning the workspace to Prisma 6 routes every Prisma document to the legacy Prisma 6 server.

@@ -118,9 +118,13 @@ const plugin: PrismaVSCodePlugin = {
       documentSelector: [{ scheme: 'file', language: 'prisma' }],
       middleware: {
         handleDiagnostics: (uri, diagnostics, next) => {
-          for (const diagnostic of diagnostics) {
-            void prisma6Handling.handleDiagnostic(diagnostic.message, context)
-          }
+          // Serialized: the prompt guards are only persisted after the user responds, so
+          // concurrent calls would all pass them and stack duplicate prompts.
+          void (async () => {
+            for (const diagnostic of diagnostics) {
+              await prisma6Handling.handleDiagnostic(diagnostic.message, context)
+            }
+          })().catch((error) => console.error('Failed to handle Prisma 6 diagnostics', error))
           next(uri, diagnostics)
         },
       },
