@@ -52,6 +52,6 @@ For marked files, the extension uses only the Prisma CLI installed at:
 <workspace-root>/node_modules/prisma/dist/prisma.js
 ```
 
-The CLI must be `prisma@8.0.0-rc.8-dev.2` or later. The workspace must be trusted. The extension does not invoke a package manager, search parent directories, or fall back to a global installation. If the CLI is unavailable, the marked file has no language-server features until a suitable Prisma Next server can be started.
+The CLI must be a Prisma version that supports the `lsp` command and directive-based document filtering. The workspace must be trusted. The extension does not invoke a package manager, search parent directories, or fall back to a global installation. If the CLI is unavailable, the marked file has no language-server features until a suitable Prisma Next server can be started.
 
 The extension starts at most one Prisma Next language server per workspace root, in addition to the single legacy server shared by the whole window. Adding or removing the directive in an open file switches which server handles it without requiring a save or restart. Prisma Next servers do not restart automatically after a failure; use **Prisma: Restart Language Server** to retry. Pinning the workspace to Prisma 6 routes every Prisma document to the legacy Prisma 6 server.

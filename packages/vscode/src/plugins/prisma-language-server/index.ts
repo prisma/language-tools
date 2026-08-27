@@ -106,9 +106,8 @@ const plugin: PrismaVSCodePlugin = {
 
     // Both language servers receive every open Prisma document and each decides from the
     // `// use prisma-next` directive in the document content whether to respond: the legacy
-    // server ignores documents with the directive, the Prisma Next server (prisma >=
-    // 8.0.0-rc.8-dev.2) ignores documents without it. The extension only decides which
-    // servers to start.
+    // server ignores documents with the directive, the Prisma Next server ignores documents
+    // without it. The extension only decides which servers to start.
     const nextClients = new PrismaNextClients((disposable) => context.subscriptions.push(disposable))
     prismaNextClients = nextClients
 
