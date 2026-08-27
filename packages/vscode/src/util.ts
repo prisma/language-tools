@@ -115,34 +115,18 @@ export function createLegacyLanguageServer(
     outputChannelName: 'Prisma Legacy Language Server',
   })
 }
-export interface RestartClientLifecycle {
-  assertActive?(): void
-  waitFor?<T>(operation: Promise<T>): Promise<T>
-  onClientStopped(): void
-  onClientCreated(client: LanguageClient): void
-}
-
 export const restartClient = async (
   context: ExtensionContext,
   client: LanguageClient,
   serverOptions: ServerOptions,
   clientOptions: LanguageClientOptions,
-  lifecycle?: RestartClientLifecycle,
 ): Promise<LanguageClient> => {
   client?.diagnostics?.dispose()
   if (client) {
-    const stopping = client.stop()
-    await (lifecycle?.waitFor?.(stopping) ?? stopping)
+    await client.stop()
   }
-  lifecycle?.onClientStopped()
-  lifecycle?.assertActive?.()
   client = createLegacyLanguageServer(serverOptions, clientOptions)
-  lifecycle?.assertActive?.()
-  lifecycle?.onClientCreated(client)
-  lifecycle?.assertActive?.()
   context.subscriptions.push(client.start())
-  const readiness = client.onReady()
-  await (lifecycle?.waitFor?.(readiness) ?? readiness)
-  lifecycle?.assertActive?.()
+  await client.onReady()
   return client
 }
