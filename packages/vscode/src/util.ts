@@ -1,14 +1,5 @@
-import {
-  WorkspaceEdit,
-  window,
-  TextEdit,
-  SnippetString,
-  TextEditorEdit,
-  env,
-  workspace,
-  ExtensionContext,
-} from 'vscode'
-import { CodeAction, TextDocumentIdentifier, LanguageClientOptions } from 'vscode-languageclient'
+import { window, env, workspace, ExtensionContext } from 'vscode'
+import { LanguageClientOptions } from 'vscode-languageclient'
 import { LanguageClient, ServerOptions } from 'vscode-languageclient/node'
 import { isPrismaNextSchema } from '@prisma/language-server/prisma-next'
 import { denyListDarkColorThemes, denyListLightColorThemes } from './denyListColorThemes'
@@ -59,53 +50,6 @@ export function checkForMinimalColorTheme(): void {
   }
 }
 
-/* This function is part of the workaround for https://github.com/prisma/language-tools/issues/311 */
-export function isSnippetEdit(action: CodeAction, document: TextDocumentIdentifier): boolean {
-  const changes = action.edit?.changes
-  if (changes !== undefined && changes[document.uri]) {
-    if (changes[document.uri].some((e) => e.newText.includes('{\n\n}\n'))) {
-      return true
-    }
-  }
-  return false
-}
-
-/* This function is part of the workaround for https://github.com/prisma/language-tools/issues/311 */
-export function applySnippetWorkspaceEdit(): (edit: WorkspaceEdit) => Promise<void> {
-  return async (edit: WorkspaceEdit) => {
-    const [uri, edits] = edit.entries()[0]
-
-    const editor = window.visibleTextEditors.find((it) => it.document.uri.toString() === uri.toString())
-    if (!editor) return
-
-    let editWithSnippet: TextEdit | undefined = undefined
-    let lineDelta = 0
-    await editor.edit((builder: TextEditorEdit) => {
-      for (const indel of edits) {
-        if (indel.newText.includes('$0')) {
-          editWithSnippet = indel
-        } else if (indel.newText.includes('{\n\n}')) {
-          indel.newText = indel.newText.replace('{\n\n}', '{\n\t$0\n}')
-          editWithSnippet = indel
-        } else {
-          if (!editWithSnippet) {
-            lineDelta = (indel.newText.match(/\n/g) || []).length - (indel.range.end.line - indel.range.start.line)
-          }
-          builder.replace(indel.range, indel.newText)
-        }
-      }
-    })
-    if (editWithSnippet) {
-      const snip = editWithSnippet as TextEdit
-      const range = snip.range.with(
-        snip.range.start.with(snip.range.start.line + lineDelta),
-        snip.range.end.with(snip.range.end.line + lineDelta),
-      )
-      await editor.insertSnippet(new SnippetString(snip.newText), range)
-    }
-  }
-}
-
 export function createLegacyLanguageServer(
   serverOptions: ServerOptions,
   clientOptions: LanguageClientOptions,
@@ -115,34 +59,24 @@ export function createLegacyLanguageServer(
     outputChannelName: 'Prisma Legacy Language Server',
   })
 }
-export interface RestartClientLifecycle {
-  assertActive?(): void
-  waitFor?<T>(operation: Promise<T>): Promise<T>
-  onClientStopped(): void
-  onClientCreated(client: LanguageClient): void
-}
-
 export const restartClient = async (
   context: ExtensionContext,
   client: LanguageClient,
   serverOptions: ServerOptions,
   clientOptions: LanguageClientOptions,
-  lifecycle?: RestartClientLifecycle,
 ): Promise<LanguageClient> => {
   client?.diagnostics?.dispose()
   if (client) {
-    const stopping = client.stop()
-    await (lifecycle?.waitFor?.(stopping) ?? stopping)
+    await client.stop()
   }
-  lifecycle?.onClientStopped()
-  lifecycle?.assertActive?.()
   client = createLegacyLanguageServer(serverOptions, clientOptions)
-  lifecycle?.assertActive?.()
-  lifecycle?.onClientCreated(client)
-  lifecycle?.assertActive?.()
   context.subscriptions.push(client.start())
-  const readiness = client.onReady()
-  await (lifecycle?.waitFor?.(readiness) ?? readiness)
-  lifecycle?.assertActive?.()
+  try {
+    await client.onReady()
+  } catch (error) {
+    // Still return the new client so the caller replaces its stopped predecessor and a
+    // later restart can stop this one.
+    console.error('Prisma Legacy Language Server failed to start', error)
+  }
   return client
 }
