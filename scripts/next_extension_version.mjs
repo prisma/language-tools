@@ -28,7 +28,9 @@ function parseStablePrismaVersion(prismaVersion) {
     throw new Error(`Invalid Prisma CLI version '${prismaVersion}'. Expected a semantic version such as 7.9.0.`)
   }
   if (parsed.prerelease.length > 0) {
-    throw new Error(`Prisma CLI version '${prismaVersion}' is a prerelease and can not be released on the stable channel.`)
+    throw new Error(
+      `Prisma CLI version '${prismaVersion}' is a prerelease and can not be released on the stable channel.`,
+    )
   }
   return parsed
 }

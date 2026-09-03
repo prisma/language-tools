@@ -21,4 +21,3 @@ export function getPackageJsonContent({ path: filePath }) {
 export function writeJsonToPackageJson({ content, path: filePath }) {
   fs.writeFileSync(filePath, JSON.stringify(content, undefined, 2))
 }
-
