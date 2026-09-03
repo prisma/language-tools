@@ -61,10 +61,14 @@ jobs:
 
       - name: Release insider (Prisma dev)
         if: steps.check_update.outputs.dev_version
-        run: gh workflow run release.yml --ref main -f channel=insider -f prisma_version="${{ steps.check_update.outputs.dev_version }}"
+        env:
+          DEV_VERSION: ${{ steps.check_update.outputs.dev_version }}
+        run: gh workflow run release.yml --ref main -f channel=insider -f prisma_version="$DEV_VERSION"
       - name: Release stable (Prisma latest)
         if: steps.check_update.outputs.latest_version
-        run: gh workflow run release.yml --ref main -f channel=stable -f prisma_version="${{ steps.check_update.outputs.latest_version }}"
+        env:
+          LATEST_VERSION: ${{ steps.check_update.outputs.latest_version }}
+        run: gh workflow run release.yml --ref main -f channel=stable -f prisma_version="$LATEST_VERSION"
       - name: Release insider from patch branch (Prisma patch-dev)
         if: steps.check_update.outputs.patch-dev_version
         env:

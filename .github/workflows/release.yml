@@ -79,13 +79,18 @@ jobs:
     steps:
       - name: Resolve channel and branch
         id: params
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PUSH_SHA: ${{ github.sha }}
+          INPUT_CHANNEL: ${{ inputs.channel }}
+          INPUT_REF: ${{ inputs.ref }}
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
+          if [ "$EVENT_NAME" = "push" ]; then
             CHANNEL=insider
-            REF="${{ github.sha }}"
+            REF="$PUSH_SHA"
           else
-            CHANNEL="${{ inputs.channel }}"
-            REF="${{ inputs.ref }}"
+            CHANNEL="$INPUT_CHANNEL"
+            REF="$INPUT_REF"
             if [ -z "$REF" ]; then
               if [ "$CHANNEL" = "stable" ]; then REF=stable; else REF=main; fi
             fi
@@ -110,7 +115,11 @@ jobs:
         run: pnpm install
       - name: Compute next extension version
         id: version
-        run: node scripts/next_extension_version.mjs "${{ steps.params.outputs.channel }}" "${{ inputs.bump || 'auto' }}" "${{ inputs.prisma_version }}"
+        env:
+          CHANNEL: ${{ steps.params.outputs.channel }}
+          BUMP: ${{ inputs.bump || 'auto' }}
+          PRISMA_VERSION: ${{ inputs.prisma_version }}
+        run: node scripts/next_extension_version.mjs "$CHANNEL" "$BUMP" "$PRISMA_VERSION"
       - name: Reset stable branch to main (new Prisma minor/major)
         if: steps.params.outputs.channel == 'stable' && inputs.prisma_version != '' && steps.version.outputs.release_type != 'patch'
         run: |
@@ -118,11 +127,16 @@ jobs:
           git push --force origin stable
       - name: Bump Prisma dependencies
         if: inputs.prisma_version != ''
+        env:
+          NPM_CHANNEL: ${{ steps.version.outputs.npm_channel }}
+          VERSION: ${{ steps.version.outputs.version }}
+          PRISMA_VERSION: ${{ inputs.prisma_version }}
+          RELEASE_REF: ${{ steps.params.outputs.ref }}
         run: |
-          node scripts/update_package_json_files.mjs "${{ steps.version.outputs.npm_channel }}" "${{ steps.version.outputs.version }}" "${{ inputs.prisma_version }}"
+          node scripts/update_package_json_files.mjs "$NPM_CHANNEL" "$VERSION" "$PRISMA_VERSION"
           sh scripts/set_git_credentials.sh
-          git commit -am "[skip ci] bump Prisma CLI to ${{ inputs.prisma_version }} and extension to ${{ steps.version.outputs.version }}"
-          git push origin "HEAD:${{ steps.params.outputs.ref }}"
+          git commit -am "[skip ci] bump Prisma CLI to $PRISMA_VERSION and extension to $VERSION"
+          git push origin "HEAD:$RELEASE_REF"
       - name: Resolve release commit
         id: sha
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
@@ -167,6 +181,7 @@ jobs:
     env:
       NPM_CHANNEL: ${{ needs.plan.outputs.npm_channel }}
       VERSION: ${{ needs.plan.outputs.version }}
+      LS_NPM_TAG: ${{ needs.plan.outputs.ls_npm_tag }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -187,7 +202,7 @@ jobs:
       - name: Build Language Server
         run: pnpm --filter @prisma/language-server build
       - name: Publish Language Server to npm
-        run: pnpm --filter @prisma/language-server publish --tag "${{ needs.plan.outputs.ls_npm_tag }}" --access public --no-git-checks
+        run: pnpm --filter @prisma/language-server publish --tag "$LS_NPM_TAG" --access public --no-git-checks
 
   package:
     name: Build extension and create GitHub release
@@ -200,6 +215,7 @@ jobs:
       VERSION: ${{ needs.plan.outputs.version }}
       TAG_NAME: ${{ needs.plan.outputs.tag_name }}
       ASSET_FILE: ${{ needs.plan.outputs.asset_name }}-${{ needs.plan.outputs.version }}.vsix
+      SHA: ${{ needs.plan.outputs.sha }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -235,7 +251,7 @@ jobs:
           if [ "$CHANNEL" = "insider" ]; then PRERELEASE="--prerelease"; fi
           gh release create "$TAG_NAME" "packages/vscode/$ASSET_FILE" \
             --title "$TAG_NAME" \
-            --target "${{ needs.plan.outputs.sha }}" \
+            --target "$SHA" \
             $PRERELEASE
 
   publish-marketplace:
@@ -245,6 +261,7 @@ jobs:
     timeout-minutes: 10
     env:
       ASSET_FILE: ${{ needs.plan.outputs.asset_name }}-${{ needs.plan.outputs.version }}.vsix
+      VSCE_PAT: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -263,7 +280,7 @@ jobs:
         with:
           name: vsix
       - name: Publish vsix to marketplace
-        run: cd packages/vscode && npx vsce publish --pat ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }} --packagePath "$GITHUB_WORKSPACE/$ASSET_FILE"
+        run: cd packages/vscode && npx vsce publish --packagePath "$GITHUB_WORKSPACE/$ASSET_FILE"
 
   publish-open-vsx:
     name: Publish to open-vsx
@@ -272,6 +289,7 @@ jobs:
     timeout-minutes: 10
     env:
       ASSET_FILE: ${{ needs.plan.outputs.asset_name }}-${{ needs.plan.outputs.version }}.vsix
+      OVSX_PAT: ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -290,4 +308,4 @@ jobs:
         with:
           name: vsix
       - name: Publish vsix to open-vsx.org
-        run: cd packages/vscode && npx ovsx --debug publish "$GITHUB_WORKSPACE/$ASSET_FILE" --pat ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
+        run: cd packages/vscode && npx ovsx --debug publish "$GITHUB_WORKSPACE/$ASSET_FILE"
