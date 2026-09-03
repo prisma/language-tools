@@ -22,6 +22,17 @@ export function latestReleasedVersion({ tags }) {
   return versions[0]
 }
 
+function parseStablePrismaVersion(prismaVersion) {
+  const parsed = semVer.parse(prismaVersion)
+  if (parsed === null) {
+    throw new Error(`Invalid Prisma CLI version '${prismaVersion}'. Expected a semantic version such as 7.9.0.`)
+  }
+  if (parsed.prerelease.length > 0) {
+    throw new Error(`Prisma CLI version '${prismaVersion}' is a prerelease and can not be released on the stable channel.`)
+  }
+  return parsed
+}
+
 export function releaseType({ channel, bump = 'auto', prismaVersion = '' }) {
   if (channel === 'insider') {
     return 'patch'
@@ -32,17 +43,19 @@ export function releaseType({ channel, bump = 'auto', prismaVersion = '' }) {
   if (!BUMPS.includes(bump)) {
     throw new Error(`Unknown bump '${bump}'. Expected one of: ${BUMPS.join(', ')}.`)
   }
+
+  const prisma = prismaVersion === '' ? null : parseStablePrismaVersion(prismaVersion)
+
   if (bump !== 'auto') {
     return bump
   }
   // 'auto' on stable mirrors the Prisma CLI release this extension ships:
   // x.0.0 -> major, x.y.0 -> minor, everything else (or no CLI bump) -> patch
-  if (prismaVersion !== '') {
-    const [, minor, patch] = prismaVersion.split('.')
-    if (minor === '0' && patch === '0') {
+  if (prisma !== null) {
+    if (prisma.minor === 0 && prisma.patch === 0) {
       return 'major'
     }
-    if (patch === '0') {
+    if (prisma.patch === 0) {
       return 'minor'
     }
   }

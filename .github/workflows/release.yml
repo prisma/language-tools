@@ -53,8 +53,7 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: write # push version tags and create GitHub releases
-  id-token: write # required for OIDC / npm Trusted Publishers
+  contents: read
 
 env:
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
@@ -67,6 +66,8 @@ jobs:
     if: github.repository == 'prisma/language-tools'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: write
     outputs:
       channel: ${{ steps.params.outputs.channel }}
       ref: ${{ steps.params.outputs.ref }}
@@ -178,6 +179,9 @@ jobs:
     needs: [plan, test]
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
     env:
       NPM_CHANNEL: ${{ needs.plan.outputs.npm_channel }}
       VERSION: ${{ needs.plan.outputs.version }}
@@ -209,6 +213,8 @@ jobs:
     needs: [plan, test]
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: write
     env:
       CHANNEL: ${{ needs.plan.outputs.channel }}
       NPM_CHANNEL: ${{ needs.plan.outputs.npm_channel }}

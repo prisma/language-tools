@@ -57,6 +57,24 @@ describe('releaseType', () => {
   it('throws on an unknown bump', () => {
     expect(() => releaseType({ channel: 'stable', bump: 'mega' })).toThrow()
   })
+
+  it('throws on a Prisma CLI version that is not a semantic version', () => {
+    expect(() => releaseType({ channel: 'stable', bump: 'auto', prismaVersion: 'invalid.0.0' })).toThrow(
+      /Invalid Prisma CLI version/,
+    )
+  })
+
+  it('throws on a Prisma CLI prerelease for a stable release', () => {
+    expect(() => releaseType({ channel: 'stable', bump: 'auto', prismaVersion: '7.9.0-dev.4' })).toThrow(/prerelease/)
+  })
+
+  it('validates the Prisma CLI version even when the bump is explicit', () => {
+    expect(() => releaseType({ channel: 'stable', bump: 'minor', prismaVersion: 'invalid.0.0' })).toThrow()
+  })
+
+  it('does not validate the Prisma CLI version on the insider channel', () => {
+    expect(releaseType({ channel: 'insider', bump: 'auto', prismaVersion: 'anything' })).toEqual('patch')
+  })
 })
 
 describe('planRelease', () => {
