@@ -36,7 +36,7 @@ jobs:
       latest_version: ${{ steps.check_update.outputs.latest_version }}
       patch_dev_version: ${{ steps.check_update.outputs.patch-dev_version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: main
           persist-credentials: false
@@ -64,7 +64,7 @@ jobs:
       LATEST_VERSION: ${{ needs.check.outputs.latest_version }}
       PATCH_DEV_VERSION: ${{ needs.check.outputs.patch_dev_version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: main
           token: ${{ secrets.PRISMA_BOT_TOKEN }}

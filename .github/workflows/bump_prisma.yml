@@ -58,7 +58,7 @@ jobs:
               ;;
           esac
           echo "ref=$REF" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ steps.validate.outputs.ref }}
           persist-credentials: false
@@ -95,7 +95,7 @@ jobs:
       REF: ${{ needs.pin.outputs.ref }}
       PRISMA_VERSION: ${{ inputs.prisma_version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ needs.pin.outputs.ref }}
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
