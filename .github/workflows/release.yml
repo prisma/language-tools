@@ -264,7 +264,6 @@ jobs:
     timeout-minutes: 10
     env:
       ASSET_FILE: ${{ needs.plan.outputs.asset_name }}-${{ needs.plan.outputs.version }}.vsix
-      VSCE_PAT: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -284,6 +283,8 @@ jobs:
         with:
           name: vsix
       - name: Publish vsix to marketplace
+        env:
+          VSCE_PAT: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
         run: cd packages/vscode && npx vsce publish --packagePath "$GITHUB_WORKSPACE/$ASSET_FILE"
 
   publish-open-vsx:
@@ -293,7 +294,6 @@ jobs:
     timeout-minutes: 10
     env:
       ASSET_FILE: ${{ needs.plan.outputs.asset_name }}-${{ needs.plan.outputs.version }}.vsix
-      OVSX_PAT: ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -313,4 +313,6 @@ jobs:
         with:
           name: vsix
       - name: Publish vsix to open-vsx.org
+        env:
+          OVSX_PAT: ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
         run: cd packages/vscode && npx ovsx --debug publish "$GITHUB_WORKSPACE/$ASSET_FILE"

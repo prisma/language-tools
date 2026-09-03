@@ -29,13 +29,16 @@ env:
   PRISMA_TELEMETRY_INFORMATION: 'language-tools bump_prisma.yml'
 
 jobs:
-  bump:
-    name: Bump Prisma CLI dependencies
+  pin:
+    name: Pin the Prisma CLI dependencies
     if: github.repository == 'prisma/language-tools'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    outputs:
+      ref: ${{ steps.validate.outputs.ref }}
     steps:
       - name: Validate inputs
+        id: validate
         env:
           PRISMA_VERSION: ${{ inputs.prisma_version }}
           INPUT_REF: ${{ inputs.ref }}
@@ -54,11 +57,11 @@ jobs:
               fi
               ;;
           esac
-          echo "REF=$REF" >> "$GITHUB_ENV"
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.REF }}
-          token: ${{ secrets.PRISMA_BOT_TOKEN }}
+          ref: ${{ steps.validate.outputs.ref }}
+          persist-credentials: false
       - name: Install pnpm
         uses: pnpm/action-setup@v4
       - name: Use Node.js
@@ -68,15 +71,39 @@ jobs:
           cache: 'pnpm'
       - name: Install Dependencies
         run: pnpm install
-      - name: Bump Prisma CLI dependencies
+      - name: Pin the Prisma CLI dependencies
         env:
           PRISMA_VERSION: ${{ inputs.prisma_version }}
         run: node scripts/bump_prisma_dependencies.mjs "$PRISMA_VERSION"
       - name: Update the lockfile
         run: pnpm install --no-frozen-lockfile
+      - name: Upload the pinned manifests
+        uses: actions/upload-artifact@v4
+        with:
+          name: pinned-manifests
+          path: |
+            packages/language-server/package.json
+            pnpm-lock.yaml
+          if-no-files-found: error
+
+  push:
+    name: Commit and push the bump
+    needs: [pin]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      REF: ${{ needs.pin.outputs.ref }}
+      PRISMA_VERSION: ${{ inputs.prisma_version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.pin.outputs.ref }}
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
+      - name: Download the pinned manifests
+        uses: actions/download-artifact@v4
+        with:
+          name: pinned-manifests
       - name: Commit and push
-        env:
-          PRISMA_VERSION: ${{ inputs.prisma_version }}
         run: |
           if git diff --quiet; then
             echo "Dependencies are already pinned to $PRISMA_VERSION, nothing to commit."

@@ -27,13 +27,14 @@ jobs:
     if: github.repository == 'prisma/language-tools'
     runs-on: ubuntu-latest
     timeout-minutes: 7
-    env:
-      GH_TOKEN: ${{ secrets.PRISMA_BOT_TOKEN }}
+    outputs:
+      dev_version: ${{ steps.check_update.outputs.dev_version }}
+      latest_version: ${{ steps.check_update.outputs.latest_version }}
+      patch_dev_version: ${{ steps.check_update.outputs.patch-dev_version }}
     steps:
       - uses: actions/checkout@v4
         with:
-          token: ${{ secrets.PRISMA_BOT_TOKEN }}
-          fetch-depth: 0 # patch branches are created from release tags
+          persist-credentials: false
       - name: Install pnpm
         uses: pnpm/action-setup@v4
       - name: Use Node.js
@@ -43,17 +44,26 @@ jobs:
           cache: 'pnpm'
       - name: Install Dependencies
         run: pnpm install
-
       - name: Check for Prisma CLI update
         id: check_update
         run: node scripts/check_for_update.mjs
 
+  record:
+    name: Record versions and start the bumps
+    needs: [check]
+    if: needs.check.outputs.dev_version || needs.check.outputs.latest_version || needs.check.outputs.patch_dev_version
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    env:
+      DEV_VERSION: ${{ needs.check.outputs.dev_version }}
+      LATEST_VERSION: ${{ needs.check.outputs.latest_version }}
+      PATCH_DEV_VERSION: ${{ needs.check.outputs.patch_dev_version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
+          fetch-depth: 0 # patch branches are created from release tags
       - name: Record new versions
-        if: steps.check_update.outputs.dev_version || steps.check_update.outputs.latest_version || steps.check_update.outputs.patch-dev_version
-        env:
-          DEV_VERSION: ${{ steps.check_update.outputs.dev_version }}
-          LATEST_VERSION: ${{ steps.check_update.outputs.latest_version }}
-          PATCH_DEV_VERSION: ${{ steps.check_update.outputs.patch-dev_version }}
         run: |
           sh scripts/set_git_credentials.sh
           if [ -n "$DEV_VERSION" ]; then echo "$DEV_VERSION" > scripts/versions/prisma_dev; fi
@@ -61,21 +71,9 @@ jobs:
           if [ -n "$PATCH_DEV_VERSION" ]; then echo "$PATCH_DEV_VERSION" > scripts/versions/prisma_patch-dev; fi
           git commit -am "[skip ci] record new Prisma CLI versions"
           git push
-
-      - name: Bump main (Prisma dev)
-        if: steps.check_update.outputs.dev_version
-        env:
-          DEV_VERSION: ${{ steps.check_update.outputs.dev_version }}
-        run: gh workflow run bump_prisma.yml --ref main -f prisma_version="$DEV_VERSION"
-      - name: Bump main (Prisma latest)
-        if: steps.check_update.outputs.latest_version && !steps.check_update.outputs.dev_version
-        env:
-          LATEST_VERSION: ${{ steps.check_update.outputs.latest_version }}
-        run: gh workflow run bump_prisma.yml --ref main -f prisma_version="$LATEST_VERSION"
-      - name: Bump the patch branch (Prisma patch-dev)
-        if: steps.check_update.outputs.patch-dev_version
-        env:
-          PATCH_DEV_VERSION: ${{ steps.check_update.outputs.patch-dev_version }}
+      - name: Create the patch branch if it is new
+        id: patch_branch
+        if: needs.check.outputs.patch_dev_version
         run: |
           BRANCH=$(node scripts/setup_branch.mjs patch-dev)
           if [ -z "$(git ls-remote --heads origin "$BRANCH")" ]; then
@@ -83,4 +81,20 @@ jobs:
             git branch "$BRANCH" "$(cat scripts/versions/tested_extension_stable)"
             git push origin "$BRANCH"
           fi
-          gh workflow run bump_prisma.yml --ref main -f prisma_version="$PATCH_DEV_VERSION" -f ref="$BRANCH"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+      - name: Bump main (Prisma dev)
+        if: needs.check.outputs.dev_version
+        env:
+          GH_TOKEN: ${{ secrets.PRISMA_BOT_TOKEN }}
+        run: gh workflow run bump_prisma.yml --ref main -f prisma_version="$DEV_VERSION"
+      - name: Bump main (Prisma latest)
+        if: needs.check.outputs.latest_version && !needs.check.outputs.dev_version
+        env:
+          GH_TOKEN: ${{ secrets.PRISMA_BOT_TOKEN }}
+        run: gh workflow run bump_prisma.yml --ref main -f prisma_version="$LATEST_VERSION"
+      - name: Bump the patch branch (Prisma patch-dev)
+        if: needs.check.outputs.patch_dev_version
+        env:
+          GH_TOKEN: ${{ secrets.PRISMA_BOT_TOKEN }}
+          BRANCH: ${{ steps.patch_branch.outputs.branch }}
+        run: gh workflow run bump_prisma.yml --ref main -f prisma_version="$PATCH_DEV_VERSION" -f ref="$BRANCH"

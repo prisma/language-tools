@@ -9,9 +9,11 @@ repository**. The next extension version is derived from the git release tags
 counter), so releasing creates no bot commits. Prisma CLI dependency updates
 are a separate workflow, [`bump_prisma.yml`](../.github/workflows/bump_prisma.yml).
 
-Everything is released from `main`. Both channels ship the same code and the
-same Prisma CLI pins; the channel only decides the extension identity
-(`prisma` vs `prisma-insider`) and the Language Server npm dist-tag.
+Standard releases, insider and stable alike, are cut from `main`. Both channels
+ship the same code and the same Prisma CLI pins; the channel only decides the
+extension identity (`prisma` vs `prisma-insider`) and the Language Server npm
+dist-tag. Patch releases for an older version are cut from the `x.y.x` branch
+passed as `ref`, which must be given explicitly — `ref` defaults to `main`.
 
 ### Triggers
 
