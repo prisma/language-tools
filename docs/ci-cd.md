@@ -1,35 +1,98 @@
 # CI/CD Overview
 
-The repository has extensive GitHub Actions workflows:
+## Publishing pipeline
 
-| Workflow                  | Trigger            | Purpose                        |
-| ------------------------- | ------------------ | ------------------------------ |
-| `1_check_for_updates.yml` | Every 5 min (cron) | Checks for new Prisma releases |
-| `2_bump_versions.yml`     | Triggered by #1    | Bumps Prisma dependencies      |
-| `3_LS_tests_publish.yml`  | On version bump    | Tests and publishes LS to npm  |
-| `4_e2e_tests.yml`         | Before releases    | Runs E2E tests                 |
-| `5_build.yml`             | After E2E pass     | Builds extension               |
-| `6_publish.yml`           | After build        | Publishes VS Code extension    |
-| `PR_build_extension.yml`  | On PRs             | Builds `.vsix` for testing     |
+All publishing — insider **and** stable — happens in a single workflow:
+[`release.yml`](../.github/workflows/release.yml). There are no chained
+workflows and no version-bump commits: the next extension version is derived
+from the git release tags (`x.y.z` for stable, `insider/x.y.z` for insider,
+one shared monotonic counter). The only commit a release can create is a real
+dependency bump when a new Prisma CLI version is passed in.
+
+### Triggers
+
+| Trigger                                        | Result                                                                    |
+| ---------------------------------------------- | ------------------------------------------------------------------------- |
+| Push to `main`                                 | Insider release                                                           |
+| Manual `workflow_dispatch`                     | Insider or stable release, optional Prisma CLI bump, optional branch      |
+| `check_for_prisma_update.yml` (cron, disabled) | Dispatches `release.yml` when a new Prisma CLI version is released on npm |
+
+### Jobs
 
 ```mermaid
 graph TD
-    A(Cron every 5 minutes) --> B[1. Check for Prisma CLI Update]
-    B -->|update available?| C[2. Bump versions]
-    C -->D{Which NPM channel was updated?}
-    D -->|dev or patch-dev| E((Our release_channel is insider))
-    D -->|latest| F((Our release_channel is stable))
-    E --> G[3. Test Language Server and publish]
-    F --> G
-    G -->|tests and publish successful?| I[4. E2E tests VS Code Extension]
-    I -->|tests pass?| J[5. Build extension]
-    J --> K[6. Publish]
+    PUSH(Push to main) --> PLAN
+    MANUAL(Manual dispatch: channel, bump, prisma_version) --> PLAN
+    CRON(check_for_prisma_update.yml cron) --> PLAN
 
-    L(Commit in the extension) --> M[1/2. Bump versions for extension only]
-    M -->E
-    N(Manual workflow dispatch) --> O[1/2. Bump and release a stable version of the extension]
-    O -->F
+    subgraph release.yml
+      PLAN[plan: resolve channel + branch, derive next version from git tags,<br>optionally commit Prisma CLI dependency bump]
+      PLAN --> TEST[test: build, typecheck, LS unit tests, E2E tests<br>on ubuntu / macos / windows]
+      TEST --> LS[publish-language-server:<br>npm publish with dist-tag dev or latest]
+      TEST --> PKG[package: build vsix, upload artifact]
+      PKG --> REL[release: download artifact,<br>create GitHub release + tag]
+      REL --> MKT[publish-marketplace: vsce publish]
+      REL --> OVSX[publish-open-vsx: ovsx publish]
+    end
 ```
+
+- **plan** resolves the release channel (`insider`/`stable`), the branch, and
+  the next version, and outputs a single commit SHA that every later job
+  checks out — no state is passed through commits mid-pipeline.
+- **test** gates publishing: build, typecheck, Language Server unit tests and
+  VS Code E2E tests on all three OSes.
+- **package** builds the `.vsix` once; the same file is attached to the GitHub
+  release and published to both marketplaces (passed as a workflow artifact).
+- **release** only downloads that artifact and creates the tag and GitHub
+  release. It does not check out, install or build anything.
+- Insider GitHub releases are marked as pre-releases, so the repository's
+  "latest release" always points to a stable version.
+
+### Permissions
+
+The workflow default is `contents: read`. Write access is granted per job:
+`plan` (pushes the dependency-bump commit and can reset `stable`), `release`
+(creates the tag and GitHub release) and `publish-language-server`
+(`id-token: write` for npm Trusted Publishers). Every checkout except `plan`'s
+sets `persist-credentials: false`, so build and test steps never see a git
+credential.
+
+Releases only run from `main`, `stable` or an `x.y.x` patch branch; `plan`
+rejects any other `ref`.
+
+### Channels and branches
+
+| Channel | Branch          | Extension name   | LS npm dist-tag |
+| ------- | --------------- | ---------------- | --------------- |
+| insider | `main`          | `prisma-insider` | `dev`           |
+| stable  | `stable`        | `prisma`         | `latest`        |
+| insider | `x.y.x` patches | `prisma-insider` | `dev`           |
+
+The `stable` branch pins the Prisma CLI `latest` dependencies while `main`
+tracks `dev`. When a stable release ships a new Prisma minor or major, the
+`plan` job resets `stable` to `main`. Patch releases for older versions are
+made by dispatching `release.yml` with an `x.y.x` branch as `ref`
+(channel `insider` for a `patch-dev` CLI, `stable` for the final patch).
+
+### Prisma CLI update automation
+
+[`check_for_prisma_update.yml`](../.github/workflows/check_for_prisma_update.yml)
+(cron, currently disabled — dispatch manually) compares the npm versions of
+`prisma@dev`, `prisma@latest` and `prisma@patch-dev` against
+`scripts/versions/prisma_*`, records new versions there, and dispatches
+`release.yml` for each channel that changed.
+
+## Other workflows
+
+| Workflow                               | Trigger             | Purpose                                      |
+| -------------------------------------- | ------------------- | -------------------------------------------- |
+| `continuous-integration.yml`           | PRs, push to main   | Tests, lint, typecheck, Playwright           |
+| `PR_build_extension.yml`               | PRs                 | Builds a `.vsix` artifact for manual testing |
+| `e2e_check_for_new_published_vsix.yml` | Cron (disabled)     | Detects new marketplace releases             |
+| `e2e_published_vsix.yml`               | Dispatched by above | E2E tests against the published extension    |
+| `codeql-analysis.yml`                  | PRs, push, cron     | CodeQL security analysis                     |
+| `pr-code-security.yml`                 | PRs                 | Security checks                              |
+| `update-api-types.yml`                 | Cron / manual       | Updates generated API types                  |
 
 ## Testing PR Builds
 
