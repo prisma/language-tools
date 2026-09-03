@@ -104,6 +104,8 @@ pins is always a separate manual dispatch.
 
 - Manually dispatch [`Release`][release-workflow] with channel `stable`
 - Select the bump: `patch`, `minor` or `major`
+- To patch an older version, pass that `x.y.x` branch as `ref`. Without it the
+  release is cut from `main`.
 
 [release-workflow]: ../../.github/workflows/release.yml
 [bump-workflow]: ../../.github/workflows/bump_prisma.yml

@@ -14,6 +14,10 @@ on:
   #   - cron: '*/5 * * * *'
   workflow_dispatch:
 
+concurrency:
+  group: check-for-prisma-update
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
@@ -34,6 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main
           persist-credentials: false
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -61,6 +66,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
           fetch-depth: 0 # patch branches are created from release tags
       - name: Record new versions
@@ -70,7 +76,7 @@ jobs:
           if [ -n "$LATEST_VERSION" ]; then echo "$LATEST_VERSION" > scripts/versions/prisma_latest; fi
           if [ -n "$PATCH_DEV_VERSION" ]; then echo "$PATCH_DEV_VERSION" > scripts/versions/prisma_patch-dev; fi
           git commit -am "[skip ci] record new Prisma CLI versions"
-          git push
+          git push origin HEAD:main
       - name: Create the patch branch if it is new
         id: patch_branch
         if: needs.check.outputs.patch_dev_version
