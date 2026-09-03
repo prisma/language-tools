@@ -1,0 +1,293 @@
+name: Release
+run-name: "Release ${{ github.event_name == 'push' && 'insider (push to main)' || format('{0}{1}', inputs.channel, inputs.prisma_version != '' && format(' — Prisma CLI {0}', inputs.prisma_version) || '') }}"
+
+# The single publishing pipeline for both the insider and the stable extension.
+#
+# - A push to main publishes an insider release.
+# - A manual dispatch publishes an insider or stable release, optionally
+#   bumping the Prisma CLI dependencies first (`prisma_version`), optionally
+#   from another branch (`ref`, e.g. an x.y.x patch branch).
+# - check_for_prisma_update.yml dispatches this workflow when a new Prisma CLI
+#   version is published to npm.
+#
+# The next extension version is derived from the git release tags (`x.y.z` for
+# stable, `insider/x.y.z` for insider), so a release only creates a commit when
+# it actually changes dependencies (`prisma_version` given). All other jobs
+# check out the exact commit resolved by the `plan` job.
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '.github/**'
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Release channel'
+        required: true
+        type: choice
+        options:
+          - insider
+          - stable
+        default: insider
+      ref:
+        description: 'Branch to release from. Defaults to main for insider and stable for stable. Use an x.y.x branch to patch an older version.'
+        required: false
+      bump:
+        description: "Extension version bump (stable only; 'auto' derives it from the Prisma CLI version)"
+        required: false
+        type: choice
+        options:
+          - auto
+          - patch
+          - minor
+          - major
+        default: auto
+      prisma_version:
+        description: 'Bump the Prisma CLI dependencies to this version before releasing (creates one commit on the release branch)'
+        required: false
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write # push version tags and create GitHub releases
+  id-token: write # required for OIDC / npm Trusted Publishers
+
+env:
+  ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+  PRISMA_TELEMETRY_INFORMATION: 'language-tools release.yml'
+  NODE_VERSION: '22'
+
+jobs:
+  plan:
+    name: Plan release
+    if: github.repository == 'prisma/language-tools'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      channel: ${{ steps.params.outputs.channel }}
+      ref: ${{ steps.params.outputs.ref }}
+      sha: ${{ steps.sha.outputs.sha }}
+      version: ${{ steps.version.outputs.version }}
+      tag_name: ${{ steps.version.outputs.tag_name }}
+      asset_name: ${{ steps.version.outputs.asset_name }}
+      npm_channel: ${{ steps.version.outputs.npm_channel }}
+      ls_npm_tag: ${{ steps.version.outputs.ls_npm_tag }}
+    steps:
+      - name: Resolve channel and branch
+        id: params
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            CHANNEL=insider
+            REF="${{ github.sha }}"
+          else
+            CHANNEL="${{ inputs.channel }}"
+            REF="${{ inputs.ref }}"
+            if [ -z "$REF" ]; then
+              if [ "$CHANNEL" = "stable" ]; then REF=stable; else REF=main; fi
+            fi
+          fi
+          {
+            echo "channel=$CHANNEL"
+            echo "ref=$REF"
+          } >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.params.outputs.ref }}
+          fetch-depth: 0 # all branches and tags: the next version is derived from release tags
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install Dependencies
+        run: pnpm install
+      - name: Compute next extension version
+        id: version
+        run: node scripts/next_extension_version.mjs "${{ steps.params.outputs.channel }}" "${{ inputs.bump || 'auto' }}" "${{ inputs.prisma_version }}"
+      - name: Reset stable branch to main (new Prisma minor/major)
+        if: steps.params.outputs.channel == 'stable' && inputs.prisma_version != '' && steps.version.outputs.release_type != 'patch'
+        run: |
+          git checkout -B stable origin/main
+          git push --force origin stable
+      - name: Bump Prisma dependencies
+        if: inputs.prisma_version != ''
+        run: |
+          node scripts/update_package_json_files.mjs "${{ steps.version.outputs.npm_channel }}" "${{ steps.version.outputs.version }}" "${{ inputs.prisma_version }}"
+          sh scripts/set_git_credentials.sh
+          git commit -am "[skip ci] bump Prisma CLI to ${{ inputs.prisma_version }} and extension to ${{ steps.version.outputs.version }}"
+          git push origin "HEAD:${{ steps.params.outputs.ref }}"
+      - name: Resolve release commit
+        id: sha
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  test:
+    name: Test (${{ matrix.os }})
+    needs: [plan]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install Dependencies
+        run: pnpm install
+      - name: Build all packages
+        run: pnpm build
+      - name: Typecheck all packages
+        run: pnpm typecheck
+      - name: Run Language Server tests
+        run: pnpm --filter @prisma/language-server test
+      - name: Headless E2E tests
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: pnpm test:e2e
+
+  publish-language-server:
+    name: Publish Language Server to npm
+    needs: [plan, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NPM_CHANNEL: ${{ needs.plan.outputs.npm_channel }}
+      VERSION: ${{ needs.plan.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Update npm to support Trusted Publishers
+        run: npm install -g npm@^11.5
+      - name: Install Dependencies
+        run: pnpm install
+      - name: Set Language Server version
+        run: node scripts/update_package_json_files.mjs "$NPM_CHANNEL" "$VERSION" ""
+      - name: Build Language Server
+        run: pnpm --filter @prisma/language-server build
+      - name: Publish Language Server to npm
+        run: pnpm --filter @prisma/language-server publish --tag "${{ needs.plan.outputs.ls_npm_tag }}" --access public --no-git-checks
+
+  package:
+    name: Build extension and create GitHub release
+    needs: [plan, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CHANNEL: ${{ needs.plan.outputs.channel }}
+      NPM_CHANNEL: ${{ needs.plan.outputs.npm_channel }}
+      VERSION: ${{ needs.plan.outputs.version }}
+      TAG_NAME: ${{ needs.plan.outputs.tag_name }}
+      ASSET_FILE: ${{ needs.plan.outputs.asset_name }}-${{ needs.plan.outputs.version }}.vsix
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install Dependencies
+        run: pnpm install
+      - name: Set extension name and version
+        run: node scripts/update_package_json_files.mjs "$NPM_CHANNEL" "$VERSION" ""
+      - name: Replace Readme for marketplace
+        run: node scripts/change_readme.mjs "$CHANNEL"
+      - name: Build all packages
+        run: pnpm build
+      - name: Build vsix
+        run: cd packages/vscode && pnpm package
+      - name: Upload vsix as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix
+          path: packages/vscode/${{ env.ASSET_FILE }}
+          if-no-files-found: error
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PRERELEASE=""
+          if [ "$CHANNEL" = "insider" ]; then PRERELEASE="--prerelease"; fi
+          gh release create "$TAG_NAME" "packages/vscode/$ASSET_FILE" \
+            --title "$TAG_NAME" \
+            --target "${{ needs.plan.outputs.sha }}" \
+            $PRERELEASE
+
+  publish-marketplace:
+    name: Publish to VS Code Marketplace
+    needs: [plan, package]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ASSET_FILE: ${{ needs.plan.outputs.asset_name }}-${{ needs.plan.outputs.version }}.vsix
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install Dependencies
+        run: pnpm install
+      - name: Download vsix artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vsix
+      - name: Publish vsix to marketplace
+        run: cd packages/vscode && npx vsce publish --pat ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }} --packagePath "$GITHUB_WORKSPACE/$ASSET_FILE"
+
+  publish-open-vsx:
+    name: Publish to open-vsx
+    needs: [plan, package]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ASSET_FILE: ${{ needs.plan.outputs.asset_name }}-${{ needs.plan.outputs.version }}.vsix
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install Dependencies
+        run: pnpm install
+      - name: Download vsix artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vsix
+      - name: Publish vsix to open-vsx.org
+        run: cd packages/vscode && npx ovsx --debug publish "$GITHUB_WORKSPACE/$ASSET_FILE" --pat ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
