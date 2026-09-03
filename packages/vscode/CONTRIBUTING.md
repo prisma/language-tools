@@ -82,15 +82,17 @@ The extension is automatically published via GitHub Actions using an
 
 [pat-docs]: https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token
 
-### Automatic Publishing
+### Prisma CLI updates
 
-Upon any Prisma `dev` release a new insiders release of the extension is automatically performed.
+[`Check for Prisma CLI update`][check-workflow] polls npm and dispatches
+[`Bump Prisma CLI`][bump-workflow] for each channel that has a new version. Its
+cron schedule is currently disabled, so it has to be dispatched manually — as
+does `Bump Prisma CLI` itself if you want to pin a specific version.
 
-Upon any Prisma `latest` release a new stable release of the extension is automatically performed.
+A bump pushed to `main` triggers an insider release. A stable release on the new
+pins is always a separate manual dispatch.
 
-### Manual Publishing (Extension-Only Release)
-
-For releases that don't coincide with a Prisma ORM release:
+### Publishing
 
 **Insider release:**
 
@@ -101,9 +103,13 @@ For releases that don't coincide with a Prisma ORM release:
 **Stable release:**
 
 - Manually dispatch [`Release`][release-workflow] with channel `stable`
-- Select the bump: `auto`, `patch`, `minor` or `major`
+- Select the bump: `patch`, `minor` or `major`
+- To patch an older version, pass that `x.y.x` branch as `ref`. Without it the
+  release is cut from `main`.
 
 [release-workflow]: ../../.github/workflows/release.yml
+[bump-workflow]: ../../.github/workflows/bump_prisma.yml
+[check-workflow]: ../../.github/workflows/check_for_prisma_update.yml
 
 ## Dependencies
 

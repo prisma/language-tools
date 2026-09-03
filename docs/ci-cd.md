@@ -3,30 +3,34 @@
 ## Publishing pipeline
 
 All publishing — insider **and** stable — happens in a single workflow:
-[`release.yml`](../.github/workflows/release.yml). There are no chained
-workflows and no version-bump commits: the next extension version is derived
-from the git release tags (`x.y.z` for stable, `insider/x.y.z` for insider,
-one shared monotonic counter). The only commit a release can create is a real
-dependency bump when a new Prisma CLI version is passed in.
+[`release.yml`](../.github/workflows/release.yml). It **never writes to the
+repository**. The next extension version is derived from the git release tags
+(`x.y.z` for stable, `insider/x.y.z` for insider, one shared monotonic
+counter), so releasing creates no bot commits. Prisma CLI dependency updates
+are a separate workflow, [`bump_prisma.yml`](../.github/workflows/bump_prisma.yml).
+
+Standard releases, insider and stable alike, are cut from `main`. Both channels
+ship the same code and the same Prisma CLI pins; the channel only decides the
+extension identity (`prisma` vs `prisma-insider`) and the Language Server npm
+dist-tag. Patch releases for an older version are cut from the `x.y.x` branch
+passed as `ref`, which must be given explicitly — `ref` defaults to `main`.
 
 ### Triggers
 
-| Trigger                                        | Result                                                                    |
-| ---------------------------------------------- | ------------------------------------------------------------------------- |
-| Push to `main`                                 | Insider release                                                           |
-| Manual `workflow_dispatch`                     | Insider or stable release, optional Prisma CLI bump, optional branch      |
-| `check_for_prisma_update.yml` (cron, disabled) | Dispatches `release.yml` when a new Prisma CLI version is released on npm |
+| Trigger                    | Result                                           |
+| -------------------------- | ------------------------------------------------ |
+| Push to `main`             | Insider release                                  |
+| Manual `workflow_dispatch` | Insider or stable release, optional patch branch |
 
 ### Jobs
 
 ```mermaid
 graph TD
     PUSH(Push to main) --> PLAN
-    MANUAL(Manual dispatch: channel, bump, prisma_version) --> PLAN
-    CRON(check_for_prisma_update.yml cron) --> PLAN
+    MANUAL(Manual dispatch: channel, bump, ref) --> PLAN
 
     subgraph release.yml
-      PLAN[plan: resolve channel + branch, derive next version from git tags,<br>optionally commit Prisma CLI dependency bump]
+      PLAN[plan: resolve channel + branch,<br>derive next version from git tags]
       PLAN --> TEST[test: build, typecheck, LS unit tests, E2E tests<br>on ubuntu / macos / windows]
       TEST --> LS[publish-language-server:<br>npm publish with dist-tag dev or latest]
       TEST --> PKG[package: build vsix, upload artifact]
@@ -50,37 +54,49 @@ graph TD
 
 ### Permissions
 
-The workflow default is `contents: read`. Write access is granted per job:
-`plan` (pushes the dependency-bump commit and can reset `stable`), `release`
-(creates the tag and GitHub release) and `publish-language-server`
-(`id-token: write` for npm Trusted Publishers). Every checkout except `plan`'s
-sets `persist-credentials: false`, so build and test steps never see a git
-credential.
+The workflow default is `contents: read`. Only two jobs are granted more:
+`release` (`contents: write`, to create the tag and GitHub release) and
+`publish-language-server` (`id-token: write`, for npm Trusted Publishers).
+Every checkout sets `persist-credentials: false`, so no job has a git
+credential in its config while running dependency code.
 
-Releases only run from `main`, `stable` or an `x.y.x` patch branch; `plan`
-rejects any other `ref`.
+Releases only run from `main` or an `x.y.x` patch branch; `plan` rejects any
+other `ref`.
 
-### Channels and branches
+### Channels
 
-| Channel | Branch          | Extension name   | LS npm dist-tag |
-| ------- | --------------- | ---------------- | --------------- |
-| insider | `main`          | `prisma-insider` | `dev`           |
-| stable  | `stable`        | `prisma`         | `latest`        |
-| insider | `x.y.x` patches | `prisma-insider` | `dev`           |
+| Channel | Extension name   | Tag             | LS npm dist-tag |
+| ------- | ---------------- | --------------- | --------------- |
+| insider | `prisma-insider` | `insider/x.y.z` | `dev`           |
+| stable  | `prisma`         | `x.y.z`         | `latest`        |
 
-The `stable` branch pins the Prisma CLI `latest` dependencies while `main`
-tracks `dev`. When a stable release ships a new Prisma minor or major, the
-`plan` job resets `stable` to `main`. Patch releases for older versions are
-made by dispatching `release.yml` with an `x.y.x` branch as `ref`
-(channel `insider` for a `patch-dev` CLI, `stable` for the final patch).
+An insider release is always a patch bump. A stable release takes the `bump`
+input (`patch`, `minor` or `major`, defaulting to `patch`). Both channels draw
+from the same version counter, so a stable release picks up from the highest
+tag either channel has reached.
 
-### Prisma CLI update automation
+To patch an older version, dispatch `release.yml` with an `x.y.x` branch as
+`ref`.
+
+## Prisma CLI dependency updates
+
+[`bump_prisma.yml`](../.github/workflows/bump_prisma.yml) is the only workflow
+that changes dependency pins. Dispatch it with a `prisma_version` (and
+optionally a `ref` for a patch branch). It runs
+`scripts/bump_prisma_dependencies.mjs`, which rewrites `@prisma/config`,
+`@prisma/prisma-schema-wasm`, `@prisma/schema-files-loader`,
+`prisma.enginesVersion` and `prisma.cliVersion` in
+`packages/language-server/package.json`, refreshes the lockfile, and pushes one
+commit.
+
+That push to `main` triggers an insider release through `release.yml`. A stable
+release on the new pins is a separate manual dispatch.
 
 [`check_for_prisma_update.yml`](../.github/workflows/check_for_prisma_update.yml)
 (cron, currently disabled — dispatch manually) compares the npm versions of
 `prisma@dev`, `prisma@latest` and `prisma@patch-dev` against
 `scripts/versions/prisma_*`, records new versions there, and dispatches
-`release.yml` for each channel that changed.
+`bump_prisma.yml` for each channel that changed.
 
 ## Other workflows
 

@@ -69,10 +69,12 @@ assets (`pglite.data`, `pglite.wasm`) are copied separately
 ⁴ Kept separate to support runtime switching between Prisma 6 and latest
 language servers via the `prisma.pinToPrisma6` setting
 
-> **Note:** These dependencies are updated via CI by
-> `.github/workflows/check_for_prisma_update.yml`, which checks npm for new
-> Prisma CLI releases and dispatches `release.yml`. Its cron schedule is
-> currently disabled; dispatch it manually. See [CI/CD](ci-cd.md).
+> **Note:** These dependencies are updated by
+> `.github/workflows/bump_prisma.yml`, which pins them to a given Prisma CLI
+> version and pushes the change. `check_for_prisma_update.yml` dispatches it
+> when npm has a newer CLI, but its cron schedule is currently disabled, so
+> both are manual dispatches today. `release.yml` only publishes; it never
+> changes dependencies. See [CI/CD](ci-cd.md).
 
 ## File Organization
 
