@@ -94,16 +94,16 @@ For releases that don't coincide with a Prisma ORM release:
 
 **Insider release:**
 
-- Push to `main` or a patch branch (e.g., `35.0.x`)
-- Automatically triggers [`1/2. Bump versions for extension only`][bump-workflow]
+- Push to `main`, which triggers [`Release`][release-workflow]
+- For a patch branch (e.g. `35.0.x`), dispatch [`Release`][release-workflow]
+  with channel `insider` and that branch as `ref`
 
 **Stable release:**
 
-- Manually trigger [`1/2. Bump and release a stable version`][stable-workflow]
-- Select release type: `patch`, `minor`, or `major`
+- Manually dispatch [`Release`][release-workflow] with channel `stable`
+- Select the bump: `auto`, `patch`, `minor` or `major`
 
-[bump-workflow]: ../../.github/workflows/1_2_bump_extension_only.yml
-[stable-workflow]: ../../.github/workflows/1_2_stable_extension_release.yml
+[release-workflow]: ../../.github/workflows/release.yml
 
 ## Dependencies
 

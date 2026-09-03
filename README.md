@@ -56,10 +56,10 @@ Press `F5` in VS Code to launch the extension in debug mode.
 
 ## Build Status
 
-[![E2E tests before Insider release][e2e-insider-badge]][e2e-insider-action]
-[![Language Server tests][ls-tests-badge]][ls-tests-action]
+[![Release][release-badge]][release-action]
+[![CI][ci-badge]][ci-action]
 
-[e2e-insider-badge]: https://github.com/prisma/language-tools/workflows/5.%20Integration%20tests%20in%20VSCode%20folder%20with%20published%20LS/badge.svg?branch=main
-[e2e-insider-action]: https://github.com/prisma/language-tools/actions/workflows/5_e2e_tests.yml?query=branch%3Amain
-[ls-tests-badge]: https://github.com/prisma/language-tools/workflows/3.%20Unit%20tests%20for%20LS%20and%20publish/badge.svg?branch=main
-[ls-tests-action]: https://github.com/prisma/language-tools/actions/workflows/3_LS_tests_publish.yml?query=branch%3Amain
+[release-badge]: https://github.com/prisma/language-tools/actions/workflows/release.yml/badge.svg?branch=main
+[release-action]: https://github.com/prisma/language-tools/actions/workflows/release.yml?query=branch%3Amain
+[ci-badge]: https://github.com/prisma/language-tools/actions/workflows/continuous-integration.yml/badge.svg?branch=main
+[ci-action]: https://github.com/prisma/language-tools/actions/workflows/continuous-integration.yml?query=branch%3Amain
