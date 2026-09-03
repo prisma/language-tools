@@ -17,7 +17,7 @@ function bumpVersionInVSCodeRepo({ version, name, displayName, description, prev
   writeJsonToPackageJson({ content: content, path: vscodePackageJsonPath })
 }
 
-async function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersion = '' }) {
+async function bumpVersionsInRepo({ channel, newExtensionVersion }) {
   const languageServerPackageJsonPath = path.join(__dirname, '../packages/language-server/package.json')
   const rootPackageJsonPath = path.join(__dirname, '../package.json')
 
@@ -43,36 +43,6 @@ async function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersi
     })
   }
 
-  // update dependency and engines versions in packages/language-server/package.json
-  if (newPrismaVersion !== '') {
-    // Find the version needed for `@prisma/prisma-schema-wasm`
-    // Let's look into the `package.json` of the `@prisma/engines` package
-    // and get the version of `@prisma/engines-version` it uses
-    const { stdout } = await execa('pnpm', ['show', `@prisma/engines@${newPrismaVersion}`, 'dependencies', '--json'])
-    console.debug(stdout)
-    const npmInfoOutput = JSON.parse(stdout)
-    const engineVersion = npmInfoOutput['@prisma/engines-version'] // 2.26.0-23.9b816b3aa13cc270074f172f30d6eda8a8ce867d
-    console.debug({ engineVersion })
-    const engineSha = engineVersion.split('.')[3]
-    console.debug({ engineSha })
-
-    const languageServerPackageJson = getPackageJsonContent({
-      path: languageServerPackageJsonPath,
-    })
-    // update engines sha
-    languageServerPackageJson['prisma']['enginesVersion'] = engineSha
-    // update engines version
-    languageServerPackageJson['dependencies']['@prisma/config'] = newPrismaVersion
-    languageServerPackageJson['dependencies']['@prisma/prisma-schema-wasm'] = engineVersion
-    languageServerPackageJson['dependencies']['@prisma/schema-files-loader'] = newPrismaVersion
-    // update CLI version
-    languageServerPackageJson['prisma']['cliVersion'] = newPrismaVersion
-    writeJsonToPackageJson({
-      content: languageServerPackageJson,
-      path: languageServerPackageJsonPath,
-    })
-  }
-
   // update version in root package.json
   const rootPackageJson = getPackageJsonContent({ path: rootPackageJsonPath })
   rootPackageJson['version'] = newExtensionVersion
@@ -95,19 +65,8 @@ async function bumpVersionsInRepo({ channel, newExtensionVersion, newPrismaVersi
 export { bumpVersionsInRepo }
 
 const args = process.argv.slice(2)
-if (args.length === 3) {
-  console.log('Bumping Prisma CLI version, extension and Language Server version in repo.')
-  await bumpVersionsInRepo({
-    channel: args[0],
-    newExtensionVersion: args[1],
-    newPrismaVersion: args[2],
-  })
-} else if (args.length === 2) {
-  console.log('Bumping extension and Language Server version in repo.')
-  await bumpVersionsInRepo({
-    channel: args[0],
-    newExtensionVersion: args[1],
-  })
-} else {
-  throw new Error(`Expected 2 or 3 arguments, but received ${args.length}.`)
+if (args.length !== 2) {
+  throw new Error(`Expected 2 arguments (channel, version), but received ${args.length}.`)
 }
+console.log('Bumping extension and Language Server version in repo.')
+await bumpVersionsInRepo({ channel: args[0], newExtensionVersion: args[1] })

@@ -4,7 +4,7 @@ import { execSync } from 'child_process'
 import { fileURLToPath } from 'url'
 import { argv } from 'process'
 
-const BUMPS = ['auto', 'patch', 'minor', 'major']
+const BUMPS = ['patch', 'minor', 'major']
 
 // The extension version is a single monotonic counter shared by both channels.
 // It is derived from the release tags (`x.y.z` for stable, `insider/x.y.z` for
@@ -22,20 +22,7 @@ export function latestReleasedVersion({ tags }) {
   return versions[0]
 }
 
-function parseStablePrismaVersion(prismaVersion) {
-  const parsed = semVer.parse(prismaVersion)
-  if (parsed === null) {
-    throw new Error(`Invalid Prisma CLI version '${prismaVersion}'. Expected a semantic version such as 7.9.0.`)
-  }
-  if (parsed.prerelease.length > 0) {
-    throw new Error(
-      `Prisma CLI version '${prismaVersion}' is a prerelease and can not be released on the stable channel.`,
-    )
-  }
-  return parsed
-}
-
-export function releaseType({ channel, bump = 'auto', prismaVersion = '' }) {
+export function releaseType({ channel, bump = 'patch' }) {
   if (channel === 'insider') {
     return 'patch'
   }
@@ -45,28 +32,12 @@ export function releaseType({ channel, bump = 'auto', prismaVersion = '' }) {
   if (!BUMPS.includes(bump)) {
     throw new Error(`Unknown bump '${bump}'. Expected one of: ${BUMPS.join(', ')}.`)
   }
-
-  const prisma = prismaVersion === '' ? null : parseStablePrismaVersion(prismaVersion)
-
-  if (bump !== 'auto') {
-    return bump
-  }
-  // 'auto' on stable mirrors the Prisma CLI release this extension ships:
-  // x.0.0 -> major, x.y.0 -> minor, everything else (or no CLI bump) -> patch
-  if (prisma !== null) {
-    if (prisma.minor === 0 && prisma.patch === 0) {
-      return 'major'
-    }
-    if (prisma.patch === 0) {
-      return 'minor'
-    }
-  }
-  return 'patch'
+  return bump
 }
 
-export function planRelease({ channel, bump, prismaVersion, tags }) {
+export function planRelease({ channel, bump, tags }) {
   const currentVersion = latestReleasedVersion({ tags })
-  const type = releaseType({ channel, bump, prismaVersion })
+  const type = releaseType({ channel, bump })
   const version = semVer.inc(currentVersion, type)
   const stable = channel === 'stable'
 
@@ -84,10 +55,10 @@ export function planRelease({ channel, bump, prismaVersion, tags }) {
 
 // Only run top-level code if this file is being executed directly (not imported)
 if (fileURLToPath(import.meta.url) === argv[1]) {
-  const [channel, bump = 'auto', prismaVersion = ''] = process.argv.slice(2)
+  const [channel, bump = 'patch'] = process.argv.slice(2)
   const tags = execSync('git tag --list', { encoding: 'utf-8' }).split('\n')
 
-  const plan = planRelease({ channel, bump, prismaVersion, tags })
+  const plan = planRelease({ channel, bump, tags })
   console.log(plan)
   for (const [key, value] of Object.entries(plan)) {
     core.setOutput(key, value)

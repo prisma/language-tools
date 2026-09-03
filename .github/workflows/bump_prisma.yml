@@ -1,0 +1,87 @@
+name: Bump Prisma CLI
+run-name: "Bump Prisma CLI to ${{ inputs.prisma_version }} on ${{ inputs.ref || 'main' }}"
+
+# Updates the Prisma CLI dependencies and pushes the change to the branch.
+#
+# Publishing is a separate workflow. A bump pushed to main triggers an insider
+# release through release.yml's push trigger; a stable release is always a
+# manual dispatch of release.yml.
+
+on:
+  workflow_dispatch:
+    inputs:
+      prisma_version:
+        description: 'Prisma CLI version to pin the dependencies to (e.g. 7.9.0)'
+        required: true
+      ref:
+        description: 'Branch to bump. Defaults to main. Use an x.y.x branch to patch an older version.'
+        required: false
+
+concurrency:
+  group: bump-prisma
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+  PRISMA_TELEMETRY_INFORMATION: 'language-tools bump_prisma.yml'
+
+jobs:
+  bump:
+    name: Bump Prisma CLI dependencies
+    if: github.repository == 'prisma/language-tools'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Validate inputs
+        env:
+          PRISMA_VERSION: ${{ inputs.prisma_version }}
+          INPUT_REF: ${{ inputs.ref }}
+        run: |
+          if ! echo "$PRISMA_VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "'$PRISMA_VERSION' is not a Prisma CLI version." >&2
+            exit 1
+          fi
+          REF="${INPUT_REF:-main}"
+          case "$REF" in
+            main) ;;
+            *)
+              if ! echo "$REF" | grep -Eq '^[0-9]+\.[0-9]+\.x$'; then
+                echo "Refusing to bump '$REF'. Bumps run on main or an x.y.x patch branch." >&2
+                exit 1
+              fi
+              ;;
+          esac
+          echo "REF=$REF" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.REF }}
+          token: ${{ secrets.PRISMA_BOT_TOKEN }}
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - name: Install Dependencies
+        run: pnpm install
+      - name: Bump Prisma CLI dependencies
+        env:
+          PRISMA_VERSION: ${{ inputs.prisma_version }}
+        run: node scripts/bump_prisma_dependencies.mjs "$PRISMA_VERSION"
+      - name: Update the lockfile
+        run: pnpm install --no-frozen-lockfile
+      - name: Commit and push
+        env:
+          PRISMA_VERSION: ${{ inputs.prisma_version }}
+        run: |
+          if git diff --quiet; then
+            echo "Dependencies are already pinned to $PRISMA_VERSION, nothing to commit."
+            exit 0
+          fi
+          sh scripts/set_git_credentials.sh
+          git commit -am "bump Prisma CLI to $PRISMA_VERSION"
+          git push origin "HEAD:$REF"

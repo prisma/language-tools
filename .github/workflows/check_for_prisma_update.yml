@@ -1,11 +1,11 @@
 name: Check for Prisma CLI update
 
-# Polls npm for new Prisma CLI versions and starts the Release workflow
-# (release.yml) for every channel that has a new version:
+# Polls npm for new Prisma CLI versions and starts the Bump Prisma CLI
+# workflow (bump_prisma.yml) for every channel that has a new version:
 #
-# - dev       -> insider release from main
-# - latest    -> stable release from the stable branch
-# - patch-dev -> insider release from the x.y.x patch branch
+# - dev, latest -> bump main; the push to main publishes an insider release,
+#                  and a stable release is a manual dispatch of release.yml
+# - patch-dev   -> bump the x.y.x patch branch, then release from it
 
 on:
   # Scheduled trigger disabled: ORM iteration is paused; CLI-update polling
@@ -13,6 +13,9 @@ on:
   # schedule:
   #   - cron: '*/5 * * * *'
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 env:
   ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
@@ -59,17 +62,17 @@ jobs:
           git commit -am "[skip ci] record new Prisma CLI versions"
           git push
 
-      - name: Release insider (Prisma dev)
+      - name: Bump main (Prisma dev)
         if: steps.check_update.outputs.dev_version
         env:
           DEV_VERSION: ${{ steps.check_update.outputs.dev_version }}
-        run: gh workflow run release.yml --ref main -f channel=insider -f prisma_version="$DEV_VERSION"
-      - name: Release stable (Prisma latest)
-        if: steps.check_update.outputs.latest_version
+        run: gh workflow run bump_prisma.yml --ref main -f prisma_version="$DEV_VERSION"
+      - name: Bump main (Prisma latest)
+        if: steps.check_update.outputs.latest_version && !steps.check_update.outputs.dev_version
         env:
           LATEST_VERSION: ${{ steps.check_update.outputs.latest_version }}
-        run: gh workflow run release.yml --ref main -f channel=stable -f prisma_version="$LATEST_VERSION"
-      - name: Release insider from patch branch (Prisma patch-dev)
+        run: gh workflow run bump_prisma.yml --ref main -f prisma_version="$LATEST_VERSION"
+      - name: Bump the patch branch (Prisma patch-dev)
         if: steps.check_update.outputs.patch-dev_version
         env:
           PATCH_DEV_VERSION: ${{ steps.check_update.outputs.patch-dev_version }}
@@ -80,4 +83,4 @@ jobs:
             git branch "$BRANCH" "$(cat scripts/versions/tested_extension_stable)"
             git push origin "$BRANCH"
           fi
-          gh workflow run release.yml --ref main -f channel=insider -f ref="$BRANCH" -f prisma_version="$PATCH_DEV_VERSION"
+          gh workflow run bump_prisma.yml --ref main -f prisma_version="$PATCH_DEV_VERSION" -f ref="$BRANCH"

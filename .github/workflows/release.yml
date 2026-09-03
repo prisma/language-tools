@@ -1,19 +1,17 @@
 name: Release
-run-name: "Release ${{ github.event_name == 'push' && 'insider (push to main)' || format('{0}{1}', inputs.channel, inputs.prisma_version != '' && format(' — Prisma CLI {0}', inputs.prisma_version) || '') }}"
+run-name: "Release ${{ github.event_name == 'push' && 'insider (push to main)' || format('{0} from {1}', inputs.channel, inputs.ref || 'main') }}"
 
 # The single publishing pipeline for both the insider and the stable extension.
 #
 # - A push to main publishes an insider release.
-# - A manual dispatch publishes an insider or stable release, optionally
-#   bumping the Prisma CLI dependencies first (`prisma_version`), optionally
-#   from another branch (`ref`, e.g. an x.y.x patch branch).
-# - check_for_prisma_update.yml dispatches this workflow when a new Prisma CLI
-#   version is published to npm.
+# - A manual dispatch publishes an insider or stable release, optionally from
+#   an x.y.x patch branch (`ref`).
 #
-# The next extension version is derived from the git release tags (`x.y.z` for
-# stable, `insider/x.y.z` for insider), so a release only creates a commit when
-# it actually changes dependencies (`prisma_version` given). All other jobs
-# check out the exact commit resolved by the `plan` job.
+# This workflow never writes to the repository. The next extension version is
+# derived from the git release tags (`x.y.z` for stable, `insider/x.y.z` for
+# insider), and Prisma CLI dependency updates are a separate workflow
+# (bump_prisma.yml) that commits to main. Only the `release` job holds write
+# access, to create the tag and GitHub release.
 
 on:
   push:
@@ -32,21 +30,17 @@ on:
           - stable
         default: insider
       ref:
-        description: 'Branch to release from. Defaults to main for insider and stable for stable. Use an x.y.x branch to patch an older version.'
+        description: 'Branch to release from. Defaults to main. Use an x.y.x branch to patch an older version.'
         required: false
       bump:
-        description: "Extension version bump (stable only; 'auto' derives it from the Prisma CLI version)"
+        description: 'Extension version bump (stable only; insider is always a patch)'
         required: false
         type: choice
         options:
-          - auto
           - patch
           - minor
           - major
-        default: auto
-      prisma_version:
-        description: 'Bump the Prisma CLI dependencies to this version before releasing (creates one commit on the release branch)'
-        required: false
+        default: patch
 
 concurrency:
   group: release
@@ -66,8 +60,6 @@ jobs:
     if: github.repository == 'prisma/language-tools'
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    permissions:
-      contents: write
     outputs:
       channel: ${{ steps.params.outputs.channel }}
       ref: ${{ steps.params.outputs.ref }}
@@ -91,15 +83,12 @@ jobs:
             REF="$PUSH_SHA"
           else
             CHANNEL="$INPUT_CHANNEL"
-            REF="$INPUT_REF"
-            if [ -z "$REF" ]; then
-              if [ "$CHANNEL" = "stable" ]; then REF=stable; else REF=main; fi
-            fi
+            REF="${INPUT_REF:-main}"
             case "$REF" in
-              main | stable) ;;
+              main) ;;
               *)
                 if ! echo "$REF" | grep -Eq '^[0-9]+\.[0-9]+\.x$'; then
-                  echo "Refusing to release from '$REF'. Releases run from main, stable or an x.y.x patch branch." >&2
+                  echo "Refusing to release from '$REF'. Releases run from main or an x.y.x patch branch." >&2
                   exit 1
                 fi
                 ;;
@@ -113,7 +102,7 @@ jobs:
         with:
           ref: ${{ steps.params.outputs.ref }}
           fetch-depth: 0 # all branches and tags: the next version is derived from release tags
-          token: ${{ secrets.PRISMA_BOT_TOKEN }}
+          persist-credentials: false
       - name: Install pnpm
         uses: pnpm/action-setup@v4
       - name: Use Node.js
@@ -127,26 +116,8 @@ jobs:
         id: version
         env:
           CHANNEL: ${{ steps.params.outputs.channel }}
-          BUMP: ${{ inputs.bump || 'auto' }}
-          PRISMA_VERSION: ${{ inputs.prisma_version }}
-        run: node scripts/next_extension_version.mjs "$CHANNEL" "$BUMP" "$PRISMA_VERSION"
-      - name: Reset stable branch to main (new Prisma minor/major)
-        if: steps.params.outputs.channel == 'stable' && inputs.prisma_version != '' && steps.version.outputs.release_type != 'patch'
-        run: |
-          git checkout -B stable origin/main
-          git push --force origin stable
-      - name: Bump Prisma dependencies
-        if: inputs.prisma_version != ''
-        env:
-          NPM_CHANNEL: ${{ steps.version.outputs.npm_channel }}
-          VERSION: ${{ steps.version.outputs.version }}
-          PRISMA_VERSION: ${{ inputs.prisma_version }}
-          RELEASE_REF: ${{ steps.params.outputs.ref }}
-        run: |
-          node scripts/update_package_json_files.mjs "$NPM_CHANNEL" "$VERSION" "$PRISMA_VERSION"
-          sh scripts/set_git_credentials.sh
-          git commit -am "[skip ci] bump Prisma CLI to $PRISMA_VERSION and extension to $VERSION"
-          git push origin "HEAD:$RELEASE_REF"
+          BUMP: ${{ inputs.bump || 'patch' }}
+        run: node scripts/next_extension_version.mjs "$CHANNEL" "$BUMP"
       - name: Resolve release commit
         id: sha
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"

@@ -27,27 +27,17 @@ describe('latestReleasedVersion', () => {
 
 describe('releaseType', () => {
   it('insider releases are always a patch', () => {
-    expect(releaseType({ channel: 'insider', bump: 'auto', prismaVersion: '7.9.0-dev.4' })).toEqual('patch')
+    expect(releaseType({ channel: 'insider', bump: 'major' })).toEqual('patch')
   })
 
-  it('stable release for a Prisma CLI patch', () => {
-    expect(releaseType({ channel: 'stable', bump: 'auto', prismaVersion: '7.8.1' })).toEqual('patch')
+  it('stable releases use the requested bump', () => {
+    expect(releaseType({ channel: 'stable', bump: 'patch' })).toEqual('patch')
+    expect(releaseType({ channel: 'stable', bump: 'minor' })).toEqual('minor')
+    expect(releaseType({ channel: 'stable', bump: 'major' })).toEqual('major')
   })
 
-  it('stable release for a Prisma CLI minor', () => {
-    expect(releaseType({ channel: 'stable', bump: 'auto', prismaVersion: '7.9.0' })).toEqual('minor')
-  })
-
-  it('stable release for a Prisma CLI major', () => {
-    expect(releaseType({ channel: 'stable', bump: 'auto', prismaVersion: '8.0.0' })).toEqual('major')
-  })
-
-  it('stable extension-only release defaults to a patch', () => {
-    expect(releaseType({ channel: 'stable', bump: 'auto' })).toEqual('patch')
-  })
-
-  it('an explicit bump wins over the Prisma CLI version', () => {
-    expect(releaseType({ channel: 'stable', bump: 'minor', prismaVersion: '7.8.1' })).toEqual('minor')
+  it('stable defaults to a patch', () => {
+    expect(releaseType({ channel: 'stable' })).toEqual('patch')
   })
 
   it('throws on an unknown channel', () => {
@@ -58,28 +48,14 @@ describe('releaseType', () => {
     expect(() => releaseType({ channel: 'stable', bump: 'mega' })).toThrow()
   })
 
-  it('throws on a Prisma CLI version that is not a semantic version', () => {
-    expect(() => releaseType({ channel: 'stable', bump: 'auto', prismaVersion: 'invalid.0.0' })).toThrow(
-      /Invalid Prisma CLI version/,
-    )
-  })
-
-  it('throws on a Prisma CLI prerelease for a stable release', () => {
-    expect(() => releaseType({ channel: 'stable', bump: 'auto', prismaVersion: '7.9.0-dev.4' })).toThrow(/prerelease/)
-  })
-
-  it('validates the Prisma CLI version even when the bump is explicit', () => {
-    expect(() => releaseType({ channel: 'stable', bump: 'minor', prismaVersion: 'invalid.0.0' })).toThrow()
-  })
-
-  it('does not validate the Prisma CLI version on the insider channel', () => {
-    expect(releaseType({ channel: 'insider', bump: 'auto', prismaVersion: 'anything' })).toEqual('patch')
+  it('throws on the removed auto bump', () => {
+    expect(() => releaseType({ channel: 'stable', bump: 'auto' })).toThrow()
   })
 })
 
 describe('planRelease', () => {
   it('plans an insider release', () => {
-    expect(planRelease({ channel: 'insider', bump: 'auto', prismaVersion: '7.9.0-dev.4', tags: TAGS })).toEqual({
+    expect(planRelease({ channel: 'insider', bump: 'patch', tags: TAGS })).toEqual({
       version: '31.12.1',
       release_type: 'patch',
       tag_name: 'insider/31.12.1',
@@ -89,8 +65,8 @@ describe('planRelease', () => {
     })
   })
 
-  it('plans a stable release for a Prisma CLI minor', () => {
-    expect(planRelease({ channel: 'stable', bump: 'auto', prismaVersion: '7.9.0', tags: TAGS })).toEqual({
+  it('plans a stable minor release', () => {
+    expect(planRelease({ channel: 'stable', bump: 'minor', tags: TAGS })).toEqual({
       version: '31.13.0',
       release_type: 'minor',
       tag_name: '31.13.0',
