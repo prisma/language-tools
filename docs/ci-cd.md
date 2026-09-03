@@ -29,9 +29,10 @@ graph TD
       PLAN[plan: resolve channel + branch, derive next version from git tags,<br>optionally commit Prisma CLI dependency bump]
       PLAN --> TEST[test: build, typecheck, LS unit tests, E2E tests<br>on ubuntu / macos / windows]
       TEST --> LS[publish-language-server:<br>npm publish with dist-tag dev or latest]
-      TEST --> PKG[package: build vsix, upload artifact,<br>create GitHub release + tag]
-      PKG --> MKT[publish-marketplace: vsce publish]
-      PKG --> OVSX[publish-open-vsx: ovsx publish]
+      TEST --> PKG[package: build vsix, upload artifact]
+      PKG --> REL[release: download artifact,<br>create GitHub release + tag]
+      REL --> MKT[publish-marketplace: vsce publish]
+      REL --> OVSX[publish-open-vsx: ovsx publish]
     end
 ```
 
@@ -42,8 +43,22 @@ graph TD
   VS Code E2E tests on all three OSes.
 - **package** builds the `.vsix` once; the same file is attached to the GitHub
   release and published to both marketplaces (passed as a workflow artifact).
+- **release** only downloads that artifact and creates the tag and GitHub
+  release. It does not check out, install or build anything.
 - Insider GitHub releases are marked as pre-releases, so the repository's
   "latest release" always points to a stable version.
+
+### Permissions
+
+The workflow default is `contents: read`. Write access is granted per job:
+`plan` (pushes the dependency-bump commit and can reset `stable`), `release`
+(creates the tag and GitHub release) and `publish-language-server`
+(`id-token: write` for npm Trusted Publishers). Every checkout except `plan`'s
+sets `persist-credentials: false`, so build and test steps never see a git
+credential.
+
+Releases only run from `main`, `stable` or an `x.y.x` patch branch; `plan`
+rejects any other `ref`.
 
 ### Channels and branches
 
