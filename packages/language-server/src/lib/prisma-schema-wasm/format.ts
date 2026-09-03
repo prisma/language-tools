@@ -3,6 +3,14 @@ import { prismaSchemaWasm } from '.'
 import { handleFormatPanic, handleWasmError } from './internals'
 import { PrismaSchema } from '../Schema'
 import { TextDocument } from 'vscode-languageserver-textdocument'
+import { URI } from 'vscode-uri'
+
+export function isSameFileUri(leftUri: string, rightUri: string, platform = process.platform): boolean {
+  const leftPath = URI.parse(leftUri).fsPath
+  const rightPath = URI.parse(rightUri).fsPath
+
+  return platform === 'win32' ? leftPath.toLocaleLowerCase() === rightPath.toLocaleLowerCase() : leftPath === rightPath
+}
 
 export default function format(
   schema: PrismaSchema,
@@ -21,12 +29,16 @@ export default function format(
     }
 
     const result = prismaSchemaWasm.format(JSON.stringify(schema), JSON.stringify(options))
+
     // tuples of [filePath, content]
     const formattedFiles = JSON.parse(result) as Array<[string, string]>
-    const formatResult = formattedFiles.find(([uri]) => uri === initiatingDocument.uri)
+
+    const formatResult = formattedFiles.find(([uri]) => isSameFileUri(uri, initiatingDocument.uri))
+
     if (!formatResult) {
       return initiatingDocument.getText()
     }
+
     return formatResult[1]
   } catch (e) {
     const err = e as Error
