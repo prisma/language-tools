@@ -1,3 +1,10 @@
 packages:
   - 'packages/*'
   - 'packages/vscode/tests/fixtures/integration-workspace/*'
+
+allowBuilds:
+  '@vscode/vsce-sign': true
+  esbuild: true
+  keytar: true
+  msgpackr-extract: true
+  workerd: true

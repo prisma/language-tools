@@ -58,16 +58,16 @@ jobs:
               ;;
           esac
           echo "ref=$REF" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ steps.validate.outputs.ref }}
           persist-credentials: false
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'pnpm'
       - name: Install Dependencies
         run: pnpm install
@@ -78,7 +78,7 @@ jobs:
       - name: Update the lockfile
         run: pnpm install --no-frozen-lockfile
       - name: Upload the pinned manifests
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: pinned-manifests
           path: |
@@ -95,15 +95,17 @@ jobs:
       REF: ${{ needs.pin.outputs.ref }}
       PRISMA_VERSION: ${{ inputs.prisma_version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.pin.outputs.ref }}
-          token: ${{ secrets.PRISMA_BOT_TOKEN }}
+          persist-credentials: false
       - name: Download the pinned manifests
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: pinned-manifests
       - name: Commit and push
+        env:
+          GH_TOKEN: ${{ secrets.PRISMA_BOT_TOKEN }}
         run: |
           if git diff --quiet; then
             echo "Dependencies are already pinned to $PRISMA_VERSION, nothing to commit."
@@ -111,4 +113,5 @@ jobs:
           fi
           sh scripts/set_git_credentials.sh
           git commit -am "bump Prisma CLI to $PRISMA_VERSION"
+          gh auth setup-git
           git push origin "HEAD:$REF"

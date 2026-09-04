@@ -36,16 +36,16 @@ jobs:
       latest_version: ${{ steps.check_update.outputs.latest_version }}
       patch_dev_version: ${{ steps.check_update.outputs.patch-dev_version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
           persist-credentials: false
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'pnpm'
       - name: Install Dependencies
         run: pnpm install
@@ -64,14 +64,17 @@ jobs:
       LATEST_VERSION: ${{ needs.check.outputs.latest_version }}
       PATCH_DEV_VERSION: ${{ needs.check.outputs.patch_dev_version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
-          token: ${{ secrets.PRISMA_BOT_TOKEN }}
           fetch-depth: 0 # patch branches are created from release tags
+          persist-credentials: false
       - name: Record new versions
+        env:
+          GH_TOKEN: ${{ secrets.PRISMA_BOT_TOKEN }}
         run: |
           sh scripts/set_git_credentials.sh
+          gh auth setup-git
           if [ -n "$DEV_VERSION" ]; then echo "$DEV_VERSION" > scripts/versions/prisma_dev; fi
           if [ -n "$LATEST_VERSION" ]; then echo "$LATEST_VERSION" > scripts/versions/prisma_latest; fi
           if [ -n "$PATCH_DEV_VERSION" ]; then echo "$PATCH_DEV_VERSION" > scripts/versions/prisma_patch-dev; fi
@@ -80,6 +83,8 @@ jobs:
       - name: Create the patch branch if it is new
         id: patch_branch
         if: needs.check.outputs.patch_dev_version
+        env:
+          GH_TOKEN: ${{ secrets.PRISMA_BOT_TOKEN }}
         run: |
           BRANCH=$(node scripts/setup_branch.mjs patch-dev)
           if [ -z "$(git ls-remote --heads origin "$BRANCH")" ]; then

@@ -14,15 +14,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.PRISMA_BOT_TOKEN }}
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'pnpm'
       - name: Install Dependencies
         run: pnpm install
@@ -32,18 +30,21 @@ jobs:
           node scripts/e2eTestsOnVsix/check_marketplace_version.mjs
       - name: Check new release of stable and Insider
         id: check_published_version
+        env:
+          INSIDER_VERSION: ${{ steps.versions.outputs.insider_version }}
+          STABLE_VERSION: ${{ steps.versions.outputs.stable_version }}
         run: |
-          node scripts/e2eTestsOnVsix/check_for_new_release.mjs ${{ steps.versions.outputs.insider_version }} ${{ steps.versions.outputs.stable_version }}
+          node scripts/e2eTestsOnVsix/check_for_new_release.mjs "$INSIDER_VERSION" "$STABLE_VERSION"
       - name: Trigger e2e tests for Insider
         if: ${{ steps.check_published_version.outputs.new_insider_version }}
-        uses: benc-uk/workflow-dispatch@v1
+        uses: benc-uk/workflow-dispatch@d004979be141727c7a17c28f603e2facc40d0855 # v1.3.3
         with:
           workflow: E2E tests after release on VSIX
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
           inputs: '{ "extension_type": "insider", "extension_version": "${{ steps.check_published_version.outputs.new_insider_version }}" }'
       - name: Trigger e2e tests for stable
         if: ${{ steps.check_published_version.outputs.new_stable_version }}
-        uses: benc-uk/workflow-dispatch@v1
+        uses: benc-uk/workflow-dispatch@d004979be141727c7a17c28f603e2facc40d0855 # v1.3.3
         with:
           workflow: E2E tests after release on VSIX
           token: ${{ secrets.PRISMA_BOT_TOKEN }}
