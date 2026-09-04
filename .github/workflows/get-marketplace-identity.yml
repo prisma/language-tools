@@ -1,8 +1,13 @@
 name: Get Marketplace identity
 
-# Temporary bootstrap workflow. Delete it after adding the managed identity to
-# the Visual Studio Marketplace publisher.
+# Temporary bootstrap workflow. Delete it after retrieving the identity ID and
+# before granting the managed identity access to the Marketplace publisher.
 on:
+  push:
+    branches:
+      - azure-managed-identioty
+    paths:
+      - '.github/workflows/get-marketplace-identity.yml'
   workflow_dispatch:
 
 permissions:
@@ -12,7 +17,7 @@ permissions:
 jobs:
   get-marketplace-identity:
     name: Get Marketplace identity
-    if: github.repository == 'prisma/language-tools' && github.ref == 'refs/heads/main'
+    if: github.repository == 'prisma/language-tools' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/azure-managed-identioty')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
