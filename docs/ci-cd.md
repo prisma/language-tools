@@ -35,7 +35,8 @@ graph TD
       TEST --> LS[publish-language-server:<br>npm publish with dist-tag dev or latest]
       TEST --> PKG[package: build vsix, upload artifact]
       PKG --> REL[release: download artifact,<br>create GitHub release + tag]
-      REL --> MKT[publish-marketplace: vsce publish]
+      REL --> PREP[prepare-marketplace-publisher:<br>install and archive vsce without OIDC permission]
+      PREP --> MKT[publish-marketplace: download artifacts,<br>authenticate and publish]
       REL --> OVSX[publish-open-vsx: ovsx publish]
     end
 ```
@@ -49,6 +50,11 @@ graph TD
   release and published to both marketplaces (passed as a workflow artifact).
 - **release** only downloads that artifact and creates the tag and GitHub
   release. It does not check out, install or build anything.
+- **prepare-marketplace-publisher** installs and archives the pinned `vsce`
+  version without any GitHub token permissions. **publish-marketplace** then
+  downloads only the VSIX and publisher artifacts before requesting an Azure
+  OIDC credential; it does not check out or execute release-source dependency
+  lifecycle scripts while holding `id-token: write`.
 - Insider GitHub releases are marked as pre-releases, so the repository's
   "latest release" always points to a stable version.
 
@@ -58,8 +64,9 @@ The workflow default is `contents: read`. Three jobs are granted additional
 permissions: `release` (`contents: write`, to create the tag and GitHub
 release), `publish-language-server` (`id-token: write`, for npm Trusted
 Publishers), and `publish-marketplace` (`id-token: write`, to authenticate to
-Azure). Every checkout sets `persist-credentials: false`, so no job has a git
-credential in its config while running dependency code.
+Azure). `prepare-marketplace-publisher` explicitly has no GitHub token
+permissions. Every checkout sets `persist-credentials: false`, so no job has a
+git credential in its config while running dependency code.
 
 Releases only run from `main` or an `x.y.x` patch branch; `plan` rejects any
 other source `ref`. The release workflow itself must be launched from `main`
@@ -106,7 +113,7 @@ The Azure and GitHub setup is external to this repository:
 
    ```bash
    az rest \
-     --url https://app.vssps.visualstudio.com/_apis/profile/profiles/me \
+     --url 'https://app.vssps.visualstudio.com/_apis/profile/profiles/me?api-version=7.1' \
      --resource 499b84ac-1321-427f-aa17-267ca6975798
    ```
 

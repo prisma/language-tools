@@ -260,34 +260,61 @@ jobs:
             --target "$SHA" \
             $PRERELEASE
 
-  publish-marketplace:
-    name: Publish to VS Code Marketplace
-    needs: [plan, release]
+  prepare-marketplace-publisher:
+    name: Prepare VS Code Marketplace publisher
+    needs: release
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    permissions:
-      contents: read
-      id-token: write
-    env:
-      ASSET_FILE: ${{ needs.plan.outputs.asset_name }}-${{ needs.plan.outputs.version }}.vsix
+    permissions: {}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ needs.plan.outputs.sha }}
-          persist-credentials: false
-      - name: Install pnpm
-        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - name: Use Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-      - name: Install Dependencies
-        run: pnpm install
+      - name: Install Marketplace publisher
+        run: |
+          npm install \
+            --prefix "$RUNNER_TEMP/marketplace-publisher" \
+            --no-save \
+            --no-audit \
+            --no-fund \
+            @vscode/vsce@2.29.0
+          tar -czf "$RUNNER_TEMP/marketplace-publisher.tar.gz" \
+            -C "$RUNNER_TEMP" marketplace-publisher
+      - name: Upload Marketplace publisher
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: marketplace-publisher
+          path: ${{ runner.temp }}/marketplace-publisher.tar.gz
+          if-no-files-found: error
+          retention-days: 1
+
+  publish-marketplace:
+    name: Publish to VS Code Marketplace
+    needs: [plan, release, prepare-marketplace-publisher]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write # Required by azure/login and vsce --azure-credential.
+    env:
+      ASSET_FILE: ${{ needs.plan.outputs.asset_name }}-${{ needs.plan.outputs.version }}.vsix
+    steps:
+      - name: Use Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
       - name: Download vsix artifact
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: vsix
+      - name: Download Marketplace publisher
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: marketplace-publisher
+          path: ${{ runner.temp }}
+      - name: Extract Marketplace publisher
+        run: tar -xzf "$RUNNER_TEMP/marketplace-publisher.tar.gz" -C "$RUNNER_TEMP"
       - name: Log in to Azure
         uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
         with:
@@ -295,7 +322,11 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           allow-no-subscriptions: true
       - name: Publish vsix to marketplace
-        run: cd packages/vscode && npx vsce publish --azure-credential --packagePath "$GITHUB_WORKSPACE/$ASSET_FILE"
+        run: |
+          node "$RUNNER_TEMP/marketplace-publisher/node_modules/@vscode/vsce/vsce" \
+            publish \
+            --azure-credential \
+            --packagePath "$GITHUB_WORKSPACE/$ASSET_FILE"
 
   publish-open-vsx:
     name: Publish to open-vsx
