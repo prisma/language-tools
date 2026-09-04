@@ -179,8 +179,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-      - name: Update npm to support trusted publishing
-        run: npm install -g npm@^11.5.1
       - name: Install Dependencies
         run: pnpm install
       - name: Set Language Server version
