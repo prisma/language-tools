@@ -77,8 +77,9 @@ permissions failure stops the job. Open VSX is separate and continues to use
 The Azure and GitHub setup is external to this repository:
 
 1. Create a user-assigned managed identity in the Azure tenant used for
-   Marketplace publishing. Give it Reader access at the narrowest practical
-   Azure scope so `azure/login` can select the configured subscription.
+   Marketplace publishing. The workflow authenticates with
+   `allow-no-subscriptions: true`, so the identity does not need an Azure RBAC
+   role assignment.
 2. Add a federated credential to that identity with these exact values:
 
    | Field    | Value                                            |
@@ -116,13 +117,12 @@ The Azure and GitHub setup is external to this repository:
    page](https://marketplace.visualstudio.com/manage), add that resource ID as
    a member of the Prisma publisher and assign the **Contributor** role.
 5. In **GitHub → prisma/language-tools → Settings → Secrets and variables →
-   Actions → Secrets**, create all three values as repository secrets:
+   Actions → Secrets**, create both values as repository secrets:
 
-   | Name                    | Storage           | Value                      |
-   | ----------------------- | ----------------- | -------------------------- |
-   | `AZURE_CLIENT_ID`       | Repository secret | Managed identity client ID |
-   | `AZURE_TENANT_ID`       | Repository secret | Microsoft Entra tenant ID  |
-   | `AZURE_SUBSCRIPTION_ID` | Repository secret | Azure subscription ID      |
+   | Name              | Storage           | Value                      |
+   | ----------------- | ----------------- | -------------------------- |
+   | `AZURE_CLIENT_ID` | Repository secret | Managed identity client ID |
+   | `AZURE_TENANT_ID` | Repository secret | Microsoft Entra tenant ID  |
 
 6. Launch `release.yml` from `main` and verify an insider release. After it
    publishes successfully, delete the obsolete
