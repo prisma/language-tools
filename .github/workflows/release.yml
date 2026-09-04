@@ -74,6 +74,7 @@ jobs:
         id: params
         env:
           EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_REF: ${{ github.ref }}
           PUSH_SHA: ${{ github.sha }}
           INPUT_CHANNEL: ${{ inputs.channel }}
           INPUT_REF: ${{ inputs.ref }}
@@ -82,6 +83,10 @@ jobs:
             CHANNEL=insider
             REF="$PUSH_SHA"
           else
+            if [ "$WORKFLOW_REF" != "refs/heads/main" ]; then
+              echo "Refusing to release from workflow ref '$WORKFLOW_REF'. Marketplace authentication is federated to main." >&2
+              exit 1
+            fi
             CHANNEL="$INPUT_CHANNEL"
             REF="${INPUT_REF:-main}"
             case "$REF" in
@@ -260,6 +265,9 @@ jobs:
     needs: [plan, release]
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write # Required by azure/login and vsce --azure-credential.
     env:
       ASSET_FILE: ${{ needs.plan.outputs.asset_name }}-${{ needs.plan.outputs.version }}.vsix
     steps:
@@ -280,10 +288,15 @@ jobs:
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: vsix
+      - name: Log in to Azure
+        uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
       - name: Publish vsix to marketplace
-        env:
-          VSCE_PAT: ${{ secrets.AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN }}
-        run: cd packages/vscode && npx vsce publish --packagePath "$GITHUB_WORKSPACE/$ASSET_FILE"
+        run: >-
+          cd packages/vscode && npx vsce publish --azure-credential --packagePath "$GITHUB_WORKSPACE/$ASSET_FILE"
 
   publish-open-vsx:
     name: Publish to open-vsx

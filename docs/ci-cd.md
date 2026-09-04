@@ -54,14 +54,83 @@ graph TD
 
 ### Permissions
 
-The workflow default is `contents: read`. Only two jobs are granted more:
-`release` (`contents: write`, to create the tag and GitHub release) and
-`publish-language-server` (`id-token: write`, for npm Trusted Publishers).
-Every checkout sets `persist-credentials: false`, so no job has a git
+The workflow default is `contents: read`. Three jobs are granted additional
+permissions: `release` (`contents: write`, to create the tag and GitHub
+release), `publish-language-server` (`id-token: write`, for npm Trusted
+Publishers), and `publish-marketplace` (`id-token: write`, to authenticate to
+Azure). Every checkout sets `persist-credentials: false`, so no job has a git
 credential in its config while running dependency code.
 
 Releases only run from `main` or an `x.y.x` patch branch; `plan` rejects any
-other `ref`.
+other source `ref`. The release workflow itself must be launched from `main`
+so its OIDC subject matches the Azure federated credential. A patch release
+can still select an `x.y.x` source branch with the `ref` input.
+
+### VS Code Marketplace authentication
+
+`publish-marketplace` uses GitHub OIDC to sign in as a user-assigned Azure
+managed identity, then runs `vsce publish --azure-credential`. It has no
+Personal Access Token fallback: an OIDC, Azure login, or Marketplace
+permissions failure stops the job. Open VSX is separate and continues to use
+`OPEN_VSX_ACCESS_TOKEN`.
+
+The Azure and GitHub setup is external to this repository:
+
+1. Create a user-assigned managed identity in the Azure tenant used for
+   Marketplace publishing. The workflow authenticates with
+   `allow-no-subscriptions: true`, so the identity does not need an Azure RBAC
+   role assignment.
+2. Add a federated credential to that identity with these exact values:
+
+   | Field    | Value                                            |
+   | -------- | ------------------------------------------------ |
+   | Issuer   | `https://token.actions.githubusercontent.com`    |
+   | Subject  | `repo:prisma/language-tools:ref:refs/heads/main` |
+   | Audience | `api://AzureADTokenExchange`                     |
+
+   For example:
+
+   ```bash
+   az identity federated-credential create \
+     --name language-tools-github-main \
+     --identity-name <managed-identity-name> \
+     --resource-group <resource-group> \
+     --issuer https://token.actions.githubusercontent.com \
+     --subject repo:prisma/language-tools:ref:refs/heads/main \
+     --audiences api://AzureADTokenExchange
+   ```
+
+3. Authenticate as the managed identity and query its Azure DevOps profile to
+   obtain the Marketplace resource ID (the `id` field, which is not the Azure
+   client ID or object ID):
+
+   ```bash
+   az rest \
+     --url 'https://app.vssps.visualstudio.com/_apis/profile/profiles/me?api-version=7.1' \
+     --resource 499b84ac-1321-427f-aa17-267ca6975798
+   ```
+
+   One way to run this command is a temporary GitHub Actions step immediately
+   after the `azure/login` step. Do not print or retain access tokens.
+
+4. On the [Visual Studio Marketplace publisher management
+   page](https://marketplace.visualstudio.com/manage), add that resource ID as
+   a member of the Prisma publisher and assign the **Contributor** role.
+5. In **GitHub → prisma/language-tools → Settings → Secrets and variables →
+   Actions → Secrets**, create both values as repository secrets:
+
+   | Name              | Storage           | Value                      |
+   | ----------------- | ----------------- | -------------------------- |
+   | `AZURE_CLIENT_ID` | Repository secret | Managed identity client ID |
+   | `AZURE_TENANT_ID` | Repository secret | Microsoft Entra tenant ID  |
+
+6. Launch `release.yml` from `main` and verify an insider release. After it
+   publishes successfully, delete the obsolete
+   `AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN` Actions secret.
+
+Microsoft's [VS Code extension publishing
+instructions](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#secure-automated-publishing-to-visual-studio-marketplace)
+describe the managed-identity Marketplace authorization flow.
 
 ### Channels
 
