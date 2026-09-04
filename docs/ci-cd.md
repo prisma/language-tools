@@ -116,13 +116,14 @@ The Azure and GitHub setup is external to this repository:
    page](https://marketplace.visualstudio.com/manage), add that resource ID as
    a member of the Prisma publisher and assign the **Contributor** role.
 5. In **GitHub → prisma/language-tools → Settings → Secrets and variables →
-   Actions → Variables**, create these repository variables:
+   Actions**, create the identity and tenant values as repository secrets and
+   the subscription value as a repository variable:
 
-   | Variable                | Value                      |
-   | ----------------------- | -------------------------- |
-   | `AZURE_CLIENT_ID`       | Managed identity client ID |
-   | `AZURE_TENANT_ID`       | Microsoft Entra tenant ID  |
-   | `AZURE_SUBSCRIPTION_ID` | Azure subscription ID      |
+   | Name                    | Storage             | Value                      |
+   | ----------------------- | ------------------- | -------------------------- |
+   | `AZURE_CLIENT_ID`       | Repository secret   | Managed identity client ID |
+   | `AZURE_TENANT_ID`       | Repository secret   | Microsoft Entra tenant ID  |
+   | `AZURE_SUBSCRIPTION_ID` | Repository variable | Azure subscription ID      |
 
 6. Launch `release.yml` from `main` and verify an insider release. After it
    publishes successfully, delete the obsolete
