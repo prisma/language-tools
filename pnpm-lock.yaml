@@ -54,8 +54,8 @@ importers:
         specifier: 9.1.7
         version: 9.1.7
       is-ci:
-        specifier: 3.0.1
-        version: 3.0.1
+        specifier: 4.1.0
+        version: 4.1.0
       lint-staged:
         specifier: 15.3.0
         version: 15.3.0
@@ -221,8 +221,8 @@ importers:
         specifier: 8.1.0
         version: 8.1.0
       is-ci:
-        specifier: 3.0.1
-        version: 3.0.1
+        specifier: 4.1.0
+        version: 4.1.0
       mocha:
         specifier: 10.8.2
         version: 10.8.2
@@ -249,10 +249,10 @@ importers:
         version: 0.2.3(magicast@0.5.4)
       '@prisma/orm-postgres':
         specifier: 8.0.0-rc.7-dev.1
-        version: 8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)
+        version: 8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))
       prisma:
         specifier: 8.0.0-rc.10-dev.82
-        version: 8.0.0-rc.10-dev.82(@types/node@20.14.8)(@types/react@19.2.7)(@vercel/nft@1.11.0(rollup@4.53.3))(magicast@0.5.4)(mongodb@6.21.0(@aws-sdk/credential-providers@3.1116.0))(mysql2@3.23.4(@types/node@20.14.8))(pg@8.22.0)(rollup@4.53.3)(typanion@3.14.0)(typescript@5.9.3)(vitest@2.1.9(@types/node@20.14.8))(ws@8.21.3)
+        version: 8.0.0-rc.10-dev.82(@types/node@20.14.8)(@types/react@19.2.7)(@vercel/nft@1.11.0(rollup@4.53.3))(magicast@0.5.4)(mongodb@6.21.0(@aws-sdk/credential-providers@3.1116.0))(mysql2@3.23.4(@types/node@20.14.8))(pg@8.22.0)(rollup@4.53.3)(typanion@3.14.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))(vitest@2.1.9(@types/node@20.14.8))(ws@8.21.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -3013,10 +3013,6 @@ packages:
   ci-info@2.0.0:
     resolution: {integrity: sha512-5tK7EtrZ0N+OLFMthtqOj4fI2Jeb88C4CAZPu25LDVUgXJ0A3Js4PMGqrn0JU1W0Mh1/Z8wZzYPxqUrXeBboCQ==}
 
-  ci-info@3.9.0:
-    resolution: {integrity: sha512-NIxF55hv4nSqQswkAeiOi1r83xy8JldOFDTWiug55KBu9Jnblncd2U6ViHmYgHf01TPZS77NJBhBMKdWj9HQMQ==}
-    engines: {node: '>=8'}
-
   ci-info@4.0.0:
     resolution: {integrity: sha512-TdHqgGf9odd8SXNuxtUBVx8Nv+qZOejE6qyqiy5NtbYYQOeFa6zmHkxlPzmaLxWWHsU6nJmB7AETdVPi+2NBUg==}
     engines: {node: '>=8'}
@@ -3928,8 +3924,8 @@ packages:
     resolution: {integrity: sha512-YfJT7rkpQB0updsdHLGWrvhBJfcfzNNawYDNIyQXJz0IViGf75O8EBPKSdvw2rF+LGCsX4FZ8tcr3b19LcZq4w==}
     hasBin: true
 
-  is-ci@3.0.1:
-    resolution: {integrity: sha512-ZYvCgrefwqoQ6yTyYUbQu64HsITZ3NfKX1lzaEYdkTDcfKzzCI/wthRRYKkdjHKFVgNiXKAKm65Zo1pk2as/QQ==}
+  is-ci@4.1.0:
+    resolution: {integrity: sha512-Ab9bQDQ11lWootZUI5qxgN2ZXwxNI5hTwnsvOc1wyxQ7zQ8OkEDw79mI0+9jI3x432NfwbVRru+3noJfXF6lSQ==}
     hasBin: true
 
   is-docker@3.0.0:
@@ -6015,7 +6011,7 @@ snapshots:
       ansi-styles: 6.2.3
       is-fullwidth-code-point: 5.1.0
 
-  '@alchemy.run/cloudflare-runtime@2.0.0-beta.74(@distilled.cloud/cloudflare@1.0.0-rc.6(effect@4.0.0-rc.111))(@types/node@20.14.8)(effect@4.0.0-rc.111)(rolldown@1.1.5)(typescript@5.9.3)':
+  '@alchemy.run/cloudflare-runtime@2.0.0-beta.74(@distilled.cloud/cloudflare@1.0.0-rc.6(effect@4.0.0-rc.111))(@types/node@20.14.8)(effect@4.0.0-rc.111)(rolldown@1.1.5)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))':
     dependencies:
       '@alchemy.run/node-utils': 2.0.0-beta.74
       '@cloudflare/unenv-preset': 2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260704.1)
@@ -6030,6 +6026,7 @@ snapshots:
       yauzl: 3.4.0
     optionalDependencies:
       rolldown: 1.1.5
+      vite: 5.4.21(@types/node@14.18.63)
     transitivePeerDependencies:
       - '@types/node'
       - proxy-agent
@@ -7403,11 +7400,11 @@ snapshots:
     transitivePeerDependencies:
       - magicast
 
-  '@prisma/composer-cli@0.14.0-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(@types/node@20.14.8)(@types/react@19.2.7)(@vercel/nft@1.11.0(rollup@4.53.3))(magicast@0.5.4)(mongodb@6.21.0(@aws-sdk/credential-providers@3.1116.0))(mysql2@3.23.4(@types/node@20.14.8))(pg@8.22.0)(typescript@5.9.3)(vitest@2.1.9(@types/node@20.14.8))(ws@8.21.3)':
+  '@prisma/composer-cli@0.14.0-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(@types/node@20.14.8)(@types/react@19.2.7)(@vercel/nft@1.11.0(rollup@4.53.3))(magicast@0.5.4)(mongodb@6.21.0(@aws-sdk/credential-providers@3.1116.0))(mysql2@3.23.4(@types/node@20.14.8))(pg@8.22.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))(vitest@2.1.9(@types/node@20.14.8))(ws@8.21.3)':
     dependencies:
       '@prisma/cli-engine': 0.2.3(magicast@0.5.4)
-      '@prisma/composer': 0.14.0-dev.1(@types/node@20.14.8)(@types/react@19.2.7)(@vercel/nft@1.11.0(rollup@4.53.3))(magicast@0.5.4)(mongodb@6.21.0(@aws-sdk/credential-providers@3.1116.0))(mysql2@3.23.4(@types/node@20.14.8))(pg@8.22.0)(typescript@5.9.3)(vitest@2.1.9(@types/node@20.14.8))(ws@8.21.3)
-      alchemy: 2.0.0-beta.74(@types/node@20.14.8)(@types/react@19.2.7)(@vercel/nft@1.11.0(rollup@4.53.3))(effect@4.0.0-rc.111)(mongodb@6.21.0(@aws-sdk/credential-providers@3.1116.0))(mysql2@3.23.4(@types/node@20.14.8))(pg@8.22.0)(typescript@5.9.3)(vitest@2.1.9(@types/node@20.14.8))(ws@8.21.3)
+      '@prisma/composer': 0.14.0-dev.1(@types/node@20.14.8)(@types/react@19.2.7)(@vercel/nft@1.11.0(rollup@4.53.3))(magicast@0.5.4)(mongodb@6.21.0(@aws-sdk/credential-providers@3.1116.0))(mysql2@3.23.4(@types/node@20.14.8))(pg@8.22.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))(vitest@2.1.9(@types/node@20.14.8))(ws@8.21.3)
+      alchemy: 2.0.0-beta.74(@types/node@20.14.8)(@types/react@19.2.7)(@vercel/nft@1.11.0(rollup@4.53.3))(effect@4.0.0-rc.111)(mongodb@6.21.0(@aws-sdk/credential-providers@3.1116.0))(mysql2@3.23.4(@types/node@20.14.8))(pg@8.22.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))(vitest@2.1.9(@types/node@20.14.8))(ws@8.21.3)
       c12: 3.3.4(magicast@0.5.4)
       effect: 4.0.0-rc.111
       esbuild: 0.28.2
@@ -7436,11 +7433,11 @@ snapshots:
       - vitest
       - ws
 
-  '@prisma/composer@0.14.0-dev.1(@types/node@20.14.8)(@types/react@19.2.7)(@vercel/nft@1.11.0(rollup@4.53.3))(magicast@0.5.4)(mongodb@6.21.0(@aws-sdk/credential-providers@3.1116.0))(mysql2@3.23.4(@types/node@20.14.8))(pg@8.22.0)(typescript@5.9.3)(vitest@2.1.9(@types/node@20.14.8))(ws@8.21.3)':
+  '@prisma/composer@0.14.0-dev.1(@types/node@20.14.8)(@types/react@19.2.7)(@vercel/nft@1.11.0(rollup@4.53.3))(magicast@0.5.4)(mongodb@6.21.0(@aws-sdk/credential-providers@3.1116.0))(mysql2@3.23.4(@types/node@20.14.8))(pg@8.22.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))(vitest@2.1.9(@types/node@20.14.8))(ws@8.21.3)':
     dependencies:
       '@prisma/management-api-sdk': 1.67.0
       '@standard-schema/spec': 1.1.0
-      alchemy: 2.0.0-beta.74(@types/node@20.14.8)(@types/react@19.2.7)(@vercel/nft@1.11.0(rollup@4.53.3))(effect@4.0.0-rc.111)(mongodb@6.21.0(@aws-sdk/credential-providers@3.1116.0))(mysql2@3.23.4(@types/node@20.14.8))(pg@8.22.0)(typescript@5.9.3)(vitest@2.1.9(@types/node@20.14.8))(ws@8.21.3)
+      alchemy: 2.0.0-beta.74(@types/node@20.14.8)(@types/react@19.2.7)(@vercel/nft@1.11.0(rollup@4.53.3))(effect@4.0.0-rc.111)(mongodb@6.21.0(@aws-sdk/credential-providers@3.1116.0))(mysql2@3.23.4(@types/node@20.14.8))(pg@8.22.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))(vitest@2.1.9(@types/node@20.14.8))(ws@8.21.3)
       arktype: 2.2.3
       c12: 3.3.4(magicast@0.5.4)
       effect: 4.0.0-rc.111
@@ -7596,10 +7593,10 @@ snapshots:
     dependencies:
       openapi-fetch: 0.14.0
 
-  '@prisma/orm-family-sql@8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)':
+  '@prisma/orm-family-sql@8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))':
     dependencies:
       '@prisma/orm-framework': 8.0.0-rc.7-dev.1(typescript@5.9.3)
-      '@prisma/orm-toolchain': 8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)
+      '@prisma/orm-toolchain': 8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))
       '@standard-schema/spec': 1.1.0
       arktype: 2.2.3
       pathe: 2.0.3
@@ -7622,12 +7619,12 @@ snapshots:
     optionalDependencies:
       typescript: 5.9.3
 
-  '@prisma/orm-postgres@8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)':
+  '@prisma/orm-postgres@8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))':
     dependencies:
-      '@prisma/orm-family-sql': 8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)
+      '@prisma/orm-family-sql': 8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))
       '@prisma/orm-framework': 8.0.0-rc.7-dev.1(typescript@5.9.3)
-      '@prisma/orm-target-postgres': 8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)
-      '@prisma/orm-toolchain': 8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)
+      '@prisma/orm-target-postgres': 8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))
+      '@prisma/orm-toolchain': 8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))
       '@types/pg': 8.20.4
       pathe: 2.0.3
       pg: 8.22.0
@@ -7640,11 +7637,11 @@ snapshots:
       - typanion
       - vite
 
-  '@prisma/orm-target-postgres@8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)':
+  '@prisma/orm-target-postgres@8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))':
     dependencies:
-      '@prisma/orm-family-sql': 8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)
+      '@prisma/orm-family-sql': 8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))
       '@prisma/orm-framework': 8.0.0-rc.7-dev.1(typescript@5.9.3)
-      '@prisma/orm-toolchain': 8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)
+      '@prisma/orm-toolchain': 8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))
       '@standard-schema/spec': 1.1.0
       '@types/pg': 8.20.4
       arktype: 2.2.3
@@ -7660,7 +7657,7 @@ snapshots:
       - typanion
       - vite
 
-  '@prisma/orm-toolchain@8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)':
+  '@prisma/orm-toolchain@8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))':
     dependencies:
       '@prisma/cli-engine': 0.2.3(magicast@0.5.4)
       '@prisma/orm-framework': 8.0.0-rc.7-dev.1(typescript@5.9.3)
@@ -7683,6 +7680,7 @@ snapshots:
       wrap-ansi: 10.0.1
     optionalDependencies:
       typescript: 5.9.3
+      vite: 5.4.21(@types/node@14.18.63)
     transitivePeerDependencies:
       - magicast
       - typanion
@@ -8283,14 +8281,6 @@ snapshots:
     optionalDependencies:
       vite: 5.4.21(@types/node@14.18.63)
 
-  '@vitest/mocker@2.1.9(vite@5.4.21(@types/node@20.14.8))':
-    dependencies:
-      '@vitest/spy': 2.1.9
-      estree-walker: 3.0.3
-      magic-string: 0.30.21
-    optionalDependencies:
-      vite: 5.4.21(@types/node@20.14.8)
-
   '@vitest/mocker@3.2.4(vite@7.2.6(@types/node@18.19.76)(jiti@2.7.0)(yaml@2.9.0))':
     dependencies:
       '@vitest/spy': 3.2.4
@@ -8511,9 +8501,9 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
-  alchemy@2.0.0-beta.74(@types/node@20.14.8)(@types/react@19.2.7)(@vercel/nft@1.11.0(rollup@4.53.3))(effect@4.0.0-rc.111)(mongodb@6.21.0(@aws-sdk/credential-providers@3.1116.0))(mysql2@3.23.4(@types/node@20.14.8))(pg@8.22.0)(typescript@5.9.3)(vitest@2.1.9(@types/node@20.14.8))(ws@8.21.3):
+  alchemy@2.0.0-beta.74(@types/node@20.14.8)(@types/react@19.2.7)(@vercel/nft@1.11.0(rollup@4.53.3))(effect@4.0.0-rc.111)(mongodb@6.21.0(@aws-sdk/credential-providers@3.1116.0))(mysql2@3.23.4(@types/node@20.14.8))(pg@8.22.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))(vitest@2.1.9(@types/node@20.14.8))(ws@8.21.3):
     dependencies:
-      '@alchemy.run/cloudflare-runtime': 2.0.0-beta.74(@distilled.cloud/cloudflare@1.0.0-rc.6(effect@4.0.0-rc.111))(@types/node@20.14.8)(effect@4.0.0-rc.111)(rolldown@1.1.5)(typescript@5.9.3)
+      '@alchemy.run/cloudflare-runtime': 2.0.0-beta.74(@distilled.cloud/cloudflare@1.0.0-rc.6(effect@4.0.0-rc.111))(@types/node@20.14.8)(effect@4.0.0-rc.111)(rolldown@1.1.5)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))
       '@alchemy.run/floci': 2.0.0-beta.74(effect@4.0.0-rc.111)
       '@alchemy.run/node-utils': 2.0.0-beta.74
       '@aws-sdk/credential-providers': 3.1116.0
@@ -8556,6 +8546,7 @@ snapshots:
       mongodb: 6.21.0(@aws-sdk/credential-providers@3.1116.0)
       mysql2: 3.23.4(@types/node@20.14.8)
       pg: 8.22.0
+      vite: 5.4.21(@types/node@14.18.63)
       ws: 8.21.3
     transitivePeerDependencies:
       - '@types/node'
@@ -8903,8 +8894,6 @@ snapshots:
   chownr@3.0.0: {}
 
   ci-info@2.0.0: {}
-
-  ci-info@3.9.0: {}
 
   ci-info@4.0.0: {}
 
@@ -9925,9 +9914,9 @@ snapshots:
     dependencies:
       ci-info: 2.0.0
 
-  is-ci@3.0.1:
+  is-ci@4.1.0:
     dependencies:
-      ci-info: 3.9.0
+      ci-info: 4.4.0
 
   is-docker@3.0.0: {}
 
@@ -10855,14 +10844,14 @@ snapshots:
     dependencies:
       parse-ms: 4.0.0
 
-  prisma@8.0.0-rc.10-dev.82(@types/node@20.14.8)(@types/react@19.2.7)(@vercel/nft@1.11.0(rollup@4.53.3))(magicast@0.5.4)(mongodb@6.21.0(@aws-sdk/credential-providers@3.1116.0))(mysql2@3.23.4(@types/node@20.14.8))(pg@8.22.0)(rollup@4.53.3)(typanion@3.14.0)(typescript@5.9.3)(vitest@2.1.9(@types/node@20.14.8))(ws@8.21.3):
+  prisma@8.0.0-rc.10-dev.82(@types/node@20.14.8)(@types/react@19.2.7)(@vercel/nft@1.11.0(rollup@4.53.3))(magicast@0.5.4)(mongodb@6.21.0(@aws-sdk/credential-providers@3.1116.0))(mysql2@3.23.4(@types/node@20.14.8))(pg@8.22.0)(rollup@4.53.3)(typanion@3.14.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))(vitest@2.1.9(@types/node@20.14.8))(ws@8.21.3):
     dependencies:
       '@manypkg/tools': 2.1.2
       '@prisma/cli-engine': 0.2.3(magicast@0.5.4)
-      '@prisma/composer-cli': 0.14.0-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(@types/node@20.14.8)(@types/react@19.2.7)(@vercel/nft@1.11.0(rollup@4.53.3))(magicast@0.5.4)(mongodb@6.21.0(@aws-sdk/credential-providers@3.1116.0))(mysql2@3.23.4(@types/node@20.14.8))(pg@8.22.0)(typescript@5.9.3)(vitest@2.1.9(@types/node@20.14.8))(ws@8.21.3)
+      '@prisma/composer-cli': 0.14.0-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(@types/node@20.14.8)(@types/react@19.2.7)(@vercel/nft@1.11.0(rollup@4.53.3))(magicast@0.5.4)(mongodb@6.21.0(@aws-sdk/credential-providers@3.1116.0))(mysql2@3.23.4(@types/node@20.14.8))(pg@8.22.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))(vitest@2.1.9(@types/node@20.14.8))(ws@8.21.3)
       '@prisma/compute-sdk': 0.39.0(@prisma/management-api-sdk@1.55.0)(rollup@4.53.3)
       '@prisma/management-api-sdk': 1.55.0
-      '@prisma/orm-toolchain': 8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)
+      '@prisma/orm-toolchain': 8.0.0-rc.7-dev.1(@prisma/cli-engine@0.2.3(magicast@0.5.4))(magicast@0.5.4)(typanion@3.14.0)(typescript@5.9.3)(vite@5.4.21(@types/node@14.18.63))
       '@vercel/detect-agent': 1.2.5
       better-result: 2.10.0
       dotenv: 17.4.2
@@ -11787,7 +11776,7 @@ snapshots:
   vitest@2.1.9(@types/node@20.14.8):
     dependencies:
       '@vitest/expect': 2.1.9
-      '@vitest/mocker': 2.1.9(vite@5.4.21(@types/node@20.14.8))
+      '@vitest/mocker': 2.1.9(vite@5.4.21(@types/node@14.18.63))
       '@vitest/pretty-format': 2.1.9
       '@vitest/runner': 2.1.9
       '@vitest/snapshot': 2.1.9
