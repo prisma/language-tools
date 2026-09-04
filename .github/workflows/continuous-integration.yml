@@ -32,17 +32,21 @@ jobs:
     name: Tests + Shellcheck
     runs-on: ${{ matrix.os }}
     timeout-minutes: 25
+    permissions:
+      contents: read
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v4
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version: '22'
+          persist-credentials: false
+      - name: Install pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - name: Use Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
           cache: 'pnpm'
       - name: Install Dependencies
         run: pnpm install
@@ -55,7 +59,7 @@ jobs:
       - name: Run unit tests in all packages
         run: pnpm test
       - name: Run VS Code extension E2E tests in headless mode
-        uses: coactions/setup-xvfb@v1
+        uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 # v1.0.1
         with:
           run: pnpm test:e2e
 
@@ -66,7 +70,7 @@ jobs:
           npx playwright install chromium
 
       - name: Run Playwright UI tests
-        uses: coactions/setup-xvfb@v1
+        uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 # v1.0.1
         with:
           run: pnpm test:playwright
           working-directory: packages/vscode
@@ -74,7 +78,7 @@ jobs:
           CI: true
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: failure()
         with:
           name: playwright-report-${{ matrix.os }}
@@ -87,7 +91,7 @@ jobs:
       - name: Catch version incompatibilities
         if: matrix.os == 'ubuntu-latest'
         run: pnpm test:scripts
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
           files: ./scripts/__tests__/coverage/clover.xml,./packages/language-server/coverage/clover.xml
           flags: ${{ matrix.os }}

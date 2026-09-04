@@ -4,10 +4,10 @@
   "version": "31.12.2",
   "author": "Prisma",
   "license": "Apache-2.0",
-  "packageManager": "pnpm@10.24.0+sha512.01ff8ae71b4419903b65c60fb2dc9d34cf8bb6e06d03bde112ef38f7a34d6904c424ba66bea5cdcf12890230bf39f9580473140ed9c946fef328b6e5238a345a",
+  "packageManager": "pnpm@11.25.0+sha512.5cde925b4f075f725eb71fbae18a42ffe784524789f19b61c731cb8721ec28aaee160e01a8d5af4fedb2a42cdbf300efe23db356b0d4a17b4d63e11f8ab7c956",
   "engines": {
     "node": ">=20",
-    "pnpm": ">=10"
+    "pnpm": ">=11"
   },
   "devDependencies": {
     "@actions/core": "1.11.1",
