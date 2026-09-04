@@ -313,4 +313,5 @@ jobs:
       - name: Publish vsix to open-vsx.org
         env:
           OVSX_PAT: ${{ secrets.OPEN_VSX_ACCESS_TOKEN }}
-        run: cd packages/vscode && npx ovsx --debug publish "$GITHUB_WORKSPACE/$ASSET_FILE"
+        run: >-
+          cd packages/vscode && npx ovsx --debug publish "$GITHUB_WORKSPACE/$ASSET_FILE"
