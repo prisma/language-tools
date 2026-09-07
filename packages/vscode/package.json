@@ -30,7 +30,7 @@
     "minimatch": "6.2.0",
     "openapi-fetch": "0.14.0",
     "postgres": "3.4.7",
-    "prisma-6-language-server": "npm:@prisma/language-server@6.19.0-hotfix.1",
+    "prisma-6-language-server": "npm:@prisma/language-server@6.19.0",
     "vscode-languageclient": "7.0.0",
     "watcher": "1.2.0",
     "zod": "3.24.3"
