@@ -12,8 +12,8 @@
   "devDependencies": {
     "@actions/core": "1.11.1",
     "@actions/github": "6.0.0",
-    "@commitlint/cli": "19.6.1",
-    "@commitlint/config-conventional": "19.6.0",
+    "@commitlint/cli": "21.2.2",
+    "@commitlint/config-conventional": "21.2.2",
     "@types/node": "14.18.63",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
