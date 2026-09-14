@@ -31,21 +31,23 @@ function waitForDiagnostics(
 }
 
 suite('Prisma-next directive', () => {
-  test('Toggling the directive toggles diagnostics', async () => {
-    const docUri = getDocUri('linting/prismaNextDirective.prisma')
-    await activate(docUri)
+  for (const directive of ['prisma-next', 'prisma-8']) {
+    test(`Toggling the ${directive} directive toggles diagnostics`, async () => {
+      const docUri = getDocUri('linting/prismaNextDirective.prisma')
+      await activate(docUri)
 
-    // Remove the directive: the file should now produce diagnostics
-    // (empty datasource block triggers a missing-argument error). This
-    // also proves the LSP is alive within the test window.
-    await setTestContent('datasource db {\n}\n')
-    await waitForDiagnostics(docUri, (d) => d.length > 0)
+      // Remove the directive: the file should now produce diagnostics
+      // (empty datasource block triggers a missing-argument error). This
+      // also proves the LSP is alive within the test window.
+      await setTestContent('datasource db {\n}\n')
+      await waitForDiagnostics(docUri, (d) => d.length > 0)
 
-    // Re-add the directive: diagnostics must clear.
-    await setTestContent('// use prisma-next\n\ndatasource db {\n}\n')
-    const cleared = await waitForDiagnostics(docUri, (d) => d.length === 0)
-    assert.deepStrictEqual([...cleared], [], 'expected diagnostics to clear after adding directive')
-  })
+      // Re-add the directive: diagnostics must clear.
+      await setTestContent(`// use ${directive}\n\ndatasource db {\n}\n`)
+      const cleared = await waitForDiagnostics(docUri, (d) => d.length === 0)
+      assert.deepStrictEqual([...cleared], [], 'expected diagnostics to clear after adding directive')
+    })
+  }
 
   test('Sibling file without directive still gets diagnostics', async () => {
     const docUri = getDocUri('linting/missingArgument.prisma')
