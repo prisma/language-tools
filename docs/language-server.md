@@ -40,11 +40,11 @@ When `prisma.pinToPrisma6` is disabled, each open Prisma document is handled ind
 
 | Document                                                                                | Handled by                                 |
 | ---------------------------------------------------------------------------------------- | ------------------------------------------ |
-| No `// use prisma-next` directive                                                        | Legacy language server                     |
+| Neither `// use prisma-next` nor `// use prisma-8` directive                                                        | Legacy language server                     |
 | Directive present, trusted file workspace, matching root, and Prisma Next CLI available  | Prisma Next server for that workspace root |
 | Directive present but Prisma Next execution is ineligible or unavailable                 | No language-server features                |
 
-The directive is content-based and applies per file. A marked file does not opt sibling files or the rest of a multi-file schema into Prisma Next tooling.
+The directives `// use prisma-next` and `// use prisma-8` are equivalent. The directive must appear at the start of the file (optionally preceded by whitespace), is content-based, and applies per file. A marked file does not opt sibling files or the rest of a multi-file schema into Prisma Next tooling.
 
 For marked files, the extension uses only the Prisma CLI installed at:
 
