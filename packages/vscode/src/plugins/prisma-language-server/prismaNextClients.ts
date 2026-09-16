@@ -209,6 +209,9 @@ export function createPrismaNextClientOptions(workspaceFolder: WorkspaceFolder):
   return {
     documentSelector: [{ language: 'prisma', scheme: 'file', pattern: `${escapedRoot}/**/*` }],
     workspaceFolder,
+    initializationOptions: {
+      completion: { supportsTriggerParameterHintsCommand: true },
+    },
     initializationFailedHandler: () => false,
     errorHandler: {
       error: () => ErrorAction.Shutdown,
