@@ -102,9 +102,7 @@ export async function installPrismaCli(folder: WorkspaceFolder, isDisposed: () =
   } catch (error) {
     console.error('Prisma ORM 8 language server restart failed', error)
     if (canInstall()) {
-      void window.showErrorMessage(
-        `Prisma ORM 8 CLI was installed, but the language server could not restart.`,
-      )
+      void window.showErrorMessage(`Prisma ORM 8 CLI was installed, but the language server could not restart.`)
     }
   }
 }
