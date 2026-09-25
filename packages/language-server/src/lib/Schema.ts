@@ -10,6 +10,7 @@ import { loadConfigFromFile, type PrismaConfigInternal } from '@prisma/config'
 import { Position } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { URI } from 'vscode-uri'
+import path from 'path'
 import { getCurrentLine } from './ast'
 
 export type Line = {
@@ -84,10 +85,19 @@ export async function loadConfig(configRoot?: string): Promise<PrismaConfigInter
 async function loadSchemaDocumentsFromPath(fsPath: string, allDocuments: TextDocument[]): Promise<SchemaDocument[]> {
   // `loadRelatedSchemaFiles` locates and returns either a single schema files, or a set of related schema files.
   const schemaFiles = await loadRelatedSchemaFiles(fsPath, createFilesResolver(allDocuments))
+  const openDocumentUris = new Map(
+    allDocuments.map((document) => [filePathKey(URI.parse(document.uri).fsPath), document.uri]),
+  )
   const documents = schemaFiles.map(([filePath, content]) => {
-    return new SchemaDocument(TextDocument.create(URI.file(filePath).toString(), 'prisma', 1, content))
+    const uri = openDocumentUris.get(filePathKey(filePath)) ?? URI.file(filePath).toString()
+    return new SchemaDocument(TextDocument.create(uri, 'prisma', 1, content))
   })
   return documents
+}
+
+function filePathKey(filePath: string): string {
+  const normalizedPath = path.normalize(filePath)
+  return process.platform === 'linux' ? normalizedPath : normalizedPath.toLowerCase()
 }
 
 type PrismaSchemaInput = { currentDocument: TextDocument; allDocuments: TextDocument[] } | SchemaDocument[]
