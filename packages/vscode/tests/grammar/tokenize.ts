@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import type { IGrammar, IOnigLib, IRawGrammar } from 'vscode-textmate'
 import { INITIAL, Registry, parseRawGrammar } from 'vscode-textmate'
 import { loadWASM, OnigScanner, OnigString } from 'vscode-oniguruma'
+import { expect } from 'vitest'
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
 
@@ -86,4 +87,49 @@ export function findToken(tokens: Token[], text: string): Token | undefined {
 
 export function hasScope(token: Token, scope: string): boolean {
   return token.scopes.includes(scope)
+}
+
+type EmbeddedLanguage = 'sql' | 'json'
+
+function embeddedLanguageOf(token: Token): EmbeddedLanguage | null {
+  if (token.scopes.includes('meta.embedded.block.sql')) {
+    return 'sql'
+  }
+  if (token.scopes.includes('meta.embedded.block.json')) {
+    return 'json'
+  }
+  return null
+}
+
+function renderHighlighting(lines: Token[][]): string {
+  let rendered = ''
+  let openLanguage: EmbeddedLanguage | null = null
+  for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+    for (const token of lines[lineIndex]) {
+      const language = embeddedLanguageOf(token)
+      if (language !== openLanguage) {
+        if (openLanguage) {
+          rendered += `</${openLanguage}>`
+        }
+        if (language) {
+          rendered += `<${language}>`
+        }
+        openLanguage = language
+      }
+      rendered += token.text
+    }
+    if (lineIndex < lines.length - 1) {
+      rendered += '\n'
+    }
+  }
+  if (openLanguage) {
+    rendered += `</${openLanguage}>`
+  }
+  return rendered
+}
+
+export async function expectHighlighting(annotated: string): Promise<void> {
+  const source = annotated.replace(/<\/?(?:sql|json)>/g, '')
+  const lines = await tokenizeSchema(source)
+  expect(renderHighlighting(lines)).toBe(annotated)
 }
