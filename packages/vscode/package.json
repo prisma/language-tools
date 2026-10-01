@@ -81,7 +81,11 @@
       {
         "language": "prisma",
         "scopeName": "source.prisma",
-        "path": "./syntaxes/prisma.tmLanguage.json"
+        "path": "./syntaxes/prisma.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.sql": "sql",
+          "meta.embedded.block.json": "json"
+        }
       },
       {
         "injectTo": [
