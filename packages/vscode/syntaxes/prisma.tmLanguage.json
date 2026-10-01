@@ -443,6 +443,12 @@
           "include": "#double_quoted_string"
         },
         {
+          "include": "#single_quoted_string"
+        },
+        {
+          "include": "#backtick_string"
+        },
+        {
           "include": "#identifier"
         }
       ]
@@ -532,6 +538,51 @@
         }
       ],
       "name": "unnamed"
+    },
+    "single_quoted_string": {
+      "name": "string.quoted.single.prisma",
+      "begin": "'",
+      "beginCaptures": {
+        "0": {
+          "name": "string.quoted.single.start.prisma"
+        }
+      },
+      "end": "'|$",
+      "endCaptures": {
+        "0": {
+          "name": "string.quoted.single.end.prisma"
+        }
+      },
+      "patterns": [
+        {
+          "match": "\\\\.",
+          "name": "constant.character.escape.prisma"
+        }
+      ]
+    },
+    "backtick_string": {
+      "name": "string.quoted.backtick.prisma",
+      "begin": "`",
+      "beginCaptures": {
+        "0": {
+          "name": "string.quoted.backtick.start.prisma"
+        }
+      },
+      "end": "`",
+      "endCaptures": {
+        "0": {
+          "name": "string.quoted.backtick.end.prisma"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#backtick_escape"
+        }
+      ]
+    },
+    "backtick_escape": {
+      "match": "\\\\[`\\\\$]",
+      "name": "constant.character.escape.prisma"
     },
     "string_interpolation": {
       "patterns": [

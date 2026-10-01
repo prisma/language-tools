@@ -14,6 +14,6 @@
     "skipLibCheck": true,
     "moduleResolution": "bundler"
   },
-  "include": ["src", "tests/playwright", "playwright.config.ts"],
+  "include": ["src", "tests/playwright", "tests/grammar", "playwright.config.ts"],
   "exclude": ["node_modules", ".vscode-test"]
 }
