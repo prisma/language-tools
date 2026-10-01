@@ -96,4 +96,21 @@ describe('double-quoted strings', () => {
     expect(body).toBeDefined()
     expect(hasScope(body!, 'string.quoted.double.prisma')).toBe(true)
   })
+
+  test('an unterminated "..." string ends at the end of its line', async () => {
+    const lines = await tokenizeSchema(`model User {
+  id String @default("abc
+  name String
+}
+
+model Post {
+  title String @default("untitled")
+}`)
+    expect(lines[2].some((token) => token.scopes.some((scope) => scope.startsWith('string.')))).toBe(false)
+
+    const quotes = lines[6].filter((token) => token.text === '"')
+    expect(quotes).toHaveLength(2)
+    expect(hasScope(quotes[0], 'string.quoted.double.start.prisma')).toBe(true)
+    expect(hasScope(quotes[1], 'string.quoted.double.end.prisma')).toBe(true)
+  })
 })

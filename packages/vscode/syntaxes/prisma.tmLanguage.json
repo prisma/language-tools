@@ -656,7 +656,7 @@
           "name": "string.quoted.double.start.prisma"
         }
       },
-      "end": "\"",
+      "end": "\"|$",
       "endCaptures": {
         "0": {
           "name": "string.quoted.double.end.prisma"
