@@ -188,6 +188,25 @@ describe('scopes the annotations do not show', () => {
     expect(hasScope(body!, 'string.quoted.double.prisma')).toBe(true)
   })
 
+  test('escaped quotes in a non-injected body do not end the string early', async () => {
+    const lines = await tokenizeSchema(`model User {
+  meta Json @default(json"{\\"plan\\": \\"free\\"}") @map("m")
+  name String
+}`)
+    const fieldLine = lines[1]
+    const plan = findToken(fieldLine, 'plan')
+    expect(plan).toBeDefined()
+    expect(hasScope(plan!, 'string.quoted.double.prisma')).toBe(true)
+
+    const mapTag = findToken(fieldLine, '@map')
+    expect(mapTag).toBeDefined()
+    expect(hasScope(mapTag!, 'entity.name.function.attribute.prisma')).toBe(true)
+
+    const nameField = findToken(lines[2], 'name')
+    expect(nameField).toBeDefined()
+    expect(hasScope(nameField!, 'variable.other.assignment.prisma')).toBe(true)
+  })
+
   test('an escape token has the escape scope', async () => {
     const lines = await tokenizeSchema(`model User {
   value String @default(sql\`a\\\`b\`)

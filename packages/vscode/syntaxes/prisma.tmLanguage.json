@@ -676,7 +676,11 @@
           "include": "#string_interpolation"
         },
         {
-          "match": "([\\w\\-\\/\\._\\\\%@:\\?=]+)",
+          "match": "\\\\.",
+          "name": "constant.character.escape.prisma"
+        },
+        {
+          "match": "([\\w\\-\\/\\._%@:\\?=]+)",
           "name": "string.quoted.double.prisma"
         }
       ],

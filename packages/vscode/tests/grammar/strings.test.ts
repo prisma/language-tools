@@ -97,6 +97,25 @@ describe('double-quoted strings', () => {
     expect(hasScope(body!, 'string.quoted.double.prisma')).toBe(true)
   })
 
+  test('a backslash escapes the next character', async () => {
+    const lines = await tokenizeSchema(`model User {
+  id String @default("a\\"b") @map("m")
+  name String
+}`)
+    const fieldLine = lines[1]
+    const escape = findToken(fieldLine, '\\"')
+    expect(escape).toBeDefined()
+    expect(hasScope(escape!, 'constant.character.escape.prisma')).toBe(true)
+
+    const mapTag = findToken(fieldLine, '@map')
+    expect(mapTag).toBeDefined()
+    expect(hasScope(mapTag!, 'entity.name.function.attribute.prisma')).toBe(true)
+
+    const nameField = findToken(lines[2], 'name')
+    expect(nameField).toBeDefined()
+    expect(hasScope(nameField!, 'variable.other.assignment.prisma')).toBe(true)
+  })
+
   test('an unterminated "..." string ends at the end of its line', async () => {
     const lines = await tokenizeSchema(`model User {
   id String @default("abc
