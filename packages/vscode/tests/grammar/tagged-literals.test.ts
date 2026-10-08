@@ -182,6 +182,27 @@ datasource db {
   })
 })
 
+describe('a // comment inside multi-line attribute arguments', () => {
+  test('an unpaired backtick inside the comment does not open a string', async () => {
+    const lines = await tokenizeSchema(`model User {
+  @@index([a, // see \`docs
+    b], map: "x")
+  name String
+}`)
+    const comment = findToken(lines[1], '// see `docs')
+    expect(comment).toBeDefined()
+    expect(hasScope(comment!, 'comment.prisma')).toBe(true)
+
+    const b = findToken(lines[2], 'b')
+    expect(b).toBeDefined()
+    expect(hasScope(b!, 'support.constant.constant.prisma')).toBe(true)
+
+    const nameField = findToken(lines[3], 'name')
+    expect(nameField).toBeDefined()
+    expect(hasScope(nameField!, 'variable.other.assignment.prisma')).toBe(true)
+  })
+})
+
 describe('scopes the annotations do not show', () => {
   test('the tag has the tagged-template scope', async () => {
     const lines = await tokenizeSchema(`model User {

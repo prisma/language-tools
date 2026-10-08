@@ -351,6 +351,9 @@
       },
       "patterns": [
         {
+          "include": "#double_comment_inline"
+        },
+        {
           "include": "#named_argument"
         },
         {
@@ -382,6 +385,9 @@
         }
       },
       "patterns": [
+        {
+          "include": "#double_comment_inline"
+        },
         {
           "include": "#value"
         }
@@ -571,6 +577,9 @@
         }
       },
       "patterns": [
+        {
+          "include": "#double_comment_inline"
+        },
         {
           "include": "#value"
         }
