@@ -3,9 +3,7 @@
 VS Code extension and Language Server for [Prisma](https://www.prisma.io/) schema files.
 
 - [**Prisma** (stable)][marketplace]
-  ![Version](https://img.shields.io/visual-studio-marketplace/v/Prisma.prisma)
 - [**Prisma Insider** (preview)][marketplace-insider]
-  ![Version](https://img.shields.io/visual-studio-marketplace/v/Prisma.prisma-insider)
 
 [marketplace]: https://marketplace.visualstudio.com/items?itemName=Prisma.prisma
 [marketplace-insider]: https://marketplace.visualstudio.com/items?itemName=Prisma.prisma-insider
