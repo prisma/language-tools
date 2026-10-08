@@ -212,6 +212,26 @@ describe('Prisma Next CLI resolution', () => {
     expect(mocks.createdClients).toHaveLength(1)
   })
 
+  it('does not start a client from a CLI search that was pending when clients were stopped', async () => {
+    let finishStat
+    mocks.stat.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishStat = resolve
+      }),
+    )
+    clients.ensureClientFor(document)
+    await clients.stopAll()
+    finishStat({ isFile: () => true })
+    await new Promise((resolve) => setImmediate(resolve))
+
+    expect(mocks.createdClients).toHaveLength(0)
+    expect(mocks.showWarningMessage).not.toHaveBeenCalled()
+
+    installCliAt(cliEntrypoint())
+    await ensureClient(clients)
+    expect(mocks.createdClients).toHaveLength(1)
+  })
+
   it('starts separate clients for packages with their own CLI', async () => {
     installCliAt(cliEntrypoint('apps', 'api'), cliEntrypoint('apps', 'web'))
     await ensureClient(clients, documentAt('apps', 'api', 'contract.prisma'))

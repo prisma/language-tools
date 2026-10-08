@@ -49,6 +49,7 @@ export class PrismaNextClients {
   private readonly failedAt = new Map<string, number>()
   private readonly missingCliWarnings = new Set<string>()
   private disposed = false
+  private generation = 0
 
   constructor(private readonly registerDisposable: (disposable: Disposable) => void) {}
 
@@ -84,6 +85,7 @@ export class PrismaNextClients {
    * without a cooldown, so an explicit restart command retries failed folders immediately.
    */
   async stopAll(): Promise<void> {
+    this.generation++
     const pending = [...this.clients.values()]
     this.clients.clear()
     this.directories.clear()
@@ -98,14 +100,15 @@ export class PrismaNextClients {
   }
 
   private async startFor(workspaceFolder: WorkspaceFolder, directory: string): Promise<LanguageClient | undefined> {
+    const generation = this.generation
     let cliDirectory: string | undefined
     try {
       cliDirectory = await findPrismaNextCliDirectory(directory, workspaceFolder.uri.fsPath)
     } catch (error) {
-      if (!this.disposed) this.handleError(workspaceFolder, error)
+      if (!this.disposed && generation === this.generation) this.handleError(workspaceFolder, error)
       return undefined
     }
-    if (this.disposed) return undefined
+    if (this.disposed || generation !== this.generation) return undefined
 
     const key = workspaceFolder.uri.toString()
     if (cliDirectory === undefined) {
