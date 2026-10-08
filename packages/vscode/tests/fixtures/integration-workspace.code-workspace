@@ -4,5 +4,17 @@
       "name": "integration-root-a",
       "path": "integration-workspace/root-a",
     },
+    {
+      "name": "integration-npm",
+      "path": "package-managers/npm",
+    },
+    {
+      "name": "integration-yarn",
+      "path": "package-managers/yarn",
+    },
+    {
+      "name": "integration-bun",
+      "path": "package-managers/bun",
+    },
   ],
 }

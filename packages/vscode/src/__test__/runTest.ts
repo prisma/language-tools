@@ -1,5 +1,6 @@
 import path from 'node:path'
 import { runTests } from '@vscode/test-electron'
+import { installPackageManagerFixtures } from './installPackageManagerFixtures'
 
 // This is executed from dist-tests like `node dist-tests/__test__/runTest`
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
@@ -52,6 +53,8 @@ async function main(): Promise<void> {
     if (testPatternFlag !== -1 && !testPattern) {
       throw new Error('--test-pattern requires a glob pattern')
     }
+
+    installPackageManagerFixtures(path.resolve(__dirname, '../../tests/fixtures/package-managers'))
 
     // 1 - Run on our minimum supported version from package.json
     // eslint-disable-next-line

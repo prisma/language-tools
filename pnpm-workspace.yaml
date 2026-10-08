@@ -3,6 +3,7 @@ packages:
   - 'packages/vscode/tests/fixtures/integration-workspace/*'
 
 allowBuilds:
+  bun: true
   '@vscode/vsce-sign': true
   esbuild: true
   keytar: true

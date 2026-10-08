@@ -6,10 +6,7 @@ const completionPollIntervalMs = 100
 
 suite('Prisma language server routing', () => {
   test('provides legacy Prisma 7 and Prisma Next completions side by side', async () => {
-    const workspaceFolders = vscode.workspace.workspaceFolders
-    assert.ok(workspaceFolders)
-    assert.strictEqual(workspaceFolders.length, 1)
-    const root = workspaceFolders[0]
+    const root = getWorkspaceFolder('integration-root-a')
 
     const legacyUri = vscode.Uri.joinPath(root.uri, 'legacy.prisma')
     const nextUri = vscode.Uri.joinPath(root.uri, 'next.prisma')
@@ -37,22 +34,47 @@ suite('Prisma language server routing', () => {
     assert.ok(hasLabel(legacyCompletions, 'model'))
     assert.ok(!hasLabel(legacyCompletions, 'namespace'))
 
-    const nextCompletions = await waitForCompletions(
-      nextUri,
-      new vscode.Position(1, 0),
-      (completions) => {
-        const namespace = findCompletion(completions, 'namespace')
-        return namespace?.kind === vscode.CompletionItemKind.Keyword && namespace.detail === 'PSL declaration keyword'
-      },
-      'Prisma Next declaration completions',
-    )
-    const namespace = findCompletion(nextCompletions, 'namespace')
-    assert.ok(namespace)
-    assert.strictEqual(namespace.kind, vscode.CompletionItemKind.Keyword)
-    assert.strictEqual(namespace.detail, 'PSL declaration keyword')
-    assert.ok(!hasLabel(nextCompletions, 'datasource'))
+    await assertPrismaNextCompletions(nextUri)
   })
+
+  for (const packageManager of ['npm', 'yarn', 'bun']) {
+    test(`finds the Prisma 8 CLI installed by ${packageManager}`, async () => {
+      const root = getWorkspaceFolder(`integration-${packageManager}`)
+      const nextUri = vscode.Uri.joinPath(root.uri, 'next.prisma')
+      const nextDocument = await vscode.workspace.openTextDocument(nextUri)
+      await vscode.window.showTextDocument(nextDocument)
+
+      const extension = vscode.extensions.getExtension('Prisma.prisma')
+      assert.ok(extension)
+      await extension.activate()
+
+      await assertPrismaNextCompletions(nextUri)
+    })
+  }
 })
+
+function getWorkspaceFolder(name: string): vscode.WorkspaceFolder {
+  const workspaceFolder = vscode.workspace.workspaceFolders?.find((folder) => folder.name === name)
+  assert.ok(workspaceFolder, `workspace folder ${name} is not open`)
+  return workspaceFolder
+}
+
+async function assertPrismaNextCompletions(nextUri: vscode.Uri): Promise<void> {
+  const nextCompletions = await waitForCompletions(
+    nextUri,
+    new vscode.Position(1, 0),
+    (completions) => {
+      const namespace = findCompletion(completions, 'namespace')
+      return namespace?.kind === vscode.CompletionItemKind.Keyword && namespace.detail === 'PSL declaration keyword'
+    },
+    'Prisma Next declaration completions',
+  )
+  const namespace = findCompletion(nextCompletions, 'namespace')
+  assert.ok(namespace)
+  assert.strictEqual(namespace.kind, vscode.CompletionItemKind.Keyword)
+  assert.strictEqual(namespace.detail, 'PSL declaration keyword')
+  assert.ok(!hasLabel(nextCompletions, 'datasource'))
+}
 
 async function waitForCompletions(
   uri: vscode.Uri,

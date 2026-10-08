@@ -27,3 +27,6 @@ dist-tests/
 
 # Turbo
 .turbo/
+
+# Yarn install state of the package manager test fixture
+packages/vscode/tests/fixtures/package-managers/yarn/.yarn/

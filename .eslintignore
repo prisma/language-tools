@@ -3,3 +3,4 @@ pnpm-lock.yaml
 **/dist/*
 .vscode-test
 api.d.ts
+packages/vscode/tests/fixtures/package-managers
