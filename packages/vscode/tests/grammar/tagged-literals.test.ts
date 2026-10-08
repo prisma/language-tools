@@ -47,6 +47,24 @@ describe('multi-line backtick bodies', () => {
   })
 })
 
+describe('a SQL line comment inside a backtick body', () => {
+  test('a single-line body ends at the closing backtick', async () => {
+    await expectHighlighting(`model User {
+  id String @default(sql\`<sql>now() -- note</sql>\`) @map("m")
+  name String
+}`)
+  })
+
+  test('a comment on the closing line of a multi-line body ends at the closing backtick', async () => {
+    await expectHighlighting(`model User {
+  id String @default(sql\`
+<sql>    select 1
+    from t -- note</sql>\`) @map("m")
+  name String
+}`)
+  })
+})
+
 describe('fence escapes inside injected bodies', () => {
   test('backtick escapes stay inside the injected SQL body', async () => {
     await expectHighlighting(`model User {

@@ -451,6 +451,15 @@
           "include": "#backtick_escape"
         },
         {
+          "match": "(--)(?:\\\\.|[^`\\\\])*",
+          "name": "comment.line.double-dash.sql",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.comment.sql"
+            }
+          }
+        },
+        {
           "include": "source.sql"
         }
       ]
