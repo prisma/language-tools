@@ -65,14 +65,17 @@ async function assertPrismaNextCompletions(nextUri: vscode.Uri): Promise<void> {
     new vscode.Position(1, 0),
     (completions) => {
       const namespace = findCompletion(completions, 'namespace')
-      return namespace?.kind === vscode.CompletionItemKind.Keyword && namespace.detail === 'PSL declaration keyword'
+      return (
+        namespace?.kind === vscode.CompletionItemKind.Keyword &&
+        namespace.detail === 'Groups declarations belonging to the same database schema or database.'
+      )
     },
     'Prisma Next declaration completions',
   )
   const namespace = findCompletion(nextCompletions, 'namespace')
   assert.ok(namespace)
   assert.strictEqual(namespace.kind, vscode.CompletionItemKind.Keyword)
-  assert.strictEqual(namespace.detail, 'PSL declaration keyword')
+  assert.strictEqual(namespace.detail, 'Groups declarations belonging to the same database schema or database.')
   assert.ok(!hasLabel(nextCompletions, 'datasource'))
 }
 
