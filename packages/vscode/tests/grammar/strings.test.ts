@@ -27,30 +27,42 @@ describe('single-quoted strings', () => {
 })
 
 describe('bare backtick strings', () => {
-  test('a single-line backtick string tokenises its escapes', async () => {
+  test('a single-line backtick string tokenises its two escapes', async () => {
     const lines = await tokenizeSchema(`model User {
-  value String @default(\`a\\\`b\\\\c\\\$d\`)
+  value String @default(\`a\\\`b\\\\c\`)
 }`)
     const fieldLine = lines[1]
     const open = findToken(fieldLine, '`')
     const backtickEscape = findToken(fieldLine, '\\`')
     const backslashEscape = findToken(fieldLine, '\\\\')
-    const dollarEscape = findToken(fieldLine, '\\$')
 
     expect(open).toBeDefined()
     expect(hasScope(open!, 'string.quoted.backtick.start.prisma')).toBe(true)
 
-    for (const escape of [backtickEscape, backslashEscape, dollarEscape]) {
+    for (const escape of [backtickEscape, backslashEscape]) {
       expect(escape).toBeDefined()
       expect(hasScope(escape!, 'constant.character.escape.prisma')).toBe(true)
       expect(hasScope(escape!, 'string.quoted.backtick.prisma')).toBe(true)
     }
   })
 
+  test('a backslash-dollar is not an escape, and is kept as written', async () => {
+    const lines = await tokenizeSchema(`model User {
+  value String @default(\`a\\\$b\`)
+}`)
+    const fieldLine = lines[1]
+    const dollarToken = findToken(fieldLine, '\\$')
+    expect(dollarToken).toBeUndefined()
+
+    const content = findToken(fieldLine, 'a\\$b')
+    expect(content).toBeDefined()
+    expect(hasScope(content!, 'string.quoted.backtick.prisma')).toBe(true)
+  })
+
   test('a multi-line backtick string stays a string across lines', async () => {
     const lines = await tokenizeSchema(`model User {
   id String @default(\`abc\\\`de\\\\f
-  ghi\\\$jkl\`)
+  ghi\\\\jkl\`)
   name2 String
 }`)
     const openingLine = lines[1]

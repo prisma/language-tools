@@ -746,7 +746,7 @@
       ]
     },
     "backtick_escape": {
-      "match": "\\\\[`\\\\$]",
+      "match": "\\\\[`\\\\]",
       "name": "constant.character.escape.prisma"
     },
     "string_interpolation": {

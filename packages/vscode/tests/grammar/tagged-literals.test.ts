@@ -86,18 +86,54 @@ describe('PostgreSQL string forms inside a backtick body', () => {
   name String
 }`)
   })
+
+  test('a dollar-quoted string next to a backslash-dollar still ends at its own closing fence', async () => {
+    await expectHighlighting(`model User {
+  id String @default(sql\`<sql>select \\$ $$it's$$</sql>\`) @map("m")
+  name String
+}`)
+  })
+
+  test('a dollar-quoted string next to ${ still ends at its own closing fence', async () => {
+    await expectHighlighting(`model User {
+  id String @default(sql\`<sql>select \${x} $$it's$$</sql>\`) @map("m")
+  name String
+}`)
+  })
 })
 
 describe('fence escapes inside injected bodies', () => {
   test('backtick escapes stay inside the injected SQL body', async () => {
     await expectHighlighting(`model User {
-  value String @default(sql\`<sql>a\\\`b\\\\c\\\$d</sql>\`)
+  value String @default(sql\`<sql>a\\\`b\\\\c</sql>\`)
 }`)
   })
 
   test('quote escapes stay inside the injected SQL body', async () => {
     await expectHighlighting(`model User {
   value String @default(sql'<sql>select \\'1\\'</sql>')
+}`)
+  })
+
+  test('a backslash-dollar in a SQL backtick body is plain text, not an escape', async () => {
+    const lines = await tokenizeSchema(`model User {
+  id String @default(sql\`select \\$x\`)
+}`)
+    const fieldLine = lines[1]
+    const escapeToken = fieldLine.find(
+      (token) => token.text === '\\$' && hasScope(token, 'constant.character.escape.prisma'),
+    )
+    expect(escapeToken).toBeUndefined()
+
+    const content = findToken(fieldLine, ' \\$x')
+    expect(content).toBeDefined()
+    expect(hasScope(content!, 'meta.embedded.block.sql')).toBe(true)
+  })
+
+  test('${ in a SQL backtick body is highlighted normally, not as an escape', async () => {
+    await expectHighlighting(`model User {
+  id String @default(sql\`<sql>select \${x}</sql>\`) @map("m")
+  name String
 }`)
   })
 })
