@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
@@ -8,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   start: vi.fn(),
   onReady: vi.fn(),
   stop: vi.fn(),
+  createdClients: [],
 }))
 
 vi.mock('../../src/plugins/prisma-language-server/installPrismaCli', () => ({
@@ -21,6 +23,9 @@ vi.mock('vscode', () => ({
 vi.mock('vscode-languageclient', () => ({ CloseAction: { DoNotRestart: 1 }, ErrorAction: { Shutdown: 1 } }))
 vi.mock('vscode-languageclient/node', () => ({
   LanguageClient: class {
+    constructor(id, name, serverOptions, clientOptions) {
+      mocks.createdClients.push({ id, name, serverOptions, clientOptions })
+    }
     start = mocks.start
     onReady = mocks.onReady
     stop = mocks.stop
@@ -33,11 +38,21 @@ const folder = {
   name: 'my-project',
   uri: { scheme: 'file', fsPath: '/my-project', toString: () => 'file:///my-project' },
 }
-const document = { uri: { scheme: 'file' } }
+const documentAt = (...segments) => ({ uri: { scheme: 'file', fsPath: path.join('/my-project', ...segments) } })
+const document = documentAt('schema.prisma')
+const cliEntrypoint = (...segments) =>
+  path.join('/my-project', ...segments, 'node_modules', 'prisma', 'dist', 'prisma.js')
+
+function installCliAt(...entrypoints) {
+  mocks.stat.mockImplementation(async (file) => {
+    if (entrypoints.includes(file)) return { isFile: () => true }
+    throw Object.assign(new Error('Missing CLI'), { code: 'ENOENT' })
+  })
+}
 
 // Flush the asynchronous filesystem check and client startup without real timers.
-async function ensureClient(clients) {
-  clients.ensureClientFor(document)
+async function ensureClient(clients, doc = document) {
+  clients.ensureClientFor(doc)
   await vi.waitFor(() => expect(mocks.stat).toHaveBeenCalled())
   await new Promise((resolve) => setImmediate(resolve))
 }
@@ -47,6 +62,7 @@ describe('missing Prisma Next CLI warning', () => {
 
   beforeEach(() => {
     vi.resetAllMocks()
+    mocks.createdClients.length = 0
     mocks.getWorkspaceFolder.mockReturnValue(folder)
     mocks.stat.mockRejectedValue(Object.assign(new Error('Missing CLI'), { code: 'ENOENT' }))
     clients = new PrismaNextClients(vi.fn())
@@ -135,5 +151,75 @@ describe('missing Prisma Next CLI warning', () => {
     await disposed
 
     expect(mocks.showWarningMessage).not.toHaveBeenCalled()
+  })
+})
+
+describe('Prisma Next CLI resolution', () => {
+  let clients
+
+  beforeEach(() => {
+    vi.resetAllMocks()
+    mocks.createdClients.length = 0
+    mocks.getWorkspaceFolder.mockReturnValue(folder)
+    clients = new PrismaNextClients(vi.fn())
+  })
+
+  afterEach(async () => {
+    await clients.dispose()
+    vi.restoreAllMocks()
+  })
+
+  it('uses the CLI installed in the package that contains the schema', async () => {
+    installCliAt(cliEntrypoint('apps', 'api'))
+    await ensureClient(clients, documentAt('apps', 'api', 'src', 'prisma', 'contract.prisma'))
+
+    expect(mocks.showWarningMessage).not.toHaveBeenCalled()
+    expect(mocks.createdClients).toHaveLength(1)
+    const [{ name, clientOptions }] = mocks.createdClients
+    expect(name).toContain(path.join('my-project', 'apps', 'api'))
+    expect(clientOptions.documentSelector).toEqual([
+      { language: 'prisma', scheme: 'file', pattern: '/my-project/apps/api/**/*' },
+    ])
+  })
+
+  it('prefers the nearest CLI over the one at the workspace root', async () => {
+    installCliAt(cliEntrypoint(), cliEntrypoint('apps', 'api'))
+    await ensureClient(clients, documentAt('apps', 'api', 'src', 'prisma', 'contract.prisma'))
+
+    expect(mocks.createdClients.map(({ id }) => id)).toEqual([`prisma-next:${path.join('/my-project', 'apps', 'api')}`])
+  })
+
+  it('falls back to the CLI at the workspace root', async () => {
+    installCliAt(cliEntrypoint())
+    await ensureClient(clients, documentAt('apps', 'api', 'src', 'prisma', 'contract.prisma'))
+
+    expect(mocks.createdClients.map(({ id }) => id)).toEqual(['prisma-next:/my-project'])
+  })
+
+  it('does not search above the workspace folder', async () => {
+    installCliAt(path.join('/', 'node_modules', 'prisma', 'dist', 'prisma.js'))
+    await ensureClient(clients, documentAt('apps', 'api', 'contract.prisma'))
+
+    expect(mocks.createdClients).toHaveLength(0)
+    expect(mocks.showWarningMessage).toHaveBeenCalledOnce()
+  })
+
+  it('shares one client between directories that resolve to the same CLI', async () => {
+    installCliAt(cliEntrypoint('apps', 'api'))
+    await ensureClient(clients, documentAt('apps', 'api', 'src', 'prisma', 'contract.prisma'))
+    await ensureClient(clients, documentAt('apps', 'api', 'other', 'contract.prisma'))
+
+    expect(mocks.createdClients).toHaveLength(1)
+  })
+
+  it('starts separate clients for packages with their own CLI', async () => {
+    installCliAt(cliEntrypoint('apps', 'api'), cliEntrypoint('apps', 'web'))
+    await ensureClient(clients, documentAt('apps', 'api', 'contract.prisma'))
+    await ensureClient(clients, documentAt('apps', 'web', 'contract.prisma'))
+
+    expect(mocks.createdClients.map(({ id }) => id)).toEqual([
+      `prisma-next:${path.join('/my-project', 'apps', 'api')}`,
+      `prisma-next:${path.join('/my-project', 'apps', 'web')}`,
+    ])
   })
 })

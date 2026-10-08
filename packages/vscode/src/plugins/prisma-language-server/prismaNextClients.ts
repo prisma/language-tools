@@ -23,46 +23,49 @@ export interface PrismaNextLauncherOptions {
 }
 
 /**
- * Starts and tracks one Prisma Next language server (`prisma lsp`) per workspace folder.
+ * Starts and tracks one Prisma Next language server (`prisma lsp`) per directory with an
+ * installed Prisma CLI. The CLI is the nearest `node_modules/prisma` found from the document's
+ * directory up to its workspace folder.
  *
  * Both the legacy and the Prisma Next server receive every open `.prisma` document and decide
  * from the `// use prisma-next` directive in the document content whether to respond, so no
- * per-document routing happens here: once a folder's client is running it synchronizes all
- * Prisma documents under that folder.
+ * per-document routing happens here: once a client is running it synchronizes all Prisma
+ * documents under the directory its CLI is installed in.
  */
 export class PrismaNextClients {
   private static readonly retryCooldownMs = 30_000
 
   private readonly clients = new Map<string, Promise<LanguageClient | undefined>>()
+  private readonly directories = new Map<string, Promise<LanguageClient | undefined>>()
   private readonly failedAt = new Map<string, number>()
   private readonly missingCliWarnings = new Set<string>()
   private disposed = false
 
   constructor(private readonly registerDisposable: (disposable: Disposable) => void) {}
 
-  /** Starts a client for the document's workspace folder unless one is already running. */
+  /** Starts a client for the document's nearest Prisma CLI unless one is already running. */
   ensureClientFor(document: TextDocument): void {
     if (this.disposed || !workspace.isTrusted || document.uri.scheme !== 'file') return
 
     const workspaceFolder = workspace.getWorkspaceFolder(document.uri)
     if (workspaceFolder?.uri.scheme !== 'file') return
 
-    const key = workspaceFolder.uri.toString()
-    if (this.clients.has(key)) return
+    const key = path.dirname(document.uri.fsPath)
+    if (this.directories.has(key)) return
 
     // Retry failed startups so a later edit (e.g. after `npm install`) recovers, but with a
     // cooldown — this runs on every change event and must not spawn a process per keystroke.
     const failedAt = this.failedAt.get(key)
     if (failedAt !== undefined && Date.now() - failedAt < PrismaNextClients.retryCooldownMs) return
 
-    const pending = this.start(workspaceFolder)
-    this.clients.set(key, pending)
+    const pending = this.startFor(workspaceFolder, key)
+    this.directories.set(key, pending)
     void pending.then((client) => {
       if (client) {
         this.failedAt.delete(key)
-      } else if (this.clients.get(key) === pending) {
+      } else if (this.directories.get(key) === pending) {
         this.failedAt.set(key, Date.now())
-        this.clients.delete(key)
+        this.directories.delete(key)
       }
     })
   }
@@ -74,6 +77,7 @@ export class PrismaNextClients {
   async stopAll(): Promise<void> {
     const pending = [...this.clients.values()]
     this.clients.clear()
+    this.directories.clear()
     this.failedAt.clear()
     this.missingCliWarnings.clear()
     await Promise.allSettled(pending.map(async (client) => (await client)?.stop()))
@@ -84,30 +88,50 @@ export class PrismaNextClients {
     await this.stopAll()
   }
 
-  private async start(workspaceFolder: WorkspaceFolder): Promise<LanguageClient | undefined> {
-    const entrypoint = getPrismaNextEntrypoint(workspaceFolder)
+  private async startFor(workspaceFolder: WorkspaceFolder, directory: string): Promise<LanguageClient | undefined> {
+    let cliDirectory: string | undefined
+    try {
+      cliDirectory = await findPrismaNextCliDirectory(directory, workspaceFolder.uri.fsPath)
+    } catch (error) {
+      if (!this.disposed) this.handleError(workspaceFolder, error)
+      return undefined
+    }
+    if (this.disposed) return undefined
+
+    const key = workspaceFolder.uri.toString()
+    if (cliDirectory === undefined) {
+      if (!this.missingCliWarnings.has(key)) {
+        this.missingCliWarnings.add(key)
+        void this.showMissingCliWarning(workspaceFolder)
+      }
+      return undefined
+    }
+    this.missingCliWarnings.delete(key)
+
+    const running = this.clients.get(cliDirectory)
+    if (running) return running
+
+    const pending = this.start(workspaceFolder, cliDirectory)
+    this.clients.set(cliDirectory, pending)
+    void pending.then((client) => {
+      if (!client && this.clients.get(cliDirectory) === pending) {
+        this.clients.delete(cliDirectory)
+      }
+    })
+    return pending
+  }
+
+  private async start(workspaceFolder: WorkspaceFolder, cliDirectory: string): Promise<LanguageClient | undefined> {
     let client: LanguageClient | undefined
     try {
-      const cliExists = await isFile(entrypoint)
-      if (this.disposed) return undefined
-
-      const key = workspaceFolder.uri.toString()
-      if (!cliExists) {
-        if (!this.missingCliWarnings.has(key)) {
-          this.missingCliWarnings.add(key)
-          void this.showMissingCliWarning(workspaceFolder)
-        }
-        return undefined
-      }
-      this.missingCliWarnings.delete(key)
-
+      const relativeDirectory = path.relative(workspaceFolder.uri.fsPath, cliDirectory)
       client = new LanguageClient(
-        `prisma-next:${workspaceFolder.uri.toString()}`,
-        `Prisma ORM 8 Language Server (${workspaceFolder.name})`,
-        createPrismaNextServerOptions(workspaceFolder, entrypoint, {
+        `prisma-next:${cliDirectory}`,
+        `Prisma ORM 8 Language Server (${path.join(workspaceFolder.name, relativeDirectory)})`,
+        createPrismaNextServerOptions(cliDirectory, {
           handleProcessError: (error) => this.handleError(workspaceFolder, error),
         }),
-        createPrismaNextClientOptions(workspaceFolder),
+        createPrismaNextClientOptions(workspaceFolder, cliDirectory),
       )
       this.registerDisposable(client.start())
       await client.onReady()
@@ -147,20 +171,34 @@ export class PrismaNextClients {
   }
 }
 
-export function getPrismaNextEntrypoint(workspaceFolder: WorkspaceFolder): string {
-  return path.join(workspaceFolder.uri.fsPath, ...prismaCliRelativePath)
+export function getPrismaNextEntrypoint(cliDirectory: string): string {
+  return path.join(cliDirectory, ...prismaCliRelativePath)
+}
+
+export async function findPrismaNextCliDirectory(
+  directory: string,
+  rootDirectory: string,
+): Promise<string | undefined> {
+  let current = directory
+  for (;;) {
+    if (await isFile(getPrismaNextEntrypoint(current))) return current
+    if (path.relative(rootDirectory, current) === '') return undefined
+
+    const parent = path.dirname(current)
+    if (parent === current) return undefined
+    current = parent
+  }
 }
 
 export function createPrismaNextServerOptions(
-  workspaceFolder: WorkspaceFolder,
-  entrypoint = getPrismaNextEntrypoint(workspaceFolder),
+  cliDirectory: string,
   launcher: PrismaNextLauncherOptions = {},
 ): ServerOptions {
   return () =>
     launchPrismaNextServer({
       executable: launcher.executable ?? process.execPath,
-      entrypoint,
-      cwd: workspaceFolder.uri.fsPath,
+      entrypoint: getPrismaNextEntrypoint(cliDirectory),
+      cwd: cliDirectory,
       environment: createExtensionHostNodeEnvironment(launcher.environment ?? process.env),
       spawnProcess: launcher.spawnProcess ?? spawn,
       handleProcessError: launcher.handleProcessError,
@@ -230,8 +268,11 @@ function destroyProcessStreams(child: ChildProcessWithoutNullStreams): void {
   child.stderr.destroy()
 }
 
-export function createPrismaNextClientOptions(workspaceFolder: WorkspaceFolder): LanguageClientOptions {
-  const rootPath = workspaceFolder.uri.fsPath.split('\\').join('/')
+export function createPrismaNextClientOptions(
+  workspaceFolder: WorkspaceFolder,
+  cliDirectory = workspaceFolder.uri.fsPath,
+): LanguageClientOptions {
+  const rootPath = cliDirectory.split('\\').join('/')
   const normalizedRoot = rootPath.endsWith('/') ? rootPath.slice(0, -1) : rootPath
   const escapedRoot = normalizedRoot.replace(/([?*{}[\]])/g, '[$1]')
   return {
