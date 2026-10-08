@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const mocks = vi.hoisted(() => ({
   showErrorMessage: vi.fn(),
   showTextDocument: vi.fn(),
+  appendLine: vi.fn(),
+  show: vi.fn(),
 }))
 
 vi.mock('vscode', () => ({
@@ -12,8 +14,15 @@ vi.mock('vscode', () => ({
 
 import { createConfigLoadFailureHandler } from '../../src/plugins/prisma-language-server/prismaConfigLoadFailure'
 
-const configUri = { toString: () => 'file:///my-project/apps/api/prisma.config.ts' }
-const otherConfigUri = { toString: () => 'file:///my-project/apps/web/prisma.config.ts' }
+const configUri = {
+  fsPath: '/my-project/apps/api/prisma.config.ts',
+  toString: () => 'file:///my-project/apps/api/prisma.config.ts',
+}
+const outputChannel = { appendLine: mocks.appendLine, show: mocks.show }
+const otherConfigUri = {
+  fsPath: '/my-project/apps/web/prisma.config.ts',
+  toString: () => 'file:///my-project/apps/web/prisma.config.ts',
+}
 const loadFailure = (message = 'Malformed authoring pslBlock contribution') => ({
   code: 'PRISMA_CONFIG_LOAD_FAILED',
   message,
@@ -27,17 +36,43 @@ describe('Prisma config load failure notification', () => {
   beforeEach(() => {
     vi.resetAllMocks()
     mocks.showErrorMessage.mockResolvedValue(undefined)
-    handle = createConfigLoadFailureHandler()
+    handle = createConfigLoadFailureHandler(() => outputChannel)
   })
 
   it('reports a config that failed to load', () => {
     handle(configUri, [loadFailure()])
 
     expect(mocks.showErrorMessage).toHaveBeenCalledOnce()
-    const [message, action] = mocks.showErrorMessage.mock.calls[0]
+    const [message, ...actions] = mocks.showErrorMessage.mock.calls[0]
     expect(message).toContain('"apps/api/prisma.config.ts"')
     expect(message).toContain('Formatting and other language features are unavailable')
-    expect(action).toBe('Open config')
+    expect(message).not.toContain('Malformed authoring pslBlock contribution')
+    expect(actions).toEqual(['Open config', 'Show details'])
+  })
+
+  it('writes the server error to the output channel without revealing it', () => {
+    handle(configUri, [loadFailure()])
+
+    expect(mocks.appendLine).toHaveBeenCalledOnce()
+    expect(mocks.appendLine).toHaveBeenCalledWith(
+      'Failed to load /my-project/apps/api/prisma.config.ts: Malformed authoring pslBlock contribution',
+    )
+    expect(mocks.show).not.toHaveBeenCalled()
+  })
+
+  it('reveals the output channel when details are requested', async () => {
+    mocks.showErrorMessage.mockResolvedValue('Show details')
+    handle(configUri, [loadFailure()])
+    await flush()
+
+    expect(mocks.show).toHaveBeenCalledOnce()
+    expect(mocks.showTextDocument).not.toHaveBeenCalled()
+  })
+
+  it('offers only to open the config when no output channel is available', () => {
+    createConfigLoadFailureHandler(() => undefined)(configUri, [loadFailure()])
+
+    expect(mocks.showErrorMessage.mock.calls[0].slice(1)).toEqual(['Open config'])
   })
 
   it('recognizes a diagnostic code with a target', () => {

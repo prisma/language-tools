@@ -1,7 +1,15 @@
 import path from 'node:path'
 import { stat } from 'node:fs/promises'
 import { spawn, type ChildProcessWithoutNullStreams, type SpawnOptionsWithoutStdio } from 'node:child_process'
-import { window, workspace, type Disposable, type MessageItem, type TextDocument, type WorkspaceFolder } from 'vscode'
+import {
+  window,
+  workspace,
+  type Disposable,
+  type MessageItem,
+  type OutputChannel,
+  type TextDocument,
+  type WorkspaceFolder,
+} from 'vscode'
 import { CloseAction, ErrorAction, type LanguageClientOptions } from 'vscode-languageclient'
 import { LanguageClient, type ChildProcessInfo, type ServerOptions } from 'vscode-languageclient/node'
 
@@ -132,7 +140,7 @@ export class PrismaNextClients {
         createPrismaNextServerOptions(cliDirectory, {
           handleProcessError: (error) => this.handleError(workspaceFolder, error),
         }),
-        createPrismaNextClientOptions(workspaceFolder, cliDirectory),
+        createPrismaNextClientOptions(workspaceFolder, cliDirectory, () => client?.outputChannel),
       )
       this.registerDisposable(client.start())
       await client.onReady()
@@ -272,11 +280,12 @@ function destroyProcessStreams(child: ChildProcessWithoutNullStreams): void {
 export function createPrismaNextClientOptions(
   workspaceFolder: WorkspaceFolder,
   cliDirectory = workspaceFolder.uri.fsPath,
+  getOutputChannel: () => OutputChannel | undefined = () => undefined,
 ): LanguageClientOptions {
   const rootPath = cliDirectory.split('\\').join('/')
   const normalizedRoot = rootPath.endsWith('/') ? rootPath.slice(0, -1) : rootPath
   const escapedRoot = normalizedRoot.replace(/([?*{}[\]])/g, '[$1]')
-  const handleConfigLoadFailure = createConfigLoadFailureHandler()
+  const handleConfigLoadFailure = createConfigLoadFailureHandler(getOutputChannel)
   return {
     documentSelector: [{ language: 'prisma', scheme: 'file', pattern: `${escapedRoot}/**/*` }],
     workspaceFolder,
