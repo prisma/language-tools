@@ -29,6 +29,7 @@
     "hono": "4.7.10",
     "minimatch": "6.2.0",
     "openapi-fetch": "0.14.0",
+    "package-manager-detector": "1.8.0",
     "postgres": "3.4.7",
     "prisma-6-language-server": "npm:@prisma/language-server@6.19.0-hotfix.1",
     "vscode-languageclient": "7.0.0",

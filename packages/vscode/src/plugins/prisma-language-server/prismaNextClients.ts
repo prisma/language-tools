@@ -1,9 +1,11 @@
 import path from 'node:path'
 import { stat } from 'node:fs/promises'
 import { spawn, type ChildProcessWithoutNullStreams, type SpawnOptionsWithoutStdio } from 'node:child_process'
-import { workspace, type Disposable, type TextDocument, type WorkspaceFolder } from 'vscode'
+import { window, workspace, type Disposable, type MessageItem, type TextDocument, type WorkspaceFolder } from 'vscode'
 import { CloseAction, ErrorAction, type LanguageClientOptions } from 'vscode-languageclient'
 import { LanguageClient, type ChildProcessInfo, type ServerOptions } from 'vscode-languageclient/node'
+
+import { installPrismaCli } from './installPrismaCli'
 
 const prismaCliRelativePath = ['node_modules', 'prisma', 'dist', 'prisma.js'] as const
 
@@ -33,6 +35,7 @@ export class PrismaNextClients {
 
   private readonly clients = new Map<string, Promise<LanguageClient | undefined>>()
   private readonly failedAt = new Map<string, number>()
+  private readonly missingCliWarnings = new Set<string>()
   private disposed = false
 
   constructor(private readonly registerDisposable: (disposable: Disposable) => void) {}
@@ -72,6 +75,7 @@ export class PrismaNextClients {
     const pending = [...this.clients.values()]
     this.clients.clear()
     this.failedAt.clear()
+    this.missingCliWarnings.clear()
     await Promise.allSettled(pending.map(async (client) => (await client)?.stop()))
   }
 
@@ -84,11 +88,22 @@ export class PrismaNextClients {
     const entrypoint = getPrismaNextEntrypoint(workspaceFolder)
     let client: LanguageClient | undefined
     try {
-      if (!(await isFile(entrypoint)) || this.disposed) return undefined
+      const cliExists = await isFile(entrypoint)
+      if (this.disposed) return undefined
+
+      const key = workspaceFolder.uri.toString()
+      if (!cliExists) {
+        if (!this.missingCliWarnings.has(key)) {
+          this.missingCliWarnings.add(key)
+          void this.showMissingCliWarning(workspaceFolder)
+        }
+        return undefined
+      }
+      this.missingCliWarnings.delete(key)
 
       client = new LanguageClient(
         `prisma-next:${workspaceFolder.uri.toString()}`,
-        `Prisma Next Language Server (${workspaceFolder.name})`,
+        `Prisma ORM 8 Language Server (${workspaceFolder.name})`,
         createPrismaNextServerOptions(workspaceFolder, entrypoint, {
           handleProcessError: (error) => this.handleError(workspaceFolder, error),
         }),
@@ -111,6 +126,19 @@ export class PrismaNextClients {
       }
       if (!this.disposed) this.handleError(workspaceFolder, error)
       return undefined
+    }
+  }
+
+  private async showMissingCliWarning(workspaceFolder: WorkspaceFolder): Promise<void> {
+    const installAction: MessageItem = { title: 'Install prisma@latest' }
+    const selected = await window.showWarningMessage(
+      `The Prisma ORM 8 CLI is required for autocomplete, formatting, and error checking in workspace "${workspaceFolder.name}".`,
+      { modal: true },
+      installAction,
+      { title: 'Continue without language features', isCloseAffordance: true },
+    )
+    if (selected === installAction) {
+      await installPrismaCli(workspaceFolder, () => this.disposed)
     }
   }
 
