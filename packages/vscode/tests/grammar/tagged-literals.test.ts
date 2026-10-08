@@ -2,30 +2,49 @@ import { describe, expect, test } from 'vitest'
 import { expectHighlighting, findToken, hasScope, tokenizeSchema } from './tokenize'
 
 describe('tag families across fences', () => {
-  test('sql, pg.sql and sqlite.sql inject SQL in every fence; json, jsonb and pg.jsonb inject JSON in backtick and single-quote fences only; foo.bar never injects', async () => {
+  test('a tag whose last segment is sql injects SQL in every fence; one whose last segment is json or jsonb injects JSON in backtick and single-quote fences only; any other tag never injects', async () => {
     await expectHighlighting(`model User {
   a String @default(sql\`<sql>select 1</sql>\`)
   b String @default(sql'<sql>select 1</sql>')
   c String @default(sql"<sql>select 1</sql>")
-  d String @default(pg.sql\`<sql>select 1</sql>\`)
-  e String @default(pg.sql'<sql>select 1</sql>')
-  f String @default(pg.sql"<sql>select 1</sql>")
-  g String @default(sqlite.sql\`<sql>select 1</sql>\`)
-  h String @default(sqlite.sql'<sql>select 1</sql>')
-  i String @default(sqlite.sql"<sql>select 1</sql>")
+  d String @default(myext.sql\`<sql>select 1</sql>\`)
+  e String @default(myext.sql'<sql>select 1</sql>')
+  f String @default(myext.sql"<sql>select 1</sql>")
   j Json @default(json\`<json>{}</json>\`)
   k Json @default(json'<json>{}</json>')
   l Json @default(json"{}")
   m Json @default(jsonb\`<json>{}</json>\`)
   n Json @default(jsonb'<json>{}</json>')
   o Json @default(jsonb"{}")
-  p Json @default(pg.jsonb\`<json>{}</json>\`)
-  q Json @default(pg.jsonb'<json>{}</json>')
-  r Json @default(pg.jsonb"{}")
-  s Json @default(foo.bar\`abc\`)
-  t Json @default(foo.bar'abc')
-  u Json @default(foo.bar"abc")
+  p Json @default(myext.json\`<json>{}</json>\`)
+  q Json @default(myext.json'<json>{}</json>')
+  r Json @default(myext.json"{}")
+  s Json @default(postgis.geometry\`abc\`)
+  t Json @default(postgis.geometry'abc')
+  u Json @default(postgis.geometry"abc")
 }`)
+  })
+})
+
+describe('a tag with more than one dot', () => {
+  test('a.b.sql is read as the identifier "a" followed by the tag "b.sql"', async () => {
+    const lines = await tokenizeSchema(`model User {
+  value String @default(a.b.sql\`select 1\`)
+}`)
+    const fieldLine = lines[1]
+
+    const strayIdentifier = findToken(fieldLine, 'a')
+    expect(strayIdentifier).toBeDefined()
+    expect(hasScope(strayIdentifier!, 'support.constant.constant.prisma')).toBe(true)
+    expect(hasScope(strayIdentifier!, 'entity.name.function.tagged-template.prisma')).toBe(false)
+
+    const tag = findToken(fieldLine, 'b.sql')
+    expect(tag).toBeDefined()
+    expect(hasScope(tag!, 'entity.name.function.tagged-template.prisma')).toBe(true)
+
+    const select = findToken(fieldLine, 'select')
+    expect(select).toBeDefined()
+    expect(hasScope(select!, 'meta.embedded.block.sql')).toBe(true)
   })
 })
 
