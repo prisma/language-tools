@@ -351,6 +351,9 @@
       },
       "patterns": [
         {
+          "include": "#double_comment_inline"
+        },
+        {
           "include": "#named_argument"
         },
         {
@@ -383,6 +386,9 @@
       },
       "patterns": [
         {
+          "include": "#double_comment_inline"
+        },
+        {
           "include": "#value"
         }
       ],
@@ -397,6 +403,9 @@
       "name": "source.prisma.value",
       "patterns": [
         {
+          "include": "#tagged_literal"
+        },
+        {
           "include": "#array"
         },
         {
@@ -406,6 +415,155 @@
           "include": "#literal"
         }
       ]
+    },
+    "tagged_literal": {
+      "patterns": [
+        {
+          "include": "#tagged_literal_sql_backtick"
+        },
+        {
+          "include": "#tagged_literal_json_backtick"
+        },
+        {
+          "include": "#tagged_literal_sql_quoted"
+        },
+        {
+          "include": "#tagged_literal_json_single_quoted"
+        },
+        {
+          "include": "#tagged_literal_other"
+        }
+      ]
+    },
+    "tagged_literal_sql_backtick": {
+      "begin": "\\b((?:[A-Za-z_]\\w*\\.)?sql)\\b([ \\t]*)(`)",
+      "beginCaptures": {
+        "1": {
+          "name": "entity.name.function.tagged-template.prisma"
+        },
+        "3": {
+          "name": "punctuation.definition.string.begin.prisma"
+        }
+      },
+      "end": "`",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.end.prisma"
+        }
+      },
+      "contentName": "meta.embedded.block.sql",
+      "patterns": [
+        {
+          "include": "#backtick_escape"
+        },
+        {
+          "match": "(--)(?:\\\\.|[^`\\\\])*",
+          "name": "comment.line.double-dash.sql",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.comment.sql"
+            }
+          }
+        },
+        {
+          "begin": "\\$(\\w*)\\$",
+          "end": "\\$\\1\\$",
+          "name": "string.quoted.other.sql"
+        },
+        {
+          "match": "[Ee]'(?:\\\\.|''|[^'\\\\])*'",
+          "name": "string.quoted.single.sql"
+        },
+        {
+          "include": "source.sql"
+        }
+      ]
+    },
+    "tagged_literal_json_backtick": {
+      "begin": "\\b((?:[A-Za-z_]\\w*\\.)?(?:jsonb|json))\\b([ \\t]*)(`)",
+      "beginCaptures": {
+        "1": {
+          "name": "entity.name.function.tagged-template.prisma"
+        },
+        "3": {
+          "name": "punctuation.definition.string.begin.prisma"
+        }
+      },
+      "end": "`",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.end.prisma"
+        }
+      },
+      "contentName": "meta.embedded.block.json",
+      "patterns": [
+        {
+          "include": "#backtick_escape"
+        },
+        {
+          "include": "source.json"
+        }
+      ]
+    },
+    "tagged_literal_sql_quoted": {
+      "match": "\\b((?:[A-Za-z_]\\w*\\.)?sql)\\b([ \\t]*)(['\"])((?:\\\\.|(?!\\3).)*)(\\3)",
+      "captures": {
+        "1": {
+          "name": "entity.name.function.tagged-template.prisma"
+        },
+        "3": {
+          "name": "punctuation.definition.string.begin.prisma"
+        },
+        "4": {
+          "name": "meta.embedded.block.sql",
+          "patterns": [
+            {
+              "match": "\\\\.",
+              "name": "constant.character.escape.prisma"
+            },
+            {
+              "include": "source.sql"
+            }
+          ]
+        },
+        "5": {
+          "name": "punctuation.definition.string.end.prisma"
+        }
+      }
+    },
+    "tagged_literal_json_single_quoted": {
+      "match": "\\b((?:[A-Za-z_]\\w*\\.)?(?:jsonb|json))\\b([ \\t]*)(')((?:\\\\.|[^'])*)(')",
+      "captures": {
+        "1": {
+          "name": "entity.name.function.tagged-template.prisma"
+        },
+        "3": {
+          "name": "punctuation.definition.string.begin.prisma"
+        },
+        "4": {
+          "name": "meta.embedded.block.json",
+          "patterns": [
+            {
+              "match": "\\\\.",
+              "name": "constant.character.escape.prisma"
+            },
+            {
+              "include": "source.json"
+            }
+          ]
+        },
+        "5": {
+          "name": "punctuation.definition.string.end.prisma"
+        }
+      }
+    },
+    "tagged_literal_other": {
+      "match": "\\b([A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)?)\\b(?=[ \\t]*[`'\"])",
+      "captures": {
+        "1": {
+          "name": "entity.name.function.tagged-template.prisma"
+        }
+      }
     },
     "functional": {
       "name": "source.prisma.functional",
@@ -419,6 +577,9 @@
         }
       },
       "patterns": [
+        {
+          "include": "#double_comment_inline"
+        },
         {
           "include": "#value"
         }
@@ -441,6 +602,12 @@
         },
         {
           "include": "#double_quoted_string"
+        },
+        {
+          "include": "#single_quoted_string"
+        },
+        {
+          "include": "#backtick_string"
         },
         {
           "include": "#identifier"
@@ -516,7 +683,7 @@
           "name": "string.quoted.double.start.prisma"
         }
       },
-      "end": "\"",
+      "end": "\"|$",
       "endCaptures": {
         "0": {
           "name": "string.quoted.double.end.prisma"
@@ -527,11 +694,60 @@
           "include": "#string_interpolation"
         },
         {
-          "match": "([\\w\\-\\/\\._\\\\%@:\\?=]+)",
+          "match": "\\\\.",
+          "name": "constant.character.escape.prisma"
+        },
+        {
+          "match": "([\\w\\-\\/\\._%@:\\?=]+)",
           "name": "string.quoted.double.prisma"
         }
       ],
       "name": "unnamed"
+    },
+    "single_quoted_string": {
+      "name": "string.quoted.single.prisma",
+      "begin": "'",
+      "beginCaptures": {
+        "0": {
+          "name": "string.quoted.single.start.prisma"
+        }
+      },
+      "end": "'|$",
+      "endCaptures": {
+        "0": {
+          "name": "string.quoted.single.end.prisma"
+        }
+      },
+      "patterns": [
+        {
+          "match": "\\\\.",
+          "name": "constant.character.escape.prisma"
+        }
+      ]
+    },
+    "backtick_string": {
+      "name": "string.quoted.backtick.prisma",
+      "begin": "`",
+      "beginCaptures": {
+        "0": {
+          "name": "string.quoted.backtick.start.prisma"
+        }
+      },
+      "end": "`",
+      "endCaptures": {
+        "0": {
+          "name": "string.quoted.backtick.end.prisma"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#backtick_escape"
+        }
+      ]
+    },
+    "backtick_escape": {
+      "match": "\\\\[`\\\\]",
+      "name": "constant.character.escape.prisma"
     },
     "string_interpolation": {
       "patterns": [
