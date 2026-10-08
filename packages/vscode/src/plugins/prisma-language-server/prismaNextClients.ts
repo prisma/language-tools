@@ -6,6 +6,7 @@ import { CloseAction, ErrorAction, type LanguageClientOptions } from 'vscode-lan
 import { LanguageClient, type ChildProcessInfo, type ServerOptions } from 'vscode-languageclient/node'
 
 import { installPrismaCli } from './installPrismaCli'
+import { createConfigLoadFailureHandler } from './prismaConfigLoadFailure'
 
 const prismaCliRelativePath = ['node_modules', 'prisma', 'dist', 'prisma.js'] as const
 
@@ -275,9 +276,16 @@ export function createPrismaNextClientOptions(
   const rootPath = cliDirectory.split('\\').join('/')
   const normalizedRoot = rootPath.endsWith('/') ? rootPath.slice(0, -1) : rootPath
   const escapedRoot = normalizedRoot.replace(/([?*{}[\]])/g, '[$1]')
+  const handleConfigLoadFailure = createConfigLoadFailureHandler()
   return {
     documentSelector: [{ language: 'prisma', scheme: 'file', pattern: `${escapedRoot}/**/*` }],
     workspaceFolder,
+    middleware: {
+      handleDiagnostics: (uri, diagnostics, next) => {
+        handleConfigLoadFailure(uri, diagnostics)
+        next(uri, diagnostics)
+      },
+    },
     initializationOptions: {
       completion: { supportsTriggerParameterHintsCommand: true },
     },
