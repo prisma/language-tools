@@ -65,6 +65,29 @@ describe('a SQL line comment inside a backtick body', () => {
   })
 })
 
+describe('PostgreSQL string forms inside a backtick body', () => {
+  test('a dollar-quoted string ends at its own closing fence', async () => {
+    await expectHighlighting(`model User {
+  id String @default(sql\`<sql>select $$it's$$</sql>\`) @map("m")
+  name String
+}`)
+  })
+
+  test('a tagged dollar-quoted string ends at its own closing fence', async () => {
+    await expectHighlighting(`model User {
+  id String @default(sql\`<sql>select $tag$it's$tag$</sql>\`) @map("m")
+  name String
+}`)
+  })
+
+  test("an E'...' string with a backslash escape ends at its own closing quote", async () => {
+    await expectHighlighting(`model User {
+  id String @default(sql\`<sql>select E'it\\'s'</sql>\`) @map("m")
+  name String
+}`)
+  })
+})
+
 describe('fence escapes inside injected bodies', () => {
   test('backtick escapes stay inside the injected SQL body', async () => {
     await expectHighlighting(`model User {

@@ -460,6 +460,15 @@
           }
         },
         {
+          "begin": "\\$(\\w*)\\$",
+          "end": "\\$\\1\\$",
+          "name": "string.quoted.other.sql"
+        },
+        {
+          "match": "[Ee]'(?:\\\\.|''|[^'\\\\])*'",
+          "name": "string.quoted.single.sql"
+        },
+        {
           "include": "source.sql"
         }
       ]
