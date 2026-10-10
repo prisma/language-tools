@@ -23,4 +23,9 @@ export interface LSSettings {
    * Whether to show diagnostics
    */
   enableDiagnostics?: boolean
+
+  /**
+   * Directories that should be ignored when resolving Prisma schema files.
+   */
+  excludedSchemaDirectories?: string[]
 }
