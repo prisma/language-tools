@@ -29,6 +29,9 @@
       "include": "#enum_block_definition"
     },
     {
+      "include": "#generic_mixin_block_definition"
+    },
+    {
       "include": "#type_definition"
     }
   ],
@@ -64,6 +67,9 @@
           "include": "#enum_block_definition"
         },
         {
+          "include": "#generic_mixin_block_definition"
+        },
+        {
           "include": "#type_definition"
         }
       ],
@@ -75,16 +81,19 @@
       }
     },
     "model_block_definition": {
-      "begin": "^\\s*(model|type|view)\\s+([A-Za-z][\\w]*)\\s*({)",
+      "begin": "^\\s*(model|type|view)\\s+(?:(mixin)\\s+)?([A-Za-z][\\w]*)\\s*({)",
       "name": "source.prisma.embedded.source",
       "beginCaptures": {
         "1": {
           "name": "storage.type.model.prisma"
         },
         "2": {
-          "name": "entity.name.type.model.prisma"
+          "name": "storage.modifier.mixin.prisma"
         },
         "3": {
+          "name": "entity.name.type.model.prisma"
+        },
+        "4": {
           "name": "punctuation.definition.tag.prisma"
         }
       },
@@ -97,6 +106,9 @@
         },
         {
           "include": "#multi_line_comment"
+        },
+        {
+          "include": "#mixin_inclusion"
         },
         {
           "include": "#field_definition"
@@ -110,16 +122,19 @@
       }
     },
     "enum_block_definition": {
-      "begin": "^\\s*(enum)\\s+([A-Za-z][\\w]*)\\s+({)",
+      "begin": "^\\s*(enum)\\s+(?:(mixin)\\s+)?([A-Za-z][\\w]*)\\s*({)",
       "name": "source.prisma.embedded.source",
       "beginCaptures": {
         "1": {
           "name": "storage.type.enum.prisma"
         },
         "2": {
-          "name": "entity.name.type.enum.prisma"
+          "name": "storage.modifier.mixin.prisma"
         },
         "3": {
+          "name": "entity.name.type.enum.prisma"
+        },
+        "4": {
           "name": "punctuation.definition.tag.prisma"
         }
       },
@@ -132,6 +147,9 @@
         },
         {
           "include": "#multi_line_comment"
+        },
+        {
+          "include": "#mixin_inclusion"
         },
         {
           "include": "#enum_value_definition"
@@ -169,6 +187,9 @@
           "include": "#multi_line_comment"
         },
         {
+          "include": "#mixin_inclusion"
+        },
+        {
           "include": "#assignment"
         }
       ],
@@ -177,6 +198,36 @@
         "1": {
           "name": "punctuation.definition.tag.prisma"
         }
+      }
+    },
+    "generic_mixin_block_definition": {
+      "begin": "^\\s*((?!namespace\\b|types\\b)[A-Za-z_]\\w*)\\s+(mixin)\\s+([A-Za-z_]\\w*)\\s*({)",
+      "name": "source.prisma.embedded.source",
+      "beginCaptures": {
+        "1": { "name": "storage.type.config.prisma" },
+        "2": { "name": "storage.modifier.mixin.prisma" },
+        "3": { "name": "entity.name.type.mixin.prisma" },
+        "4": { "name": "punctuation.definition.tag.prisma" }
+      },
+      "patterns": [
+        { "include": "#triple_comment" },
+        { "include": "#double_comment" },
+        { "include": "#multi_line_comment" },
+        { "include": "#mixin_inclusion" },
+        { "include": "#assignment" },
+        { "include": "#attribute_with_arguments" },
+        { "include": "#attribute" }
+      ],
+      "end": "\\s*\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.tag.prisma" }
+      }
+    },
+    "mixin_inclusion": {
+      "match": "(\\+)[ \\t]*([A-Za-z_]\\w*(?:[ \\t]*\\.[ \\t]*[A-Za-z_]\\w*)*)",
+      "captures": {
+        "1": { "name": "keyword.operator.mixin.prisma" },
+        "2": { "name": "entity.name.type.mixin.prisma" }
       }
     },
     "assignment": {

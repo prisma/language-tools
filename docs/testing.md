@@ -55,6 +55,18 @@ const helper = await getMultifileHelper('user-posts')
 const userFile = helper.file('User.prisma')
 ```
 
+## TextMate Grammar Tests
+
+```bash
+pnpm --dir packages/vscode test tests/grammar
+```
+
+Tests in `packages/vscode/tests/grammar/` tokenize schemas with the extension's
+TextMate grammar. Mixin coverage includes declarations (`model mixin`, `type mixin`,
+`enum mixin`, and generic block mixins), namespace declarations, and inclusions
+such as `+Timestamps` and `+auth.Timestamps`. It also checks that fields named
+`mixin`, comments, and signed numeric attribute arguments keep their existing scopes.
+
 ## VS Code E2E Tests
 
 ```bash
