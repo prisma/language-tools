@@ -11,6 +11,7 @@ import { Position } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { URI } from 'vscode-uri'
 import { getCurrentLine } from './ast'
+import path from 'node:path'
 
 export type Line = {
   readonly document: SchemaDocument
@@ -81,12 +82,41 @@ export async function loadConfig(configRoot?: string): Promise<PrismaConfigInter
   return config
 }
 
-async function loadSchemaDocumentsFromPath(fsPath: string, allDocuments: TextDocument[]): Promise<SchemaDocument[]> {
-  // `loadRelatedSchemaFiles` locates and returns either a single schema files, or a set of related schema files.
-  const schemaFiles = await loadRelatedSchemaFiles(fsPath, createFilesResolver(allDocuments))
-  const documents = schemaFiles.map(([filePath, content]) => {
-    return new SchemaDocument(TextDocument.create(URI.file(filePath).toString(), 'prisma', 1, content))
+type SchemaLoadOptions = {
+  excludedSchemaDirectories?: string[]
+}
+
+function isExcludedPath(filePath: string, excludedDirectories: string[]): boolean {
+  const normalizedPath = path.resolve(filePath)
+  const comparablePath = process.platform === 'win32' ? normalizedPath.toLowerCase() : normalizedPath
+
+  return excludedDirectories.some((directory) => {
+    const normalizedDirectory = path.resolve(directory)
+    const comparableDirectory = process.platform === 'win32' ? normalizedDirectory.toLowerCase() : normalizedDirectory
+
+    return comparablePath === comparableDirectory || comparablePath.startsWith(`${comparableDirectory}${path.sep}`)
   })
+}
+
+async function loadSchemaDocumentsFromPath(
+  fsPath: string,
+  allDocuments: TextDocument[],
+  options: SchemaLoadOptions = {},
+): Promise<SchemaDocument[]> {
+  const excludedDirectories = options.excludedSchemaDirectories ?? []
+
+  const filteredDocuments = allDocuments.filter((document) => {
+    const filePath = URI.parse(document.uri).fsPath
+    return !isExcludedPath(filePath, excludedDirectories)
+  })
+
+  // `loadRelatedSchemaFiles` locates and returns either a single schema files, or a set of related schema files.
+  const schemaFiles = await loadRelatedSchemaFiles(fsPath, createFilesResolver(filteredDocuments))
+  const documents = schemaFiles
+    .filter(([filePath]) => !isExcludedPath(filePath, excludedDirectories))
+    .map(([filePath, content]) => {
+      return new SchemaDocument(TextDocument.create(URI.file(filePath).toString(), 'prisma', 1, content))
+    })
   return documents
 }
 
@@ -98,7 +128,11 @@ export class PrismaSchema {
     return new PrismaSchema([new SchemaDocument(textDocument)])
   }
 
-  static async load(input: PrismaSchemaInput, configRoot?: string): Promise<PrismaSchema> {
+  static async load(
+    input: PrismaSchemaInput,
+    configRoot?: string,
+    options: SchemaLoadOptions = {},
+  ): Promise<PrismaSchema> {
     let config: PrismaConfigInternal | undefined
     try {
       config = await loadConfig(configRoot)
@@ -107,12 +141,18 @@ export class PrismaSchema {
       console.log('Continuing without Prisma config file')
     }
 
+    const resolvedExcludedDirectories = (options.excludedSchemaDirectories ?? []).map((directory) =>
+      path.resolve(configRoot ?? process.cwd(), directory),
+    )
+
     let schemaDocs: SchemaDocument[]
     if (Array.isArray(input)) {
       schemaDocs = input
     } else {
       const fsPath = config?.schema ?? URI.parse(input.currentDocument.uri).fsPath
-      schemaDocs = await loadSchemaDocumentsFromPath(fsPath, input.allDocuments)
+      schemaDocs = await loadSchemaDocumentsFromPath(fsPath, input.allDocuments, {
+        excludedSchemaDirectories: resolvedExcludedDirectories,
+      })
     }
     return new PrismaSchema(schemaDocs, config)
   }
