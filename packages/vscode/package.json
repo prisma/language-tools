@@ -705,7 +705,7 @@
     "sinon": "^21.0.0",
     "tm-grammars": "^1.32.22",
     "typescript": "5.7.3",
-    "vitest": "^2.1.0",
+    "vitest": "^4.0.0",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.3.2"
   },
